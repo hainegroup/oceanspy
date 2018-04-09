@@ -20,7 +20,7 @@ OceanSpy
 
 
 
-**OceanSpy** is a python package that facilitates extracting information from numerical model output of Ocean General Circulation Models set up and run by the research group of [Prof. Thomas W. N. Haine](http://sites.krieger.jhu.edu/haine/). The dynamics are simulated using the Massachussets Institute of Technology general circulation model (MITgcm), and our high-resolution datasets are publicly available on [SciServer](http://www.sciserver.org/). SciServer is a collaborative research environment for large-scale data-driven science administered by [IDIES](http://idies.jhu.edu/) at  [Johns Hopkins University](https://www.jhu.edu/).
+**OceanSpy** is a python package that facilitates extracting information from numerical model output of Ocean General Circulation Models set up and run by the research group of `Prof. Thomas W. N. Haine <http://sites.krieger.jhu.edu/haine/>`_. The dynamics are simulated using the Massachussets Institute of Technology general circulation model (MITgcm), and our high-resolution datasets are publicly available on `SciServer <http://www.sciserver.org/>`_. SciServer is a collaborative research environment for large-scale data-driven science administered by `IDIES <http://idies.jhu.edu/>`_ at  `Johns Hopkins University <https://www.jhu.edu/>`_.
 
 The analysis of large datasets is often restricted by limited computation resources. Our goal is to build a collaborative sharing environment where users can access and process high-resolution datasets. OceanSpy aims to allow users to trace the physical evolution of ocean currents across orders of magnitude in space and time, and to quickly analyze important aspects of model events in conjunction with observational data.
 
@@ -36,7 +36,7 @@ Features
 
 Credits
 -------
-OceanSpy is based on several tools and packages involved in the [Pangeo](https://pangeo-data.github.io/) community such as [xarray](http://xarray.pydata.org/en/stable/) and [dask](https://dask.pydata.org/en/latest/).
+OceanSpy is based on several tools and packages involved in the `Pangeo <https://pangeo-data.github.io/>`_ community such as `xarray <http://xarray.pydata.org/en/stable/>`_ and `dask <https://dask.pydata.org/en/latest/>`_.
 This package was created with Cookiecutter_ and the `audreyr/cookiecutter-pypackage`_ project template.
 
 .. _Cookiecutter: https://github.com/audreyr/cookiecutter
