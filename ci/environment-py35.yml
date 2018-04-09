@@ -3,10 +3,13 @@ dependencies:
   - python=3.5
   - xarray
   - dask
+  - bottleneck
+  - netCDF4
+  - cartopy
   - numpy
   - pytest
   - future
   - pip:
-    - docrep
+    - xgcm
     - codecov
     - pytest-cov
