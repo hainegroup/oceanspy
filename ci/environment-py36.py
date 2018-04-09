@@ -1,6 +1,6 @@
 name: test_env
 dependencies:
-  - python=2.7
+  - python=3.6
   - xarray
   - dask
   - bottleneck
