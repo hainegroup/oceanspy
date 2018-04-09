@@ -1,4 +1,6 @@
 name: test_env
+channels:
+  - conda-forge  
 dependencies:
   - python=3.6
   - xarray
@@ -6,9 +8,7 @@ dependencies:
   - bottleneck
   - netCDF4
   - cartopy
-  - numpy
   - pytest
-  - future
   - pip:
     - xgcm
     - codecov
