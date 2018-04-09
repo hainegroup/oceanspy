@@ -1,4 +1,6 @@
 name: xgcm
+channels:
+  - conda-forge
 dependencies:
   - python=2.7
   - xarray
@@ -6,12 +8,9 @@ dependencies:
   - bottleneck
   - netCDF4  
   - cartopy  
-  - numpy
-  - future
   - pytest
   - numpydoc
   - sphinx
   - pip:
-    - time
     - xgcm
     - nbsphinx
