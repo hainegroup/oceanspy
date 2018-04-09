@@ -1,15 +1,16 @@
-name: test_env
+name: xgcm
 dependencies:
   - python=2.7
   - xarray
   - dask
   - bottleneck
-  - netCDF4
-  - cartopy
+  - netCDF4  
+  - cartopy  
   - numpy
-  - pytest
   - future
+  - pytest
+  - numpydoc
+  - sphinx
   - pip:
     - xgcm
-    - codecov
-    - pytest-cov
+    - nbsphinx
