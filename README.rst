@@ -31,12 +31,13 @@ The analysis of large datasets is often restricted by limited computation resour
 Features
 --------
 
-* SciServer users can either download subsets of data on their own machines, or run our tools online and store post-processing files on SciServer.
+* SciServer users can either download subsets of data on their own machines, or run our tools online and store/visualize post-processing files on SciServer.
 * OceanSpy is meant to be user-friendly and can be easily run by non-python users.
 
 Credits
 -------
-OceanSpy is based on several tools and packages involved in the `Pangeo <https://pangeo-data.github.io/>`_ community such as `xarray <http://xarray.pydata.org/en/stable/>`_ and `dask <https://dask.pydata.org/en/latest/>`_.
+OceanSpy is based on several tools and packages involved in the `Pangeo <https://pangeo-data.github.io/>`_ community, such as `xarray <http://xarray.pydata.org/en/stable/>`_ and `dask <https://dask.pydata.org/en/latest/>`_.
+
 This package was created with Cookiecutter_ and the `audreyr/cookiecutter-pypackage`_ project template.
 
 .. _Cookiecutter: https://github.com/audreyr/cookiecutter
