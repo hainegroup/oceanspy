@@ -1,0 +1,16 @@
+name: xgcm
+dependencies:
+  - python=2.7
+  - xarray
+  - dask
+  - bottleneck
+  - netCDF4  
+  - cartopy  
+  - numpy
+  - future
+  - pytest
+  - numpydoc
+  - sphinx
+  - pip:
+    - xgcm
+    - nbsphinx
