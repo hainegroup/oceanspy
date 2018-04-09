@@ -10,7 +10,6 @@ dependencies:
   - pytest
   - future
   - pip:
-    - time       
     - xgcm
     - codecov
     - pytest-cov
