@@ -1,0 +1,16 @@
+name: test_env
+dependencies:
+  - python=2.7
+  - xarray
+  - dask
+  - bottleneck
+  - netCDF4
+  - cartopy
+  - numpy
+  - pytest
+  - future
+  - pip:
+    - time       
+    - xgcm
+    - codecov
+    - pytest-cov
