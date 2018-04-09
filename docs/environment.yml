@@ -1,7 +1,6 @@
 name: xgcm
 dependencies:
   - python=2.7
-  - time
   - xarray
   - dask
   - bottleneck
@@ -13,5 +12,6 @@ dependencies:
   - numpydoc
   - sphinx
   - pip:
+    - time
     - xgcm
     - nbsphinx
