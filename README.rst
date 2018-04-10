@@ -1,6 +1,6 @@
-========
-OceanSpy
-========
+===========================================================
+OceanSpy: A Python Package for Oceanographic Investigations
+===========================================================
 
 
 .. image:: https://img.shields.io/pypi/v/oceanspy.svg
@@ -12,12 +12,6 @@ OceanSpy
 .. image:: https://readthedocs.org/projects/oceanspy/badge/?version=latest
         :target: https://oceanspy.readthedocs.io/en/latest/?badge=latest
         :alt: Documentation Status
-
-
-.. image:: https://pyup.io/repos/github/malmans2/oceanspy/shield.svg
-     :target: https://pyup.io/repos/github/malmans2/oceanspy/
-     :alt: Updates
-
 
 
 **OceanSpy** is a python package that facilitates extracting information from numerical model output of Ocean General Circulation Models set up and run by the research group of `Prof. Thomas W. N. Haine <http://sites.krieger.jhu.edu/haine/>`_. The dynamics are simulated using the Massachussets Institute of Technology general circulation model (MITgcm), and our high-resolution datasets are publicly available on `SciServer <http://www.sciserver.org/>`_. SciServer is a collaborative research environment for large-scale data-driven science administered by `IDIES <http://idies.jhu.edu/>`_ at  `Johns Hopkins University <https://www.jhu.edu/>`_.
