@@ -23,7 +23,7 @@ SciServer access
 Dependencies
 ------------
 The easiest way to install all the dependencies is to use `Conda <https://conda.io/docs/>`_.
-First open a terminal (click on New-->Terminal), and run the following commands
+First open a terminal (click on New-->Terminal), and run the following commands:
 
 .. code-block:: console
 
