@@ -43,8 +43,9 @@ The analysis of large datasets is often restricted by limited computation resour
 
 Features
 --------
-* SciServer users can either download subsets of data on their own machines, or run our tools online and store/visualize post-processing files on SciServer.
+* OceanSpy's documentation is available at: https://oceanspy.readthedocs.io/en/latest/ 
 * OceanSpy is meant to be user-friendly and does not require advanced coding skills.
+* SciServer users can either download subsets of data on their own machines, or run our tools online and store/visualize post-processing files on SciServer.
 
 Credits
 -------
