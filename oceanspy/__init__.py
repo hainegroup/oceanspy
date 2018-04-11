@@ -7,3 +7,4 @@ __email__ = 'mattia.almansi@jhu.edu'
 __version__ = '0.0.2'
 
 from .autogenerate import generate_ds_grid
+from .oceanspy import *
