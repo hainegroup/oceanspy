@@ -30,9 +30,9 @@ def smart_chunking(ds,
     """
     
     # Check parameters
-    if not isinstance(ds, xr.Dataset): raise RuntimeError("'ds' needs to be a xarray.Dataset")
-    if not isinstance(ds, int):        raise RuntimeError("'ds' needs to be an integer")
-    if not isinstance(ds, list):       raise RuntimeError("'ds' needs to be a list")
+    if not isinstance(ds, xr.Dataset):   raise RuntimeError("'ds' needs to be a xarray.Dataset")
+    if not isinstance(limOM, int):       raise RuntimeError("'limOM' needs to be an integer")
+    if not isinstance(dims2chunk, list): raise RuntimeError("'dims2chunk' needs to be a list")
         
     # Get dimensions' size
     OM=6
