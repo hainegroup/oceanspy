@@ -1,7 +1,5 @@
 import xarray as xr
 import numpy as np
-import matplotlib.pyplot as plt
-import cartopy.crs as ccrs
 
 def smart_chunking(ds,
                    limOM      = 6,

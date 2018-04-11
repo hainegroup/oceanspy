@@ -54,7 +54,7 @@ def subsample(ds         = None,
     grid : xgcm.Grid
           Grid with all the staggered grids
     """
-    
+
     # Check parameters
     if not isinstance(ds, xr.Dataset) and ds!=None: 
         raise RuntimeError("'ds' needs to be a xarray.Dataset or None")
@@ -115,6 +115,7 @@ def subsample(ds         = None,
                     ds[varName] = grid.interp(ds[varName], axis=dim[0], boundary='fill', fill_value=float('nan'))
     
     # Chunk array
+    from oceanspy.useful_funcs import smart_chunking    
     ds = smart_chunking(ds)
     
     # Save to NetCDF
