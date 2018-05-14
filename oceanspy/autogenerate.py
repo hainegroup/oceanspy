@@ -86,7 +86,7 @@ def generate_ds_grid(cropped   = False,
     ds = ds.rename({'T': 'time', 'Ztmp': 'Z', 'Zmd000216': 'Z'})
     ds = ds.squeeze('Zd000001')
     for dim in ['Z','Zp1', 'Zu','Zl']:
-        ds[dim].values   = np.fabs(ds[dim].values)
+        ds[dim].values   = ds[dim].values
         ds[dim].attrs.update({'positive': 'down'}) 
     
     # Create xgcm grid
