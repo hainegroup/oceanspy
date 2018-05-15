@@ -51,7 +51,7 @@ def generate_ds_grid(cropped   = False,
                                 concat_dim     = 'T',
                                 drop_variables = ['diag_levels','iter'])
     ds = xr.merge([gridset, fldsset])
-        
+    
     # Create horizontal vectors (remove zeros due to exch2)
     ds['X'].values   = ds.XC.where((ds.XC!=0) & (ds.YC!=0)).mean(dim='Y',   skipna=True)
     ds['Xp1'].values = ds.XG.where((ds.XG!=0) & (ds.YG!=0)).mean(dim='Yp1', skipna=True)
