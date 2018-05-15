@@ -85,9 +85,10 @@ def generate_ds_grid(cropped   = False,
     ds = ds.rename({'Z': 'Ztmp'})
     ds = ds.rename({'T': 'time', 'Ztmp': 'Z', 'Zmd000216': 'Z'})
     ds = ds.squeeze('Zd000001')
+    
     for dim in ['Z','Zp1', 'Zu','Zl']:
         ds[dim].values   = ds[dim].values
-        ds[dim].attrs.update({'positive': 'down'}) 
+        ds[dim].attrs.update({'positive': 'up'}) 
     
     # Create xgcm grid
     for dim in ['Z', 'X', 'Y']: ds[dim].attrs.update({'axis': dim})  

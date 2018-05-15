@@ -99,6 +99,11 @@ class Sample:
         converted to python by jahn on 2010-04-29
         """
         
+        # Compute potential density only if not available
+        if any(d == 'Sigma0' for d in self.CUTOFF.variables):
+            print('Sigma0 has been already added to CUTOFF')
+            return
+        
         # coefficients nonlinear equation of state in pressure coordinates for
         # 1. density of fresh water at p = 0
         eosJMDCFw = [ 999.842594,
@@ -232,12 +237,45 @@ class Sample:
         
         # Compute density
         rho    = rho / (1. - p/bulkmod)
-        sigma0 = rho - 1000
-        # Store results
-        self.CUTOFF = xr.merge([self.CUTOFF,self.CUTOFF.rename({'Temp': 'Sigma0'})])
-        self.CUTOFF['Sigma0'] = sigma0
-        self.CUTOFF['Sigma0'].attrs['units']     = 'kg/m^3'
-        self.CUTOFF['Sigma0'].attrs['long_name'] = 'potential density anomaly' 
+        Sigma0 = rho - 1000
         
+        # Store results in CUTOFF
+        Sigma0   = Sigma0.to_dataset(name='Sigma0')
+        Sigma0['Sigma0'].attrs['units']     = 'kg/m^3'
+        Sigma0['Sigma0'].attrs['long_name'] = 'potential density anomaly'
+        self.CUTOFF = xr.merge([self.CUTOFF,Sigma0])
+        
+        print('Sigma0 added to CUTOFF')
+        
+    def compute_N2(self):
+        """
+        Compute potential density anomaly and add it to self.CUTOFF.
+        N2 = -(g/rho0)(drho/dz)
+        """
+        
+        # Compute N2 only if not available
+        if any(d == 'N2' for d in self.CUTOFF.variables):
+            print('N2 has been already added to CUTOFF')
+            return
 
+        # Compute potential density if not available
+        if all(d != 'Sigma0' for d in self.CUTOFF.variables): self.compute_Sigma0()
+            
+        # Compute Brunt-Vaisala
+        g    = 9.81 # m/s^2
+        rho0 = 1027 # kg/m^3 
+        N2   = - (g / rho0) * (self.CUTOFF['Sigma0'].diff('Z') / self.CUTOFF['Z'].diff('Z'))
         
+        # Store results in CUTOFF
+        N2   = N2.to_dataset(name='N2')
+        N2   = N2.rename({'Z': 'Zm1'})
+        N2['Zm1'].values = (self.CUTOFF['Z'][:-1].values + self.CUTOFF['Z'][1:].values) / 2
+        N2['Zm1'].attrs.update({'c_grid_axis_shift': -0.5})
+        self.CUTOFF = xr.merge([self.CUTOFF, N2])
+        
+        # Interpolte from Zm1 to Z
+        grid = xgcm.Grid(self.CUTOFF,periodic=False)
+        self.CUTOFF['N2'] = grid.interp(self.CUTOFF['N2'], axis='Z', boundary='fill', fill_value=float('nan'))
+        self.CUTOFF = self.CUTOFF.drop('Zm1')
+        
+        print('N2 added to CUTOFF')
