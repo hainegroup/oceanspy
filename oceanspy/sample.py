@@ -72,8 +72,8 @@ class Sample:
         ds = ds.sel(X    = slice(min(ds['Xp1'].values), max(ds['Xp1'].values)),
                     Y    = slice(min(ds['Yp1'].values), max(ds['Yp1'].values)),
                     Z    = slice(max(ds['Zp1'].values), min(ds['Zp1'].values)),
-                    Zu   = slice(max(ds['Zp1'].values), min(ds['Zp1'].values)),
-                    Zl   = slice(max(ds['Zp1'].values), min(ds['Zp1'].values)))
+                    Zu   = slice(max(ds['Zp1'].values), min(ds['Zp1'].values)))
+        ds = ds.sel(Zl   = slice(max(ds['Zp1'].values), min(ds['Z'].values)))
         
         # Resample (Time)
         from pandas.tseries.frequencies import to_offset
@@ -87,7 +87,7 @@ class Sample:
             
         # Store cutted array
         self.CUTOUT = ds
-        self.GRID   = xgcm.Grid(ds,periodic=False)
+        self.GRID   = xgcm.Grid(ds, periodic=False)
     
     def compute_Sigma0(self):
         """
@@ -266,14 +266,18 @@ class Sample:
         g    = 9.81 # m/s^2
         rho0 = 1027 # kg/m^3    
         N2 =  ( - g / rho0   
-                * self.GRID.diff(self.CUTOUT['Sigma0'], 'Z', boundary='fill', fill_value=float('nan'))
-                * self.GRID.interp(self.CUTOUT['HFacC'], 'Z', boundary='fill', fill_value=float('nan'))
+                * self.GRID.diff(self.CUTOUT['Sigma0'], 'Z', to='outer',
+                                                             boundary='fill', 
+                                                             fill_value=float('nan'))
+                * self.GRID.interp(self.CUTOUT['HFacC'], 'Z', to='outer',
+                                                              boundary='fill', 
+                                                              fill_value=float('nan'))
                 / (self.CUTOUT.drC)
               )
 
         # Store results in CUTOUT
         N2   = N2.to_dataset(name='N2')
-        N2['N2'].attrs['units']     = '1/s^2'
+        N2['N2'].attrs['units']     = 's^-2'
         N2['N2'].attrs['long_name'] = 'Brunt-Vaisala Frequency'
         N2['N2'].attrs['history']   = 'Computed offline by OceanSpy'
         self.CUTOUT = xr.merge([self.CUTOUT,N2])
@@ -281,14 +285,72 @@ class Sample:
         print('N2 added to CUTOUT')
         
     def compute_vorticity(self):
+        """
+        Compute horizontal and vertical components of vorticity and add them to self.CUTOUT.
+        momVort1 = dw/dy-dv/dz
+        momVort2 = du/dz-dw/dx
+        momVort3 = dv/dx-du/dy
+        """
         
-        grid = xgcm.Grid(self.CUTOUT,periodic=False)
+        if any((d == 'momVort1' and d == 'momVort2' and d == 'momVort3' )for d in self.CUTOUT.variables):
+            print('momVort1, momVort2, and momVort3 have been already added to CUTOUT')
+            return
         
-        zeta = (grid.diff(self.CUTOUT['V'] * self.CUTOUT['dyC'], 'X', boundary='fill', fill_value=float('nan')) -
-                grid.diff(self.CUTOUT['U'] * self.CUTOUT['dxC'], 'Y', boundary='fill', fill_value=float('nan')) 
-               )/ self.CUTOUT['rAz']          
-       
+        # Adapt drC to Zl
+        drC = self.CUTOUT['drC'][:-1]
+        drC = drC.rename({'Zp1': 'Zl'})
         
-        return zeta
+        # ============================
+        # dw/dy-dv/dz
+        # ============================
+        momVort1 = (self.GRID.diff(self.CUTOUT['W'] * drC, 'Y', boundary='fill', fill_value=float('nan')) -
+                    self.GRID.diff(self.CUTOUT['V'] * self.CUTOUT['dyC'], 'Z', to='right', 
+                                                                               boundary='fill', 
+                                                                               fill_value=float('nan')) 
+                   )/ (self.CUTOUT['dyC'] * drC)
+        # Store results in CUTOUT
+        momVort1   = momVort1.to_dataset(name='momVort1')
+        momVort1['momVort1'].attrs['units']     = 's^-1'
+        momVort1['momVort1'].attrs['long_name'] = '1st component (horizontal) of Vorticity'
+        momVort1['momVort1'].attrs['history']   = 'Computed offline by OceanSpy'
+        self.CUTOUT = xr.merge([self.CUTOUT,momVort1])
+        print('momVort1 added to CUTOUT')
+        # ============================
         
+        # ============================
+        # du/dz-dw/dx
+        # ============================
+        momVort2 = (self.GRID.diff(self.CUTOUT['U'] * self.CUTOUT['dxC'], 'Z', to='right',
+                                                                               boundary='fill', 
+                                                                               fill_value=float('nan')) -
+                    self.GRID.diff(self.CUTOUT['W'] * drC, 'X', boundary='fill', fill_value=float('nan')) 
+                   )/ (self.CUTOUT['dxC'] * drC)
+        # Store results in CUTOUT
+        momVort2   = momVort2.to_dataset(name='momVort2')
+        momVort2['momVort2'].attrs['units']     = 's^-1'
+        momVort2['momVort2'].attrs['long_name'] = '2nd component (horizontal) of Vorticity'
+        momVort2['momVort2'].attrs['history']   = 'Computed offline by OceanSpy'
+        self.CUTOUT = xr.merge([self.CUTOUT,momVort2])
+        print('momVort2 added to CUTOUT')
+        # ============================
+        
+        # ============================
+        # dv/dx-du/dy
+        # ============================
+        if any(d == 'momVort3' for d in self.CUTOUT.variables):
+            print('momVort3 has been computed online')
+        else:
+            momVort3 = (self.GRID.diff(self.CUTOUT['V'] * self.CUTOUT['dyC'], 'X', boundary='fill', 
+                                                                                   fill_value=float('nan')) -
+                        self.GRID.diff(self.CUTOUT['U'] * self.CUTOUT['dxC'], 'Y', boundary='fill', 
+                                                                                   fill_value=float('nan')) 
+                        )/ self.CUTOUT['rAz']
+            # Store results in CUTOUT
+            momVort3   = momVort3.to_dataset(name='momVort3')
+            momVort3['momVort3'].attrs['units']     = 's^-1'
+            momVort3['momVort3'].attrs['long_name'] = '3rd component (vertical) of Vorticity'
+            momVort3['momVort3'].attrs['history']   = 'Computed offline by OceanSpy'
+            self.CUTOUT = xr.merge([self.CUTOUT,momVort3])
+            print('momVort3 added to CUTOUT')
+        # ============================
         
