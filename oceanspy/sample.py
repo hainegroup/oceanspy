@@ -19,7 +19,7 @@ class Sample:
                  sampMethod = 'snapshot'):
         """
         Subsample a dataset in time and space.
-        The new dataset is stored in self.CUTOFF.
+        The new dataset is stored in self.CUTOUT.
         
 
         Parameters
@@ -86,12 +86,12 @@ class Sample:
             ds = ds.resample(time=timeFreq).mean()
             
         # Store cutted array
-        self.CUTOFF = ds
-    
+        self.CUTOUT = ds
+        self.GRID   = xgcm.Grid(ds,periodic=False)
     
     def compute_Sigma0(self):
         """
-        Compute potential density anomaly and add it to self.CUTOFF.
+        Compute potential density anomaly and add it to self.CUTOUT.
         
         Adapted from jmd95.py:
         Density of Sea Water using Jackett and McDougall 1995 (JAOT 12) polynomial
@@ -100,8 +100,8 @@ class Sample:
         """
         
         # Compute potential density only if not available
-        if any(d == 'Sigma0' for d in self.CUTOFF.variables):
-            print('Sigma0 has been already added to CUTOFF')
+        if any(d == 'Sigma0' for d in self.CUTOUT.variables):
+            print('Sigma0 has been already added to CUTOUT')
             return
         
         # coefficients nonlinear equation of state in pressure coordinates for
@@ -159,8 +159,8 @@ class Sample:
                     ]
 
         # Define variables
-        t = self.CUTOFF['Temp']
-        s = self.CUTOFF['S']  
+        t = self.CUTOUT['Temp']
+        s = self.CUTOUT['S']  
         p = 0.
         # Useful stuff
         t2   = t*t
@@ -239,43 +239,56 @@ class Sample:
         rho    = rho / (1. - p/bulkmod)
         Sigma0 = rho - 1000
         
-        # Store results in CUTOFF
+        # Store results in CUTOUT
         Sigma0   = Sigma0.to_dataset(name='Sigma0')
         Sigma0['Sigma0'].attrs['units']     = 'kg/m^3'
         Sigma0['Sigma0'].attrs['long_name'] = 'potential density anomaly'
-        self.CUTOFF = xr.merge([self.CUTOFF,Sigma0])
+        Sigma0['Sigma0'].attrs['history']   = 'Computed offline by OceanSpy'
+        self.CUTOUT = xr.merge([self.CUTOUT,Sigma0])
         
-        print('Sigma0 added to CUTOFF')
+        print('Sigma0 added to CUTOUT')
         
     def compute_N2(self):
         """
-        Compute potential density anomaly and add it to self.CUTOFF.
+        Compute potential density anomaly and add it to self.CUTOUT.
         N2 = -(g/rho0)(drho/dz)
         """
         
         # Compute N2 only if not available
-        if any(d == 'N2' for d in self.CUTOFF.variables):
-            print('N2 has been already added to CUTOFF')
+        if any(d == 'N2' for d in self.CUTOUT.variables):
+            print('N2 has been already added to CUTOUT')
             return
 
         # Compute potential density if not available
-        if all(d != 'Sigma0' for d in self.CUTOFF.variables): self.compute_Sigma0()
+        if all(d != 'Sigma0' for d in self.CUTOUT.variables): self.compute_Sigma0()
             
         # Compute Brunt-Vaisala
         g    = 9.81 # m/s^2
-        rho0 = 1027 # kg/m^3 
-        N2   = - (g / rho0) * (self.CUTOFF['Sigma0'].diff('Z') / self.CUTOFF['Z'].diff('Z'))
-        
-        # Store results in CUTOFF
+        rho0 = 1027 # kg/m^3    
+        N2 =  ( - g / rho0   
+                * self.GRID.diff(self.CUTOUT['Sigma0'], 'Z', boundary='fill', fill_value=float('nan'))
+                * self.GRID.interp(self.CUTOUT['HFacC'], 'Z', boundary='fill', fill_value=float('nan'))
+                / (self.CUTOUT.drC)
+              )
+
+        # Store results in CUTOUT
         N2   = N2.to_dataset(name='N2')
-        N2   = N2.rename({'Z': 'Zm1'})
-        N2['Zm1'].values = (self.CUTOFF['Z'][:-1].values + self.CUTOFF['Z'][1:].values) / 2
-        N2['Zm1'].attrs.update({'c_grid_axis_shift': -0.5})
-        self.CUTOFF = xr.merge([self.CUTOFF, N2])
+        N2['N2'].attrs['units']     = '1/s^2'
+        N2['N2'].attrs['long_name'] = 'Brunt-Vaisala Frequency'
+        N2['N2'].attrs['history']   = 'Computed offline by OceanSpy'
+        self.CUTOUT = xr.merge([self.CUTOUT,N2])
+
+        print('N2 added to CUTOUT')
         
-        # Interpolte from Zm1 to Z
-        grid = xgcm.Grid(self.CUTOFF,periodic=False)
-        self.CUTOFF['N2'] = grid.interp(self.CUTOFF['N2'], axis='Z', boundary='fill', fill_value=float('nan'))
-        self.CUTOFF = self.CUTOFF.drop('Zm1')
+    def compute_vorticity(self):
         
-        print('N2 added to CUTOFF')
+        grid = xgcm.Grid(self.CUTOUT,periodic=False)
+        
+        zeta = (grid.diff(self.CUTOUT['V'] * self.CUTOUT['dyC'], 'X', boundary='fill', fill_value=float('nan')) -
+                grid.diff(self.CUTOUT['U'] * self.CUTOUT['dxC'], 'Y', boundary='fill', fill_value=float('nan')) 
+               )/ self.CUTOUT['rAz']          
+       
+        
+        return zeta
+        
+        
