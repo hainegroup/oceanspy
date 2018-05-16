@@ -96,7 +96,7 @@ def generate_ds_grid(cropped   = False,
     
     # Create xgcm grid
     for dim in ['Z', 'X', 'Y']: ds[dim].attrs.update({'axis': dim})  
-    for dim in ['Zp1','Xp1','Yp1']: # Don't create xgcm grid for Zu and Zl
+    for dim in ['Zp1','Zu','Zl','Xp1','Yp1']: 
         if min(ds[dim].values)<min(ds[dim[0]].values):
             ds[dim].attrs.update({'axis': dim[0], 'c_grid_axis_shift': -0.5})
         elif min(ds[dim].values)>min(ds[dim[0]].values):
