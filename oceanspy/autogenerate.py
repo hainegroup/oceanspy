@@ -58,6 +58,10 @@ def generate_ds_grid(cropped   = False,
     ds['Y'].values   = ds.YC.where((ds.XC!=0) & (ds.YC!=0)).mean(dim='X',   skipna=True)
     ds['Yp1'].values = ds.YG.where((ds.XG!=0) & (ds.YG!=0)).mean(dim='Xp1', skipna=True)
     ds = ds.drop(['XC','YC','XG','YG'])
+    
+    # Negative dr in order to be consistent with upward z axis
+    ds['drC'].values = -ds['drC'].values
+    ds['drF'].values = -ds['drF'].values
        
     # Read cropped files and crop ds
     if cropped:
@@ -92,7 +96,7 @@ def generate_ds_grid(cropped   = False,
     
     # Create xgcm grid
     for dim in ['Z', 'X', 'Y']: ds[dim].attrs.update({'axis': dim})  
-    for dim in ['Zp1','Zu','Zl','Xp1','Yp1']:
+    for dim in ['Zp1','Xp1','Yp1']: # Don't create xgcm grid for Zu and Zl
         if min(ds[dim].values)<min(ds[dim[0]].values):
             ds[dim].attrs.update({'axis': dim[0], 'c_grid_axis_shift': -0.5})
         elif min(ds[dim].values)>min(ds[dim[0]].values):
