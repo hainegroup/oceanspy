@@ -6,11 +6,11 @@ import time
 import matplotlib.pyplot as plt
 import cartopy.crs as ccrs
 
-def generate_ds_grid(cropped   = False,
-                     dispTable = False,
-                     plotMap   = False):
+def generate_ds(cropped   = False,
+                dispTable = False,
+                plotMap   = False):
     """
-    Generate a Dataset and its Grid from NetCDFs.
+    Generate a Dataset from NetCDFs.
     This function cointains hard-coded parameters specific for SciServer.
     
     Parameters
@@ -28,8 +28,6 @@ def generate_ds_grid(cropped   = False,
     -------
     ds: xarray.Dataset
        Dataset with all the available variables
-    grid: xgcm.Grid
-         Grid with all the staggered grids
     """
     
     # Check parameters
@@ -94,14 +92,13 @@ def generate_ds_grid(cropped   = False,
         ds[dim].values   = ds[dim].values
         ds[dim].attrs.update({'positive': 'up'}) 
     
-    # Create xgcm grid
+    # Add xgcm info
     for dim in ['Z', 'X', 'Y']: ds[dim].attrs.update({'axis': dim})  
     for dim in ['Zp1','Zu','Zl','Xp1','Yp1']: 
         if min(ds[dim].values)<min(ds[dim[0]].values):
             ds[dim].attrs.update({'axis': dim[0], 'c_grid_axis_shift': -0.5})
         elif min(ds[dim].values)>min(ds[dim[0]].values):
             ds[dim].attrs.update({'axis': dim[0], 'c_grid_axis_shift': +0.5})
-    grid = xgcm.Grid(ds,periodic=False)
     
     # ByeBye
     elapsed_time = time.time() - start_time
@@ -143,5 +140,5 @@ def generate_ds_grid(cropped   = False,
                                          cbar_kwargs={'label':'[km^2]'});
         plt.title(ds['rA'].attrs.get('description'))
         plt.show()
-    return ds, grid
+    return ds
 
