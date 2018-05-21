@@ -3,41 +3,35 @@ import pandas as pd
 import xarray as xr
 import xgcm as xgcm
 import time
-import matplotlib.pyplot as plt
-import cartopy.crs as ccrs
 
-def generate_ds(cropped   = False,
-                dispTable = False,
-                plotMap   = False):
+from .utils import *
+
+def generate_ds(cropped   = False):
     """
     Generate a Dataset from NetCDFs.
     This function cointains hard-coded parameters specific for SciServer.
     
+    exp_ASR is the only dataset currently available.
+    
     Parameters
     ----------
     cropped: bool
-            If True include variables to close the heat/salt budget. Budget's variables
-            have been cropped and have a smaller domain (lonRange:[69, 72]; latRange:[-13, -22]). 
-            Thus, also the regular variables will be cropped and only one Dataset is created.
-    dispTable: bool
-              If True prints a table with the available variables and their description
-    plotMap: bool
-            If True plot a map of the model domain and its resolution
+        If True include variables to close the heat/salt budget. Budget's variables
+        have been cropped and have a smaller domain (lonRange:[69, 72]; latRange:[-13, -22]). 
+        Thus, also the regular variables will be cropped and only one Dataset is created.
                
     Returns
     -------
     ds: xarray.Dataset
-       Dataset with all the available variables
+        Dataset with all the available variables
     """
     
     # Check parameters
-    if not isinstance(cropped, bool)  : raise RuntimeError("'cropped' needs to be a Boolean")
-    if not isinstance(dispTable, bool): raise RuntimeError("'dispTable' needs to be a Boolean")
-    if not isinstance(plotMap, bool)  : raise RuntimeError("'plotMap' needs to be a Boolean")
+    if not isinstance(cropped, bool)  : raise RuntimeError("'cropped' must be a boolean")
           
     # Hello
     start_time = time.time()
-    print('Opening dataset:',end=' ')
+    print('Opening dataset',end=': ')
     
     # Import grid and fields separately, then merge
     gridpath = '/home/idies/workspace/OceanCirculation/exp_ASR/grid_glued.nc'
@@ -103,42 +97,6 @@ def generate_ds(cropped   = False,
     # ByeBye
     elapsed_time = time.time() - start_time
     print(time.strftime('done in %H:%M:%S', time.gmtime(elapsed_time)))
-    
-    # Display available variables
-    if dispTable:
-        from IPython.core.display import HTML, display
-        name        = ds.variables
-        description = []
-        units       = []
-        for varName in name:
-            this_desc  = ds[varName].attrs.get('long_name')
-            this_units = ds[varName].attrs.get('units')
-            if this_desc is None: 
-                this_desc = ds[varName].attrs.get('description')
-                if this_desc is None: this_desc = ' '
-            if this_units is None: this_units = ' '
-            description.append(this_desc)
-            units.append(this_units)
-        table = {'Name': name,'Description': description, 'Units':units}    
-        table = pd.DataFrame(table)
-        display(HTML(table[['Name','Description','Units']].to_html()))
         
-    # Plot map
-    if plotMap:
-        from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
-        ax = plt.axes(projection=ccrs.Mercator(ds['X'].values.mean(), ds['Y'].values.min(), ds['Y'].values.max()))
-        gl = ax.gridlines(crs=ccrs.PlateCarree(), draw_labels=True,
-                          linewidth=2, color='gray', alpha=0.5, linestyle='--')
-        gl.xlabels_top = False
-        gl.ylabels_right = False
-        gl.xformatter = LONGITUDE_FORMATTER
-        gl.yformatter = LATITUDE_FORMATTER
-        mask = ds['HFacC'].isel(Z=0)
-        rA = ds['rA']*1.E-6
-        rA.where(mask>0).plot.pcolormesh(ax=ax, 
-                                         transform=ccrs.PlateCarree(),
-                                         cbar_kwargs={'label':'[km^2]'});
-        plt.title(ds['rA'].attrs.get('description'))
-        plt.show()
     return ds
 
