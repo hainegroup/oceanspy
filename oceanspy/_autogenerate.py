@@ -4,7 +4,7 @@ import xarray as xr
 import xgcm as xgcm
 import time
 
-from ._useful_funcs import *
+from .utils import *
 
 def generate_ds(cropped   = False):
     """
@@ -16,22 +16,22 @@ def generate_ds(cropped   = False):
     Parameters
     ----------
     cropped: bool
-            If True include variables to close the heat/salt budget. Budget's variables
-            have been cropped and have a smaller domain (lonRange:[69, 72]; latRange:[-13, -22]). 
-            Thus, also the regular variables will be cropped and only one Dataset is created.
+        If True include variables to close the heat/salt budget. Budget's variables
+        have been cropped and have a smaller domain (lonRange:[69, 72]; latRange:[-13, -22]). 
+        Thus, also the regular variables will be cropped and only one Dataset is created.
                
     Returns
     -------
     ds: xarray.Dataset
-       Dataset with all the available variables
+        Dataset with all the available variables
     """
     
     # Check parameters
-    if not isinstance(cropped, bool)  : raise RuntimeError("'cropped' needs to be a Boolean")
+    if not isinstance(cropped, bool)  : raise RuntimeError("'cropped' must be a boolean")
           
     # Hello
     start_time = time.time()
-    print('Opening dataset:',end=' ')
+    print('Opening dataset',end=': ')
     
     # Import grid and fields separately, then merge
     gridpath = '/home/idies/workspace/OceanCirculation/exp_ASR/grid_glued.nc'

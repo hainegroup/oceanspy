@@ -4,11 +4,12 @@ import xarray as xr
 import xgcm as xgcm
 import time
 
-from ._useful_funcs import *
+from ._autogenerate import generate_ds
+from .utils import *
 
 class Cutout:
     """
-    An object that provides access to a cutout's Dataset. 
+    An object that provides access to a Dataset's cutout. 
     """
     
     def __init__(self,
@@ -28,32 +29,34 @@ class Cutout:
         Parameters
         ----------
         ds: xarray.Dataset or None
-           Dataset with all the available variables.
-           If None, autogenerate xarray.
+            Dataset with all the available variables.
+            If None, autogenerate xarray.
         lonRange: list
-                 Longitude limits (based on Xp1 dimension)
+            Longitude limits (based on Xp1 dimension)
         latRange: list
-                 Latitude limits  (based on Yp1 dimension)
+            Latitude limits  (based on Yp1 dimension)
         depthRange: list
-                   Depth limits   (based on Zp1 dimension)
+            Depth limits   (based on Zp1 dimension)
         timeRange: list
-                  Time limits
+            Time limits
         timeFreq: str
-                 Time frequency. Available optionts are pandas Offset Aliases (e.g., '6H'):
-                 http://pandas.pydata.org/pandas-docs/stable/timeseries.html#offset-aliases
+            Time frequency. Available optionts are pandas Offset Aliases (e.g., '6H'):
+            http://pandas.pydata.org/pandas-docs/stable/timeseries.html#offset-aliases
         sampMethod: str
-                   Sampling method: 'snapshot' or 'mean'
+            Sampling method: 'snapshot' or 'mean'
         """
 
         # Check parameters
         if not isinstance(ds, xr.Dataset) and ds!=None: 
             raise RuntimeError("'ds' must be a xarray.Dataset or None")
-        if not isinstance(lonRange, list): raise RuntimeError("'lonRange' must be a list")
-        if not isinstance(latRange, list): raise RuntimeError("'latRange' must be a list")
+        if not isinstance(lonRange, list):   raise RuntimeError("'lonRange' must be a list")
+        if not isinstance(latRange, list):   raise RuntimeError("'latRange' must be a list")
         if not isinstance(depthRange, list): raise RuntimeError("'depthRange' must be a list")
-        if not isinstance(timeRange, list): raise RuntimeError("'timeRange' must be a list")
-        if not isinstance(timeFreq, str): raise RuntimeError("'timeFreq' must be a string")
-        if not isinstance(sampMethod, str): raise RuntimeError("'sampMethod' must be a string")
+        if any(d > 0 for d in depthRange):   raise RuntimeError("Depth is defined negative. "+ 
+                                                              "DepthRange limits must be negative.")
+        if not isinstance(timeRange, list):  raise RuntimeError("'timeRange' must be a list")
+        if not isinstance(timeFreq, str):    raise RuntimeError("'timeFreq' must be a string")
+        if not isinstance(sampMethod, str):  raise RuntimeError("'sampMethod' must be a string")
 
         # Load dataset if not provided
         if ds is None: ds = generate_ds()    
@@ -121,8 +124,18 @@ class Cutout:
         
         
     # Plot map
-    def plotMap(self):
-        ax = plot_mercator(self._INds.HFacC.isel(Z=0))    
+    def plot_map(self):
+        """
+        Plot a map with the original domain and the cutout.
+        
+        Returns
+        -------
+        ax: cartopy.mpl.geoaxes.GeoAxes
+            Object used by cartopy, which is a subclass of a normal matplotlib Axes.
+        gl: cartopy.mpl.gridliner.Gridliner
+            Object used by cartopy to add gridlines and tick labels to a map.
+        """
+        ax, gl = plot_mercator(self._INds.HFacC.isel(Z=0))    
         ax.plot([min(self.ds['Xp1']), min(self.ds['Xp1'])],[min(self.ds['Yp1']), max(self.ds['Yp1'])],
                 color='red', linewidth=3, transform=ccrs.PlateCarree())
         ax.plot([max(self.ds['Xp1']), max(self.ds['Xp1'])],[min(self.ds['Yp1']), max(self.ds['Yp1'])],
@@ -132,7 +145,7 @@ class Cutout:
         ax.plot([min(self.ds['Xp1']), max(self.ds['Xp1'])],[max(self.ds['Yp1']), max(self.ds['Yp1'])],
                 color='red', linewidth=3, transform=ccrs.PlateCarree())
         
-        
+        return ax, gl
         
     def compute_Sigma0(self):
         """
@@ -506,4 +519,43 @@ class Cutout:
         self.ds = xr.merge([self.ds,PV])
         print('PV added to ds')
         
+        
+    def save_to_netcdf(self, path, varList, gridInfo=False):
+        """
+        Save variables to NetCDF file using xarray.Dataset.to_netcdf.
+        
+        Parameters
+        ----------
+        path: str
+            Path to which to save.
+        varList: list
+            List of variables to save.
+        gridInfo: boolean
+            If true include grid information (timeless variables).
+            Otherwise, only include listed variables.
+        **kwargs : optional
+            Additional keyword arguments to xarray.Dataset.to_netcdf
+        """
+        
+        # Check parameters
+        if not isinstance(path, str)     : raise RuntimeError("'path' must be a string")
+        if not isinstance(varList, list)  : raise RuntimeError("'varList' must be a string")
+        if not isinstance(gridInfo, bool) : raise RuntimeError("'gridInfo' must be a boolean")
+            
+        # Hello
+        start_time = time.time()
+        print('Saving to '+path,end=': ')
+        
+        # Split into requested variables and grid, then merge
+        ds = self.ds
+        ds_vars = ds.drop([ var for var in ds.variables if not var in varList ])    
+        ds_grid = ds.drop([ var for var in ds.variables if 'time' in ds[var].dims ])
+        if gridInfo: ds = xr.merge([ds_vars, ds_grid])
+        else:        ds = ds_vars
+        ds.to_netcdf(path=path)
+        
+        # ByeBye
+        elapsed_time = time.time() - start_time
+        print(time.strftime('done in %H:%M:%S', time.gmtime(elapsed_time)))
+            
         
