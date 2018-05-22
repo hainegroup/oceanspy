@@ -3,10 +3,9 @@
 
 """Tests for `oceanspy` package."""
 
-"""
 import pytest
 
-
+"""
 from oceanspy import oceanspy
 
 
