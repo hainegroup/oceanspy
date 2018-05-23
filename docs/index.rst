@@ -8,8 +8,8 @@ Welcome to OceanSpy's documentation!
    readme
    installation
    usage
-   modules
    contributing
+   api
    authors
    history
 
