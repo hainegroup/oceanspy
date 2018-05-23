@@ -4,125 +4,216 @@
 Contributing
 ============
 
-Contributions are welcome, and they are greatly appreciated! Every little bit
-helps, and credit will always be given.
+Report Bugs and Submit Feedbacks
+--------------------------------
 
-You can contribute in many ways:
+Report bugs and submit feedbacks at https://github.com/malmans2/oceanspy/issues.
 
-Types of Contributions
-----------------------
 
-Report Bugs
-~~~~~~~~~~~
 
-Report bugs at https://github.com/malmans2/oceanspy/issues.
 
-If you are reporting a bug, please include:
+.. _git:
 
-* Your operating system name and version.
-* Any details about your local setup that might be helpful in troubleshooting.
-* Detailed steps to reproduce the bug.
+Using Git and GitHub
+--------------------
 
-Fix Bugs
-~~~~~~~~
+Git is the distributed version control system used to develop OceanSpy, while GitHub_ is the website hosting the repository ``oceanspy``.
 
-Look through the GitHub issues for bugs. Anything tagged with "bug" and "help
-wanted" is open to whoever wants to implement it.
+**Go to** GitHub_:
 
-Implement Features
-~~~~~~~~~~~~~~~~~~
+1. If you don't have an account yet, Sign up. Otherwise, Sign in. 
 
-Look through the GitHub issues for features. Anything tagged with "enhancement"
-and "help wanted" is open to whoever wants to implement it.
+2. Go to the OceanSpy_ GitHub repository, then fork the project using the fork button (top right).
 
-Write Documentation
-~~~~~~~~~~~~~~~~~~~
+**Move to your terminal**:
 
-OceanSpy could always use more documentation, whether as part of the
-official OceanSpy docs, in docstrings, or even on the web in blog posts,
-articles, and such.
+3. Set your GitHub username and email address. From your terminal (e.g., SciServer's terminal), run the following commands
 
-Submit Feedback
-~~~~~~~~~~~~~~~
+   .. code-block:: bash
 
-The best way to send feedback is to file an issue at https://github.com/malmans2/oceanspy/issues.
+    git config --global user.name "your_username_here"
+    git config --global user.email your_email_here@example.com
 
-If you are proposing a feature:
+4. Create a local clone
 
-* Explain in detail how it would work.
-* Keep the scope as narrow as possible, to make it easier to implement.
-* Remember that this is a volunteer-driven project, and that contributions
-  are welcome :)
+   .. code-block:: bash 
 
-Get Started!
-------------
+    git https://github.com/your_username_here/oceanspy.git
 
-Ready to contribute? Here's how to set up `oceanspy` for local development.
+5. Move into your local clone directory, then set up a remote that points to the original
 
-1. Fork the `oceanspy` repo on GitHub.
-2. Clone your fork locally::
+   .. code-block:: bash
+    
+    cd oceanspy
+    git https://github.com/malmans2/oceanspy.git
 
-    $ git clone git@github.com:your_name_here/oceanspy.git
+6. Make a new branch from ``upstream/master``
 
-3. Install your local copy into a virtualenv. Assuming you have virtualenvwrapper installed, this is how you set up your fork for local development::
+   .. code-block:: bash
+        
+    git fetch upstream
+    git checkout -b name_of_your_new_branch
 
-    $ mkvirtualenv oceanspy
-    $ cd oceanspy/
-    $ python setup.py develop
+7. Edit and/or add new files
 
-4. Create a branch for local development::
+    * :ref:`documentation`
+    * :ref:`code`
 
-    $ git checkout -b name-of-your-bugfix-or-feature
+8. To stage the files ready for a commit, use the command
 
-   Now you can make your changes locally.
+   .. code-block:: bash
+           
+    git add .
 
-5. When you're done making changes, check that your changes pass flake8 and the
-   tests, including testing other Python versions with tox::
+9. To commit the files, use the command
 
-    $ flake8 oceanspy tests
-    $ python setup.py test or py.test
-    $ tox
+   .. code-block:: bash 
+               
+    git commit -m "Commit message describing your edits" 
 
-   To get flake8 and tox, just pip install them into your virtualenv.
+10. You can use multiple commits, and repeat 8 and 9 multiple times.
+11. To push your branch and update your GitHub copy of ``oceanspy``, use the command
 
-6. Commit your changes and push your branch to GitHub::
+   .. code-block:: bash
+           
+    git push -u origin name_of_your_branch
 
-    $ git add .
-    $ git commit -m "Your detailed description of your changes."
-    $ git push origin name-of-your-bugfix-or-feature
+**Finally, go to your OceanSpy fork on** GitHub_ *(https://github.com/your_username_here/oceanspy)* **and click on** ``Compare and Pull``.
+   
 
-7. Submit a pull request through the GitHub website.
 
-Pull Request Guidelines
------------------------
 
-Before you submit a pull request, check that it meets these guidelines:
 
-1. The pull request should include tests.
-2. If the pull request adds functionality, the docs should be updated. Put
-   your new functionality into a function with a docstring, and add the
-   feature to the list in README.rst.
-3. The pull request should work for Python 2.7, 3.4, 3.5 and 3.6, and for PyPy. Check
-   https://travis-ci.org/malmans2/oceanspy/pull_requests
-   and make sure that the tests pass for all supported Python versions.
+.. _documentation:
 
-Tips
-----
+Contributing to the Documentation
+---------------------------------
+The documentation is built with Sphinx_ and hosted by `Read the Docs`_.
+It is written in reStructuredText_.
 
-To run a subset of tests::
+1. First, you need a local clone of ``oceanspy`` and a branch (follow the instruction in :ref:`git`)
 
-$ py.test tests.test_oceanspy
+2. Move into the directory containing the documentation
+
+   .. code-block:: bash 
+           
+    cd oceanspy/docs
+
+3. In order to build the documentation, you need to create a Conda_ environment
+
+   .. code-block:: bash 
+           
+    conda env create -f environment.yml
+
+4. Activate the new environment (named ``rtd``)
+   
+   .. code-block:: bash
+
+    # Older versions of conda
+    source activate rtd 
+    # Newer versions of conda
+    conda activate rtd
+
+   NOTE: make sure that the ``rtd`` environment is activated every time you work on the documentation.
+   For example, if you start working on a new terminal, you don't need to create a new environment but you just have to activate ``rtd``.
+
+4. Edit and/or add new files
+
+5. To build the documentation run:
+
+   .. code-block:: bash
+           
+    make html
+
+   NOTE: if you want to do a full clean build, run ``make clean`` before ``make html``.
+
+6. You can find the HTML output in ``ocenspy/docs/_build/html``.
+
+7. Use git to ``add``, ``commit``, and ``push`` as explained in :ref:`git`.
+
+
+
+
+
+
+.. _code:
+
+Contributing to the Code
+------------------------
+
+1. First, you need a local clone of ``oceanspy`` and a branch (follow the instructions in :ref:`git`)
+
+2. If you are not already into your local clone directory, move there
+
+   .. code-block:: bash
+           
+    cd oceanspy
+
+3. Install OceanSpy's dependencies, following the instruction in :ref:`dependencies`.
+
+   TODO: no need to create a separate environment yet.
+   In the future, use ``conda env create -f ci/environment-pyxx.yml`` and add tests! 
+
+4. Install OceanSpy in development mode
+
+   .. code-block:: bash 
+           
+    pip install -e .
+
+5. Edit and/or add new files
+
+6. Use git to ``add``, ``commit``, and ``push`` as explained in :ref:`git`.
+
+
+
 
 
 Deploying
 ---------
 
 A reminder for the maintainers on how to deploy.
-Make sure all your changes are committed (including an entry in HISTORY.rst).
-Then run::
 
-$ bumpversion patch # possible: major / minor / patch
-$ git push
-$ git push --tags
+1. Download and install bumpversion
 
-Travis will then deploy to PyPI if tests pass.
+   .. code-block:: bash
+
+    pip install --upgrade bumpversion
+
+2. Update ``HISTORY.rst``
+
+3. Use git to ``add`` and ``commit`` changes
+
+4. Update version number
+
+    .. code-block:: bash
+
+    bumpversion patch # possible: major / minor / patch
+
+5. Release on PyPI_ by uploading both sdist and wheel:
+
+    .. code-block:: bash
+
+    python setup.py sdist upload
+    python setup.py bdist_wheel upload 
+
+6. Use git to ``push``
+
+7. Push tags
+
+    .. code-block:: bash
+
+    git push --tags
+
+8. Add the release's notes on the `releases' page`_ (copy and past from ``HISTORY.rst``)
+   
+
+.. _GitHub: https://github.com
+.. _OceanSpy: https://github.com/malmans2/oceanspy
+.. _Sphinx: http://www.sphinx-doc.org/en/master
+.. _Read the Docs: https://readthedocs.org
+.. _reStructuredText: http://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html
+.. _Conda: https://conda.io/docs
+.. _PyPI: https://pypi.org/project/oceanspy
+.. _releases' page: https://github.com/malmans2/oceanspy/releases
+
+
