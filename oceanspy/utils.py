@@ -1,3 +1,8 @@
+"""
+Quick and dirty useful functions
+"""
+
+# Start aliases with _: I don't wanna see them using TAB.
 import xarray as _xr
 import numpy as _np
 import pandas as _pd
@@ -8,21 +13,22 @@ def smart_chunking(ds,
                    order_of_mag = 6,
                    dims2chunk   = ['time', 'Z', 'X', 'Y']):
     """
-    Chunk a dataset defining the order of magnitude of elements in each 4D chunk.
+    Chunk a ``Dataset`` defining the order of magnitude of elements in each chunk.
 
     From xarray's documentation:
     A good rule of thumb to create arrays with a minimum chunksize of at least one million elements. 
     With large arrays (10+ GB), the cost of queueing up dask operations can be noticeable, 
-    and you may need even larger chunksizes.
+    and you may need even larger chunksizes [1]_.
 
     Parameters
     ----------
-    ds: xarray.Dataset or None
-        Dataset that will be chunked.
+    ds: xarray.Dataset
+        Dataset to rechunk.
     order_of_marg: int
-        Order of magnitude of elements in each 4D chunk.
+        Order of magnitude of elements in each chunk.
     dims2chunk: list
         Dimensions to chunk. 
+
         To minimize chunked dimensions, it starts from first, then second if necessary
         Available dimensions are ['time', 'Z', 'X', 'Y']
     
@@ -30,6 +36,11 @@ def smart_chunking(ds,
     -------
     ds: xarray.Dataset
         Chunked Dataset 
+
+
+    REERENCES
+    ---------
+    .. [1] Chunking and performance http://xarray.pydata.org/en/stable/dask.html#chunking-and-performance
     """
     
     # Check parameters

@@ -4,16 +4,15 @@ import xarray as xr
 import xgcm as xgcm
 import time
 
-from ._autogenerate import generate_ds
 from .utils import *
 
 class Cutout:
     """
-    An object that provides access to a Dataset's cutout. 
+    An object that represents a cutout dataset.
     """
     
     def __init__(self,
-                 ds         = None, 
+                 ds , 
                  lonRange   = [-180, 180],
                  latRange   = [-90, 90],
                  depthRange = [0, float("-inf")],
@@ -21,34 +20,38 @@ class Cutout:
                  timeFreq   = '6H',
                  sampMethod = 'snapshot'):
         """
-        Subsample a dataset in time and space.
-        Automatic rechunking so 3D chunks have at least 1.E6 elements.
-        The new dataset is stored in self.ds
+        Cutout the original dataset using the cutout parameters (space and time).
+        Then rechunk so that 4D chunks have at least 1.E6 elements.
         
-
         Parameters
         ----------
         ds: xarray.Dataset or None
-            Dataset with all the available variables.
-            If None, autogenerate xarray.
+            Dataset with all available variables.
         lonRange: list
             Longitude limits (based on Xp1 dimension)
         latRange: list
-            Latitude limits  (based on Yp1 dimension)
+            Latitude limits (based on Yp1 dimension)
         depthRange: list
-            Depth limits   (based on Zp1 dimension)
+            Depth limits (based on Zp1 dimension)
         timeRange: list
             Time limits
         timeFreq: str
             Time frequency. Available optionts are pandas Offset Aliases (e.g., '6H'):
             http://pandas.pydata.org/pandas-docs/stable/timeseries.html#offset-aliases
         sampMethod: str
-            Sampling method: 'snapshot' or 'mean'
+            Downsampling method: 'snapshot' or 'mean'
+
+        Returns
+        -------
+        self.ds: xarray.Dataset
+            Cutout Dataset
+        self.grid: xgcm.Grid
+            Cutout Grid
         """
 
         # Check parameters
-        if not isinstance(ds, xr.Dataset) and ds!=None: 
-            raise RuntimeError("'ds' must be a xarray.Dataset or None")
+        if not isinstance(ds, xr.Dataset): 
+            raise RuntimeError("'ds' must be a xarray.Dataset")
         if not isinstance(lonRange, list):   raise RuntimeError("'lonRange' must be a list")
         if not isinstance(latRange, list):   raise RuntimeError("'latRange' must be a list")
         if not isinstance(depthRange, list): raise RuntimeError("'depthRange' must be a list")
@@ -58,9 +61,6 @@ class Cutout:
         if not isinstance(timeFreq, str):    raise RuntimeError("'timeFreq' must be a string")
         if not isinstance(sampMethod, str):  raise RuntimeError("'sampMethod' must be a string")
 
-        # Load dataset if not provided
-        if ds is None: ds = generate_ds()    
-            
         # Store input
         self._INds         = ds
         self._INlonRange   = lonRange

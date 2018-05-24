@@ -4,13 +4,15 @@
 Installation
 ============
 
-SciServer access
+SciServer Access
 ----------------
-1. `Register <http://portal.sciserver.org/login-portal/Account/Register>`_ for a new account or `log in <http://portal.sciserver.org/login-portal/Account/Login?callbackUrl=http:%2f%2fcompute.sciserver.org%2fdashboard>`_ to an existing account 
-2. Create a new container and choose
+SciServer Compute_ optimizes Big Data science by allowing users to bring their analysis close to the data with Jupyter Notebooks deployed in server-side containers.
+
+1. Register_  for a new account or `log in`_ to an existing account 
+2. Create a new container and select
  
-.. list-table::
-    :stub-columns: 1
+   .. list-table::
+    :stub-columns: 0
     :widths: 60 60
 
     * - Image:
@@ -20,52 +22,40 @@ SciServer access
 
 3. Click on the green play button 
 
-Dependencies
-------------
-The easiest way to install all the dependencies is to use `Conda <https://conda.io/docs/>`_.
-First open a terminal (click on New-->Terminal), and run the following commands:
+.. _dependencies:
 
-.. code-block:: console
+Install Dependencies
+--------------------
+The easiest way to install most of OceanSpy's dependencies is to use Conda_.
+First open a terminal by clicking on ``New`` + ``Terminal`` (top right), then run the following commands:
 
-    $ conda install dask netCDF4 bottleneck
-    $ conda install -c conda-forge xarray cartopy
-    $ pip install xgcm
+.. code-block:: bash
 
-Stable release
---------------
+    conda install dask distributed netCDF4 bottleneck
+    conda install -c conda-forge xarray cartopy
+    pip install xgcm
+
+Install OceanSpy
+----------------
 To install OceanSpy, run this command in your terminal:
 
-.. code-block:: console
+.. code-block:: bash
 
-    $ pip install oceanspy
+    pip install oceanspy
 
 This is the preferred method to install OceanSpy, as it will always install the most recent stable release.
 
-If you don't have `pip`_ installed, this `Python installation guide`_ can guide
-you through the process.
+Install from Python
+-------------------
+To install OceanSpy and its dependencies from Python, use these commands::
 
-From sources
-------------
-The sources for OceanSpy can be downloaded from the `Github repo`_.
+    import sys
+    !conda install --yes --prefix {sys.prefix} dask distributed bottleneck netCDF4
+    !conda install --yes --prefix {sys.prefix} -c conda-forge xarray cartopy
+    !{sys.executable} -m pip install xgcm oceanspy
 
-You can either clone the public repository:
-
-.. code-block:: console
-
-    $ git clone git://github.com/malmans2/oceanspy
-
-Or download the `tarball`_:
-
-.. code-block:: console
-
-    $ curl  -OL https://github.com/malmans2/oceanspy/tarball/master
-
-Once you have a copy of the source, you can install it with:
-
-.. code-block:: console
-
-    $ python setup.py install
-
-
-.. _Github repo: https://github.com/malmans2/oceanspy
-.. _tarball: https://github.com/malmans2/oceanspy/tarball/master
+.. _SciServer: http://www.sciserver.org
+.. _Compute: http://compute.sciserver.org/dashboard/Home/Index
+.. _Register: http://portal.sciserver.org/login-portal/Account/Register
+.. _log in: http://portal.sciserver.org/login-portal/Account/Login?callbackUrl=http:%2f%2fcompute.sciserver.org%2fdashboard
+.. _Conda: https://conda.io/docs

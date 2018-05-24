@@ -1,15 +1,30 @@
-.. currentmodule:: oceanspy
+===
+API 
+===
 
-#############
-API reference
-#############
+Modules
+=======
 
-This page provides an auto-generated summary of OceanSpy's API. 
+autogenerate
+************
+.. automodule:: oceanspy.autogenerate
+    :members:
 
-Top-level functions
-===================
+utils
+*****
+.. automodule:: oceanspy.utils
+    :members:
 
-.. autosummary::
-   :toctree: generated/
 
-    generate_ds
+
+
+Classes
+=======
+
+Cutout
+******
+
+.. autoclass:: oceanspy.Cutout
+    :members:
+
+    .. automethod:: __init__
