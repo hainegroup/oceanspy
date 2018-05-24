@@ -1,48 +1,50 @@
-import numpy as np
-import pandas as pd
-import xarray as xr
-import xgcm as xgcm
-import time
+"""
+Generate a ``Dataset`` from model output stored on SciServer.
+"""
 
-from .utils import *
+# Start aliases with _: I don't wanna see them using TAB.
+import xarray as _xr
+import time as _time
 
-def generate_ds(cropped   = False):
+def exp_ASR(cropped = False):
     """
-    Generate a Dataset from NetCDFs.
-    This function cointains hard-coded parameters specific for SciServer.
-    
-    exp_ASR is the only dataset currently available.
-    
+    Same configuration as Almansi et al., 2017 [1]_.
+    However, the atmospheric forcing is the Arctic System Reanalysis (ASR).
+     
     Parameters
     ----------
     cropped: bool
-        If True include variables to close the heat/salt budget. Budget's variables
-        have been cropped and have a smaller domain (lonRange:[69, 72]; latRange:[-13, -22]). 
-        Thus, also the regular variables will be cropped and only one Dataset is created.
-               
+        If True include diagnostics to close the heat/salt budget. 
+        Since these variable have been cropped, return a Dataset on a smaller domain: 
+        [ 72N , 69N] [-22E , -13E]
+
     Returns
     -------
     ds: xarray.Dataset
-        Dataset with all the available variables
+        Dataset with all available diagnostics
+    
+    REFERENCES
+    ----------
+    .. [1] Almansi et al., 2017 http://doi.org/10.1175/JPO-D-17-0129.1
     """
     
     # Check parameters
-    if not isinstance(cropped, bool)  : raise RuntimeError("'cropped' must be a boolean")
+    if not isinstance(cropped, bool) : raise RuntimeError("'cropped' must be a boolean")
           
     # Hello
-    start_time = time.time()
+    start_time = _time.time()
     print('Opening dataset',end=': ')
     
     # Import grid and fields separately, then merge
     gridpath = '/home/idies/workspace/OceanCirculation/exp_ASR/grid_glued.nc'
     fldspath = '/home/idies/workspace/OceanCirculation/exp_ASR/result_*/output_glued/*.*_glued.nc'
     croppath = '/home/idies/workspace/OceanCirculation/exp_ASR/result_*/output_glued/cropped/*.*_glued.nc'
-    gridset = xr.open_dataset(gridpath,
+    gridset = _xr.open_dataset(gridpath,
                               drop_variables = ['XU','YU','XV','YV','RC','RF','RU','RL'])
-    fldsset = xr.open_mfdataset(fldspath,
+    fldsset = _xr.open_mfdataset(fldspath,
                                 concat_dim     = 'T',
                                 drop_variables = ['diag_levels','iter'])
-    ds = xr.merge([gridset, fldsset])
+    ds = _xr.merge([gridset, fldsset])
     
     # Create horizontal vectors (remove zeros due to exch2)
     ds['X'].values   = ds.XC.where((ds.XC!=0) & (ds.YC!=0)).mean(dim='Y',   skipna=True)
@@ -57,7 +59,7 @@ def generate_ds(cropped   = False):
        
     # Read cropped files and crop ds
     if cropped:
-        cropset = xr.open_mfdataset(croppath,
+        cropset = _xr.open_mfdataset(croppath,
                                     concat_dim     = 'T',
                                     drop_variables = ['diag_levels','iter'])
         cropset = cropset.rename({'Zld000216': 'Zl'})
@@ -75,7 +77,7 @@ def generate_ds(cropped   = False):
                      Zp1       = slice(0,cropset['Zmd000216'].size+1),
                      Zu        = slice(0,cropset['Zmd000216'].size))
         for dim in ['X', 'Xp1', 'Y', 'Yp1']: cropset[dim]=ds[dim]
-        ds = xr.merge([ds, cropset])
+        ds = _xr.merge([ds, cropset])
         
     # Adjust dimensions creating conflicts
     ds = ds.rename({'Z': 'Ztmp'})
@@ -95,8 +97,8 @@ def generate_ds(cropped   = False):
             ds[dim].attrs.update({'axis': dim[0], 'c_grid_axis_shift': +0.5})
     
     # ByeBye
-    elapsed_time = time.time() - start_time
-    print(time.strftime('done in %H:%M:%S', time.gmtime(elapsed_time)))
+    elapsed_time = _time.time() - start_time
+    print(_time.strftime('done in %H:%M:%S', _time.gmtime(elapsed_time)))
         
     return ds
 

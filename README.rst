@@ -38,18 +38,17 @@ OceanSpy - A Python Package for Oceanographic Investigations
    :target: https://github.com/malmans2/oceanspy
 
 
-**OceanSpy** is an open-source, user-friendly Python package that aims to enable scientists and interested amateurs to use oceanographic datasets as virtual sandboxes.
+**OceanSpy** is an open-source and user-friendly Python package that aims to enable scientists and interested amateurs to use oceanographic datasets as virtual sandboxes.
 OceanSpy builds on software packages developed by the Pangeo_ community, and exploits the Johns Hopkins University SciServer_ system.
 
 Our goal is to create a collaborative research environment where users can access and process high-resolution datasets.
-For example, OceanSpy and SciServer allow to trace the physical evolution of ocean currents across orders of magnitude in space and time, 
-and to quickly analyze important aspects of model events in conjunction with observational data.
+For example, OceanSpy and SciServer allow to quickly analyze important aspects of model events in conjunction with observational data.
 
-OceanSpy is currently suited to facilitate extracting information from Ocean General Circulation Models set up and run by the research group of Prof. Thomas W. N. Haine_.
-Users can either download subsets of data on their own machines, or run OceanSpy and the Pangeo softwares online storing post-processing files on our servers.
+OceanSpy is currently suited to facilitate extracting information from Ocean General Circulation Models set up and run by the research group of `Prof. Tom Haine`_.
+Users can either download subsets of data on their own machines, or run OceanSpy and the Pangeo softwares online storing post-processing files on SciServer.
 
 
-.. _Haine: http://sites.krieger.jhu.edu/haine
+.. _Prof. Tom Haine: http://sites.krieger.jhu.edu/haine
 .. _Pangeo: http://pangeo-data.github.io
 .. _SciServer: http://www.sciserver.org
 

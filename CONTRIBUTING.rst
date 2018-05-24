@@ -12,12 +12,12 @@ Report bugs and submit feedbacks at https://github.com/malmans2/oceanspy/issues.
 
 
 
-.. _git:
+.. _using git:
 
 Using Git and GitHub
 --------------------
 
-Git is the distributed version control system used to develop OceanSpy, while GitHub_ is the website hosting the repository ``oceanspy``.
+Git_ is the distributed version control system used to develop OceanSpy, while GitHub_ is the website hosting the repository ``oceanspy``.
 
 **Go to** GitHub_:
 
@@ -54,7 +54,7 @@ Git is the distributed version control system used to develop OceanSpy, while Gi
     git fetch upstream
     git checkout -b name_of_your_new_branch
 
-7. Edit and/or add new files
+7. Edit and/or add new files:
 
     * :ref:`documentation`
     * :ref:`code`
@@ -71,8 +71,9 @@ Git is the distributed version control system used to develop OceanSpy, while Gi
                
     git commit -m "Commit message describing your edits" 
 
-10. You can use multiple commits, and repeat 8 and 9 multiple times.
-11. To push your branch and update your GitHub copy of ``oceanspy``, use the command
+   NOTE: You can use multiple commits, and repeat 8 and 9 multiple times.
+
+10. To push your branch and update your GitHub copy of ``oceanspy``, use the command
 
    .. code-block:: bash
            
@@ -91,7 +92,7 @@ Contributing to the Documentation
 The documentation is built with Sphinx_ and hosted by `Read the Docs`_.
 It is written in reStructuredText_.
 
-1. First, you need a local clone of ``oceanspy`` and a branch (follow the instruction in :ref:`git`)
+1. First, you need a local clone of ``oceanspy`` and a branch (follow the instruction in :ref:`using git`)
 
 2. Move into the directory containing the documentation
 
@@ -129,7 +130,7 @@ It is written in reStructuredText_.
 
 6. You can find the HTML output in ``ocenspy/docs/_build/html``.
 
-7. Use git to ``add``, ``commit``, and ``push`` as explained in :ref:`git`.
+7. Use git to ``add``, ``commit``, and ``push`` as explained in :ref:`using git`.
 
 
 
@@ -141,7 +142,7 @@ It is written in reStructuredText_.
 Contributing to the Code
 ------------------------
 
-1. First, you need a local clone of ``oceanspy`` and a branch (follow the instructions in :ref:`git`)
+1. First, you need a local clone of ``oceanspy`` and a branch (follow the instructions in :ref:`using git`)
 
 2. If you are not already into your local clone directory, move there
 
@@ -162,7 +163,7 @@ Contributing to the Code
 
 5. Edit and/or add new files
 
-6. Use git to ``add``, ``commit``, and ``push`` as explained in :ref:`git`.
+6. Use git to ``add``, ``commit``, and ``push`` as explained in :ref:`using git`.
 
 
 
@@ -185,13 +186,13 @@ A reminder for the maintainers on how to deploy.
 
 4. Update version number
 
-    .. code-block:: bash
+   .. code-block:: bash
 
     bumpversion patch # possible: major / minor / patch
 
 5. Release on PyPI_ by uploading both sdist and wheel:
 
-    .. code-block:: bash
+   .. code-block:: bash
 
     python setup.py sdist upload
     python setup.py bdist_wheel upload 
@@ -200,13 +201,14 @@ A reminder for the maintainers on how to deploy.
 
 7. Push tags
 
-    .. code-block:: bash
+   .. code-block:: bash
 
     git push --tags
 
 8. Add the release's notes on the `releases' page`_ (copy and past from ``HISTORY.rst``)
    
 
+.. _Git: https://git-scm.com
 .. _GitHub: https://github.com
 .. _OceanSpy: https://github.com/malmans2/oceanspy
 .. _Sphinx: http://www.sphinx-doc.org/en/master
