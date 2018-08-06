@@ -31,9 +31,10 @@ First open a terminal by clicking on ``New`` + ``Terminal`` (top right), then ru
 
 .. code-block:: bash
 
-    conda install dask distributed netCDF4 bottleneck
-    conda install -c conda-forge xarray cartopy
-    pip install xgcm
+    conda install dask distributed bottleneck netCDF4
+    conda install -c conda-forge xarray cartopy esmpy 
+    conda install -c pyviz hvplot geoviews
+    pip install xgcm xesmf
 
 Install OceanSpy
 ----------------
@@ -51,8 +52,9 @@ To install OceanSpy and its dependencies from Python, use these commands::
 
     import sys
     !conda install --yes --prefix {sys.prefix} dask distributed bottleneck netCDF4
-    !conda install --yes --prefix {sys.prefix} -c conda-forge xarray cartopy
-    !{sys.executable} -m pip install xgcm oceanspy
+    !conda install --yes --prefix {sys.prefix} -c conda-forge xarray cartopy esmpy 
+    !conda install --yes --prefix {sys.prefix} -c pyviz hvplot geoviews
+    !{sys.executable} -m pip install xgcm xesmf
 
 .. _SciServer: http://www.sciserver.org
 .. _Compute: http://compute.sciserver.org/dashboard/Home/Index
