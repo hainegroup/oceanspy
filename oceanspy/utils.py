@@ -1,161 +1,194 @@
 """
-Quick and dirty useful functions
+Utils: functions used by other OceanSpy modules
 """
 
-# Start aliases with _: I don't wanna see them using TAB.
-import xarray as _xr
+# Comments for developers:
+# 1) Keep imported modules secret using _
+
 import numpy as _np
-import pandas as _pd
-import matplotlib.pyplot as _plt
-import cartopy.crs as _ccrs
+import pickle as _pickle
+import time as _time
+from . import compute as _compute
 
-def smart_chunking(ds,
-                   order_of_mag = 6,
-                   dims2chunk   = ['time', 'Z', 'X', 'Y']):
+def great_circle_path(lat1,lon1,lat2,lon2,delta_km):
     """
-    Chunk a ``Dataset`` defining the order of magnitude of elements in each chunk.
-
-    From xarray's documentation:
-    A good rule of thumb to create arrays with a minimum chunksize of at least one million elements. 
-    With large arrays (10+ GB), the cost of queueing up dask operations can be noticeable, 
-    and you may need even larger chunksizes [1]_.
-
+    Generate a great circle trajectory specifying the resolution.
+    
     Parameters
     ----------
-    ds: xarray.Dataset
-        Dataset to rechunk.
-    order_of_marg: int
-        Order of magnitude of elements in each chunk.
-    dims2chunk: list
-        Dimensions to chunk. 
-
-        To minimize chunked dimensions, it starts from first, then second if necessary
-        Available dimensions are ['time', 'Z', 'X', 'Y']
-    
-    Returns
-    -------
-    ds: xarray.Dataset
-        Chunked Dataset 
-
-
-    REERENCES
-    ---------
-    .. [1] Chunking and performance http://xarray.pydata.org/en/stable/dask.html#chunking-and-performance
-    """
-    
-    # Check parameters
-    if not isinstance(ds, _xr.Dataset):   raise RuntimeError("'ds' must be a xarray.Dataset")
-    if not isinstance(order_of_mag, int): raise RuntimeError("'order_of_mag' must be an integer")
-    if not isinstance(dims2chunk, list):  raise RuntimeError("'dims2chunk' must be a list")
-        
-    # Get dimensions' size
-    chunks = {}
-    for dim in dims2chunk: chunks[dim] = ds[dim].size
-
-    # Loop reemoving 1 every time
-    totSize = 1
-    for key in chunks: 
-        totSize=totSize * chunks[key]
-    totOM = int(_np.log10(totSize))
-    while totOM>order_of_mag: 
-        for dim in dims2chunk:
-            if chunks[dim]>1:
-                chunks[dim] = chunks[dim]-1
-                totSize = 1
-                for key in chunks: 
-                    totSize=totSize * chunks[key]
-                totOM = int(_np.log10(totSize))
-                break
-
-    # Chunk dataset
-    CHUNKS = {}
-    for dim in ds.dims:
-        for dim2chunk in dims2chunk:
-            if dim==dim2chunk: CHUNKS[dim]=chunks[dim2chunk]
-            elif dim[0]==dim2chunk:
-                if ds[dim].size==chunks[dim2chunk]+1: CHUNKS[dim]=ds[dim].size
-                else: CHUNKS[dim]=chunks[dim2chunk]
-            else: 
-                CHUNKS[dim]=ds[dim].size
-            break
-    ds = ds.chunk(chunks=CHUNKS)
-    
-    return ds
-
-
-
-def disp_variables(ds):    
-    """
-    Print a table with the available variables, and their descriptions and units
-
-    Parameters
-    ----------
-    ds: xarray.Dataset or None
-        Dataset that will be chunked.
-    """
-    
-    # Check parameters
-    if not isinstance(ds, _xr.Dataset): raise RuntimeError("'ds' must be a xarray.Dataset")
-        
-    from IPython.core.display import HTML, display
-    name        = ds.variables
-    description = []
-    units       = []
-    for varName in name:
-        this_desc  = ds[varName].attrs.get('long_name')
-        this_units = ds[varName].attrs.get('units')
-        if this_desc is None: 
-            this_desc = ds[varName].attrs.get('description')
-            if this_desc is None: this_desc = ' '
-        if this_units is None: this_units = ' '
-        description.append(this_desc)
-        units.append(this_units)
-    table = {'Name': name,'Description': description, 'Units':units}    
-    table = _pd.DataFrame(table)
-    display(HTML(table[['Name','Description','Units']].to_html()))
-    
-    
-    
-def plot_mercator(da):
-    """
-    Quick-plot of a 2D DataArray using Mercator projection.
-
-    Parameters
-    ----------
-    da: xarray.DataArray        
-        DataArray to plot.
+    lat1: number
+        Latitude of vertex 1 [degrees N]
+    lon1: number
+        Longitude of vertex 1 [degrees E]
+    lat2: number
+        Latitude of vertex 2 [degrees N]
+    lon2: number
+        Longitude of vertex 2 [degrees E]
+    delta_km: number
+        Horizontal resolution [km]
         
     Returns
     -------
-    ax: cartopy.mpl.geoaxes.GeoAxes
-        Object used by cartopy, which is a subclass of a normal matplotlib Axes.
-    gl: cartopy.mpl.gridliner.Gridliner
-        Object used by cartopy to add gridlines and tick labels to a map.
+    lats: vector
+        Great circle latitudes [degrees N]
+    lons: vector
+        Great circle longitudes [degrees E]
+    dist: vector
+        Distances from vertex 1 [km]
     """
     
-    # Check parameters
-    if not isinstance(da, _xr.DataArray): raise RuntimeError("'da' must be a xarray.DataArray")
-    if len(da.dims)!=2: raise RuntimeError("'da' must have 2 dimensions")    
-    if not all(dim[0] in ['X', 'Y'] for dim in da.dims): 
-        raise RuntimeError("'da' must have lon/lat dimensions (e.g., X and Y, or Xp1 and Yp1, ...")     
+    # Convert to radians
+    lat1=_np.deg2rad(lat1)
+    lon1=_np.deg2rad(lon1)
+    lat2=_np.deg2rad(lat2)
+    lon2=_np.deg2rad(lon2)
+
+    # Using the right-handed coordinate frame with Z toward (lat,lon)=(0,0) and 
+    # Y toward (lat,lon)=(90,0), the unit_radial of a (lat,lon) is given by:
+    # 
+    #               [ cos(lat)*sin(lon) ]
+    # unit_radial = [     sin(lat)      ]
+    #               [ cos(lat)*cos(lon) ]
+    unit_radial_1 = _np.array([_np.cos(lat1)*_np.sin(lon1), _np.sin(lat1), _np.cos(lat1)*_np.cos(lon1)])
+    unit_radial_2 = _np.array([_np.cos(lat2)*_np.sin(lon2), _np.sin(lat2), _np.cos(lat2)*_np.cos(lon2)])
+
+    # Define the vector that is normal to both unit_radial_1 & unit_radial_2
+    normal_vec = _np.cross(unit_radial_1,unit_radial_2); 
+    unit_normal = normal_vec / _np.sqrt(_np.sum(normal_vec**2))
+
+    # Define the vector that is tangent to the great circle flight path at
+    # (lat1,lon1)
+    tangent_1_vec = _np.cross(unit_normal,unit_radial_1)
+    unit_tangent_1 = tangent_1_vec / _np.sqrt(_np.sum(tangent_1_vec**2))
+
+    # Determine the total arc distance from 1 to 2 
+    total_arc_angle_1_to_2 = _np.arccos(unit_radial_1.dot(unit_radial_2)) # radians
+
+    # Determine the set of arc angles to use 
+    # (approximately spaced by delta_km)
+    R0 = 6371; # km, radius of a circle having approximately the surface area of the earth
+    angs2use = _np.linspace(0,total_arc_angle_1_to_2,_np.ceil(total_arc_angle_1_to_2/(delta_km/R0))); # radians
+    M=angs2use.size;
+
+    # Now find the unit radials of the entire "trajectory"
+    #                                                              [ cos(angs2use(m)) -sin(angs2use(m)) 0 ]   [ 1 ]
+    # unit_radial_m = [unit_radial_1 unit_tangent_1 unit_normal] * [ sin(angs2use(m))  cos(angs2use(m)) 0 ] * [ 0 ]
+    #                                                              [        0                 0         1 ]   [ 0 ]
+    # equals
+    #                                                              [ cos(angs2use(m)) ]
+    # unit_radial_m = [unit_radial_1 unit_tangent_1 unit_normal] * [ sin(angs2use(m)) ]
+    #                                                              [        0         ]
+    # equals
+    #
+    # unit_radial_m = [unit_radial_1*cos(angs2use(m)) + unit_tangent_1*sin(angs2use(m)) + 0]
+    #
+    # unit_radials is a 3xM array of M unit radials
+    unit_radials = _np.array([unit_radial_1]).transpose().dot(_np.ones((1,M))) *\
+                   _np.ones((3,1)).dot(_np.array([_np.cos(angs2use)])) +\
+                   _np.array([unit_tangent_1]).transpose().dot(_np.ones((1,M))) *\
+                   _np.ones((3,1)).dot(_np.array([_np.sin(angs2use)]))
+
+    # Convert to latitudes and longitudes
+    lats = _np.rad2deg(_np.arcsin(unit_radials[1,:]))
+    lons = _np.rad2deg(_np.arctan2(unit_radials[0,:],unit_radials[2,:]))
     
-    # Import useful stuff
-    from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
+    # Compute distance
+    dlon = _np.deg2rad(lons[:-1] - lons[1:])
+    dlat = _np.deg2rad(lats[:-1] - lats[1:])
+    a = _np.sin(dlat / 2)**2 + _np.cos(lat1) * _np.cos(lat2) * _np.sin(dlon / 2)**2
+    c = 2 * _np.arctan2(_np.sqrt(a), _np.sqrt(1 - a))
+    dists = _np.append(0,_np.cumsum(R0 * c))
     
-    # Assign lon and lat
-    for dim in da.dims:
-        if   dim[0] == 'X': lon=da[dim]
-        elif dim[0] == 'Y': lat=da[dim]
+    return lats, lons, dists
+
+def rotation_angle(dist, lats, lons):
+    """
+    Compute the rotation_angle to obtain orthogonal and tangential velocities.
     
-    # Plot
-    ax = _plt.axes(projection=_ccrs.Mercator(lon.values.mean(), lat.values.min(), lat.values.max()))
-    gl = ax.gridlines(crs=_ccrs.PlateCarree(), draw_labels=True)
-    gl.xlabels_top = False
-    gl.ylabels_right = False
-    gl.xformatter = LONGITUDE_FORMATTER
-    gl.yformatter = LATITUDE_FORMATTER
-    da.plot.pcolormesh(ax=ax, 
-                       transform=_ccrs.PlateCarree());
+    Parameters
+    ----------
+    dist: vector
+        Distances from starting point
+    lats: vector
+        Longitudes [degrees E]
+    lons: vector
+        Latitudes [degrees N]
         
-    return ax, gl    
+    Returns
+    -------
+    rot_ang: number
+        Rotation angle [degrees]
+    """
     
+    # Find vertices
+    imin = dist.argmin(); imax = dist.argmax()
+    lat1 = _np.deg2rad(lats[imin]); lon1 = _np.deg2rad(lons[imin])
+    lat2 = _np.deg2rad(lats[imax]); lon2 = _np.deg2rad(lons[imax])
+    
+    # Find rotation angle
+    az = _np.arctan2(_np.cos(lat2) * _np.sin(lon2-lon1),
+                     _np.cos(lat1) * _np.sin(lat2) - _np.sin(lat1) * _np.cos(lat2) * _np.cos(lon2-lon1)) 
+    while _np.rad2deg(az)<0: az = _np.pi*2 + az
+    rot_ang = _np.pi/2 - az
+    if rot_ang<0: rot_ang = _np.pi*2 + rot_ang
+        
+    return rot_ang
+
+def compute_missing_variables(ds, info, 
+                              varList, 
+                              deep_copy = False):
+    """
+    Try to compute missing variables using oceanspy.compute
+    
+    Parameters
+    ----------
+    ds: xarray.Dataset
+    info: oceanspy.open_dataset._info
+    varList: list
+        List of variables to check
+    deep_copy: bool
+        If True, deep copy ds and info    
+        
+    Returns
+    -------
+    ds: xarray.Dataset
+    info: open_dataset._info
+    """
+    
+    # Deep copy
+    if deep_copy: ds, info = _utils.deep_copy(ds, info)
+    
+    # Try to compute missing variables
+    for var in varList:
+        if var in info.var_names: var = info.var_names[var]
+        if var not in ds.variables: 
+            try: ds, info = eval('_compute.'+var+'(ds   = ds, info = info)')
+            except: raise RuntimeError("%s not available and can't be computed" % var)    
+                
+    return ds, info
+
+def deep_copy(ds, info):
+    """
+    Deep copy ds and info  
+    
+    Parameters
+    ----------
+    ds: xarray.Dataset
+    info: oceanspy.open_dataset._info   
+        
+    Returns
+    -------
+    ds: xarray.Dataset
+    info: open_dataset._info
+    """
+    
+    # Message
+    print('Copying ds and info')  
+    
+    # Copy ds
+    ds = ds.copy(deep=True)
+    
+    # Copy info (pickle is faster than copy)
+    info = _pickle.loads(_pickle.dumps(info, -1))
+    
+    return ds, info
