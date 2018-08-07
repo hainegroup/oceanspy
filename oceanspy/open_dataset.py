@@ -16,6 +16,7 @@ Open dataset: import datasets stored on SciServer.
 
 import xarray as _xr
 import xgcm as _xgcm
+import pickle as _pickle
 
 class _info:
     """
@@ -48,7 +49,22 @@ class _info:
         summary.append("* Other info: parameters")
         summary.append("              var_names")
         return '\n'.join(summary)
-
+    
+    def to_obj(self, path):
+        """
+        Save info to object file
+    
+        Parameters
+        ---------- 
+        path: str
+            Path to which to save info
+        """
+        
+        print('Saving info to', path)
+        _pickle.dump(self, open(path,'wb'))
+        
+        
+        
 def exp_ASR(cropped = False, 
             machine = 'sciserver'):
     """

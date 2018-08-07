@@ -8,6 +8,7 @@ Utils: functions used by other OceanSpy modules
 import numpy as _np
 import pickle as _pickle
 import time as _time
+import xarray as _xr
 from . import compute as _compute
 
 def great_circle_path(lat1,lon1,lat2,lon2,delta_km):
@@ -190,5 +191,62 @@ def deep_copy(ds, info):
     
     # Copy info (pickle is faster than copy)
     info = _pickle.loads(_pickle.dumps(info, -1))
+    
+    return ds, info
+
+
+def save_ds_info(ds, info, path):
+    """
+    Save ds and info to path.nc and path.obj, respectively 
+    
+    Parameters
+    ----------
+    ds: xarray.Dataset
+    info: oceanspy.open_dataset._info   
+    path: str
+        Path to which to save ds and info
+    """
+    
+    # Create paths
+    ds_path   = path+'.nc'
+    info_path = path+'.obj'
+    
+    # Save ds
+    print('Saving ds to', ds_path)
+    ds.to_netcdf(ds_path)
+    
+    # Save info
+    info.to_obj(info_path)
+    
+
+    
+def open_ds_info(path):
+    """
+    Open ds and info from path.nc and path.obj, respectively 
+    
+    Parameters
+    ---------- 
+    path: str
+        Path from which to open ds and info.
+        Do not provide extensions. 
+        ds and info must have the same path (path.nc and path.obj).
+        
+    Returns
+    -------
+    ds: xarray.Dataset
+    info: open_dataset._info
+    """
+    
+    # Create paths
+    ds_path   = path+'.nc'
+    info_path = path+'.obj'
+    
+    # Open ds
+    print('Opening ds from', ds_path)
+    ds = _xr.open_dataset(ds_path)
+    
+    # Open info
+    print('Opening info from', info_path)
+    info = _pickle.load(open(info_path,'rb')) 
     
     return ds, info
