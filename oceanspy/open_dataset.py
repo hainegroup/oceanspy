@@ -16,7 +16,7 @@ Open dataset: import datasets stored on SciServer.
 
 import xarray as _xr
 import xgcm as _xgcm
-import pickle as _pickle
+import numpy as _np
 
 class _info:
     """
@@ -59,7 +59,8 @@ class _info:
         path: str
             Path to which to save info
         """
-        
+        import pickle as _pickle
+
         print('Saving info to', path)
         _pickle.dump(self, open(path,'wb'))
         

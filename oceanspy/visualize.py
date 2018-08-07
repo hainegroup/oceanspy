@@ -2,10 +2,9 @@
 Visualize: plot dataset
 """
 
-import copy as _copy
-import cartopy.crs as _ccrs
 import xarray as _xr
-
+import numpy as _np
+import xgcm as _xgcm
 
 def interactive(dsORda,
                 info,
@@ -26,7 +25,10 @@ def interactive(dsORda,
     -------
     GUI
     """
-    
+
+    import cartopy.crs as _ccrs
+    import copy as _copy
+
     # Import modules
     from ipywidgets import interact
     import hvplot.xarray

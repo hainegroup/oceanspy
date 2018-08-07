@@ -11,12 +11,10 @@ Subsample: extract samples from the original dataset.
 
 # 3) Keep imported modules secret using _
 
-import numpy as _np
-import pandas as _pd
+
 import xarray as _xr
 import xgcm as _xgcm
-import xesmf as _xe
-import time as _time
+import numpy as _np
 from . import utils as _utils
 
 def cutout(ds,
@@ -59,7 +57,8 @@ def cutout(ds,
     ds: xarray.Dataset
     info: open_dataset._info
     """
-    
+    import pandas as _pd
+
     # Deep copy
     if deep_copy: ds, info = _utils.deep_copy(ds, info)
     
@@ -161,7 +160,7 @@ def survey(ds,
     timeFreq: str or None
         Time frequency. Available options are pandas Offset Aliases (e.g., '6H'):
         http://pandas.pydata.org/pandas-docs/stable/timeseries.html#offset-aliases
-    sampMethod: {'snapshot', 'mean'}
+    sampMethod: {'snapshot', 'mean'}xgc
         Downsampling method (only if timeFreq is not None)
     method_xe: srt
         Regridding alghoritm. Available options are xesmf methods: 
@@ -174,7 +173,8 @@ def survey(ds,
     ds: xarray.Dataset
     info: open_dataset._info
     """   
-        
+    import xesmf as _xe
+
     # Deep copy
     if deep_copy: ds, info = _utils.deep_copy(ds, info)
         
