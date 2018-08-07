@@ -7,10 +7,9 @@ Welcome to OceanSpy's documentation!
 
    readme
    installation
-   usage
    contributing
    api
-   authors
+   people
    history
 
 Indices and tables

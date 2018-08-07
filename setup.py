@@ -11,7 +11,18 @@ with open('README.rst') as readme_file:
 with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
-requirements = ['xarray', 'dask', 'cartopy', 'bottleneck', 'netCDF4', 'xgcm', ]
+requirements = ['dask', 
+                'distributed', 
+                'bottleneck', 
+                'netCDF4', 
+                'xarray', 
+                'cartopy', 
+                'esmpy', 
+                'pyviz', 
+                'hvplot', 
+                'geoviews', 
+                'xgcm', 
+                'xesmf']
 
 setup_requirements = ['pytest-runner', ]
 

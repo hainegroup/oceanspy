@@ -1,0 +1,57 @@
+<html>
+<head>
+<style>
+#persons {
+    width: 100%;
+	height: 100%;
+}
+
+#persons tr:nth-child(even){background-color: #f2f2f2;}
+
+</style>
+</head>
+<body>
+
+<table id="persons">
+  {% for person in people %}
+    <tr>
+	  <td margin-bottom: 3cm>
+		  <strong>{{ person.first_name }} {{ person.last_name}}</strong>
+		  <br/>{{ person.institution }}
+	  </td>
+	  <td>
+	    {% if person.email %}
+	      <a class="icon" href="mailto:{{ person.email }}">
+			<span class="fa-stack fa-lg">
+	          <i class="fa fa-envelope fa-stack-1x"></i>
+			</span>
+	      </a>
+	    {% endif %}
+	    {% if person.website %}
+	      <a class="icon" href="{{ person.website }}">
+		    <span class="fa-stack fa-lg">
+	          <i class="fa fa-external-link fa-stack-1x"></i>
+			</span>
+	      </a>
+	    {% endif %}
+	    {% if person.github %}
+	      <a class="icon" href="https://github.com/{{ person.github }}">
+		    <span class="fa-stack fa-lg">
+	          <i class="fa fa-github fa-stack-1x"></i>
+			</span>
+	      </a>
+	    {% endif %}
+	    {% if person.twitter %}
+	      <a class="icon" href="https://twitter.com/{{ person.twitter }}">
+		    <span class="fa-stack fa-lg">
+	          <i class="fa fa-twitter fa-stack-1x"></i>
+			</span>
+	      </a>
+	    {% endif %}
+	  </td>
+    </tr>
+  {% endfor %}
+</table>
+
+</body>
+</html>

@@ -1,4 +1,4 @@
-.. highlight:: shell
+.. _installation:
 
 ============
 Installation
@@ -6,28 +6,37 @@ Installation
 
 SciServer Access
 ----------------
-SciServer Compute_ optimizes Big Data science by allowing users to bring their analysis close to the data with Jupyter Notebooks deployed in server-side containers.
+SciServer_ optimizes Big Data science by allowing users to bring their analysis close to the data with Jupyter Notebooks deployed in server-side containers.
+Several Apps_ are available on SciServer: use Compute to analyze data with interactive notebook, while use Compute Jobs to asynchronously run notebooks.
 
-1. Register_  for a new account or `log in`_ to an existing account 
-2. Create a new container and select
+1. Go to Apps_ and register for a new account or log in to an existing account
+2. Click on Compute
+3. Create a new container and select
  
    .. list-table::
     :stub-columns: 0
     :widths: 60 60
 
-    * - Image:
-      - Python (astro)
-    * - Public Volumes:
+    * - Compute Image:
+      - Geo
+    * - Data volumes:
       - Ocean Circulation
 
-3. Click on the green play button 
+4. Click on the container
+5. Install OceanSpy and its dependencies
 
-.. _dependencies:
+Expert users can run notebooks using the Compute Jobs.
 
-Install Dependencies
---------------------
+.. note::
+    Users won't need to install OceanSpy and its dependencies on SciServer in the future.  
+
+.. warning::
+    OceanSpy's interactive plots are currently available for Classical Jupyter only, but they will be available on JupyterLab in the future.
+
+Install OceanSpy from Terminal
+------------------------------
 The easiest way to install most of OceanSpy's dependencies is to use Conda_.
-First open a terminal by clicking on ``New`` + ``Terminal`` (top right), then run the following commands:
+First open a terminal (SciServer: click on ``New`` + ``Terminal``), then run the following commands:
 
 .. code-block:: bash
 
@@ -36,8 +45,6 @@ First open a terminal by clicking on ``New`` + ``Terminal`` (top right), then ru
     conda install -c pyviz hvplot geoviews
     pip install xgcm xesmf
 
-Install OceanSpy
-----------------
 To install OceanSpy, run this command in your terminal:
 
 .. code-block:: bash
@@ -46,8 +53,8 @@ To install OceanSpy, run this command in your terminal:
 
 This is the preferred method to install OceanSpy, as it will always install the most recent stable release.
 
-Install from Python
--------------------
+Install from Jupyter Notebook
+-----------------------------
 To install OceanSpy and its dependencies from Python, use these commands::
 
     import sys
@@ -56,8 +63,9 @@ To install OceanSpy and its dependencies from Python, use these commands::
     !conda install --yes --prefix {sys.prefix} -c pyviz hvplot geoviews
     !{sys.executable} -m pip install xgcm xesmf
 
+.. note::
+    Users using Compute Jobs currently have to install OceanSpy and its dependencies in the first Notebook cell (this won't be necessary in the future).
+
 .. _SciServer: http://www.sciserver.org
-.. _Compute: http://compute.sciserver.org/dashboard/Home/Index
-.. _Register: http://portal.sciserver.org/login-portal/Account/Register
-.. _log in: http://portal.sciserver.org/login-portal/Account/Login?callbackUrl=http:%2f%2fcompute.sciserver.org%2fdashboard
+.. _Apps: https://apps.sciserver.org
 .. _Conda: https://conda.io/docs

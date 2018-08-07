@@ -1,16 +1,10 @@
-.. highlight:: shell
+.. _contributing:
 
 ============
 Contributing
 ============
-
-Report Bugs and Submit Feedbacks
---------------------------------
-
-Report bugs and submit feedbacks at https://github.com/malmans2/oceanspy/issues.
-
-
-
+| Report bugs and submit feedbacks at https://github.com/malmans2/oceanspy/issues.
+| Don't forget to add yourself to the list of :ref:`people` contributing to OceanSpy! 
 
 .. _using git:
 
@@ -71,7 +65,7 @@ Git_ is the distributed version control system used to develop OceanSpy, while G
                
     git commit -m "Commit message describing your edits" 
 
-   NOTE: You can use multiple commits, and repeat 8 and 9 multiple times.
+   You can use multiple commits, and repeat 8 and 9 multiple times.
 
 10. To push your branch and update your GitHub copy of ``oceanspy``, use the command
 
@@ -80,7 +74,9 @@ Git_ is the distributed version control system used to develop OceanSpy, while G
     git push -u origin name_of_your_branch
 
 **Finally, go to your OceanSpy fork on** GitHub_ *(https://github.com/your_username_here/oceanspy)* **and click on** ``Compare and Pull``.
-   
+  
+
+
 
 
 
@@ -106,17 +102,14 @@ It is written in reStructuredText_.
            
     conda env create -f environment.yml
 
-4. Activate the new environment (named ``rtd``)
+4. Activate the new environment (named ``ospy_docs``)
    
    .. code-block:: bash
 
     # Older versions of conda
-    source activate rtd 
+    source activate ospy_docs
     # Newer versions of conda
-    conda activate rtd
-
-   NOTE: make sure that the ``rtd`` environment is activated every time you work on the documentation.
-   For example, if you start working on a new terminal, you don't need to create a new environment but you just have to activate ``rtd``.
+    conda activate ospy_docs
 
 4. Edit and/or add new files
 
@@ -126,7 +119,7 @@ It is written in reStructuredText_.
            
     make html
 
-   NOTE: if you want to do a full clean build, run ``make clean`` before ``make html``.
+   If you want to do a full clean build, run ``make clean`` before ``make html``.
 
 6. You can find the HTML output in ``ocenspy/docs/_build/html``.
 
@@ -150,10 +143,7 @@ Contributing to the Code
            
     cd oceanspy
 
-3. Install OceanSpy's dependencies, following the instruction in :ref:`dependencies`.
-
-   TODO: no need to create a separate environment yet.
-   In the future, use ``conda env create -f ci/environment-pyxx.yml`` and add tests! 
+3. Install OceanSpy's dependencies, following the instruction in :ref:`installation` or creating a test environment (``conda env create -f ci/environment-pyxx.yml``).
 
 4. Install OceanSpy in development mode
 
@@ -174,38 +164,40 @@ Deploying
 
 A reminder for the maintainers on how to deploy.
 
-1. Download and install bumpversion
+1. Add documentation and test!
+
+2. Download and install bumpversion
 
    .. code-block:: bash
 
     pip install --upgrade bumpversion
 
-2. Update ``HISTORY.rst``
+3. Update ``HISTORY.rst``
 
-3. Use git to ``add`` and ``commit`` changes
+4. Use git to ``add`` and ``commit`` changes
 
-4. Update version number
+5. Update version number
 
    .. code-block:: bash
 
     bumpversion patch # possible: major / minor / patch
 
-5. Release on PyPI_ by uploading both sdist and wheel:
+6. Release on PyPI_ by uploading both sdist and wheel:
 
    .. code-block:: bash
 
     python setup.py sdist upload
     python setup.py bdist_wheel upload 
 
-6. Use git to ``push``
+7. Use git to ``push``
 
-7. Push tags
+8. Push tags
 
    .. code-block:: bash
 
     git push --tags
 
-8. Add the release's notes on the `releases' page`_ (copy and past from ``HISTORY.rst``)
+9. Add the release's notes on the `releases' page`_ (copy and past from ``HISTORY.rst``)
    
 
 .. _Git: https://git-scm.com
@@ -217,5 +209,6 @@ A reminder for the maintainers on how to deploy.
 .. _Conda: https://conda.io/docs
 .. _PyPI: https://pypi.org/project/oceanspy
 .. _releases' page: https://github.com/malmans2/oceanspy/releases
+
 
 
