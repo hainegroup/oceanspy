@@ -40,7 +40,9 @@ extensions = ['sphinx.ext.mathjax',
               'sphinx.ext.extlinks',
               'sphinx.ext.intersphinx',
               'numpydoc',
-              'nbsphinx']
+              'nbsphinx',
+              'IPython.sphinxext.ipython_directive',
+              'IPython.sphinxext.ipython_console_highlighting',]
 
 autosummary_generate = True
 numpydoc_class_members_toctree = True
