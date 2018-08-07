@@ -4,18 +4,9 @@ channels:
 dependencies:
   - python=3.6
   - dask
-  - distributed
-  - bottleneck
-  - netCDF4
   - xarray
-  - cartopy
-  - esmpy
-  - geoviews
   - pytest
   - pip:
-    - pyviz
-    - hvplot
     - xgcm
-    - xesmf
     - codecov
     - pytest-cov

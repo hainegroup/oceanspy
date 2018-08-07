@@ -12,17 +12,8 @@ with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
 requirements = ['dask', 
-                'distributed', 
-                'bottleneck', 
-                'netCDF4', 
                 'xarray', 
-                'cartopy', 
-                'esmpy', 
-                'pyviz', 
-                'hvplot', 
-                'geoviews', 
-                'xgcm', 
-                'xesmf']
+                'xgcm']
 
 setup_requirements = ['pytest-runner', ]
 
