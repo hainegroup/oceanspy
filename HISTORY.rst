@@ -4,7 +4,7 @@
 History
 =======
 
-0.0.7 (2018-08-07)
+0.0.8 (2018-08-07)
 ------------------
 
-* OceanSpy skeleton
+* OceanSpy skeleton: start collaborating with Haine group.
