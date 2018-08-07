@@ -31,7 +31,7 @@ setup(
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
     ],
-    description="OceanSpy contains algorithms to facilitate extracting information from ocean model output hosted by SciServer.",
+    description="A Python package to extract information from ocean model outputs stored on SciServer",
     install_requires=requirements,
     license="MIT license",
     long_description=readme + '\n\n' + history,
