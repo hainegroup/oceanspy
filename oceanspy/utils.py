@@ -6,9 +6,8 @@ Utils: functions used by other OceanSpy modules
 # 1) Keep imported modules secret using _
 
 import numpy as _np
-import pickle as _pickle
-import time as _time
 import xarray as _xr
+import xgcm as _xgcm
 from . import compute as _compute
 
 def great_circle_path(lat1,lon1,lat2,lon2,delta_km):
@@ -183,6 +182,8 @@ def deep_copy(ds, info):
     info: open_dataset._info
     """
     
+    import pickle as _pickle
+
     # Message
     print('Copying ds and info')  
     
@@ -206,6 +207,8 @@ def save_ds_info(ds, info, path):
     path: str
         Path to which to save ds and info
     """
+    
+    import pickle as _pickle
     
     # Create paths
     ds_path   = path+'.nc'
