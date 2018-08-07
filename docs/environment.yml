@@ -1,16 +1,23 @@
-name: xgcm
+name: ospy_docs
 channels:
   - conda-forge
 dependencies:
-  - python=3.5
-  - xarray
+  - python=3.5  
   - dask
+  - distributed
   - bottleneck
-  - netCDF4  
-  - cartopy  
+  - netCDF4
+  - xarray
+  - cartopy
+  - esmpy
+  - geoviews
   - pytest
   - numpydoc
   - sphinx
   - pip:
+    - hvplot
+    - pyviz   
     - xgcm
+    - xesmf
+    - sphinx_rtd_theme
     - nbsphinx

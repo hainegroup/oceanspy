@@ -32,12 +32,14 @@ import oceanspy
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.autodoc', 
+extensions = ['sphinx.ext.mathjax',
+              'sphinx.ext.autodoc', 
               'sphinx.ext.autosummary',
               'sphinx.ext.intersphinx',
               'sphinx.ext.viewcode',
               'sphinx.ext.extlinks',
               'numpydoc',
+              'nbsphinx',
               'IPython.sphinxext.ipython_console_highlighting',
               'IPython.sphinxext.ipython_directive']
 
@@ -97,7 +99,6 @@ todo_include_todos = False
 # a list of builtin themes.
 #
 html_theme = 'sphinx_rtd_theme'
-# html_theme = 'alabaster'
 
 # Theme options are theme-specific and customize the look and feel of a
 # theme further.  For a list of options available for each theme, see the
@@ -176,4 +177,11 @@ texinfo_documents = [
 ]
 
 
+# Get custom people data into sphinx
+# Borrowed from Pange's website
+import yaml
+with open('data/people.yml') as people_data_file:
+    people = yaml.load(people_data_file)
+people.sort(key=lambda x: x['last_name'].lower())
 
+html_context = {'people': people}

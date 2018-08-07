@@ -1,3 +1,5 @@
+.. _readme:
+
 ============================================================
 OceanSpy - A Python Package for Oceanographic Investigations
 ============================================================
@@ -45,7 +47,7 @@ Our goal is to create a collaborative research environment where users can acces
 For example, OceanSpy and SciServer allow to quickly analyze important aspects of model events in conjunction with observational data.
 
 OceanSpy is currently suited to facilitate extracting information from Ocean General Circulation Models set up and run by the research group of `Prof. Tom Haine`_.
-Users can either download subsets of data on their own machines, or run OceanSpy and the Pangeo softwares online storing post-processing files on SciServer.
+Users can either download subsets of data on their own machines, or run OceanSpy online storing post-processing files on SciServer.
 
 
 .. _Prof. Tom Haine: http://sites.krieger.jhu.edu/haine

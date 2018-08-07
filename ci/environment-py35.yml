@@ -3,13 +3,19 @@ channels:
   - conda-forge  
 dependencies:
   - python=3.5
-  - xarray
   - dask
+  - distributed
   - bottleneck
   - netCDF4
+  - xarray
   - cartopy
+  - esmpy
+  - geoviews
   - pytest
   - pip:
+    - pyviz
+    - hvplot
     - xgcm
+    - xesmf
     - codecov
     - pytest-cov

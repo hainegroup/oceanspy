@@ -1,3 +1,5 @@
+.. _api:
+
 ===
 API 
 ===
@@ -5,9 +7,24 @@ API
 Modules
 =======
 
-autogenerate
+open_dataset
 ************
-.. automodule:: oceanspy.autogenerate
+.. automodule:: oceanspy.open_dataset
+    :members:
+
+subsample
+************
+.. automodule:: oceanspy.subsample
+    :members:
+
+compute
+************
+.. automodule:: oceanspy.compute
+    :members:
+
+visualize
+************
+.. automodule:: oceanspy.visualize
     :members:
 
 utils
@@ -18,13 +35,3 @@ utils
 
 
 
-Classes
-=======
-
-Cutout
-******
-
-.. autoclass:: oceanspy.Cutout
-    :members:
-
-    .. automethod:: __init__
