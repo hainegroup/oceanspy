@@ -239,7 +239,9 @@ def open_ds_info(path):
     ds: xarray.Dataset
     info: open_dataset._info
     """
-    
+
+    import pickle as _pickle   
+ 
     # Create paths
     ds_path   = path+'.nc'
     info_path = path+'.obj'

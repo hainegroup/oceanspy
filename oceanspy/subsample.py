@@ -101,14 +101,12 @@ def cutout(ds,
     # Resample in time
     if timeFreq:      
         print('Resampling timeseries')
-        start_time = _time.time()
         ds_withtime = ds.drop([ var for var in ds.variables if not 'time' in ds[var].dims ])
         ds_timeless = ds.drop([ var for var in ds.variables if     'time' in ds[var].dims ])
         if   sampMethod=='snapshot' and timeFreq!=_pd.infer_freq(ds.time.values):
             ds = _xr.merge([ds_timeless, ds_withtime.resample(time=timeFreq, keep_attrs=True).first(skipna=False)])
         elif sampMethod=='mean':
             ds = _xr.merge([ds_timeless, ds_withtime.resample(time=timeFreq, keep_attrs=True).mean()])
-        elapsed_time = _time.time() - start_time
 
     # Create grid 
     info.grid = _xgcm.Grid(ds, periodic=periodic)
