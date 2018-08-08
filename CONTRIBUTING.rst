@@ -39,7 +39,7 @@ Git_ is the distributed version control system used to develop OceanSpy, while G
    .. code-block:: bash
     
     cd oceanspy
-    git https://github.com/malmans2/oceanspy.git
+    git remote add upstream https://github.com/malmans2/oceanspy.git
 
 6. Make a new branch from ``upstream/master``
 
