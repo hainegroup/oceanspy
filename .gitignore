@@ -66,6 +66,7 @@ instance/
 # Sphinx documentation
 docs/_build/
 docs/generate
+docs/tmp/
 
 # PyBuilder
 target/
@@ -106,5 +107,3 @@ ENV/
 # vim tmp
 .*.swp
 
-# dask
-./dask-worker-space/
