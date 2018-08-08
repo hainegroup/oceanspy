@@ -60,8 +60,11 @@ class _info:
             Path to which to save info
         """
         import pickle as _pickle
+        import os as _os
 
         print('Saving info to', path)
+        if path[0]=='/': path = path[1:]
+        if not _os.path.exists(_os.path.dirname(path)): _os.makedirs(_os.path.dirname(path))
         _pickle.dump(self, open(path,'wb'))
         
         

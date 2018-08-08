@@ -317,8 +317,6 @@ def momVort1(ds, info,
     momVort1 = (info.grid.diff(W * drC, 'Y', boundary='fill', fill_value=float('nan')) -
                 info.grid.diff(V * dyC, 'Z', to='right', boundary='fill', fill_value=float('nan'))
                ) / (dyC * drC)
-    momVort1 = info.grid.interp(momVort1, 'Y', boundary='fill', fill_value=float('nan'))
-    momVort1 = info.grid.interp(momVort1, 'Z', boundary='fill', fill_value=float('nan'))
     
     # Create DataArray
     momVort1.attrs['units']     = 's^-1'
@@ -376,8 +374,6 @@ def momVort2(ds, info,
     momVort2 = (info.grid.diff(U * dxC, 'Z', to='right', boundary='fill', fill_value=float('nan')) -
                 info.grid.diff(W * drC, 'X', boundary='fill', fill_value=float('nan'))
                ) / (dxC * drC)
-    momVort2 = info.grid.interp(momVort2, 'X', boundary='fill', fill_value=float('nan'))
-    momVort2 = info.grid.interp(momVort2, 'Z', boundary='fill', fill_value=float('nan'))
     
     # Create DataArray
     momVort2.attrs['units']     = 's^-1'
@@ -490,6 +486,20 @@ def Ertel_PV(ds, info,
     # Parameters
     omega = info.parameters['omega']
     g     = info.parameters['g']
+    
+    # Interpolate relative vorticity and N2
+    N2       = info.grid.interp(N2, 'Z')
+    
+    momVort1 = info.grid.interp(momVort1, 'Y', boundary='fill', fill_value=float('nan'))
+    momVort1 = info.grid.interp(momVort1, 'Z', boundary='fill', fill_value=float('nan'))
+ 
+    momVort2 = info.grid.interp(momVort2, 'X', boundary='fill', fill_value=float('nan'))
+    momVort2
+    momVort2 = info.grid.interp(momVort2, 'Z', boundary='fill', fill_value=float('nan'))
+    
+    momVort3 = info.grid.interp(momVort3, 'X', boundary='fill', fill_value=float('nan'))
+    momVort3
+    momVort3 = info.grid.interp(momVort3, 'Y', boundary='fill', fill_value=float('nan'))
     
     # Compute Ertel PV
     e = 2 * omega * _xr.ufuncs.cos(_xr.ufuncs.deg2rad(Y))
