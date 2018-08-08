@@ -209,8 +209,11 @@ def save_ds_info(ds, info, path):
     """
     
     import pickle as _pickle
+    import os as _os
     
     # Create paths
+    if path[0]=='/': path = path[1:]
+    if not _os.path.exists(_os.path.dirname(path)): _os.makedirs(_os.path.dirname(path))
     ds_path   = path+'.nc'
     info_path = path+'.obj'
     
