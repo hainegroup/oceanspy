@@ -56,7 +56,7 @@ Run the following command to install the latest version:
 
 .. code-block:: bash
 
-    pip install git+https:https://github.com/malmans2/oceanspy.git
+    pip install git+https://github.com/malmans2/oceanspy.git
 
 .. note::
     Use ``Shift``+right click to paste into JupyterLab terminal.
