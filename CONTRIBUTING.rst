@@ -32,7 +32,7 @@ Git_ is the distributed version control system used to develop OceanSpy, while G
 
    .. code-block:: bash 
 
-    git https://github.com/your_username_here/oceanspy.git
+    git clone https://github.com/your_username_here/oceanspy.git
 
 5. Move into your local clone directory, then set up a remote that points to the original
 
