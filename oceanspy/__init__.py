@@ -1,6 +1,6 @@
 __author__ = """Mattia Almansi"""
 __email__ = 'mattia.almansi@jhu.edu'
-__version__ = '0.0.9'
+__version__ = '0.0.10'
 
 from . import open_dataset
 from . import subsample
