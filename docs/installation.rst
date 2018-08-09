@@ -18,7 +18,7 @@ Several Apps_ are available on SciServer: use Compute to analyze data with inter
     :widths: 60 60
 
     * - Compute Image:
-      - Geo
+      - Python + R
     * - Data volumes:
       - Ocean Circulation
 
