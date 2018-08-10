@@ -212,7 +212,6 @@ def save_ds_info(ds, info, path):
     import os as _os
     
     # Create paths
-    if path[0]=='/': path = path[1:]
     if not _os.path.exists(_os.path.dirname(path)): _os.makedirs(_os.path.dirname(path))
     ds_path   = path+'.nc'
     info_path = path+'.obj'
@@ -255,6 +254,8 @@ def open_ds_info(path):
     
     # Open info
     print('Opening info from', info_path)
-    info = _pickle.load(open(info_path,'rb')) 
+    f = open(info_path,'rb')
+    info = _pickle.load(f) 
+    f.close()
     
     return ds, info
