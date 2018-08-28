@@ -43,7 +43,7 @@ First open a terminal (SciServer: click on ``New`` + ``Terminal``), then run the
     conda install dask distributed bottleneck netCDF4
     conda install -c conda-forge xarray cartopy esmpy 
     conda install -c pyviz hvplot geoviews
-    pip install xgcm xesmf
+    pip install geopy xgcm xesmf
 
 To install OceanSpy, run this command in your terminal:
 
@@ -69,7 +69,7 @@ To install OceanSpy and its dependencies from Python, use these commands::
     !conda install --yes --prefix {sys.prefix} dask distributed bottleneck netCDF4
     !conda install --yes --prefix {sys.prefix} -c conda-forge xarray cartopy esmpy 
     !conda install --yes --prefix {sys.prefix} -c pyviz hvplot geoviews
-    !{sys.executable} -m pip install xgcm xesmf oceanspy
+    !{sys.executable} -m pip install geopy xgcm xesmf oceanspy
 
 .. note::
     Users using Compute Jobs currently have to install OceanSpy and its dependencies in the first Notebook cell (this won't be necessary in the future).

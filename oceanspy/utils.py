@@ -36,7 +36,9 @@ def great_circle_path(lat1,lon1,lat2,lon2,delta_km):
     dist: vector
         Distances from vertex 1 [km]
     """
-    
+    from geopy.distance import great_circle as _great_circle
+    from geopy.distance import EARTH_RADIUS as _EARTH_RADIUS
+
     # Convert to radians
     lat1=_np.deg2rad(lat1)
     lon1=_np.deg2rad(lon1)
@@ -66,7 +68,7 @@ def great_circle_path(lat1,lon1,lat2,lon2,delta_km):
 
     # Determine the set of arc angles to use 
     # (approximately spaced by delta_km)
-    R0 = 6371; # km, radius of a circle having approximately the surface area of the earth
+    R0 = _EARTH_RADIUS; # km, radius of a circle having approximately the surface area of the earth
     angs2use = _np.linspace(0,total_arc_angle_1_to_2,_np.ceil(total_arc_angle_1_to_2/(delta_km/R0))); # radians
     M=angs2use.size;
 
@@ -93,11 +95,12 @@ def great_circle_path(lat1,lon1,lat2,lon2,delta_km):
     lons = _np.rad2deg(_np.arctan2(unit_radials[0,:],unit_radials[2,:]))
     
     # Compute distance
-    dlon = _np.deg2rad(lons[:-1] - lons[1:])
-    dlat = _np.deg2rad(lats[:-1] - lats[1:])
-    a = _np.sin(dlat / 2)**2 + _np.cos(lat1) * _np.cos(lat2) * _np.sin(dlon / 2)**2
-    c = 2 * _np.arctan2(_np.sqrt(a), _np.sqrt(1 - a))
-    dists = _np.append(0,_np.cumsum(R0 * c))
+    dists = _np.zeros(lons.shape)
+    for i in range(1,len(lons)):
+        coord1   = (lats[i-1],lons[i-1])
+        coord2   = (lats[i],lons[i])
+        dists[i] = _great_circle(coord1,coord2).km
+    dists = _np.cumsum(dists)
     
     return lats, lons, dists
 
