@@ -99,7 +99,7 @@ def great_circle_path(lat1,lon1,lat2,lon2,delta_km):
     for i in range(1,len(lons)):
         coord1   = (lats[i-1],lons[i-1])
         coord2   = (lats[i],lons[i])
-        dists[i] = _great_circle(coord1,coord2).kmS
+        dists[i] = _great_circle(coord1,coord2).km
     dists = _np.cumsum(dists)
     
     return lats, lons, dists
