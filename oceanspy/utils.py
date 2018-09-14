@@ -220,8 +220,11 @@ def save_ds_info(ds, info, path):
     info_path = path+'.obj'
     
     # Save ds
+    from dask.diagnostics import ProgressBar as _ProgressBar
     print('Saving ds to', ds_path)
-    ds.to_netcdf(ds_path)
+    delayed_obj = ds.to_netcdf(ds_path, compute=False)
+    with _ProgressBar():
+        results = delayed_obj.compute()
     
     # Save info
     info.to_obj(info_path)
