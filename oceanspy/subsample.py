@@ -217,6 +217,7 @@ def survey(ds,
     for v in ds_in.variables:
         if   v in ['lon', 'lat']: continue
         elif any(d in ['lat', 'lon'] for d in ds_in[v].dims): 
+            print('Regridding variable [',v,']')
             ds[v] = regridder(ds_in[v])
             for a in ds_in[v].attrs: ds[v].attrs[a] = ds_in[v].attrs[a]
         else: ds[v] = ds_in[v]
