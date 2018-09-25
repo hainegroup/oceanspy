@@ -751,3 +751,164 @@ def ort_Vel(ds, info,
     return ds, info
 
 
+def transport(ds, info,
+              deep_copy = False):
+    """
+    Compute transport through a mooring array section, and add to dataset.
+    Transport at the extremities is set to 0: extremities should be on land.
+    Transport can be computed using two paths, so the dimension 'path' is added
+    
+    Parameters
+    ----------
+    ds: xarray.Dataset
+    info: oceanspy.open_dataset._info
+    deep_copy: bool
+        If True, deep copy ds and infod
+    
+    Returns
+    -------
+    ds: xarray.Dataset 
+    info: oceanspy.open_dataset._info
+    """    
+    
+    # Deep copy
+    if deep_copy: ds, info = _utils.deep_copy(ds, info)
+        
+    # Add missing variables
+    varList = ['U', 'V', 'dyG', 'dxG', 'HFacW', 'HFacS', 'drF']
+    ds, info = _utils.compute_missing_variables(ds, info, varList)
+    
+    # Message
+    print('Computing transport')
+    
+    # Define dist, lats, lons 
+    try:
+        dist = ds[info.var_names['dist_array']]
+        X    = ds[info.var_names['X_array']]
+        Y    = ds[info.var_names['Y_array']]
+    except ValueError: 
+        raise ValueError("\n 'ds' must be a mooring array section. Info needed: dist_array, X_array, Y_array")
+    
+    # Check extremities
+    from warnings import warn as _warn
+    if 'Depth' not in ds.variables:
+        _warn("\nds['Depth'] not available: ospy.compute.transport() can not check if extremities are on land",stacklevel=2)
+    elif (ds['Depth'][0]!=0 or ds['Depth'][-1]!=0):
+        _warn('\nThe extremities of the array are not on land. ospy.compute.transport() always returns zero transport at the extremities.',stacklevel=2)
+    
+    
+    # Variables (define 2 paths)
+    a    = 0; b    = 1
+    u_in = 1; v_in = 1
+    if X[0] == X[-1]:
+        direction = 'Positive: Toward East'
+        v_in = 0
+    elif Y[0] == Y[-1]:
+        direction = 'Positive: Toward North'
+        u_in = 0
+    elif _np.sign(Y[0]-Y[-1])*_np.sign(X[0]-X[-1])==1:
+        a = 1; b = 0
+        direction = 'Positive: Toward North-West'
+        u_in = -1
+    else:
+        direction = 'Positive: Toward North-East'
+        u_in = 1
+
+    drF  = ds['drF']
+    
+    Ua   = ds['U'].isel(Xpath=a)
+    Ub   = ds['U'].isel(Xpath=b)
+    Va   = ds['V'].isel(Ypath=a)
+    Vb   = ds['V'].isel(Ypath=b)
+
+    dyGa   = ds['dyG'].isel(Xpath=a)
+    dyGb   = ds['dyG'].isel(Xpath=b)
+    HFacWa = ds['HFacW'].isel(Xpath=a)
+    HFacWb = ds['HFacW'].isel(Xpath=b)
+
+    dxGa   = ds['dxG'].isel(Ypath=0)
+    dxGb   = ds['dxG'].isel(Ypath=1)
+    HFacSa = ds['HFacS'].isel(Ypath=0)
+    HFacSb = ds['HFacS'].isel(Ypath=1)
+
+    mask_Va  = _np.zeros(dist.shape)
+    mask_Vb  = _np.zeros(dist.shape)
+    mask_Ua  = _np.zeros(dist.shape)
+    mask_Ub  = _np.zeros(dist.shape)
+    U_Y  = Y 
+    U_Xa = ds['Xp1_array'].isel(Xpath=0)
+    U_Xb = ds['Xp1_array'].isel(Xpath=1)
+    V_X  = X
+    V_Ya = ds['Yp1_array'].isel(Ypath=0)
+    V_Yb = ds['Yp1_array'].isel(Ypath=1)
+
+    if X[0] == X[-1]:
+        direction = 'Positive: Toward East'
+        v_in = 0
+    elif Y[0] == Y[-1]:
+        direction = 'Positive: Toward North'
+        u_in = 0
+    elif _np.sign(Y[0]-Y[-1])*_np.sign(X[0]-X[-1])==1:
+        Ua   = ds['U'].isel(Xpath=1)
+        Ub   = ds['U'].isel(Xpath=0)
+        U_Xa = ds['Xp1_array'].isel(Xpath=1)
+        U_Xb = ds['Xp1_array'].isel(Xpath=0)
+
+        dyGa   = ds['dyG'].isel(Xpath=1)
+        dyGb   = ds['dyG'].isel(Xpath=0)
+        HFacWa = ds['HFacW'].isel(Xpath=1)
+        HFacWb = ds['HFacW'].isel(Xpath=0)
+
+        dir_inflow = 'Positive: Toward North-West'
+        u_in = -1
+    else:
+        dir_inflow = 'Positive: Toward North-East'
+        u_in = 1
+            
+    # Mask velocities
+    for i in range(1,len(dist)-1):
+        if X[i-1]==X[i]==X[i+1]:
+            mask_Ua[i] = u_in
+            mask_Ub[i] = u_in
+        elif Y[i-1]==Y[i]==Y[i+1]:
+            mask_Va[i] = v_in
+            mask_Vb[i] = v_in
+        elif (X[i-1]<X[i] and Y[i]<Y[i+1]) or (Y[i-1]>Y[i] and X[i]>X[i+1]):
+            mask_Ua[i] = u_in
+            mask_Va[i] = v_in
+        elif (X[i-1]<X[i] and Y[i]>Y[i+1]) or (Y[i-1]<Y[i] and X[i]>X[i+1]):
+            mask_Ub[i] = u_in
+            mask_Vb[i] = v_in
+        elif (Y[i-1]<Y[i] and X[i]<X[i+1]) or (X[i-1]>X[i] and Y[i]>Y[i+1]):
+            mask_Ub[i] = u_in
+            mask_Vb[i] = v_in    
+        elif (Y[i-1]>Y[i] and X[i]<X[i+1]) or (X[i-1]>X[i] and Y[i]<Y[i+1]):
+            mask_Ua[i] = u_in
+            mask_Va[i] = v_in
+    
+    # Compute transport
+    transport_a = (Ua * mask_Ua * dyGa * HFacWa +
+                   Va * mask_Va * dxGa * HFacSa ).expand_dims('path')
+    transport_b = (Ub * mask_Ub * dyGb * HFacWb +
+                   Vb * mask_Vb * dxGb * HFacSb ).expand_dims('path')
+    transport   = _xr.concat([transport_a, transport_b], dim='path') * _xr.ufuncs.fabs(drF) * 1.e-6
+    
+    
+    # Create DataArray
+    transport.attrs['long_name'] = 'Transport (volume flux)'
+    transport.attrs['direction'] = direction
+    transport.attrs['units']     = 'Sv (10^6 m^3/s)'
+    transport.attrs['history']   = 'Computed offline by OceanSpy'
+    
+    # Add to dataset
+    ds['transport'] = transport
+    
+    # Update var_names
+    info.var_names['transport'] = 'transport'
+    
+    return ds, info
+            
+    
+
+    
+    
