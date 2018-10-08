@@ -514,3 +514,99 @@ def mooring_array(ds,
     info.grid    = 'ZigZag path'
     
     return ds, info
+
+
+def extract_properties(ds, 
+                       info, 
+                       lats          = None,
+                       lons          = None,
+                       deps          = None,
+                       times         = None,
+                       varList       = None,
+                       interpmethod  = 'nearest',
+                       deep_copy     = False):
+    """
+    Interpolate Eulerian tracer fields on particle positions.
+    
+    Parameters
+    ----------
+    ds: xarray.Dataset
+    info: oceanspy.open_dataset._info
+    lats, lons, deps: positions (latititudes (deg), longitudes (deg), and depths (m)) of particles to which to interpolate
+    lats,lons, deps shape: [ntimes,npart] array
+    times: times when properties are requested
+    varList: requested properties; default is all variables!
+    interpmethod: Interpolation method: only 'nearest' (default) and 'linear' are available
+    deep_copy: bool
+        If True, deep copy ds and info
+    ----------
+    
+    Returns
+    -------
+    ds: xarray.Dataset
+    info: open_dataset._info
+    -------
+    """
+    
+    from scipy.interpolate import RegularGridInterpolator as _RGI
+    
+    # Deep copy
+    if deep_copy: ds, info = _utils.deep_copy(ds, info)
+    
+    # Message
+    print('Interpolating')
+    
+    # Drop variables
+    if varList: 
+        ds = ds.drop([v for v in ds.variables if (v not in ds.dims and v not in ds.coords and v not in varList)])
+            
+    
+    # Create cutout for faster processing
+    bdr = 0.5
+    ds_cut, info_cut = _subsample.cutout(ds,
+                                             info,
+                                             varList    = varList,
+                                             latRange   = [_np.amin(lats.values.ravel())-bdr,
+                                                           _np.amax(lats.values.ravel())+bdr],
+                                             lonRange   = [_np.amin(lons.values.ravel())-bdr, 
+                                                           _np.amax(lons.values.ravel())+bdr],
+                                             depthRange = [max([_np.amin(ds['Z'].values.ravel()),_np.amin(deps.values.ravel())-30]),
+                                                           min([0,_np.amax(deps.values.ravel())+30])],
+                                             timeRange  = [times[0], times[-1]],
+                                             timeFreq   = '6H',
+                                             sampMethod = 'snapshot',
+                                             deep_copy  = True)
+    
+   
+    # Make sure depths are positive
+    deps = _xr.ufuncs.fabs(deps)
+    ds_cut.coords['Z'] = _xr.ufuncs.fabs(ds_cut['Z'])
+        
+    # Find interpolated values
+    for v in varList:
+        ds_cut[v + '_lagr'] = _xr.DataArray(_np.ones((len(times),deps.shape[1])), dims=['time','particle'])
+        for t in times:
+            partpos = _np.concatenate((deps.sel(time=t),lats.sel(time=t),lons.sel(time=t))).reshape(3,len(deps.sel(time=t))).T
+            
+            my_interpolating_function = _RGI((ds_cut['Z'].values, ds_cut['Y'].values, ds_cut['X'].values), 
+                                                                 ds_cut[v].sel(time=t).values,
+                                                                 method=interpmethod)
+            
+            ds_cut[v + '_lagr'][_np.where(times == t)[0],:] = my_interpolating_function(partpos)
+            
+            
+    # Update var_names
+    ds_cut = ds_cut.rename({'Y': 'lat_p',
+                            'X': 'lon_p',
+                            'Z': 'dep_p'})
+    info_cut.var_names['lat_p'] = 'lats'
+    info_cut.var_names['lon_p'] = 'lons'
+    info_cut.var_names['dep_p'] = 'deps'
+    
+    # Rename grid
+    info_cut.grid    = 'Particle positions'
+    
+    return ds_cut, info_cut
+    
+
+
