@@ -645,6 +645,12 @@ def Okubo_Weiss(ds, info,
     shear_strain  = ds[info.var_names['shear_strain']]
     momVort3      = ds[info.var_names['momVort3']]
     
+    # Interpolate vorticity and shear strain
+    shear_strain = info.grid.interp(shear_strain, 'X', boundary='fill', fill_value=float('nan'))
+    shear_strain = info.grid.interp(shear_strain, 'Y', boundary='fill', fill_value=float('nan'))
+    momVort3 = info.grid.interp(momVort3, 'X', boundary='fill', fill_value=float('nan'))
+    momVort3 = info.grid.interp(momVort3, 'Y', boundary='fill', fill_value=float('nan'))
+    
     # Compute Okubo_Weiss
     Okubo_Weiss = (_xr.ufuncs.square(normal_strain) + 
                    _xr.ufuncs.square(shear_strain)  - 
@@ -662,10 +668,6 @@ def Okubo_Weiss(ds, info,
     info.var_names['Okubo_Weiss'] = 'Okubo_Weiss'
     
     return ds, info
-
-
-
-
 
 
 def Ertel_PV(ds, info,
@@ -691,14 +693,13 @@ def Ertel_PV(ds, info,
     if deep_copy: ds, info = _utils.deep_copy(ds, info)
         
     # Add missing variables
-    varList = ['Y', 'fCori', 'dxC', 'dyC', 'Sigma0', 'N2', 'momVort1', 'momVort2', 'momVort3']
+    varList = ['fCori', 'dxC', 'dyC', 'Sigma0', 'N2', 'momVort1', 'momVort2', 'momVort3']
     ds, info = _utils.compute_missing_variables(ds, info, varList)
     
     # Message
     print('Computing Ertel_PV')
     
     # Variables
-    Y        = ds[info.var_names['Y']]
     fCori    = ds[info.var_names['fCori']]
     dxC      = ds[info.var_names['dxC']]
     dyC      = ds[info.var_names['dyC']]
@@ -719,11 +720,9 @@ def Ertel_PV(ds, info,
     momVort1 = info.grid.interp(momVort1, 'Z', boundary='fill', fill_value=float('nan'))
  
     momVort2 = info.grid.interp(momVort2, 'X', boundary='fill', fill_value=float('nan'))
-    momVort2
     momVort2 = info.grid.interp(momVort2, 'Z', boundary='fill', fill_value=float('nan'))
     
     momVort3 = info.grid.interp(momVort3, 'X', boundary='fill', fill_value=float('nan'))
-    momVort3
     momVort3 = info.grid.interp(momVort3, 'Y', boundary='fill', fill_value=float('nan'))
     
     # Compute Ertel PV
