@@ -693,13 +693,14 @@ def Ertel_PV(ds, info,
     if deep_copy: ds, info = _utils.deep_copy(ds, info)
         
     # Add missing variables
-    varList = ['fCori', 'dxC', 'dyC', 'Sigma0', 'N2', 'momVort1', 'momVort2', 'momVort3']
+    varList = ['Y', 'fCori', 'dxC', 'dyC', 'Sigma0', 'N2', 'momVort1', 'momVort2', 'momVort3']
     ds, info = _utils.compute_missing_variables(ds, info, varList)
     
     # Message
     print('Computing Ertel_PV')
     
     # Variables
+    Y        = ds[info.var_names['Y']]
     fCori    = ds[info.var_names['fCori']]
     dxC      = ds[info.var_names['dxC']]
     dyC      = ds[info.var_names['dyC']]
