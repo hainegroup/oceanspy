@@ -443,6 +443,66 @@ def momVort3(ds, info,
     
     return ds, info
 
+def hor_div(ds, info,
+            deep_copy = False):
+    """
+    Compute horizontal divergence.
+    dU/dX + dV/dY 
+    https://mitgcm.readthedocs.io/en/latest/algorithm/algorithm.html#horizontal-divergence
+    
+    Parameters
+    ----------
+    ds: xarray.Dataset
+    info: oceanspy.open_dataset._info
+    deep_copy: bool
+        If True, deep copy ds and infod
+    
+    Returns
+    -------
+    ds: xarray.Dataset 
+    info: oceanspy.open_dataset._info
+    """
+    
+    # Deep copy
+    if deep_copy: ds, info = _utils.deep_copy(ds, info)
+        
+    # Add missing variables
+    varList = ['U', 'V', 'dyG', 'dxG', 'HFacW', 'HFacS', 'rA', 'HFacC']
+    ds, info = _utils.compute_missing_variables(ds, info, varList)
+    
+    # Message
+    print('Computing hor_div')
+    
+    # Variables
+    U     = ds[info.var_names['U']]
+    V     = ds[info.var_names['V']]
+    dyG   = ds[info.var_names['dyG']]
+    dxG   = ds[info.var_names['dxG']]
+    HFacW = ds[info.var_names['HFacW']]
+    HFacS = ds[info.var_names['HFacS']]
+    HFacC = ds[info.var_names['HFacC']]
+    rA    = ds[info.var_names['rA']]
+    
+    # Compute hor_div
+    hor_div = (info.grid.diff(U * dyG * HFacW,'X') + 
+               info.grid.diff(V * dxG * HFacS,'Y')) / (rA * HFacC)
+    
+    # Create DataArray
+    momVort3.attrs['units']     = 's^-1'
+    momVort3.attrs['long_name'] = 'Horizontal divergence'
+    momVort3.attrs['history']   = 'Computed offline by OceanSpy'
+    
+    # Add to dataset
+    ds['hor_div'] = momVort3
+    
+    # Update var_names
+    info.var_names['hor_div'] = 'hor_div'
+    
+    return ds, info
+
+
+
+
 def Ertel_PV(ds, info,
              deep_copy = False):
     """
