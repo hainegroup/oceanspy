@@ -539,13 +539,11 @@ def extract_properties(ds,
     interpmethod: Interpolation method: only 'nearest' (default) and 'linear' are available
     deep_copy: bool
         If True, deep copy ds and info
-    ----------
-    
+        
     Returns
     -------
     ds: xarray.Dataset
     info: open_dataset._info
-    -------
     """
     
     from scipy.interpolate import RegularGridInterpolator as _RGI
@@ -563,7 +561,7 @@ def extract_properties(ds,
     
     # Create cutout for faster processing
     bdr = 0.5
-    ds_cut, info_cut = _subsample.cutout(ds,
+    ds_cut, info_cut = cutout(ds,
                                              info,
                                              varList    = varList,
                                              latRange   = [_np.amin(lats.values.ravel())-bdr,
@@ -584,7 +582,16 @@ def extract_properties(ds,
         
     # Find interpolated values
     for v in varList:
-        ds_cut[v + '_lagr'] = _xr.DataArray(_np.ones((len(times),deps.shape[1])), dims=['time','particle'])
+        if v is varList[0]:
+            # Initialize new dataset
+            varname = [v, '_lagr']
+            ds_lagr = _xr.Dataset({''.join(varname): (['time','particles'], _np.ones((len(times),deps.shape[1])))},
+                                  coords={'time': times,
+                                          'particles': _np.arange(deps.shape[1])})
+        else:
+            # add variable to dataset
+            ds_lagr.assign({''.join(varname): _np.ones((len(times),deps.shape[1]))})
+        
         for t in times:
             partpos = _np.concatenate((deps.sel(time=t),lats.sel(time=t),lons.sel(time=t))).reshape(3,len(deps.sel(time=t))).T
             
@@ -592,21 +599,10 @@ def extract_properties(ds,
                                                                  ds_cut[v].sel(time=t).values,
                                                                  method=interpmethod)
             
-            ds_cut[v + '_lagr'][_np.where(times == t)[0],:] = my_interpolating_function(partpos)
+            ds_lagr[v + '_lagr'][_np.where(times == t)[0],:] = my_interpolating_function(partpos)
             
-            
-    # Update var_names
-    ds_cut = ds_cut.rename({'Y': 'lat_p',
-                            'X': 'lon_p',
-                            'Z': 'dep_p'})
-    info_cut.var_names['lat_p'] = 'lats'
-    info_cut.var_names['lon_p'] = 'lons'
-    info_cut.var_names['dep_p'] = 'deps'
     
-    # Rename grid
-    info_cut.grid    = 'Particle positions'
-    
-    return ds_cut, info_cut
+    return ds_lagr, info
     
 
 
