@@ -443,6 +443,233 @@ def momVort3(ds, info,
     
     return ds, info
 
+def shear_strain(ds, info,
+                 deep_copy = False):
+    """
+    Compute shear component of strain.
+    dV/dX + dU/dY 
+    
+    Parameters
+    ----------
+    ds: xarray.Dataset
+    info: oceanspy.open_dataset._info
+    deep_copy: bool
+        If True, deep copy ds and infod
+    
+    Returns
+    -------
+    ds: xarray.Dataset 
+    info: oceanspy.open_dataset._info
+    """
+    
+    # Deep copy
+    if deep_copy: ds, info = _utils.deep_copy(ds, info)
+        
+    # Add missing variables
+    varList = ['rAz', 'dxC', 'dyC', 'U', 'V']
+    ds, info = _utils.compute_missing_variables(ds, info, varList)
+    
+    # Message
+    print('Computing shear_strain')
+    
+    # Variables
+    rAz = ds[info.var_names['rAz']]
+    dxC = ds[info.var_names['dxC']]
+    dyC = ds[info.var_names['dyC']]
+    U   = ds[info.var_names['U']]
+    V   = ds[info.var_names['V']]
+    
+    # Compute shear_strain
+    shear_strain = (info.grid.diff(V * dyC, 'X', boundary='fill', fill_value=float('nan')) +
+                    info.grid.diff(U * dxC, 'Y', boundary='fill', fill_value=float('nan'))
+                    ) /  rAz
+    
+    # Create DataArray
+    shear_strain.attrs['units']     = 's^-1'
+    shear_strain.attrs['long_name'] = 'Shear component of Strain'
+    shear_strain.attrs['history']   = 'Computed offline by OceanSpy'
+    
+    # Add to dataset
+    ds['shear_strain'] = shear_strain
+    
+    # Update var_names
+    info.var_names['shear_strain'] = 'shear_strain'
+    
+    return ds, info
+
+
+def hor_div(ds, info,
+            deep_copy = False):
+    """
+    Compute horizontal divergence.
+    dU/dX + dV/dY 
+    https://mitgcm.readthedocs.io/en/latest/algorithm/algorithm.html#horizontal-divergence
+    
+    Parameters
+    ----------
+    ds: xarray.Dataset
+    info: oceanspy.open_dataset._info
+    deep_copy: bool
+        If True, deep copy ds and infod
+    
+    Returns
+    -------
+    ds: xarray.Dataset 
+    info: oceanspy.open_dataset._info
+    """
+    
+    # Deep copy
+    if deep_copy: ds, info = _utils.deep_copy(ds, info)
+        
+    # Add missing variables
+    varList = ['U', 'V', 'dyG', 'dxG', 'HFacW', 'HFacS', 'rA', 'HFacC']
+    ds, info = _utils.compute_missing_variables(ds, info, varList)
+    
+    # Message
+    print('Computing hor_div')
+    
+    # Variables
+    U     = ds[info.var_names['U']]
+    V     = ds[info.var_names['V']]
+    dyG   = ds[info.var_names['dyG']]
+    dxG   = ds[info.var_names['dxG']]
+    HFacW = ds[info.var_names['HFacW']]
+    HFacS = ds[info.var_names['HFacS']]
+    HFacC = ds[info.var_names['HFacC']]
+    rA    = ds[info.var_names['rA']]
+    
+    # Compute hor_div
+    hor_div = (info.grid.diff(U * dyG * HFacW,'X') + 
+               info.grid.diff(V * dxG * HFacS,'Y')) / (rA * HFacC)
+    
+    # Create DataArray
+    hor_div.attrs['units']     = 's^-1'
+    hor_div.attrs['long_name'] = 'Horizontal divergence'
+    hor_div.attrs['history']   = 'Computed offline by OceanSpy'
+    
+    # Add to dataset
+    ds['hor_div'] = hor_div
+    
+    # Update var_names
+    info.var_names['hor_div'] = 'hor_div'
+    
+    return ds, info
+
+def normal_strain(ds, info,
+                  deep_copy = False):
+    """
+    Compute normal component of strain.
+    dU/dX - dV/dY 
+    
+    Parameters
+    ----------
+    ds: xarray.Dataset
+    info: oceanspy.open_dataset._info
+    deep_copy: bool
+        If True, deep copy ds and infod
+    
+    Returns
+    -------
+    ds: xarray.Dataset 
+    info: oceanspy.open_dataset._info
+    """
+    
+    # Deep copy
+    if deep_copy: ds, info = _utils.deep_copy(ds, info)
+        
+    # Add missing variables
+    varList = ['U', 'V', 'dyG', 'dxG', 'HFacW', 'HFacS', 'rA', 'HFacC']
+    ds, info = _utils.compute_missing_variables(ds, info, varList)
+    
+    # Message
+    print('Computing normal_strain')
+    
+    # Variables
+    U     = ds[info.var_names['U']]
+    V     = ds[info.var_names['V']]
+    dyG   = ds[info.var_names['dyG']]
+    dxG   = ds[info.var_names['dxG']]
+    HFacW = ds[info.var_names['HFacW']]
+    HFacS = ds[info.var_names['HFacS']]
+    HFacC = ds[info.var_names['HFacC']]
+    rA    = ds[info.var_names['rA']]
+    
+    # Compute normal_strain
+    normal_strain = (info.grid.diff(U * dyG * HFacW,'X') - 
+                     info.grid.diff(V * dxG * HFacS,'Y')) / (rA * HFacC)
+    
+    # Create DataArray
+    normal_strain.attrs['units']     = 's^-1'
+    normal_strain.attrs['long_name'] = 'Normal component of Strain'
+    normal_strain.attrs['history']   = 'Computed offline by OceanSpy'
+    
+    # Add to dataset
+    ds['normal_strain'] = normal_strain
+    
+    # Update var_names
+    info.var_names['normal_strain'] = 'normal_strain'
+    
+    return ds, info
+
+def Okubo_Weiss(ds, info,
+                deep_copy = False):
+    """
+    Compute Okubo-Weiss parameter.
+    OW = normal_strain^2 + shear_strain^2 - momVort3^2 
+    
+    Parameters
+    ----------
+    ds: xarray.Dataset
+    info: oceanspy.open_dataset._info
+    deep_copy: bool
+        If True, deep copy ds and infod
+    
+    Returns
+    -------
+    ds: xarray.Dataset 
+    info: oceanspy.open_dataset._info
+    """
+    
+    # Deep copy
+    if deep_copy: ds, info = _utils.deep_copy(ds, info)
+        
+    # Add missing variables
+    varList = ['normal_strain', 'shear_strain', 'momVort3']
+    ds, info = _utils.compute_missing_variables(ds, info, varList)
+    
+    # Message
+    print('Computing Okubo_Weiss')
+    
+    # Variables
+    normal_strain = ds[info.var_names['normal_strain']]
+    shear_strain  = ds[info.var_names['shear_strain']]
+    momVort3      = ds[info.var_names['momVort3']]
+    
+    # Interpolate vorticity and shear strain
+    shear_strain = info.grid.interp(shear_strain, 'X', boundary='fill', fill_value=float('nan'))
+    shear_strain = info.grid.interp(shear_strain, 'Y', boundary='fill', fill_value=float('nan'))
+    momVort3 = info.grid.interp(momVort3, 'X', boundary='fill', fill_value=float('nan'))
+    momVort3 = info.grid.interp(momVort3, 'Y', boundary='fill', fill_value=float('nan'))
+    
+    # Compute Okubo_Weiss
+    Okubo_Weiss = (_xr.ufuncs.square(normal_strain) + 
+                   _xr.ufuncs.square(shear_strain)  - 
+                   _xr.ufuncs.square(momVort3)      )
+    
+    # Create DataArray
+    Okubo_Weiss.attrs['units']     = 's^-2'
+    Okubo_Weiss.attrs['long_name'] = 'Okubo-Weiss parameter'
+    Okubo_Weiss.attrs['history']   = 'Computed offline by OceanSpy'
+    
+    # Add to dataset
+    ds['Okubo_Weiss'] = Okubo_Weiss
+    
+    # Update var_names
+    info.var_names['Okubo_Weiss'] = 'Okubo_Weiss'
+    
+    return ds, info
+
+
 def Ertel_PV(ds, info,
              deep_copy = False):
     """
@@ -466,14 +693,13 @@ def Ertel_PV(ds, info,
     if deep_copy: ds, info = _utils.deep_copy(ds, info)
         
     # Add missing variables
-    varList = ['Y', 'fCori', 'dxC', 'dyC', 'Sigma0', 'N2', 'momVort1', 'momVort2', 'momVort3']
+    varList = ['fCori', 'dxC', 'dyC', 'Sigma0', 'N2', 'momVort1', 'momVort2', 'momVort3']
     ds, info = _utils.compute_missing_variables(ds, info, varList)
     
     # Message
     print('Computing Ertel_PV')
     
     # Variables
-    Y        = ds[info.var_names['Y']]
     fCori    = ds[info.var_names['fCori']]
     dxC      = ds[info.var_names['dxC']]
     dyC      = ds[info.var_names['dyC']]
@@ -494,11 +720,9 @@ def Ertel_PV(ds, info,
     momVort1 = info.grid.interp(momVort1, 'Z', boundary='fill', fill_value=float('nan'))
  
     momVort2 = info.grid.interp(momVort2, 'X', boundary='fill', fill_value=float('nan'))
-    momVort2
     momVort2 = info.grid.interp(momVort2, 'Z', boundary='fill', fill_value=float('nan'))
     
     momVort3 = info.grid.interp(momVort3, 'X', boundary='fill', fill_value=float('nan'))
-    momVort3
     momVort3 = info.grid.interp(momVort3, 'Y', boundary='fill', fill_value=float('nan'))
     
     # Compute Ertel PV
