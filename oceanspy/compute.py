@@ -236,7 +236,7 @@ def N2(ds, info,
     if deep_copy: ds, info = _utils.deep_copy(ds, info)
     
     # Add missing variables
-    varList = ['Sigma0', 'HFacC', 'drC']
+    varList = ['Sigma0', 'HFacC', 'drC', 'Z']
     ds, info = _utils.compute_missing_variables(ds, info, varList)
     
     # Message
@@ -245,7 +245,7 @@ def N2(ds, info,
     # Variables
     Sigma0 = ds[info.var_names['Sigma0']]
     HFacC  = ds[info.var_names['HFacC']]
-    drC    = ds[info.var_names['drC']]
+    drC    = _xr.ufuncs.sign(ds['Z'][-1]-ds['Z'][0]) * ds[info.var_names['drC']]
     
     # Parameters
     g    = info.parameters['g'] # m/s^2
@@ -306,8 +306,8 @@ def momVort1(ds, info,
     print('Computing momVort1')
     
     # Variables
-    dyC = ds[info.var_names['dyC']]
-    drC = ds[info.var_names['drC']]
+    dyC = _xr.ufuncs.sign(ds['Y'][-1]-ds['Y'][0]) * ds[info.var_names['dyC']]
+    drC = _xr.ufuncs.sign(ds['Z'][-1]-ds['Z'][0]) * ds[info.var_names['drC']]
     W = ds[info.var_names['W']]
     V = ds[info.var_names['V']]
     
@@ -363,8 +363,8 @@ def momVort2(ds, info,
     print('Computing momVort2')
     
     # Variables
-    dxC = ds[info.var_names['dxC']]
-    drC = ds[info.var_names['drC']]
+    dxC = _xr.ufuncs.sign(ds['X'][-1]-ds['X'][0]) * ds[info.var_names['dxC']]
+    drC = _xr.ufuncs.sign(ds['Z'][-1]-ds['Z'][0]) * ds[info.var_names['drC']]
     W = ds[info.var_names['W']]
     U = ds[info.var_names['U']]
     
@@ -420,8 +420,8 @@ def momVort3(ds, info,
     
     # Variables
     rAz = ds[info.var_names['rAz']]
-    dxC = ds[info.var_names['dxC']]
-    dyC = ds[info.var_names['dyC']]
+    dxC = _xr.ufuncs.sign(ds['X'][-1]-ds['X'][0]) * ds[info.var_names['dxC']]
+    dyC = _xr.ufuncs.sign(ds['Y'][-1]-ds['Y'][0]) * ds[info.var_names['dyC']]
     U   = ds[info.var_names['U']]
     V   = ds[info.var_names['V']]
     
@@ -474,8 +474,8 @@ def shear_strain(ds, info,
     
     # Variables
     rAz = ds[info.var_names['rAz']]
-    dxC = ds[info.var_names['dxC']]
-    dyC = ds[info.var_names['dyC']]
+    dxC = _xr.ufuncs.sign(ds['X'][-1]-ds['X'][0]) * ds[info.var_names['dxC']]
+    dyC = _xr.ufuncs.sign(ds['Y'][-1]-ds['Y'][0]) * ds[info.var_names['dyC']]
     U   = ds[info.var_names['U']]
     V   = ds[info.var_names['V']]
     
@@ -531,8 +531,8 @@ def hor_div(ds, info,
     # Variables
     U     = ds[info.var_names['U']]
     V     = ds[info.var_names['V']]
-    dyG   = ds[info.var_names['dyG']]
-    dxG   = ds[info.var_names['dxG']]
+    dyG   = _xr.ufuncs.sign(ds['Yp1'][-1]-ds['Yp1'][0]) * ds[info.var_names['dyG']]
+    dxG   = _xr.ufuncs.sign(ds['Xp1'][-1]-ds['Xp1'][0]) * ds[info.var_names['dxG']]
     HFacW = ds[info.var_names['HFacW']]
     HFacS = ds[info.var_names['HFacS']]
     HFacC = ds[info.var_names['HFacC']]
@@ -587,8 +587,8 @@ def normal_strain(ds, info,
     # Variables
     U     = ds[info.var_names['U']]
     V     = ds[info.var_names['V']]
-    dyG   = ds[info.var_names['dyG']]
-    dxG   = ds[info.var_names['dxG']]
+    dyG   = _xr.ufuncs.sign(ds['Yp1'][-1]-ds['Yp1'][0]) * ds[info.var_names['dyG']]
+    dxG   = _xr.ufuncs.sign(ds['Xp1'][-1]-ds['Xp1'][0]) * ds[info.var_names['dxG']]
     HFacW = ds[info.var_names['HFacW']]
     HFacS = ds[info.var_names['HFacS']]
     HFacC = ds[info.var_names['HFacC']]
@@ -702,8 +702,8 @@ def Ertel_PV(ds, info,
     # Variables
     Y        = ds[info.var_names['Y']]
     fCori    = ds[info.var_names['fCori']]
-    dxC      = ds[info.var_names['dxC']]
-    dyC      = ds[info.var_names['dyC']]
+    dxC      = _xr.ufuncs.sign(ds['X'][-1]-ds['X'][0]) * ds[info.var_names['dxC']]
+    dyC      = _xr.ufuncs.sign(ds['Y'][-1]-ds['Y'][0]) * ds[info.var_names['dyC']]
     Sigma0   = ds[info.var_names['Sigma0']]
     N2       = ds[info.var_names['N2']]
     momVort1 = ds[info.var_names['momVort1']]
@@ -1116,7 +1116,7 @@ def transport(ds, info,
                    Va * mask_Va * dxGa * HFacSa ).expand_dims('path')
     transport_b = (Ub * mask_Ub * dyGb * HFacWb +
                    Vb * mask_Vb * dxGb * HFacSb ).expand_dims('path')
-    transport   = _xr.concat([transport_a, transport_b], dim='path') * _xr.ufuncs.fabs(drF) * 1.e-6
+    transport   = _xr.concat([transport_a, transport_b], dim='path') * drF * 1.e-6
     
     
     # Create DataArray
