@@ -674,7 +674,7 @@ def Ertel_PV(ds, info,
              deep_copy = False):
     """
     Compute Ertel Potential Vorticity and add to dataset.
-    Eq. 2.2 in OC3D, Klinger and Haine, 2018.
+    Eq. 2.25 in OC3D, Klinger and Haine, 2018.
     
     Parameters
     ----------
