@@ -107,7 +107,7 @@ def cutout(ds,
             ds = _xr.merge([ds_timeless, ds_withtime.resample(time=timeFreq, keep_attrs=True).first(skipna=False)])
         elif sampMethod=='mean':
             ds = _xr.merge([ds_timeless, ds_withtime.resample(time=timeFreq, keep_attrs=True).mean()])
-
+            ds.attrs['history']   = timeFreq + '-mean computed offline by OceanSpy'
     # Create grid 
     info.grid = _xgcm.Grid(ds, periodic=periodic)
     
