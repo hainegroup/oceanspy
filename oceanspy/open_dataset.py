@@ -113,7 +113,7 @@ def exp_ASR(cropped = False,
                                 concat_dim     = 'T',
                                 drop_variables = ['diag_levels','iter'])
     ds = _xr.merge([gridset, fldsset])
-
+    
     # Create horizontal vectors (remove zeros due to exch2)
     ds['X'].values   = ds.XC.mean(dim='Y',   skipna=True)
     ds['Xp1'].values = ds.XG.mean(dim='Yp1', skipna=True)
@@ -122,7 +122,7 @@ def exp_ASR(cropped = False,
     ds = ds.drop(['XC','YC','XG','YG'])
 
     # Negative dr in order to be consistent with upward z axis
-    ds['drC'].values = -ds['drC'].values
+    ds['drC'].values = ds['drC'].values
     ds['drF'].values = -ds['drF'].values
 
     # Read cropped files and crop ds
@@ -146,7 +146,7 @@ def exp_ASR(cropped = False,
                      Zu        = slice(0,cropset['Zmd000216'].size))
         for dim in ['X', 'Xp1', 'Y', 'Yp1']: cropset[dim]=ds[dim]
         ds = _xr.merge([ds, cropset])
-
+    
     # Adjust dimensions creating conflicts
     ds = ds.rename({'Z': 'Ztmp'})
     ds = ds.rename({'T': 'time', 'Ztmp': 'Z', 'Zmd000216': 'Z'})
@@ -154,6 +154,14 @@ def exp_ASR(cropped = False,
     for dim in ['Z','Zp1', 'Zu','Zl']:
         ds[dim].values   = ds[dim].values
         ds[dim].attrs.update({'positive': 'up'}) 
+        
+    # Add attribute (snapshot vs average)
+    for var in [var for var in ds.variables if 'time' in ds[var].coords]:
+        if var in ['ADVr_SLT', 'ADVx_SLT', 'ADVy_SLT', 'ADVr_TH', 'ADVx_TH', 'ADVy_TH', 'DFrI_SLT',
+                     'DFrI_TH', 'KPPg_SLT', 'KPPg_TH', 'SFLUX', 'TFLUX', 'oceSPtnd', 'oceQsw_AVG']:
+            ds[var].attrs.update({'original_output': 'average'}) 
+        elif var!='time':
+            ds[var].attrs.update({'original_output': 'snapshot'}) 
 
     # Adjust attributes creating conflicts
     for var in ds.variables:
