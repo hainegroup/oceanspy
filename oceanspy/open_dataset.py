@@ -108,10 +108,10 @@ def exp_ASR(cropped = False,
         croppath = '/sciserver/oceanography/exp_ASR/result_*/output_glued/cropped/*.*_glued.nc'
     else: raise RuntimeError("machine = %s not available" % machine.lower())
     gridset = _xr.open_dataset(gridpath,
-                              drop_variables = ['XU','YU','XV','YV','RC','RF','RU','RL'])
+                               drop_variables = ['XU','YU','XV','YV','RC','RF','RU','RL'])
     fldsset = _xr.open_mfdataset(fldspath,
-                                concat_dim     = 'T',
-                                drop_variables = ['diag_levels','iter'])
+                                 concat_dim     = 'T',
+                                 drop_variables = ['diag_levels','iter'])
     ds = _xr.merge([gridset, fldsset])
     
     # Create horizontal vectors (remove zeros due to exch2)
@@ -120,10 +120,6 @@ def exp_ASR(cropped = False,
     ds['Y'].values   = ds.YC.mean(dim='X',   skipna=True)
     ds['Yp1'].values = ds.YG.mean(dim='Xp1', skipna=True)
     ds = ds.drop(['XC','YC','XG','YG'])
-
-    # Negative dr in order to be consistent with upward z axis
-    ds['drC'].values = ds['drC'].values
-    ds['drF'].values = -ds['drF'].values
 
     # Read cropped files and crop ds
     if cropped:
@@ -201,4 +197,115 @@ def exp_ASR(cropped = False,
     return ds, info
         
 
+def exp_ERAI(daily   = False, 
+             machine = 'sciserver'):
+    """
+    Same configuration as Almansi et al., 2017 [1]_.
 
+    Parameters
+    ----------
+    daily: bool
+        If True, include diagnostics stored with daily resolution (SI, oce)
+    machine: str
+        Available options: {'sciserver', 'datascope'}.
+
+    Returns
+    -------
+    ds: xarray.Dataset
+    info: oceanspy.open_dataset._info
+        
+    REFERENCES
+    ----------
+    .. [1] Almansi et al., 2017 http://doi.org/10.1175/JPO-D-17-0129.1
+    """
+
+    # Message
+    print('Opening exp_ERAI')
+
+    # Import grid and fields separately, then merge
+    if machine.lower() == 'sciserver':
+        gridpath = '/home/idies/workspace/OceanCirculation/exp_ERAI/grid_glued.nc'
+        fldspath = '/home/idies/workspace/OceanCirculation/exp_ERAI/result_*/output_glued/*.*_glued.nc'
+        dailypath = '/home/idies/workspace/OceanCirculation/exp_ERAI/result_*/output_glued/daily/*.*_glued.nc'
+    elif machine.lower() == 'datascope':
+        gridpath = '/sciserver/oceanography/exp_ERAI/grid_glued.nc'
+        fldspath = '/sciserver/oceanography/exp_ERAI/result_*/output_glued/*.*_glued.nc'
+        dailypath = '/sciserver/oceanography/exp_ERAI/result_*/output_glued/daily/*.*_glued.nc'
+    else: raise RuntimeError("machine = %s not available" % machine.lower())
+    gridset = _xr.open_dataset(gridpath,
+                               drop_variables = ['XU','YU','XV','YV','RC','RF','RU','RL'])
+    fldsset = _xr.open_mfdataset(fldspath,
+                                 concat_dim     = 'T',
+                                 drop_variables = ['diag_levels','iter'])
+    ds = _xr.merge([gridset, fldsset])
+    
+    # Create horizontal vectors (remove zeros due to exch2)
+    ds['X'].values   = ds.XC.mean(dim='Y',   skipna=True)
+    ds['Xp1'].values = ds.XG.mean(dim='Yp1', skipna=True)
+    ds['Y'].values   = ds.YC.mean(dim='X',   skipna=True)
+    ds['Yp1'].values = ds.YG.mean(dim='Xp1', skipna=True)
+    ds = ds.drop(['XC','YC','XG','YG'])
+
+    # Read daily files and resample in time
+    if daily:
+        dailyset = _xr.open_mfdataset(dailypath,
+                                      concat_dim     = 'T',
+                                      drop_variables = ['diag_levels','iter'])
+        # dailyset = dailyset.rename({'Zld000216': 'Zl'})
+        
+        # Resample in time    
+        ds_withtime = ds.drop([ var for var in ds.variables if not 'T' in ds[var].dims ])
+        ds_timeless = ds.drop([ var for var in ds.variables if     'T' in ds[var].dims ])
+        ds = _xr.merge([ds_timeless, ds_withtime.resample(T='1D', keep_attrs=True).first(skipna=False)])
+        for dim in ['X', 'Xp1', 'Y', 'Yp1']: dailyset[dim]=ds[dim]
+        ds = _xr.merge([ds, dailyset])
+    
+    # Adjust dimensions creating conflicts
+    ds = ds.rename({'Z': 'Ztmp'})
+    ds = ds.rename({'T': 'time', 'Ztmp': 'Z', 'Zmd000216': 'Z'})
+    ds = ds.squeeze('Zd000001')
+    for dim in ['Z','Zp1', 'Zu','Zl']:
+        ds[dim].values   = ds[dim].values
+        ds[dim].attrs.update({'positive': 'up'}) 
+        
+    # Add attribute (snapshot vs average)
+    for var in [var for var in ds.variables if 'time' in ds[var].coords]:
+        if var!='time':
+            ds[var].attrs.update({'original_output': 'snapshot'}) 
+
+    # Adjust attributes creating conflicts
+    for var in ds.variables:
+        if 'coordinates' in ds[var].attrs: del ds[var].attrs['coordinates']
+
+    # Add parameters
+    parameters = {}
+    parameters['rho0']     = 1027 # kg/m^3
+    parameters['g']        = 9.81 # m/s^2
+    parameters['omega']    = 7.292123516990375E-05 # rad/s
+    parameters['eq_state'] = 'jmd95' # equation of state
+    
+    # Variable names dictionary
+    # key is exp_ASR name, value is custom name
+    # This is exp_ASR, so key and value are the same
+    var_names = {}
+    for var in ds.variables: var_names[var] = var 
+    
+    # Assign the axis attribute to each dimension, 
+    # because it is used by both xgcm and OceanSpy!
+    for dim in ['Z', 'X', 'Y', 'time']: ds[dim].attrs.update({'axis': dim})  
+    for dim in ['Zp1','Zu','Zl','Xp1','Yp1']: 
+        if min(ds[dim].values)<min(ds[dim[0]].values):
+            ds[dim].attrs.update({'axis': dim[0], 'c_grid_axis_shift': -0.5})
+        elif min(ds[dim].values)>min(ds[dim[0]].values):
+            ds[dim].attrs.update({'axis': dim[0], 'c_grid_axis_shift': +0.5})
+            
+    # Create xgcm.Grid
+    grid = _xgcm.Grid(ds, periodic=False)
+
+    # Create info
+    info = _info(name       = 'exp_ERAI',
+                 grid       = grid,
+                 parameters = parameters,
+                 var_names  = var_names)
+    
+    return ds, info
