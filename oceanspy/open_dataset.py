@@ -186,14 +186,10 @@ def exp_ASR(cropped = False,
         elif min(ds[dim].values)>min(ds[dim[0]].values):
             ds[dim].attrs.update({'axis': dim[0], 'c_grid_axis_shift': +0.5})
             
-    # Add time_mean (for xgcm purposes)
-    freq = _pd.infer_freq(ds['time'].values)
-    freq_i  = int(''.join([i for i in freq if i.isdigit()]))
-    freq_s  = ''.join([i for i in freq if not i.isdigit()])
-    if freq_s=='H': freq_s='h'
-    ds['time_mean'] = _xr.DataArray((ds['time'].values+_np.timedelta64(freq_i, freq_s))[:-1], 
-                                     dims=('time_mean'),
-                                     attrs={'axis': 'time', 'c_grid_axis_shift': +0.5})
+    # Add time_middle (for xgcm purposes) 
+    ds['time_middle'] = _xr.DataArray(ds['time'].values[:-1]+(ds['time'].values[1:]-ds['time'].values[:-1])/2, 
+                                      dims=('time_middle'),
+                                      attrs={'axis': 'time', 'c_grid_axis_shift': +0.5})
     
     # Create xgcm.Grid
     grid = _xgcm.Grid(ds, periodic=False)
@@ -308,15 +304,11 @@ def exp_ERAI(daily   = False,
             ds[dim].attrs.update({'axis': dim[0], 'c_grid_axis_shift': -0.5})
         elif min(ds[dim].values)>min(ds[dim[0]].values):
             ds[dim].attrs.update({'axis': dim[0], 'c_grid_axis_shift': +0.5})
-     
-    # Add time_mean (for xgcm purposes)
-    freq = _pd.infer_freq(ds['time'].values)
-    freq_i  = int(''.join([i for i in freq if i.isdigit()]))
-    freq_s  = ''.join([i for i in freq if not i.isdigit()])
-    if freq_s=='H': freq_s='h'
-    ds['time_mean'] = _xr.DataArray((ds['time'].values+_np.timedelta64(freq_i, freq_s))[:-1], 
-                                     dims=('time_mean'),
-                                     attrs={'axis': 'time', 'c_grid_axis_shift': +0.5})
+    
+    # Add time_middle (for xgcm purposes)   
+    ds['time_middle'] = _xr.DataArray(ds['time'].values[:-1]+(ds['time'].values[1:]-ds['time'].values[:-1])/2, 
+                                      dims=('time_middle'),
+                                      attrs={'axis': 'time', 'c_grid_axis_shift': +0.5})
     
     # Create xgcm.Grid
     grid = _xgcm.Grid(ds, periodic=False)
