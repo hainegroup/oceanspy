@@ -96,7 +96,8 @@ def cutout(ds,
     if timeRange: 
         tmp_len = len(ds['time'])
         ds = ds.sel(time = slice(min(timeRange),  max(timeRange)))
-        if (len(ds['time']) == tmp_len) and (info.grid.axes['time']._periodic is True): periodic.append('time')   
+        if (len(ds['time']) == tmp_len) and (info.grid.axes['time']._periodic is True): periodic.append('time')
+        ds = ds.sel(time_midp  = slice(min(ds['time'].values), max(ds['time'].values)))
             
     # Resample in time
     if timeFreq:      
@@ -108,6 +109,7 @@ def cutout(ds,
         elif sampMethod=='mean':
             ds = _xr.merge([ds_timeless, ds_withtime.resample(time=timeFreq, keep_attrs=True).mean()])
             ds.attrs['history']   = timeFreq + '-mean computed offline by OceanSpy'
+            
     # Create grid 
     info.grid = _xgcm.Grid(ds, periodic=periodic)
     
