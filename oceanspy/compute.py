@@ -978,7 +978,7 @@ def ort_Vel(ds, info,
 def heat_budget(ds, info,
                 deep_copy = False):
     """
-    Compute terms to close the heat budget and add to dataset as explained in [1]_.
+    Compute terms to close heat budget and add to dataset as explained in [1]_.
     
     Terms: 
         tendH: Heat total tendency
@@ -1140,7 +1140,162 @@ def heat_budget(ds, info,
     
     return ds, info
 
+def salt_budget(ds, info,
+                deep_copy = False):
+    """
+    Compute terms to close salt budget and add to dataset as explained in [1]_.
+    
+    Terms: 
+        tendS: Salt total tendency
+        adv_hConvS: Salt horizontal advective convergence
+        adv_vConvS: Salt vertical advective convergence
+        dif_vConvS: Salt vertical diffusive convergence
+        kpp_vConvS: Salt vertical kpp convergence
+        forcH: Salt surface forcing
+    Budget is closed if tendS = adv_hConvS + adv_vConvS + dif_vConvS + kpp_vConvS + forcS
+    The total tendency cannot be estimated for the first timestep
+    The vertical convergences cannot be estimated for the last vertical level
+    
+    Parameters
+    ----------
+    ds: xarray.Dataset
+    info: oceanspy.open_dataset._info
+    deep_copy: bool
+        If True, deep copy ds and infod
+    
+    Returns
+    -------
+    ds: xarray.Dataset 
+    info: oceanspy.open_dataset._info
+    
+    REFERENCES
+    ----------
+    .. [1] Piecuch, 2017 ftp://ecco.jpl.nasa.gov/Version4/Release3/doc/evaluating_budgets_in_eccov4r3.pdf
+    """    
+    
+    # Deep copy
+    if deep_copy: ds, info = _utils.deep_copy(ds, info)
+        
+    # Add missing variables
+    varList = ['S', 'Eta', 'Depth', 'ADVx_SLT', 'ADVy_SLT', 'ADVr_SLT', 'DFrI_SLT', 'KPPg_SLT', 'SFLUX', 'oceSPtnd', 
+               'time', 'HFacC', 'HFacW', 'HFacS', 'drF', 'rA']
+    ds, info = _utils.compute_missing_variables(ds, info, varList)
+    
+    # Message
+    print('Computing heat budget terms')
+    
+    # Variables
+    S        = ds[info.var_names['S']]
+    Eta      = ds[info.var_names['Eta']]
+    Depth    = ds[info.var_names['Depth']]
+    ADVx_SLT = ds[info.var_names['ADVx_SLT']]
+    ADVy_SLT = ds[info.var_names['ADVy_SLT']]
+    ADVr_SLT = ds[info.var_names['ADVr_SLT']]
+    DFrI_SLT = ds[info.var_names['DFrI_SLT']]
+    KPPg_SLT = ds[info.var_names['KPPg_SLT']]
+    SFLUX    = ds[info.var_names['SFLUX']]
+    oceSPtnd = ds[info.var_names['oceSPtnd']]
+    time     = ds[info.var_names['time']]
+    HFacC    = ds[info.var_names['HFacC']]
+    HFacW    = ds[info.var_names['HFacW']]
+    HFacS    = ds[info.var_names['HFacS']]
+    drF      = ds[info.var_names['drF']]
+    rA       = ds[info.var_names['rA']]
+    
+    # Parameters
+    rho0 = info.parameters['rho0']
+    
+    # Compute useful grid-factor variables
+    HFacC_Zl  = info.grid.interp(HFacC,'Z', boundary='fill', fill_value=0, to='right')
+    dzMat   = drF * HFacC
+    CellVol = rA  * dzMat
+    
+    # Total tendency
+    dt    = time.diff('time')/_np.timedelta64(1, 's')
+    tendS = S*(1+Eta/Depth).where(HFacC!=0)
+    tendS = (tendS.diff('time')/dt)
+    tmp   = _xr.DataArray(_np.zeros(tendS.isel(time=0).shape),
+                         coords=tendS.isel(time=0).coords,
+                         dims=tendS.isel(time=0).dims)
+    tmp   = tmp.assign_coords(time=ds['time'].isel(time=0))
+    tendS = _xr.concat([tmp, tendS], 'time')
+    tendS = tendS.where(tendS['time']!=tendS['time'].isel(time=0))
+    
+    # Horizontal convergence
+    adv_hConvS = -(info.grid.diff(ADVx_SLT.where(HFacW!=0),'X') + 
+                   info.grid.diff(ADVy_SLT.where(HFacS!=0),'Y'))/CellVol
+    
+    # Vertical convergence
+    for i in range(3):
+        if   i==0: var_in = ADVr_SLT
+        elif i==1: var_in = DFrI_SLT
+        elif i==2: var_in = KPPg_SLT
 
+        var_out = var_in.where(HFacC_Zl!=0).diff('Zl')
+        var_out = var_out.drop('Zl').rename({'Zl':'Z'}).assign_coords(Z=ds['Z'].isel(Z=slice(None,-1)))
+        tmp     = _xr.DataArray(_np.zeros(var_out.isel(Z=-1).shape),
+                                  coords=var_out.isel(Z=-1).coords,
+                                  dims=var_out.isel(Z=-1).dims)
+        tmp = tmp.assign_coords(Z=ds['Z'].isel(Z=-1))
+        var_out = _xr.concat([var_out, tmp], 'Z')
+        var_out = var_out.where(var_out['Z']!=var_out['Z'].isel(Z=-1))
+        var_out = var_out/CellVol
+
+        if   i==0: adv_vConvS = var_out
+        elif i==1: dif_vConvS = var_out 
+        elif i==2: kpp_vConvS = var_out 
+    
+    # Surface flux
+    forcS = oceSPtnd
+    if ds['Zp1'].isel(Zp1=0)==0:
+        forcS_surf = (SFLUX + forcS.isel(Z=0)).expand_dims('Z')
+        forcS_bott = forcS.isel(Z=slice(1,None))
+        forcS = _xr.concat([forcS_surf, forcS_bott],dim='Z')
+    forcS = forcS /(dzMat*rho0)
+    
+    
+    # Create DataArrays
+    tendS.attrs['units']     = 'psu/s'
+    tendS.attrs['long_name'] = 'Salt total tendency'
+    tendS.attrs['history']   = 'Computed offline by OceanSpy'
+    
+    adv_hConvS.attrs['units']     = 'psu/s'
+    adv_hConvS.attrs['long_name'] = 'Salt horizontal advective convergence'
+    adv_hConvS.attrs['history']   = 'Computed offline by OceanSpy'
+    
+    adv_vConvS.attrs['units']     = 'psu/s'
+    adv_vConvS.attrs['long_name'] = 'Salt vertical advective convergence'
+    adv_vConvS.attrs['history']   = 'Computed offline by OceanSpy'
+    
+    dif_vConvS.attrs['units']     = 'psu/s'
+    dif_vConvS.attrs['long_name'] = 'Salt vertical diffusive convergence'
+    dif_vConvS.attrs['history']   = 'Computed offline by OceanSpy'
+    
+    kpp_vConvS.attrs['units']     = 'psu/s'
+    kpp_vConvS.attrs['long_name'] = 'Salt vertical kpp convergence'
+    kpp_vConvS.attrs['history']   = 'Computed offline by OceanSpy'
+    
+    forcS.attrs['units']     = 'psu/s'
+    forcS.attrs['long_name'] = 'Salt surface forcing'
+    forcS.attrs['history']   = 'Computed offline by OceanSpy'
+    
+    # Add to dataset
+    ds['tendS']      = tendS
+    ds['adv_hConvS'] = adv_hConvS
+    ds['adv_vConvS'] = adv_vConvS
+    ds['dif_vConvS'] = dif_vConvS
+    ds['kpp_vConvS'] = kpp_vConvS
+    ds['forcS']      = forcS
+    
+    # Update var_names
+    info.var_names['tendS']      = 'tendS'
+    info.var_names['adv_hConvS'] = 'adv_hConvS'
+    info.var_names['adv_vConvS'] = 'adv_vConvS'
+    info.var_names['dif_vConvS'] = 'dif_vConvS'
+    info.var_names['kpp_vConvS'] = 'kpp_vConvS'
+    info.var_names['forcS']      = 'forcS'
+    
+    return ds, info
 
 def transport(ds, info,
               deep_copy = False):
