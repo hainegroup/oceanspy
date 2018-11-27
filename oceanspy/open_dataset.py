@@ -187,10 +187,13 @@ def exp_ASR(cropped = False,
         elif min(ds[dim].values)>min(ds[dim[0]].values):
             ds[dim].attrs.update({'axis': dim[0], 'c_grid_axis_shift': +0.5})
             
-    # Add time_middle (for xgcm purposes) 
-    ds['time_middle'] = _xr.DataArray(ds['time'].values[:-1]+(ds['time'].values[1:]-ds['time'].values[:-1])/2, 
-                                      dims=('time_middle'),
-                                      attrs={'axis': 'time', 'c_grid_axis_shift': +0.5})
+    # Add time midpoints (for xgcm purposes) 
+    ds['time_midp'] = _xr.DataArray(ds['time'].values[:-1]+(ds['time'].values[1:]-ds['time'].values[:-1])/2, 
+                                      dims=('time_midp'),
+                                      attrs={'axis': 'time', 
+                                             'c_grid_axis_shift': +0.5, 
+                                             'long_name': 'time midpoints',
+                                             'history': 'Computed offline by OceanSpy'})
     
     # Create xgcm.Grid
     grid = _xgcm.Grid(ds, periodic=False)
@@ -307,10 +310,13 @@ def exp_ERAI(daily   = False,
         elif min(ds[dim].values)>min(ds[dim[0]].values):
             ds[dim].attrs.update({'axis': dim[0], 'c_grid_axis_shift': +0.5})
     
-    # Add time_middle (for xgcm purposes)   
-    ds['time_middle'] = _xr.DataArray(ds['time'].values[:-1]+(ds['time'].values[1:]-ds['time'].values[:-1])/2, 
-                                      dims=('time_middle'),
-                                      attrs={'axis': 'time', 'c_grid_axis_shift': +0.5})
+    # Add time mid points (for xgcm purposes)   
+    ds['time_midp'] = _xr.DataArray(ds['time'].values[:-1]+(ds['time'].values[1:]-ds['time'].values[:-1])/2, 
+                                      dims=('time_midp'),
+                                      attrs={'axis': 'time', 
+                                             'c_grid_axis_shift': +0.5, 
+                                             'long_name': 'time midpoints',
+                                             'history': 'Computed offline by OceanSpy'})
     
     # Create xgcm.Grid
     grid = _xgcm.Grid(ds, periodic=False)
