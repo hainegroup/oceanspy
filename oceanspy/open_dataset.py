@@ -170,6 +170,7 @@ def exp_ASR(cropped = False,
     parameters['g']        = 9.81 # m/s^2
     parameters['omega']    = 7.292123516990375E-05 # rad/s
     parameters['eq_state'] = 'jmd95' # equation of state
+    parameters['c_p']      = 3.986E3 # specific heat [J/kg/K]
     
     # Variable names dictionary
     # key is exp_ASR name, value is custom name
@@ -289,6 +290,7 @@ def exp_ERAI(daily   = False,
     parameters['g']        = 9.81 # m/s^2
     parameters['omega']    = 7.292123516990375E-05 # rad/s
     parameters['eq_state'] = 'jmd95' # equation of state
+    parameters['c_p']      = 3.986E3 # specific heat [J/kg/K] 
     
     # Variable names dictionary
     # key is exp_ASR name, value is custom name
