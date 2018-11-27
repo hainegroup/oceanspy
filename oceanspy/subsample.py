@@ -97,7 +97,7 @@ def cutout(ds,
         tmp_len = len(ds['time'])
         ds = ds.sel(time = slice(min(timeRange),  max(timeRange)))
         if (len(ds['time']) == tmp_len) and (info.grid.axes['time']._periodic is True): periodic.append('time')
-        ds = ds.sel(time_middle  = slice(min(ds['time'].values), max(ds['time'].values)))
+        ds = ds.sel(time_midp  = slice(min(ds['time'].values), max(ds['time'].values)))
             
     # Resample in time
     if timeFreq:      
