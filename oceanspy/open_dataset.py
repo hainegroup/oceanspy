@@ -17,6 +17,7 @@ Open dataset: import datasets stored on SciServer.
 import xarray as _xr
 import xgcm as _xgcm
 import numpy as _np
+import pandas as _pd
 
 class _info:
     """
@@ -169,6 +170,7 @@ def exp_ASR(cropped = False,
     parameters['g']        = 9.81 # m/s^2
     parameters['omega']    = 7.292123516990375E-05 # rad/s
     parameters['eq_state'] = 'jmd95' # equation of state
+    parameters['c_p']      = 3.986E3 # specific heat [J/kg/K]
     
     # Variable names dictionary
     # key is exp_ASR name, value is custom name
@@ -185,6 +187,14 @@ def exp_ASR(cropped = False,
         elif min(ds[dim].values)>min(ds[dim[0]].values):
             ds[dim].attrs.update({'axis': dim[0], 'c_grid_axis_shift': +0.5})
             
+    # Add time midpoints (for xgcm purposes) 
+    ds['time_midp'] = _xr.DataArray(ds['time'].values[:-1]+(ds['time'].values[1:]-ds['time'].values[:-1])/2, 
+                                      dims=('time_midp'),
+                                      attrs={'axis': 'time', 
+                                             'c_grid_axis_shift': +0.5, 
+                                             'long_name': 'time midpoints',
+                                             'history': 'Computed offline by OceanSpy'})
+    
     # Create xgcm.Grid
     grid = _xgcm.Grid(ds, periodic=False)
 
@@ -283,6 +293,7 @@ def exp_ERAI(daily   = False,
     parameters['g']        = 9.81 # m/s^2
     parameters['omega']    = 7.292123516990375E-05 # rad/s
     parameters['eq_state'] = 'jmd95' # equation of state
+    parameters['c_p']      = 3.986E3 # specific heat [J/kg/K] 
     
     # Variable names dictionary
     # key is exp_ASR name, value is custom name
@@ -298,7 +309,15 @@ def exp_ERAI(daily   = False,
             ds[dim].attrs.update({'axis': dim[0], 'c_grid_axis_shift': -0.5})
         elif min(ds[dim].values)>min(ds[dim[0]].values):
             ds[dim].attrs.update({'axis': dim[0], 'c_grid_axis_shift': +0.5})
-            
+    
+    # Add time mid points (for xgcm purposes)   
+    ds['time_midp'] = _xr.DataArray(ds['time'].values[:-1]+(ds['time'].values[1:]-ds['time'].values[:-1])/2, 
+                                      dims=('time_midp'),
+                                      attrs={'axis': 'time', 
+                                             'c_grid_axis_shift': +0.5, 
+                                             'long_name': 'time midpoints',
+                                             'history': 'Computed offline by OceanSpy'})
+    
     # Create xgcm.Grid
     grid = _xgcm.Grid(ds, periodic=False)
 

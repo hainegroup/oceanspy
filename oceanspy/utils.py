@@ -165,6 +165,11 @@ def compute_missing_variables(ds, info,
     for var in varList:
         if var in info.var_names: var = info.var_names[var]
         if var not in ds.variables: 
+            if  var in ['tendH', 'adv_hConvH', 'adv_vConvH', 'dif_vConvH', 'kpp_vConvH', 'forcH']: 
+                var='heat_budget'
+            elif var in ['tendS', 'adv_hConvS', 'adv_vConvS', 'dif_vConvS', 'kpp_vConvS', 'forcS']: 
+                var='salt_budget'
+                
             try: ds, info = eval('_compute.'+var+'(ds   = ds, info = info)')
             except: raise RuntimeError("%s not available and can't be computed" % var)    
                 
