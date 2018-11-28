@@ -102,12 +102,17 @@ def cutout(ds,
     # Resample in time
     if timeFreq:      
         print('Resampling timeseries')
-        ds_withtime = ds.drop([ var for var in ds.variables if not 'time' in ds[var].dims ])
-        ds_timeless = ds.drop([ var for var in ds.variables if     'time' in ds[var].dims ])
+        ds_time = ds.drop([ var for var in ds.variables if not 'time' in ds[var].dims ])
+        ds_time_midp = ds.drop([ var for var in ds.variables if not 'time_midp' in ds[var].dims ])
+        ds_timeless = ds.drop([var for var in ds.variables if  any(dim in ['time', 'time_midp'] for dim in ds[var].dims)])
         if   sampMethod=='snapshot' and timeFreq!=_pd.infer_freq(ds.time.values):
-            ds = _xr.merge([ds_timeless, ds_withtime.resample(time=timeFreq, keep_attrs=True).first(skipna=False)])
+            ds = _xr.merge([ds_timeless, 
+                            ds_time.resample(time=timeFreq, keep_attrs=True).first(skipna=False),
+                            ds_time_midp.resample(time_midp=timeFreq, keep_attrs=True).first(skipna=False)])
         elif sampMethod=='mean':
-            ds = _xr.merge([ds_timeless, ds_withtime.resample(time=timeFreq, keep_attrs=True).mean()])
+            ds = _xr.merge([ds_timeless, 
+                            ds_time.resample(time=timeFreq, keep_attrs=True).mean(),
+                            ds_time_midp.resample(time_midp=timeFreq, keep_attrs=True).mean()])
             ds.attrs['history']   = timeFreq + '-mean computed offline by OceanSpy'
             
     # Create grid 

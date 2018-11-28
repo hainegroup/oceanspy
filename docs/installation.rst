@@ -51,7 +51,7 @@ To install OceanSpy, run this command in your terminal:
 
     pip install oceanspy
 
-This is the preferred method to install OceanSpy, as it will always install the most recent stable release.  
+This is the preferred method to install OceanSpy, as it will always install the most recent stable release.
 Run the following command to install the latest version:
 
 .. code-block:: bash
@@ -59,10 +59,11 @@ Run the following command to install the latest version:
     pip install git+https://github.com/malmans2/oceanspy.git
 
 .. note::
-    Use ``Shift``+right click to paste into JupyterLab terminal.
+    Use ``Shift``\+right click to paste into JupyterLab terminal.  
     
 Install from Jupyter Notebook
 -----------------------------
+
 To install OceanSpy and its dependencies from Python, use these commands::
 
     import sys

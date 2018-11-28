@@ -144,18 +144,27 @@ def exp_ASR(cropped = False,
         for dim in ['X', 'Xp1', 'Y', 'Yp1']: cropset[dim]=ds[dim]
         ds = _xr.merge([ds, cropset])
     
-    # Adjust dimensions creating conflicts
+    # Adjust dimensions creating conflicts and add time midpoints
     ds = ds.rename({'Z': 'Ztmp'})
     ds = ds.rename({'T': 'time', 'Ztmp': 'Z', 'Zmd000216': 'Z'})
     ds = ds.squeeze('Zd000001')
     for dim in ['Z','Zp1', 'Zu','Zl']:
         ds[dim].values   = ds[dim].values
         ds[dim].attrs.update({'positive': 'up'}) 
-        
+    time_midp = _xr.DataArray(ds['time'].values[:-1]+
+                              ds['time'].diff('time')/2,
+                              attrs={'long_name':'model_time midpoints',
+                                     'history': 'Computed offline by OceanSpy'})
+    time_midp = time_midp.rename({'time': 'time_midp'}).rename('time_midp')
+    ds['time_midp'] = time_midp
+    
     # Add attribute (snapshot vs average)
     for var in [var for var in ds.variables if 'time' in ds[var].coords]:
         if var in ['ADVr_SLT', 'ADVx_SLT', 'ADVy_SLT', 'ADVr_TH', 'ADVx_TH', 'ADVy_TH', 'DFrI_SLT',
                      'DFrI_TH', 'KPPg_SLT', 'KPPg_TH', 'SFLUX', 'TFLUX', 'oceSPtnd', 'oceQsw_AVG']:
+            this_var = ds[var].isel(time=slice(1,None)).drop('time').rename({'time': 'time_midp'})
+            this_var['time_midp'] = ds['time_midp']
+            ds[var] = this_var
             ds[var].attrs.update({'original_output': 'average'}) 
         elif var!='time':
             ds[var].attrs.update({'original_output': 'snapshot'}) 
@@ -172,12 +181,6 @@ def exp_ASR(cropped = False,
     parameters['eq_state'] = 'jmd95' # equation of state
     parameters['c_p']      = 3.986E3 # specific heat [J/kg/K]
     
-    # Variable names dictionary
-    # key is exp_ASR name, value is custom name
-    # This is exp_ASR, so key and value are the same
-    var_names = {}
-    for var in ds.variables: var_names[var] = var 
-    
     # Assign the axis attribute to each dimension, 
     # because it is used by both xgcm and OceanSpy!
     for dim in ['Z', 'X', 'Y', 'time']: ds[dim].attrs.update({'axis': dim})  
@@ -186,18 +189,22 @@ def exp_ASR(cropped = False,
             ds[dim].attrs.update({'axis': dim[0], 'c_grid_axis_shift': -0.5})
         elif min(ds[dim].values)>min(ds[dim[0]].values):
             ds[dim].attrs.update({'axis': dim[0], 'c_grid_axis_shift': +0.5})
-            
-    # Add time midpoints (for xgcm purposes) 
-    ds['time_midp'] = _xr.DataArray(ds['time'].values[:-1]+(ds['time'].values[1:]-ds['time'].values[:-1])/2, 
-                                      dims=('time_midp'),
-                                      attrs={'axis': 'time', 
-                                             'c_grid_axis_shift': +0.5, 
-                                             'long_name': 'time midpoints',
-                                             'history': 'Computed offline by OceanSpy'})
+    ds['time_midp'].attrs.update({'axis': 'time', 'c_grid_axis_shift': +0.5})
     
     # Create xgcm.Grid
     grid = _xgcm.Grid(ds, periodic=False)
 
+    # Create delta time
+    ds['dt'] = grid.diff(ds['time'], 'time')/_np.timedelta64(1, 's')
+    ds['dt'].attrs.update({'long_name': 'delta time',
+                           'units': 's'})
+    
+    # Variable names dictionary
+    # key is exp_ASR name, value is custom name
+    # This is exp_ASR, so key and value are the same
+    var_names = {}
+    for var in ds.variables: var_names[var] = var 
+        
     # Create info
     info = _info(name       = 'exp_ASR',
                  grid       = grid,
@@ -206,7 +213,9 @@ def exp_ASR(cropped = False,
     
     return ds, info
         
-
+    # Reorganize dimensions
+    ds = ds.transpose(*ds.dims)
+    
 def exp_ERAI(daily   = False, 
              machine = 'sciserver'):
     """
@@ -270,13 +279,19 @@ def exp_ERAI(daily   = False,
         for dim in ['X', 'Xp1', 'Y', 'Yp1']: dailyset[dim]=ds[dim]
         ds = _xr.merge([ds, dailyset])
     
-    # Adjust dimensions creating conflicts
+    # Adjust dimensions creating conflicts and add time midpoints
     ds = ds.rename({'Z': 'Ztmp'})
     ds = ds.rename({'T': 'time', 'Ztmp': 'Z', 'Zmd000216': 'Z'})
     ds = ds.squeeze('Zd000001')
     for dim in ['Z','Zp1', 'Zu','Zl']:
         ds[dim].values   = ds[dim].values
         ds[dim].attrs.update({'positive': 'up'}) 
+    time_midp = _xr.DataArray(ds['time'].values[:-1]+
+                              ds['time'].diff('time')/2,
+                              attrs={'long_name':'model_time midpoints',
+                                     'history': 'Computed offline by OceanSpy'})
+    time_midp = time_midp.rename({'time': 'time_midp'}).rename('time_midp')
+    ds['time_midp'] = time_midp
         
     # Add attribute (snapshot vs average)
     for var in [var for var in ds.variables if 'time' in ds[var].coords]:
@@ -295,12 +310,6 @@ def exp_ERAI(daily   = False,
     parameters['eq_state'] = 'jmd95' # equation of state
     parameters['c_p']      = 3.986E3 # specific heat [J/kg/K] 
     
-    # Variable names dictionary
-    # key is exp_ASR name, value is custom name
-    # This is exp_ASR, so key and value are the same
-    var_names = {}
-    for var in ds.variables: var_names[var] = var 
-    
     # Assign the axis attribute to each dimension, 
     # because it is used by both xgcm and OceanSpy!
     for dim in ['Z', 'X', 'Y', 'time']: ds[dim].attrs.update({'axis': dim})  
@@ -309,22 +318,28 @@ def exp_ERAI(daily   = False,
             ds[dim].attrs.update({'axis': dim[0], 'c_grid_axis_shift': -0.5})
         elif min(ds[dim].values)>min(ds[dim[0]].values):
             ds[dim].attrs.update({'axis': dim[0], 'c_grid_axis_shift': +0.5})
-    
-    # Add time mid points (for xgcm purposes)   
-    ds['time_midp'] = _xr.DataArray(ds['time'].values[:-1]+(ds['time'].values[1:]-ds['time'].values[:-1])/2, 
-                                      dims=('time_midp'),
-                                      attrs={'axis': 'time', 
-                                             'c_grid_axis_shift': +0.5, 
-                                             'long_name': 'time midpoints',
-                                             'history': 'Computed offline by OceanSpy'})
+    ds['time_midp'].attrs.update({'axis': 'time', 'c_grid_axis_shift': +0.5})
     
     # Create xgcm.Grid
     grid = _xgcm.Grid(ds, periodic=False)
 
+    # Create delta time
+    ds['dt'] = grid.diff(ds['time'], 'time')/_np.timedelta64(1, 's')
+    ds['dt'].attrs.update({'long_name': 'delta time',
+                           'units': 's'})
+    
+    # Variable names dictionary
+    # key is exp_ASR name, value is custom name
+    # This is exp_ASR, so key and value are the same
+    var_names = {}
+    for var in ds.variables: var_names[var] = var 
+        
     # Create info
     info = _info(name       = 'exp_ERAI',
                  grid       = grid,
                  parameters = parameters,
                  var_names  = var_names)
+    
+         
     
     return ds, info
