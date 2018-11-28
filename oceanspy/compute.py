@@ -8,6 +8,7 @@ Compute: add new variables to the dataset
 #    - Input and output ds and info (add new variables to ds and info)
 #    - Always add deep_copy option, check missing variables, and print a message
 #    - Always add the following attribute da.attrs['history'] = 'Computed offline by OceanSpy'
+#    - At the end, transpose ds to make sure that the dimension's order is always the same
 
 # 2) Keep imported modules secret using _
 
@@ -211,6 +212,9 @@ def Sigma0(ds, info,
     # Update var_names
     info.var_names['Sigma0'] = 'Sigma0'
     
+    # Reorganize dimensions
+    ds = ds.transpose(*ds.dims)
+    
     return ds, info
 
 def N2(ds, info,
@@ -271,6 +275,9 @@ def N2(ds, info,
     # Update var_names
     info.var_names['N2'] = 'N2'
     
+    # Reorganize dimensions
+    ds = ds.transpose(*ds.dims)
+    
     return ds, info
 
 def momVort1(ds, info,
@@ -329,6 +336,9 @@ def momVort1(ds, info,
     # Update var_names
     info.var_names['momVort1'] = 'momVort1'
     
+    # Reorganize dimensions
+    ds = ds.transpose(*ds.dims)
+    
     return ds, info
     
 def momVort2(ds, info,
@@ -386,6 +396,9 @@ def momVort2(ds, info,
     # Update var_names
     info.var_names['momVort2'] = 'momVort2'
     
+    # Reorganize dimensions
+    ds = ds.transpose(*ds.dims)
+    
     return ds, info
     
 def momVort3(ds, info,
@@ -441,6 +454,9 @@ def momVort3(ds, info,
     # Update var_names
     info.var_names['momVort3'] = 'momVort3'
     
+    # Reorganize dimensions
+    ds = ds.transpose(*ds.dims)
+    
     return ds, info
 
 def shear_strain(ds, info,
@@ -494,6 +510,9 @@ def shear_strain(ds, info,
     
     # Update var_names
     info.var_names['shear_strain'] = 'shear_strain'
+    
+    # Reorganize dimensions
+    ds = ds.transpose(*ds.dims)
     
     return ds, info
 
@@ -553,6 +572,9 @@ def hor_div(ds, info,
     # Update var_names
     info.var_names['hor_div'] = 'hor_div'
     
+    # Reorganize dimensions
+    ds = ds.transpose(*ds.dims)
+    
     return ds, info
 
 def normal_strain(ds, info,
@@ -608,6 +630,9 @@ def normal_strain(ds, info,
     
     # Update var_names
     info.var_names['normal_strain'] = 'normal_strain'
+    
+    # Reorganize dimensions
+    ds = ds.transpose(*ds.dims)
     
     return ds, info
 
@@ -666,6 +691,9 @@ def Okubo_Weiss(ds, info,
     
     # Update var_names
     info.var_names['Okubo_Weiss'] = 'Okubo_Weiss'
+    
+    # Reorganize dimensions
+    ds = ds.transpose(*ds.dims)
     
     return ds, info
 
@@ -749,6 +777,9 @@ def Ertel_PV(ds, info,
     # Update var_names
     info.var_names['Ertel_PV'] = 'Ertel_PV'
     
+    # Reorganize dimensions
+    ds = ds.transpose(*ds.dims)
+    
     return ds, info
 
 def KE(ds, info,
@@ -801,6 +832,9 @@ def KE(ds, info,
     
     # Update var_names
     info.var_names['KE'] = 'KE'
+    
+    # Reorganize dimensions
+    ds = ds.transpose(*ds.dims)
     
     return ds, info
 
@@ -859,6 +893,9 @@ def EKE(ds, info,
     # Update var_names
     info.var_names['EKE'] = 'EKE'
     
+    # Reorganize dimensions
+    ds = ds.transpose(*ds.dims)
+    
     return ds, info
 
 def tan_Vel(ds, info,
@@ -915,6 +952,9 @@ def tan_Vel(ds, info,
     
     # Update var_names
     info.var_names['tan_Vel'] = 'tan_Vel'
+    
+    # Reorganize dimensions
+    ds = ds.transpose(*ds.dims)
     
     return ds, info
 
@@ -973,23 +1013,26 @@ def ort_Vel(ds, info,
     # Update var_names
     info.var_names['ort_Vel'] = 'ort_Vel'
     
+    # Reorganize dimensions
+    ds = ds.transpose(*ds.dims)
+    
     return ds, info
 
 def heat_budget(ds, info,
                 deep_copy = False):
     """
-    Compute terms to close heat budget and add to dataset as explained in [1]_.
+    Compute terms to close heat budget as explained in [1]_, and add to dataset.
     
-    Terms: 
-        tendH: Heat total tendency
-        adv_hConvH: Heat horizontal advective convergence
-        adv_vConvH: Heat vertical advective convergence
-        dif_vConvH: Heat vertical diffusive convergence
-        kpp_vConvH: Heat vertical kpp convergence
-        forcH: Heat surface forcing
+    Terms:    
+        | tendH: Heat total tendency    
+        | adv_hConvH: Heat horizontal advective convergence  
+        | adv_vConvH: Heat vertical advective convergence  
+        | dif_vConvH: Heat vertical diffusive convergence  
+        | kpp_vConvH: Heat vertical kpp convergence  
+        | forcH: Heat surface forcing  
+    
     Budget is closed if tendH = adv_hConvH + adv_vConvH + dif_vConvH + kpp_vConvH + forcH
-    The total tendency cannot be estimated for the first timestep
-    The vertical convergences cannot be estimated for the last vertical level
+    Vertical convergences cannot be estimated for the last vertical level (nans are returned)
     
     Parameters
     ----------
@@ -1006,7 +1049,8 @@ def heat_budget(ds, info,
     REFERENCES
     ----------
     .. [1] Piecuch, 2017 ftp://ecco.jpl.nasa.gov/Version4/Release3/doc/evaluating_budgets_in_eccov4r3.pdf
-    """    
+    """
+  
     
     # Deep copy
     if deep_copy: ds, info = _utils.deep_copy(ds, info)
@@ -1030,12 +1074,12 @@ def heat_budget(ds, info,
     KPPg_TH    = ds[info.var_names['KPPg_TH']]
     TFLUX      = ds[info.var_names['TFLUX']]
     oceQsw_AVG = ds[info.var_names['oceQsw_AVG']]
-    time       = ds[info.var_names['time']]
     HFacC     = ds[info.var_names['HFacC']]
     HFacW     = ds[info.var_names['HFacW']]
     HFacS     = ds[info.var_names['HFacS']]
     drF     = ds[info.var_names['drF']]
     rA      = ds[info.var_names['rA']]
+    dt      = ds[info.var_names['dt']]
     
     # Parameters
     rho0 = info.parameters['rho0']
@@ -1048,19 +1092,12 @@ def heat_budget(ds, info,
     CellVol = rA  * dzMat
     
     # Total tendency
-    dt    = time.diff('time')/_np.timedelta64(1, 's')
-    tendH = Temp*(1+Eta/Depth).where(HFacC!=0)
-    tendH = (tendH.diff('time')/dt)
-    tmp   = _xr.DataArray(_np.zeros(tendH.isel(time=0).shape),
-                         coords=tendH.isel(time=0).coords,
-                         dims=tendH.isel(time=0).dims)
-    tmp   = tmp.assign_coords(time=ds['time'].isel(time=0))
-    tendH = _xr.concat([tmp, tendH], 'time')
-    tendH = tendH.where(tendH['time']!=tendH['time'].isel(time=0))
+    z_star_scale = (1+Eta/Depth)
+    tendH = info.grid.diff((Temp*z_star_scale).where(HFacC!=0),'time')/dt
     
     # Horizontal convergence
     adv_hConvH = -(info.grid.diff(ADVx_TH.where(HFacW!=0),'X') + 
-               info.grid.diff(ADVy_TH.where(HFacS!=0),'Y'))/CellVol
+                   info.grid.diff(ADVy_TH.where(HFacS!=0),'Y'))/CellVol
     
     # Vertical convergence
     for i in range(3):
@@ -1138,23 +1175,26 @@ def heat_budget(ds, info,
     info.var_names['kpp_vConvH'] = 'kpp_vConvH'
     info.var_names['forcH']      = 'forcH'
     
+    # Reorganize dimensions
+    ds = ds.transpose(*ds.dims)
+    
     return ds, info
 
 def salt_budget(ds, info,
                 deep_copy = False):
     """
-    Compute terms to close salt budget and add to dataset as explained in [1]_.
+    Compute terms to close salt budget as explained in [1]_, and add to dataset.
     
-    Terms: 
-        tendS: Salt total tendency
-        adv_hConvS: Salt horizontal advective convergence
-        adv_vConvS: Salt vertical advective convergence
-        dif_vConvS: Salt vertical diffusive convergence
-        kpp_vConvS: Salt vertical kpp convergence
-        forcH: Salt surface forcing
+    Terms:    
+        | tendS: Salt total tendency    
+        | adv_hConvS: Salt horizontal advective convergence  
+        | adv_vConvS: Salt vertical advective convergence  
+        | dif_vConvS: Salt vertical diffusive convergence  
+        | kpp_vConvS: Salt vertical kpp convergence  
+        | forcS: Salt surface forcing  
+    
     Budget is closed if tendS = adv_hConvS + adv_vConvS + dif_vConvS + kpp_vConvS + forcS
-    The total tendency cannot be estimated for the first timestep
-    The vertical convergences cannot be estimated for the last vertical level
+    Vertical convergences cannot be estimated for the last vertical level (nans are returned)
     
     Parameters
     ----------
@@ -1171,7 +1211,8 @@ def salt_budget(ds, info,
     REFERENCES
     ----------
     .. [1] Piecuch, 2017 ftp://ecco.jpl.nasa.gov/Version4/Release3/doc/evaluating_budgets_in_eccov4r3.pdf
-    """    
+    """
+
     
     # Deep copy
     if deep_copy: ds, info = _utils.deep_copy(ds, info)
@@ -1195,12 +1236,12 @@ def salt_budget(ds, info,
     KPPg_SLT = ds[info.var_names['KPPg_SLT']]
     SFLUX    = ds[info.var_names['SFLUX']]
     oceSPtnd = ds[info.var_names['oceSPtnd']]
-    time     = ds[info.var_names['time']]
     HFacC    = ds[info.var_names['HFacC']]
     HFacW    = ds[info.var_names['HFacW']]
     HFacS    = ds[info.var_names['HFacS']]
     drF      = ds[info.var_names['drF']]
     rA       = ds[info.var_names['rA']]
+    dt      = ds[info.var_names['dt']]
     
     # Parameters
     rho0 = info.parameters['rho0']
@@ -1211,15 +1252,8 @@ def salt_budget(ds, info,
     CellVol = rA  * dzMat
     
     # Total tendency
-    dt    = time.diff('time')/_np.timedelta64(1, 's')
-    tendS = S*(1+Eta/Depth).where(HFacC!=0)
-    tendS = (tendS.diff('time')/dt)
-    tmp   = _xr.DataArray(_np.zeros(tendS.isel(time=0).shape),
-                         coords=tendS.isel(time=0).coords,
-                         dims=tendS.isel(time=0).dims)
-    tmp   = tmp.assign_coords(time=ds['time'].isel(time=0))
-    tendS = _xr.concat([tmp, tendS], 'time')
-    tendS = tendS.where(tendS['time']!=tendS['time'].isel(time=0))
+    z_star_scale = (1+Eta/Depth)
+    tendS = info.grid.diff((S*z_star_scale).where(HFacC!=0),'time')/dt
     
     # Horizontal convergence
     adv_hConvS = -(info.grid.diff(ADVx_SLT.where(HFacW!=0),'X') + 
@@ -1294,6 +1328,9 @@ def salt_budget(ds, info,
     info.var_names['dif_vConvS'] = 'dif_vConvS'
     info.var_names['kpp_vConvS'] = 'kpp_vConvS'
     info.var_names['forcS']      = 'forcS'
+    
+    # Reorganize dimensions
+    ds = ds.transpose(*ds.dims)
     
     return ds, info
 
@@ -1451,6 +1488,9 @@ def transport(ds, info,
     
     # Update var_names
     info.var_names['transport'] = 'transport'
+    
+    # Reorganize dimensions
+    ds = ds.transpose(*ds.dims)
     
     return ds, info
             
