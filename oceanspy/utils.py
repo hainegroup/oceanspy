@@ -120,7 +120,7 @@ def rotation_angle(dist, lats, lons):
     Returns
     -------
     rot_ang: number
-        Rotation angle [degrees]
+        Rotation angle [radians]
     """
     
     # Find vertices
