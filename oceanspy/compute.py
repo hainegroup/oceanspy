@@ -8,7 +8,7 @@ Compute: add new variables to the dataset
 #    - Input and output ds and info (add new variables to ds and info)
 #    - Always add deep_copy option, check missing variables, and print a message
 #    - Always add the following attribute da.attrs['history'] = 'Computed offline by OceanSpy'
-#    - At the end, transpose ds to make sure that the dimension's order is always the same
+#    - Return ds applying _utils.reorder_ds(ds)
 
 # 2) Keep imported modules secret using _
 
@@ -212,10 +212,7 @@ def Sigma0(ds, info,
     # Update var_names
     info.var_names['Sigma0'] = 'Sigma0'
     
-    # Reorganize dimensions
-    ds = ds.transpose(*ds.dims)
-    
-    return ds, info
+    return _utils.reorder_ds(ds), info
 
 def N2(ds, info,
        deep_copy = False):
@@ -275,10 +272,7 @@ def N2(ds, info,
     # Update var_names
     info.var_names['N2'] = 'N2'
     
-    # Reorganize dimensions
-    ds = ds.transpose(*ds.dims)
-    
-    return ds, info
+    return _utils.reorder_ds(ds), info
 
 def momVort1(ds, info,
              deep_copy = False):
@@ -336,10 +330,7 @@ def momVort1(ds, info,
     # Update var_names
     info.var_names['momVort1'] = 'momVort1'
     
-    # Reorganize dimensions
-    ds = ds.transpose(*ds.dims)
-    
-    return ds, info
+    return _utils.reorder_ds(ds), info
     
 def momVort2(ds, info,
              deep_copy = False):
@@ -396,10 +387,7 @@ def momVort2(ds, info,
     # Update var_names
     info.var_names['momVort2'] = 'momVort2'
     
-    # Reorganize dimensions
-    ds = ds.transpose(*ds.dims)
-    
-    return ds, info
+    return _utils.reorder_ds(ds), info
     
 def momVort3(ds, info,
              deep_copy = False):
@@ -454,10 +442,7 @@ def momVort3(ds, info,
     # Update var_names
     info.var_names['momVort3'] = 'momVort3'
     
-    # Reorganize dimensions
-    ds = ds.transpose(*ds.dims)
-    
-    return ds, info
+    return _utils.reorder_ds(ds), info
 
 def shear_strain(ds, info,
                  deep_copy = False):
@@ -511,10 +496,7 @@ def shear_strain(ds, info,
     # Update var_names
     info.var_names['shear_strain'] = 'shear_strain'
     
-    # Reorganize dimensions
-    ds = ds.transpose(*ds.dims)
-    
-    return ds, info
+    return _utils.reorder_ds(ds), info
 
 
 def hor_div(ds, info,
@@ -572,10 +554,7 @@ def hor_div(ds, info,
     # Update var_names
     info.var_names['hor_div'] = 'hor_div'
     
-    # Reorganize dimensions
-    ds = ds.transpose(*ds.dims)
-    
-    return ds, info
+    return _utils.reorder_ds(ds), info
 
 def normal_strain(ds, info,
                   deep_copy = False):
@@ -631,10 +610,7 @@ def normal_strain(ds, info,
     # Update var_names
     info.var_names['normal_strain'] = 'normal_strain'
     
-    # Reorganize dimensions
-    ds = ds.transpose(*ds.dims)
-    
-    return ds, info
+    return _utils.reorder_ds(ds), info
 
 def Okubo_Weiss(ds, info,
                 deep_copy = False):
@@ -692,10 +668,7 @@ def Okubo_Weiss(ds, info,
     # Update var_names
     info.var_names['Okubo_Weiss'] = 'Okubo_Weiss'
     
-    # Reorganize dimensions
-    ds = ds.transpose(*ds.dims)
-    
-    return ds, info
+    return _utils.reorder_ds(ds), info
 
 
 def Ertel_PV(ds, info,
@@ -777,10 +750,7 @@ def Ertel_PV(ds, info,
     # Update var_names
     info.var_names['Ertel_PV'] = 'Ertel_PV'
     
-    # Reorganize dimensions
-    ds = ds.transpose(*ds.dims)
-    
-    return ds, info
+    return _utils.reorder_ds(ds), info
 
 def KE(ds, info,
        deep_copy = False):
@@ -833,10 +803,7 @@ def KE(ds, info,
     # Update var_names
     info.var_names['KE'] = 'KE'
     
-    # Reorganize dimensions
-    ds = ds.transpose(*ds.dims)
-    
-    return ds, info
+    return _utils.reorder_ds(ds), info
 
 def EKE(ds, info,
         deep_copy = False):
@@ -893,10 +860,7 @@ def EKE(ds, info,
     # Update var_names
     info.var_names['EKE'] = 'EKE'
     
-    # Reorganize dimensions
-    ds = ds.transpose(*ds.dims)
-    
-    return ds, info
+    return _utils.reorder_ds(ds), info
 
 def tan_Vel(ds, info,
             deep_copy = False):
@@ -953,10 +917,7 @@ def tan_Vel(ds, info,
     # Update var_names
     info.var_names['tan_Vel'] = 'tan_Vel'
     
-    # Reorganize dimensions
-    ds = ds.transpose(*ds.dims)
-    
-    return ds, info
+    return _utils.reorder_ds(ds), info
 
 def ort_Vel(ds, info,
             deep_copy = False):
@@ -1013,10 +974,7 @@ def ort_Vel(ds, info,
     # Update var_names
     info.var_names['ort_Vel'] = 'ort_Vel'
     
-    # Reorganize dimensions
-    ds = ds.transpose(*ds.dims)
-    
-    return ds, info
+    return _utils.reorder_ds(ds), info
 
 def heat_budget(ds, info,
                 deep_copy = False):
@@ -1175,10 +1133,7 @@ def heat_budget(ds, info,
     info.var_names['kpp_vConvH'] = 'kpp_vConvH'
     info.var_names['forcH']      = 'forcH'
     
-    # Reorganize dimensions
-    ds = ds.transpose(*ds.dims)
-    
-    return ds, info
+    return _utils.reorder_ds(ds), info
 
 def salt_budget(ds, info,
                 deep_copy = False):
@@ -1329,17 +1284,18 @@ def salt_budget(ds, info,
     info.var_names['kpp_vConvS'] = 'kpp_vConvS'
     info.var_names['forcS']      = 'forcS'
     
-    # Reorganize dimensions
-    ds = ds.transpose(*ds.dims)
-    
-    return ds, info
+    return _utils.reorder_ds(ds), info
+
 
 def transport(ds, info,
               deep_copy = False):
     """
-    Compute transport through a mooring array section, and add to dataset.
-    Transport at the extremities is set to 0: extremities should be on land.
-    Transport can be computed using two paths, so the dimension 'path' is added
+    Compute volume flux through a mooring array section (in/outflow), and add to dataset.
+    If the array is closed, transport in the first cell is not computed.
+    Otherwise, transport in both the first and last cells is not computed.
+    Transport can be computed following two paths (ext and int side), so 'path'=[0,1] dimension is added.
+    'zonal_dir_tran' and 'merid_dir_tran' indicate the direction of positive transport along the path.
+    For example, merid_dir_tran=1 and zonal_dir_tran=-1 means positive transport towards NW.
     
     Parameters
     ----------
@@ -1356,144 +1312,138 @@ def transport(ds, info,
     
     # Deep copy
     if deep_copy: ds, info = _utils.deep_copy(ds, info)
-        
+    
     # Add missing variables
-    varList = ['U', 'V', 'dyG', 'dxG', 'HFacW', 'HFacS', 'drF']
+    varList  = ['Xc', 'Yc', 'dyG', 'dxG', 'drF']
     ds, info = _utils.compute_missing_variables(ds, info, varList)
     
     # Message
     print('Computing transport')
     
-    # Define dist, lats, lons 
+    # Variables
+    X    = ds[info.var_names['Xc']]
+    Y    = ds[info.var_names['Yc']]
+    dxG  = ds[info.var_names['dxG']]
+    dyG  = ds[info.var_names['dyG']]
+    drF  = ds[info.var_names['drF']]
+    cell = ds[info.var_names['cell']]
+    
+    # Check if mass weighted variables are available, otherwise compute
     try:
-        dist = ds[info.var_names['dist_array']]
-        X    = ds[info.var_names['X_array']]
-        Y    = ds[info.var_names['Y_array']]
-    except ValueError: 
-        raise ValueError("\n 'ds' must be a mooring array section. Info needed: dist_array, X_array, Y_array")
+        varList = ['UVELMASS', 'VVELMASS']
+        ds, info = _utils.compute_missing_variables(ds, info, varList)
+        Umass = ds[info.var_names['UVELMASS']]; 
+        Vmass = ds[info.var_names['VVELMASS']];
+    except:
+        varList = ['U', 'V', 'HFacW', 'HFacS']
+        ds, info = _utils.compute_missing_variables(ds, info, varList)
+        U     = ds[info.var_names['U']]
+        V     = ds[info.var_names['V']]
+        HFacW = ds[info.var_names['HFacW']]
+        HFacS = ds[info.var_names['HFacS']]
+        Umass = U*HFacW; 
+        Vmass = V*HFacS;
     
-    # Check extremities
-    from warnings import warn as _warn
-    if 'Depth' not in ds.variables:
-        _warn("\nds['Depth'] not available: ospy.compute.transport() can not check if extremities are on land",stacklevel=2)
-    elif (ds['Depth'][0]!=0 or ds['Depth'][-1]!=0):
-        _warn('\nThe extremities of the array are not on land. ospy.compute.transport() always returns zero transport at the extremities.',stacklevel=2)
+    # Extract bfill-ffill values: m^2/s
+    U = Umass * ds['dyG'] 
+    V = Vmass * ds['dxG'] 
+    Ub=U.sel(Xu='Xb'); Uf=U.sel(Xu='Xf')
+    Vb=V.sel(Yv='Yb'); Vf=V.sel(Yv='Yf')
     
+    # Initialize direction
+    Uf_dir = _np.zeros((len(X),2)); Ub_dir = _np.zeros((len(X),2))
+    Vf_dir = _np.zeros((len(Y),2)); Vb_dir = _np.zeros((len(Y),2))
     
-    # Variables (define 2 paths)
-    a    = 0; b    = 1
-    u_in = 1; v_in = 1
-    if X[0] == X[-1]:
-        direction = 'Positive: Toward East'
-        v_in = 0
-    elif Y[0] == Y[-1]:
-        direction = 'Positive: Toward North'
-        u_in = 0
-    elif _np.sign(Y[0]-Y[-1])*_np.sign(X[0]-X[-1])==1:
-        a = 1; b = 0
-        direction = 'Positive: Toward North-West'
-        u_in = -1
-    else:
-        direction = 'Positive: Toward North-East'
-        u_in = 1
-
-    drF  = ds['drF']
+    # Steps
+    diffX = _np.diff(X); diffY = _np.diff(Y)
     
-    Ua   = ds['U'].isel(Xpath=a)
-    Ub   = ds['U'].isel(Xpath=b)
-    Va   = ds['V'].isel(Ypath=a)
-    Vb   = ds['V'].isel(Ypath=b)
-
-    dyGa   = ds['dyG'].isel(Xpath=a)
-    dyGb   = ds['dyG'].isel(Xpath=b)
-    HFacWa = ds['HFacW'].isel(Xpath=a)
-    HFacWb = ds['HFacW'].isel(Xpath=b)
-
-    dxGa   = ds['dxG'].isel(Ypath=0)
-    dxGb   = ds['dxG'].isel(Ypath=1)
-    HFacSa = ds['HFacS'].isel(Ypath=0)
-    HFacSb = ds['HFacS'].isel(Ypath=1)
-
-    mask_Va  = _np.zeros(dist.shape)
-    mask_Vb  = _np.zeros(dist.shape)
-    mask_Ua  = _np.zeros(dist.shape)
-    mask_Ub  = _np.zeros(dist.shape)
-    U_Y  = Y 
-    U_Xa = ds['Xp1_array'].isel(Xpath=0)
-    U_Xb = ds['Xp1_array'].isel(Xpath=1)
-    V_X  = X
-    V_Ya = ds['Yp1_array'].isel(Ypath=0)
-    V_Yb = ds['Yp1_array'].isel(Ypath=1)
-
-    if X[0] == X[-1]:
-        direction = 'Positive: Toward East'
-        v_in = 0
-    elif Y[0] == Y[-1]:
-        direction = 'Positive: Toward North'
-        u_in = 0
-    elif _np.sign(Y[0]-Y[-1])*_np.sign(X[0]-X[-1])==1:
-        Ua   = ds['U'].isel(Xpath=1)
-        Ub   = ds['U'].isel(Xpath=0)
-        U_Xa = ds['Xp1_array'].isel(Xpath=1)
-        U_Xb = ds['Xp1_array'].isel(Xpath=0)
-
-        dyGa   = ds['dyG'].isel(Xpath=1)
-        dyGb   = ds['dyG'].isel(Xpath=0)
-        HFacWa = ds['HFacW'].isel(Xpath=1)
-        HFacWb = ds['HFacW'].isel(Xpath=0)
-
-        dir_inflow = 'Positive: Toward North-West'
-        u_in = -1
-    else:
-        dir_inflow = 'Positive: Toward North-East'
-        u_in = 1
+    # Closed array?
+    if X[0]==X[-1] and Y[0]==Y[-1]:
+        closed = True
+        diffX  = _np.append(diffX,diffX[0])
+        diffY  = _np.append(diffY,diffY[0])
+    else: closed = False
+        
+    # Loop
+    Usign = 1; Vsign = 1
+    keepXf = False; keepYf = False
+    for i in range(len(diffX)-1):
+        if diffY[i]==0 and diffY[i+1]==0:   # Zonal
+            Vb_dir[i+1,:]=Vsign; Vf_dir[i+1,:]=Vsign
+        elif diffX[i]==0 and diffX[i+1]==0: # Meridional
+            Ub_dir[i+1,:]=Usign; Uf_dir[i+1,:]=Usign
             
-    # Mask velocities
-    for i in range(1,len(dist)-1):
-        if X[i-1]==X[i]==X[i+1]:
-            mask_Ua[i] = u_in
-            mask_Ub[i] = u_in
-        elif Y[i-1]==Y[i]==Y[i+1]:
-            mask_Va[i] = v_in
-            mask_Vb[i] = v_in
-        elif (X[i-1]<X[i] and Y[i]<Y[i+1]) or (Y[i-1]>Y[i] and X[i]>X[i+1]):
-            mask_Ua[i] = u_in
-            mask_Va[i] = v_in
-        elif (X[i-1]<X[i] and Y[i]>Y[i+1]) or (Y[i-1]<Y[i] and X[i]>X[i+1]):
-            mask_Ub[i] = u_in
-            mask_Vb[i] = v_in
-        elif (Y[i-1]<Y[i] and X[i]<X[i+1]) or (X[i-1]>X[i] and Y[i]>Y[i+1]):
-            mask_Ub[i] = u_in
-            mask_Vb[i] = v_in    
-        elif (Y[i-1]>Y[i] and X[i]<X[i+1]) or (X[i-1]>X[i] and Y[i]<Y[i+1]):
-            mask_Ua[i] = u_in
-            mask_Va[i] = v_in
+        # Corners
+        elif (diffY[i]<0  and diffX[i+1]>0):  # |_
+            Vsign=Usign; keepYf=keepXf
+            Uf_dir[i+1,:]=Usign; Vf_dir[i+1,:]=Vsign  
+        elif (diffY[i+1]>0  and diffX[i]<0):  
+            Usign=Vsign; keepXf=keepYf
+            Uf_dir[i+1,:]=Usign; Vf_dir[i+1,:]=Vsign 
+
+        elif (diffY[i]>0  and diffX[i+1]>0): # |‾
+            Vsign=-Usign; keepYf=not keepXf
+            Uf_dir[i+1,:]=Usign; Vb_dir[i+1,:]=Vsign
+        elif (diffY[i+1]<0  and diffX[i]<0):
+            Usign=-Vsign; keepXf=not keepYf
+            Uf_dir[i+1,:]=Usign; Vb_dir[i+1,:]=Vsign    
+
+        elif (diffX[i]>0  and diffY[i+1]<0): # ‾|  
+            Usign=Vsign; keepXf=keepYf
+            Vb_dir[i+1,:]=Vsign; Ub_dir[i+1,:]=Usign
+        elif (diffX[i+1]<0  and diffY[i]>0):  
+            Vsign=Usign; keepYf=keepXf
+            Vb_dir[i+1,:]=Vsign; Ub_dir[i+1,:]=Usign
+
+        elif (diffX[i]>0  and diffY[i+1]>0): # _| 
+            Usign=-Vsign; keepXf=not keepYf
+            Vf_dir[i+1,:]= Vsign; Ub_dir[i+1,:]=Usign
+        elif (diffX[i+1]<0  and diffY[i]<0):  
+            Vsign=-Usign; keepYf=not keepXf
+            Vf_dir[i+1,:]= Vsign; Ub_dir[i+1,:]=Usign 
+    
+        if keepXf: Ub_dir[i+1,0]=0; Uf_dir[i+1,1]=0
+        else:      Uf_dir[i+1,0]=0; Ub_dir[i+1,1]=0
+        if keepYf: Vb_dir[i+1,0]=0; Vf_dir[i+1,1]=0
+        else:      Vf_dir[i+1,0]=0; Vb_dir[i+1,1]=0
+        
+    # Create direction DataArrays. 
+    # Add a switch to return this? Useful to debug and/or plot velocities.
+    Ub_dir  = _xr.DataArray(Ub_dir,  coords={'cell': cell, 'path':[0,1]}, dims=('cell', 'path'))
+    Uf_dir  = _xr.DataArray(Uf_dir,  coords={'cell': cell, 'path':[0,1]}, dims=('cell', 'path'))
+    Vb_dir  = _xr.DataArray(Vb_dir,  coords={'cell': cell, 'path':[0,1]}, dims=('cell', 'path'))
+    Vf_dir  = _xr.DataArray(Vf_dir,  coords={'cell': cell, 'path':[0,1]}, dims=('cell', 'path'))
     
     # Compute transport
-    transport_a = (Ua * mask_Ua * dyGa * HFacWa +
-                   Va * mask_Va * dxGa * HFacSa ).expand_dims('path')
-    transport_b = (Ub * mask_Ub * dyGb * HFacWb +
-                   Vb * mask_Vb * dxGb * HFacSb ).expand_dims('path')
-    transport   = _xr.concat([transport_a, transport_b], dim='path') * drF * 1.e-6
+    transport = (Ub*Ub_dir+Uf*Uf_dir+Vb*Vb_dir+Vf*Vf_dir)*drF*1.E-6
+    if closed: transport = transport.where(ds['cell']!=ds['cell'].isel(cell=0))
+    else:      transport = transport.where(ds['cell']==ds['cell'].isel(cell=slice(1,-1)))
+    transport.attrs.update({'long_name': 'Volume flux', 
+                            'units': 'Sv',
+                            'history': 'Computed offline by OceanSpy'}) 
     
-    
-    # Create DataArray
-    transport.attrs['long_name'] = 'Transport (volume flux)'
-    transport.attrs['direction'] = direction
-    transport.attrs['units']     = 'Sv (10^6 m^3/s)'
-    transport.attrs['history']   = 'Computed offline by OceanSpy'
+    # Return directions
+    zonal_dir_tran = Ub_dir+Uf_dir
+    zonal_dir_tran.attrs.update({'long_name': 'Zonal direction of the transport', 
+                                 'units': '0: No zonal contribution; 1:Eastward; -1:Westward',
+                                 'history': 'Computed offline by OceanSpy'}) 
+    merid_dir_tran = Vb_dir+Vf_dir
+    merid_dir_tran.attrs.update({'long_name': 'Meridional direction of the transport', 
+                                 'units': '0: No meridional contribution; 1:Northward; -1:Southward',
+                                 'history': 'Computed offline by OceanSpy'}) 
     
     # Add to dataset
     ds['transport'] = transport
+    ds['zonal_dir_tran'] = zonal_dir_tran
+    ds['merid_dir_tran'] = merid_dir_tran
     
     # Update var_names
-    info.var_names['transport'] = 'transport'
+    info.var_names['transport']      = 'transport'
+    info.var_names['zonal_dir_tran'] = 'zonal_dir_tran'
+    info.var_names['merid_dir_tran'] = 'merid_dir_tran'
     
-    # Reorganize dimensions
-    ds = ds.transpose(*ds.dims)
-    
-    return ds, info
-            
+    return _utils.reorder_ds(ds), info
+
     
 
     

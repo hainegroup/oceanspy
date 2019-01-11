@@ -270,3 +270,20 @@ def open_ds_info(path):
     f.close()
     
     return ds, info
+
+def reorder_ds(ds):
+    """
+    Reorder dataset dimensions.  
+    
+    Parameters
+    ----------
+    ds: xarray.Dataset
+        
+    Returns
+    -------
+    ds: xarray.Dataset
+    """
+    
+    # ds = ds.transpose(*ds.dims).transpose()
+    
+    return ds
