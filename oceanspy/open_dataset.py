@@ -4,20 +4,23 @@ Open dataset: import datasets stored on SciServer.
 
 # Comments for developers: 
 
-# 1) Define new functions similar to exp_ASR to import different datasets.
+# 1) Define new functions similar to exp_ASR to import different datasets (return ds and info).
 
-# 2) OceanSpy was built around exp_ASR, so the variable names must be consistent with OceanSpy.
+# 2) Return ds applying _utils.reorder_ds(ds)
+
+# 3) OceanSpy was built around exp_ASR, so the variable names must be consistent with OceanSpy.
 #    Use oceanspy.open_dataset._info.var_names to specify variable names, 
 #    or rename the variables so they are consistent with exp_ASR.
 
-# 3) Dimension names must be the same as exp_ASR (implement a smarter way in the future??).
+# 4) Dimension names must be the same as exp_ASR (implement a smarter way in the future??).
 
-# 4) Keep imported modules secret using _
+# 5) Keep imported modules secret using _
 
 import xarray as _xr
 import xgcm as _xgcm
 import numpy as _np
 import pandas as _pd
+from . import utils as _utils
 
 class _info:
     """
@@ -211,10 +214,7 @@ def exp_ASR(cropped = False,
                  parameters = parameters,
                  var_names  = var_names)
     
-    return ds, info
-        
-    # Reorganize dimensions
-    ds = ds.transpose(*ds.dims)
+    return _utils.reorder_ds(ds), info
     
 def exp_ERAI(daily   = False, 
              machine = 'sciserver'):
@@ -340,6 +340,4 @@ def exp_ERAI(daily   = False,
                  parameters = parameters,
                  var_names  = var_names)
     
-         
-    
-    return ds, info
+    return _utils.reorder_ds(ds), info
