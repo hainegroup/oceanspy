@@ -589,8 +589,9 @@ def extract_properties(ds,
                        deps          = None,
                        times         = None,
                        varList       = None,
-                       interpmethod  = 'nearest',
+                       interp_method = 'nearest',
                        deep_copy     = False):
+    
     """
     Interpolate Eulerian tracer fields on particle positions.
     
@@ -598,21 +599,26 @@ def extract_properties(ds,
     ----------
     ds: xarray.Dataset
     info: oceanspy.open_dataset._info
-    lats, lons, deps: positions (latititudes (deg), longitudes (deg), and depths (m)) of particles to which to interpolate
-    lats,lons, deps shape: [ntimes,npart] array
+    lats, lons, deps: numpy arrays of size (ntimes,nparticles)
+         positions (latititudes (deg), longitudes (deg), and depths (m)) of particles to which to interpolate
     times: times when properties are requested
     varList: requested properties; default is all variables!
-    interpmethod: Interpolation method: only 'nearest' (default) and 'linear' are available
+    interpmethod: Interpolation method: default is 'nearest' 
     deep_copy: bool
         If True, deep copy ds and info
         
     Returns
     -------
-    ds: xarray.Dataset
+    ds_lagr: xarray.Dataset
     info: open_dataset._info
     """
-    
-    from scipy.interpolate import RegularGridInterpolator as _RGI
+
+    # Make sure lats, lons, deps all have the same size and that times has the correct length
+    if not (_np.array_equal(lats.shape,lons.shape) or _np.array_equal(lats.shape,deps.shape) or _np.array_equal(lons.shape,deps.shape)):
+        raise RuntimeError("lats, lons, and deps need to have the same shape")
+    npart  = lats.shape[1]
+    ntimes = lats.shape[0]
+    if ntimes != times.size: raise RuntimeError("Length of 'times' array inconsistent with length of particle locations time series")
     
     # Deep copy
     if deep_copy: ds, info = _utils.deep_copy(ds, info)
@@ -624,51 +630,37 @@ def extract_properties(ds,
     if varList: 
         ds = ds.drop([v for v in ds.variables if (v not in ds.dims and v not in ds.coords and v not in varList)])
             
-    
     # Create cutout for faster processing
-    bdr = 0.5
-    ds_cut, info_cut = cutout(ds,
-                                             info,
-                                             varList    = varList,
-                                             latRange   = [_np.amin(lats.values.ravel())-bdr,
-                                                           _np.amax(lats.values.ravel())+bdr],
-                                             lonRange   = [_np.amin(lons.values.ravel())-bdr, 
-                                                           _np.amax(lons.values.ravel())+bdr],
-                                             depthRange = [max([_np.amin(ds['Z'].values.ravel()),_np.amin(deps.values.ravel())-30]),
-                                                           min([0,_np.amax(deps.values.ravel())+30])],
-                                             timeRange  = [times[0], times[-1]],
-                                             timeFreq   = '6H',
-                                             sampMethod = 'snapshot',
-                                             deep_copy  = True)
-    
+    ds, info = cutout(ds,
+                      info,
+                      varList    = varList,
+                      latRange   = [_np.amin(lats.ravel()),_np.amax(lats.ravel())],
+                      lonRange   = [_np.amin(lons.ravel()),_np.amax(lons.ravel())],
+                      depthRange = [_np.amin(deps.ravel()),_np.amax(deps.ravel())],
+                      timeRange  = [times[0], times[-1]],
+                      sampMethod = 'snapshot',
+                      deep_copy  = False)    
    
-    # Make sure depths are positive
-    deps = _xr.ufuncs.fabs(deps)
-    ds_cut.coords['Z'] = _xr.ufuncs.fabs(ds_cut['Z'])
-        
     # Find interpolated values
-    for v in varList:
-        if v is varList[0]:
-            # Initialize new dataset
-            varname = [v, '_lagr']
-            ds_lagr = _xr.Dataset({''.join(varname): (['time','particles'], _np.ones((len(times),deps.shape[1])))},
+    ds_lagr = _xr.Dataset({'tempvar': (['time','particle'], _np.ones((len(times),deps.shape[1])))},
                                   coords={'time': times,
-                                          'particles': _np.arange(deps.shape[1])})
-        else:
-            # add variable to dataset
-            ds_lagr.assign({''.join(varname): _np.ones((len(times),deps.shape[1]))})
-        
-        for t in times:
-            partpos = _np.concatenate((deps.sel(time=t),lats.sel(time=t),lons.sel(time=t))).reshape(3,len(deps.sel(time=t))).T
-            
-            my_interpolating_function = _RGI((ds_cut['Z'].values, ds_cut['Y'].values, ds_cut['X'].values), 
-                                                                 ds_cut[v].sel(time=t).values,
-                                                                 method=interpmethod)
-            
-            ds_lagr[v + '_lagr'][_np.where(times == t)[0],:] = my_interpolating_function(partpos)
-            
+                                          'particle': _np.arange(deps.shape[1])})
+
+    for v in varList:
+        for t in _np.arange(len(times)):
+            xtest = _xr.DataArray(lons[t,:], dims='particle')
+            ytest = _xr.DataArray(lats[t,:], dims='particle')
+            ztest = _xr.DataArray(deps[t,:], dims='particle')
+            var = ds[v].isel(time=t).interp(X=xtest,Y=ytest,Z=ztest, method=interp_method).expand_dims('time')
+            if t == 0:
+                vartemp = var
+            else:
+                vartemp = _xr.concat([vartemp,var],dim='time')
+        ds_lagr = ds_lagr.assign({v:vartemp})
+    ds_lagr = ds_lagr.drop('tempvar')
+
+    # Remove grid
+    info.grid  = 'Particle locations'
     
     return _utils.reorder_ds(ds_lagr), info
-    
-
 
