@@ -659,7 +659,7 @@ def extract_properties(ds,
             xtest = _xr.DataArray(lons[t,:], dims='particle')
             ytest = _xr.DataArray(lats[t,:], dims='particle')
             ztest = _xr.DataArray(deps[t,:], dims='particle')
-            var = ds[v].isel(time=t).interp(X=xtest,Y=ytest,Z=ztest, method=interp_method).expand_dims('time')
+            var = ds[v].sel(time=times[t]).interp(X=xtest,Y=ytest,Z=ztest, method=interp_method).expand_dims('time')
             if t == 0:
                 vartemp = var
             else:
