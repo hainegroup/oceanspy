@@ -77,6 +77,8 @@ def cutout(ds,
     periodic = [] 
     if latRange: 
         tmp_len = len(ds['Yp1'])
+        latRange = [min(ds['Yp1'].values) if lat < min(ds['Yp1'].values) else lat for lat in latRange]
+        latRange = [max(ds['Yp1'].values) if lat > max(ds['Yp1'].values) else lat for lat in latRange]
         Y0 = ds['Yp1'].sel(Yp1=min(latRange), method='ffill')
         Y1 = ds['Yp1'].sel(Yp1=max(latRange), method='bfill')
         inds = _np.where(ds['Yp1'].isin([Y0, Y1]))
@@ -89,6 +91,8 @@ def cutout(ds,
         if (len(ds['Yp1']) == tmp_len and info.grid.axes['Y']._periodic is True): periodic.append('Y') 
     if lonRange: 
         tmp_len = len(ds['Xp1'])
+        lonRange = [min(ds['Xp1'].values) if lon < min(ds['Xp1'].values) else lon for lon in lonRange]
+        lonRange = [max(ds['Xp1'].values) if lon > max(ds['Xp1'].values) else lon for lon in lonRange]
         X0 = ds['Xp1'].sel(Xp1=min(lonRange), method='ffill')
         X1 = ds['Xp1'].sel(Xp1=max(lonRange), method='bfill')
         inds = _np.where(ds['Xp1'].isin([X0, X1]))
@@ -101,6 +105,8 @@ def cutout(ds,
         if (len(ds['Xp1']) == tmp_len and info.grid.axes['X']._periodic is True): periodic.append('X')        
     if depthRange: 
         tmp_len = len(ds['Zp1'])
+        depthRange = [min(ds['Zp1'].values) if depth < min(ds['Zp1'].values) else depth for depth in depthRange]
+        depthRange = [max(ds['Zp1'].values) if depth > max(ds['Zp1'].values) else depth for depth in depthRange]
         Z0 = ds['Zp1'].sel(Zp1=max(depthRange), method='ffill')
         Z1 = ds['Zp1'].sel(Zp1=min(depthRange), method='bfill')
         inds = _np.where(ds['Zp1'].isin([Z0, Z1]))
@@ -115,6 +121,8 @@ def cutout(ds,
         if (len(ds['Zp1']) == tmp_len and info.grid.axes['Z']._periodic is True): periodic.append('Z')     
     if timeRange: 
         tmp_len = len(ds['time'])
+        timeRange = [_np.datetime_as_string(min(ds['time'].values)) if _np.datetime64(time) < min(ds['time'].values) else time for time in timeRange]
+        timeRange = [_np.datetime_as_string(max(ds['time'].values)) if _np.datetime64(time) > max(ds['time'].values) else time for time in timeRange]
         T0 = ds['time'].sel(time=min(timeRange), method='ffill')
         T1 = ds['time'].sel(time=max(timeRange), method='bfill')
         inds = _np.where(ds['time'].isin([T0.values, T1.values]))
