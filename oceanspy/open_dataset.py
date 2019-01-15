@@ -104,19 +104,22 @@ def exp_ASR(cropped = False,
     # Import grid and fields separately, then merge
     if machine.lower() == 'sciserver':
         gridpath = '/home/idies/workspace/OceanCirculation/exp_ASR/grid_glued.nc'
+        kpppath  = '/home/idies/workspace/OceanCirculation/exp_ASR/kpp_state_glued.nc'
         fldspath = '/home/idies/workspace/OceanCirculation/exp_ASR/result_*/output_glued/*.*_glued.nc'
         croppath = '/home/idies/workspace/OceanCirculation/exp_ASR/result_*/output_glued/cropped/*.*_glued.nc'
     elif machine.lower() == 'datascope':
         gridpath = '/sciserver/oceanography/exp_ASR/grid_glued.nc'
+        kpppath  = '/sciserver/oceanography/exp_ASR/kpp_state_glued.nc'
         fldspath = '/sciserver/oceanography/exp_ASR/result_*/output_glued/*.*_glued.nc'
         croppath = '/sciserver/oceanography/exp_ASR/result_*/output_glued/cropped/*.*_glued.nc'
     else: raise RuntimeError("machine = %s not available" % machine.lower())
     gridset = _xr.open_dataset(gridpath,
                                drop_variables = ['XU','YU','XV','YV','RC','RF','RU','RL'])
+    kppset  = _xr.open_dataset(kpppath)
     fldsset = _xr.open_mfdataset(fldspath,
                                  concat_dim     = 'T',
                                  drop_variables = ['diag_levels','iter'])
-    ds = _xr.merge([gridset, fldsset])
+    ds = _xr.merge([gridset, kppset, fldsset])
     
     # Create horizontal vectors (remove zeros due to exch2)
     ds['X'].values   = ds.XC.mean(dim='Y',   skipna=True)
@@ -243,20 +246,23 @@ def exp_ERAI(daily   = False,
 
     # Import grid and fields separately, then merge
     if machine.lower() == 'sciserver':
-        gridpath = '/home/idies/workspace/OceanCirculation/exp_ERAI/grid_glued.nc'
-        fldspath = '/home/idies/workspace/OceanCirculation/exp_ERAI/result_*/output_glued/*.*_glued.nc'
+        gridpath  = '/home/idies/workspace/OceanCirculation/exp_ERAI/grid_glued.nc'
+        kpppath   = '/home/idies/workspace/OceanCirculation/exp_ERAI/kpp_state_glued.nc'
+        fldspath  = '/home/idies/workspace/OceanCirculation/exp_ERAI/result_*/output_glued/*.*_glued.nc'
         dailypath = '/home/idies/workspace/OceanCirculation/exp_ERAI/result_*/output_glued/daily/*.*_glued.nc'
     elif machine.lower() == 'datascope':
-        gridpath = '/sciserver/oceanography/exp_ERAI/grid_glued.nc'
-        fldspath = '/sciserver/oceanography/exp_ERAI/result_*/output_glued/*.*_glued.nc'
+        gridpath  = '/sciserver/oceanography/exp_ERAI/grid_glued.nc'
+        kpppath   = '/sciserver/oceanography/exp_ERAI/kpp_state_glued.nc'
+        fldspath  = '/sciserver/oceanography/exp_ERAI/result_*/output_glued/*.*_glued.nc'
         dailypath = '/sciserver/oceanography/exp_ERAI/result_*/output_glued/daily/*.*_glued.nc'
     else: raise RuntimeError("machine = %s not available" % machine.lower())
     gridset = _xr.open_dataset(gridpath,
                                drop_variables = ['XU','YU','XV','YV','RC','RF','RU','RL'])
+    kppset  = _xr.open_dataset(kpppath)
     fldsset = _xr.open_mfdataset(fldspath,
                                  concat_dim     = 'T',
                                  drop_variables = ['diag_levels','iter'])
-    ds = _xr.merge([gridset, fldsset])
+    ds = _xr.merge([gridset, kppset, fldsset])
     
     # Create horizontal vectors (remove zeros due to exch2)
     ds['X'].values   = ds.XC.mean(dim='Y',   skipna=True)
