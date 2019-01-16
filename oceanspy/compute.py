@@ -8,6 +8,7 @@ Compute: add new variables to the dataset
 #    - Input and output ds and info (add new variables to ds and info)
 #    - Always add deep_copy option, check missing variables, and print a message
 #    - Always add the following attribute da.attrs['history'] = 'Computed offline by OceanSpy'
+#    - Return ds applying _utils.reorder_ds(ds)
 
 # 2) Keep imported modules secret using _
 
@@ -211,7 +212,7 @@ def Sigma0(ds, info,
     # Update var_names
     info.var_names['Sigma0'] = 'Sigma0'
     
-    return ds, info
+    return _utils.reorder_ds(ds), info
 
 def N2(ds, info,
        deep_copy = False):
@@ -236,7 +237,7 @@ def N2(ds, info,
     if deep_copy: ds, info = _utils.deep_copy(ds, info)
     
     # Add missing variables
-    varList = ['Sigma0', 'HFacC', 'drC']
+    varList = ['Sigma0', 'HFacC', 'drC', 'Z']
     ds, info = _utils.compute_missing_variables(ds, info, varList)
     
     # Message
@@ -245,7 +246,7 @@ def N2(ds, info,
     # Variables
     Sigma0 = ds[info.var_names['Sigma0']]
     HFacC  = ds[info.var_names['HFacC']]
-    drC    = ds[info.var_names['drC']]
+    drC    = _xr.ufuncs.sign(ds['Z'][-1]-ds['Z'][0]) * ds[info.var_names['drC']]
     
     # Parameters
     g    = info.parameters['g'] # m/s^2
@@ -271,7 +272,7 @@ def N2(ds, info,
     # Update var_names
     info.var_names['N2'] = 'N2'
     
-    return ds, info
+    return _utils.reorder_ds(ds), info
 
 def momVort1(ds, info,
              deep_copy = False):
@@ -306,8 +307,8 @@ def momVort1(ds, info,
     print('Computing momVort1')
     
     # Variables
-    dyC = ds[info.var_names['dyC']]
-    drC = ds[info.var_names['drC']]
+    dyC = _xr.ufuncs.sign(ds['Y'][-1]-ds['Y'][0]) * ds[info.var_names['dyC']]
+    drC = _xr.ufuncs.sign(ds['Z'][-1]-ds['Z'][0]) * ds[info.var_names['drC']]
     W = ds[info.var_names['W']]
     V = ds[info.var_names['V']]
     
@@ -329,7 +330,7 @@ def momVort1(ds, info,
     # Update var_names
     info.var_names['momVort1'] = 'momVort1'
     
-    return ds, info
+    return _utils.reorder_ds(ds), info
     
 def momVort2(ds, info,
              deep_copy = False):
@@ -363,8 +364,8 @@ def momVort2(ds, info,
     print('Computing momVort2')
     
     # Variables
-    dxC = ds[info.var_names['dxC']]
-    drC = ds[info.var_names['drC']]
+    dxC = _xr.ufuncs.sign(ds['X'][-1]-ds['X'][0]) * ds[info.var_names['dxC']]
+    drC = _xr.ufuncs.sign(ds['Z'][-1]-ds['Z'][0]) * ds[info.var_names['drC']]
     W = ds[info.var_names['W']]
     U = ds[info.var_names['U']]
     
@@ -386,7 +387,7 @@ def momVort2(ds, info,
     # Update var_names
     info.var_names['momVort2'] = 'momVort2'
     
-    return ds, info
+    return _utils.reorder_ds(ds), info
     
 def momVort3(ds, info,
              deep_copy = False):
@@ -420,8 +421,8 @@ def momVort3(ds, info,
     
     # Variables
     rAz = ds[info.var_names['rAz']]
-    dxC = ds[info.var_names['dxC']]
-    dyC = ds[info.var_names['dyC']]
+    dxC = _xr.ufuncs.sign(ds['X'][-1]-ds['X'][0]) * ds[info.var_names['dxC']]
+    dyC = _xr.ufuncs.sign(ds['Y'][-1]-ds['Y'][0]) * ds[info.var_names['dyC']]
     U   = ds[info.var_names['U']]
     V   = ds[info.var_names['V']]
     
@@ -441,13 +442,240 @@ def momVort3(ds, info,
     # Update var_names
     info.var_names['momVort3'] = 'momVort3'
     
-    return ds, info
+    return _utils.reorder_ds(ds), info
+
+def shear_strain(ds, info,
+                 deep_copy = False):
+    """
+    Compute shear component of strain.
+    dV/dX + dU/dY 
+    
+    Parameters
+    ----------
+    ds: xarray.Dataset
+    info: oceanspy.open_dataset._info
+    deep_copy: bool
+        If True, deep copy ds and infod
+    
+    Returns
+    -------
+    ds: xarray.Dataset 
+    info: oceanspy.open_dataset._info
+    """
+    
+    # Deep copy
+    if deep_copy: ds, info = _utils.deep_copy(ds, info)
+        
+    # Add missing variables
+    varList = ['rAz', 'dxC', 'dyC', 'U', 'V']
+    ds, info = _utils.compute_missing_variables(ds, info, varList)
+    
+    # Message
+    print('Computing shear_strain')
+    
+    # Variables
+    rAz = ds[info.var_names['rAz']]
+    dxC = _xr.ufuncs.sign(ds['X'][-1]-ds['X'][0]) * ds[info.var_names['dxC']]
+    dyC = _xr.ufuncs.sign(ds['Y'][-1]-ds['Y'][0]) * ds[info.var_names['dyC']]
+    U   = ds[info.var_names['U']]
+    V   = ds[info.var_names['V']]
+    
+    # Compute shear_strain
+    shear_strain = (info.grid.diff(V * dyC, 'X', boundary='fill', fill_value=float('nan')) +
+                    info.grid.diff(U * dxC, 'Y', boundary='fill', fill_value=float('nan'))
+                    ) /  rAz
+    
+    # Create DataArray
+    shear_strain.attrs['units']     = 's^-1'
+    shear_strain.attrs['long_name'] = 'Shear component of Strain'
+    shear_strain.attrs['history']   = 'Computed offline by OceanSpy'
+    
+    # Add to dataset
+    ds['shear_strain'] = shear_strain
+    
+    # Update var_names
+    info.var_names['shear_strain'] = 'shear_strain'
+    
+    return _utils.reorder_ds(ds), info
+
+
+def hor_div(ds, info,
+            deep_copy = False):
+    """
+    Compute horizontal divergence.
+    dU/dX + dV/dY 
+    https://mitgcm.readthedocs.io/en/latest/algorithm/algorithm.html#horizontal-divergence
+    
+    Parameters
+    ----------
+    ds: xarray.Dataset
+    info: oceanspy.open_dataset._info
+    deep_copy: bool
+        If True, deep copy ds and infod
+    
+    Returns
+    -------
+    ds: xarray.Dataset 
+    info: oceanspy.open_dataset._info
+    """
+    
+    # Deep copy
+    if deep_copy: ds, info = _utils.deep_copy(ds, info)
+        
+    # Add missing variables
+    varList = ['U', 'V', 'dyG', 'dxG', 'HFacW', 'HFacS', 'rA', 'HFacC']
+    ds, info = _utils.compute_missing_variables(ds, info, varList)
+    
+    # Message
+    print('Computing hor_div')
+    
+    # Variables
+    U     = ds[info.var_names['U']]
+    V     = ds[info.var_names['V']]
+    dyG   = _xr.ufuncs.sign(ds['Yp1'][-1]-ds['Yp1'][0]) * ds[info.var_names['dyG']]
+    dxG   = _xr.ufuncs.sign(ds['Xp1'][-1]-ds['Xp1'][0]) * ds[info.var_names['dxG']]
+    HFacW = ds[info.var_names['HFacW']]
+    HFacS = ds[info.var_names['HFacS']]
+    HFacC = ds[info.var_names['HFacC']]
+    rA    = ds[info.var_names['rA']]
+    
+    # Compute hor_div
+    hor_div = (info.grid.diff(U * dyG * HFacW,'X') + 
+               info.grid.diff(V * dxG * HFacS,'Y')) / (rA * HFacC)
+    
+    # Create DataArray
+    hor_div.attrs['units']     = 's^-1'
+    hor_div.attrs['long_name'] = 'Horizontal divergence'
+    hor_div.attrs['history']   = 'Computed offline by OceanSpy'
+    
+    # Add to dataset
+    ds['hor_div'] = hor_div
+    
+    # Update var_names
+    info.var_names['hor_div'] = 'hor_div'
+    
+    return _utils.reorder_ds(ds), info
+
+def normal_strain(ds, info,
+                  deep_copy = False):
+    """
+    Compute normal component of strain.
+    dU/dX - dV/dY 
+    
+    Parameters
+    ----------
+    ds: xarray.Dataset
+    info: oceanspy.open_dataset._info
+    deep_copy: bool
+        If True, deep copy ds and infod
+    
+    Returns
+    -------
+    ds: xarray.Dataset 
+    info: oceanspy.open_dataset._info
+    """
+    
+    # Deep copy
+    if deep_copy: ds, info = _utils.deep_copy(ds, info)
+        
+    # Add missing variables
+    varList = ['U', 'V', 'dyG', 'dxG', 'HFacW', 'HFacS', 'rA', 'HFacC']
+    ds, info = _utils.compute_missing_variables(ds, info, varList)
+    
+    # Message
+    print('Computing normal_strain')
+    
+    # Variables
+    U     = ds[info.var_names['U']]
+    V     = ds[info.var_names['V']]
+    dyG   = _xr.ufuncs.sign(ds['Yp1'][-1]-ds['Yp1'][0]) * ds[info.var_names['dyG']]
+    dxG   = _xr.ufuncs.sign(ds['Xp1'][-1]-ds['Xp1'][0]) * ds[info.var_names['dxG']]
+    HFacW = ds[info.var_names['HFacW']]
+    HFacS = ds[info.var_names['HFacS']]
+    HFacC = ds[info.var_names['HFacC']]
+    rA    = ds[info.var_names['rA']]
+    
+    # Compute normal_strain
+    normal_strain = (info.grid.diff(U * dyG * HFacW,'X') - 
+                     info.grid.diff(V * dxG * HFacS,'Y')) / (rA * HFacC)
+    
+    # Create DataArray
+    normal_strain.attrs['units']     = 's^-1'
+    normal_strain.attrs['long_name'] = 'Normal component of Strain'
+    normal_strain.attrs['history']   = 'Computed offline by OceanSpy'
+    
+    # Add to dataset
+    ds['normal_strain'] = normal_strain
+    
+    # Update var_names
+    info.var_names['normal_strain'] = 'normal_strain'
+    
+    return _utils.reorder_ds(ds), info
+
+def Okubo_Weiss(ds, info,
+                deep_copy = False):
+    """
+    Compute Okubo-Weiss parameter.
+    OW = normal_strain^2 + shear_strain^2 - momVort3^2 
+    
+    Parameters
+    ----------
+    ds: xarray.Dataset
+    info: oceanspy.open_dataset._info
+    deep_copy: bool
+        If True, deep copy ds and infod
+    
+    Returns
+    -------
+    ds: xarray.Dataset 
+    info: oceanspy.open_dataset._info
+    """
+    
+    # Deep copy
+    if deep_copy: ds, info = _utils.deep_copy(ds, info)
+        
+    # Add missing variables
+    varList = ['normal_strain', 'shear_strain', 'momVort3']
+    ds, info = _utils.compute_missing_variables(ds, info, varList)
+    
+    # Message
+    print('Computing Okubo_Weiss')
+    
+    # Variables
+    normal_strain = ds[info.var_names['normal_strain']]
+    shear_strain  = ds[info.var_names['shear_strain']]
+    momVort3      = ds[info.var_names['momVort3']]
+    
+    # Interpolate vorticity and shear strain
+    shear_strain = info.grid.interp(shear_strain, 'X', boundary='fill', fill_value=float('nan'))
+    shear_strain = info.grid.interp(shear_strain, 'Y', boundary='fill', fill_value=float('nan'))
+    momVort3 = info.grid.interp(momVort3, 'X', boundary='fill', fill_value=float('nan'))
+    momVort3 = info.grid.interp(momVort3, 'Y', boundary='fill', fill_value=float('nan'))
+    
+    # Compute Okubo_Weiss
+    Okubo_Weiss = (_xr.ufuncs.square(normal_strain) + 
+                   _xr.ufuncs.square(shear_strain)  - 
+                   _xr.ufuncs.square(momVort3)      )
+    
+    # Create DataArray
+    Okubo_Weiss.attrs['units']     = 's^-2'
+    Okubo_Weiss.attrs['long_name'] = 'Okubo-Weiss parameter'
+    Okubo_Weiss.attrs['history']   = 'Computed offline by OceanSpy'
+    
+    # Add to dataset
+    ds['Okubo_Weiss'] = Okubo_Weiss
+    
+    # Update var_names
+    info.var_names['Okubo_Weiss'] = 'Okubo_Weiss'
+    
+    return _utils.reorder_ds(ds), info
+
 
 def Ertel_PV(ds, info,
              deep_copy = False):
     """
     Compute Ertel Potential Vorticity and add to dataset.
-    Eq. 2.2 in OC3D, Klinger and Haine, 2018.
+    Eq. 2.25 in OC3D, Klinger and Haine, 2018.
     
     Parameters
     ----------
@@ -475,8 +703,8 @@ def Ertel_PV(ds, info,
     # Variables
     Y        = ds[info.var_names['Y']]
     fCori    = ds[info.var_names['fCori']]
-    dxC      = ds[info.var_names['dxC']]
-    dyC      = ds[info.var_names['dyC']]
+    dxC      = _xr.ufuncs.sign(ds['X'][-1]-ds['X'][0]) * ds[info.var_names['dxC']]
+    dyC      = _xr.ufuncs.sign(ds['Y'][-1]-ds['Y'][0]) * ds[info.var_names['dyC']]
     Sigma0   = ds[info.var_names['Sigma0']]
     N2       = ds[info.var_names['N2']]
     momVort1 = ds[info.var_names['momVort1']]
@@ -494,11 +722,9 @@ def Ertel_PV(ds, info,
     momVort1 = info.grid.interp(momVort1, 'Z', boundary='fill', fill_value=float('nan'))
  
     momVort2 = info.grid.interp(momVort2, 'X', boundary='fill', fill_value=float('nan'))
-    momVort2
     momVort2 = info.grid.interp(momVort2, 'Z', boundary='fill', fill_value=float('nan'))
     
     momVort3 = info.grid.interp(momVort3, 'X', boundary='fill', fill_value=float('nan'))
-    momVort3
     momVort3 = info.grid.interp(momVort3, 'Y', boundary='fill', fill_value=float('nan'))
     
     # Compute Ertel PV
@@ -524,7 +750,7 @@ def Ertel_PV(ds, info,
     # Update var_names
     info.var_names['Ertel_PV'] = 'Ertel_PV'
     
-    return ds, info
+    return _utils.reorder_ds(ds), info
 
 def KE(ds, info,
        deep_copy = False):
@@ -577,7 +803,7 @@ def KE(ds, info,
     # Update var_names
     info.var_names['KE'] = 'KE'
     
-    return ds, info
+    return _utils.reorder_ds(ds), info
 
 def EKE(ds, info,
         deep_copy = False):
@@ -634,7 +860,7 @@ def EKE(ds, info,
     # Update var_names
     info.var_names['EKE'] = 'EKE'
     
-    return ds, info
+    return _utils.reorder_ds(ds), info
 
 def tan_Vel(ds, info,
             deep_copy = False):
@@ -691,7 +917,7 @@ def tan_Vel(ds, info,
     # Update var_names
     info.var_names['tan_Vel'] = 'tan_Vel'
     
-    return ds, info
+    return _utils.reorder_ds(ds), info
 
 def ort_Vel(ds, info,
             deep_copy = False):
@@ -748,6 +974,477 @@ def ort_Vel(ds, info,
     # Update var_names
     info.var_names['ort_Vel'] = 'ort_Vel'
     
-    return ds, info
+    return _utils.reorder_ds(ds), info
+
+def heat_budget(ds, info,
+                deep_copy = False):
+    """
+    Compute terms to close heat budget as explained in [1]_, and add to dataset.
+    
+    Terms:    
+        | tendH: Heat total tendency    
+        | adv_hConvH: Heat horizontal advective convergence  
+        | adv_vConvH: Heat vertical advective convergence  
+        | dif_vConvH: Heat vertical diffusive convergence  
+        | kpp_vConvH: Heat vertical kpp convergence  
+        | forcH: Heat surface forcing  
+    
+    Budget is closed if tendH = adv_hConvH + adv_vConvH + dif_vConvH + kpp_vConvH + forcH
+    Vertical convergences cannot be estimated for the last vertical level (nans are returned)
+    
+    Parameters
+    ----------
+    ds: xarray.Dataset
+    info: oceanspy.open_dataset._info
+    deep_copy: bool
+        If True, deep copy ds and infod
+    
+    Returns
+    -------
+    ds: xarray.Dataset 
+    info: oceanspy.open_dataset._info
+    
+    REFERENCES
+    ----------
+    .. [1] Piecuch, 2017 ftp://ecco.jpl.nasa.gov/Version4/Release3/doc/evaluating_budgets_in_eccov4r3.pdf
+    """
+  
+    
+    # Deep copy
+    if deep_copy: ds, info = _utils.deep_copy(ds, info)
+        
+    # Add missing variables
+    varList = ['Temp', 'Eta', 'Depth', 'ADVx_TH', 'ADVy_TH', 'ADVr_TH', 'DFrI_TH', 'KPPg_TH', 'TFLUX', 'oceQsw_AVG', 
+               'time', 'HFacC', 'HFacW', 'HFacS', 'drF', 'rA']
+    ds, info = _utils.compute_missing_variables(ds, info, varList)
+    
+    # Message
+    print('Computing heat budget terms')
+    
+    # Variables
+    Temp       = ds[info.var_names['Temp']]
+    Eta        = ds[info.var_names['Eta']]
+    Depth      = ds[info.var_names['Depth']]
+    ADVx_TH    = ds[info.var_names['ADVx_TH']]
+    ADVy_TH    = ds[info.var_names['ADVy_TH']]
+    ADVr_TH    = ds[info.var_names['ADVr_TH']]
+    DFrI_TH    = ds[info.var_names['DFrI_TH']]
+    KPPg_TH    = ds[info.var_names['KPPg_TH']]
+    TFLUX      = ds[info.var_names['TFLUX']]
+    oceQsw_AVG = ds[info.var_names['oceQsw_AVG']]
+    HFacC     = ds[info.var_names['HFacC']]
+    HFacW     = ds[info.var_names['HFacW']]
+    HFacS     = ds[info.var_names['HFacS']]
+    drF     = ds[info.var_names['drF']]
+    rA      = ds[info.var_names['rA']]
+    dt      = ds[info.var_names['dt']]
+    
+    # Parameters
+    rho0 = info.parameters['rho0']
+    c_p  = info.parameters['c_p']
+    
+    # Compute useful grid-factor variables
+    HFacC_Zl  = info.grid.interp(HFacC,'Z', boundary='fill', fill_value=0, to='right')
+    HFacC_Zp1 = info.grid.interp(HFacC,'Z', boundary='fill', fill_value=0, to='outer')
+    dzMat   = drF * HFacC
+    CellVol = rA  * dzMat
+    
+    # Total tendency
+    z_star_scale = (1+Eta/Depth)
+    tendH = info.grid.diff((Temp*z_star_scale).where(HFacC!=0),'time')/dt
+    
+    # Horizontal convergence
+    adv_hConvH = -(info.grid.diff(ADVx_TH.where(HFacW!=0),'X') + 
+                   info.grid.diff(ADVy_TH.where(HFacS!=0),'Y'))/CellVol
+    
+    # Vertical convergence
+    for i in range(3):
+        if   i==0: var_in = ADVr_TH
+        elif i==1: var_in = DFrI_TH
+        elif i==2: var_in = KPPg_TH
+
+        var_out = var_in.where(HFacC_Zl!=0).diff('Zl')
+        var_out = var_out.drop('Zl').rename({'Zl':'Z'}).assign_coords(Z=ds['Z'].isel(Z=slice(None,-1)))
+        tmp     = _xr.DataArray(_np.zeros(var_out.isel(Z=-1).shape),
+                               coords=var_out.isel(Z=-1).coords,
+                               dims=var_out.isel(Z=-1).dims)
+        tmp = tmp.assign_coords(Z=ds['Z'].isel(Z=-1))
+        var_out = _xr.concat([var_out, tmp], 'Z')
+        var_out = var_out.where(var_out['Z']!=var_out['Z'].isel(Z=-1))
+        var_out = var_out/CellVol
+
+        if   i==0: adv_vConvH = var_out
+        elif i==1: dif_vConvH = var_out 
+        elif i==2: kpp_vConvH = var_out 
+    
+    # Surface flux
+    R       = 0.62
+    zeta1   = 0.6
+    zeta2   = 20
+    q = (R * _xr.ufuncs.exp(ds['Zp1']/zeta1) + (1-R)*_xr.ufuncs.exp(ds['Zp1']/zeta2)).where(ds['Zp1']>=-200,0)
+    forcH   = -info.grid.diff(q.where(HFacC_Zp1!=0),'Z')
+    if ds['Zp1'].isel(Zp1=0)==0:
+        forcH_surf = (TFLUX-(1-forcH.isel(Z=0))*oceQsw_AVG).expand_dims('Z')
+        forcH_bott = forcH.isel(Z=slice(1,None))*oceQsw_AVG
+        forcH = _xr.concat([forcH_surf, forcH_bott],dim='Z')
+    else:
+        forcH   = forcH * oceQsw_AVG
+    forcH   = (forcH/(rho0*c_p*dzMat))
+    
+    
+    # Create DataArrays
+    tendH.attrs['units']     = 'degC/s'
+    tendH.attrs['long_name'] = 'Heat total tendency'
+    tendH.attrs['history']   = 'Computed offline by OceanSpy'
+    
+    adv_hConvH.attrs['units']     = 'degC/s'
+    adv_hConvH.attrs['long_name'] = 'Heat horizontal advective convergence'
+    adv_hConvH.attrs['history']   = 'Computed offline by OceanSpy'
+    
+    adv_vConvH.attrs['units']     = 'degC/s'
+    adv_vConvH.attrs['long_name'] = 'Heat vertical advective convergence'
+    adv_vConvH.attrs['history']   = 'Computed offline by OceanSpy'
+    
+    dif_vConvH.attrs['units']     = 'degC/s'
+    dif_vConvH.attrs['long_name'] = 'Heat vertical diffusive convergence'
+    dif_vConvH.attrs['history']   = 'Computed offline by OceanSpy'
+    
+    kpp_vConvH.attrs['units']     = 'degC/s'
+    kpp_vConvH.attrs['long_name'] = 'Heat vertical kpp convergence'
+    kpp_vConvH.attrs['history']   = 'Computed offline by OceanSpy'
+    
+    forcH.attrs['units']     = 'degC/s'
+    forcH.attrs['long_name'] = 'Heat surface forcing'
+    forcH.attrs['history']   = 'Computed offline by OceanSpy'
+    
+    # Add to dataset
+    ds['tendH']      = tendH
+    ds['adv_hConvH'] = adv_hConvH
+    ds['adv_vConvH'] = adv_vConvH
+    ds['dif_vConvH'] = dif_vConvH
+    ds['kpp_vConvH'] = kpp_vConvH
+    ds['forcH']      = forcH
+    
+    # Update var_names
+    info.var_names['tendH']      = 'tendH'
+    info.var_names['adv_hConvH'] = 'adv_hConvH'
+    info.var_names['adv_vConvH'] = 'adv_vConvH'
+    info.var_names['dif_vConvH'] = 'dif_vConvH'
+    info.var_names['kpp_vConvH'] = 'kpp_vConvH'
+    info.var_names['forcH']      = 'forcH'
+    
+    return _utils.reorder_ds(ds), info
+
+def salt_budget(ds, info,
+                deep_copy = False):
+    """
+    Compute terms to close salt budget as explained in [1]_, and add to dataset.
+    
+    Terms:    
+        | tendS: Salt total tendency    
+        | adv_hConvS: Salt horizontal advective convergence  
+        | adv_vConvS: Salt vertical advective convergence  
+        | dif_vConvS: Salt vertical diffusive convergence  
+        | kpp_vConvS: Salt vertical kpp convergence  
+        | forcS: Salt surface forcing  
+    
+    Budget is closed if tendS = adv_hConvS + adv_vConvS + dif_vConvS + kpp_vConvS + forcS
+    Vertical convergences cannot be estimated for the last vertical level (nans are returned)
+    
+    Parameters
+    ----------
+    ds: xarray.Dataset
+    info: oceanspy.open_dataset._info
+    deep_copy: bool
+        If True, deep copy ds and infod
+    
+    Returns
+    -------
+    ds: xarray.Dataset 
+    info: oceanspy.open_dataset._info
+    
+    REFERENCES
+    ----------
+    .. [1] Piecuch, 2017 ftp://ecco.jpl.nasa.gov/Version4/Release3/doc/evaluating_budgets_in_eccov4r3.pdf
+    """
+
+    
+    # Deep copy
+    if deep_copy: ds, info = _utils.deep_copy(ds, info)
+        
+    # Add missing variables
+    varList = ['S', 'Eta', 'Depth', 'ADVx_SLT', 'ADVy_SLT', 'ADVr_SLT', 'DFrI_SLT', 'KPPg_SLT', 'SFLUX', 'oceSPtnd', 
+               'time', 'HFacC', 'HFacW', 'HFacS', 'drF', 'rA']
+    ds, info = _utils.compute_missing_variables(ds, info, varList)
+    
+    # Message
+    print('Computing heat budget terms')
+    
+    # Variables
+    S        = ds[info.var_names['S']]
+    Eta      = ds[info.var_names['Eta']]
+    Depth    = ds[info.var_names['Depth']]
+    ADVx_SLT = ds[info.var_names['ADVx_SLT']]
+    ADVy_SLT = ds[info.var_names['ADVy_SLT']]
+    ADVr_SLT = ds[info.var_names['ADVr_SLT']]
+    DFrI_SLT = ds[info.var_names['DFrI_SLT']]
+    KPPg_SLT = ds[info.var_names['KPPg_SLT']]
+    SFLUX    = ds[info.var_names['SFLUX']]
+    oceSPtnd = ds[info.var_names['oceSPtnd']]
+    HFacC    = ds[info.var_names['HFacC']]
+    HFacW    = ds[info.var_names['HFacW']]
+    HFacS    = ds[info.var_names['HFacS']]
+    drF      = ds[info.var_names['drF']]
+    rA       = ds[info.var_names['rA']]
+    dt      = ds[info.var_names['dt']]
+    
+    # Parameters
+    rho0 = info.parameters['rho0']
+    
+    # Compute useful grid-factor variables
+    HFacC_Zl  = info.grid.interp(HFacC,'Z', boundary='fill', fill_value=0, to='right')
+    dzMat   = drF * HFacC
+    CellVol = rA  * dzMat
+    
+    # Total tendency
+    z_star_scale = (1+Eta/Depth)
+    tendS = info.grid.diff((S*z_star_scale).where(HFacC!=0),'time')/dt
+    
+    # Horizontal convergence
+    adv_hConvS = -(info.grid.diff(ADVx_SLT.where(HFacW!=0),'X') + 
+                   info.grid.diff(ADVy_SLT.where(HFacS!=0),'Y'))/CellVol
+    
+    # Vertical convergence
+    for i in range(3):
+        if   i==0: var_in = ADVr_SLT
+        elif i==1: var_in = DFrI_SLT
+        elif i==2: var_in = KPPg_SLT
+
+        var_out = var_in.where(HFacC_Zl!=0).diff('Zl')
+        var_out = var_out.drop('Zl').rename({'Zl':'Z'}).assign_coords(Z=ds['Z'].isel(Z=slice(None,-1)))
+        tmp     = _xr.DataArray(_np.zeros(var_out.isel(Z=-1).shape),
+                                  coords=var_out.isel(Z=-1).coords,
+                                  dims=var_out.isel(Z=-1).dims)
+        tmp = tmp.assign_coords(Z=ds['Z'].isel(Z=-1))
+        var_out = _xr.concat([var_out, tmp], 'Z')
+        var_out = var_out.where(var_out['Z']!=var_out['Z'].isel(Z=-1))
+        var_out = var_out/CellVol
+
+        if   i==0: adv_vConvS = var_out
+        elif i==1: dif_vConvS = var_out 
+        elif i==2: kpp_vConvS = var_out 
+    
+    # Surface flux
+    forcS = oceSPtnd
+    if ds['Zp1'].isel(Zp1=0)==0:
+        forcS_surf = (SFLUX + forcS.isel(Z=0)).expand_dims('Z')
+        forcS_bott = forcS.isel(Z=slice(1,None))
+        forcS = _xr.concat([forcS_surf, forcS_bott],dim='Z')
+    forcS = forcS /(dzMat*rho0)
+    
+    
+    # Create DataArrays
+    tendS.attrs['units']     = 'psu/s'
+    tendS.attrs['long_name'] = 'Salt total tendency'
+    tendS.attrs['history']   = 'Computed offline by OceanSpy'
+    
+    adv_hConvS.attrs['units']     = 'psu/s'
+    adv_hConvS.attrs['long_name'] = 'Salt horizontal advective convergence'
+    adv_hConvS.attrs['history']   = 'Computed offline by OceanSpy'
+    
+    adv_vConvS.attrs['units']     = 'psu/s'
+    adv_vConvS.attrs['long_name'] = 'Salt vertical advective convergence'
+    adv_vConvS.attrs['history']   = 'Computed offline by OceanSpy'
+    
+    dif_vConvS.attrs['units']     = 'psu/s'
+    dif_vConvS.attrs['long_name'] = 'Salt vertical diffusive convergence'
+    dif_vConvS.attrs['history']   = 'Computed offline by OceanSpy'
+    
+    kpp_vConvS.attrs['units']     = 'psu/s'
+    kpp_vConvS.attrs['long_name'] = 'Salt vertical kpp convergence'
+    kpp_vConvS.attrs['history']   = 'Computed offline by OceanSpy'
+    
+    forcS.attrs['units']     = 'psu/s'
+    forcS.attrs['long_name'] = 'Salt surface forcing'
+    forcS.attrs['history']   = 'Computed offline by OceanSpy'
+    
+    # Add to dataset
+    ds['tendS']      = tendS
+    ds['adv_hConvS'] = adv_hConvS
+    ds['adv_vConvS'] = adv_vConvS
+    ds['dif_vConvS'] = dif_vConvS
+    ds['kpp_vConvS'] = kpp_vConvS
+    ds['forcS']      = forcS
+    
+    # Update var_names
+    info.var_names['tendS']      = 'tendS'
+    info.var_names['adv_hConvS'] = 'adv_hConvS'
+    info.var_names['adv_vConvS'] = 'adv_vConvS'
+    info.var_names['dif_vConvS'] = 'dif_vConvS'
+    info.var_names['kpp_vConvS'] = 'kpp_vConvS'
+    info.var_names['forcS']      = 'forcS'
+    
+    return _utils.reorder_ds(ds), info
 
 
+def transport(ds, info,
+              deep_copy = False):
+    """
+    Compute volume flux through a mooring array section (in/outflow), and add to dataset.
+    If the array is closed, transport in the first cell is not computed.
+    Otherwise, transport in both the first and last cells is not computed.
+    Transport can be computed following two paths (ext and int side), so 'path'=[0,1] dimension is added.
+    'zonal_dir_tran' and 'merid_dir_tran' indicate the direction of positive transport along the path.
+    For example, merid_dir_tran=1 and zonal_dir_tran=-1 means positive transport towards NW.
+    
+    Parameters
+    ----------
+    ds: xarray.Dataset
+    info: oceanspy.open_dataset._info
+    deep_copy: bool
+        If True, deep copy ds and infod
+    
+    Returns
+    -------
+    ds: xarray.Dataset 
+    info: oceanspy.open_dataset._info
+    """    
+    
+    # Deep copy
+    if deep_copy: ds, info = _utils.deep_copy(ds, info)
+    
+    # Add missing variables
+    varList  = ['Xc', 'Yc', 'dyG', 'dxG', 'drF']
+    ds, info = _utils.compute_missing_variables(ds, info, varList)
+    
+    # Message
+    print('Computing transport')
+    
+    # Variables
+    X    = ds[info.var_names['Xc']]
+    Y    = ds[info.var_names['Yc']]
+    dxG  = ds[info.var_names['dxG']]
+    dyG  = ds[info.var_names['dyG']]
+    drF  = ds[info.var_names['drF']]
+    cell = ds[info.var_names['cell']]
+    
+    # Check if mass weighted variables are available, otherwise compute
+    try:
+        varList = ['UVELMASS', 'VVELMASS']
+        ds, info = _utils.compute_missing_variables(ds, info, varList)
+        Umass = ds[info.var_names['UVELMASS']]; 
+        Vmass = ds[info.var_names['VVELMASS']];
+    except:
+        varList = ['U', 'V', 'HFacW', 'HFacS']
+        ds, info = _utils.compute_missing_variables(ds, info, varList)
+        U     = ds[info.var_names['U']]
+        V     = ds[info.var_names['V']]
+        HFacW = ds[info.var_names['HFacW']]
+        HFacS = ds[info.var_names['HFacS']]
+        Umass = U*HFacW; 
+        Vmass = V*HFacS;
+    
+    # Extract bfill-ffill values: m^2/s
+    U = Umass * ds['dyG'] 
+    V = Vmass * ds['dxG'] 
+    Ub=U.sel(Xu='Xb'); Uf=U.sel(Xu='Xf')
+    Vb=V.sel(Yv='Yb'); Vf=V.sel(Yv='Yf')
+    
+    # Initialize direction
+    Uf_dir = _np.zeros((len(X),2)); Ub_dir = _np.zeros((len(X),2))
+    Vf_dir = _np.zeros((len(Y),2)); Vb_dir = _np.zeros((len(Y),2))
+    
+    # Steps
+    diffX = _np.diff(X); diffY = _np.diff(Y)
+    
+    # Closed array?
+    if X[0]==X[-1] and Y[0]==Y[-1]:
+        closed = True
+        diffX  = _np.append(diffX,diffX[0])
+        diffY  = _np.append(diffY,diffY[0])
+    else: closed = False
+        
+    # Loop
+    Usign = 1; Vsign = 1
+    keepXf = False; keepYf = False
+    for i in range(len(diffX)-1):
+        if diffY[i]==0 and diffY[i+1]==0:   # Zonal
+            Vb_dir[i+1,:]=Vsign; Vf_dir[i+1,:]=Vsign
+        elif diffX[i]==0 and diffX[i+1]==0: # Meridional
+            Ub_dir[i+1,:]=Usign; Uf_dir[i+1,:]=Usign
+            
+        # Corners
+        elif (diffY[i]<0  and diffX[i+1]>0):  # |_
+            Vsign=Usign; keepYf=keepXf
+            Uf_dir[i+1,:]=Usign; Vf_dir[i+1,:]=Vsign  
+        elif (diffY[i+1]>0  and diffX[i]<0):  
+            Usign=Vsign; keepXf=keepYf
+            Uf_dir[i+1,:]=Usign; Vf_dir[i+1,:]=Vsign 
+
+        elif (diffY[i]>0  and diffX[i+1]>0): # |‾
+            Vsign=-Usign; keepYf=not keepXf
+            Uf_dir[i+1,:]=Usign; Vb_dir[i+1,:]=Vsign
+        elif (diffY[i+1]<0  and diffX[i]<0):
+            Usign=-Vsign; keepXf=not keepYf
+            Uf_dir[i+1,:]=Usign; Vb_dir[i+1,:]=Vsign    
+
+        elif (diffX[i]>0  and diffY[i+1]<0): # ‾|  
+            Usign=Vsign; keepXf=keepYf
+            Vb_dir[i+1,:]=Vsign; Ub_dir[i+1,:]=Usign
+        elif (diffX[i+1]<0  and diffY[i]>0):  
+            Vsign=Usign; keepYf=keepXf
+            Vb_dir[i+1,:]=Vsign; Ub_dir[i+1,:]=Usign
+
+        elif (diffX[i]>0  and diffY[i+1]>0): # _| 
+            Usign=-Vsign; keepXf=not keepYf
+            Vf_dir[i+1,:]= Vsign; Ub_dir[i+1,:]=Usign
+        elif (diffX[i+1]<0  and diffY[i]<0):  
+            Vsign=-Usign; keepYf=not keepXf
+            Vf_dir[i+1,:]= Vsign; Ub_dir[i+1,:]=Usign 
+    
+        if keepXf: Ub_dir[i+1,0]=0; Uf_dir[i+1,1]=0
+        else:      Uf_dir[i+1,0]=0; Ub_dir[i+1,1]=0
+        if keepYf: Vb_dir[i+1,0]=0; Vf_dir[i+1,1]=0
+        else:      Vf_dir[i+1,0]=0; Vb_dir[i+1,1]=0
+        
+    # Create direction DataArrays. 
+    # Add a switch to return this? Useful to debug and/or plot velocities.
+    Ub_dir  = _xr.DataArray(Ub_dir,  coords={'cell': cell, 'path':[0,1]}, dims=('cell', 'path'))
+    Uf_dir  = _xr.DataArray(Uf_dir,  coords={'cell': cell, 'path':[0,1]}, dims=('cell', 'path'))
+    Vb_dir  = _xr.DataArray(Vb_dir,  coords={'cell': cell, 'path':[0,1]}, dims=('cell', 'path'))
+    Vf_dir  = _xr.DataArray(Vf_dir,  coords={'cell': cell, 'path':[0,1]}, dims=('cell', 'path'))
+    
+    # Compute transport
+    transport = (Ub*Ub_dir+Uf*Uf_dir+Vb*Vb_dir+Vf*Vf_dir)*drF*1.E-6
+    if closed: transport = transport.where(ds['cell']!=ds['cell'].isel(cell=0))
+    else:      transport = transport.where(ds['cell']==ds['cell'].isel(cell=slice(1,-1)))
+    transport.attrs.update({'long_name': 'Volume flux', 
+                            'units': 'Sv',
+                            'history': 'Computed offline by OceanSpy'}) 
+    
+    # Return directions
+    zonal_dir_tran = Ub_dir+Uf_dir
+    zonal_dir_tran.attrs.update({'long_name': 'Zonal direction of the transport', 
+                                 'units': '0: No zonal contribution; 1:Eastward; -1:Westward',
+                                 'history': 'Computed offline by OceanSpy'}) 
+    merid_dir_tran = Vb_dir+Vf_dir
+    merid_dir_tran.attrs.update({'long_name': 'Meridional direction of the transport', 
+                                 'units': '0: No meridional contribution; 1:Northward; -1:Southward',
+                                 'history': 'Computed offline by OceanSpy'}) 
+    
+    # Add to dataset
+    ds['transport'] = transport
+    ds['zonal_dir_tran'] = zonal_dir_tran
+    ds['merid_dir_tran'] = merid_dir_tran
+    
+    # Update var_names
+    info.var_names['transport']      = 'transport'
+    info.var_names['zonal_dir_tran'] = 'zonal_dir_tran'
+    info.var_names['merid_dir_tran'] = 'merid_dir_tran'
+    
+    return _utils.reorder_ds(ds), info
+
+    
+
+    
+    
