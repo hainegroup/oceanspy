@@ -6,6 +6,12 @@ import xarray as _xr
 import numpy as _np
 import xgcm as _xgcm
 
+import matplotlib.pyplot as plt
+import ipywidgets as ipyw
+from matplotlib import animation
+from IPython.display import HTML, display
+
+
 def interactive(dsORda,
                 info,
                 hvplot_kwargs = {}):
@@ -108,3 +114,82 @@ def interactive(dsORda,
         
     return interact(plot_da,varname=[var for var in ds.variables if 
                                      (var not in ds.dims and var not in ds.coords)])
+
+def _creat_animation_mpl(plot_func, ds, info, time_idx_min_max):
+    
+    time_idx_range = range(time_idx_min_max[0], time_idx_min_max[1] + 1)
+    n_frames = len(time_idx_range)
+        
+    fig, ax = plt.subplots()
+
+    def init():
+        pass
+
+    def animate(i):
+        plot_func(ds, info, fig, time_idx_range[i])
+
+    # call the animator. blit=True means only re-draw the parts that have changed.
+    anim = animation.FuncAnimation(fig, animate, init_func=init,
+                                   frames=n_frames, interval=200, blit=False)
+ 
+
+    display(HTML(anim.to_html5_video()))
+
+def interactive_animate(ds, info, plot_func):
+    
+    """
+    GUI for creating animation using matplotlib
+
+    Parameters
+    ----------
+    ds: xarray.Dataset
+    info: oceanspy.open_dataset._info
+    plot_func: function
+        user provided function that generates matplotlib plots
+        the plot_func is called with ds, info, matplotlib figure
+        and time-index as its arguments
+
+    Returns
+    -------
+    GUI
+    """
+
+    last_time_step = len(ds['time']) - 1
+    
+    
+    def get_params(time_idx_min_max):
+        _creat_animation_mpl(plot_func, ds, info, time_idx_min_max)
+
+    # Creating widget objects
+    int_slider = ipyw.widgets.IntRangeSlider(
+            value=[0, last_time_step],
+            min=0,
+            max=last_time_step,
+            step=1,
+            description='Time Range:',
+            disabled=False,
+            continuous_update=False,
+            orientation='horizontal',
+            readout=True,
+            readout_format='d')
+    begin_time_label = ipyw.widgets.Label(value=str(ds['time'].isel(time=int_slider.min).values))
+    end_time_label = ipyw.widgets.Label(value=str(ds['time'].isel(time=int_slider.max).values))
+    
+    # Adding callback for slider(observe:does the linking btw two widgets)
+    #https://ipywidgets.readthedocs.io/en/stable/examples/Widget%20Events.html
+    def update_labels(change):
+        newRange = change['new']
+        begin_time_label.value = str(ds['time'].isel(time=newRange[0]).values)
+        end_time_label.value = str(ds['time'].isel(time=newRange[1]).values)
+
+    int_slider.observe(update_labels, names='value')
+        
+    # Show interactive parts (slider)
+    ipyw.interact_manual(
+        get_params,
+        time_idx_min_max=int_slider
+    )
+    
+    # Show labels
+    display(begin_time_label, end_time_label)
+
