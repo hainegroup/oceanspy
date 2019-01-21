@@ -111,7 +111,7 @@ def interactive(dsORda,
     return interact(plot_da,varname=[var for var in ds.variables if 
                                      (var not in ds.dims and var not in ds.coords)])
 
-def _creat_animation_mpl(plot_func, ds, info, time_idx_min_max):
+def _create_animation_mpl(plot_func, ds, info, time_idx_min_max):
     
     import matplotlib.pyplot as plt
     from matplotlib import animation
@@ -126,7 +126,10 @@ def _creat_animation_mpl(plot_func, ds, info, time_idx_min_max):
         pass
 
     def animate(i):
-        plot_func(ds, info, fig, time_idx_range[i])
+        fig.clear()
+        # This creates axis for fig
+        ax = fig.subplots()
+        plot_func(ds, info, ax, time_idx_range[i])
 
     # call the animator. blit=True means only re-draw the parts that have changed.
     anim = animation.FuncAnimation(fig, animate, init_func=init,
@@ -134,6 +137,8 @@ def _creat_animation_mpl(plot_func, ds, info, time_idx_min_max):
  
 
     display(HTML(anim.to_html5_video()))
+
+    return anim
 
 def interactive_animate(ds, info, plot_func):
     
@@ -161,7 +166,7 @@ def interactive_animate(ds, info, plot_func):
     
     
     def get_params(time_idx_min_max):
-        _creat_animation_mpl(plot_func, ds, info, time_idx_min_max)
+        _create_animation_mpl(plot_func, ds, info, time_idx_min_max)
 
     # Creating widget objects
     int_slider = ipyw.widgets.IntRangeSlider(
@@ -195,3 +200,32 @@ def interactive_animate(ds, info, plot_func):
     # Show labels
     display(begin_time_label, end_time_label)
 
+
+def animate_batch(ds, info, plot_func, time_idx_min, time_idx_max):
+
+    """
+    Function to generate animation given a plot function,
+    without any GUI interaction.
+
+    Parameters
+    ----------
+    ds: xarray.Dataset
+    info: oceanspy.open_dataset._info
+    plot_func: function
+        user provided function that generates matplotlib plots
+        the plot_func is called with ds, info, matplotlib figure
+        and time-index as its arguments
+    time_idx_min: int
+        minimum index of time in ds to create an animation from
+    time_idx_max: int
+        maximum index of time in ds to create an animation from
+
+    Returns
+    -------
+    anim: matplotlib.Animation
+    """
+    
+    time_idx_min_max = [time_idx_min, time_idx_max]
+    anim = _create_animation_mpl(plot_func, ds, info, time_idx_min_max)
+    
+    return anim
