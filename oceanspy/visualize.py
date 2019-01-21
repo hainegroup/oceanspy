@@ -6,10 +6,6 @@ import xarray as _xr
 import numpy as _np
 import xgcm as _xgcm
 
-import matplotlib.pyplot as plt
-import ipywidgets as ipyw
-from matplotlib import animation
-from IPython.display import HTML, display
 
 
 def interactive(dsORda,
@@ -117,6 +113,10 @@ def interactive(dsORda,
 
 def _creat_animation_mpl(plot_func, ds, info, time_idx_min_max):
     
+    import matplotlib.pyplot as plt
+    from matplotlib import animation
+    from IPython.display import HTML, display
+
     time_idx_range = range(time_idx_min_max[0], time_idx_min_max[1] + 1)
     n_frames = len(time_idx_range)
         
@@ -154,6 +154,9 @@ def interactive_animate(ds, info, plot_func):
     GUI
     """
 
+    import ipywidgets as ipyw
+    from IPython.display import display
+
     last_time_step = len(ds['time']) - 1
     
     
@@ -176,7 +179,6 @@ def interactive_animate(ds, info, plot_func):
     end_time_label = ipyw.widgets.Label(value=str(ds['time'].isel(time=int_slider.max).values))
     
     # Adding callback for slider(observe:does the linking btw two widgets)
-    #https://ipywidgets.readthedocs.io/en/stable/examples/Widget%20Events.html
     def update_labels(change):
         newRange = change['new']
         begin_time_label.value = str(ds['time'].isel(time=newRange[0]).values)
