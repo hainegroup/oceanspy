@@ -109,7 +109,7 @@ def interactive(dsORda,
     return interact(plot_da,varname=[var for var in ds.variables if 
                                      (var not in ds.dims and var not in ds.coords)])
 
-def TS_diagram(ds_user,info_user):
+def TS_diagram(ds_user,info_user,time_user):
     
     # import modules and libraries
     import oceanspy as _ospy
@@ -119,11 +119,15 @@ def TS_diagram(ds_user,info_user):
     temp=ds_user[info_user.var_names["Temp"]]
     salinity=ds_user[info_user.var_names["S"]]
     
+    # Check time string
+    if isinstance(time_user,str)==False:
+        raise ValueError('Time argument needs to a string')
+    
     # Compute the density grid
-    salinity_max=_np.nanmax(salinity[0,:,:,:])
-    temp_max=_np.nanmax(temp[0,:,:,:])
-    salinity_min=_np.nanmin(salinity[0,:,:,:])
-    temp_min=_np.nanmin(temp[0,:,:,:])
+    salinity_max=_np.nanmax(salinity.sel(time=time_user))
+    temp_max=_np.nanmax(temp.sel(time=time_user))
+    salinity_min=_np.nanmin(salinity.sel(time=time_user))
+    temp_min=_np.nanmin(temp.sel(time=time_user))
     
     # provide option in kwargs for grid spacing, else take default of 10
     
@@ -149,7 +153,7 @@ def TS_diagram(ds_user,info_user):
     fig,ax=_plt.subplots()
     CS = ax.contour(sal_grid_vals,temp_grid_vals,density_contour['Sigma0'],linestyles='dashed',cmap='viridis')
     ax.clabel(CS, inline=1, fontsize=10,colors='red')
-    _plt.scatter(salinity[0,:,:,:].stack(scat_coord=('Z','X','Y')), temp[0,:,:,:].stack(scat_coord=('Z','X','Y')),s=1)
+    _plt.scatter(salinity.sel(time=time_user).stack(scat_coord=('Z','X','Y')), temp.sel(time=time_user).stack(scat_coord=('Z','X','Y')),s=1)
     _plt.xlabel('Salinity (psu)')
     _plt.ylabel('Potential Temperature (${^\circ}$C)')
     _plt.show()
