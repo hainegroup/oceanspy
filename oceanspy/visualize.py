@@ -108,3 +108,49 @@ def interactive(dsORda,
         
     return interact(plot_da,varname=[var for var in ds.variables if 
                                      (var not in ds.dims and var not in ds.coords)])
+
+def TS_diagram(ds_user,info_user):
+    
+    # import modules and libraries
+    import oceanspy as _ospy
+    import matplotlib.pyplot as _plt
+    
+    # Get the required variables for the T-S diagram
+    temp=ds_user[info_user.var_names["Temp"]]
+    salinity=ds_user[info_user.var_names["S"]]
+    
+    # Compute the density grid
+    salinity_max=_np.nanmax(salinity[0,:,:,:])
+    temp_max=_np.nanmax(temp[0,:,:,:])
+    salinity_min=_np.nanmin(salinity[0,:,:,:])
+    temp_min=_np.nanmin(temp[0,:,:,:])
+    
+    # provide option in kwargs for grid spacing, else take default of 10
+    
+    grid_spacing_sal=(salinity_max-salinity_min)*0.1
+    grid_spacing_temp=(temp_max-temp_min)*0.1
+    
+    sal_grid_vals=_np.linspace(salinity_min-grid_spacing_sal,salinity_max+grid_spacing_sal,10)
+    temp_grid_vals=_np.linspace(temp_min-grid_spacing_temp,temp_max+grid_spacing_temp,10)
+    
+    sal_grid_vals_mesh,temp_grid_vals_mesh=_np.meshgrid(sal_grid_vals,temp_grid_vals)
+    
+    # Creating xarray dataset from salinity and temperature meshes to pass ospy.compute for calculating density
+    ds_sigma=_xr.Dataset({'Temp' : (['x','y'],temp_grid_vals_mesh), 'S' : (['x','y'],sal_grid_vals_mesh)},
+                   coords={'X': (['x', 'y'], sal_grid_vals_mesh),'Y': (['x', 'y'], temp_grid_vals_mesh)})
+    print(ds_sigma)
+    # Change info_sigma based on user input
+    info_sigma=info_user    
+   
+    # Calling ospy.compute for density computation
+    density_contour,info_contour=_ospy.compute.Sigma0(ds_sigma, info_sigma)
+    
+    # Plotting the T_S scatter
+    fig,ax=_plt.subplots()
+    CS = ax.contour(sal_grid_vals,temp_grid_vals,density_contour['Sigma0'],linestyles='dashed',cmap='viridis')
+    ax.clabel(CS, inline=1, fontsize=10,colors='red')
+    _plt.scatter(salinity[0,:,:,:].stack(scat_coord=('Z','X','Y')), temp[0,:,:,:].stack(scat_coord=('Z','X','Y')),s=1)
+    _plt.xlabel('Salinity (psu)')
+    _plt.ylabel('Potential Temperature (${^\circ}$C)')
+    _plt.show()
+    return 
