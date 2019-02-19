@@ -18,7 +18,7 @@ def from_netcdf(path):
     
     Returns
     -------
-    od: oceanspy.OceanDataset
+    od: OceanDataset
     """
     
     # Check parameters
@@ -60,11 +60,10 @@ def EGshelfIIseas2km_ERAI(daily     = False,
 
     Returns
     -------
-    od: oceanspy.OceanDataset
+    od: OceanDataset
         
     References
     ----------
-    .. rubric:: 
     .. [AHPM17] Almansi, M., T.W. Haine, R.S. Pickart, M.G. Magaldi, R. Gelderloos, and D. Mastropole, 2017: High-Frequency Variability in the Circulation and Hydrography of the Denmark Strait Overflow from a High-Resolution Numerical Model. J. Phys. Oceanogr., 47, 2999–3013, https://doi.org/10.1175/JPO-D-17-0129.1 
     """
 
@@ -119,8 +118,7 @@ def EGshelfIIseas2km_ERAI(daily     = False,
                    'X'    : {'X': None, 'Xp1': 0.5},
                    'Z'    : {'Z': None, 'Zp1': 0.5, 'Zu': -0.5, 'Zl': 0.5},
                    'time' : {'time': -0.5}}
-    parameters = {'rSphere': 6.371E3}
-    od = od.set_grid_coords(grid_coords = grid_coords, add_midp=True).set_parameters(parameters)
+    od = od.set_grid_coords(grid_coords = grid_coords, add_midp=True)
     
     return od
 
@@ -151,11 +149,10 @@ def EGshelfIIseas2km_ASR(cropped   = False,
 
     Returns
     -------
-    od: oceanspy.OceanDataset
+    od: OceanDataset
       
     References
     ----------
-    .. rubric::
     .. [AHPM17] Almansi, M., T.W. Haine, R.S. Pickart, M.G. Magaldi, R. Gelderloos, and D. Mastropole, 2017: High-Frequency Variability in the Circulation and Hydrography of the Denmark Strait Overflow from a High-Resolution Numerical Model. J. Phys. Oceanogr., 47, 2999–3013, https://doi.org/10.1175/JPO-D-17-0129.1
     """
 
@@ -202,6 +199,8 @@ def EGshelfIIseas2km_ASR(cropped   = False,
         ds = ds.sel({dim:slice(cropset[dim].isel({dim: 0}).values, cropset[dim].isel({dim: -1}).values) for dim in cropset.dims})
         ds = ds.isel(Zp1=slice(len(cropset['Z'])+1), Zu=slice(len(cropset['Z'])))
         ds = _xr.merge([ds, cropset])
+
+        
         
     # Add sign
     for dim in ['Z', 'Zp1', 'Zu', 'Zl']: ds[dim].attrs.update({'positive': 'up'}) 
@@ -211,8 +210,11 @@ def EGshelfIIseas2km_ASR(cropped   = False,
     
     # Add attribute (snapshot vs average)
     for var in [var for var in ds.variables if ('time' in ds[var].coords and var!='time')]:
-        if cropped and var in cropset.variables: Time = 'average'
-        else:                                    Time = 'snapshot'
+        if cropped and var in cropset.variables: 
+            ds[var] = ds[var].drop('time').isel(time=slice(1, None)).rename({'time': 'time_midp'})
+            Time = 'average'
+        else:      
+            Time = 'snapshot'
         ds[var].attrs.update({'original_output': Time}) 
 
     # Initialize OceanDataset
@@ -220,10 +222,9 @@ def EGshelfIIseas2km_ASR(cropped   = False,
     od = od.set_coords(fillna=True, coords1Dfrom2D=True)
     grid_coords = {'Y'    : {'Y': None, 'Yp1': 0.5},
                    'X'    : {'X': None, 'Xp1': 0.5},
-                   'Z'    : {'Z': None, 'Zp1': 0.5, 'Zu': -0.5, 'Zl': 0.5},
+                   'Z'    : {'Z': None, 'Zp1': 0.5, 'Zu': 0.5, 'Zl': -0.5},
                    'time' : {'time': -0.5}}
-    parameters = {'rSphere': 6.371E3}
-    od = od.set_grid_coords(grid_coords = grid_coords, add_midp=True).set_parameters(parameters)   
+    od = od.set_grid_coords(grid_coords = grid_coords, add_midp=True)  
         
     return od        
 
@@ -247,7 +248,7 @@ def exp_Arctic_Control(gridpath  = '/home/idies/workspace/OceanCirculation/exp_A
         
     Returns
     -------
-    od: oceanspy.OceanDataset
+    od: OceanDataset
     """
     
     # Check input
@@ -291,10 +292,9 @@ def exp_Arctic_Control(gridpath  = '/home/idies/workspace/OceanCirculation/exp_A
     od = od.set_coords(coordsUVfromG=True)
     grid_coords = {'Y'    : {'Y': None, 'Yp1': 0.5},
                    'X'    : {'X': None, 'Xp1': 0.5},
-                   'Z'    : {'Z': None, 'Zp1': 0.5, 'Zu': -0.5, 'Zl': 0.5},
+                   'Z'    : {'Z': None, 'Zp1': 0.5, 'Zu': 0.5, 'Zl': -0.5},
                    'time' : {'time': -0.5}}
-    parameters = {'rSphere': 6.371E3}
-    od = od.set_grid_coords(grid_coords = grid_coords, add_midp=True).set_parameters(parameters)
+    od = od.set_grid_coords(grid_coords = grid_coords, add_midp=True)
     
     return od
     
@@ -322,17 +322,16 @@ def EGshelfSJsec500m(Hydrostatic = True,
         
     Returns
     -------
-    od: oceanspy.OceanDataset
+    od: OceanDataset
         
     References
     ----------
-    .. rubric:: 
     .. [MaHa15] Marcello G. Magaldi, Thomas W.N. Haine, Hydrostatic and non-hydrostatic simulations of dense waters cascading off a shelf: The East Greenland case, Deep Sea Research Part I: Oceanographic Research Papers, Volume 96, 2015, Pages 89-104, ISSN 0967-0637, https://doi.org/10.1016/j.dsr.2014.10.008.
     """
     
     # Check input
     if not isinstance(Hydrostatic, bool): raise TypeError('`Hydrostatic` must be bool')
-    if not isinstance(ExtForcing, bool):  raise TypeError('`ExtForcing` must be bool')
+    if not isinstance(sixH, bool):        raise TypeError('`sixH` must be bool')
     if not isinstance(resultpath, str):   raise TypeError('`resultpath` must be str')
     
     # Import modules
@@ -394,14 +393,10 @@ def EGshelfSJsec500m(Hydrostatic = True,
         ds_i0[var] = _xr.zeros_like(ds[var].isel(time=0).expand_dims('time'))
         ds_i0[var] = ds_i0[var].where(ds_i0['time']!=ds_i0['time'])
     ds = _xr.concat([ds_i0, ds], 'time')
-
+    
     # Vertical dimensions
     for dim in ['Z', 'Zp1', 'Zu', 'Zl']: ds[dim].attrs.update({'positive': 'up'})
     
-    # Rename unmatching variables, and create time_midp 
-    # (I could have used aliases instead ...)
-    ds = ds.rename({}) 
-        
     # Add attribute (snapshot vs average)
     for var in [var for var in ds.variables if ('time' in ds[var].coords and var!='time')]:
         if var=='MXLDEPTH': Time = 'average'
@@ -412,16 +407,20 @@ def EGshelfSJsec500m(Hydrostatic = True,
     ds = ds.rename({'XC': 'X', 'YC': 'Y', 'XG': 'Xp1', 'YG': 'Yp1',
                     'T': 'Temp', 'hFacC': 'HFacC', 'hFacW': 'HFacW', 'hFacS': 'HFacS'})
     
+    # TODO: quick fix to make it work with binary. 
+    #       Why are binary stored on same C and G dimensions?
+    ds = ds.isel(X = slice(1,None), Y=slice(1, None))
+    
     # Initialize OceanDataset
     od = _OceanDataset(ds).set_name(name).set_description(description)
     od = od.set_coords(coords2Dfrom1D=True)
     grid_coords = {'Y'    : {'Y': None, 'Yp1': 0.5},
                    'X'    : {'X': None, 'Xp1': 0.5},
-                   'Z'    : {'Z': None, 'Zp1': 0.5, 'Zu': -0.5, 'Zl': 0.5},
+                   'Z'    : {'Z': None, 'Zp1': 0.5, 'Zu': 0.5, 'Zl': -0.5},
                    'time' : {'time': -0.5}}
-    parameters = {'rSphere': 6.371E3}
-    od = od.set_grid_coords(grid_coords = grid_coords, add_midp=True).set_parameters(parameters)
-    
+    od = od.set_grid_coords(grid_coords = grid_coords, add_midp=True)
+    if Hydrostatic is False:
+        od = od.set_parameters({'eps_nh': 1})
     return od
 
 

@@ -34,7 +34,7 @@ def cutout(od,
 
     Parameters
     ----------
-    od: oceanspy.OceanDataset
+    od: OceanDataset
         oceandataset to subsample
     varList: 1D array_like, str, or None
         List of variables (strings). 
@@ -65,13 +65,13 @@ def cutout(od,
 
     Returns
     -------
-    od: oceanspy.OceanDataset
+    od: OceanDataset
         Subsampled oceandataset
     """
     
     # Convert variables to numpy arrays and make some check
     if not isinstance(od, _ospy.OceanDataset):
-        raise TypeError('`od` must be oceanspy.OceanDataset')
+        raise TypeError('`od` must be OceanDataset')
     
     if varList is not None:
         varList = _np.asarray(varList, dtype='str')
@@ -404,18 +404,18 @@ def mooring_array(od, Ymoor, Xmoor,
     
     Parameters
     ----------
-    od: oceanspy.OceanDataset
+    od: OceanDataset
         od that will be subsampled
     Ymoor: 1D array_like, scalar
         Y coordinates of moorings. 
     Xmoor: 1D array_like, scalar
         X coordinates of moorings.
     **kwargs: 
-        Keyword arguments for oceanspy.subsample.cutout
+        Keyword arguments for subsample.cutout
 
     Returns
     -------
-    od: oceanspy.OceanDataset
+    od: OceanDataset
         Subsampled oceandataset
     """       
     
@@ -645,7 +645,7 @@ def survey_stations(od, Ysurv, Xsurv, delta,
     
     Parameters
     ----------
-    od: oceanspy.OceanDataset
+    od: OceanDataset
         od that will be subsampled
     Ysurv: 1D array_like
         Y coordinates of stations. 
@@ -659,11 +659,11 @@ def survey_stations(od, Ysurv, Xsurv, delta,
         Defaul method: `bilinear`.  
         Available methods: {‘bilinear’, ‘conservative’, ‘patch’, ‘nearest_s2d’, ‘nearest_d2s’}
     **kwargs: 
-        Keyword arguments for oceanspy.subsample.cutout
+        Keyword arguments for subsample.cutout
 
     Returns
     -------
-    od: oceanspy.OceanDataset
+    od: OceanDataset
         Subsampled oceandataset
         
     References
@@ -801,7 +801,7 @@ def particle_properties(od, times, Ypart, Xpart, Zpart, **kwargs):
     
     Parameters
     ----------
-    od: oceanspy.OceanDataset
+    od: OceanDataset
         od that will be subsampled.
     times: 1D array_like or scalar
         time of particles.
@@ -812,11 +812,11 @@ def particle_properties(od, times, Ypart, Xpart, Zpart, **kwargs):
     Zpart: 2D array_like or 1D array_like if times is scalar
         Z of particles.
     **kwargs: 
-        Keyword arguments for oceanspy.subsample.cutout
+        Keyword arguments for subsample.cutout
 
     Returns
     -------
-    od: oceanspy.OceanDataset
+    od: OceanDataset
         Subsampled oceandataset
     """
     
