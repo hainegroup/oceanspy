@@ -1,9 +1,13 @@
-import xarray as _xr
-import copy   as _copy
-import xgcm   as _xgcm
-import numpy  as _np
+import xarray   as _xr
+import copy     as _copy
+import xgcm     as _xgcm
+import numpy    as _np
+import warnings as _warnings
 from . import subsample as _subsample
-from . import utils as _utils
+from . import compute   as _compute
+from . import utils     as _utils
+
+# TODO: add parameters check in set_parameters
 
 class OceanDataset:
     """
@@ -355,9 +359,17 @@ class OceanDataset:
         """
         A dictionary defining model parameters that are used by OceanSpy.
         {'parameter_name': parameter value}
+        If a parameter is not available, use default.
         """
         
+        from oceanspy import DEFAULT_PARAMETERS
         parameters = self._read_from_global_attr('parameters')
+        
+        if parameters is None:
+            parameters = DEFAULT_PARAMETERS
+        else:
+            parameters = {**DEFAULT_PARAMETERS, **parameters}
+        
         
         return parameters
     
@@ -369,7 +381,7 @@ class OceanDataset:
         
         raise AttributeError("Set new `parameters` using .set_parameters")
     
-    def set_parameters(self, parameters, overwrite=None):
+    def set_parameters(self, parameters):
         """
         Set model parameters used by OceanSpy.
         
@@ -377,10 +389,6 @@ class OceanDataset:
         ----------
         parameters: dict
             {'parameter_name': parameter_value}
-        overwrite: bool or None
-            If None, raise error if parameters has been previously set.
-            If True, overwrite previous parameters.  
-            If False, combine with previous parameters.
         """
         
         # Check parameters
@@ -390,7 +398,7 @@ class OceanDataset:
         # Set parameters
         self = self._store_as_global_attr(name      = 'parameters', 
                                           attr      = parameters,
-                                          overwrite = overwrite) 
+                                          overwrite = False) 
         
         return self
     
@@ -419,7 +427,7 @@ class OceanDataset:
         
         raise AttributeError("Set new `grid_coords` using .set_grid_coords")
     
-    def set_grid_coords(self, grid_coords, add_midp = False, overwrite=None):
+    def set_grid_coords(self, grid_coords, add_midp=False, overwrite=None):
         """
         Set grid coordinates used by xgcm.Grid.
         
@@ -564,7 +572,7 @@ class OceanDataset:
     # ===========
     # METHODS
     # ===========
-    def add_DataArray(self, da):
+    def add_DataArray(self, da, overwrite=None):
         """
         Add DataArray to the oceandataset
         
@@ -572,10 +580,27 @@ class OceanDataset:
         ----------
         da: xarray.DataArray
             xarray.DataArray to be added
+        overwrite: bool or None
+            If None, raise error if da already exists.
+            If True, overwrite existing da.  
+            If False, do not add existing da.
         """
         if not isinstance(da, _xr.DataArray):
             raise TypeError('`da` must be xarray.DataArray')
         
+        if not isinstance(overwrite, (bool, type(None))):
+            raise TypeError("`overwrite` must be bool or None")
+        
+        # Check if da exists
+        if da.name in self.dataset.variables:  
+            if overwrite is None:
+                raise ValueError("[{}] already exists: `overwrite` must be bool ".format(da.name))
+            elif overwrite is False:
+                _warnings.warn(("\n[{}] already exists:"
+                               "`da` will NOT be added to the oceandataset").format(da.name), stacklevel=2)
+                return self
+        
+        # Only add if overwrite True, or da not in the oceandataset
         attrs   = self.dataset.attrs
         dataset = _xr.merge([self.dataset, da])
         dataset.attrs = attrs
@@ -583,7 +608,7 @@ class OceanDataset:
         
         return self
         
-    def merge_Dataset(self, ds):
+    def merge_Dataset(self, ds, overwrite=None):
         """
         Merge Dataset to the oceandataset
         
@@ -591,12 +616,36 @@ class OceanDataset:
         ----------
         ds: xarray.Dataset
             xarray.Dataset to be merged
+        overwrite: bool or None
+            If None, raise error if any xarray.DataArray already exists.
+            If True, overwrite existing xarray.DataArray.  
+            If False, do not add existing xarray.DataArray.
         """
         if not isinstance(ds, _xr.Dataset):
             raise TypeError('`ds` must be xarray.Dataset')
         
-        attrs   = self.dataset.attrs
-        dataset = _xr.merge([self.dataset, ds])
+        if not isinstance(overwrite, (bool, type(None))):
+            raise TypeError("`overwrite` must be bool or None")
+                               
+        existing_da = [da for da in ds.variables if da in self.dataset.variables and da not in self.dataset.coords]          
+        if len(existing_da)!=0:
+            if overwrite is None:
+                raise ValueError(("{} already exist: "
+                                  "`overwrite` must be bool.").format(existing_da))
+            elif overwrite is False:
+                _warnings.warn(("\n{} already exist "
+                                "and will NOT be added to the oceandataset.").format(existing_da), stacklevel=2)
+                dataset = self.dataset
+                ds      = ds.drop(existing_da)
+            else:
+                _warnings.warn(("\n{} already exist "
+                                "and will be replaced.").format(existing_da), stacklevel=2)
+                dataset = self.dataset.drop(existing_da)
+        else:   dataset = self.dataset
+        
+        # Save attributes and merge dataset (raise error if dimension indexes are not matching)
+        attrs   = dataset.attrs
+        dataset = _xr.merge([dataset, ds]) 
         dataset.attrs = attrs
         self = OceanDataset(dataset)
         
@@ -846,14 +895,20 @@ class OceanDataset:
     # SHORTCUTS
     # ===========
     
+    # ------------
+    # Subsample
     def cutout(self, **kwargs):
         """
-        Shortcut for oceanspy.subsample.cutout
+        Shortcut for subsample.cutout
         
         Parameters
         ----------
         **kwargs: 
-            Arguments for oceanspy.subsample.cutout
+            Arguments for subsample.cutout
+            
+        See Also
+        --------
+        subsample.cutout
         """
         
         self = _subsample.cutout(od = self, **kwargs)
@@ -862,12 +917,16 @@ class OceanDataset:
     
     def mooring_array(self, **kwargs):
         """
-        Shortcut for oceanspy.subsample.mooring_array
+        Shortcut for subsample.mooring_array
         
         Parameters
         ----------
         **kwargs: 
-            Arguments for oceanspy.subsample.mooring_array
+            Arguments for subsample.mooring_array
+            
+        See Also
+        --------
+        subsample.mooring_array
         """
         
         self = _subsample.mooring_array(od = self, **kwargs)
@@ -876,12 +935,16 @@ class OceanDataset:
     
     def survey_stations(self, **kwargs):
         """
-        Shortcut for oceanspy.subsample.survey_stations
+        Shortcut for subsample.survey_stations
         
         Parameters
         ----------
         **kwargs: 
-            Arguments for oceanspy.subsample.survey_stations
+            Arguments for subsample.survey_stations
+            
+        See Also
+        --------
+        subsample.survey_stations
         """
         
         self = _subsample.survey_stations(od = self, **kwargs)
@@ -890,18 +953,468 @@ class OceanDataset:
     
     def particle_properties(self, **kwargs):
         """
-        Shortcut for oceanspy.subsample.particle_properties
+        Shortcut for subsample.particle_properties
         
         Parameters
         ----------
         **kwargs: 
-            Arguments for oceanspy.subsample.particle_properties
+            Arguments for subsample.particle_properties
+            
+        See Also
+        --------
+        subsample.particle_properties
         """
         
         self = _subsample.particle_properties(od = self, **kwargs)
         
         return self
 
+    
+    # ------------
+    # Compute
+
+    def merge_gradient(self, overwrite=None, **kwargs):
+        """
+        Shortcut for compute.gradient and OceanDataset.merge_Dataset.
+        
+        Parameters
+        ----------
+        overwrite: bool or None
+            If None, raise error if any xarray.DataArray already exists.  
+            If True, overwrite existing xarray.DataArray.    
+            If False, do not add existing xarray.DataArray.  
+        **kwargs: 
+            Keyword arguments for compute.gradient
+            
+        See Also
+        --------
+        compute.gradient
+        """
+        
+        self = self.merge_Dataset(_compute.gradient(self, **kwargs), overwrite)
+        
+        return self
+    
+    def merge_divergence(self, overwrite=None, **kwargs):
+        """
+        Shortcut for compute.divergence and OceanDataset.merge_Dataset.
+        
+        Parameters
+        ----------
+        overwrite: bool or None
+            If None, raise error if any xarray.DataArray already exists.  
+            If True, overwrite existing xarray.DataArray.    
+            If False, do not add existing xarray.DataArray.  
+        **kwargs: 
+            Keyword arguments for compute.divergence
+            
+        See Also
+        --------
+        compute.divergence
+        """
+        
+        self = self.merge_Dataset(_compute.divergence(self, **kwargs), overwrite)
+        
+        return self
+    
+    def merge_curl(self, overwrite=None, **kwargs):
+        """
+        Shortcut for compute.curl and OceanDataset.merge_Dataset.
+        
+        Parameters
+        ----------
+        overwrite: bool or None
+            If None, raise error if any xarray.DataArray already exists.  
+            If True, overwrite existing xarray.DataArray.    
+            If False, do not add existing xarray.DataArray.  
+        **kwargs: 
+            Keyword arguments for compute.curl
+            
+        See Also
+        --------
+        compute.curl
+        """
+        
+        self = self.merge_Dataset(_compute.curl(self, **kwargs), overwrite)
+        
+        return self
+    
+    def merge_laplacian(self, overwrite=None, **kwargs):
+        """
+        Shortcut for compute.laplacian and OceanDataset.merge_Dataset.
+        
+        Parameters
+        ----------
+        overwrite: bool or None
+            If None, raise error if any xarray.DataArray already exists.  
+            If True, overwrite existing xarray.DataArray.    
+            If False, do not add existing xarray.DataArray.  
+        **kwargs: 
+            Keyword arguments for compute.laplacian
+            
+        See Also
+        --------
+        compute.laplacian
+        """
+        
+        self = self.merge_Dataset(_compute.laplacian(self, **kwargs), overwrite)
+        
+        return self
+    
+    def merge_volume_weighted_mean(self, overwrite=None, **kwargs):
+        """
+        Shortcut for compute.volume_weighted_mean and OceanDataset.merge_Dataset.
+        
+        Parameters
+        ----------
+        overwrite: bool or None
+            If None, raise error if any xarray.DataArray already exists.  
+            If True, overwrite existing xarray.DataArray.    
+            If False, do not add existing xarray.DataArray.  
+        **kwargs: 
+            Keyword arguments for compute.volume_weighted_mean
+            
+        See Also
+        --------
+        compute.volume_weighted_mean
+        """
+        
+        self = self.merge_Dataset(_compute.volume_weighted_mean(self, **kwargs), overwrite)
+        
+        return self
+    
+    
+    def merge_potential_density_anomaly(self, overwrite=None, **kwargs):
+        """
+        Shortcut for compute.potential_density_anomaly and OceanDataset.merge_Dataset.
+        
+        Parameters
+        ----------
+        overwrite: bool or None
+            If None, raise error if any xarray.DataArray already exists.  
+            If True, overwrite existing xarray.DataArray.    
+            If False, do not add existing xarray.DataArray.  
+        **kwargs: 
+            Keyword arguments for compute.potential_density_anomaly 
+            
+        See Also
+        --------
+        compute.potential_density_anomaly
+        """
+        
+        self = self.merge_Dataset(_compute.potential_density_anomaly(self, **kwargs), overwrite)
+        
+        return self
+    
+    def merge_Brunt_Vaisala_frequency(self, overwrite=None, **kwargs):
+        """
+        Shortcut for compute.Brunt_Vaisala_frequency and OceanDataset.merge_Dataset.
+        
+        Parameters
+        ----------
+        overwrite: bool or None
+            If None, raise error if any xarray.DataArray already exists.  
+            If True, overwrite existing xarray.DataArray.    
+            If False, do not add existing xarray.DataArray.  
+        **kwargs: 
+            Keyword arguments for compute.Brunt_Vaisala_frequency
+            
+        See Also
+        --------
+        compute.Brunt_Vaisala_frequency
+        """
+        
+        self = self.merge_Dataset(_compute.Brunt_Vaisala_frequency(self, **kwargs), overwrite)
+        
+        return self
+    
+    def merge_vertical_relative_vorticity(self, overwrite=None, **kwargs):
+        """
+        Shortcut for compute.vertical_relative_vorticity and OceanDataset.merge_Dataset.
+        
+        Parameters
+        ----------
+        overwrite: bool or None
+            If None, raise error if any xarray.DataArray already exists.  
+            If True, overwrite existing xarray.DataArray.    
+            If False, do not add existing xarray.DataArray.  
+        **kwargs: 
+            Keyword arguments for compute.vertical_relative_vorticity 
+            
+        See Also
+        --------
+        compute.vertical_relative_vorticity
+        """
+        
+        self = self.merge_Dataset(_compute.vertical_relative_vorticity(self, **kwargs), overwrite)
+        
+        return self
+    
+    def merge_relative_vorticity(self, overwrite=None, **kwargs):
+        """
+        Shortcut for compute.relative_vorticity and OceanDataset.merge_Dataset.
+        
+        Parameters
+        ----------
+        overwrite: bool or None
+            If None, raise error if any xarray.DataArray already exists.  
+            If True, overwrite existing xarray.DataArray.    
+            If False, do not add existing xarray.DataArray.  
+        **kwargs: 
+            Keyword arguments for compute.relative_vorticity
+            
+        See Also
+        --------
+        compute.relative_vorticity
+        """
+        
+        self = self.merge_Dataset(_compute.relative_vorticity(self, **kwargs), overwrite)
+        
+        return self
+    
+    def merge_kinetic_energy(self, overwrite=None, **kwargs):
+        """
+        Shortcut for compute.kinetic_energy and OceanDataset.merge_Dataset.
+        
+        Parameters
+        ----------
+        overwrite: bool or None
+            If None, raise error if any xarray.DataArray already exists.  
+            If True, overwrite existing xarray.DataArray.    
+            If False, do not add existing xarray.DataArray.  
+        **kwargs: 
+            Keyword arguments for compute.kinetic_energy
+            
+        See Also
+        --------
+        compute.kinetic_energy
+        """
+        
+        self = self.merge_Dataset(_compute.kinetic_energy(self, **kwargs), overwrite)
+        
+        return self
+    
+    def merge_eddy_kinetic_energy(self, overwrite=None, **kwargs):
+        """
+        Shortcut for compute.eddy_kinetic_energy and OceanDataset.merge_Dataset.
+        
+        Parameters
+        ----------
+        overwrite: bool or None
+            If None, raise error if any xarray.DataArray already exists.  
+            If True, overwrite existing xarray.DataArray.    
+            If False, do not add existing xarray.DataArray.  
+        **kwargs: 
+            Keyword arguments for compute.eddy_kinetic_energy 
+            
+        See Also
+        --------
+        compute.eddy_kinetic_energy
+        """
+        
+        self = self.merge_Dataset(_compute.eddy_kinetic_energy(self, **kwargs), overwrite)
+        
+        return self
+    
+    def merge_horizontal_divergence_velocity(self, overwrite=None, **kwargs):
+        """
+        Shortcut for compute.horizontal_divergence_velocity and OceanDataset.merge_Dataset.
+        
+        Parameters
+        ----------
+        overwrite: bool or None
+            If None, raise error if any xarray.DataArray already exists.  
+            If True, overwrite existing xarray.DataArray.  
+            If False, do not add existing xarray.DataArray.  
+        **kwargs: 
+            Keyword arguments for compute.horizontal_divergence_velocity
+            
+        See Also
+        --------
+        compute.horizontal_divergence_velocity
+        """
+        
+        self = self.merge_Dataset(_compute.horizontal_divergence_velocity(self, **kwargs), overwrite)
+        
+        return self
+    
+    def merge_shear_strain(self, overwrite=None, **kwargs):
+        """
+        Shortcut for compute.shear_strain and OceanDataset.merge_Dataset.
+        
+        Parameters
+        ----------
+        overwrite: bool or None
+            If None, raise error if any xarray.DataArray already exists.  
+            If True, overwrite existing xarray.DataArray.   
+            If False, do not add existing xarray.DataArray.  
+        **kwargs: 
+            Keyword arguments for compute.shear_strain
+            
+        See Also
+        --------
+        compute.shear_strain
+        """
+        
+        self = self.merge_Dataset(_compute.shear_strain(self, **kwargs), overwrite)
+        
+        return self
+    
+    def merge_normal_strain(self, overwrite=None, **kwargs):
+        """
+        Shortcut for compute.normal_strain and OceanDataset.merge_Dataset.
+        
+        Parameters
+        ----------
+        overwrite: bool or None
+            If None, raise error if any xarray.DataArray already exists.  
+            If True, overwrite existing xarray.DataArray.    
+            If False, do not add existing xarray.DataArray.  
+        **kwargs: 
+            Keyword arguments for compute.normal_strain
+            
+        See Also
+        --------
+        compute.normal_strain
+        """
+        
+        self = self.merge_Dataset(_compute.normal_strain(self, **kwargs), overwrite)
+        
+        return self
+    
+    def merge_Okubo_Weiss_parameter(self, overwrite=None, **kwargs):
+        """
+        Shortcut for compute.Okubo_Weiss_parameter and OceanDataset.merge_Dataset.
+        
+        Parameters
+        ----------
+        overwrite: bool or None
+            If None, raise error if any xarray.DataArray already exists.  
+            If True, overwrite existing xarray.DataArray.    
+            If False, do not add existing xarray.DataArray.  
+        **kwargs: 
+            Keyword arguments for compute.Okubo_Weiss_parameter
+            
+        See Also
+        --------
+        compute.Okubo_Weiss_parameter
+        """
+        
+        self = self.merge_Dataset(_compute.Okubo_Weiss_parameter(self, **kwargs), overwrite)
+        
+        return self
+    
+    def merge_Ertel_potential_vorticity(self, overwrite=None, **kwargs):
+        """
+        Shortcut for compute.Ertel_potential_vorticity and OceanDataset.merge_Dataset.
+        
+        Parameters
+        ----------
+        overwrite: bool or None
+            If None, raise error if any xarray.DataArray already exists.  
+            If True, overwrite existing xarray.DataArray.   
+            If False, do not add existing xarray.DataArray.  
+        **kwargs: 
+            Keyword arguments for compute.Ertel_potential_vorticity
+            
+        See Also
+        --------
+        compute.Ertel_potential_vorticity
+        """
+        
+        self = self.merge_Dataset(_compute.Ertel_potential_vorticity(self, **kwargs), overwrite)
+        
+        return self
+    
+    def merge_horizontal_volume_transport(self, overwrite=None, **kwargs):
+        """
+        Shortcut for compute.horizontal_volume_transport and OceanDataset.merge_Dataset.
+        
+        Parameters
+        ----------
+        overwrite: bool or None
+            If None, raise error if any xarray.DataArray already exists.  
+            If True, overwrite existing xarray.DataArray.   
+            If False, do not add existing xarray.DataArray.  
+        **kwargs: 
+            Keyword arguments for compute.horizontal_volume_transport 
+            
+        See Also
+        --------
+        compute.horizontal_volume_transportt
+        """
+        
+        self = self.merge_Dataset(_compute.horizontal_volume_transport(self, **kwargs), overwrite)
+        
+        return self
+    
+    def merge_heat_budget(self, overwrite=None, **kwargs):
+        """
+        Shortcut for compute.heat_budget and OceanDataset.merge_Dataset.
+        
+        Parameters
+        ----------
+        overwrite: bool or None
+            If None, raise error if any xarray.DataArray already exists.  
+            If True, overwrite existing xarray.DataArray.   
+            If False, do not add existing xarray.DataArray.  
+        **kwargs: 
+            Keyword arguments for compute.heat_budget
+            
+        See Also
+        --------
+        compute.heat_budget
+        """
+        
+        self = self.merge_Dataset(_compute.heat_budget(self, **kwargs), overwrite)
+        
+        return self
+    
+    def merge_salt_budget(self, overwrite=None, **kwargs):
+        """
+        Shortcut for compute.salt_budget and OceanDataset.merge_Dataset.
+        
+        Parameters
+        ----------
+        overwrite: bool or None
+            If None, raise error if any xarray.DataArray already exists.  
+            If True, overwrite existing xarray.DataArray.    
+            If False, do not add existing xarray.DataArray.  
+        **kwargs: 
+            Keyword arguments for compute.salt_budget 
+            
+        See Also
+        --------
+        compute.salt_budget
+        """
+        
+        self = self.merge_Dataset(_compute.salt_budget(self, **kwargs), overwrite)
+        
+        return self
+    
+    def merge_aligned_velocities(self, overwrite=None, **kwargs):
+        """
+        Shortcut for compute.aligned_velocities and OceanDataset.merge_Dataset.
+        
+        Parameters
+        ----------
+        overwrite: bool or None
+            If None, raise error if any xarray.DataArray already exists.  
+            If True, overwrite existing xarray.DataArray.    
+            If False, do not add existing xarray.DataArray.  
+        **kwargs: 
+            Keyword arguments for compute.aligned_velocities
+            
+        See Also
+        --------
+        compute.aligned_velocities
+        """
+        
+        self = self.merge_Dataset(_compute.aligned_velocities(self, **kwargs), overwrite)
+        
+        return self
+        
+        
         
 def _create_grid(dataset, coords, periodic):
 
