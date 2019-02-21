@@ -1,3 +1,7 @@
+"""
+Create new variables using OceanDataset objects.
+"""
+
 import xarray   as _xr
 import oceanspy as _ospy
 import numpy    as _np
@@ -1726,7 +1730,7 @@ def geographical_aligned_velocities(od):
     Compute zonal and meridional velocities from U and V on orthogonal curvilinear grid.
     
     .. math::
-        (u_{zonal}, v_{merid}) = (\\cos{\\phi} u - \\sin{\\phi} v, \\sin{\\phi} u + \\cos{\\phi} v)
+        (u_{zonal}, v_{merid}) = (u\\cos{\\phi} - v\\sin{\\phi}, u\\sin{\\phi} + v\\cos{\\phi})
         
     Parameters
     ----------
@@ -1785,6 +1789,9 @@ def geographical_aligned_velocities(od):
 def survey_aligned_velocities(od):
     """
     Compute horizontal velocities orthogonal and tengential to a survey.
+    
+    .. math::
+        (v_{tan}, v_{ort}) = (u\\cos{\\phi} + v\\sin{\\phi}, v\\cos{\\phi} - u\\sin{\\phi})
         
     Parameters
     ----------

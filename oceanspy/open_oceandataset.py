@@ -1,5 +1,5 @@
 """
-Open an OceanDataset.
+Open OceanDataset objects stored on SciServer.
 """
 # TODO: check dask warnings
 

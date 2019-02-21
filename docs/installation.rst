@@ -25,8 +25,6 @@ Several Apps_ are available on SciServer: use Compute to analyze data with inter
 4. Click on the container
 5. Install OceanSpy and its dependencies
 
-Expert users can run notebooks using the Compute Jobs.
-
 .. note::
     Users won't need to install OceanSpy and its dependencies on SciServer in the future.  
 
@@ -35,15 +33,15 @@ Expert users can run notebooks using the Compute Jobs.
 
 Install OceanSpy from Terminal
 ------------------------------
-The easiest way to install most of OceanSpy's dependencies is to use Conda_.
-First open a terminal (SciServer: click on ``New`` + ``Terminal``), then run the following commands:
+The easiest way to install most of OceanSpy's dependencies is to use conda-forge_.
+First open a terminal (Jupyter Notebook: click on ``New`` + ``Terminal``), then run the following commands:
 
 .. code-block:: bash
 
-    conda install dask distributed bottleneck netCDF4
-    conda install -c conda-forge xarray cartopy esmpy 
-    conda install -c pyviz hvplot geoviews
-    pip install geopy xgcm xesmf
+    conda config --remove channels defaults
+    conda config --add channels conda-forge
+    conda install dask distributed bottleneck netCDF4 xarray cartopy esmpy
+    pip install geopy xgcm xesmf xmitgcm
 
 To install OceanSpy, run this command in your terminal:
 
@@ -64,13 +62,16 @@ Run the following command to install the latest version:
 Install from Jupyter Notebook
 -----------------------------
 
-To install OceanSpy and its dependencies from Python, use these commands::
+This cell installs OceanSpy and its dependencies from a Jupyter Notebook:
 
-    import sys
-    !conda install --yes --prefix {sys.prefix} dask distributed bottleneck netCDF4
-    !conda install --yes --prefix {sys.prefix} -c conda-forge xarray cartopy esmpy 
-    !conda install --yes --prefix {sys.prefix} -c pyviz hvplot geoviews
-    !{sys.executable} -m pip install geopy xgcm xesmf oceanspy
+.. code-block:: python
+    :class: no-execute
+
+    %%bash
+    conda config --remove channels defaults
+    conda config --add channels conda-forge
+    conda install dask distributed bottleneck netCDF4 xarray cartopy esmpy
+    pip install geopy xgcm xesmf xmitgcm oceanspy
 
 .. note::
     Users using Compute Jobs currently have to install OceanSpy and its dependencies in the first Notebook cell (this won't be necessary in the future).
@@ -78,3 +79,4 @@ To install OceanSpy and its dependencies from Python, use these commands::
 .. _SciServer: http://www.sciserver.org
 .. _Apps: https://apps.sciserver.org
 .. _Conda: https://conda.io/docs
+.. _conda-forge: https://conda-forge.org/
