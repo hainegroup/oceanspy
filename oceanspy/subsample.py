@@ -200,9 +200,17 @@ def cutout(od,
         
         # Cutout
         ds = ds.isel(Yp1 = slice(iY[0], iY[1]+1),
-                     Y   = slice(iY[0], iY[1]),
-                     Xp1 = slice(iX[0], iX[1]+1), 
-                     X   = slice(iX[0], iX[1]))
+                     Xp1 = slice(iX[0], iX[1]+1))
+        if   (('outer' in od._grid.axes['X'].coords and od._grid.axes['X'].coords['outer'].name == 'Xp1') or  
+              ('left'  in od._grid.axes['X'].coords and od._grid.axes['X'].coords['left'].name  == 'Xp1')):
+            ds = ds.isel(X = slice(iX[0], iX[1]))
+        elif   'right' in od._grid.axes['X'].coords and od._grid.axes['X'].coords['right'].name =='Xp1':
+            ds = ds.isel(X = slice(iX[0]+1, iX[1]+1))   
+        if   (('outer' in od._grid.axes['Y'].coords and od._grid.axes['Y'].coords['outer'].name == 'Yp1') or  
+              ('left'  in od._grid.axes['Y'].coords and od._grid.axes['Y'].coords['left'].name  == 'Yp1')):
+            ds = ds.isel(Y = slice(iY[0], iY[1]))
+        elif   'right' in od._grid.axes['Y'].coords and od._grid.axes['Y'].coords['right'].name =='Yp1':
+            ds = ds.isel(Y = slice(iY[0]+1, iY[1]+1))
         
         # Cut axis can't be periodic
         if len(ds['Yp1'])  < lenY and 'Y' in periodic: periodic.remove(Y)

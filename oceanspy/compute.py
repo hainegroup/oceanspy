@@ -21,7 +21,7 @@ from . import utils as _utils
 #       https://github.com/dcherian/tools/blob/master/mitgcm/matlab/cs_grid/cubeCalcAngle.m
 # TODO: gradient, curl, divergence, laplacian currently can't handle aliases.
 
-# Hard coded the list of variables outputed by functions
+# Hard coded list of variables outputed by functions
 _FUNC2VARS = {'potential_density_anomaly'     : ['Sigma0'],
               'Brunt_Vaisala_frequency'       : ['N2'],
               'vertical_relative_vorticity'   : ['momVort3'],

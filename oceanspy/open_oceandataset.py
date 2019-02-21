@@ -407,10 +407,6 @@ def EGshelfSJsec500m(Hydrostatic = True,
     ds = ds.rename({'XC': 'X', 'YC': 'Y', 'XG': 'Xp1', 'YG': 'Yp1',
                     'T': 'Temp', 'hFacC': 'HFacC', 'hFacW': 'HFacW', 'hFacS': 'HFacS'})
     
-    # TODO: quick fix to make it work with binary. 
-    #       Why are binary stored on same C and G dimensions?
-    ds = ds.isel(X = slice(1,None), Y=slice(1, None))
-    
     # Initialize OceanDataset
     od = _OceanDataset(ds).set_name(name).set_description(description)
     od = od.set_coords(coords2Dfrom1D=True)
