@@ -118,7 +118,7 @@ def EGshelfIIseas2km_ERAI(daily     = False,
                    'X'    : {'X': None, 'Xp1': 0.5},
                    'Z'    : {'Z': None, 'Zp1': 0.5, 'Zu': -0.5, 'Zl': 0.5},
                    'time' : {'time': -0.5}}
-    od = od.set_grid_coords(grid_coords = grid_coords, add_midp=True)
+    od = od.set_grid_coords(grid_coords = grid_coords, add_midp=True, overwrite=False)
     
     return od
 

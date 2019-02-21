@@ -15,13 +15,16 @@ from . import utils as _utils
 # 7) Add function name, and variables returned in _FUNC2VARS
 
 
-# TODO: consider add functions to compute dx, dy, dr, rA, ... when not available (maybe add in utils?)
-# TODO: consider add functions to compute AngleCS and AngleSN when not available (maybe add in utils?)
+# TODO: add functions to compute dx, dy, dr, rA, ... when not available (maybe add in utils?)
+# TODO: add functions to compute AngleCS and AngleSN when not available (maybe add in utils?)
 #       http://mailman.mitgcm.org/pipermail/mitgcm-support/2014-January/008797.html
 #       https://github.com/dcherian/tools/blob/master/mitgcm/matlab/cs_grid/cubeCalcAngle.m
 # TODO: gradient, curl, divergence, laplacian currently can't handle aliases.
+# TODO: any time velocities are mutiplied by hfac, we should use mass weighted velocities if available (mass_weighted function?)
+# TODO: add area weighted mean for 2D variables, e.g. SSH (are_weighted_mean, SI, ...), or vertical sections
 
-# Hard coded list of variables outputed by functions
+
+# Hard coded  list of variables outputed by functions
 _FUNC2VARS = {'potential_density_anomaly'     : ['Sigma0'],
               'Brunt_Vaisala_frequency'       : ['N2'],
               'vertical_relative_vorticity'   : ['momVort3'],
@@ -33,19 +36,20 @@ _FUNC2VARS = {'potential_density_anomaly'     : ['Sigma0'],
               'normal_strain'                 : ['n_strain'],
               'Okubo_Weiss_parameter'         : ['Okubo_Weiss'],
               'Ertel_potential_vorticity'     : ['Ertel_PV'],
-              'horizontal_volume_transport'   : ['transport', 
-                                                 'Vtransport',     'Utransport', 
-                                                 'Y_transport',    'X_transport', 
-                                                 'Y_Utransport',   'X_Utransport',
-                                                 'Y_Vtransport',   'X_Vtransport',
-                                                 'dir_Utransport', 'dir_Vtransport'],
+              'mooring_horizontal_volume_transport' : ['transport', 
+                                                       'Vtransport',     'Utransport', 
+                                                       'Y_transport',    'X_transport', 
+                                                       'Y_Utransport',   'X_Utransport',
+                                                       'Y_Vtransport',   'X_Vtransport',
+                                                       'dir_Utransport', 'dir_Vtransport'],
              'heat_budget'                    : ['tendH', 'adv_hConvH', 'adv_vConvH', 'dif_vConvH', 'kpp_vConvH', 'forcH'],
              'salt_budget'                    : ['tendS', 'adv_hConvS', 'adv_vConvS', 'dif_vConvS', 'kpp_vConvS', 'forcS'],
-             'aligned_velocities'             : ['U_zonal', 'V_merid']}
+             'geographical_aligned_velocities': ['U_zonal', 'V_merid'],
+             'survey_aligned_velocities'      : ['rot_ang_Vel', 'tan_Vel', 'ort_Vel']}
 
 
 
-def _add_missing_variables(od, varList, FUNC2VARS = _FUNC2VARS):
+def _add_missing_variables(od, varList, FUNC2VARS = _FUNC2VARS, raiseError=True):
     """
     If any variable in varList is missing in the oceandataset, try to compute it.
     
@@ -84,7 +88,13 @@ def _add_missing_variables(od, varList, FUNC2VARS = _FUNC2VARS):
     if len(var_error)!=0:
         if od.aliases:
             var_error = [custom if ospy in var_error else ospy for ospy, custom in od.aliases.items()]
-        raise ValueError('These variables are not available and can not be computed: {}'.format(var_error))
+        message = 'These variables are not available and can not be computed: {}'.format(var_error)
+        if raiseError:
+            raise ValueError(message)
+        else: 
+            _warnings.warn(message, stacklevel=2)
+            
+            
     
     # Compute new variables
     funcList = list(set([VAR2FUNC[var] for var in varList if var in VAR2FUNC]))
@@ -144,6 +154,10 @@ def gradient(od, varNameList, axesList=None, aliases = False):
         dTemp_dZ     (time, Zl, Y, X) float64 dask.array<shape=(1464, 216, 880, 960), chunksize=(40, 1, 880, 960)>
         dTemp_dtime  (time_midp, Z, Y, X) float64 dask.array<shape=(1463, 216, 880, 960), chunksize=(39, 216, 880, 960)>
             
+    Notes
+    -----
+    Denominator is delta of distances for mooring and survey (units: km)
+    
     References
     ----------
     MITgcm: https://mitgcm.readthedocs.io/en/latest/algorithm/algorithm.html#notation
@@ -224,12 +238,17 @@ def gradient(od, varNameList, axesList=None, aliases = False):
 
             # Vertical gradient
             if axis == 'time':
-                for dim in [od._grid.axes[axis].coords[coord].name for coord in od._grid.axes[axis].coords]:
-
-                    # Compute and conver in s
-                    dden = od._grid.diff(od._ds[dim], axis, boundary='fill', fill_value=_np.nan)
-                    dden = dden / _np.timedelta64(1, 's')
-            
+                
+                # Compute and conver in s
+                dden = od._grid.diff(od._ds['time'], axis, boundary='fill', fill_value=_np.nan)
+                dden = dden / _np.timedelta64(1, 's')
+                
+            # Vertical survey and mooring
+            if axis in ['mooring', 'station']:
+        
+                # Compute and conver in s
+                dden = od._grid.diff(od._ds[axis+'_dist'], axis, boundary='fill', fill_value=_np.nan)
+                    
             # Add and clear
             grad['d'+varName+'_d'+axis] = dnum / dden
             del dnum, dden
@@ -284,9 +303,6 @@ def divergence(od, iName=None, jName=None, kName=None, aliases = False):
     ----------
     MITgcm: https://mitgcm.readthedocs.io/en/latest/algorithm/algorithm.html#notation
     """
-    
-    # TODO: explain horizontal differences
-    # TODO: add check on dimensions!
     
     # Check input
     if not isinstance(od, _ospy.OceanDataset):
@@ -379,8 +395,6 @@ def curl(od, iName=None, jName=None, kName=None, aliases = False):
     ----------
     MITgcm: https://mitgcm.readthedocs.io/en/latest/algorithm/algorithm.html#notation
     """
-    # TODO: explain vertical component
-    # TODO: add check on dimensions!
     
     # Check input
     if not isinstance(od, _ospy.OceanDataset):
@@ -1251,7 +1265,7 @@ def Ertel_potential_vorticity(od):
     
     return _ospy.OceanDataset(ds).dataset
 
-def horizontal_volume_transport(od):
+def mooring_horizontal_volume_transport(od):
     """
     Compute horizontal volume flux through a mooring array section (in/outflow).  
     If the array is closed, transport at the first mooring is not computed.  
@@ -1707,7 +1721,7 @@ def salt_budget(od):
     
     return _ospy.OceanDataset(ds).dataset
 
-def aligned_velocities(od):
+def geographical_aligned_velocities(od):
     """
     Compute zonal and meridional velocities from U and V on orthogonal curvilinear grid.
     
@@ -1735,7 +1749,7 @@ def aligned_velocities(od):
     od = _add_missing_variables(od, varList)
     
     # Message
-    print('Computing aligned velocities.')
+    print('Computing geographical aligned velocities.')
     
     # Extract Variables
     U = od._ds['U']
@@ -1751,13 +1765,13 @@ def aligned_velocities(od):
     V = grid.interp(V, 'Y')
     
     # Compute velocities
-    U_zonal = AngleCS * U - AngleSN * V
+    U_zonal = U * AngleCS - V * AngleSN
     if 'units' in od._ds['U'].attrs: U_zonal.attrs['units'] = od._ds['U'].attrs['units']
     U_zonal.attrs['long_name'] = 'zonal velocity'
     U_zonal.attrs['direction'] = 'positive: eastwards'
     
-    V_merid = AngleSN * U + AngleCS * V
-    if 'units' in od._ds['V'].attrs: V_zonal.attrs['units'] = od._ds['V'].attrs['units']
+    V_merid = U * AngleSN + V * AngleCS
+    if 'units' in od._ds['V'].attrs: V_merid.attrs['units'] = od._ds['V'].attrs['units']
     V_merid.attrs['long_name'] = 'meridional velocity'
     V_merid.attrs['direction'] = 'positive: northwards'
     
@@ -1768,7 +1782,99 @@ def aligned_velocities(od):
     return _ospy.OceanDataset(ds).dataset
 
 
-
+def survey_aligned_velocities(od):
+    """
+    Compute horizontal velocities orthogonal and tengential to a survey.
+        
+    Parameters
+    ----------
+    od: OceanDataset
+        oceandataset used to compute
+        
+    Returns
+    -------
+    ds: xarray.Dataset
+        | rot_ang_Vel: Angle used to rotate geographical to survey aligned velocities
+        | tan_Vel: Velocity component tangential to survey
+        | ort_Vel: Velocity component orthogonal to survey
+    """
+    
+    # Check input
+    if not isinstance(od, _ospy.OceanDataset):
+        raise TypeError('`od` must be OceanDataset')
+        
+    if 'station' not in od._ds.dims:
+        raise TypeError('oceadatasets must be subsampled using `subsample.survey_stations`')
+        
+    # Get zonal and meridional velocities
+    var_list = ['lat', 'lon']
+    try:
+        # Add missing variables
+        varList = ['U_zonal', 'V_merid'] + var_list
+        od = _add_missing_variables(od, varList)
+        
+        # Extract variables
+        U = od._ds['U_zonal']
+        V = od._ds['V_merid'] 
+    except Exception as e:
+        # Assume U=U_zonal and V=V_zonal
+        _warnings.warn(("\n{}"
+                        "\nAssuming U=U_zonal and V=V_merid"
+                        "\nIf you are using curvilinear coordinates, run `compute.geographical_aligned_velocities` before `subsample.survey_stations`").format(e), stacklevel=2)
+        
+        # Add missing variables
+        varList = ['U', 'V'] + var_list
+        od = _add_missing_variables(od, varList)
+        
+        # Extract variables
+        U = od._ds['U']
+        V = od._ds['V']
+        
+    # Extract varibles
+    lat = _np.deg2rad(od._ds['lat'])
+    lon = _np.deg2rad(od._ds['lon'])
+    
+    # Extract grid
+    grid = od._grid
+    
+    # Message
+    print('Computing survey aligned velocities.')
+    
+    # Compute azimuth
+    # Translated from matlab: https://www.mathworks.com/help/map/ref/azimuth.html
+    az = _np.arctan2(_np.cos(lat[1:]).values  * _np.sin(grid.diff(lon, 'station')),
+                 _np.cos(lat[:-1]).values * _np.sin(lat[1:]).values - 
+                 _np.sin(lat[:-1]).values * _np.cos(lat[1:]).values * _np.cos(grid.diff(lon, 'station'))) 
+    az = grid.interp(az, 'station', boundary = 'extend')
+    az = _xr.where(_np.rad2deg(az)<0, _np.pi*2 + az, az)
+    
+    # Compute rotation angle
+    rot_ang_rad = _np.pi/2 - az
+    rot_ang_rad = _xr.where(rot_ang_rad < 0, _np.pi*2 + rot_ang_rad, rot_ang_rad)
+    rot_ang_deg =_np.rad2deg(rot_ang_rad)
+    rot_ang_Vel = rot_ang_deg
+    rot_ang_Vel.attrs['long_name'] = 'Angle used to rotate geographical to survey aligned velocities'
+    rot_ang_Vel.attrs['units']     = 'deg (+: counterclockwise)'
+    
+    # Rotate velocities
+    tan_Vel =  U*_np.cos(rot_ang_rad) + V*_np.sin(rot_ang_rad)
+    tan_Vel.attrs['long_name'] = 'Velocity component tangential to survey'
+    if 'units' in U.attrs: units = U.attrs['units']
+    else:                  units = ''
+    tan_Vel.attrs['units'] = units + ' (+: flow towards station indexed with higher number)'
+    
+    ort_Vel =  V*_np.cos(rot_ang_rad) - U*_np.sin(rot_ang_rad)
+    ort_Vel.attrs['long_name'] = 'Velocity component orthogonal to survey'
+    if 'units' in V.attrs: units = V.attrs['units']
+    else:                  units = ''
+    ort_Vel.attrs['units'] = units + ' (+: flow keeps station indexed with higher number to the right'
+    
+    # Create ds
+    ds = _xr.Dataset({'rot_ang_Vel': rot_ang_Vel, 
+                      'ort_Vel'    : ort_Vel,
+                      'tan_Vel'    : tan_Vel,}, attrs=od.dataset.attrs)
+    
+    return _ospy.OceanDataset(ds).dataset
 
 
 

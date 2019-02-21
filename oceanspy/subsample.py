@@ -10,6 +10,8 @@ Subsample: functions to subsample an oceandataset.
 # 5) Add new functions in docs/api.rst under subsample 
 # 6) Create a shortcut in _oceandataset and add the shortcut in docs/api.rst under OceanDataset - Shortcuts
 
+# TODO: warnings when limits are out of bound
+
 import xarray as _xr
 import pandas as _pd
 import numpy  as _np
@@ -640,6 +642,7 @@ def mooring_array(od, Ymoor, Xmoor,
     
     # Recreate od
     od._ds = new_ds
+    od = od.set_grid_coords({'mooring': {'mooring': -0.5}}, add_midp=True, overwrite=False)
     
     return od
 
@@ -757,8 +760,6 @@ def survey_stations(od, Ysurv, Xsurv, delta,
 
     # Interpolate
     import xesmf as _xe
-    # TODO: explain manual fix for cartesian:
-    # https://github.com/JiaweiZhuang/xESMF/issues/39
     regridder = _xe.Regridder(ds_in, ds, **xesmf_regridder_kwargs) 
     for var in [var for var in ds_in.variables if var not in ['lon', 'lat', 'X', 'Y']]:
         if set(['X', 'Y']).issubset(ds_in[var].dims): 
@@ -794,7 +795,7 @@ def survey_stations(od, Ysurv, Xsurv, delta,
     
     # Return od
     od._ds = ds
-    od = od.set_grid_coords({'Z': od.grid_coords.pop('Z', None), 'time': od.grid_coords.pop('time', None)}, overwrite=True)
+    od = od.set_grid_coords({'Z': od.grid_coords.pop('Z', None), 'time': od.grid_coords.pop('time', None), 'station': {'station': -0.5}}, add_midp=True, overwrite=True)
     
     return od
 
