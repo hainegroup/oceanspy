@@ -1,5 +1,5 @@
 """
-Utils: useful functions used by OceanSpy
+OceanSpy utilities that don't need OceanDataset objects.
 """
 import xarray as _xr
 import numpy  as _np

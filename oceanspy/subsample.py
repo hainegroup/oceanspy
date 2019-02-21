@@ -1,5 +1,5 @@
 """
-Subsample: functions to subsample an oceandataset.
+Subsample OceanDataset objects.
 """
 
 # Instructions for developers:

@@ -12,7 +12,7 @@ from . import utils     as _utils
 
 class OceanDataset:
     """
-    OceanDataset combines a xarray.Dataset with objects used by OceanSpy.
+    OceanDataset combines a xarray.Dataset with other objects used by OceanSpy (e.g., xgcm.Grid).
 
     Additional objects are attached to the xarray.Dataset as global attributes.
     
