@@ -83,10 +83,11 @@ Compute
    OceanDataset.merge_normal_strain
    OceanDataset.merge_Okubo_Weiss_parameter
    OceanDataset.merge_Ertel_potential_vorticity
-   OceanDataset.merge_horizontal_volume_transport
+   OceanDataset.merge_mooring_horizontal_volume_transport
    OceanDataset.merge_heat_budget
    OceanDataset.merge_salt_budget
-   OceanDataset.merge_aligned_velocities
+   OceanDataset.merge_geographical_aligned_velocities
+   OceanDataset.merge_survey_aligned_velocities
    
 
 Opening an OceanDataset
@@ -165,10 +166,11 @@ Functions
    compute.normal_strain
    compute.Okubo_Weiss_parameter
    compute.Ertel_potential_vorticity
-   compute.horizontal_volume_transport
+   compute.mooring_horizontal_volume_transport
    compute.heat_budget
    compute.salt_budget
-   compute.aligned_velocities
+   compute.geographical_aligned_velocities
+   compute.survey_aligned_velocities
    
 OceanSpy utilities
 ==================

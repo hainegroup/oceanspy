@@ -8,6 +8,7 @@ from . import compute   as _compute
 from . import utils     as _utils
 
 # TODO: add parameters check in set_parameters
+# TODO: add more xgcm options. E.g., boundary method.
 
 class OceanDataset:
     """
@@ -454,7 +455,7 @@ class OceanDataset:
         if not isinstance(grid_coords, dict):
             raise TypeError("`grid_coords` must be dict")
             
-        list_axis  = ['X', 'Y', 'Z', 'time']
+        list_axis  = ['X', 'Y', 'Z', 'time', 'mooring', 'station']
         list_dims  = [dim for dim in self.dataset.dims]
         list_shift = [0.5, None, -0.5]
         for axis in grid_coords:
@@ -627,7 +628,7 @@ class OceanDataset:
         if not isinstance(overwrite, (bool, type(None))):
             raise TypeError("`overwrite` must be bool or None")
                                
-        existing_da = [da for da in ds.variables if da in self.dataset.variables and da not in self.dataset.coords]          
+        existing_da = [da for da in ds.variables if da in self.dataset.data_vars]          
         if len(existing_da)!=0:
             if overwrite is None:
                 raise ValueError(("{} already exist: "
@@ -1326,9 +1327,9 @@ class OceanDataset:
         
         return self
     
-    def merge_horizontal_volume_transport(self, overwrite=None, **kwargs):
+    def merge_mooring_horizontal_volume_transport(self, overwrite=None, **kwargs):
         """
-        Shortcut for compute.horizontal_volume_transport and OceanDataset.merge_Dataset.
+        Shortcut for compute.mooring_horizontal_volume_transport and OceanDataset.merge_Dataset.
         
         Parameters
         ----------
@@ -1337,14 +1338,14 @@ class OceanDataset:
             If True, overwrite existing xarray.DataArray.   
             If False, do not add existing xarray.DataArray.  
         **kwargs: 
-            Keyword arguments for compute.horizontal_volume_transport 
+            Keyword arguments for compute.mooring_horizontal_volume_transport 
             
         See Also
         --------
-        compute.horizontal_volume_transportt
+        compute.mooring_horizontal_volume_transport
         """
         
-        self = self.merge_Dataset(_compute.horizontal_volume_transport(self, **kwargs), overwrite)
+        self = self.merge_Dataset(_compute.mooring_horizontal_volume_transport(self, **kwargs), overwrite)
         
         return self
     
@@ -1392,9 +1393,9 @@ class OceanDataset:
         
         return self
     
-    def merge_aligned_velocities(self, overwrite=None, **kwargs):
+    def merge_geographical_aligned_velocities(self, overwrite=None, **kwargs):
         """
-        Shortcut for compute.aligned_velocities and OceanDataset.merge_Dataset.
+        Shortcut for compute.geographical_aligned_velocities and OceanDataset.merge_Dataset.
         
         Parameters
         ----------
@@ -1403,19 +1404,40 @@ class OceanDataset:
             If True, overwrite existing xarray.DataArray.    
             If False, do not add existing xarray.DataArray.  
         **kwargs: 
-            Keyword arguments for compute.aligned_velocities
+            Keyword arguments for compute.geographical_aligned_velocities
             
         See Also
         --------
-        compute.aligned_velocities
+        compute.geographical_aligned_velocities
         """
         
-        self = self.merge_Dataset(_compute.aligned_velocities(self, **kwargs), overwrite)
+        self = self.merge_Dataset(_compute.geographical_aligned_velocities(self, **kwargs), overwrite)
         
         return self
         
+    def merge_survey_aligned_velocities(self, overwrite=None, **kwargs):
+        """
+        Shortcut for compute.survey_aligned_velocities and OceanDataset.merge_Dataset.
         
+        Parameters
+        ----------
+        overwrite: bool or None
+            If None, raise error if any xarray.DataArray already exists.  
+            If True, overwrite existing xarray.DataArray.    
+            If False, do not add existing xarray.DataArray.  
+        **kwargs: 
+            Keyword arguments for compute.survey_aligned_velocities
+            
+        See Also
+        --------
+        compute.survey_aligned_velocities
+        """
         
+        self = self.merge_Dataset(_compute.survey_aligned_velocities(self, **kwargs), overwrite)
+        
+        return self
+        
+
 def _create_grid(dataset, coords, periodic):
 
     # TODO: add option to infer axis using comodo since we're currently cleaning up comodo attributes by default
