@@ -1062,6 +1062,28 @@ class OceanDataset:
         
         return self
     
+    def merge_volume_cells(self, overwrite=None, **kwargs):
+        """
+        Shortcut for compute.volume_cells and OceanDataset.merge_Dataset.
+        
+        Parameters
+        ----------
+        overwrite: bool or None
+            If None, raise error if any xarray.DataArray already exists.  
+            If True, overwrite existing xarray.DataArray.    
+            If False, do not add existing xarray.DataArray.  
+        **kwargs: 
+            Keyword arguments for compute.volume_cells
+            
+        See Also
+        --------
+        compute.volume_cells
+        """
+        
+        self = self.merge_Dataset(_compute.volume_cells(self, **kwargs), overwrite)
+        
+        return self
+    
     def merge_volume_weighted_mean(self, overwrite=None, **kwargs):
         """
         Shortcut for compute.volume_weighted_mean and OceanDataset.merge_Dataset.

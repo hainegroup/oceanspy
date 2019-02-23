@@ -71,6 +71,7 @@ Compute
    OceanDataset.merge_divergence
    OceanDataset.merge_curl
    OceanDataset.merge_laplacian
+   OceanDataset.merge_volume_cells
    OceanDataset.merge_volume_weighted_mean
    OceanDataset.merge_potential_density_anomaly
    OceanDataset.merge_Brunt_Vaisala_frequency
@@ -154,6 +155,7 @@ Functions
    compute.divergence
    compute.curl
    compute.laplacian
+   compute.volume_cells
    compute.volume_weighted_mean
    compute.potential_density_anomaly
    compute.Brunt_Vaisala_frequency
