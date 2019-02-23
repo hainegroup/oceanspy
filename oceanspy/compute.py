@@ -1289,7 +1289,7 @@ def Okubo_Weiss_parameter(od):
     return _ospy.OceanDataset(ds).dataset
 
 
-def Ertel_potential_vorticity(od):
+def Ertel_potential_vorticity(od, full=True):
     """
     Compute Ertel Potential Vorticity.  
     Interpolate all terms to C and Z points.
@@ -1307,6 +1307,9 @@ def Ertel_potential_vorticity(od):
     ----------
     od: OceanDataset
         oceandataset used to compute
+    full: bool
+        If False, only use vertical component of the vorticity vectors (fCoriG, momVort3).
+        If True, use both vertical and horizontal components.
     
     Returns
     -------
@@ -1324,27 +1327,32 @@ def Ertel_potential_vorticity(od):
     # Check input
     if not isinstance(od, _ospy.OceanDataset):
         raise TypeError('`od` must be OceanDataset')
+    if not isinstance(full, bool):
+        raise TypeError('`full` must be bool')
         
     # Add missing variables
-    varList = ['fCoriG', 'momVort1', 'momVort2', 'momVort3', 'N2', 'YC']
+    varList = ['fCoriG', 'momVort3', 'N2']
+    if full: varList = varList + ['momVort1', 'momVort2', 'YC']
     od = _add_missing_variables(od, varList)
     
     # Parameters
-    paramsList = ['g', 'rho0', 'omega']
+    paramsList = ['g', 'rho0']
+    if full: paramsList = paramsList + ['omega']
     params2use = {par:od.parameters[par] for par in od.parameters if par in paramsList}
     
     # Extract variables
-    momVort1 = od._ds['momVort1']
-    momVort2 = od._ds['momVort2']
     momVort3 = od._ds['momVort3']
     fCoriG   = od._ds['fCoriG']
     N2       = od._ds['N2']
-    YC       = od._ds['YC']
+    if full:
+        momVort1 = od._ds['momVort1']
+        momVort2 = od._ds['momVort2']
+        YC       = od._ds['YC']
     
     # Extract parameters
     g     = params2use['g']
     rho0  = params2use['rho0']
-    omega = params2use['omega']
+    if full: omega = params2use['omega']
     
     # Extract grid
     grid = od._grid
@@ -1358,14 +1366,16 @@ def Ertel_potential_vorticity(od):
     # Interpolate fields
     fpluszeta  = grid.interp(grid.interp(momVort3 + fCoriG, 'X'), 'Y')
     N2         = grid.interp(N2, 'Z', to='center', boundary='fill', fill_value=_np.nan)
-    momVort1   = grid.interp(grid.interp(momVort1, 'Y'), 'Z', to='center', boundary='fill', fill_value=_np.nan)
-    momVort2   = grid.interp(grid.interp(momVort2, 'X'), 'Z', to='center', boundary='fill', fill_value=_np.nan)
-    dSigma0_dX = grid.interp(Sigma0_grads['dSigma0_dX'], 'X')  
-    dSigma0_dY = grid.interp(Sigma0_grads['dSigma0_dY'], 'Y')  
-    _, e = _utils.Coriolis_parameter(YC, omega)
+    if full:
+        momVort1   = grid.interp(grid.interp(momVort1, 'Y'), 'Z', to='center', boundary='fill', fill_value=_np.nan)
+        momVort2   = grid.interp(grid.interp(momVort2, 'X'), 'Z', to='center', boundary='fill', fill_value=_np.nan)
+        dSigma0_dX = grid.interp(Sigma0_grads['dSigma0_dX'], 'X')  
+        dSigma0_dY = grid.interp(Sigma0_grads['dSigma0_dY'], 'Y')  
+        _, e = _utils.Coriolis_parameter(YC, omega)
     
     # Create DataArray
-    Ertel_PV = fpluszeta * N2 / g + (momVort1 * dSigma0_dX + (momVort2 + e) * dSigma0_dY)/rho0
+    Ertel_PV = fpluszeta * N2 / g
+    if full: Ertel_PV = Ertel_PV + (momVort1 * dSigma0_dX + (momVort2 + e) * dSigma0_dY)/rho0
     Ertel_PV.attrs['units']      = 'm^-1 s^-1'
     Ertel_PV.attrs['long_name']  = 'Ertel potential vorticity'
     Ertel_PV.attrs['OceanSpy_parameters'] = str(params2use)
@@ -1673,8 +1683,12 @@ def heat_budget(od):
     ds['tendH'].attrs['long_name'] = 'Heat total tendency'
     ds['tendH'].attrs['OceanSpy_parameters'] = str(params2use)
     
+    # Store chunks
+    chunks = {dim: ds['tendH'].chunks[i] for i, dim in enumerate(ds['tendH'].dims)}
+    
     # Horizontal convergence
     ds['adv_hConvH'] = -(grid.diff(ADVx_TH.where(HFacW!=0),'X') +  grid.diff(ADVy_TH.where(HFacS!=0),'Y'))/CellVol
+    ds['adv_hConvH'] = ds['adv_hConvH'].chunk(chunks)
     ds['adv_hConvH'].attrs['units']     = units
     ds['adv_hConvH'].attrs['long_name'] = 'Heat horizontal advective convergence'
     ds['adv_hConvH'].attrs['OceanSpy_parameters'] = str(params2use)
@@ -1684,6 +1698,7 @@ def heat_budget(od):
                                                           ['adv_vConvH', 'dif_vConvH', 'kpp_vConvH'], 
                                                           ['advective', 'diffusive', 'kpp'])):
         ds[name_out] = grid.diff(var_in, 'Z', boundary='fill', fill_value=_np.nan).where(HFacC!=0)/CellVol
+        ds[name_out] = ds[name_out].chunk(chunks)
         ds[name_out].attrs['units'] = units
         ds[name_out].attrs['units'] = 'Heat vertical {} convergence'.format(long_name)
         ds[name_out].attrs['OceanSpy_parameters'] = str(params2use)
@@ -1703,9 +1718,11 @@ def heat_budget(od):
     else:
         forcH   = forcH * oceQsw_AVG
     ds['forcH'] = (forcH/(rho0*c_p*dzMat))
+    ds['forcH'] = ds['forcH'].chunk(chunks)
     ds['forcH'].attrs['units']     = units
     ds['forcH'].attrs['long_name'] = 'Heat surface forcing'
     ds['forcH'].attrs['OceanSpy_parameters'] = str(params2use)
+    
     
     return _ospy.OceanDataset(ds).dataset
 
@@ -1804,8 +1821,12 @@ def salt_budget(od):
     ds['tendS'].attrs['long_name'] = 'Salt total tendency'
     ds['tendS'].attrs['OceanSpy_parameters'] = str(params2use)
     
+    # Store chunks
+    chunks = {dim: ds['tendS'].chunks[i] for i, dim in enumerate(ds['tendS'].dims)}
+    
     # Horizontal convergence
     ds['adv_hConvS'] = -(grid.diff(ADVx_SLT.where(HFacW!=0),'X') +  grid.diff(ADVy_SLT.where(HFacS!=0),'Y'))/CellVol
+    ds['adv_hConvS'] = ds['adv_hConvS'].chunk(chunks)
     ds['adv_hConvS'].attrs['units']     = units
     ds['adv_hConvS'].attrs['long_name'] = 'Salt horizontal advective convergence'
     ds['adv_hConvS'].attrs['OceanSpy_parameters'] = str(params2use)
@@ -1815,6 +1836,7 @@ def salt_budget(od):
                                                           ['adv_vConvS', 'dif_vConvS', 'kpp_vConvS'], 
                                                           ['advective', 'diffusive', 'kpp'])):
         ds[name_out] = grid.diff(var_in, 'Z', boundary='fill', fill_value=_np.nan).where(HFacC!=0)/CellVol
+        ds[name_out] = ds[name_out].chunk(chunks)
         ds[name_out].attrs['units'] = units
         ds[name_out].attrs['units'] = 'Salt vertical {} convergence'.format(long_name)
 
@@ -1824,7 +1846,10 @@ def salt_budget(od):
         forcS_surf = (SFLUX + forcS.isel(Z=0)).expand_dims('Z', S.dims.index('Z'))
         forcS_bott = forcS.isel(Z=slice(1,None))
         forcS = _xr.concat([forcS_surf, forcS_bott],dim='Z')
+        
+    # Use same chunking
     ds['forcS'] = (forcS/(rho0*dzMat))
+    ds['forcS'] = ds['forcS'].chunk(chunks)
     ds['forcS'].attrs['units']     = units
     ds['forcS'].attrs['long_name'] = 'Salt surface forcing'
     ds['forcS'].attrs['OceanSpy_parameters'] = str(params2use)
