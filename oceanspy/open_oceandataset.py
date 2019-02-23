@@ -110,7 +110,12 @@ def EGshelfIIseas2km_ERAI(daily     = False,
     # Add attribute (snapshot vs average)
     for var in [var for var in ds.variables if ('time' in ds[var].coords and var!='time')]:
         ds[var].attrs.update({'original_output': 'snapshot'}) 
-      
+    
+    # Consistent chunkink
+    chunks = {**ds.sizes,
+              'time': ds['Temp'].chunks[ds['Temp'].dims.index('time')]}
+    ds = ds.chunk(chunks)
+    
     # Initialize OceanDataset
     od = _OceanDataset(ds).set_name(name).set_description(description)
     od = od.set_coords(fillna=True, coords1Dfrom2D=True)
@@ -215,7 +220,7 @@ def EGshelfIIseas2km_ASR(cropped   = False,
             Time = 'snapshot'
         ds[var].attrs.update({'original_output': Time}) 
     
-    # Consistent chunks
+    # Consistent chunkink
     chunks = {**ds.sizes,
               'time': ds['Temp'].chunks[ds['Temp'].dims.index('time')]}
     if cropped:
@@ -290,9 +295,22 @@ def exp_Arctic_Control(gridpath  = '/home/idies/workspace/OceanCirculation/exp_A
 
     # Rename time and add attributes
     ds = ds.rename({'T': 'time'})
+    
+    # Add attribute (snapshot vs average)
     for var in [var for var in ds.variables if ('time' in ds[var].coords and var!='time')]:
-        ds[var].attrs.update({'original_output': 'snapshot'}) 
-      
+        if var in fldsset.variables: 
+            ds[var] = ds[var].drop('time').isel(time=slice(1, None)).rename({'time': 'time_midp'})
+            Time = 'average'
+        else:      
+            Time = 'snapshot'
+        ds[var].attrs.update({'original_output': Time}) 
+    
+    # Consistent chunkink
+    chunks = {**ds.sizes,
+              'time': ds['Temp'].chunks[ds['Temp'].dims.index('time')],
+              'time_midp': ds['TFLUX'].chunks[ds['TFLUX'].dims.index('time_midp')]}
+    ds = ds.chunk(chunks)
+    
     # Initialize OceanDataset
     od = _OceanDataset(ds).set_name(name).set_description(description)
     od = od.set_coords(coordsUVfromG=True)
@@ -412,6 +430,11 @@ def EGshelfSJsec500m(Hydrostatic = True,
     # Rename variables (We could use aliases instead)
     ds = ds.rename({'XC': 'X', 'YC': 'Y', 'XG': 'Xp1', 'YG': 'Yp1',
                     'T': 'Temp', 'hFacC': 'HFacC', 'hFacW': 'HFacW', 'hFacS': 'HFacS'})
+    
+    # Consistent chunkink
+    chunks = {**ds.sizes,
+              'time': ds['Temp'].chunks[ds['Temp'].dims.index('time')]}
+    ds = ds.chunk(chunks)
     
     # Initialize OceanDataset
     od = _OceanDataset(ds).set_name(name).set_description(description)
