@@ -26,7 +26,9 @@ from . import utils as _utils
 # TODO: gradient, curl, divergence, laplacian currently can't handle aliases.
 # TODO: any time velocities are mutiplied by hfac, we should use mass weighted velocities if available (mass_weighted function?)
 # TODO: add area weighted mean for 2D variables, e.g. SSH (are_weighted_mean, SI, ...), or vertical sections
-
+# TODO: add error when function will fail (e.g., divergence of W fails when only one level is available)
+# TODO: compute transport for survey
+# TODO: add integrals?
 
 # Hard coded  list of variables outputed by functions
 _FUNC2VARS = {'potential_density_anomaly'     : ['Sigma0'],
@@ -325,16 +327,16 @@ def divergence(od, iName=None, jName=None, kName=None, aliases = False):
         od = _add_missing_variables(od, varList)
         
         # Add div
-        div['d'+iName+'_dX'] = (1 / (od._ds['rA'] * od._ds['HFacC']) *
-                                    od._grid.diff(od._ds['dyG']*od._ds['HFacW']*od._ds[iName], 'X', ))
+        div['d'+iName+'_dX'] = (od._grid.diff(od._ds[iName]*od._ds['HFacW']*od._ds['dyG'], 'X') / 
+                                (od._ds['HFacC'] * od._ds['rA']))
     if jName is not None:
         # Add missing variables
         varList = ['HFacC', 'rA', 'dxG', 'HFacS', jName]
         od = _add_missing_variables(od, varList)
         
         # Add div
-        div['d'+jName+'_dY'] = (1 / (od._ds['rA'] * od._ds['HFacC']) *
-                                     od._grid.diff(od._ds['dxG']*od._ds['HFacS']*od._ds[jName], 'Y'))
+        div['d'+jName+'_dY'] = (od._grid.diff(od._ds[jName]*od._ds['HFacS']*od._ds['dxG'], 'Y') / 
+                                (od._ds['HFacC'] * od._ds['rA']))
     if kName is not None:
         # Add missing variables
         od = _add_missing_variables(od, kName)
@@ -418,11 +420,11 @@ def curl(od, iName=None, jName=None, kName=None, aliases = False):
         
         # Add curl
         Name = 'd'+jName+'_dX-d'+iName+'_dY'
-        crl[Name] = (1/od._ds['rAz'] * 
-                      (od._grid.diff(od._ds['dyC']*od._ds[jName], 'X', 
-                                     boundary='fill', fill_value=_np.nan) -
-                       od._grid.diff(od._ds['dxC']*od._ds[iName], 'Y',
-                                     boundary='fill', fill_value=_np.nan)))
+        crl[Name] = (od._grid.diff(od._ds[jName]*od._ds['dyC'], 'X',
+                                   boundary='fill', fill_value=_np.nan) -
+                     od._grid.diff(od._ds[iName]*od._ds['dxC'], 'Y',
+                                   boundary='fill', fill_value=_np.nan)) / od._ds['rAz']
+                         
     if jName is not None and kName is not None:
         # Add missing variables
         varList = [jName, kName]
@@ -1172,8 +1174,8 @@ def shear_strain(od):
         
     # Create DataArray
     # Same of vertical relative vorticity with + instead of -
-    s_strain = (1/rAz * (grid.diff(dyC*V, 'X', boundary='fill', fill_value=_np.nan) + 
-                         grid.diff(dxC*U, 'Y', boundary='fill', fill_value=_np.nan)))
+    s_strain = (od._grid.diff(V*dyC, 'X', boundary='fill', fill_value=_np.nan) +
+                od._grid.diff(U*dxC, 'Y',  boundary='fill', fill_value=_np.nan)) / rAz
     s_strain.attrs['units']     = 's^-1'
     s_strain.attrs['long_name'] = 'shear component of strain'
 
@@ -1354,7 +1356,7 @@ def Ertel_potential_vorticity(od):
     Sigma0_grads = gradient(od, varNameList='Sigma0', axesList=['X', 'Y'], aliases = False)
     
     # Interpolate fields
-    fpluszeta  = grid.interp(grid.interp(fCoriG + momVort3, 'X'), 'Y')
+    fpluszeta  = grid.interp(grid.interp(momVort3 + fCoriG, 'X'), 'Y')
     N2         = grid.interp(N2, 'Z', to='center', boundary='fill', fill_value=_np.nan)
     momVort1   = grid.interp(grid.interp(momVort1, 'Y'), 'Z', to='center', boundary='fill', fill_value=_np.nan)
     momVort2   = grid.interp(grid.interp(momVort2, 'X'), 'Z', to='center', boundary='fill', fill_value=_np.nan)
@@ -1695,7 +1697,7 @@ def heat_budget(od):
     q = (R * _np.exp(Zp1/zeta1) + (1-R)*_np.exp(Zp1/zeta2)).where(Zp1>=-200,0)
     forcH   = -grid.diff(q,'Z').where(HFacC!=0)
     if Zp1.isel(Zp1=0)==0:
-        forcH_surf = (TFLUX-(1-forcH.isel(Z=0))*oceQsw_AVG).expand_dims('Z')
+        forcH_surf = (TFLUX-(1-forcH.isel(Z=0))*oceQsw_AVG).expand_dims('Z', Temp.dims.index('Z'))
         forcH_bott = forcH.isel(Z=slice(1,None))*oceQsw_AVG
         forcH = _xr.concat([forcH_surf, forcH_bott],dim='Z')
     else:
@@ -1819,7 +1821,7 @@ def salt_budget(od):
     # Surface flux    
     forcS = oceSPtnd
     if Zp1.isel(Zp1=0)==0:
-        forcS_surf = (SFLUX + forcS.isel(Z=0)).expand_dims('Z')
+        forcS_surf = (SFLUX + forcS.isel(Z=0)).expand_dims('Z', S.dims.index('Z'))
         forcS_bott = forcS.isel(Z=slice(1,None))
         forcS = _xr.concat([forcS_surf, forcS_bott],dim='Z')
     ds['forcS'] = (forcS/(rho0*dzMat))
