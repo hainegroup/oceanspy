@@ -621,6 +621,11 @@ class OceanDataset:
             If None, raise error if any xarray.DataArray already exists.
             If True, overwrite existing xarray.DataArray.  
             If False, do not add existing xarray.DataArray.
+        
+        Returns
+        -------
+        ds: xarray.Dataset 
+            Contains cell volumes named as cellVol[grid point]_[Z dim]
         """
         if not isinstance(ds, _xr.Dataset):
             raise TypeError('`ds` must be xarray.Dataset')

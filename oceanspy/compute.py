@@ -528,15 +528,16 @@ def volume_cells(od, varNameList = None):
     varNameList: 1D array_like, str, or None
         List of variables (strings).  
         If None, compute volumes for each grid in the dataset.
-        Otherwise, compute volumes for grids of requested variables 
+        Otherwise, compute volumes for grids of requested variables
     
-    Returns
-    -------
-    ds: xarray.Dataset 
-        Contains cell volumes named as cellVol[grid point]_[Z dim]
+    Notes
+    -----
+    This function will take a few seconds when it need to check all variables. Use `varNameList` to make it quicker.  
     
     Examples
     --------
+    >>> od = ospy.open_oceandataset.EGshelfIIseas2km_ASR()
+    >>> ospy.compute.volume_cells(od)
     <xarray.Dataset>
     Dimensions:      (X: 960, Xp1: 961, Y: 880, Yp1: 881, Z: 216, Zl: 216)
     Coordinates:
@@ -557,10 +558,6 @@ def volume_cells(od, varNameList = None):
         cellVolW_Z   (Z, Y, Xp1) float64 dask.array<shape=(216, 880, 961), chunksize=(216, 880, 961)>
         cellVolS_Z   (Z, Yp1, X) float64 dask.array<shape=(216, 881, 960), chunksize=(216, 881, 960)>
         cellVolC_Zl  (Zl, Y, X) float64 dask.array<shape=(216, 880, 960), chunksize=(1, 880, 960)>
-        
-    Notes
-    -----
-    This function will take a few seconds when it need to check all variables. Use `varNameList` to make it quicker.  
     """
     
     # Check input
@@ -654,6 +651,10 @@ def volume_weighted_mean(od, varNameList, aliases = False):
     -------
     ds: xarray.Dataset 
         Contains averaged variable named as varName_vw_mean
+    
+    See Also
+    --------
+    volume_cells
     
     Examples
     --------
