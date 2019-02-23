@@ -199,9 +199,7 @@ def EGshelfIIseas2km_ASR(cropped   = False,
         ds = ds.sel({dim:slice(cropset[dim].isel({dim: 0}).values, cropset[dim].isel({dim: -1}).values) for dim in cropset.dims})
         ds = ds.isel(Zp1=slice(len(cropset['Z'])+1), Zu=slice(len(cropset['Z'])))
         ds = _xr.merge([ds, cropset])
-
-        
-        
+    
     # Add sign
     for dim in ['Z', 'Zp1', 'Zu', 'Zl']: ds[dim].attrs.update({'positive': 'up'}) 
     
@@ -216,7 +214,15 @@ def EGshelfIIseas2km_ASR(cropped   = False,
         else:      
             Time = 'snapshot'
         ds[var].attrs.update({'original_output': Time}) 
-
+    
+    # Consistent chunks
+    chunks = {**ds.sizes,
+              'time': ds['Temp'].chunks[ds['Temp'].dims.index('time')]}
+    if cropped:
+        chunks = {**chunks, 
+                  'time_midp': ds['ADVr_SLT'].chunks[ds['ADVr_SLT'].dims.index('time_midp')]}
+    ds = ds.chunk(chunks)
+    
     # Initialize OceanDataset
     od = _OceanDataset(ds).set_name(name).set_description(description)
     od = od.set_coords(fillna=True, coords1Dfrom2D=True)

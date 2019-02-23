@@ -1682,13 +1682,10 @@ def heat_budget(od):
     ds['tendH'].attrs['units']     = units
     ds['tendH'].attrs['long_name'] = 'Heat total tendency'
     ds['tendH'].attrs['OceanSpy_parameters'] = str(params2use)
-    
-    # Store chunks
-    chunks = {dim: ds['tendH'].chunks[i] for i, dim in enumerate(ds['tendH'].dims)}
+
     
     # Horizontal convergence
     ds['adv_hConvH'] = -(grid.diff(ADVx_TH.where(HFacW!=0),'X') +  grid.diff(ADVy_TH.where(HFacS!=0),'Y'))/CellVol
-    ds['adv_hConvH'] = ds['adv_hConvH'].chunk(chunks)
     ds['adv_hConvH'].attrs['units']     = units
     ds['adv_hConvH'].attrs['long_name'] = 'Heat horizontal advective convergence'
     ds['adv_hConvH'].attrs['OceanSpy_parameters'] = str(params2use)
@@ -1698,7 +1695,6 @@ def heat_budget(od):
                                                           ['adv_vConvH', 'dif_vConvH', 'kpp_vConvH'], 
                                                           ['advective', 'diffusive', 'kpp'])):
         ds[name_out] = grid.diff(var_in, 'Z', boundary='fill', fill_value=_np.nan).where(HFacC!=0)/CellVol
-        ds[name_out] = ds[name_out].chunk(chunks)
         ds[name_out].attrs['units'] = units
         ds[name_out].attrs['units'] = 'Heat vertical {} convergence'.format(long_name)
         ds[name_out].attrs['OceanSpy_parameters'] = str(params2use)
@@ -1718,7 +1714,6 @@ def heat_budget(od):
     else:
         forcH   = forcH * oceQsw_AVG
     ds['forcH'] = (forcH/(rho0*c_p*dzMat))
-    ds['forcH'] = ds['forcH'].chunk(chunks)
     ds['forcH'].attrs['units']     = units
     ds['forcH'].attrs['long_name'] = 'Heat surface forcing'
     ds['forcH'].attrs['OceanSpy_parameters'] = str(params2use)
@@ -1821,12 +1816,8 @@ def salt_budget(od):
     ds['tendS'].attrs['long_name'] = 'Salt total tendency'
     ds['tendS'].attrs['OceanSpy_parameters'] = str(params2use)
     
-    # Store chunks
-    chunks = {dim: ds['tendS'].chunks[i] for i, dim in enumerate(ds['tendS'].dims)}
-    
     # Horizontal convergence
     ds['adv_hConvS'] = -(grid.diff(ADVx_SLT.where(HFacW!=0),'X') +  grid.diff(ADVy_SLT.where(HFacS!=0),'Y'))/CellVol
-    ds['adv_hConvS'] = ds['adv_hConvS'].chunk(chunks)
     ds['adv_hConvS'].attrs['units']     = units
     ds['adv_hConvS'].attrs['long_name'] = 'Salt horizontal advective convergence'
     ds['adv_hConvS'].attrs['OceanSpy_parameters'] = str(params2use)
@@ -1836,7 +1827,6 @@ def salt_budget(od):
                                                           ['adv_vConvS', 'dif_vConvS', 'kpp_vConvS'], 
                                                           ['advective', 'diffusive', 'kpp'])):
         ds[name_out] = grid.diff(var_in, 'Z', boundary='fill', fill_value=_np.nan).where(HFacC!=0)/CellVol
-        ds[name_out] = ds[name_out].chunk(chunks)
         ds[name_out].attrs['units'] = units
         ds[name_out].attrs['units'] = 'Salt vertical {} convergence'.format(long_name)
 
@@ -1849,7 +1839,6 @@ def salt_budget(od):
         
     # Use same chunking
     ds['forcS'] = (forcS/(rho0*dzMat))
-    ds['forcS'] = ds['forcS'].chunk(chunks)
     ds['forcS'].attrs['units']     = units
     ds['forcS'].attrs['long_name'] = 'Salt surface forcing'
     ds['forcS'].attrs['OceanSpy_parameters'] = str(params2use)

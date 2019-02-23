@@ -646,7 +646,9 @@ class OceanDataset:
         
         # Save attributes and merge dataset (raise error if dimension indexes are not matching)
         attrs   = dataset.attrs
+        chunks  = dataset.chunks
         dataset = _xr.merge([dataset, ds]) 
+        dataset = dataset.chunk(chunks)
         dataset.attrs = attrs
         self = OceanDataset(dataset)
         
