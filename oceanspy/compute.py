@@ -513,7 +513,132 @@ def laplacian(od, varNameList, axesList=None, aliases = False):
         div = div + [divergence(od, **compNames)]
     
     return _xr.merge(div)
+     
+
+def volume_cells(od, varNameList = None):
+    """
+    Compute volume of cells.
+
+    Parameters
+    ----------
+    od: OceanDataset
+        oceandataset used to compute 
+    varNameList: 1D array_like, str, or None
+        List of variables (strings).  
+        If None, compute volumes for each grid in the dataset.
+        Otherwise, compute volumes for grids of requested variables 
+    
+    Returns
+    -------
+    ds: xarray.Dataset 
+        Contains cell volumes named as cellVol[grid point]_[Z dim]
+    
+    Examples
+    --------
+    >>> od = ospy.open_oceandataset.EGshelfIIseas2km_ASR()
+    >>> ospy.compute.volume_cells(od)
+    <xarray.Dataset>
+    Dimensions:      (X: 960, Xp1: 961, Y: 880, Yp1: 881, Z: 216, Zl: 216)
+    Coordinates:
+      * Z            (Z) float64 -1.0 -3.5 -7.0 ... -3.112e+03 -3.126e+03 -3.142e+03
+      * X            (X) float64 -46.92 -46.83 -46.74 -46.65 ... 1.156 1.244 1.332
+      * Y            (Y) float64 56.81 56.85 56.89 56.93 ... 76.37 76.41 76.44 76.48
+        XC           (Y, X) float64 dask.array<shape=(880, 960), chunksize=(880, 960)>
+        YC           (Y, X) float64 dask.array<shape=(880, 960), chunksize=(880, 960)>
+      * Xp1          (Xp1) float64 -46.96 -46.87 -46.78 -46.7 ... 1.2 1.288 1.376
+        XU           (Y, Xp1) float64 dask.array<shape=(880, 961), chunksize=(880, 961)>
+        YU           (Y, Xp1) float64 dask.array<shape=(880, 961), chunksize=(880, 961)>
+      * Yp1          (Yp1) float64 56.79 56.83 56.87 56.91 ... 76.43 76.46 76.5
+        XV           (Yp1, X) float64 dask.array<shape=(881, 960), chunksize=(881, 960)>
+        YV           (Yp1, X) float64 dask.array<shape=(881, 960), chunksize=(881, 960)>
+      * Zl           (Zl) float64 0.0 -2.0 -5.0 ... -3.104e+03 -3.119e+03 -3.134e+03
+    Data variables:
+        cellVolC_Z   (Z, Y, X) float64 dask.array<shape=(216, 880, 960), chunksize=(216, 880, 960)>
+        cellVolW_Z   (Z, Y, Xp1) float64 dask.array<shape=(216, 880, 961), chunksize=(216, 880, 961)>
+        cellVolS_Z   (Z, Yp1, X) float64 dask.array<shape=(216, 881, 960), chunksize=(216, 881, 960)>
+        cellVolC_Zl  (Zl, Y, X) float64 dask.array<shape=(216, 880, 960), chunksize=(1, 880, 960)>
         
+    Notes
+    -----
+    This function will take a few seconds when it need to check all variables. Use `varNameList` to make it quicker.  
+    """
+    
+    # Check input
+    if not isinstance(od, _ospy.OceanDataset):
+        raise TypeError('`od` must be OceanDataset')
+        
+    if varNameList is not None:
+        varNameList = _np.asarray(varNameList, dtype='str')
+        if varNameList.ndim == 0: varNameList = varNameList.reshape(1)
+        elif varNameList.ndim >1: raise TypeError('Invalid `varNameList`')
+    else:
+        # Check all variables is varNameList is not provided
+        varNameList = od._ds.data_vars
+
+    # Add missing variables
+    # TODO: We don't really need to always check all of them!
+    varList = ['HFacC', 'HFacW', 'HFacS', 'rA', 'rAs', 'rAw', 'rAz', 'drF', 'drC']
+    od = _add_missing_variables(od, varList)
+ 
+    # Loop through all variables
+    dims_done = []
+    vols = {}
+    cont = False
+    for varName in varNameList:
+        for dims in dims_done:
+            if set(dims).issubset(od._ds[varName].dims) or len(od._ds[varName].dims)<3: 
+                cont = True
+                continue
+        if cont: 
+            cont = False
+            continue
+        
+        # Check dimensions
+        for axis in ['X', 'Y', 'Z']:
+            dims = [od._grid.axes[axis].coords[coord].name for coord in od._grid.axes[axis].coords]
+            if not any(dim in od._ds[varName].dims for dim in dims): 
+                cont = True
+                continue
+        if cont:
+            cont = False
+            continue
+        
+        # Extract HFac
+        point = None
+        if   set(['X', 'Y']).issubset(od._ds[varName].dims)  : point = 'C'
+        elif set(['Xp1', 'Y']).issubset(od._ds[varName].dims): point = 'W'
+        elif set(['X', 'Yp1']).issubset(od._ds[varName].dims): point = 'S'
+            
+        if point is None: continue
+        else: HFac = od._ds['HFac'+point]
+        
+        # Extract rA
+        rA = None
+        for Aname in ['rA', 'rAs', 'rAw', 'rAz']:
+            if set(od._ds[Aname].dims).issubset(od._ds[varName].dims): rA = od._ds[Aname]
+        if rA is None: continue
+
+        # Extract dr
+        dr = None
+        for rName in ['drF', 'drC']:
+            if set(od._ds[rName].dims).issubset(od._ds[varName].dims):  dr = od._ds[rName]
+        for coord in od._grid.axes['Z'].coords:
+            if od._grid.axes['Z'].coords[coord].name in od._ds[varName].dims and coord!='center':
+                HFac = od._grid.interp(HFac, 'Z', to=coord, boundary='fill', fill_value=_np.nan)
+                if coord!='outer':
+                    dr = od._grid.interp(od._ds['drF'], 'Z', to=coord, boundary='fill', fill_value=_np.nan)
+        if dr is None: continue
+
+        # Compute Volume
+        cellVol = dr * HFac * rA
+        name = 'cellVol'+point+'_'+dr.dims[0]
+        
+        # Add to dataset
+        vols[name] = cellVol
+        dims_done = dims_done + [cellVol.dims]
+    
+    return _xr.Dataset(vols)
+    
 def volume_weighted_mean(od, varNameList, aliases = False):
     """
     Compute volume weighted mean.
@@ -550,47 +675,26 @@ def volume_weighted_mean(od, varNameList, aliases = False):
     if varNameList.ndim == 0: varNameList = varNameList.reshape(1)
     elif varNameList.ndim >1: raise TypeError('Invalid `varNameList`')
     
-    # Check grid axis
-    axis_error = [axis for axis in ['X', 'Y', 'Z'] if axis not in od._grid.axes]
-    if len(axis_error)!=0: raise ValueError('{} must be in grid_coords'.format(axis_error))
-    
     # Add missing variables
-    varList = ['HFacC', 'HFacW', 'HFacS', 'rA', 'rAs', 'rAw', 'rAz', 'drF', 'drC'] + list(varNameList)
+    varList = list(varNameList)
     od = _add_missing_variables(od, varList)
+    
+    # Message
+    print('Computing volume weighted means')
     
     # Loop through variables
     mean = {}
     for varName in varNameList:
-        # Check dimensions
-        for axis in ['X', 'Y', 'Z']:
-            dims = [od._grid.axes[axis].coords[coord].name for coord in od._grid.axes[axis].coords]
-            if not any(dim in od._ds[varName].dims for dim in dims): 
-                raise ValueError('[{}] must have one of these dimensions {}'.format(varName, dims))
-
-        # Extract HFac
-        if   set(['X', 'Y']).issubset(od._ds[varName].dims):   HFac = od._ds['HFacC']
-        elif set(['Xp1', 'Y']).issubset(od._ds[varName].dims): HFac = od._ds['HFacW']
-        elif set(['X', 'Yp1']).issubset(od._ds[varName].dims): HFac = od._ds['HFacS']
-
-        # Extract rA
-        for Aname in ['rA', 'rAs', 'rAw', 'rAz']:
-            if set(od._ds[Aname].dims).issubset(od._ds[varName].dims): rA = od._ds[Aname]
-
-        # Extract dr
-        for rName in ['drF', 'drC']:
-            if set(od._ds[rName].dims).issubset(od._ds[varName].dims):  dr = od._ds[rName]
-        for coord in od._grid.axes['Z'].coords:
-            if od._grid.axes['Z'].coords[coord].name in od._ds[varName].dims and coord!='center':
-                HFac = od._grid.interp(HFac, 'Z', to=coord, boundary='fill', fill_value=_np.nan)
-                if coord!='outer':
-                    dr = od._grid.interp(od._ds['drF'], 'Z', to=coord, boundary='fill', fill_value=_np.nan)
 
         # Compute Volume
-        cellVol = dr * HFac * rA
+        cellVol = volume_cells(od, varName)
+        Volname = [var for var in cellVol.data_vars][0]
+        cellVol = cellVol[Volname]
 
         # Add and clear
-        mean[varName+'_vw_mean'] = (od._ds[varName]*cellVol).sum(cellVol.dims) / cellVol.sum()
-        del cellVol, dr, HFac, rA
+        mean[varName+'_vw_mean'] = ((od._ds[varName]*cellVol).sum(cellVol.dims)/
+                                    cellVol.where(~od._ds[varName].isnull()).sum(cellVol.dims))
+        mean[varName+'_vw_mean'].attrs = od._ds[varName].attrs
         
     return _xr.Dataset(mean)
     
