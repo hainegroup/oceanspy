@@ -294,15 +294,15 @@ def divergence(od, iName=None, jName=None, kName=None, aliases = False):
     <xarray.Dataset>
     Dimensions:  (X: 960, Y: 880, Z: 216, time: 1464)
     Coordinates:
-      * X        (X) float64 -46.92 -46.83 -46.74 -46.65 ... 1.069 1.156 1.244 1.332
+      * time     (time) datetime64[ns] 2007-09-01 ... 2008-08-31T18:00:00
+      * Z        (Z) float64 -1.0 -3.5 -7.0 ... -3.112e+03 -3.126e+03 -3.142e+03
       * Y        (Y) float64 56.81 56.85 56.89 56.93 ... 76.37 76.41 76.44 76.48
+      * X        (X) float64 -46.92 -46.83 -46.74 -46.65 ... 1.069 1.156 1.244 1.332
         XC       (Y, X) float64 dask.array<shape=(880, 960), chunksize=(880, 960)>
         YC       (Y, X) float64 dask.array<shape=(880, 960), chunksize=(880, 960)>
-      * Z        (Z) float64 -1.0 -3.5 -7.0 ... -3.112e+03 -3.126e+03 -3.142e+03
-      * time     (time) datetime64[ns] 2007-09-01 ... 2008-08-31T18:00:00
     Data variables:
-        dU_dX    (Y, X, Z, time) float64 dask.array<shape=(880, 960, 216, 1464), chunksize=(880, 960, 216, 40)>
-        dV_dY    (Y, X, Z, time) float64 dask.array<shape=(880, 960, 216, 1464), chunksize=(880, 960, 216, 40)>
+        dU_dX    (time, Z, Y, X) float64 dask.array<shape=(1464, 216, 880, 960), chunksize=(40, 216, 880, 960)>
+        dV_dY    (time, Z, Y, X) float64 dask.array<shape=(1464, 216, 880, 960), chunksize=(40, 216, 880, 960)>
         dW_dZ    (time, Z, Y, X) float64 dask.array<shape=(1464, 216, 880, 960), chunksize=(40, 215, 880, 960)>
         
     References
@@ -379,12 +379,12 @@ def curl(od, iName=None, jName=None, kName=None, aliases = False):
     <xarray.Dataset>
     Dimensions:      (X: 960, Xp1: 961, Y: 880, Yp1: 881, Z: 216, Zl: 216, time: 1464)
     Coordinates:
-      * Xp1          (Xp1) float64 -46.96 -46.87 -46.78 -46.7 ... 1.2 1.288 1.376
-      * Yp1          (Yp1) float64 56.79 56.83 56.87 56.91 ... 76.43 76.46 76.5
-        XG           (Yp1, Xp1) float64 dask.array<shape=(881, 961), chunksize=(881, 961)>
-        YG           (Yp1, Xp1) float64 dask.array<shape=(881, 961), chunksize=(881, 961)>
       * time         (time) datetime64[ns] 2007-09-01 ... 2008-08-31T18:00:00
       * Z            (Z) float64 -1.0 -3.5 -7.0 ... -3.112e+03 -3.126e+03 -3.142e+03
+      * Yp1          (Yp1) float64 56.79 56.83 56.87 56.91 ... 76.43 76.46 76.5
+      * Xp1          (Xp1) float64 -46.96 -46.87 -46.78 -46.7 ... 1.2 1.288 1.376
+        XG           (Yp1, Xp1) float64 dask.array<shape=(881, 961), chunksize=(881, 961)>
+        YG           (Yp1, Xp1) float64 dask.array<shape=(881, 961), chunksize=(881, 961)>
       * Zl           (Zl) float64 0.0 -2.0 -5.0 ... -3.104e+03 -3.119e+03 -3.134e+03
       * X            (X) float64 -46.92 -46.83 -46.74 -46.65 ... 1.156 1.244 1.332
         XV           (Yp1, X) float64 dask.array<shape=(881, 960), chunksize=(881, 960)>
@@ -393,7 +393,7 @@ def curl(od, iName=None, jName=None, kName=None, aliases = False):
         XU           (Y, Xp1) float64 dask.array<shape=(880, 961), chunksize=(880, 961)>
         YU           (Y, Xp1) float64 dask.array<shape=(880, 961), chunksize=(880, 961)>
     Data variables:
-        dV_dX-dU_dY  (Yp1, Xp1, time, Z) float64 dask.array<shape=(881, 961, 1464, 216), chunksize=(1, 1, 40, 216)>
+        dV_dX-dU_dY  (time, Z, Yp1, Xp1) float64 dask.array<shape=(1464, 216, 881, 961), chunksize=(40, 216, 1, 1)>
         dW_dY-dV_dZ  (time, Zl, Yp1, X) float64 dask.array<shape=(1464, 216, 881, 960), chunksize=(40, 1, 1, 960)>
         dU_dZ-dW_dX  (time, Zl, Y, Xp1) float64 dask.array<shape=(1464, 216, 880, 961), chunksize=(40, 1, 880, 1)>
         
@@ -468,15 +468,15 @@ def laplacian(od, varNameList, axesList=None, aliases = False):
     <xarray.Dataset>
     Dimensions:       (X: 960, Y: 880, Z: 216, time: 1464)
     Coordinates:
-      * X             (X) float64 -46.92 -46.83 -46.74 -46.65 ... 1.156 1.244 1.332
+      * time          (time) datetime64[ns] 2007-09-01 ... 2008-08-31T18:00:00
+      * Z             (Z) float64 -1.0 -3.5 -7.0 ... -3.126e+03 -3.142e+03
       * Y             (Y) float64 56.81 56.85 56.89 56.93 ... 76.41 76.44 76.48
+      * X             (X) float64 -46.92 -46.83 -46.74 -46.65 ... 1.156 1.244 1.332
         XC            (Y, X) float64 dask.array<shape=(880, 960), chunksize=(880, 960)>
         YC            (Y, X) float64 dask.array<shape=(880, 960), chunksize=(880, 960)>
-      * Z             (Z) float64 -1.0 -3.5 -7.0 ... -3.126e+03 -3.142e+03
-      * time          (time) datetime64[ns] 2007-09-01 ... 2008-08-31T18:00:00
     Data variables:
-        ddTemp_dX_dX  (Y, X, Z, time) float64 dask.array<shape=(880, 960, 216, 1464), chunksize=(880, 1, 216, 40)>
-        ddTemp_dY_dY  (Y, X, Z, time) float64 dask.array<shape=(880, 960, 216, 1464), chunksize=(1, 960, 216, 40)>
+        ddTemp_dX_dX  (time, Z, Y, X) float64 dask.array<shape=(1464, 216, 880, 960), chunksize=(40, 216, 880, 1)>
+        ddTemp_dY_dY  (time, Z, Y, X) float64 dask.array<shape=(1464, 216, 880, 960), chunksize=(40, 216, 1, 960)>
         ddTemp_dZ_dZ  (time, Z, Y, X) float64 dask.array<shape=(1464, 216, 880, 960), chunksize=(40, 1, 880, 960)>
             
     References
@@ -537,8 +537,6 @@ def volume_cells(od, varNameList = None):
     
     Examples
     --------
-    >>> od = ospy.open_oceandataset.EGshelfIIseas2km_ASR()
-    >>> ospy.compute.volume_cells(od)
     <xarray.Dataset>
     Dimensions:      (X: 960, Xp1: 961, Y: 880, Yp1: 881, Z: 216, Zl: 216)
     Coordinates:
