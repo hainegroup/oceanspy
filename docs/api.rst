@@ -26,6 +26,7 @@ Attributes
     OceanDataset.aliases
     OceanDataset.grid_coords
     OceanDataset.grid_periodic
+    OceanDataset.projection
 
 Methods
 -------
@@ -43,6 +44,7 @@ Methods
     OceanDataset.set_grid_coords
     OceanDataset.set_grid_periodic
     OceanDataset.set_coords
+    OceanDataset.set_projection
     OceanDataset.create_tree
 
 Shortcuts
