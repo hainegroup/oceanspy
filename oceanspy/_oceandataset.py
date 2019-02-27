@@ -585,7 +585,7 @@ class OceanDataset:
         projection = self._read_from_global_attr('projection')
         if projection:
             import cartopy.crs as ccrs
-            projection = eval('ccrs.{}()'.format(projection))
+            projection = eval('ccrs.{}'.format(projection))
             
         return projection
 
@@ -597,7 +597,7 @@ class OceanDataset:
         
         raise AttributeError("Set new `projection` using .set_projection")
     
-    def set_projection(self, projection):
+    def set_projection(self, projection, **kwargs):
         """
         Projection of the OceanDataset.
         
@@ -605,7 +605,9 @@ class OceanDataset:
         ----------
         projection: str
             cartopy projection of the OceanDataset
-            
+        **kwargs:
+            Keyword arguments used by cartopy
+            E.g., central_longitude=0.0 for PlateCarree
         References
         ----------
         https://scitools.org.uk/cartopy/docs/latest/crs/projections.html
@@ -618,7 +620,8 @@ class OceanDataset:
         import cartopy.crs as ccrs
         if not hasattr(ccrs, projection):
             raise TypeError("{} is not a cartopy projection")
-            
+        projection = '{}(**{})'.format(projection, str(kwargs))
+
         # Set projection
         self = self._store_as_global_attr(name      = 'projection', 
                                           attr      = projection,
