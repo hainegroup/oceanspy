@@ -619,7 +619,7 @@ class OceanDataset:
         
         import cartopy.crs as ccrs
         if not hasattr(ccrs, projection):
-            raise TypeError("{} is not a cartopy projection")
+            raise TypeError("{} is not a cartopy projection".format(projection))
         projection = '{}(**{})'.format(projection, str(kwargs))
 
         # Set projection
