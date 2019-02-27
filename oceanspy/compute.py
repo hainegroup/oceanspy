@@ -23,12 +23,13 @@ from . import utils as _utils
 # TODO: add functions to compute AngleCS and AngleSN when not available (maybe add in utils?)
 #       http://mailman.mitgcm.org/pipermail/mitgcm-support/2014-January/008797.html
 #       https://github.com/dcherian/tools/blob/master/mitgcm/matlab/cs_grid/cubeCalcAngle.m
-# TODO: gradient, curl, divergence, laplacian currently can't handle aliases.
+# TODO: gradient, curl, divergence, laplacian currently can't handle aliases. (DONE UNTIL CURL!)
 # TODO: any time velocities are mutiplied by hfac, we should use mass weighted velocities if available (mass_weighted function?)
 # TODO: add area weighted mean for 2D variables, e.g. SSH (are_weighted_mean, SI, ...), or vertical sections
 # TODO: add error when function will fail (e.g., divergence of W fails when only one level is available)
 # TODO: compute transport for survey
 # TODO: add integrals?
+# TODO: wrap aliases handler
 
 # Hard coded  list of variables outputed by functions
 _FUNC2VARS = {'potential_density_anomaly'     : ['Sigma0'],
@@ -115,8 +116,19 @@ def _add_missing_variables(od, varList, FUNC2VARS = _FUNC2VARS, raiseError=True)
     
     return od
 
+def _rename_aliased(od, varNameList):
+    
+    
+    if od._aliases_flipped is not None:
+        varNameListIN  = [od._aliases_flipped[varName] if varName in od._aliases_flipped else varName for varName in list(varNameList)]
+    else: 
+        varNameListIN = varNameList
+    if isinstance(varNameList, str):
+        varNameListIN = varNameListIN[0]
+    return varNameListIN
 
-def gradient(od, varNameList, axesList=None, aliases = False):
+
+def gradient(od, varNameList, axesList=None, aliased = True):
     """
     Compute gradient along specified axes, returning all terms (not summed).
     
@@ -129,6 +141,9 @@ def gradient(od, varNameList, axesList=None, aliases = False):
         oceandataset used to compute 
     varNameList: 1D array_like, str
         List of variables to differenciate
+    aliased: bool
+        Set it False when working with ._ds and ._grid.
+        Otherwise, aliased must be True
     
     Returns
     -------
@@ -169,6 +184,7 @@ def gradient(od, varNameList, axesList=None, aliases = False):
     MITgcm: https://mitgcm.readthedocs.io/en/latest/algorithm/algorithm.html#notation
     """
     # TODO: should I remove summatory in doc?
+    # TODO: check aliased
     
     # Check input
     if not isinstance(od, _ospy.OceanDataset):
@@ -177,7 +193,6 @@ def gradient(od, varNameList, axesList=None, aliases = False):
     varNameList = _np.asarray(varNameList, dtype='str')
     if varNameList.ndim == 0: varNameList = varNameList.reshape(1)
     elif varNameList.ndim >1: raise TypeError('Invalid `varNameList`')
-        
     if axesList is not None:
         axesList = _np.asarray(axesList, dtype='str')
         if axesList.ndim == 0: axesList = axesList.reshape(1)
@@ -189,13 +204,24 @@ def gradient(od, varNameList, axesList=None, aliases = False):
     else:
         err_axes = [axis for axis in axesList if axis not in grid_axes]
         if len(err_axes)!=0: raise ValueError('{} are not available. Available axes are {}'.format(err_axes, grid_axes))
-        
+     
+    if not isinstance(aliased, bool):
+        raise TypeError('`aliased` must be bool')
+    
+    
+    # Handle aliases
+    if aliased:
+        varNameListIN = _rename_aliased(od, varNameList)
+    else:
+        varNameListIN = varNameList
+    varNameListOUT = varNameList
+    
     # Add missing variables
-    od = _add_missing_variables(od, list(varNameList))
+    od = _add_missing_variables(od, list(varNameListIN))
     
     # Loop through variables
     grad = {}
-    for varName in varNameList:
+    for _, (varName, varNameOUT) in enumerate(zip(varNameListIN, varNameListOUT)):
         
         for axis in axesList:
             # Numerator
@@ -206,7 +232,7 @@ def gradient(od, varNameList, axesList=None, aliases = False):
 
                 # Add missing variables
                 varList = ['dxC', 'dxF', 'dxG', 'dxV', 'dyC', 'dyF', 'dyG', 'dyU']
-                od = _compute._add_missing_variables(od, varList)
+                od = _add_missing_variables(od, varList)
 
                 # Select d
                 pointList = ['C', 'F', 'G']
@@ -223,7 +249,7 @@ def gradient(od, varNameList, axesList=None, aliases = False):
 
                 # Add missing variables
                 varList = ['HFacC', 'HFacW', 'HFacS']
-                od = _compute._add_missing_variables(od, varList)
+                od = _add_missing_variables(od, varList)
 
                 # Extract HFac
                 if set(['X', 'Y']).issubset(dnum.dims):     HFac = od._ds['HFacC']
@@ -256,12 +282,12 @@ def gradient(od, varNameList, axesList=None, aliases = False):
                 dden = od._grid.diff(od._ds[axis+'_dist'], axis, boundary='fill', fill_value=_np.nan)
                     
             # Add and clear
-            grad['d'+varName+'_d'+axis] = dnum / dden
+            grad['d'+varNameOUT+'_d'+axis] = dnum / dden
             del dnum, dden
             
     return _xr.Dataset(grad)
                 
-def divergence(od, iName=None, jName=None, kName=None, aliases = False):
+def divergence(od, iName=None, jName=None, kName=None, aliased = True):
     """
     Compute divergence of a vector field 
 
@@ -281,6 +307,9 @@ def divergence(od, iName=None, jName=None, kName=None, aliases = False):
         Name of variable corresponding to j-component
     kName: str or None
         Name of variable corresponding to k-component
+    aliased: bool
+        Set it False when working with ._ds and ._grid.
+        Otherwise, aliased must be True
     
     Returns
     -------
@@ -319,34 +348,60 @@ def divergence(od, iName=None, jName=None, kName=None, aliases = False):
         raise TypeError('`jName` must be str or None')
     if not isinstance(kName, (str, type(None))):
         raise TypeError('`kName` must be str or None')
-    
+    if not isinstance(aliased, bool):
+        raise TypeError('`aliased` must be bool')
+        
     div = {}
     if iName is not None:
+        # Handle aliases
+        Name = iName
+        if aliased:
+            NameIN = _rename_aliased(od, Name)
+        else:
+            NameIN = Name
+        NameOUT = Name
+        
         # Add missing variables
-        varList = ['HFacC', 'rA', 'dyG', 'HFacW', iName]
+        varList = ['HFacC', 'rA', 'dyG', 'HFacW', NameIN]
         od = _add_missing_variables(od, varList)
         
         # Add div
-        div['d'+iName+'_dX'] = (od._grid.diff(od._ds[iName]*od._ds['HFacW']*od._ds['dyG'], 'X') / 
-                                (od._ds['HFacC'] * od._ds['rA']))
+        div['d'+NameOUT+'_dX'] = (od._grid.diff(od._ds[NameIN]*od._ds['HFacW']*od._ds['dyG'], 'X') / 
+                                   (od._ds['HFacC'] * od._ds['rA']))
     if jName is not None:
+        # Handle aliases
+        Name = jName
+        if aliased:
+            NameIN = _rename_aliased(od, Name)
+        else:
+            NameIN = Name
+        NameOUT = Name
+        
         # Add missing variables
-        varList = ['HFacC', 'rA', 'dxG', 'HFacS', jName]
+        varList = ['HFacC', 'rA', 'dxG', 'HFacS', NameIN]
         od = _add_missing_variables(od, varList)
         
         # Add div
-        div['d'+jName+'_dY'] = (od._grid.diff(od._ds[jName]*od._ds['HFacS']*od._ds['dxG'], 'Y') / 
-                                (od._ds['HFacC'] * od._ds['rA']))
+        div['d'+NameOUT+'_dY'] = (od._grid.diff(od._ds[NameIN]*od._ds['HFacS']*od._ds['dxG'], 'Y') / 
+                                 (od._ds['HFacC'] * od._ds['rA']))
     if kName is not None:
+        # Handle aliases
+        Name = kName
+        if aliased:
+            NameIN = _rename_aliased(od, Name)
+        else:
+            NameIN = Name
+        NameOUT = Name
+        
         # Add missing variables
-        od = _add_missing_variables(od, kName)
+        od = _add_missing_variables(od, NameIN)
         
         # Add div (same of gradient)
-        div['d'+kName+'_dZ'] = gradient(od, varNameList = kName, axesList='Z')['d'+kName+'_dZ']
+        div['d'+NameOUT+'_dZ'] = gradient(od, varNameList = NameIN, axesList='Z', aliased=False)['d'+NameIN+'_dZ']
     
     return _xr.Dataset(div)
                                                         
-def curl(od, iName=None, jName=None, kName=None, aliases = False):
+def curl(od, iName=None, jName=None, kName=None, aliased = True):
     """
     Compute curl of a vector field 
 
@@ -366,6 +421,9 @@ def curl(od, iName=None, jName=None, kName=None, aliases = False):
         Name of variable corresponding to j-component
     kName: str or None
         Name of variable corresponding to k-component
+    aliased: bool
+        Set it False when working with ._ds and ._grid.
+        Otherwise, aliased must be True
     
     Returns
     -------
@@ -411,38 +469,74 @@ def curl(od, iName=None, jName=None, kName=None, aliases = False):
         raise TypeError('`jName` must be str or None')
     if not isinstance(kName, (str, type(None))):
         raise TypeError('`kName` must be str or None')
+    if not isinstance(aliased, bool):
+        raise TypeError('`aliased` must be bool')
         
     crl = {}
     if iName is not None and jName is not None:
+        # Handle aliases
+        if aliased:
+            iNameIN = _rename_aliased(od, iName)
+            jNameIN = _rename_aliased(od, jName)
+        else:
+            iNameIN = iName
+            jNameIN = jName
+        iNameOUT = iName
+        jNameOUT = jName
+    
         # Add missing variables
-        varList = ['rAz', 'dyC', 'dxC', iName, jName]
+        varList = ['rAz', 'dyC', 'dxC', iNameIN, jNameIN]
         od = _add_missing_variables(od, varList)
         
         # Add curl
-        Name = 'd'+jName+'_dX-d'+iName+'_dY'
-        crl[Name] = (od._grid.diff(od._ds[jName]*od._ds['dyC'], 'X',
+        Name = 'd'+jNameOUT+'_dX-d'+iNameOUT+'_dY'
+        crl[Name] = (od._grid.diff(od._ds[jNameIN]*od._ds['dyC'], 'X',
                                    boundary='fill', fill_value=_np.nan) -
-                     od._grid.diff(od._ds[iName]*od._ds['dxC'], 'Y',
+                     od._grid.diff(od._ds[iNameIN]*od._ds['dxC'], 'Y',
                                    boundary='fill', fill_value=_np.nan)) / od._ds['rAz']
                          
     if jName is not None and kName is not None:
+        # Handle aliases
+        if aliased:
+            jNameIN = _rename_aliased(od, jName)
+            kNameIN = _rename_aliased(od, kName)
+        else:
+            jNameIN = jName
+            kNameIN = kName
+        jNameOUT = jName
+        kNameOUT = kName
+        
         # Add missing variables
-        varList = [jName, kName]
+        varList = [jNameIN, kNameIN]
         od = _add_missing_variables(od, varList)
         
         # Add curl using gradients
-        Name = 'd'+kName+'_dY-d'+jName+'_dZ'
-        crl[Name] =(gradient(od, kName, 'Y')['d'+kName+'_dY'] -
-                     gradient(od, jName, 'Z')['d'+jName+'_dZ'])
+        Name = 'd'+kNameOUT+'_dY-d'+jNameOUT+'_dZ'
+        crl[Name] =(gradient(od, kNameIN, 'Y', aliased=False)['d'+kNameIN+'_dY'] -
+                    gradient(od, jNameIN, 'Z', aliased=False)['d'+jNameIN+'_dZ'])
     if kName is not None and iName is not None:
+        # Handle aliases
+        if aliased:
+            iNameIN = _rename_aliased(od, iName)
+            kNameIN = _rename_aliased(od, kName)
+        else:
+            iNameIN = iName
+            kNameIN = kName
+        iNameOUT = iName
+        kNameOUT = kName
+        
+        # Add missing variables
+        varList = [iNameIN, kNameIN]
+        od = _add_missing_variables(od, varList)
+        
         # Add curl using gradients
-        Name = 'd'+iName+'_dZ-d'+kName+'_dX' 
-        crl[Name] =(gradient(od, iName, 'Z')['d'+iName+'_dZ'] -
-                     gradient(od, kName, 'X')['d'+kName+'_dX'])
+        Name = 'd'+iNameOUT+'_dZ-d'+kNameOUT+'_dX' 
+        crl[Name] =(gradient(od, iNameIN, 'Z', aliased=False)['d'+iNameIN+'_dZ'] -
+                    gradient(od, kNameIN, 'X', aliased=False)['d'+kNameIN+'_dX'])
         
     return _xr.Dataset(crl)           
 
-def laplacian(od, varNameList, axesList=None, aliases = False):
+def laplacian(od, varNameList, axesList=None, aliased = True):
     """
     Compute laplacian along specified axis
 
@@ -455,6 +549,9 @@ def laplacian(od, varNameList, axesList=None, aliases = False):
         oceandataset used to compute 
     varNameList: 1D array_like, str
         Name of variables to differenciate
+    aliased: bool
+        Set it False when working with ._ds and ._grid.
+        Otherwise, aliased must be True
     
     Returns
     -------
@@ -491,6 +588,9 @@ def laplacian(od, varNameList, axesList=None, aliases = False):
     varNameList = _np.asarray(varNameList, dtype='str')
     if varNameList.ndim == 0: varNameList = varNameList.reshape(1)
     elif varNameList.ndim >1: raise TypeError('Invalid `varNameList`')
+    
+    if not isinstance(aliased, bool):
+        raise TypeError('`aliased` must be bool')
         
     # Loop through variables
     div = []
@@ -517,7 +617,7 @@ def laplacian(od, varNameList, axesList=None, aliases = False):
     return _xr.merge(div)
      
 
-def volume_cells(od, varNameList = None):
+def volume_cells(od, varNameList = None, aliased = True):
     """
     Compute volume of cells.
 
@@ -529,6 +629,9 @@ def volume_cells(od, varNameList = None):
         List of variables (strings).  
         If None, compute volumes for each grid in the dataset.
         Otherwise, compute volumes for grids of requested variables
+    aliased: bool
+        Set it False when working with ._ds and ._grid.
+        Otherwise, aliased must be True
     
     Notes
     -----
@@ -571,7 +674,10 @@ def volume_cells(od, varNameList = None):
     else:
         # Check all variables is varNameList is not provided
         varNameList = od._ds.data_vars
-
+    
+    if not isinstance(aliased, bool):
+        raise TypeError('`aliased` must be bool')
+        
     # Add missing variables
     # TODO: We don't really need to always check all of them!
     varList = ['HFacC', 'HFacW', 'HFacS', 'rA', 'rAs', 'rAw', 'rAz', 'drF', 'drC']
@@ -602,12 +708,20 @@ def volume_cells(od, varNameList = None):
         
         # Extract HFac
         point = None
-        if   set(['X', 'Y']).issubset(od._ds[varName].dims)  : point = 'C'
-        elif set(['Xp1', 'Y']).issubset(od._ds[varName].dims): point = 'W'
-        elif set(['X', 'Yp1']).issubset(od._ds[varName].dims): point = 'S'
+        if   set(['X', 'Y']).issubset(od._ds[varName].dims)  :   point = 'C'
+        elif set(['Xp1', 'Y']).issubset(od._ds[varName].dims):   point = 'W'
+        elif set(['X', 'Yp1']).issubset(od._ds[varName].dims):   point = 'S'
+        elif set(['Xp1', 'Yp1']).issubset(od._ds[varName].dims): point = 'G'
             
         if point is None: continue
-        else: HFac = od._ds['HFac'+point]
+        elif point=='G':
+            # TODO: MITgcm actualy compute HFacW and S using the minimum of adjacent values.
+            # We could do something similar using rolling. But HFacG is not actually used by the model,
+            # and what to do at the boundaries? Let's use xgcm with extent boundary for now.
+            HFac = od._grid.interp(od._grid.interp(od._ds['HFacC'], 'X', boundary='extend'), 'Y', boundary='extend')
+        else:
+            HFac = od._ds['HFac'+point]
+            
         
         # Extract rA
         rA = None
@@ -636,7 +750,7 @@ def volume_cells(od, varNameList = None):
     
     return _xr.Dataset(vols)
     
-def volume_weighted_mean(od, varNameList, aliases = False):
+def volume_weighted_mean(od, varNameList, aliased = True):
     """
     Compute volume weighted mean.
 
@@ -646,6 +760,9 @@ def volume_weighted_mean(od, varNameList, aliases = False):
         oceandataset used to compute 
     varNameList: 1D array_like, str
         List of variables (strings). 
+    aliased: bool
+        Set it False when working with ._ds and ._grid.
+        Otherwise, aliased must be True
     
     Returns
     -------
@@ -676,6 +793,9 @@ def volume_weighted_mean(od, varNameList, aliases = False):
     if varNameList.ndim == 0: varNameList = varNameList.reshape(1)
     elif varNameList.ndim >1: raise TypeError('Invalid `varNameList`')
     
+    if not isinstance(aliased, bool):
+        raise TypeError('`aliased` must be bool')
+        
     # Add missing variables
     varList = list(varNameList)
     od = _add_missing_variables(od, varList)
