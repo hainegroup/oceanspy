@@ -206,7 +206,7 @@ def gradient(od, varNameList, axesList=None, aliases = False):
 
                 # Add missing variables
                 varList = ['dxC', 'dxF', 'dxG', 'dxV', 'dyC', 'dyF', 'dyG', 'dyU']
-                od = _add_missing_variables(od, varList)
+                od = _compute._add_missing_variables(od, varList)
 
                 # Select d
                 pointList = ['C', 'F', 'G']
@@ -223,7 +223,7 @@ def gradient(od, varNameList, axesList=None, aliases = False):
 
                 # Add missing variables
                 varList = ['HFacC', 'HFacW', 'HFacS']
-                od = _add_missing_variables(od, varList)
+                od = _compute._add_missing_variables(od, varList)
 
                 # Extract HFac
                 if set(['X', 'Y']).issubset(dnum.dims):     HFac = od._ds['HFacC']
