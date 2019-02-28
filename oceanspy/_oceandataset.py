@@ -5,6 +5,7 @@ import numpy    as _np
 import warnings as _warnings
 from . import subsample as _subsample
 from . import compute   as _compute
+from . import plot      as _plot
 from . import utils     as _utils
 
 # TODO: add parameters check in set_parameters
@@ -1527,7 +1528,34 @@ class OceanDataset:
         
         return self
         
-
+    # ------------
+    # plot
+    
+    def TS_diagram(self, **kwargs):
+        """
+        Shortcut for plot.TS_diagram.
+        
+        Parameters
+        ----------
+        **kwargs: 
+            Keyword arguments for plot.TS_diagram
+            
+        Returns
+        -------
+        ax: matplotlib.pyplot.Axes
+    
+        See Also
+        --------
+        plot.TS_diagram
+        """
+        
+        ax = _plot.TS_diagram(self, **kwargs)
+        
+        return ax
+    
+    
+    
+    
 def _create_grid(dataset, coords, periodic):
 
     # TODO: add option to infer axis using comodo since we're currently cleaning up comodo attributes by default

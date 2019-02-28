@@ -4,8 +4,8 @@
 API 
 ###
 
-Creating an OceanDataset
-========================
+OceanDataset
+============
 
 .. autosummary::
    :toctree: generated/
@@ -92,9 +92,21 @@ Compute
    OceanDataset.merge_geographical_aligned_velocities
    OceanDataset.merge_survey_aligned_velocities
    
+Plot
+^^^^
 
-Opening an OceanDataset
-=======================
+.. autosummary::
+   :toctree: generated/
+   
+   OceanDataset.TS_diagram
+   
+   
+   
+   
+   
+
+Opening 
+=======
 
 .. autosummary::
    :toctree: generated/
@@ -118,8 +130,8 @@ Functions
 
 
 
-Subsampling an OceanDataset
-===========================
+Subsampling
+===========
 
 .. autosummary::
    :toctree: generated/
@@ -139,8 +151,8 @@ Functions
    
    
    
-Computing from an OceanDataset
-==============================
+Computing
+=========
 
 .. autosummary::
    :toctree: generated/
@@ -176,8 +188,35 @@ Functions
    compute.geographical_aligned_velocities
    compute.survey_aligned_velocities
    
-OceanSpy utilities
-==================
+   
+   
+Plotting
+========
+
+.. autosummary::
+   :toctree: generated/
+   
+   plot
+   
+Functions
+---------
+
+.. autosummary::
+   :toctree: generated/
+   
+   plot.TS_diagram
+
+   
+   
+   
+   
+   
+   
+   
+   
+   
+Utilities
+=========
 
 .. autosummary::
    :toctree: generated/
@@ -196,3 +235,5 @@ Functions
    utils.densjmd95
    utils.densmdjwf
    utils.Coriolis_parameter
+   
+   

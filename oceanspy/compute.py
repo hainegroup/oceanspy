@@ -23,13 +23,11 @@ from . import utils as _utils
 # TODO: add functions to compute AngleCS and AngleSN when not available (maybe add in utils?)
 #       http://mailman.mitgcm.org/pipermail/mitgcm-support/2014-January/008797.html
 #       https://github.com/dcherian/tools/blob/master/mitgcm/matlab/cs_grid/cubeCalcAngle.m
-# TODO: gradient, curl, divergence, laplacian currently can't handle aliases. (DONE UNTIL CURL!)
 # TODO: any time velocities are mutiplied by hfac, we should use mass weighted velocities if available (mass_weighted function?)
 # TODO: add area weighted mean for 2D variables, e.g. SSH (are_weighted_mean, SI, ...), or vertical sections
 # TODO: add error when function will fail (e.g., divergence of W fails when only one level is available)
 # TODO: compute transport for survey
 # TODO: add integrals?
-# TODO: wrap aliases handler
 
 # Hard coded  list of variables outputed by functions
 _FUNC2VARS = {'potential_density_anomaly'     : ['Sigma0'],
@@ -93,16 +91,12 @@ def _add_missing_variables(od, varList, FUNC2VARS = _FUNC2VARS, raiseError=True)
     VAR2FUNC  = {VAR: FUNC for FUNC in FUNC2VARS  for VAR in FUNC2VARS[FUNC]}
     var_error = [var for var in varList if var not in VAR2FUNC]
     if len(var_error)!=0:
-        if od.aliases:
-            var_error = [custom if ospy in var_error else ospy for ospy, custom in od.aliases.items()]
         message = 'These variables are not available and can not be computed: {}'.format(var_error)
         if raiseError:
             raise ValueError(message)
         else: 
             _warnings.warn(message, stacklevel=2)
             
-            
-    
     # Compute new variables
     funcList = list(set([VAR2FUNC[var] for var in varList if var in VAR2FUNC]))
     allds = []
@@ -117,14 +111,39 @@ def _add_missing_variables(od, varList, FUNC2VARS = _FUNC2VARS, raiseError=True)
     return od
 
 def _rename_aliased(od, varNameList):
+    """
+    Check if there are aliases, and return the name of variables in the private dataset
     
+    Parameters
+    ----------
+    od: OceanDataset
+        oceandataset to check for missing variables
+    varNameList: 1D array_like, str
+        List of variables (strings).     
+        
+    Returns
+    -------
+    varNameListIN: list of variables
+        List of variable name to use on od._ds
+    """
     
+    # Check parameters
+    if not isinstance(od, _ospy.OceanDataset):
+        raise TypeError('`od` must be OceanDataset')
+        
+    varNameList = _np.asarray(varNameList, dtype='str')
+    if varNameList.ndim == 0: varNameList = varNameList.reshape(1)
+    elif varNameList.ndim >1: raise TypeError('Invalid `varList`')
+    
+    # Get _ds names
     if od._aliases_flipped is not None:
-        varNameListIN  = [od._aliases_flipped[varName] if varName in od._aliases_flipped else varName for varName in list(varNameList)]
+        varNameListIN  =[od._aliases_flipped[varName] if varName in od._aliases_flipped else varName for varName in list(varNameList)]
     else: 
         varNameListIN = varNameList
+        
     if isinstance(varNameList, str):
         varNameListIN = varNameListIN[0]
+        
     return varNameListIN
 
 
@@ -215,7 +234,7 @@ def gradient(od, varNameList, axesList=None, aliased = True):
     else:
         varNameListIN = varNameList
     varNameListOUT = varNameList
-    
+
     # Add missing variables
     od = _add_missing_variables(od, list(varNameListIN))
     
@@ -360,7 +379,7 @@ def divergence(od, iName=None, jName=None, kName=None, aliased = True):
         else:
             NameIN = Name
         NameOUT = Name
-        
+
         # Add missing variables
         varList = ['HFacC', 'rA', 'dyG', 'HFacW', NameIN]
         od = _add_missing_variables(od, varList)
@@ -592,11 +611,20 @@ def laplacian(od, varNameList, axesList=None, aliased = True):
     if not isinstance(aliased, bool):
         raise TypeError('`aliased` must be bool')
         
+        
+    # Handle aliases
+    if aliased:
+        varNameListIN = _rename_aliased(od, varNameList)
+    else:
+        varNameListIN = varNameList
+    varNameListOUT = varNameList
+    
     # Loop through variables
     div = []
-    for varName in varNameList:
+    for _, (varName, varNameOUT) in enumerate(zip(varNameListIN, varNameListOUT)):
+
         # Compute gradients
-        grad = gradient(od, varNameList = varName, axesList = axesList)
+        grad = gradient(od, varNameList = varName, axesList = axesList, aliased = False)
 
         # Add to od
         od = _copy.copy(od)
@@ -606,14 +634,21 @@ def laplacian(od, varNameList, axesList=None, aliased = True):
 
         # Compute laplacian
         compNames = {}
+        rename_dict = {}
         for compName in grad.variables:
             if compName in grad.coords: continue
-            elif compName[-1] == 'X': compNames['iName'] = compName
-            elif compName[-1] == 'Y': compNames['jName'] = compName 
-            elif compName[-1] == 'Z': compNames['kName'] = compName 
-                
-        div = div + [divergence(od, **compNames)]
-    
+            elif compName[-1] == 'X': 
+                compNames['iName'] = compName
+                rename_dict['dd{}_dX_dX'.format(varName)] = 'dd{}_dX_dX'.format(varNameOUT)
+            elif compName[-1] == 'Y': 
+                compNames['jName'] = compName
+                rename_dict['dd{}_dY_dY'.format(varName)] = 'dd{}_dY_dY'.format(varNameOUT)
+            elif compName[-1] == 'Z': 
+                compNames['kName'] = compName
+                rename_dict['dd{}_dZ_dZ'.format(varName)] = 'dd{}_dZ_dZ'.format(varNameOUT)
+
+        div = div + [divergence(od, **compNames, aliased=False).rename(rename_dict)]
+        
     return _xr.merge(div)
      
 
@@ -795,27 +830,33 @@ def volume_weighted_mean(od, varNameList, aliased = True):
     
     if not isinstance(aliased, bool):
         raise TypeError('`aliased` must be bool')
-        
-    # Add missing variables
-    varList = list(varNameList)
-    od = _add_missing_variables(od, varList)
     
     # Message
     print('Computing volume weighted means')
     
+    # Handle aliases
+    if aliased:
+        varNameListIN = _rename_aliased(od, varNameList)
+    else:
+        varNameListIN = varNameList
+    varNameListOUT = varNameList
+
+    # Add missing variables
+    od = _add_missing_variables(od, list(varNameListIN))
+    
     # Loop through variables
     mean = {}
-    for varName in varNameList:
+    for _, (varName, varNameOUT) in enumerate(zip(varNameListIN, varNameListOUT)):
 
         # Compute Volume
         cellVol = volume_cells(od, varName)
         Volname = [var for var in cellVol.data_vars][0]
         cellVol = cellVol[Volname]
 
-        # Add and clear
-        mean[varName+'_vw_mean'] = ((od._ds[varName]*cellVol).sum(cellVol.dims)/
+        # Add 
+        mean[varNameOUT+'_vw_mean'] = ((od._ds[varName]*cellVol).sum(cellVol.dims)/
                                     cellVol.where(~od._ds[varName].isnull()).sum(cellVol.dims))
-        mean[varName+'_vw_mean'].attrs = od._ds[varName].attrs
+        mean[varNameOUT+'_vw_mean'].attrs = od._ds[varName].attrs
         
     return _xr.Dataset(mean)
     
@@ -926,7 +967,7 @@ def Brunt_Vaisala_frequency(od):
     print('Computing Brunt-Väisälä Frequency using the following parameters: {}'.format(params2use))
     
     # Create DataArray
-    grad = gradient(od, varNameList = 'Sigma0', axesList= 'Z', aliases = False)
+    grad = gradient(od, varNameList = 'Sigma0', axesList= 'Z', aliased = False)
     N2   = - g / rho0 * grad['dSigma0_dZ']
     N2.attrs['units']      = 's^-2'
     N2.attrs['long_name']  = 'Brunt-Väisälä Frequency'
@@ -968,7 +1009,7 @@ def vertical_relative_vorticity(od):
     print('Computing vertical component of relative vorticity')
     
     # Create DataArray
-    crl      = curl(od, iName='U', jName='V', kName=None, aliases = False)
+    crl      = curl(od, iName='U', jName='V', kName=None, aliased = False)
     momVort3 = crl['dV_dX-dU_dY']
     momVort3.attrs['units']      = 's^-1'
     momVort3.attrs['long_name']  = 'Vertical component of relative vorticity'
@@ -1015,7 +1056,7 @@ def relative_vorticity(od):
     print('Computing relative vorticity')
     
     # Create DataArray
-    ds = curl(od, iName='U', jName='V', kName='W', aliases = False)
+    ds = curl(od, iName='U', jName='V', kName='W', aliased = False)
     for _, (orig, out, comp) in enumerate(zip(['dV_dX-dU_dY', 'dW_dY-dV_dZ', 'dU_dZ-dW_dX'],
                                               ['momVort3', 'momVort1', 'momVort2'],
                                               ['k', 'i', 'j'])):
@@ -1235,7 +1276,7 @@ def horizontal_divergence_velocity(od):
     print('Computing horizontal divergence of the velocity field')
     
     # Create DataArray
-    div = divergence(od, iName='U', jName='V', kName=None, aliases = False)
+    div = divergence(od, iName='U', jName='V', kName=None, aliased = False)
     hor_div_vel = div['dU_dX'] + div['dV_dY']
     hor_div_vel.attrs['units']      = 'm s^-2'
     hor_div_vel.attrs['long_name']  = 'horizontal divergence of the velocity field'
@@ -1335,7 +1376,7 @@ def normal_strain(od):
     
     # Create DataArray
     # Same of horizontal divergence of velocity field with - instead of +
-    div = divergence(od, iName='U', jName='V', kName=None, aliases = False)
+    div = divergence(od, iName='U', jName='V', kName=None, aliased = False)
     n_strain = div['dU_dX'] - div['dV_dY'] 
     n_strain.attrs['units']      = 'm s^-2'
     n_strain.attrs['long_name']  = 'normal component of strain'
@@ -1480,7 +1521,7 @@ def Ertel_potential_vorticity(od, full=True):
     print('Computing Ertel potential vorticity using the following parameters: {}'.format(params2use))
     
     # Compute Sigma0 gradients
-    Sigma0_grads = gradient(od, varNameList='Sigma0', axesList=['X', 'Y'], aliases = False)
+    Sigma0_grads = gradient(od, varNameList='Sigma0', axesList=['X', 'Y'], aliased = False)
     
     # Interpolate fields
     fpluszeta  = grid.interp(grid.interp(momVort3 + fCoriG, 'X'), 'Y')

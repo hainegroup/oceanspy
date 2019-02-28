@@ -13,6 +13,7 @@ oceanspy.OceanDataset
 
    .. autosummary::
    
+      ~OceanDataset.TS_diagram
       ~OceanDataset.__init__
       ~OceanDataset.add_DataArray
       ~OceanDataset.create_tree
@@ -49,6 +50,7 @@ oceanspy.OceanDataset
       ~OceanDataset.set_grid_periodic
       ~OceanDataset.set_name
       ~OceanDataset.set_parameters
+      ~OceanDataset.set_projection
       ~OceanDataset.survey_stations
       ~OceanDataset.to_netcdf
    
@@ -68,5 +70,6 @@ oceanspy.OceanDataset
       ~OceanDataset.grid_periodic
       ~OceanDataset.name
       ~OceanDataset.parameters
+      ~OceanDataset.projection
    
    
