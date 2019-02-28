@@ -38,14 +38,14 @@ def TS_diagram(od,
     ax: matplotlib.pyplot.axes
         If None, uses the current axis.
     cmap_kwargs: dict
-        The keyword arguments for the colormap (same used by xarray)
+        Keyword arguments for the colormap (same used by xarray)
     contour_kwargs: dict
-        The keyword arguments for the matplotlib.pytplot.contour (isopycnals)
+        Keyword arguments for matplotlib.pytplot.contour (isopycnals)
     clabel_kwargs: dict
-        The keyword arguments for the matplotlib.pytplot.clabel (isopycnals)    
+        Keyword arguments for matplotlib.pytplot.clabel (isopycnals)    
     **kwargs:
-        If colorName is None: The kewyword arguments for matplotlib.pytplot.plot()
-        Otherwise, the kewyword arguments for matplotlib.pytplot.scatter()
+        If colorName is None: Kewyword arguments for matplotlib.pytplot.plot()
+        Otherwise, kewyword arguments for matplotlib.pytplot.scatter()
         
     Returns
     -------
