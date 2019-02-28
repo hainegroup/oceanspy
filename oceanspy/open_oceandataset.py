@@ -76,7 +76,7 @@ def EGshelfIIseas2km_ERAI(daily     = False,
         
     # Message
     name = 'EGshelfIIseas2km_ERAI'
-    description = 'High-resolution (~2km) numerical simulation covering the east Greenland shelf (EGshelf), and the Iceland and Irminger Seas (IIseas)'
+    description = 'High-resolution (~2km) numerical simulation covering the east Greenland shelf (EGshelf), and the Iceland and Irminger Seas (IIseas). Citation: Almansi et al., 2017 - JPO.'
     print('Opening [{}]:\n[{}]'.format(name, description))
     
     # Open, concatenate, and merge
@@ -110,6 +110,31 @@ def EGshelfIIseas2km_ERAI(daily     = False,
     # Add attribute (snapshot vs average)
     for var in [var for var in ds.variables if ('time' in ds[var].coords and var!='time')]:
         ds[var].attrs.update({'original_output': 'snapshot'}) 
+        
+    # Add missing names
+    ds['U'].attrs['long_name']         = 'Zonal Component of Velocity'
+    ds['V'].attrs['long_name']         = 'Meridional Component of Velocity'
+    ds['W'].attrs['long_name']         = 'Vertical Component of Velocity'
+    ds['phiHyd'].attrs['long_name']    = 'Hydrostatic Pressure Pot.(p/rho) Anomaly'
+    ds['phiHydLow'].attrs['long_name'] = 'Depth integral of (rho -rhoconst) * g * dz / rhoconst'
+    
+    # Add missing units
+    for varName in ['drC', 'drF', 'dxC', 'dyC', 'dxF', 'dyF', 'dxG', 'dyG', 'dxV', 'dyU', 'R_low']:
+        ds[varName].attrs['units'] = 'm'
+    for varName in ['rA', 'rAw', 'rAs', 'rAz']:
+        ds[varName].attrs['units'] = 'm^2'
+    for varName in ['fCori', 'fCoriG']:
+        ds[varName].attrs['units'] = '1/s'
+    for varName in ['Ro_surf']:
+        ds[varName].attrs['units'] = 'kg/m^3'
+    for varName in ['Depth']:
+        ds[varName].attrs['units'] = 'm'
+    for varName in ['HFacC', 'HFacW', 'HFacS']:
+        ds[varName].attrs['units'] = '-'
+    for varName in ['S']:
+        ds[varName].attrs['units'] = 'psu'
+    for varName in ['phiHyd', 'phiHydLow']:
+        ds[varName].attrs['units'] = 'm^2/s^2'
     
     # Consistent chunkink
     chunks = {**ds.sizes,
@@ -124,6 +149,15 @@ def EGshelfIIseas2km_ERAI(daily     = False,
                    'Z'    : {'Z': None, 'Zp1': 0.5, 'Zu': -0.5, 'Zl': 0.5},
                    'time' : {'time': -0.5}}
     od = od.set_grid_coords(grid_coords = grid_coords, add_midp=True, overwrite=False)
+    od = od.set_parameters({'rSphere' : 6.371E3,                # km None: cartesian
+                            'eq_state': 'jmd95',                # jmd95, mdjwf
+                            'rho0'    : 1027,                   # kg/m^3  TODO: None: compute volume weighted average
+                            'g'       : 9.81,                   # m/s^2
+                            'eps_nh'  : 0,                      # 0 is hydrostatic
+                            'omega'   : 7.292123516990375E-05,  # rad/s
+                            'c_p'     : 3.986E3                 # specific heat [J/kg/K]
+                            })
+    od = od.set_projection('PlateCarree')
     
     return od
 
@@ -170,7 +204,7 @@ def EGshelfIIseas2km_ASR(cropped   = False,
     
     # Message
     name = 'EGshelfIIseas2km_ASR'
-    description = 'High-resolution (~2km) numerical simulation covering the east Greenland shelf (EGshelf), and the Iceland and Irminger Seas (IIseas)'
+    description = 'High-resolution (~2km) numerical simulation covering the east Greenland shelf (EGshelf), and the Iceland and Irminger Seas (IIseas). Citation: Almansi et al., 2017 - JPO.'
     print('Opening [{}]:\n[{}]'.format(name, description))
     
     # Open, concatenate, and merge
@@ -221,14 +255,15 @@ def EGshelfIIseas2km_ASR(cropped   = False,
         ds[var].attrs.update({'original_output': Time}) 
     
     # Add missing names
-    ds['U'].attrs['long_name'] = 'Zonal Component of Velocity'
-    ds['V'].attrs['long_name'] = 'Meridional Component of Velocity'
-    ds['W'].attrs['long_name'] = 'Vertical Component of Velocity'
-    ds['phiHyd'].attrs['long_name'] = 'Hydrostatic Pressure Pot.(p/rho) Anomaly'
+    ds['U'].attrs['long_name']         = 'Zonal Component of Velocity'
+    ds['V'].attrs['long_name']         = 'Meridional Component of Velocity'
+    ds['W'].attrs['long_name']         = 'Vertical Component of Velocity'
+    ds['phiHyd'].attrs['long_name']    = 'Hydrostatic Pressure Pot.(p/rho) Anomaly'
+    ds['phiHydLow'].attrs['long_name'] = 'Depth integral of (rho -rhoconst) * g * dz / rhoconst'
     
     # Add missing units
-    for varName in ['drC', 'drF', 'dxC', 'dyC', 'dxF', 'dyF', 'dxG', 'dyG', 'dxV', 'dyU']:
-        ds[varName].attrs['units'] = 'meters'
+    for varName in ['drC', 'drF', 'dxC', 'dyC', 'dxF', 'dyF', 'dxG', 'dyG', 'dxV', 'dyU', 'R_low']:
+        ds[varName].attrs['units'] = 'm'
     for varName in ['rA', 'rAw', 'rAs', 'rAz']:
         ds[varName].attrs['units'] = 'm^2'
     for varName in ['fCori', 'fCoriG']:
@@ -236,13 +271,13 @@ def EGshelfIIseas2km_ASR(cropped   = False,
     for varName in ['Ro_surf']:
         ds[varName].attrs['units'] = 'kg/m^3'
     for varName in ['Depth']:
-        ds[varName].attrs['units'] = 'meters'
+        ds[varName].attrs['units'] = 'm'
     for varName in ['HFacC', 'HFacW', 'HFacS']:
         ds[varName].attrs['units'] = '-'
     for varName in ['S']:
         ds[varName].attrs['units'] = 'psu'
-    for varName in ['phiHyd']:
-            ds[varName].attrs['units'] = 'm^2/s^2'
+    for varName in ['phiHyd', 'phiHydLow']:
+        ds[varName].attrs['units'] = 'm^2/s^2'
     
     # Consistent chunkink
     chunks = {**ds.sizes,
@@ -330,6 +365,29 @@ def exp_Arctic_Control(gridpath  = '/home/idies/workspace/OceanCirculation/exp_A
             Time = 'snapshot'
         ds[var].attrs.update({'original_output': Time}) 
     
+    # Add missing names
+    ds['U'].attrs['long_name'] = 'Zonal Component of Velocity'
+    ds['V'].attrs['long_name'] = 'Meridional Component of Velocity'
+    ds['W'].attrs['long_name'] = 'Vertical Component of Velocity'
+    
+    # Add missing units
+    for varName in ['drC', 'drF', 'dxC', 'dyC', 'dxF', 'dyF', 'dxG', 'dyG', 'dxV', 'dyU', 'R_low']:
+        ds[varName].attrs['units'] = 'm'
+    for varName in ['rA', 'rAw', 'rAs', 'rAz']:
+        ds[varName].attrs['units'] = 'm^2'
+    for varName in ['fCori', 'fCoriG']:
+        ds[varName].attrs['units'] = '1/s'
+    for varName in ['Ro_surf']:
+        ds[varName].attrs['units'] = 'kg/m^3'
+    for varName in ['Depth']:
+        ds[varName].attrs['units'] = 'm'
+    for varName in ['HFacC', 'HFacW', 'HFacS']:
+        ds[varName].attrs['units'] = '-'
+    for varName in ['S']:
+        ds[varName].attrs['units'] = 'psu'
+    for varName in ['AngleCS', 'AngleSN']:
+        ds[varName].attrs['units'] = '-'
+    
     # Consistent chunkink
     chunks = {**ds.sizes,
               'time': ds['Temp'].chunks[ds['Temp'].dims.index('time')],
@@ -344,7 +402,15 @@ def exp_Arctic_Control(gridpath  = '/home/idies/workspace/OceanCirculation/exp_A
                    'Z'    : {'Z': None, 'Zp1': 0.5, 'Zu': 0.5, 'Zl': -0.5},
                    'time' : {'time': -0.5}}
     od = od.set_grid_coords(grid_coords = grid_coords, add_midp=True)
-    
+    od = od.set_parameters({'rSphere' : 6.371E3,                # km None: cartesian
+                            'eq_state': 'jmd95',                # jmd95, mdjwf
+                            'rho0'    : 1027.5,                   # kg/m^3  TODO: None: compute volume weighted average
+                            'g'       : 9.81,                   # m/s^2
+                            'eps_nh'  : 0,                      # 0 is hydrostatic
+                            'omega'   : 7.292123516990375E-05,  # rad/s
+                            'c_p'     : 3.986E3                 # specific heat [J/kg/K]
+                            })
+    od = od.set_projection('NorthPolarStereo')
     return od
     
 
@@ -393,7 +459,7 @@ def EGshelfSJsec500m(Hydrostatic = True,
     
     # Message
     name = 'EGshelfSJsec500m'
-    description = 'Very high-resolution (500m) numerical simulation covering the east Greenland shelf (EGshelf) and the Spill Jet section (SJsec)'
+    description = 'Very high-resolution (500m) numerical simulation covering the east Greenland shelf (EGshelf) and the Spill Jet section (SJsec). Citation: Magaldi and Haine, 2015 - DSR.'
     print('Opening [{}]:\n[{}]'.format(name, description))
     
     # We can't open everything at once because: EXF and state have different frequency, 
@@ -456,6 +522,10 @@ def EGshelfSJsec500m(Hydrostatic = True,
     ds = ds.rename({'XC': 'X', 'YC': 'Y', 'XG': 'Xp1', 'YG': 'Yp1',
                     'T': 'Temp', 'hFacC': 'HFacC', 'hFacW': 'HFacW', 'hFacS': 'HFacS'})
     
+    # Add missing units
+    for varName in ['HFacC', 'HFacW', 'HFacS', 'iter']:
+        ds[varName].attrs['units'] = '-'
+        
     # Consistent chunkink
     chunks = {**ds.sizes,
               'time': ds['Temp'].chunks[ds['Temp'].dims.index('time')]}
@@ -471,6 +541,7 @@ def EGshelfSJsec500m(Hydrostatic = True,
     od = od.set_grid_coords(grid_coords = grid_coords, add_midp=True)
     if Hydrostatic is False:
         od = od.set_parameters({'eps_nh': 1})
+    od = od.set_projection('PlateCarree')
     return od
 
 
