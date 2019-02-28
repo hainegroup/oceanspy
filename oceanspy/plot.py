@@ -19,15 +19,81 @@ def TS_diagram(od,
                clabel_kwargs  = None,
                **kwargs):
     
-    # TODO: check anddoc
+    """
+    Plot temperature-salinity diagram.
     
+    Parameters
+    ----------
+    od: OceanDataset
+        oceandataset to check for missing variables
+    Tlim: array_like with 2 elements
+        Temperature limits on the y axis.
+        If None, uses the min and max value.
+    Slim: array_like with 2 elements
+        Salinity limits on the x axis.
+        If None, uses the min and max value.
+    colorName: str, None
+        string of the variable to use to color (e.g., Temp).
+        If None, uses plot insted of scatter (much faster)
+    ax: matplotlib.pyplot.axes
+        If None, uses the current axis.
+    cmap_kwargs: dict
+        The keyword arguments for the colormap (same used by xarray)
+    contour_kwargs: dict
+        The keyword arguments for the matplotlib.pytplot.contour (isopycnals)
+    clabel_kwargs: dict
+        The keyword arguments for the matplotlib.pytplot.clabel (isopycnals)    
+    **kwargs:
+        If colorName is None: The kewyword arguments for matplotlib.pytplot.plot()
+        Otherwise, the kewyword arguments for matplotlib.pytplot.scatter()
+        
+    Returns
+    -------
+    ax: matplotlib.pyplot.Axes
+    
+    References
+    ----------
+    http://xarray.pydata.org/en/stable/plotting.html#introduction
+    """
+    
+    # TODO: implement Faceting?
+    
+    import matplotlib.pyplot as _plt
+    
+    # Check parameters
+    if not isinstance(od, _ospy.OceanDataset):
+        raise TypeError('`od` must be OceanDataset')
+        
+    if Tlim is not None:
+        Tlim  = _np.asarray(Tlim)
+        if Tlim.size!=2:  raise TypeError('`Tlim` must contain 2 elements')
+        Tlim = Tlim.reshape(2)
+            
+    if Slim is not None:
+        Slim  = _np.asarray(Slim)
+        if Slim.size!=2:  raise TypeError('`Slim` must contain 2 elements')
+        Slim = Slim.reshape(2)
+       
+    if not isinstance(colorName, (type(None), str)):
+        raise TypeError('`colorName` must be str')
+    
+    if not isinstance(ax, (type(None), _plt.Axes)):
+        raise TypeError('`ax` must be matplotlib.pyplot.Axes')
+            
+    if not isinstance(cmap_kwargs, (type(None), dict)):
+        raise TypeError('`cmap_kwargs` must None or dict')
+       
+    if not isinstance(contour_kwargs, (type(None), dict)):
+        raise TypeError('`contour_kwargs` must None or dict')
+        
+    if not isinstance(clabel_kwargs, (type(None), dict)):
+        raise TypeError('`clabel_kwargs` must None or dict')
+        
     # Handle kwargs
-    if cmap_kwargs is None:
-        cmap_kwargs = {}
-    if contour_kwargs is None:
-        contour_kwargs = {}
-    if clabel_kwargs is None:
-        clabel_kwargs = {}
+    if cmap_kwargs is None:    cmap_kwargs = {}
+    if contour_kwargs is None: contour_kwargs = {}
+    if clabel_kwargs is None:  clabel_kwargs = {}
+        
     # Check and extract T and S
     varList = ['Temp', 'S']
     od = _compute._add_missing_variables(od, varList)
@@ -37,22 +103,14 @@ def TS_diagram(od,
     # Extract color field, and interpolate if needed
     if colorName is not None:
         
-        # Use dataset if available, otherwise try to compute from _ds
-        if colorName in od.dataset.variables:
-            color = od.dataset[colorName]
-            grid  = od.grid
-            # If dimension have aliases, take care of the aliases
-            # TODO: need to double check this!
-            if od.aliases is not None:
-                Tdims = [od.aliases[dim] if dim in od.aliases else dim for dim in T.dims]
-            else:
-                Tdims = T.dims
-            dims2interp = [dim for dim in color.dims if dim not in Tdims]
-        else:
-            # TODO: add a warning?
-            od = _compute._add_missing_variables(od, [colorName])
-            grid = od._grid
-            dims2interp = [dim for dim in color.dims if dim not in T.dims]
+        # Add missing variables (use private)
+        _colorName =  _compute._rename_aliased(od, colorName)
+        od = _compute._add_missing_variables(od, _colorName)
+
+        # Extract color (use public)
+        color = od.dataset[colorName]
+        grid  = od.grid
+        dims2interp = [dim for dim in color.dims if dim not in T.dims]
         
         # Interpolation 
         for dim in dims2interp:
@@ -82,7 +140,6 @@ def TS_diagram(od,
     d = odSigma0._ds['Sigma0']   
     
     # Create axis
-    import matplotlib.pyplot as _plt
     if ax is None: ax = _plt.gca()
         
     # Use plot if colorless (faster!), otherwise use scatter

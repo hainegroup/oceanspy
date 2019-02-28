@@ -220,6 +220,30 @@ def EGshelfIIseas2km_ASR(cropped   = False,
             Time = 'snapshot'
         ds[var].attrs.update({'original_output': Time}) 
     
+    # Add missing names
+    ds['U'].attrs['long_name'] = 'Zonal Component of Velocity'
+    ds['V'].attrs['long_name'] = 'Meridional Component of Velocity'
+    ds['W'].attrs['long_name'] = 'Vertical Component of Velocity'
+    ds['phiHyd'].attrs['long_name'] = 'Hydrostatic Pressure Pot.(p/rho) Anomaly'
+    
+    # Add missing units
+    for varName in ['drC', 'drF', 'dxC', 'dyC', 'dxF', 'dyF', 'dxG', 'dyG', 'dxV', 'dyU']:
+        ds[varName].attrs['units'] = 'meters'
+    for varName in ['rA', 'rAw', 'rAs', 'rAz']:
+        ds[varName].attrs['units'] = 'm^2'
+    for varName in ['fCori', 'fCoriG']:
+        ds[varName].attrs['units'] = '1/s'
+    for varName in ['Ro_surf']:
+        ds[varName].attrs['units'] = 'kg/m^3'
+    for varName in ['Depth']:
+        ds[varName].attrs['units'] = 'meters'
+    for varName in ['HFacC', 'HFacW', 'HFacS']:
+        ds[varName].attrs['units'] = '-'
+    for varName in ['S']:
+        ds[varName].attrs['units'] = 'psu'
+    for varName in ['phiHyd']:
+            ds[varName].attrs['units'] = 'm^2/s^2'
+    
     # Consistent chunkink
     chunks = {**ds.sizes,
               'time': ds['Temp'].chunks[ds['Temp'].dims.index('time')]}
@@ -235,7 +259,8 @@ def EGshelfIIseas2km_ASR(cropped   = False,
                    'X'    : {'X': None, 'Xp1': 0.5},
                    'Z'    : {'Z': None, 'Zp1': 0.5, 'Zu': 0.5, 'Zl': -0.5},
                    'time' : {'time': -0.5}}
-    od = od.set_grid_coords(grid_coords = grid_coords, add_midp=True)  
+    od = od.set_grid_coords(grid_coords = grid_coords, add_midp=True)
+    od = od.set_projection('PlateCarree')
         
     return od        
 
