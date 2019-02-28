@@ -17,11 +17,3 @@ DEFAULT_PARAMETERS = {'rSphere' : 6.371E3,                # km None: cartesian
 AVAILABLE_PARAMETERS = {'eq_state': ['jmd95', 'mdjwf']} 
 
 
-ospy_aliases = ['Y', 'X', 
-                'Yp1', 'Xp1', 
-                'Z', 'Zp1', 'Zu', 'Zl',
-                'time', 'time_midp',
-                'YC', 'XC', 'YG', 'XG', 'YU', 'XU', 'YV', 'XV',
-                'Temp', 'S', 'Sigma0', 'N2', 'Z',
-                'U', 'V', 'dxC', 'dyC', 'rAz', 'dyU', 'dxV']
-
