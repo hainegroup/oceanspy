@@ -17,6 +17,7 @@ def TS_diagram(od,
                cmap_kwargs    = None,
                contour_kwargs = None,
                clabel_kwargs  = None,
+               cutout_kwargs  = None,
                **kwargs):
     
     """
@@ -42,7 +43,9 @@ def TS_diagram(od,
     contour_kwargs: dict
         Keyword arguments for matplotlib.pytplot.contour (isopycnals)
     clabel_kwargs: dict
-        Keyword arguments for matplotlib.pytplot.clabel (isopycnals)    
+        Keyword arguments for matplotlib.pytplot.clabel (isopycnals)  
+    cutout_kwargs: dict
+        Keyword arguments for subsample.cutout
     **kwargs:
         If colorName is None: Kewyword arguments for matplotlib.pytplot.plot()
         Otherwise, kewyword arguments for matplotlib.pytplot.scatter()
@@ -81,19 +84,26 @@ def TS_diagram(od,
         raise TypeError('`ax` must be matplotlib.pyplot.Axes')
             
     if not isinstance(cmap_kwargs, (type(None), dict)):
-        raise TypeError('`cmap_kwargs` must None or dict')
+        raise TypeError('`cmap_kwargs` must be None or dict')
        
     if not isinstance(contour_kwargs, (type(None), dict)):
-        raise TypeError('`contour_kwargs` must None or dict')
+        raise TypeError('`contour_kwargs` must be None or dict')
         
     if not isinstance(clabel_kwargs, (type(None), dict)):
-        raise TypeError('`clabel_kwargs` must None or dict')
+        raise TypeError('`clabel_kwargs` must be None or dict')
+        
+    if not isinstance(cutout_kwargs, (type(None), dict)):
+        raise TypeError('`cutout_kwargs` must be None or dict')
         
     # Handle kwargs
     if cmap_kwargs is None:    cmap_kwargs = {}
     if contour_kwargs is None: contour_kwargs = {}
     if clabel_kwargs is None:  clabel_kwargs = {}
+    if cutout_kwargs is None:  cutout_kwargs = {}
         
+    # Cutout first
+    od = od.cutout(**cutout_kwargs)
+    
     # Check and extract T and S
     varList = ['Temp', 'S']
     od = _compute._add_missing_variables(od, varList)
@@ -174,6 +184,25 @@ def TS_diagram(od,
     ax.set_ylabel(_xr.plot.utils.label_from_attrs(T))
     ax.set_xlim(Slim)
     ax.set_ylim(Tlim)
-    ax.set_title('TS diagram')
+    
+    # Set title
+    title = ''
+    for dim in T.dims:
+        dim2rem = [d for d in T.dims if len(T[d])==1 and d!=dim]
+        tit0 = T.squeeze(dim2rem).drop(dim2rem).isel({dim: 0})._title_for_slice()
+        tit1 = T.squeeze(dim2rem).drop(dim2rem).isel({dim: -1})._title_for_slice()
+        
+        
+        if tit0==tit1:
+            tit = tit0
+        else:
+            tit0 = tit0.replace(dim+' = ', dim+': from ')
+            tit1 = tit1.replace(dim+' = ', ' to ')
+            tit = tit0 + tit1
+        if title=='':
+            title = title + tit
+        else:
+            title = title + '\n' + tit
+    ax.set_title(title)
     
     return ax

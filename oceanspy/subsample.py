@@ -30,7 +30,8 @@ def cutout(od,
            add_Vbdr     = False,
            timeRange    = None,
            timeFreq     = None,
-           sampMethod   = 'snapshot'):
+           sampMethod   = 'snapshot',
+           killAxes     = False):
     """
     Cutout the original dataset in space and time preserving the original grid structure. 
 
@@ -64,7 +65,11 @@ def cutout(od,
         http://pandas.pydata.org/pandas-docs/stable/timeseries.html#offset-aliases
     sampMethod: {'snapshot', 'mean'}
         Downsampling method (only if timeFreq is not None)
-
+    killAxes: 1D array_like, str, or bool
+        List of axes to remove from Grid object if one point only is in the range.
+        If True, set killAxes=od.grid_coords.
+        If False, preserve original grid.
+    
     Returns
     -------
     od: OceanDataset
@@ -113,6 +118,22 @@ def cutout(od,
     if sampMethod not in sampMethod_list:
         raise ValueError('[{}] is not an available `sampMethod`.\nOptions: {}'.format(sampMethod, sampMethod_list))
         
+    if not isinstance(killAxes, bool):
+        killAxes = _np.asarray(killAxes, dtype='str')
+        if killAxes.ndim == 0: killAxes = killAxes.reshape(1)
+        elif killAxes.ndim >1: raise TypeError('Invalid `varList`')
+        axis_error = [axis for axis in killAxes if axis not in od.grid_coords]
+        if len(axis_error)!=0:
+            raise ValueError('{} are not in od.grid_coords and can not be killed'.format(axis_error))
+    elif killAxes is True:
+        killAxes = od.grid_coords
+        if YRange is None   : killAxes.pop('Y', None)
+        if XRange is None   : killAxes.pop('X', None)
+        if ZRange is None   : killAxes.pop('Z', None)
+        if timeRange is None: killAxes.pop('time', None)
+    else:
+        killAxes = {}
+            
     # Message
     print('Cutting out the oceandataset')
                      
@@ -194,29 +215,40 @@ def cutout(od,
         
         # Indexis
         if iY[0]==iY[1]:
-            if iY[0]>0: iY[0]=iY[0]-1
-            else:       iY[1]=iY[1]+1
-        if iX[0]==iX[1]: 
-            if iX[0]>0: iX[0]=iX[0]-1
-            else:       iX[1]=iX[1]+1
+            if 'Y' not in killAxes:
+                if iY[0]>0: iY[0]=iY[0]-1
+                else:       iY[1]=iY[1]+1
+        else: killAxes.pop('Y', None)
+                    
+        if iX[0]==iX[1]:
+            if 'X' not in killAxes:
+                if iX[0]>0: iX[0]=iX[0]-1
+                else:       iX[1]=iX[1]+1
+        else: killAxes.pop('X', None)
         
         # Cutout
         ds = ds.isel(Yp1 = slice(iY[0], iY[1]+1),
                      Xp1 = slice(iX[0], iX[1]+1))
-        if   (('outer' in od._grid.axes['X'].coords and od._grid.axes['X'].coords['outer'].name == 'Xp1') or  
+        
+        if 'X' in killAxes:
+            ds = ds.isel(X = slice(iX[0], iX[1]+1))
+        elif (('outer' in od._grid.axes['X'].coords and od._grid.axes['X'].coords['outer'].name == 'Xp1') or  
               ('left'  in od._grid.axes['X'].coords and od._grid.axes['X'].coords['left'].name  == 'Xp1')):
             ds = ds.isel(X = slice(iX[0], iX[1]))
         elif   'right' in od._grid.axes['X'].coords and od._grid.axes['X'].coords['right'].name =='Xp1':
             ds = ds.isel(X = slice(iX[0]+1, iX[1]+1))   
-        if   (('outer' in od._grid.axes['Y'].coords and od._grid.axes['Y'].coords['outer'].name == 'Yp1') or  
+            
+        if 'Y' in killAxes:
+            ds = ds.isel(Y = slice(iY[0], iY[1]+1))
+        elif (('outer' in od._grid.axes['Y'].coords and od._grid.axes['Y'].coords['outer'].name == 'Yp1') or  
               ('left'  in od._grid.axes['Y'].coords and od._grid.axes['Y'].coords['left'].name  == 'Yp1')):
             ds = ds.isel(Y = slice(iY[0], iY[1]))
         elif   'right' in od._grid.axes['Y'].coords and od._grid.axes['Y'].coords['right'].name =='Yp1':
             ds = ds.isel(Y = slice(iY[0]+1, iY[1]+1))
         
         # Cut axis can't be periodic
-        if len(ds['Yp1'])  < lenY and 'Y' in periodic: periodic.remove(Y)
-        if len(ds['Xp1'])  < lenX and 'X' in periodic: periodic.remove(X)
+        if (len(ds['Yp1'])  < lenY or 'Y' in killAxes) and 'Y' in periodic: periodic.remove('Y')
+        if (len(ds['Xp1'])  < lenX or 'X' in killAxes) and 'X' in periodic: periodic.remove('X')
     
     # ---------------------------
     # Vertical CUTOUT
@@ -247,12 +279,17 @@ def cutout(od,
         
         # Indexis
         if iZ[0]==iZ[1]:
-            if iZ[0]>0: iZ[0]=iZ[0]-1
-            else:       iZ[1]=iZ[1]+1
+            if 'Z' not in killAxes:
+                if iZ[0]>0: iZ[0]=iZ[0]-1
+                else:       iZ[1]=iZ[1]+1
+        else: killAxes.pop('Z', None)
         
         # Cutout
-        ds = ds.isel(Zp1 = slice(iZ[0], iZ[1]+1),
-                     Z   = slice(iZ[0], iZ[1]))
+        ds = ds.isel(Zp1 = slice(iZ[0], iZ[1]+1))
+        if 'Z' in killAxes:
+            ds = ds.isel(Z = slice(iZ[0], iZ[1]+1))
+        else:
+            ds = ds.isel(Z = slice(iZ[0], iZ[1]))
         
         if 'Zu' in ds.dims:
             ds = ds.sel(Zu = slice(ds['Zp1'].isel(Zp1=0).values,   ds['Zp1'].isel(Zp1=-1).values))
@@ -261,7 +298,7 @@ def cutout(od,
             ds = ds.sel(Zl = slice(ds['Zp1'].isel(Zp1=0).values,  ds['Z'].isel(Z=-1).values))
         
         # Cut axis can't be periodic
-        if len(ds['Zp1'])  < lenZ and 'Z' in periodic: periodic.remove(Z)
+        if (len(ds['Z']) < lenZ or 'Z' in killAxes) and 'Z' in periodic: periodic.remove('Z')
     
     # ---------------------------
     # Time CUTOUT
@@ -297,15 +334,20 @@ def cutout(od,
         
         # Indexis
         if iT[0]==iT[1]:
-            if iT[0]>0: iT[0]=iT[0]-1
-            else:       iT[1]=iT[1]+1
+            if 'time' not in killAxes:
+                if iT[0]>0: iT[0]=iT[0]-1
+                else:       iT[1]=iT[1]+1
+        else: killAxes.pop('time', None)
         
         # Cutout
-        ds = ds.isel(time      = slice(iT[0], iT[1]+1),
-                     time_midp = slice(iT[0], iT[1]))
+        ds = ds.isel(time = slice(iT[0], iT[1]+1))
+        if 'time' in killAxes:
+            ds = ds.isel(time_midp = slice(iT[0], iT[1]+1))
+        else:
+            ds = ds.isel(time_midp = slice(iT[0], iT[1]))
         
         # Cut axis can't be periodic
-        if len(ds['time']) < lenT and 'T' in periodic: periodic.remove(T)
+        if (len(ds['time']) < lenT or 'T' in killAxes) and 'time' in periodic: periodic.remove('time')
     
     # ---------------------------
     # Horizontal MASK
@@ -396,11 +438,19 @@ def cutout(od,
     od._ds = ds
     
     # Add time midp
-    if timeFreq:
+    if timeFreq and 'time' not in killAxes:
         od = od.set_grid_coords({'time' : {'time': -0.5}}, add_midp=True, overwrite=False)
 
+    # Kill axes
+    grid_coords = od.grid_coords
+    for coord in list(grid_coords): 
+        if coord in killAxes: grid_coords.pop(coord, None)
+    od = od.set_grid_coords(grid_coords, overwrite=True)
+    
     # Cut axis can't be periodic 
     od = od.set_grid_periodic(periodic, overwrite = True)
+    
+    
         
     return od
 
