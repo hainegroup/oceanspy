@@ -121,7 +121,7 @@ def cutout(od,
     if not isinstance(dropAxes, bool):
         dropAxes = _np.asarray(dropAxes, dtype='str')
         if dropAxes.ndim == 0: dropAxes = dropAxes.reshape(1)
-        elif dropAxes.ndim >1: raise TypeError('Invalid `varList`')
+        elif dropAxes.ndim >1: raise TypeError('Invalid `dropAxes`')
         axis_error = [axis for axis in dropAxes if axis not in od.grid_coords]
         if len(axis_error)!=0:
             raise ValueError('{} are not in od.grid_coords and can not be dropped'.format(axis_error))
