@@ -99,7 +99,7 @@ Plot
    :toctree: generated/
    
    OceanDataset.TS_diagram
-   
+   OceanDataset.time_series
    
    
    
@@ -205,6 +205,7 @@ Functions
    :toctree: generated/
    
    plot.TS_diagram
+   plot.time_series
 
    
    

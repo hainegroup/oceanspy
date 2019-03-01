@@ -1553,6 +1553,28 @@ class OceanDataset:
         
         return ax
     
+    def time_series(self, **kwargs):
+        """
+        Shortcut for plot.time_series.
+        
+        Parameters
+        ----------
+        **kwargs: 
+            Keyword arguments for plot.time_series
+            
+        Returns
+        -------
+        ax: matplotlib.pyplot.Axes
+    
+        See Also
+        --------
+        plot.time_series
+        """
+        
+        ax = _plot.time_series(self, **kwargs)
+        
+        return ax
+    
     
     
     

@@ -9,6 +9,131 @@ import warnings as _warnings
 import copy     as _copy
 from . import compute as _compute
 
+def time_series(od, 
+                varName, 
+                meanAxes      = False, 
+                sumAxes       = False,
+                cutout_kwargs = None,
+                **kwargs):
+        
+    """
+    Plot time series.
+    
+    Parameters
+    ----------
+    od: OceanDataset
+        oceandataset to check for missing variables
+    varName: str, None
+        Name of the variable to plot.
+    meanAxes: 1D array_like, str, or bool
+        List of axes over which to apply mean.
+        If True, set meanAxes=od.grid_coords (excluding time).
+        If False, does not apply mean.
+    sumAxes: 1D array_like, str, or bool
+        List of axes over which to apply sum.
+        If True, set sumAxes=od.grid_coords (excluding time).
+        If False, does not apply mean.
+    cutout_kwargs: dict
+        Keyword arguments for subsample.cutout
+    **kwargs:
+        Kewyword arguments for xarray.plot.line
+        
+    Returns
+    -------
+    ax: matplotlib.pyplot.Axes
+    
+    See also
+    --------
+    subsample.coutout
+    xarray.plot.line
+    
+    References
+    ----------
+    http://xarray.pydata.org/en/stable/generated/xarray.plot.line.html#xarray.plot.line
+    """
+        
+    import matplotlib.pyplot as _plt
+    
+    # Check parameters
+    if not isinstance(od, _ospy.OceanDataset):
+        raise TypeError('`od` must be OceanDataset')
+        
+    if not isinstance(varName, str):
+        raise TypeError('`varName` must be str')
+        
+    if (meanAxes is True and sumAxes is not False) or (sumAxes is True and meanAxes is not False):
+        raise ValueError('If one between `meanAxes` and `sumAxes` is True, the other must be False')
+    
+    if not isinstance(meanAxes, bool):
+        meanAxes = _np.asarray(meanAxes, dtype='str')
+        if meanAxes.ndim == 0: meanAxes = meanAxes.reshape(1)
+        elif meanAxes.ndim >1: raise TypeError('Invalid `meanAxes`')
+        axis_error = [axis for axis in meanAxes if axis not in od.grid_coords]
+        if len(axis_error)!=0:
+            raise ValueError('{} are not in od.grid_coords and can not be averaged'.format(axis_error))
+        elif 'time' in meanAxes:
+            raise ValueError('`time` can not be in `meanAxes`')
+    elif meanAxes is True:
+        meanAxes = [coord for coord in od.grid_coords if coord!='time']
+    else:
+        meanAxes = []
+        
+    if not isinstance(sumAxes, bool):
+        sumAxes = _np.asarray(sumAxes, dtype='str')
+        if sumAxes.ndim == 0: sumAxes = sumAxes.reshape(1)
+        elif sumAxes.ndim >1: raise TypeError('Invalid `meanAxes`')
+        axis_error = [axis for axis in sumAxes if axis not in od.grid_coords]
+        if len(axis_error)!=0:
+            raise ValueError('{} are not in od.grid_coords and can not be averaged'.format(axis_error))
+        elif 'time' in sumAxes:
+            raise ValueError('`time` can not be in `sumAxes`')
+    elif sumAxes is True:
+        sumAxes = [coord for coord in od.grid_coords if coord!='time']
+    else:
+        sumAxes = []
+
+    if len(sumAxes)>0 and len(meanAxes)>0:
+        if set(meanAxes).issubset(sumAxes) or set(sumAxes).issubset(meanAxes):
+            raise ValueError('`meanAxes` and `sumAxes` can not contain the same Axes')
+        
+    # Handle kwargs
+    if cutout_kwargs is None:  cutout_kwargs = {}
+    
+    # Cutout first
+    od = od.cutout(**cutout_kwargs)
+    
+    # Variable name 
+    _varName =  _compute._rename_aliased(od, varName)
+    od = _compute._add_missing_variables(od, _varName)
+    
+    # Extract DataArray (use public)
+    da = od.dataset[varName]
+    
+    # Get time name
+    time_name = [dim for dim in od.grid_coords['time'] if dim in da.dims][0]
+    
+    # Mean and sum
+    meanDims = []
+    for axes in meanAxes: 
+        meanDims = meanDims + [dim for dim in od.grid_coords[axes] if dim in da.dims]
+    sumDims = []
+    for axes in sumAxes: 
+        sumDims = sumDims + [dim for dim in od.grid_coords[axes] if dim in da.dims]
+    da = da.sum(sumDims, keep_attrs=True).mean(meanDims, keep_attrs=True).squeeze()
+
+    # Check
+    if len(da.shape)>2:
+        dims = da.dims
+        dims.remove(time_name)
+        raise ValueError('Timeseries containing multiple dimension other than time: {}'.format(dims))
+        
+    # Plot
+    _ = da.plot.line(**{'x': time_name, **kwargs})
+    
+    return _plt.gca()
+
+
+
 def TS_diagram(od, 
                Tlim           = None,
                Slim           = None,
@@ -34,7 +159,7 @@ def TS_diagram(od,
         Salinity limits on the x axis.
         If None, uses the min and max value.
     colorName: str, None
-        string of the variable to use to color (e.g., Temp).
+        Name of the variable to use to color (e.g., Temp).
         If None, uses plot insted of scatter (much faster)
     ax: matplotlib.pyplot.axes
         If None, uses the current axis.
@@ -54,12 +179,14 @@ def TS_diagram(od,
     -------
     ax: matplotlib.pyplot.Axes
     
+    See also
+    --------
+    subsample.coutout
+    
     References
     ----------
     http://xarray.pydata.org/en/stable/plotting.html#introduction
     """
-    
-    # TODO: implement Faceting?
     
     import matplotlib.pyplot as _plt
     
@@ -78,7 +205,7 @@ def TS_diagram(od,
         Slim = Slim.reshape(2)
        
     if not isinstance(colorName, (type(None), str)):
-        raise TypeError('`colorName` must be str')
+        raise TypeError('`colorName` must be str or None')
     
     if not isinstance(ax, (type(None), _plt.Axes)):
         raise TypeError('`ax` must be matplotlib.pyplot.Axes')
@@ -206,3 +333,6 @@ def TS_diagram(od,
     ax.set_title(title)
     
     return ax
+
+
+
