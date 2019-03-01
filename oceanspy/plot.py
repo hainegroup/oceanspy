@@ -32,7 +32,7 @@ def time_series(od,
     sumAxes: 1D array_like, str, or bool
         List of axes over which to apply sum.
         If True, set sumAxes=od.grid_coords (excluding time).
-        If False, does not apply mean.
+        If False, does not apply sum.
     cutout_kwargs: dict
         Keyword arguments for subsample.cutout
     **kwargs:
