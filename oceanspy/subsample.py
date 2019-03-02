@@ -125,6 +125,7 @@ def cutout(od,
         axis_error = [axis for axis in dropAxes if axis not in od.grid_coords]
         if len(axis_error)!=0:
             raise ValueError('{} are not in od.grid_coords and can not be dropped'.format(axis_error))
+        dropAxes = {d: od.grid_coords[d] for d in dropAxes}
     elif dropAxes is True:
         dropAxes = od.grid_coords
         if YRange is None   : dropAxes.pop('Y', None)

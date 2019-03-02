@@ -9,6 +9,268 @@ import warnings as _warnings
 import copy     as _copy
 from . import compute as _compute
 
+def horizontal_section(od, 
+                       varName, 
+                       plotType       = 'contourf',
+                       contourName    = None,
+                       meanAxes       = False, 
+                       sumAxes        = False,
+                       contour_kwargs = None,
+                       clabel_kwargs  = None,
+                       cutout_kwargs  = None,
+                       **kwargs):
+        
+    """
+    Plot horizontal section.
+    
+    Parameters
+    ----------
+    od: OceanDataset
+        oceandataset to check for missing variables
+    varName: str, None
+        Name of the variable to plot.
+    plotType: str 
+        2D plot type: {'contourf', 'contour', 'imshow', 'pcolormesh'}
+    meanAxes: 1D array_like, str, or bool
+        List of axes over which to apply mean.
+        If True, set meanAxes=od.grid_coords (excluding time).
+        If False, does not apply mean.
+    sumAxes: 1D array_like, str, or bool
+        List of axes over which to apply sum.
+        If True, set sumAxes=od.grid_coords (excluding time).
+        If False, does not apply sum.
+    contour_kwargs: dict
+        Keyword arguments for xarray.plot.contour
+    clabel_kwargs: dict
+        Keyword arguments for matplotlib.pyplot.clabel
+    cutout_kwargs: dict
+        Keyword arguments for subsample.cutout
+    **kwargs:
+        Kewyword arguments for xarray.plot.['plotType']
+        
+    Returns
+    -------
+    Axes or FacetGrid object
+    
+    See also
+    --------
+    subsample.coutout
+    
+    References
+    ----------
+    http://xarray.pydata.org/en/stable/plotting.html
+    """
+    
+    import matplotlib.pyplot as _plt
+    if od.projection is not None: import cartopy.crs as _ccrs
+        
+    # Check parameters
+    if not isinstance(od, _ospy.OceanDataset):
+        raise TypeError('`od` must be OceanDataset')
+        
+    if not isinstance(varName, str):
+        raise TypeError('`varName` must be str')
+        
+    plotTypes = ['contourf', 'contour', 'imshow', 'pcolormesh']
+    if not isinstance(plotType, str):
+        raise TypeError('`plotType` must be str')
+    elif plotType not in plotTypes:
+        raise TypeError('plotType [{}] not available. Options are: {}'.format(plotType, plotTypes))
+    
+    if not isinstance(contourName, (type(None), str)):
+        raise TypeError('`contourName` must be str or None')
+        
+    if (meanAxes is True and sumAxes is not False) or (sumAxes is True and meanAxes is not False):
+        raise ValueError('If one between `meanAxes` and `sumAxes` is True, the other must be False')
+    
+    if not isinstance(meanAxes, bool):
+        meanAxes = _np.asarray(meanAxes, dtype='str')
+        if meanAxes.ndim == 0: meanAxes = meanAxes.reshape(1)
+        elif meanAxes.ndim >1: raise TypeError('Invalid `meanAxes`')
+        axis_error = [axis for axis in meanAxes if axis not in od.grid_coords]
+        if len(axis_error)!=0:
+            raise ValueError('{} are not in od.grid_coords and can not be averaged'.format(axis_error))
+        elif 'X' in meanAxes or 'Y' in meanAxes:
+            raise ValueError('`X` and `Y` can not be in `meanAxes`')
+    elif meanAxes is True:
+        meanAxes = [coord for coord in od.grid_coords if coord!='X' and coord!='Y']
+    else:
+        meanAxes = []
+        
+    if not isinstance(sumAxes, bool):
+        sumAxes = _np.asarray(sumAxes, dtype='str')
+        if sumAxes.ndim == 0: sumAxes = sumAxes.reshape(1)
+        elif sumAxes.ndim >1: raise TypeError('Invalid `sumAxes`')
+        axis_error = [axis for axis in sumAxes if axis not in od.grid_coords]
+        if len(axis_error)!=0:
+            raise ValueError('{} are not in od.grid_coords and can not be averaged'.format(axis_error))
+        elif 'X' in sumAxes or 'Y' in sumAxes:
+            raise ValueError('`X` and `Y` can not be in `meanAxes`')
+    elif sumAxes is True:
+        sumAxes = [coord for coord in od.grid_coords if coord!='X' and coord!='Y']
+    else:
+        sumAxes = []
+
+    if len(meanAxes)>0 and len(sumAxes)>0:
+        if set(sumAxes).issubset(sumAxes) or set(sumAxes).issubset(meanAxes):
+            raise ValueError('`meanAxes` and `sumAxes` can not contain the same Axes')
+        
+    if not isinstance(contour_kwargs, (type(None), dict)):
+        raise TypeError('`contour_kwargs` must be None or dict')
+       
+    if not isinstance(clabel_kwargs, (type(None), dict)):
+        raise TypeError('`clabel_kwargs` must be None or dict')
+        
+    if not isinstance(cutout_kwargs, (type(None), dict)):
+        raise TypeError('`cutout_kwargs` must be None or dict')
+        
+    # Handle kwargs
+    if contour_kwargs  is None: contour_kwargs = {}
+    if clabel_kwargs   is None: clabel_kwargs = {}
+    if cutout_kwargs   is None: cutout_kwargs = {}
+        
+    # Cutout first
+    od = od.cutout(**cutout_kwargs)
+    
+    # Check variables and add
+    listName = [varName]
+    if contourName is not None: listName = listName + [contourName]
+    _listName =  _compute._rename_aliased(od, listName)
+    od = _compute._add_missing_variables(od, _listName)
+    
+    # VARNAME
+    # Extract DataArray (use public)
+    da = od.dataset[varName]
+    
+    # Get time name
+    X_name = [dim for dim in od.grid_coords['X'] if dim in da.dims][0]
+    Y_name = [dim for dim in od.grid_coords['Y'] if dim in da.dims][0]
+    
+    # Apply mean and sum
+    meanDims = []
+    for axes in meanAxes: 
+        meanDims = meanDims + [dim for dim in od.grid_coords[axes] if dim in da.dims]
+    sumDims = []
+    for axes in sumAxes: 
+        sumDims = sumDims + [dim for dim in od.grid_coords[axes] if dim in da.dims]
+    if len(meanDims)>0: da = da.mean(meanDims, keep_attrs=True)
+    if len(sumDims)>0: da = da.sum(sumDims, keep_attrs=True)
+    
+    # CONTOURNAME
+    if contourName is not None: 
+        # Extract DataArray (use public)
+        da_contour = od.dataset[contourName]
+        
+        # Get time name
+        X_name_cont = [dim for dim in od.grid_coords['X'] if dim in da_contour.dims][0]
+        Y_name_cont = [dim for dim in od.grid_coords['Y'] if dim in da_contour.dims][0]
+
+        # Apply mean and sum
+        meanDims = []
+        for axes in meanAxes: 
+            meanDims = meanDims + [dim for dim in od.grid_coords[axes] if dim in da_contour.dims]
+        sumDims = []
+        for axes in sumAxes: 
+            sumDims = sumDims + [dim for dim in od.grid_coords[axes] if dim in da_contour.dims]
+        if len(meanDims)>0: da_contour = da_contour.mean(meanDims, keep_attrs=True)
+        if len(sumDims)>0:  da_contour = da_contour.sum(sumDims, keep_attrs=True)
+            
+    # Check dimensions
+    da = da.squeeze()
+    dims = list(da.dims)
+    dims.remove(X_name)
+    dims.remove(Y_name)
+    
+    # Pop from kwargs
+    ax  = kwargs.pop('ax', None)
+    col = kwargs.pop('col', None)
+    col_wrap    = kwargs.pop('col_wrap', None)
+    subplot_kws = kwargs.pop('subplot_kws', None)
+    transform   = kwargs.pop('transform', None)
+    
+    if len(dims)==0:
+        # Single plot:    
+        # Add ax
+        if ax is None:
+            ax = _plt.axes(projection=od.projection);
+        kwargs['ax'] = ax
+            
+    elif len(dims)==1:
+        
+        # Multiple plots:
+        extra_name = dims[0]
+        
+        # TODO: For some reason, faceting and cartopy are not working very nice with our configurations
+        #       Drop it for now, but we need to explore it more
+        if od.projection is not None:
+            print('WARNING')
+            od = od.set_projection(None)
+            transform = None
+        
+        # Add col
+        if col is None:
+            col = extra_name
+        kwargs['col'] = col
+        kwargs['col_wrap'] = col_wrap
+        
+        # Add projection
+        if isinstance(subplot_kws, dict):
+            projection = subplot_kws.pop('projection', None)
+            if projection is None:
+                projection = od.projection
+            subplot_kws['projection'] = projection
+        else:
+            subplot_kws = {'projection': od.projection}
+        kwargs['subplot_kws'] = subplot_kws
+            
+    # Add transform
+    if transform is None and od.projection is not None:
+        kwargs['transform'] = _ccrs.PlateCarree()
+        
+    # Plot
+    args = {'x': X_name, 'y': Y_name, **kwargs}
+    if plotType=='contourf':
+        p = da.plot.contourf(**args)
+    elif plotType=='contour':
+        p = da.plot.contour(**args)
+    elif plotType=='imshow':
+        p = da.plot.imshow(**args)
+    elif plotType=='pcolormesh':
+        p = da.plot.pcolormesh(**args)
+
+    # Contour
+    ax          = args.pop('ax', None)
+    transform   = args.pop('transform', None)
+    subplot_kws = args.pop('subplot_kws', None)
+    args        = {'x': X_name_cont, 'y': Y_name_cont, 'ax': ax, 'transform': transform, 'subplot_kws': subplot_kws, 'colors': 'gray', 'add_labels': False, **contour_kwargs}
+    if ax is not None:
+        cont = da_contour.plot.contour(**args, **clabel_kwargs)
+        _plt.clabel(cont)
+    else:
+        for i, thisax in enumerate(p.axes.flat):
+            if extra_name in da_contour.dims:
+                da_contour_i = da_contour.isel({extra_name: i}).squeeze()
+            else:
+                da_contour_i = da_contour
+            cont = da_contour_i.plot.contour(**{**args, 'ax': thisax})
+            _plt.clabel(cont, **clabel_kwargs)
+            
+    # Labels and return
+    add_labels = kwargs.pop('add_labels', None)
+    if ax is not None: 
+        if add_labels is not False:
+            try:
+                gl = ax.gridlines(crs=transform, draw_labels=True)
+                gl.xlabels_top   = False
+                gl.ylabels_right = False
+            except: pass
+        return ax
+    else: 
+        return p
+
+
+
+
 def time_series(od, 
                 varName, 
                 meanAxes      = False, 
@@ -40,12 +302,11 @@ def time_series(od,
         
     Returns
     -------
-    ax: matplotlib.pyplot.Axes
+    Axes object
     
     See also
     --------
     subsample.coutout
-    xarray.plot.line
     
     References
     ----------
@@ -95,6 +356,9 @@ def time_series(od,
     if len(sumAxes)>0 and len(meanAxes)>0:
         if set(meanAxes).issubset(sumAxes) or set(sumAxes).issubset(meanAxes):
             raise ValueError('`meanAxes` and `sumAxes` can not contain the same Axes')
+        
+    if not isinstance(cutout_kwargs, (dict, type(None))):
+        raise ValueError('`cutout_kwargs` must be dict or None')
         
     # Handle kwargs
     if cutout_kwargs is None:  cutout_kwargs = {}
@@ -177,7 +441,7 @@ def TS_diagram(od,
         
     Returns
     -------
-    ax: matplotlib.pyplot.Axes
+    Axes object
     
     See also
     --------
