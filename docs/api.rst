@@ -98,8 +98,10 @@ Plot
 .. autosummary::
    :toctree: generated/
    
-   OceanDataset.TS_diagram
+   OceanDataset.horizontal_section
    OceanDataset.time_series
+   OceanDataset.TS_diagram
+   
    
    
    
@@ -204,8 +206,10 @@ Functions
 .. autosummary::
    :toctree: generated/
    
-   plot.TS_diagram
+   plot.horizontal_section
    plot.time_series
+   plot.TS_diagram
+   
 
    
    

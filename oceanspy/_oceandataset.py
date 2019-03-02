@@ -585,8 +585,11 @@ class OceanDataset:
         
         projection = self._read_from_global_attr('projection')
         if projection:
-            import cartopy.crs as ccrs
-            projection = eval('ccrs.{}'.format(projection))
+            if projection=='None':
+                projection = eval(projection)
+            else:
+                import cartopy.crs as ccrs
+                projection = eval('ccrs.{}'.format(projection))
             
         return projection
 
@@ -615,19 +618,22 @@ class OceanDataset:
         """
         
         # Check parameters
-        if not isinstance(projection, str):
+        if not isinstance(projection, (type(None), str)):
             raise TypeError("`projection` must be str")
         
-        import cartopy.crs as ccrs
-        if not hasattr(ccrs, projection):
-            raise TypeError("{} is not a cartopy projection".format(projection))
-        projection = '{}(**{})'.format(projection, str(kwargs))
+        if projection is not None:
+            import cartopy.crs as ccrs
+            if not hasattr(ccrs, projection):
+                raise TypeError("{} is not a cartopy projection".format(projection))
+            projection = '{}(**{{}})'.format(projection, kwargs)
+        else: 
+            projection = str(projection) 
 
         # Set projection
         self = self._store_as_global_attr(name      = 'projection', 
                                           attr      = projection,
                                           overwrite = True) 
-        
+
         return self
     
     
@@ -1531,27 +1537,25 @@ class OceanDataset:
     # ------------
     # plot
     
-    def TS_diagram(self, **kwargs):
+    def horizontal_section(self, **kwargs):
         """
-        Shortcut for plot.TS_diagram.
+        Shortcut for plot.horizontal_section.
         
         Parameters
         ----------
         **kwargs: 
-            Keyword arguments for plot.TS_diagram
+            Keyword arguments for plot.horizontal_section
             
         Returns
         -------
-        ax: matplotlib.pyplot.Axes
+        Axes or FacetGrid object
     
         See Also
         --------
-        plot.TS_diagram
+        plot.horizontal_section
         """
-        
-        ax = _plot.TS_diagram(self, **kwargs)
-        
-        return ax
+                
+        return _plot.horizontal_section(self, **kwargs)
     
     def time_series(self, **kwargs):
         """
@@ -1564,16 +1568,36 @@ class OceanDataset:
             
         Returns
         -------
-        ax: matplotlib.pyplot.Axes
+        Axes object
     
         See Also
         --------
         plot.time_series
         """
+                
+        return _plot.time_series(self, **kwargs)
+    
+    def TS_diagram(self, **kwargs):
+        """
+        Shortcut for plot.TS_diagram.
         
-        ax = _plot.time_series(self, **kwargs)
-        
-        return ax
+        Parameters
+        ----------
+        **kwargs: 
+            Keyword arguments for plot.TS_diagram
+            
+        Returns
+        -------
+        Axes object
+    
+        See Also
+        --------
+        plot.TS_diagram
+        """
+                
+        return _plot.TS_diagram(self, **kwargs)
+    
+    
     
     
     
