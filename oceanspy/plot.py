@@ -9,9 +9,272 @@ import warnings as _warnings
 import copy     as _copy
 from . import compute as _compute
 
+def vertical_section(od, 
+                     varName, 
+                     plotType       = 'contourf',
+                     use_dist       = True,
+                     subsampMethod  = None,
+                     contourName    = None,
+                     meanAxes       = False, 
+                     sumAxes        = False,
+                     contour_kwargs = None,
+                     clabel_kwargs  = None,
+                     subsamp_kwargs = None,
+                     **kwargs):
+    """
+    Plot vertical section.
+    
+    Parameters
+    ----------
+    od: OceanDataset
+        oceandataset to check for missing variables
+    varName: str, None
+        Name of the variable to plot.
+    plotType: str 
+        2D plot type: {'contourf', 'contour', 'imshow', 'pcolormesh'}
+    use_dist: bool
+        If True, use distances for x axis.
+        If False, use mooring or station.
+    subsampMethod: str, None
+        Subsample methods: {'mooring_array', 'survey_station'}
+    contourName: str, None
+        Name of the variable to contour on top.
+    meanAxes: 1D array_like, str, or bool
+        List of axes over which to apply mean.
+        If True, set meanAxes=od.grid_coords (excluding time).
+        If False, does not apply mean.
+    sumAxes: 1D array_like, str, or bool
+        List of axes over which to apply sum.
+        If True, set sumAxes=od.grid_coords (excluding time).
+        If False, does not apply sum.
+    contour_kwargs: dict
+        Keyword arguments for xarray.plot.contour
+    clabel_kwargs: dict
+        Keyword arguments for matplotlib.pyplot.clabel
+    subsamp_kwargs: dict
+        Keyword arguments for subsample.mooring_array or subsample.survey_stations
+    **kwargs:
+        Kewyword arguments for xarray.plot.['plotType']
+        
+    Returns
+    -------
+    Axes or FacetGrid object
+    
+    See also
+    --------
+    subsample.coutout
+    
+    References
+    ----------
+    http://xarray.pydata.org/en/stable/plotting.html
+    """
+    
+    # Check parameters
+    if not isinstance(od, _ospy.OceanDataset):
+        raise TypeError('`od` must be OceanDataset')
+        
+    if not isinstance(varName, str):
+        raise TypeError('`varName` must be str')
+    
+    plotTypes = ['contourf', 'contour', 'imshow', 'pcolormesh']
+    if not isinstance(plotType, str):
+        raise TypeError('`plotType` must be str')
+    elif plotType not in plotTypes:
+        raise TypeError('plotType [{}] not available. Options are: {}'.format(plotType, plotTypes))
+        
+    if not isinstance(use_dist, bool):
+        raise TypeError('`use_dist` must be bool')
+        
+    if subsampMethod is not None:
+        subsampMethods = ['mooring_array', 'survey_stations']
+        if not isinstance(subsampMethod, str):
+            raise TypeError('`subsampMethod` must be str or None')
+        elif subsampMethod not in subsampMethods:
+            raise TypeError('subsampMethod [{}] not available. Options are: {}'.format(subsampMethod, subsampMethod))
+        
+    if not isinstance(contourName, (type(None), str)):
+        raise TypeError('`contourName` must be str or None')
+        
+    if (meanAxes is True and sumAxes is not False) or (sumAxes is True and meanAxes is not False):
+        raise ValueError('If one between `meanAxes` and `sumAxes` is True, the other must be False')
+    
+    if not isinstance(meanAxes, bool):
+        meanAxes = _np.asarray(meanAxes, dtype='str')
+        if meanAxes.ndim == 0: meanAxes = meanAxes.reshape(1)
+        elif meanAxes.ndim >1: raise TypeError('Invalid `meanAxes`')
+        axis_error = [axis for axis in meanAxes if axis not in od.grid_coords]
+        if len(axis_error)!=0:
+            raise ValueError('{} are not in od.grid_coords and can not be averaged'.format(axis_error))
+        elif 'mooring' in meanAxes or 'Z' in meanAxes or 'station' in meanAxes:
+            raise ValueError('`mooring`, `station`, and `Z` can not be in `meanAxes`')
+    elif meanAxes is True:
+        meanAxes = [coord for coord in od.grid_coords if coord!='mooring' and coord!='station' and coord!='Z']
+    else:
+        meanAxes = []
+        
+    if not isinstance(sumAxes, bool):
+        sumAxes = _np.asarray(sumAxes, dtype='str')
+        if sumAxes.ndim == 0: sumAxes = sumAxes.reshape(1)
+        elif sumAxes.ndim >1: raise TypeError('Invalid `sumAxes`')
+        axis_error = [axis for axis in sumAxes if axis not in od.grid_coords]
+        if len(axis_error)!=0:
+            raise ValueError('{} are not in od.grid_coords and can not be averaged'.format(axis_error))
+        elif 'mooring' in sumAxes or 'Z' in sumAxes or 'station' in sumAxes:
+            raise ValueError('`mooring`, `station`, and `Z` can not be in `sumAxes`')
+    elif sumAxes is True:
+        sumAxes = [coord for coord in od.grid_coords if coord!='mooring' and coord!='station' and coord!='Z']
+    else:
+        sumAxes = []
+
+    if len(meanAxes)>0 and len(sumAxes)>0:
+        if set(sumAxes).issubset(sumAxes) or set(sumAxes).issubset(meanAxes):
+            raise ValueError('`meanAxes` and `sumAxes` can not contain the same Axes')
+        
+    if not isinstance(contour_kwargs, (type(None), dict)):
+        raise TypeError('`contour_kwargs` must be None or dict')
+       
+    if not isinstance(clabel_kwargs, (type(None), dict)):
+        raise TypeError('`clabel_kwargs` must be None or dict')
+        
+    if not isinstance(subsamp_kwargs, (type(None), dict)):
+        raise TypeError('`subsamp_kwargs` must be None or dict')
+        
+    # Handle kwargs
+    if contour_kwargs  is None: contour_kwargs = {}
+    if clabel_kwargs   is None: clabel_kwargs  = {}
+    if subsamp_kwargs  is None: subsamp_kwargs = {}
+    
+    # Subsample first
+    if subsampMethod=='mooring_array':
+        od = od.mooring_array(**subsamp_kwargs)
+    elif subsampMethod=='survey_stations':
+        od = od.survey_stations(**subsamp_kwargs)
+        
+    # Check variables and add
+    listName = [varName]
+    if contourName is not None: listName = listName + [contourName]
+    _listName =  _compute._rename_aliased(od, listName)
+    od = _compute._add_missing_variables(od, _listName)
+    
+    # VARNAME
+    # Extract DataArray (use public)
+    da = od.dataset[varName]
+    
+    # Get dimension names
+    if 'mooring' in od.grid_coords:
+        hor_name = [dim for dim in od.grid_coords['mooring'] if dim in da.dims][0]
+    elif 'station' in od.grid_coords:
+        hor_name = [dim for dim in od.grid_coords['station'] if dim in da.dims][0]
+    else: 
+        raise ValueError('The oceandataset must be subsampled using mooring or survey')
+    ver_name = [dim for dim in od.grid_coords['Z'] if dim in da.dims][0]
+        
+    # Apply mean and sum
+    meanDims = []
+    for axes in meanAxes: 
+        meanDims = meanDims + [dim for dim in od.grid_coords[axes] if dim in da.dims]
+    sumDims = []
+    for axes in sumAxes: 
+        sumDims = sumDims + [dim for dim in od.grid_coords[axes] if dim in da.dims]
+    if len(meanDims)>0: da = da.mean(meanDims, keep_attrs=True)
+    if len(sumDims)>0: da = da.sum(sumDims, keep_attrs=True)
+    da = da.squeeze()       
+    
+    # CONTOURNAME
+    if contourName is not None: 
+        # Extract DataArray (use public)
+        da_contour = od.dataset[contourName]
+        
+        # Get dimension names
+        if 'mooring' in od.grid_coords:
+            hor_name_cont = [dim for dim in od.grid_coords['mooring'] if dim in da_contour.dims][0]
+        elif 'station' in od.grid_coords:
+            hor_name_cont = [dim for dim in od.grid_coords['station'] if dim in da_contour.dims][0]
+        ver_name_cont = [dim for dim in od.grid_coords['Z'] if dim in da_contour.dims][0]
+
+        # Apply mean and sum
+        meanDims = []
+        for axes in meanAxes: 
+            meanDims = meanDims + [dim for dim in od.grid_coords[axes] if dim in da_contour.dims]
+        sumDims = []
+        for axes in sumAxes: 
+            sumDims = sumDims + [dim for dim in od.grid_coords[axes] if dim in da_contour.dims]
+        if len(meanDims)>0: da_contour = da_contour.mean(meanDims, keep_attrs=True)
+        if len(sumDims)>0:  da_contour = da_contour.sum(sumDims, keep_attrs=True)
+        da_contour = da_contour.squeeze()       
+                
+    # Check dimensions
+    dims = list(da.dims)
+    dims.remove(hor_name)
+    dims.remove(ver_name)
+    
+    # Use distances
+    if use_dist:
+        if contourName is None:
+            if hor_name+'_dist' in da.coords: 
+                hor_name=hor_name+'_dist'
+        else:
+            if hor_name+'_dist' in da.coords and hor_name_cont+'_dist' in da_contour.coords:
+                hor_name      =hor_name+'_dist'
+                hor_name_cont =hor_name_cont+'_dist'
+    
+    # Pop from kwargs
+    ax  = kwargs.pop('ax', None)
+    col = kwargs.pop('col', None)
+    
+    if len(dims)==0:
+        # Single plot:    
+        # Add ax
+        if ax is None:
+            ax = _plt.axes();
+        kwargs['ax'] = ax
+        
+    elif len(dims)==1:
+        
+        # Multiple plots:
+        extra_name = dims[0]
+        
+        # Add col
+        if col is None:
+            col = extra_name
+        kwargs['col'] = col
+
+    # Plot
+    args = {'x': hor_name, 'y': ver_name, **kwargs}
+    if plotType=='contourf':
+        p = da.plot.contourf(**args)
+    elif plotType=='contour':
+        p = da.plot.contour(**args)
+    elif plotType=='imshow':
+        p = da.plot.imshow(**args)
+    elif plotType=='pcolormesh':
+        p = da.plot.pcolormesh(**args)
+        
+    # Contour
+    if contourName is not None: 
+        ax          = args.pop('ax', None)
+        args        = {'x': hor_name_cont, 'y': ver_name_cont, 'ax': ax, 'colors': 'gray', 'add_labels': False, **contour_kwargs}
+        if ax is not None:
+            cont = da_contour.plot.contour(**args, **clabel_kwargs)
+            _plt.clabel(cont)
+        else:
+            for i, thisax in enumerate(p.axes.flat):
+                if extra_name in da_contour.dims:
+                    da_contour_i = da_contour.isel({extra_name: i}).squeeze()
+                else:
+                    da_contour_i = da_contour
+                cont = da_contour_i.plot.contour(**{**args, 'ax': thisax})
+                _plt.clabel(cont, **clabel_kwargs)
+                
+    # Return
+    if ax is not None: return ax
+    else: return p
+    
+
 def horizontal_section(od, 
                        varName, 
-                       plotType       = 'contourf',
+                       plotType       = 'pcolormesh',
+                       use_coords     = True,
                        contourName    = None,
                        meanAxes       = False, 
                        sumAxes        = False,
@@ -31,6 +294,11 @@ def horizontal_section(od,
         Name of the variable to plot.
     plotType: str 
         2D plot type: {'contourf', 'contour', 'imshow', 'pcolormesh'}
+    use_coords: bool
+        If True, use coordinates for x and y axis (e.g., XC and YC).
+        If False, use dimensions for x and y axis (e.g., X and Y)
+    contourName: str, None
+        Name of the variable to contour on top.
     meanAxes: 1D array_like, str, or bool
         List of axes over which to apply mean.
         If True, set meanAxes=od.grid_coords (excluding time).
@@ -77,6 +345,9 @@ def horizontal_section(od,
     elif plotType not in plotTypes:
         raise TypeError('plotType [{}] not available. Options are: {}'.format(plotType, plotTypes))
     
+    if not isinstance(use_coords, bool):
+        raise TypeError('`use_coords` must be bool')
+        
     if not isinstance(contourName, (type(None), str)):
         raise TypeError('`contourName` must be str or None')
         
@@ -142,7 +413,7 @@ def horizontal_section(od,
     # Extract DataArray (use public)
     da = od.dataset[varName]
     
-    # Get time name
+    # Get dimension names
     X_name = [dim for dim in od.grid_coords['X'] if dim in da.dims][0]
     Y_name = [dim for dim in od.grid_coords['Y'] if dim in da.dims][0]
     
@@ -155,13 +426,14 @@ def horizontal_section(od,
         sumDims = sumDims + [dim for dim in od.grid_coords[axes] if dim in da.dims]
     if len(meanDims)>0: da = da.mean(meanDims, keep_attrs=True)
     if len(sumDims)>0: da = da.sum(sumDims, keep_attrs=True)
+    da = da.squeeze()
     
     # CONTOURNAME
     if contourName is not None: 
         # Extract DataArray (use public)
         da_contour = od.dataset[contourName]
         
-        # Get time name
+        # Get dimension names
         X_name_cont = [dim for dim in od.grid_coords['X'] if dim in da_contour.dims][0]
         Y_name_cont = [dim for dim in od.grid_coords['Y'] if dim in da_contour.dims][0]
 
@@ -174,13 +446,38 @@ def horizontal_section(od,
             sumDims = sumDims + [dim for dim in od.grid_coords[axes] if dim in da_contour.dims]
         if len(meanDims)>0: da_contour = da_contour.mean(meanDims, keep_attrs=True)
         if len(sumDims)>0:  da_contour = da_contour.sum(sumDims, keep_attrs=True)
-            
+        da_contour = da_contour.squeeze()    
+        
     # Check dimensions
-    da = da.squeeze()
     dims = list(da.dims)
     dims.remove(X_name)
     dims.remove(Y_name)
     
+    # Use coordinates
+    if use_coords:
+        if X_name=='X' and Y_name=='Y': 
+            point = 'C'
+        elif X_name=='Xp1' and Y_name=='Y':
+            point = 'U'
+        elif X_name=='X' and Y_name=='Yp1':
+            point = 'V'
+        elif X_name=='Xp1' and Y_name=='Yp1':
+            point = 'G'
+        X_name = 'X'+point
+        Y_name = 'Y'+point
+
+        if contourName is not None:
+            if X_name_cont=='X' and Y_name_cont=='Y': 
+                point_cont = 'C'
+            elif X_name_cont=='Xp1' and Y_name_cont=='Y':
+                point_cont = 'U'
+            elif X_name_cont=='X' and Y_name_cont=='Yp1':
+                point_cont = 'V'
+            elif X_name_cont=='Xp1' and Y_name_cont=='Yp1':
+                point_cont = 'G'
+            X_name_cont = 'X'+point_cont
+            Y_name_cont = 'Y'+point_cont
+                
     # Pop from kwargs
     ax  = kwargs.pop('ax', None)
     col = kwargs.pop('col', None)
@@ -203,7 +500,8 @@ def horizontal_section(od,
         # TODO: For some reason, faceting and cartopy are not working very nice with our configurations
         #       Drop it for now, but we need to explore it more
         if od.projection is not None:
-            print('WARNING')
+            _warnings.warn("\nSwitch projection off."
+                           " This function currently does not support faceting for projected plots.", stacklevel=2)
             od = od.set_projection(None)
             transform = None
         
@@ -239,21 +537,22 @@ def horizontal_section(od,
         p = da.plot.pcolormesh(**args)
 
     # Contour
-    ax          = args.pop('ax', None)
-    transform   = args.pop('transform', None)
-    subplot_kws = args.pop('subplot_kws', None)
-    args        = {'x': X_name_cont, 'y': Y_name_cont, 'ax': ax, 'transform': transform, 'subplot_kws': subplot_kws, 'colors': 'gray', 'add_labels': False, **contour_kwargs}
-    if ax is not None:
-        cont = da_contour.plot.contour(**args, **clabel_kwargs)
-        _plt.clabel(cont)
-    else:
-        for i, thisax in enumerate(p.axes.flat):
-            if extra_name in da_contour.dims:
-                da_contour_i = da_contour.isel({extra_name: i}).squeeze()
-            else:
-                da_contour_i = da_contour
-            cont = da_contour_i.plot.contour(**{**args, 'ax': thisax})
-            _plt.clabel(cont, **clabel_kwargs)
+    if contourName is not None: 
+        ax          = args.pop('ax', None)
+        transform   = args.pop('transform', None)
+        subplot_kws = args.pop('subplot_kws', None)
+        args        = {'x': X_name_cont, 'y': Y_name_cont, 'ax': ax, 'transform': transform, 'subplot_kws': subplot_kws, 'colors': 'gray', 'add_labels': False, **contour_kwargs}
+        if ax is not None:
+            cont = da_contour.plot.contour(**args, **clabel_kwargs)
+            # _plt.clabel(cont)
+        else:
+            for i, thisax in enumerate(p.axes.flat):
+                if extra_name in da_contour.dims:
+                    da_contour_i = da_contour.isel({extra_name: i}).squeeze()
+                else:
+                    da_contour_i = da_contour
+                cont = da_contour_i.plot.contour(**{**args, 'ax': thisax})
+                _plt.clabel(cont, **clabel_kwargs)
             
     # Labels and return
     add_labels = kwargs.pop('add_labels', None)
