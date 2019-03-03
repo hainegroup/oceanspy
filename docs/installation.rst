@@ -40,7 +40,7 @@ First open a terminal (Jupyter Notebook: click on ``New`` + ``Terminal``), then 
 
     conda config --remove channels defaults
     conda config --add channels conda-forge
-    conda install dask distributed bottleneck netCDF4 xarray cartopy esmpy
+    conda install dask distributed bottleneck netCDF4 xarray cartopy esmpy ffmpeg
     pip install geopy xgcm xesmf xmitgcm
 
 To install OceanSpy, run this command in your terminal:
@@ -70,7 +70,7 @@ This cell installs OceanSpy and its dependencies from a Jupyter Notebook:
     %%bash
     conda config --remove channels defaults
     conda config --add channels conda-forge
-    conda install dask distributed bottleneck netCDF4 xarray cartopy esmpy
+    conda install dask distributed bottleneck netCDF4 xarray cartopy esmpy ffmpeg
     pip install geopy xgcm xesmf xmitgcm oceanspy
 
 .. note::

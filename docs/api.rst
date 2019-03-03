@@ -213,7 +213,23 @@ Functions
    plot.TS_diagram
    
 
+
+Animating
+=========
+
+.. autosummary::
+   :toctree: generated/
    
+   animate
+   
+Functions
+---------
+
+.. autosummary::
+   :toctree: generated/
+   
+   animate.TS_diagram
+
    
    
    

@@ -6,6 +6,7 @@ import warnings as _warnings
 from . import subsample as _subsample
 from . import compute   as _compute
 from . import plot      as _plot
+from . import animate   as _animate
 from . import utils     as _utils
 
 # TODO: add parameters check in set_parameters
@@ -1597,25 +1598,36 @@ class OceanDataset:
                 
         return _plot.time_series(self, **kwargs)
     
-    def TS_diagram(self, **kwargs):
+    def TS_diagram(self, animate=False, **kwargs):
         """
-        Shortcut for plot.TS_diagram.
+        Shortcut for plot.TS_diagram or animate.TS_diagram.
         
         Parameters
         ----------
+        animate: bool
+            False: use plot.TS_diagram
+            True:  use animate.TS_diagram
         **kwargs: 
             Keyword arguments for plot.TS_diagram
             
         Returns
         -------
-        Axes object
+        Axes or Animation object
     
         See Also
         --------
         plot.TS_diagram
+        animate.TS_diagram
         """
-                
-        return _plot.TS_diagram(self, **kwargs)
+        
+        # Check parameters
+        if not isinstance(animate, bool):
+            raise TypeError('`animate` must be bool')
+            
+        if animate:
+            return _animate.TS_diagram(self, **kwargs)
+        else:
+            return _plot.TS_diagram(self, **kwargs)
     
     
     

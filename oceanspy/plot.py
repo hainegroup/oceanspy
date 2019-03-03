@@ -688,6 +688,8 @@ def time_series(od,
 def TS_diagram(od, 
                Tlim           = None,
                Slim           = None,
+               dens           = None,
+               meanAxes       = None,
                colorName      = None,
                ax             = None,
                cmap_kwargs    = None,
@@ -709,6 +711,12 @@ def TS_diagram(od,
     Slim: array_like with 2 elements
         Salinity limits on the x axis.
         If None, uses the min and max value.
+    meanAxes: 1D array_like, str, bool
+        List of axes over which to apply mean.
+    dens: xarray.DataArray
+        DataArray corresponding to density used for isopycnals.
+        Must contain coordinates (Temp, S)
+        In None, it will be inferred.
     colorName: str, None
         Name of the variable to use to color (e.g., Temp).
         If None, uses plot insted of scatter (much faster)
@@ -755,6 +763,21 @@ def TS_diagram(od,
         if Slim.size!=2:  raise TypeError('`Slim` must contain 2 elements')
         Slim = Slim.reshape(2)
        
+    if meanAxes is not None:
+        meanAxes = _np.asarray(meanAxes, dtype='str')
+        if meanAxes.ndim == 0: meanAxes = meanAxes.reshape(1)
+        elif meanAxes.ndim >1: raise TypeError('Invalid `meanAxes`')
+        axis_error = [axis for axis in meanAxes if axis not in od.grid_coords]
+        if len(axis_error)!=0: raise ValueError('{} are not in od.grid_coords and can not be averaged'.format(axis_error))
+    else:
+        meanAxes = []
+        
+    if dens is not None:
+        if not isinstance(dens, _xr.DataArray):
+            raise TypeError('`dens` must be xarray.DataArray')
+        elif not set(['Temp', 'S']).issubset(dens.coords):
+            raise ValueError('`dens` must have coordinates (Temp, S)') 
+            
     if not isinstance(colorName, (type(None), str)):
         raise TypeError('`colorName` must be str or None')
     
@@ -781,7 +804,7 @@ def TS_diagram(od,
         
     # Cutout first
     od = od.cutout(**cutout_kwargs)
-    
+        
     # Check and extract T and S
     varList = ['Temp', 'S']
     od = _compute._add_missing_variables(od, varList)
@@ -811,21 +834,47 @@ def TS_diagram(od,
                         
         # Broadcast, in case color has different dimensions
         T, S, color = _xr.broadcast(T, S, color)
-            
+      
+    
+    # Compute mean
+    meanDims = []
+    for axes in meanAxes: 
+        meanDims = meanDims + [dim for dim in od.grid_coords[axes] if dim in T.dims]
+    T = T.mean(meanDims, keep_attrs=True)
+    S = S.mean(meanDims, keep_attrs=True)
+    
+    if colorName is not None:
+        meanDims = []
+        for axes in meanAxes: 
+            meanDims = meanDims + [dim for dim in od.grid_coords[axes] if dim in color.dims]
+        color = color.mean(meanDims, keep_attrs=True)
+    
     # Compute density
     if Tlim is None:
-        Tlim = [_np.floor(T.min().values), _np.ceil(T.max().values)]
+        Tlim = [T.min().values, T.max().values]
     if Slim is None:
-        Slim = [_np.floor(S.min().values), _np.ceil(S.max().values)]
-    t, s = _xr.broadcast(_xr.DataArray(_np.linspace(Tlim[0], Tlim[-1], 100), dims= ('t')),
-                         _xr.DataArray(_np.linspace(Slim[0], Slim[-1], 100), dims= ('s')))
-    odSigma0 = _ospy.OceanDataset(_xr.Dataset({'Temp': t, 'S': s})).set_parameters(od.parameters)
-    odSigma0 = odSigma0.merge_potential_density_anomaly()
-    
-    # Extract density variables
-    t = odSigma0._ds['Temp']
-    s = odSigma0._ds['S']
-    d = odSigma0._ds['Sigma0']   
+        Slim = [S.min().values, S.max().values]
+        
+    if dens is None:
+        t, s = _xr.broadcast(_xr.DataArray(_np.linspace(Tlim[0], Tlim[-1], 100), dims= ('t')),
+                             _xr.DataArray(_np.linspace(Slim[0], Slim[-1], 100), dims= ('s')))
+        odSigma0 = _ospy.OceanDataset(_xr.Dataset({'Temp': t, 'S': s})).set_parameters(od.parameters)
+        odSigma0 = odSigma0.merge_potential_density_anomaly()
+        odSigma0._ds = odSigma0._ds.set_coords(['Temp', 'S'])
+        
+        # Freezing point
+        paramsList = ['tempFrz0', 'dTempFrz_dS']
+        params2use = {par:od.parameters[par] for par in od.parameters if par in paramsList}
+        tempFrz0    = params2use['tempFrz0']
+        dTempFrz_dS = params2use['dTempFrz_dS']
+        freez_point = tempFrz0 + odSigma0._ds['S']*dTempFrz_dS
+        
+        # Extract Density
+        dens = odSigma0._ds['Sigma0'].where(odSigma0._ds['Temp']>freez_point)    
+
+    # Extract temp and salinity
+    t = dens['Temp']
+    s = dens['S']
     
     # Create axis
     if ax is None: ax = _plt.gca()
@@ -854,7 +903,7 @@ def TS_diagram(od,
     # Plot isopycnals
     default_contour_kwargs = {'colors': 'gray'}
     contour_kwargs = {**default_contour_kwargs, **contour_kwargs}
-    CS = ax.contour(s.values, t.values, d.values, **contour_kwargs)
+    CS = ax.contour(s.values, t.values, dens.values, **contour_kwargs)
     ax.clabel(CS, **clabel_kwargs)
     
     # Set labels and limits
