@@ -241,14 +241,8 @@ def vertical_section(od,
 
     # Plot
     args = {'x': hor_name, 'y': ver_name, **kwargs}
-    if plotType=='contourf':
-        p = da.plot.contourf(**args)
-    elif plotType=='contour':
-        p = da.plot.contour(**args)
-    elif plotType=='imshow':
-        p = da.plot.imshow(**args)
-    elif plotType=='pcolormesh':
-        p = da.plot.pcolormesh(**args)
+    plotfunc = eval('_xr.plot.'+plotType)
+    p = plotfunc(da, **args)
         
     # Contour
     if contourName is not None: 
@@ -527,14 +521,8 @@ def horizontal_section(od,
         
     # Plot
     args = {'x': X_name, 'y': Y_name, **kwargs}
-    if plotType=='contourf':
-        p = da.plot.contourf(**args)
-    elif plotType=='contour':
-        p = da.plot.contour(**args)
-    elif plotType=='imshow':
-        p = da.plot.imshow(**args)
-    elif plotType=='pcolormesh':
-        p = da.plot.pcolormesh(**args)
+    plotfunc = eval('_xr.plot.'+plotType)
+    p = plotfunc(da, **args)
 
     # Contour
     if contourName is not None: 
