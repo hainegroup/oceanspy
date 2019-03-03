@@ -1537,6 +1537,26 @@ class OceanDataset:
     # ------------
     # plot
     
+    def vertical_section(self, **kwargs):
+        """
+        Shortcut for plot.vertical_section.
+        
+        Parameters
+        ----------
+        **kwargs: 
+            Keyword arguments for plot.vertical_section
+            
+        Returns
+        -------
+        Axes or FacetGrid object
+    
+        See Also
+        --------
+        plot.vertical_section
+        """
+                
+        return _plot.vertical_section(self, **kwargs)
+    
     def horizontal_section(self, **kwargs):
         """
         Shortcut for plot.horizontal_section.

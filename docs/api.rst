@@ -98,6 +98,7 @@ Plot
 .. autosummary::
    :toctree: generated/
    
+   OceanDataset.vertical_section
    OceanDataset.horizontal_section
    OceanDataset.time_series
    OceanDataset.TS_diagram
@@ -206,6 +207,7 @@ Functions
 .. autosummary::
    :toctree: generated/
    
+   plot.vertical_section
    plot.horizontal_section
    plot.time_series
    plot.TS_diagram
