@@ -1538,7 +1538,7 @@ class OceanDataset:
     # ------------
     # plot
     
-    def vertical_section(self, **kwargs):
+    def vertical_section(self, animate=False, **kwargs):
         """
         Shortcut for plot.vertical_section or animate.vertical_section.
         
