@@ -5,6 +5,8 @@ import numpy    as _np
 import warnings as _warnings
 from . import subsample as _subsample
 from . import compute   as _compute
+from . import plot      as _plot
+from . import animate   as _animate
 from . import utils     as _utils
 
 # TODO: add parameters check in set_parameters
@@ -64,17 +66,21 @@ class OceanDataset:
         
         main_info = ['<oceanspy.OceanDataset>']
         main_info.append('\nMain attributes:')
-        if self.name:
-            main_info.append("   .name: %s" % self.name)
-        if self.description:
-            main_info.append("   .description: %s" % self.description)
         if self.dataset:
-            main_info.append("   .dataset: %s" % self.dataset.__repr__()[self.dataset.__repr__().find('<'):
-                                                                     self.dataset.__repr__().find('>')+1]) 
+            main_info.append("   .dataset: %s"    % self.dataset.__repr__()[self.dataset.__repr__().find('<'):
+                                                                            self.dataset.__repr__().find('>')+1]) 
         if self.grid_coords:
-            main_info.append("   .grid: %s"    % self.grid.__repr__()[self.grid.__repr__().find('<'):
-                                                                    self.grid.__repr__().find('>')+1]) 
+            main_info.append("   .grid: %s"       % self.grid.__repr__()[self.grid.__repr__().find('<'):
+                                                                         self.grid.__repr__().find('>')+1]) 
+        if self.projection:
+            main_info.append("   .projection: %s" % self.projection.__repr__()[self.projection.__repr__().find('<'):
+                                                                               self.projection.__repr__().find('>')+1]) 
+            
         more_info = ['\n\nMore attributes:']
+        if self.name:
+            more_info.append("   .name: %s" % self.name)
+        if self.description:
+            more_info.append("   .description: %s" % self.description)
         if self.parameters:
             more_info.append("   .parameters: %s" % type(self.parameters))
         if self.aliases:
@@ -568,6 +574,69 @@ class OceanDataset:
                                           overwrite = overwrite) 
         
         return self
+    
+    # -------------------
+    # projection
+    # -------------------
+    @property
+    def projection(self):
+        """
+        Projection of the OceanDataset.
+        """
+        
+        projection = self._read_from_global_attr('projection')
+        if projection:
+            if projection=='None':
+                projection = eval(projection)
+            else:
+                import cartopy.crs as ccrs
+                projection = eval('ccrs.{}'.format(projection))
+            
+        return projection
+
+    @projection.setter
+    def projection(self, projection):
+        """
+        Inhibit setter
+        """
+        
+        raise AttributeError("Set new `projection` using .set_projection")
+    
+    def set_projection(self, projection, **kwargs):
+        """
+        Projection of the OceanDataset.
+        
+        Parameters
+        ----------
+        projection: str
+            cartopy projection of the OceanDataset
+        **kwargs:
+            Keyword arguments used by cartopy
+            E.g., central_longitude=0.0 for PlateCarree
+        References
+        ----------
+        https://scitools.org.uk/cartopy/docs/latest/crs/projections.html
+        """
+        
+        # Check parameters
+        if not isinstance(projection, (type(None), str)):
+            raise TypeError("`projection` must be str")
+        
+        if projection is not None:
+            import cartopy.crs as ccrs
+            if not hasattr(ccrs, projection):
+                raise TypeError("{} is not a cartopy projection".format(projection))
+            projection = '{}(**{{}})'.format(projection, kwargs)
+        else: 
+            projection = str(projection) 
+
+        # Set projection
+        self = self._store_as_global_attr(name      = 'projection', 
+                                          attr      = projection,
+                                          overwrite = True) 
+
+        return self
+    
     
     
     # ===========
@@ -1466,7 +1535,128 @@ class OceanDataset:
         
         return self
         
-
+    # ------------
+    # plot
+    
+    def vertical_section(self, animate=False, **kwargs):
+        """
+        Shortcut for plot.vertical_section or animate.vertical_section.
+        
+        Parameters
+        ----------
+        animate: bool
+            False: use plot.vertical_section
+            True:  use animate.vertical_section
+        **kwargs: 
+            Keyword arguments for plot.vertical_section
+            
+        Returns
+        -------
+        Axes or Animation object
+    
+        See Also
+        --------
+        plot.vertical_section
+        animate.vertical_section
+        """
+        
+        # Check parameters
+        if not isinstance(animate, bool):
+            raise TypeError('`animate` must be bool')
+            
+        if animate:
+            return _animate.vertical_section(self, **kwargs)
+        else:
+            return _plot.vertical_section(self, **kwargs)
+        
+    
+    def horizontal_section(self, animate=False, **kwargs):
+        """
+        Shortcut for plot.horizontal_section or animate.horizontal_section.
+        
+        Parameters
+        ----------
+        animate: bool
+            False: use plot.horizontal_section
+            True:  use animate.horizontal_section
+        **kwargs: 
+            Keyword arguments for plot.horizontal_section
+            
+        Returns
+        -------
+        Axes or Animation object
+    
+        See Also
+        --------
+        plot.horizontal_section
+        animate.horizontal_section
+        """
+        
+        # Check parameters
+        if not isinstance(animate, bool):
+            raise TypeError('`animate` must be bool')
+            
+        if animate:
+            return _animate.horizontal_section(self, **kwargs)
+        else:
+            return _plot.horizontal_section(self, **kwargs)
+    
+    def time_series(self, **kwargs):
+        """
+        Shortcut for plot.time_series.
+        
+        Parameters
+        ----------
+        **kwargs: 
+            Keyword arguments for plot.time_series
+            
+        Returns
+        -------
+        Axes object
+    
+        See Also
+        --------
+        plot.time_series
+        """
+                
+        return _plot.time_series(self, **kwargs)
+    
+    def TS_diagram(self, animate=False, **kwargs):
+        """
+        Shortcut for plot.TS_diagram or animate.TS_diagram.
+        
+        Parameters
+        ----------
+        animate: bool
+            False: use plot.TS_diagram
+            True:  use animate.TS_diagram
+        **kwargs: 
+            Keyword arguments for plot.TS_diagram
+            
+        Returns
+        -------
+        Axes or Animation object
+    
+        See Also
+        --------
+        plot.TS_diagram
+        animate.TS_diagram
+        """
+        
+        # Check parameters
+        if not isinstance(animate, bool):
+            raise TypeError('`animate` must be bool')
+            
+        if animate:
+            return _animate.TS_diagram(self, **kwargs)
+        else:
+            return _plot.TS_diagram(self, **kwargs)
+    
+    
+    
+    
+    
+    
 def _create_grid(dataset, coords, periodic):
 
     # TODO: add option to infer axis using comodo since we're currently cleaning up comodo attributes by default
