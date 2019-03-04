@@ -142,21 +142,8 @@ def EGshelfIIseas2km_ERAI(daily     = False,
     ds = ds.chunk(chunks)
     
     # Initialize OceanDataset
-    od = _OceanDataset(ds).set_name(name).set_description(description)
-    od = od.set_coords(fillna=True, coords1Dfrom2D=True)
-    grid_coords = {'Y'    : {'Y': None, 'Yp1': 0.5},
-                   'X'    : {'X': None, 'Xp1': 0.5},
-                   'Z'    : {'Z': None, 'Zp1': 0.5, 'Zu': -0.5, 'Zl': 0.5},
-                   'time' : {'time': -0.5}}
-    od = od.set_grid_coords(grid_coords = grid_coords, add_midp=True, overwrite=False)
-    od = od.set_parameters({'rSphere' : 6.371E3,                # km None: cartesian
-                            'eq_state': 'jmd95',                # jmd95, mdjwf
-                            'rho0'    : 1027,                   # kg/m^3  TODO: None: compute volume weighted average
-                            'g'       : 9.81,                   # m/s^2
-                            'eps_nh'  : 0,                      # 0 is hydrostatic
-                            'omega'   : 7.292123516990375E-05,  # rad/s
-                            'c_p'     : 3.986E3                 # specific heat [J/kg/K]
-                            })
+    od = _OceanDataset(ds).import_MITgcm_rect_nc()
+    od = od.set_name(name).set_description(description)
     od = od.set_projection('Mercator', 
                            central_longitude=od.dataset['X'].mean().values, 
                            min_latitude=od.dataset['Y'].min().values, 
@@ -293,13 +280,8 @@ def EGshelfIIseas2km_ASR(cropped   = False,
     ds = ds.chunk(chunks)
     
     # Initialize OceanDataset
-    od = _OceanDataset(ds).set_name(name).set_description(description)
-    od = od.set_coords(fillna=True, coords1Dfrom2D=True)
-    grid_coords = {'Y'    : {'Y': None, 'Yp1': 0.5},
-                   'X'    : {'X': None, 'Xp1': 0.5},
-                   'Z'    : {'Z': None, 'Zp1': 0.5, 'Zu': 0.5, 'Zl': -0.5},
-                   'time' : {'time': -0.5}}
-    od = od.set_grid_coords(grid_coords = grid_coords, add_midp=True)
+    od = _OceanDataset(ds).import_MITgcm_rect_nc()
+    od = od.set_name(name).set_description(description)
     od = od.set_projection('Mercator', 
                            central_longitude=od.dataset['X'].mean().values, 
                            min_latitude=od.dataset['Y'].min().values, 

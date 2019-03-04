@@ -22,9 +22,7 @@ class OceanDataset:
     """
     
     def __init__(self, 
-                 dataset,
-                 name = None,
-                 description = None):
+                 dataset):
         """
         Parameters
         ----------
@@ -95,6 +93,24 @@ class OceanDataset:
             info = info+'\n'.join(more_info)
         return info
             
+    # ======
+    # IMPORT
+    # ======
+    def import_MITgcm_rect_nc(self):
+        """
+        Apply functions on a dataset from a MITgcm run with rectilinear grid stored in NetCDF format,
+        and make it satisfy OceanSpy requirements.
+        """
+        
+        # Set coordinates
+        self = self.set_coords(fillna=True, coords1Dfrom2D=True)
+        grid_coords = {'Y'    : {'Y': None, 'Yp1': 0.5},
+                       'X'    : {'X': None, 'Xp1': 0.5},
+                       'Z'    : {'Z': None, 'Zp1': 0.5, 'Zu': 0.5, 'Zl': -0.5},
+                       'time' : {'time': -0.5}}
+        self = self.set_grid_coords(grid_coords = grid_coords, add_midp=True)
+        
+        return self
     
     # ===========
     # ATTRIBUTES
