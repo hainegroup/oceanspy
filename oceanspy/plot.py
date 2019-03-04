@@ -931,6 +931,7 @@ def TS_diagram(od,
         else:
             title = title + '\n' + tit
     ax.set_title(title)
+    _plt.tight_layout()
     
     return ax
 
