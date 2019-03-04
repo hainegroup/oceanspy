@@ -85,6 +85,94 @@ def _create_animation(od, time, plot_func, func_kwargs, display, **kwargs):
         
     return anim
 
+
+def vertical_section(od, 
+                     display = True,
+                     FuncAnimation_kwargs = None, 
+                     **kwargs):
+    
+    """
+    Animate vertical section plots.
+    
+    Parameters
+    ----------
+    od: OceanDataset
+        oceandataset to check for missing variables
+    display: bool
+        display the animation in the notebook 
+    FuncAnimation_kwargs: dict
+        Keyword arguments from matplotlib.animation.FuncAnimation
+    **kwargs:
+        Keyword arguments for plot.vertical_section
+        
+    Returns
+    -------
+    Animation object
+    
+    See also
+    --------
+    plot.vertical_section
+    """
+    
+    # Check input
+    if not isinstance(od, _ospy.OceanDataset):
+        raise TypeError('`od` must be OceanDataset')
+        
+    if not isinstance(FuncAnimation_kwargs, (dict, type(None))):
+        raise TypeError('`FuncAnimation_kwargs` must be dict or None')
+        
+    # Handle kwargs
+    if FuncAnimation_kwargs is None: FuncAnimation_kwargs = {}
+        
+    # Name of the plot_functions
+    plot_func = eval('_plot.vertical_section')
+    
+    # First cutout and get time
+    subsamp_kwargs = kwargs.pop('subsamp_kwargs', None)
+    subsampMethod  = kwargs.pop('subsampMethod', None)
+    if subsamp_kwargs is not None:
+        # Subsample first
+        if subsampMethod=='mooring_array':
+            od = od.mooring_array(**subsamp_kwargs)
+        elif subsampMethod=='survey_stations':
+            od = od.survey_stations(**subsamp_kwargs)
+    time = od._ds['time']
+    
+    # Fix colorbar
+    varName = kwargs.pop('varName', None)
+    
+    # Add missing variables (use private)
+    _varName =  _compute._rename_aliased(od, varName)
+    od = _compute._add_missing_variables(od, _varName)
+
+    # Extract color (use public)
+    color = od.dataset[varName]
+
+    # Create colorbar (stolen from xarray)
+    cmap_kwargs = {}
+    for par in ['vmin', 'vmax', 'cmap', 'center', 'robust', 'extend', 'levels', 'filled', 'norm']:
+        cmap_kwargs[par] = kwargs.pop(par, None)
+    cmap_kwargs['plot_data'] = color.values
+    cmap_kwargs = _xr.plot.utils._determine_cmap_params(**cmap_kwargs)
+    kwargs = {'varName': varName, **kwargs, **cmap_kwargs}
+        
+    # Pop ax, it doesn't work for animation
+    ax = kwargs.pop('ax', None)
+    if ax is not None:
+        _warnings.warn("\n`ax` can not be provided for animations. "
+                       "This function will use the current axis", stacklevel=2)
+    
+    # Animation
+    anim = _create_animation(od          = od, 
+                             time        = time, 
+                             plot_func   = plot_func, 
+                             func_kwargs = kwargs, 
+                             display     = display, 
+                             **FuncAnimation_kwargs)
+    
+    return anim
+
+
 def horizontal_section(od, 
                        display = True,
                        FuncAnimation_kwargs = None, 
@@ -102,7 +190,7 @@ def horizontal_section(od,
     FuncAnimation_kwargs: dict
         Keyword arguments from matplotlib.animation.FuncAnimation
     **kwargs:
-        Keyword arguments for plot.TS_diagram
+        Keyword arguments for plot.horizontal_section
         
     Returns
     -------
@@ -162,7 +250,6 @@ def horizontal_section(od,
                              func_kwargs = kwargs, 
                              display     = display, 
                              **FuncAnimation_kwargs)
-    
     
     return anim
 

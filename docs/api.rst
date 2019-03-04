@@ -228,6 +228,7 @@ Functions
 .. autosummary::
    :toctree: generated/
    
+   animate.vertical_section
    animate.horizontal_section
    animate.TS_diagram
 

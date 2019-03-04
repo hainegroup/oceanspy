@@ -1540,23 +1540,35 @@ class OceanDataset:
     
     def vertical_section(self, **kwargs):
         """
-        Shortcut for plot.vertical_section.
+        Shortcut for plot.vertical_section or animate.vertical_section.
         
         Parameters
         ----------
+        animate: bool
+            False: use plot.vertical_section
+            True:  use animate.vertical_section
         **kwargs: 
             Keyword arguments for plot.vertical_section
             
         Returns
         -------
-        Axes or FacetGrid object
+        Axes or Animation object
     
         See Also
         --------
         plot.vertical_section
+        animate.vertical_section
         """
-                
-        return _plot.vertical_section(self, **kwargs)
+        
+        # Check parameters
+        if not isinstance(animate, bool):
+            raise TypeError('`animate` must be bool')
+            
+        if animate:
+            return _animate.vertical_section(self, **kwargs)
+        else:
+            return _plot.vertical_section(self, **kwargs)
+        
     
     def horizontal_section(self, animate=False, **kwargs):
         """
