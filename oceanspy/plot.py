@@ -532,7 +532,7 @@ def horizontal_section(od,
         args        = {'x': X_name_cont, 'y': Y_name_cont, 'ax': ax, 'transform': transform, 'subplot_kws': subplot_kws, 'colors': 'gray', 'add_labels': False, **contour_kwargs}
         if ax is not None:
             cont = da_contour.plot.contour(**args, **clabel_kwargs)
-            # _plt.clabel(cont)
+            _plt.clabel(cont)
         else:
             for i, thisax in enumerate(p.axes.flat):
                 if extra_name in da_contour.dims:
