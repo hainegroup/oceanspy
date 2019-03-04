@@ -1558,25 +1558,36 @@ class OceanDataset:
                 
         return _plot.vertical_section(self, **kwargs)
     
-    def horizontal_section(self, **kwargs):
+    def horizontal_section(self, animate=False, **kwargs):
         """
-        Shortcut for plot.horizontal_section.
+        Shortcut for plot.horizontal_section or animate.horizontal_section.
         
         Parameters
         ----------
+        animate: bool
+            False: use plot.horizontal_section
+            True:  use animate.horizontal_section
         **kwargs: 
             Keyword arguments for plot.horizontal_section
             
         Returns
         -------
-        Axes or FacetGrid object
+        Axes or Animation object
     
         See Also
         --------
         plot.horizontal_section
+        animate.horizontal_section
         """
-                
-        return _plot.horizontal_section(self, **kwargs)
+        
+        # Check parameters
+        if not isinstance(animate, bool):
+            raise TypeError('`animate` must be bool')
+            
+        if animate:
+            return _animate.horizontal_section(self, **kwargs)
+        else:
+            return _plot.horizontal_section(self, **kwargs)
     
     def time_series(self, **kwargs):
         """

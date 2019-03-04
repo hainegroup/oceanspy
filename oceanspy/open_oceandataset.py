@@ -157,7 +157,12 @@ def EGshelfIIseas2km_ERAI(daily     = False,
                             'omega'   : 7.292123516990375E-05,  # rad/s
                             'c_p'     : 3.986E3                 # specific heat [J/kg/K]
                             })
-    od = od.set_projection('PlateCarree')
+    od = od.set_projection('Mercator', 
+                           central_longitude=od.dataset['X'].mean().values, 
+                           min_latitude=od.dataset['Y'].min().values, 
+                           max_latitude=od.dataset['Y'].max().values, 
+                           globe=None, 
+                           latitude_true_scale=od.dataset['Y'].mean().values)
     
     return od
 
@@ -295,7 +300,12 @@ def EGshelfIIseas2km_ASR(cropped   = False,
                    'Z'    : {'Z': None, 'Zp1': 0.5, 'Zu': 0.5, 'Zl': -0.5},
                    'time' : {'time': -0.5}}
     od = od.set_grid_coords(grid_coords = grid_coords, add_midp=True)
-    od = od.set_projection('PlateCarree')
+    od = od.set_projection('Mercator', 
+                           central_longitude=od.dataset['X'].mean().values, 
+                           min_latitude=od.dataset['Y'].min().values, 
+                           max_latitude=od.dataset['Y'].max().values, 
+                           globe=None, 
+                           latitude_true_scale=od.dataset['Y'].mean().values)
         
     return od        
 
