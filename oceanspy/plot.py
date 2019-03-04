@@ -269,10 +269,14 @@ def vertical_section(od,
                     da_contour_i = da_contour
                 cont = da_contour_i.plot.contour(**{**args, 'ax': thisax})
                 _plt.clabel(cont, **clabel_kwargs)
-                
+          
+    
     # Return
-    if ax is not None: return ax
-    else: return p
+    if ax is not None: 
+        _plt.tight_layout()
+        return ax
+    else: 
+        return p
     
 
 def horizontal_section(od, 
@@ -551,7 +555,7 @@ def horizontal_section(od,
                     da_contour_i = da_contour
                 cont = da_contour_i.plot.contour(**{**args, 'ax': thisax})
                 _plt.clabel(cont, **clabel_kwargs)
-            
+    
     # Labels and return
     add_labels = kwargs.pop('add_labels', None)
     if ax is not None: 
@@ -561,6 +565,8 @@ def horizontal_section(od,
                 gl.xlabels_top   = False
                 gl.ylabels_right = False
             except: pass
+        if od.projection is None:
+            _plt.tight_layout()
         return ax
     else: 
         return p
@@ -690,6 +696,7 @@ def time_series(od,
         
     # Plot
     _ = da.plot.line(**{'x': time_name, **kwargs})
+    _plt.tight_layout()
     
     return _plt.gca()
 
