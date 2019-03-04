@@ -20,6 +20,7 @@ def vertical_section(od,
                      contour_kwargs = None,
                      clabel_kwargs  = None,
                      subsamp_kwargs = None,
+                     cutout_kwargs  = None, 
                      **kwargs):
     """
     Plot vertical section.
@@ -53,6 +54,8 @@ def vertical_section(od,
         Keyword arguments for matplotlib.pyplot.clabel
     subsamp_kwargs: dict
         Keyword arguments for subsample.mooring_array or subsample.survey_stations
+    cutout_kwargs: dict
+        Keyword arguments for subsample.cutout
     **kwargs:
         Kewyword arguments for xarray.plot.['plotType']
         
@@ -68,6 +71,7 @@ def vertical_section(od,
     ----------
     http://xarray.pydata.org/en/stable/plotting.html
     """
+    import matplotlib.pyplot as _plt
     
     # Check parameters
     if not isinstance(od, _ospy.OceanDataset):
@@ -90,7 +94,7 @@ def vertical_section(od,
         if not isinstance(subsampMethod, str):
             raise TypeError('`subsampMethod` must be str or None')
         elif subsampMethod not in subsampMethods:
-            raise TypeError('subsampMethod [{}] not available. Options are: {}'.format(subsampMethod, subsampMethod))
+            raise TypeError('subsampMethod [{}] not available. Options are: {}'.format(subsampMethod, subsampMethods))
         
     if not isinstance(contourName, (type(None), str)):
         raise TypeError('`contourName` must be str or None')
@@ -142,13 +146,19 @@ def vertical_section(od,
     # Handle kwargs
     if contour_kwargs  is None: contour_kwargs = {}
     if clabel_kwargs   is None: clabel_kwargs  = {}
-    if subsamp_kwargs  is None: subsamp_kwargs = {}
+    
+    # For animation purposes.
+    # TODO: take out useless variables?
+    if cutout_kwargs is not None:     
+        # Cutout first (needed)
+        od = od.cutout(**cutout_kwargs)
     
     # Subsample first
-    if subsampMethod=='mooring_array':
-        od = od.mooring_array(**subsamp_kwargs)
-    elif subsampMethod=='survey_stations':
-        od = od.survey_stations(**subsamp_kwargs)
+    if subsamp_kwargs is not None:
+        if subsampMethod=='mooring_array':
+            od = od.mooring_array(**subsamp_kwargs)
+        elif subsampMethod=='survey_stations':
+            od = od.survey_stations(**subsamp_kwargs)
         
     # Check variables and add
     listName = [varName]
