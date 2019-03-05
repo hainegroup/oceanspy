@@ -3,13 +3,18 @@ Open OceanDataset objects stored on SciServer.
 """
 # TODO: check dask warnings
 
+# Import oceanspy dependencies
 import xarray as _xr
 import warnings as _warnings
 from ._oceandataset import OceanDataset as _OceanDataset
 
+# Import extra modules
+try:    import xmitgcm as _xmitgcm
+except: pass
+
 def from_netcdf(path):
     """
-    Load and decode an oceandataset from a netcdf file.
+    Load an oceandataset from a netcdf file.
     
     Parameters
     ----------
@@ -144,6 +149,16 @@ def EGshelfIIseas2km_ERAI(daily     = False,
     # Initialize OceanDataset
     od = _OceanDataset(ds).import_MITgcm_rect_nc()
     od = od.set_name(name).set_description(description)
+    od = od.set_parameters({'rSphere'    : 6.371E3,                # km None: cartesian
+                            'eq_state'   : 'jmd95',                # jmd95, mdjwf
+                            'rho0'       : 1027,                   # kg/m^3  TODO: None: compute volume weighted average
+                            'g'          : 9.81,                   # m/s^2
+                            'eps_nh'     : 0,                      # 0 is hydrostatic
+                            'omega'      : 7.292123516990375E-05,  # rad/s
+                            'c_p'        : 3.986E3,                # specific heat [J/kg/K]
+                            'tempFrz0'   : 9.01E-02,               # freezing temp. of sea water (intercept)
+                            'dTempFrz_dS': -5.75E-02,              # freezing temp. of sea water (slope)
+                            })
     od = od.set_projection('Mercator', 
                            central_longitude=od.dataset['X'].mean().values, 
                            min_latitude=od.dataset['Y'].min().values, 
@@ -240,7 +255,6 @@ def EGshelfIIseas2km_ASR(cropped   = False,
     # Add attribute (snapshot vs average)
     for var in [var for var in ds.variables if ('time' in ds[var].coords and var!='time')]:
         if cropped and var in cropset.variables: 
-            ds[var] = ds[var].drop('time').isel(time=slice(1, None)).rename({'time': 'time_midp'})
             Time = 'average'
         else:      
             Time = 'snapshot'
@@ -274,14 +288,21 @@ def EGshelfIIseas2km_ASR(cropped   = False,
     # Consistent chunkink
     chunks = {**ds.sizes,
               'time': ds['Temp'].chunks[ds['Temp'].dims.index('time')]}
-    if cropped:
-        chunks = {**chunks, 
-                  'time_midp': ds['ADVr_SLT'].chunks[ds['ADVr_SLT'].dims.index('time_midp')]}
     ds = ds.chunk(chunks)
     
     # Initialize OceanDataset
     od = _OceanDataset(ds).import_MITgcm_rect_nc()
     od = od.set_name(name).set_description(description)
+    od = od.set_parameters({'rSphere'    : 6.371E3,                # km None: cartesian
+                            'eq_state'   : 'jmd95',                # jmd95, mdjwf
+                            'rho0'       : 1027,                   # kg/m^3  TODO: None: compute volume weighted average
+                            'g'          : 9.81,                   # m/s^2
+                            'eps_nh'     : 0,                      # 0 is hydrostatic
+                            'omega'      : 7.292123516990375E-05,  # rad/s
+                            'c_p'        : 3.986E3,                # specific heat [J/kg/K]
+                            'tempFrz0'   : 9.01E-02,               # freezing temp. of sea water (intercept)
+                            'dTempFrz_dS': -5.75E-02,              # freezing temp. of sea water (slope)
+                            })
     od = od.set_projection('Mercator', 
                            central_longitude=od.dataset['X'].mean().values, 
                            min_latitude=od.dataset['Y'].min().values, 
@@ -351,7 +372,6 @@ def exp_Arctic_Control(gridpath  = '/home/idies/workspace/OceanCirculation/exp_A
     # Add attribute (snapshot vs average)
     for var in [var for var in ds.variables if ('time' in ds[var].coords and var!='time')]:
         if var in fldsset.variables: 
-            ds[var] = ds[var].drop('time').isel(time=slice(1, None)).rename({'time': 'time_midp'})
             Time = 'average'
         else:      
             Time = 'snapshot'
@@ -382,18 +402,12 @@ def exp_Arctic_Control(gridpath  = '/home/idies/workspace/OceanCirculation/exp_A
     
     # Consistent chunkink
     chunks = {**ds.sizes,
-              'time': ds['Temp'].chunks[ds['Temp'].dims.index('time')],
-              'time_midp': ds['TFLUX'].chunks[ds['TFLUX'].dims.index('time_midp')]}
+              'time': ds['Temp'].chunks[ds['Temp'].dims.index('time')]}
     ds = ds.chunk(chunks)
     
     # Initialize OceanDataset
-    od = _OceanDataset(ds).set_name(name).set_description(description)
-    od = od.set_coords(coordsUVfromG=True)
-    grid_coords = {'Y'    : {'Y': None, 'Yp1': 0.5},
-                   'X'    : {'X': None, 'Xp1': 0.5},
-                   'Z'    : {'Z': None, 'Zp1': 0.5, 'Zu': 0.5, 'Zl': -0.5},
-                   'time' : {'time': -0.5}}
-    od = od.set_grid_coords(grid_coords = grid_coords, add_midp=True)
+    od = _OceanDataset(ds).import_MITgcm_curv_nc()
+    od = od.set_name(name).set_description(description)
     od = od.set_parameters({'rSphere' : 6.371E3,                # km None: cartesian
                             'eq_state': 'jmd95',                # jmd95, mdjwf
                             'rho0'    : 1027.5,                   # kg/m^3  TODO: None: compute volume weighted average
@@ -403,6 +417,7 @@ def exp_Arctic_Control(gridpath  = '/home/idies/workspace/OceanCirculation/exp_A
                             'c_p'     : 3.986E3                 # specific heat [J/kg/K]
                             })
     od = od.set_projection('NorthPolarStereo')
+
     return od
     
 
@@ -440,9 +455,6 @@ def EGshelfSJsec500m(Hydrostatic = True,
     if not isinstance(Hydrostatic, bool): raise TypeError('`Hydrostatic` must be bool')
     if not isinstance(sixH, bool):        raise TypeError('`sixH` must be bool')
     if not isinstance(resultpath, str):   raise TypeError('`resultpath` must be str')
-    
-    # Import modules
-    import xmitgcm as _xmitgcm
     
     # Hydrostatic switch
     if Hydrostatic: expname = 'exp1/'
@@ -524,16 +536,17 @@ def EGshelfSJsec500m(Hydrostatic = True,
     ds = ds.chunk(chunks)
     
     # Initialize OceanDataset
-    od = _OceanDataset(ds).set_name(name).set_description(description)
-    od = od.set_coords(coords2Dfrom1D=True)
-    grid_coords = {'Y'    : {'Y': None, 'Yp1': 0.5},
-                   'X'    : {'X': None, 'Xp1': 0.5},
-                   'Z'    : {'Z': None, 'Zp1': 0.5, 'Zu': 0.5, 'Zl': -0.5},
-                   'time' : {'time': -0.5}}
-    od = od.set_grid_coords(grid_coords = grid_coords, add_midp=True)
+    od = _OceanDataset(ds).import_MITgcm_rect_bin()
+    od = od.set_name(name).set_description(description)
     if Hydrostatic is False:
         od = od.set_parameters({'eps_nh': 1})
-    od = od.set_projection('PlateCarree')
+    od = od.set_projection('Mercator', 
+                           central_longitude=od.dataset['X'].mean().values, 
+                           min_latitude=od.dataset['Y'].min().values, 
+                           max_latitude=od.dataset['Y'].max().values, 
+                           globe=None, 
+                           latitude_true_scale=od.dataset['Y'].mean().values)
+    
     return od
 
 

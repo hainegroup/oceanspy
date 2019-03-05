@@ -19,6 +19,9 @@ oceanspy.OceanDataset
       ~OceanDataset.create_tree
       ~OceanDataset.cutout
       ~OceanDataset.horizontal_section
+      ~OceanDataset.import_MITgcm_curv_nc
+      ~OceanDataset.import_MITgcm_rect_bin
+      ~OceanDataset.import_MITgcm_rect_nc
       ~OceanDataset.merge_Brunt_Vaisala_frequency
       ~OceanDataset.merge_Dataset
       ~OceanDataset.merge_Ertel_potential_vorticity

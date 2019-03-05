@@ -10,3 +10,4 @@ exclude_lines =
 ignore_errors = True
 omit = oceanspy/test/*
        oceanspy/__init__.py
+       oceanspy/open_oceandataset.py

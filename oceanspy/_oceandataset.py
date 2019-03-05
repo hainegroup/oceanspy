@@ -96,14 +96,128 @@ class OceanDataset:
     # ======
     # IMPORT
     # ======
-    def import_MITgcm_rect_nc(self):
+    # Function used by open_oceandataset
+    
+    def _shift_averages(self):
         """
-        Apply functions on a dataset from a MITgcm run with rectilinear grid stored in NetCDF format,
-        and make it satisfy OceanSpy requirements.
+        Shift average variables to time_midp.
+        Average variables must have attribute original_output = 'average'.
+        """
+        for var in self._ds.data_vars:
+            original_output = self._ds[var].attrs.pop('original_output', None)
+            if original_output == 'average':
+                self._ds[var] = self._ds[var].drop('time').isel(time=slice(1, None)).rename({'time': 'time_midp'})
+            if original_output is not None:
+                self._ds[var].attrs['original_output'] = original_output
+        return self
+    
+    def _set_coords(self, fillna=False, coords1Dfrom2D=False, coords2Dfrom1D=False, coordsUVfromG=False):
+        """
+        Set dataset coordinates: dimensions + 2D horizontal coordinates.        
+        
+        Parameters
+        ----------
+        fillna: bool
+            If True, fill NaNs in 2D coordinates propagating backward and forward.  
+        coords1Dfrom2D: bool
+            If True, compute 1D coordinates from 2D coordinates (means). 
+            Use with rectilinear grid only!
+        coords2Dfrom1D: bool
+            If True, compute 2D coordinates from 1D coordinates (brodacast). 
+        coordsUVfromCG: bool
+            If True, compute missing coords (U and V points) from G points.
+        """
+                
+        # TODO: I think most of this function can be replaced by xgcm.autogenerate.
+        #       As soon as a new xgcm version will be released, implemente autogenerate.
+        
+        # Check parameters
+        if not isinstance(fillna, bool):
+            raise TypeError('`fillna` must be bool')
+        if not isinstance(coords1Dfrom2D, bool):
+            raise TypeError('`coords1Dfrom2D` must be bool')
+        if not isinstance(coordsUVfromG, bool):
+            raise TypeError('`coordsUVfromG` must be bool')
+        if coords1Dfrom2D and coords2Dfrom1D:
+            raise TypeError('`coords1Dfrom2D` and `coords2Dfrom1D` can not be both True')
+            
+        # Copy because the dataset will change
+        self = _copy.copy(self)
+
+        # Coordinates are dimensions only
+        self._ds = self._ds.reset_coords()
+        
+        # Fill nans (e.g., because of exch2)
+        if fillna:
+            coords = ['YC', 'XC', 'YG', 'XG', 'YU', 'XU', 'YV', 'XV'] 
+            dims   = ['X', 'Y', 'Xp1', 'Yp1', 'Xp1', 'Y', 'X', 'Yp1']
+            
+            for i, (coord, dim) in enumerate(zip(coords, dims)):
+                if coord in self._ds.variables:
+                    self._ds[coord] = self._ds[coord].ffill(dim).bfill(dim).persist()
+
+        
+        # Get U and V by rolling G
+        if coordsUVfromG:
+
+            for i, (point_pos, dim2roll) in enumerate(zip(['U', 'V'], ['Yp1', 'Xp1'])):
+                for dim in ['Y', 'X']:
+                    coord = self._ds[dim+'G'].rolling(**{dim2roll: 2}).mean().dropna(dim2roll)
+                    coord = coord.drop(coord.coords).rename({dim2roll: dim2roll[0]})
+                    self._ds[dim+point_pos] = coord
+                    if 'units' in self._ds[dim+'G'].attrs:
+                        self._ds[dim+point_pos].attrs['units'] = self._ds[dim+'G'].attrs['units']
+                        
+        # For cartesian grid we can use 1D coordinates
+        if coords1Dfrom2D:
+            # Take mean
+            self._ds['Y']   = self._ds['YC'].mean('X', keep_attrs=True).persist()
+            self._ds['X']   = self._ds['XC'].mean('Y', keep_attrs=True).persist()
+            self._ds['Yp1'] = self._ds['YG'].mean('Xp1', keep_attrs=True).persist()
+            self._ds['Xp1'] = self._ds['XG'].mean('Yp1', keep_attrs=True).persist()
+        
+        # Get 2D coordinates broadcasting 1D
+        if coords2Dfrom1D:
+            # Broadcast
+            self._ds['YC'], self._ds['XC'] = _xr.broadcast(self._ds['Y'],   self._ds['X'])
+            self._ds['YG'], self._ds['XG'] = _xr.broadcast(self._ds['Yp1'], self._ds['Xp1'])
+            self._ds['YU'], self._ds['XU'] = _xr.broadcast(self._ds['Y'],   self._ds['Xp1'])
+            self._ds['YV'], self._ds['XV'] = _xr.broadcast(self._ds['Yp1'], self._ds['X'])
+            
+            # Add units
+            for i, (D2, D1) in enumerate(zip(['YC', 'XC', 'YG',  'XG',  'YU', 'XU',  'YV',  'XV'],
+                                             ['Y',  'X',  'Yp1', 'Xp1', 'Y',  'Xp1', 'Yp1', 'X'])):
+                if 'units' in self._ds[D1].attrs: self._ds[D2].attrs['units'] = self._ds[D1].attrs['units']
+            
+        # Set 2D coordinates
+        self._ds = self._ds.set_coords(['YC', 'XC',
+                                        'YG', 'XG',
+                                        'YU', 'XU',
+                                        'YV', 'XV'])
+        return self
+    
+    def import_MITgcm_rect_nc(self, shift_averages = True):
+        """
+        Set coordinates of a dataset from a MITgcm run with rectilinear grid and data stored in NetCDF format.
+        Open and concatentate dataset before running this function.
+        
+        Parameters
+        ----------
+        shift_averages: bool
+            If True, shift average variable to time_midp. 
+            Average variables must have attribute original_output = 'average'
         """
         
+        # Check parameters
+        if not isinstance(shift_averages, bool):
+            raise TypeError('`shift_averages` must be bool')
+                
+        # Shift averages
+        if shift_averages is True:
+            self = self._shift_averages()
+        
         # Set coordinates
-        self = self.set_coords(fillna=True, coords1Dfrom2D=True)
+        self = self._set_coords(fillna=True, coords1Dfrom2D=True)
         grid_coords = {'Y'    : {'Y': None, 'Yp1': 0.5},
                        'X'    : {'X': None, 'Xp1': 0.5},
                        'Z'    : {'Z': None, 'Zp1': 0.5, 'Zu': 0.5, 'Zl': -0.5},
@@ -111,6 +225,67 @@ class OceanDataset:
         self = self.set_grid_coords(grid_coords = grid_coords, add_midp=True)
         
         return self
+    
+    def import_MITgcm_rect_bin(self, shift_averages = True):
+        """
+        Set coordinates of a dataset from a MITgcm run with rectilinear grid and data stored in bin format.
+        Open and concatentate dataset before running this function.
+        
+        Parameters
+        ----------
+        shift_averages: bool
+            If True, shift average variable to time_midp. 
+            Average variables must have attribute original_output = 'average'
+        """
+        
+        # Check parameters
+        if not isinstance(shift_averages, bool):
+            raise TypeError('`shift_averages` must be bool')
+                
+        # Shift averages
+        if shift_averages is True:
+            self = self._shift_averages()
+        # Set coordinates
+        self = self._set_coords(coords2Dfrom1D=True)
+        grid_coords = {'Y'    : {'Y': None, 'Yp1': 0.5},
+                       'X'    : {'X': None, 'Xp1': 0.5},
+                       'Z'    : {'Z': None, 'Zp1': 0.5, 'Zu': 0.5, 'Zl': -0.5},
+                       'time' : {'time': -0.5}}
+        self = self.set_grid_coords(grid_coords = grid_coords, add_midp=True)
+        
+        return self
+    
+    def import_MITgcm_curv_nc(self, shift_averages = True):
+        """
+        Set coordinates of a dataset from a MITgcm run with curvilinear grid and data stored in NetCDF format.
+        Open and concatentate dataset before running this function.
+        
+        Parameters
+        ----------
+        shift_averages: bool
+            If True, shift average variable to time_midp. 
+            Average variables must have attribute original_output = 'average'
+        """
+        
+        # Check parameters
+        if not isinstance(shift_averages, bool):
+            raise TypeError('`shift_averages` must be bool')
+                
+        # Shift averages
+        if shift_averages is True:
+            self = self._shift_averages()
+        # Set coordinates
+        self = self._set_coords(coordsUVfromG=True)
+        grid_coords = {'Y'    : {'Y': None, 'Yp1': 0.5},
+                       'X'    : {'X': None, 'Xp1': 0.5},
+                       'Z'    : {'Z': None, 'Zp1': 0.5, 'Zu': 0.5, 'Zl': -0.5},
+                       'time' : {'time': -0.5}}
+        self = self.set_grid_coords(grid_coords = grid_coords, add_midp=True)
+        
+        return self
+        
+    
+    
     
     # ===========
     # ATTRIBUTES
@@ -799,6 +974,7 @@ class OceanDataset:
         
         # Get U and V by rolling G
         if coordsUVfromG:
+
             for i, (point_pos, dim2roll) in enumerate(zip(['U', 'V'], ['Yp1', 'Xp1'])):
                 for dim in ['Y', 'X']:
                     coord = self._ds[dim+'G'].rolling(**{dim2roll: 2}).mean().dropna(dim2roll)
@@ -984,6 +1160,18 @@ class OceanDataset:
         
         return attr
       
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
     # ===========
     # SHORTCUTS
     # ===========

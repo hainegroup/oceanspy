@@ -18,15 +18,15 @@ Attributes
 .. autosummary::
    :toctree: generated/
 
-    OceanDataset.name
-    OceanDataset.description
-    OceanDataset.dataset
-    OceanDataset.grid
-    OceanDataset.parameters
-    OceanDataset.aliases
-    OceanDataset.grid_coords
-    OceanDataset.grid_periodic
-    OceanDataset.projection
+[comment]: <>    OceanDataset.name
+[comment]: <>    OceanDataset.description
+[comment]: <>    OceanDataset.dataset
+[comment]: <>    OceanDataset.grid
+[comment]: <>    OceanDataset.parameters
+[comment]: <>    OceanDataset.aliases
+[comment]: <>    OceanDataset.grid_coords
+[comment]: <>    OceanDataset.grid_periodic
+[comment]: <>    OceanDataset.projection
 
 Methods
 -------
@@ -34,18 +34,21 @@ Methods
 .. autosummary::
    :toctree: generated/
    
-    OceanDataset.add_DataArray
-    OceanDataset.merge_Dataset
-    OceanDataset.to_netcdf
-    OceanDataset.set_name
-    OceanDataset.set_description
-    OceanDataset.set_parameters
-    OceanDataset.set_aliases
-    OceanDataset.set_grid_coords
-    OceanDataset.set_grid_periodic
-    OceanDataset.set_coords
-    OceanDataset.set_projection
-    OceanDataset.create_tree
+    OceanDataset.import_MITgcm_rect_nc
+    OceanDataset.import_MITgcm_rect_bin
+    OceanDataset.import_MITgcm_curv_nc
+    
+[comment]: <>    OceanDataset.add_DataArray
+[comment]: <>    OceanDataset.merge_Dataset
+[comment]: <>    OceanDataset.to_netcdf
+[comment]: <>    OceanDataset.set_name
+[comment]: <>    OceanDataset.set_description
+[comment]: <>    OceanDataset.set_parameters
+[comment]: <>    OceanDataset.set_aliases
+[comment]: <>    OceanDataset.set_grid_coords
+[comment]: <>    OceanDataset.set_grid_periodic
+[comment]: <>    OceanDataset.set_projection
+[comment]: <>    OceanDataset.create_tree
 
 Shortcuts
 ---------
@@ -57,10 +60,10 @@ Subsample
 .. autosummary::
    :toctree: generated/
    
-   OceanDataset.cutout
-   OceanDataset.mooring_array
-   OceanDataset.survey_stations
-   OceanDataset.particle_properties
+[comment]: <>   OceanDataset.cutout
+[comment]: <>   OceanDataset.mooring_array
+[comment]: <>   OceanDataset.survey_stations
+[comment]: <>   OceanDataset.particle_properties
 
 
 Compute
@@ -69,28 +72,28 @@ Compute
 .. autosummary::
    :toctree: generated/
    
-   OceanDataset.merge_gradient
-   OceanDataset.merge_divergence
-   OceanDataset.merge_curl
-   OceanDataset.merge_laplacian
-   OceanDataset.merge_volume_cells
-   OceanDataset.merge_volume_weighted_mean
-   OceanDataset.merge_potential_density_anomaly
-   OceanDataset.merge_Brunt_Vaisala_frequency
-   OceanDataset.merge_vertical_relative_vorticity
-   OceanDataset.merge_relative_vorticity
-   OceanDataset.merge_kinetic_energy
-   OceanDataset.merge_eddy_kinetic_energy
-   OceanDataset.merge_horizontal_divergence_velocity
-   OceanDataset.merge_shear_strain
-   OceanDataset.merge_normal_strain
-   OceanDataset.merge_Okubo_Weiss_parameter
-   OceanDataset.merge_Ertel_potential_vorticity
-   OceanDataset.merge_mooring_horizontal_volume_transport
-   OceanDataset.merge_heat_budget
-   OceanDataset.merge_salt_budget
-   OceanDataset.merge_geographical_aligned_velocities
-   OceanDataset.merge_survey_aligned_velocities
+[comment]: <>   OceanDataset.merge_gradient
+[comment]: <>   OceanDataset.merge_divergence
+[comment]: <>   OceanDataset.merge_curl
+[comment]: <>   OceanDataset.merge_laplacian
+[comment]: <>   OceanDataset.merge_volume_cells
+[comment]: <>   OceanDataset.merge_volume_weighted_mean
+[comment]: <>   OceanDataset.merge_potential_density_anomaly
+[comment]: <>   OceanDataset.merge_Brunt_Vaisala_frequency
+[comment]: <>   OceanDataset.merge_vertical_relative_vorticity
+[comment]: <>   OceanDataset.merge_relative_vorticity
+[comment]: <>   OceanDataset.merge_kinetic_energy
+[comment]: <>   OceanDataset.merge_eddy_kinetic_energy
+[comment]: <>   OceanDataset.merge_horizontal_divergence_velocity
+[comment]: <>   OceanDataset.merge_shear_strain
+[comment]: <>   OceanDataset.merge_normal_strain
+[comment]: <>   OceanDataset.merge_Okubo_Weiss_parameter
+[comment]: <>   OceanDataset.merge_Ertel_potential_vorticity
+[comment]: <>   OceanDataset.merge_mooring_horizontal_volume_transport
+[comment]: <>   OceanDataset.merge_heat_budget
+[comment]: <>   OceanDataset.merge_salt_budget
+[comment]: <>   OceanDataset.merge_geographical_aligned_velocities
+[comment]: <>   OceanDataset.merge_survey_aligned_velocities
    
 Plot
 ^^^^
@@ -98,10 +101,10 @@ Plot
 .. autosummary::
    :toctree: generated/
    
-   OceanDataset.vertical_section
-   OceanDataset.horizontal_section
-   OceanDataset.time_series
-   OceanDataset.TS_diagram
+[comment]: <>   OceanDataset.vertical_section
+[comment]: <>   OceanDataset.horizontal_section
+[comment]: <>   OceanDataset.time_series
+[comment]: <>   OceanDataset.TS_diagram
    
    
    
