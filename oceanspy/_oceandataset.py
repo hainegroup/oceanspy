@@ -533,18 +533,24 @@ class OceanDataset:
         parameters: dict
             {'parameter_name': parameter_value}
         """
-        from oceanspy import AVAILABLE_PARAMETERS, TYPE_PARAMETERS
+        from oceanspy import DEFAULT_PARAMETERS, AVAILABLE_PARAMETERS, TYPE_PARAMETERS
         
         # Check parameters
         if not isinstance(parameters, dict):
             raise TypeError("`parameters` must be dict")
                 
         # Check parameters
+        warn_params = []
         for key, value in parameters.items():
-            if not isinstance(value, TYPE_PARAMETERS[key]):
-                raise TypeError("Invalid [{}]. Check oceanspy.TYPE_PARAMETERS".format(key))
-            if key in AVAILABLE_PARAMETERS.keys() and value not in AVAILABLE_PARAMETERS[key]:
-                raise ValueError("Requested [{}] not available. Check oceanspy.AVAILABLE_PARAMETERS".format(key))
+            if key not in DEFAULT_PARAMETERS.keys(): warn_params = warn_params + [key]
+            else:
+                if not isinstance(value, TYPE_PARAMETERS[key]):
+                    raise TypeError("Invalid [{}]. Check oceanspy.TYPE_PARAMETERS".format(key))
+                if key in AVAILABLE_PARAMETERS.keys() and value not in AVAILABLE_PARAMETERS[key]:
+                    raise ValueError("Requested [{}] not available. Check oceanspy.AVAILABLE_PARAMETERS".format(key))
+                    
+        if len(warn_params)!=0:
+            _warnings.warn(("{} are not OceanSpy parameters").format(warn_params), stacklevel=2)
         
         # Set parameters
         self = self._store_as_global_attr(name      = 'parameters', 
