@@ -227,7 +227,6 @@ def gradient(od, varNameList, axesList=None, aliased = True):
     if not isinstance(aliased, bool):
         raise TypeError('`aliased` must be bool')
     
-    
     # Handle aliases
     if aliased:
         varNameListIN = _rename_aliased(od, varNameList)

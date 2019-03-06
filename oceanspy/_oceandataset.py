@@ -549,7 +549,7 @@ class OceanDataset:
         # Set parameters
         self = self._store_as_global_attr(name      = 'parameters', 
                                           attr      = parameters,
-                                          overwrite = False) 
+                                          overwrite = True) 
         
         return self
     
