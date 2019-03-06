@@ -12,12 +12,13 @@ Subsample OceanDataset objects.
 
 # TODO: warnings when limits are out of bound
 
-import xarray as _xr
-import pandas as _pd
-import numpy  as _np
-import copy as _copy
+import xarray   as _xr
+import pandas   as _pd
+import numpy    as _np
+import copy     as _copy
 import warnings as _warnings
 import oceanspy as _ospy
+
 from . import utils as _utils
 
 def cutout(od,
@@ -720,9 +721,10 @@ def survey_stations(od, Ysurv, Xsurv, delta,
         Y coordinates of stations. 
     Xsurv: 1D array_like,
         X coordinates of stations.
-    delta: scalar
+    delta: scalar, None
         Distance between stations.
         Units are km for spherical coordinate, same units of coordinates for cartesian.
+        If None, only (Ysurv, Xsurv) stations are used.
     xesmf_regridder_kwargs: dict
         Keyword arguments for xesmf.regridder, such as `method`.
         Defaul method: `bilinear`.  
@@ -761,7 +763,7 @@ def survey_stations(od, Ysurv, Xsurv, delta,
     # Earth Radius
     R = od.parameters['rSphere']
     if R is None:
-        _warnings.warn("\nospy.survey_stations interpolates using xesmf.regridder. \nxesmf.regridder currently dosen't allow to set the coordinates system (default is spherical). \nSurveys using cartesian coordinates can be made by changing the xesmf source code as explained here: https://github.com/JiaweiZhuang/xESMF/issues/39".format(inFreq, timeFreq), stacklevel=2)
+        _warnings.warn("\nospy.survey_stations interpolates using xesmf.regridder. \nxesmf.regridder currently dosen't allow to set the coordinates system (default is spherical). \nSurveys using cartesian coordinates can be made by changing the xesmf source code as explained here: https://github.com/JiaweiZhuang/xESMF/issues/39", stacklevel=2)
     
     # Compute trajectory
     for i, (lat0, lon0, lat1, lon1) in enumerate(zip(Ysurv[:-1], Xsurv[:-1], Ysurv[1:], Xsurv[1:])):
