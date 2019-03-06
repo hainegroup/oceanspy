@@ -7,7 +7,7 @@ import sys
 from oceanspy import OceanDataset
 from oceanspy._oceandataset import _setter_error_message, _wrong_axes_error_message
 from . datasets import datasets
-from oceanspy   import DEFAULT_PARAMETERS, OCEANSPY_AXES
+from oceanspy   import DEFAULT_PARAMETERS, AVAILABLE_PARAMETERS, TYPE_PARAMETERS, OCEANSPY_AXES
 
 OVERWRITE_ERROR_MESSAGE = "has been previously set: `overwrite` must be bool"
 
@@ -117,6 +117,10 @@ def test_parameters():
     # OceanDataset
     assert od_in.parameters == DEFAULT_PARAMETERS
     
+    # Parameters default and checks
+    assert DEFAULT_PARAMETERS.keys() == TYPE_PARAMETERS.keys()
+    assert set(AVAILABLE_PARAMETERS.keys()).issubset(AVAILABLE_PARAMETERS.keys())
+    
     # Wrong type
     test_dict = 1
     with pytest.raises(TypeError) as e:
@@ -140,6 +144,11 @@ def test_parameters():
         od_out.set_parameters({'eq_state': 1})
     with pytest.raises(ValueError):
         od_out.set_parameters({'eq_state': 'test'})
+        
+    # Check new parameters
+    with pytest.warns(UserWarning):
+        od_out = od_in.set_parameters({'test': 'test'})
+    assert 'test' in od_out.parameters
     
 def test_grid_coords():
     
