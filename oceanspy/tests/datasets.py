@@ -156,4 +156,9 @@ oceandatasets = {'MITgcm_rect_nc' : OceanDataset(datasets['MITgcm_rect_nc']).imp
                  'MITgcm_rect_bin': OceanDataset(datasets['MITgcm_rect_nc']).import_MITgcm_rect_nc(),
                  'MITgcm_curv_nc' : OceanDataset(datasets['MITgcm_rect_nc']).import_MITgcm_rect_nc()}
 
-
+aliased_ods = {}
+for od_name in oceandatasets:
+    dataset = oceandatasets[od_name].dataset
+    aliases = {var: 'alias_'+var for var in dataset.variables}
+    dataset = dataset.rename(aliases)
+    aliased_ods[od_name] = OceanDataset(dataset).set_aliases(aliases)
