@@ -1878,7 +1878,6 @@ def heat_budget(od):
     ds['forcH'].attrs['long_name'] = 'Heat surface forcing'
     ds['forcH'].attrs['OceanSpy_parameters'] = str(params2use)
     
-    
     return _ospy.OceanDataset(ds).dataset
 
 def salt_budget(od):

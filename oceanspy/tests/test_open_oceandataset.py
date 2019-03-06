@@ -22,6 +22,9 @@ def test_import_MITgcm_rect_nc():
                     'Z':    'center', 'Zp1': 'outer', 'Zu': 'right', 'Zl': 'left',
                     'time': 'outer', 'time_midp': 'center'}
     
+    # All coordinates
+    assert set(od.dataset.variables).issubset(od.dataset.coords)
+    
     # Check NaNs
     assert any(od.dataset.isnull()) == False    
     
@@ -64,6 +67,9 @@ def test_import_MITgcm_rect_bin():
                     'Z':    'center', 'Zp1': 'outer', 'Zu': 'right', 'Zl': 'left',
                     'time': 'outer', 'time_midp': 'center'} 
     
+    # All coordinates
+    assert set(od.dataset.variables).issubset(od.dataset.coords)
+    
     # Check new dimensions
     assert np.array_equal(od.dataset['XC'].isel(Y=0).values,   od.dataset['X'].values)
     assert np.array_equal(od.dataset['XG'].isel(Yp1=0).values, od.dataset['Xp1'].values)
@@ -102,6 +108,9 @@ def test_import_MITgcm_curv():
                     'X':    'center', 'Xp1': 'outer', 
                     'Z':    'center', 'Zp1': 'outer', 'Zu': 'right', 'Zl': 'left',
                     'time': 'outer', 'time_midp': 'center'}   
+    
+    # All coordinates
+    assert set(od.dataset.variables).issubset(od.dataset.coords)
     
     # Check grid
     for axis in od.grid.axes.keys():
