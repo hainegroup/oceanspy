@@ -698,7 +698,7 @@ def mooring_array(od, Ymoor, Xmoor,
     # Create dist_midp
     dist_midp = _xr.DataArray(od._grid.interp(od._ds['mooring_dist'], 'mooring'),
                               attrs=od._ds['mooring_dist'].attrs)
-    od = od.add_DataArray(dist_midp.rename('mooring_midp_dist'))
+    od = od.merge_into_oceandataset(dist_midp.rename('mooring_midp_dist'))
     od._ds = od._ds.set_coords([coord for coord in od._ds.coords]+['mooring_midp_dist'])
 
     return od
@@ -858,7 +858,7 @@ def survey_stations(od, Ysurv, Xsurv, delta,
     # Create dist_midp
     dist_midp = _xr.DataArray(od._grid.interp(od._ds['station_dist'], 'station'),
                               attrs=od._ds['station_dist'].attrs)
-    od = od.add_DataArray(dist_midp.rename('station_midp_dist'))
+    od = od.merge_into_oceandataset(dist_midp.rename('station_midp_dist'))
     od._ds = od._ds.set_coords([coord for coord in od._ds.coords]+['station_midp_dist'])
     
     return od
