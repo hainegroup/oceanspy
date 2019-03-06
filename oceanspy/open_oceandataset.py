@@ -7,6 +7,7 @@ Open OceanDataset objects stored on SciServer.
 import xarray as _xr
 import warnings as _warnings
 from ._oceandataset import OceanDataset as _OceanDataset
+from . import subsample as _subsample
 
 # Import extra modules
 try:    import xmitgcm as _xmitgcm
@@ -37,6 +38,117 @@ def from_netcdf(path):
     
     return od
 
+
+def get_started():
+    """
+    Open a small oceandataset to get started with OceanSpy.  
+    The dataset is a small cutout from EGshelfIIseas2km_ASR.
+
+    Returns
+    -------
+    od: OceanDataset
+      
+    See Also
+    --------
+    EGshelfIIseas2km_ASR
+    """
+
+    # Message
+    name = 'Getting Started with OceanSpy'
+    description = 'A small cutout from EGshelfIIseas2km_ASR.'
+    print('Opening [{}]:\n[{}]'.format(name, description))
+    
+    # Paths
+    gridpath = '/home/idies/workspace/OceanCirculation/exp_ASR/grid_glued.nc'
+    kppspath = '/home/idies/workspace/OceanCirculation/exp_ASR/kpp_state_glued.nc'
+    fldspath = '/home/idies/workspace/OceanCirculation/exp_ASR/result_20070831_20070912/output_glued/*.*_glued.nc'
+                
+    # Open, concatenate, and merge
+    gridset = _xr.open_dataset(gridpath,
+                               drop_variables = ['RC', 'RF', 'RU', 'RL'],
+                               chunks={})
+    kppset  = _xr.open_dataset(kppspath,
+                               chunks={})
+    fldsset = _xr.open_mfdataset(fldspath,
+                                 drop_variables = ['diag_levels','iter'])
+    ds = _xr.merge([gridset, kppset, fldsset])
+    
+    # Squeeze 1D Zs and create Z, Zp1, Zu, and Zl only
+    ds = ds.rename({'Z': 'Ztmp'}) 
+    ds = ds.rename({'Ztmp': 'Z', 'Zmd000216': 'Z'})
+    ds = ds.squeeze('Zd000001')
+    
+    # Add sign
+    for dim in ['Z', 'Zp1', 'Zu', 'Zl']: ds[dim].attrs.update({'positive': 'up'}) 
+    
+    # Rename time
+    ds = ds.rename({'T': 'time'}) 
+    
+    # Add attribute (snapshot vs average)
+    for var in [var for var in ds.variables if ('time' in ds[var].coords and var!='time')]:
+        Time = 'snapshot'
+        ds[var].attrs.update({'original_output': Time}) 
+    
+    # Add missing names
+    ds['U'].attrs['long_name']         = 'Zonal Component of Velocity'
+    ds['V'].attrs['long_name']         = 'Meridional Component of Velocity'
+    ds['W'].attrs['long_name']         = 'Vertical Component of Velocity'
+    ds['phiHyd'].attrs['long_name']    = 'Hydrostatic Pressure Pot.(p/rho) Anomaly'
+    ds['phiHydLow'].attrs['long_name'] = 'Depth integral of (rho -rhoconst) * g * dz / rhoconst'
+    
+    # Add missing units
+    for varName in ['drC', 'drF', 'dxC', 'dyC', 'dxF', 'dyF', 'dxG', 'dyG', 'dxV', 'dyU', 'R_low']:
+        ds[varName].attrs['units'] = 'm'
+    for varName in ['rA', 'rAw', 'rAs', 'rAz']:
+        ds[varName].attrs['units'] = 'm^2'
+    for varName in ['fCori', 'fCoriG']:
+        ds[varName].attrs['units'] = '1/s'
+    for varName in ['Ro_surf']:
+        ds[varName].attrs['units'] = 'kg/m^3'
+    for varName in ['Depth']:
+        ds[varName].attrs['units'] = 'm'
+    for varName in ['HFacC', 'HFacW', 'HFacS']:
+        ds[varName].attrs['units'] = '-'
+    for varName in ['S']:
+        ds[varName].attrs['units'] = 'psu'
+    for varName in ['phiHyd', 'phiHydLow']:
+        ds[varName].attrs['units'] = 'm^2/s^2'
+    
+    # Consistent chunkink
+    chunks = {**ds.sizes,
+              'time': ds['Temp'].chunks[ds['Temp'].dims.index('time')]}
+    ds = ds.chunk(chunks)
+    
+    # Initialize OceanDataset
+    od = _OceanDataset(ds).import_MITgcm_rect_nc()
+    od = od.set_name(name).set_description(description)
+    od = od.set_parameters({'rSphere'    : 6.371E3,                # km None: cartesian
+                            'eq_state'   : 'jmd95',                # jmd95, mdjwf
+                            'rho0'       : 1027,                   # kg/m^3  TODO: None: compute volume weighted average
+                            'g'          : 9.81,                   # m/s^2
+                            'eps_nh'     : 0,                      # 0 is hydrostatic
+                            'omega'      : 7.292123516990375E-05,  # rad/s
+                            'c_p'        : 3.986E3,                # specific heat [J/kg/K]
+                            'tempFrz0'   : 9.01E-02,               # freezing temp. of sea water (intercept)
+                            'dTempFrz_dS': -5.75E-02,              # freezing temp. of sea water (slope)
+                            })
+    
+    od = od.set_projection('Mercator', 
+                           central_longitude=float(od.dataset['X'].mean().values), 
+                           min_latitude=float(od.dataset['Y'].min().values), 
+                           max_latitude=float(od.dataset['Y'].max().values), 
+                           globe=None, 
+                           latitude_true_scale=float(od.dataset['Y'].mean().values))
+    
+    from IPython.utils import io
+    with io.capture_output() as captured:
+        od = _subsample.cutout(od,
+                               YRange=[66, 71],
+                               XRange=[-30, -15], 
+                               ZRange=[0, -2000])
+    
+    return od        
+    
 
 
 def EGshelfIIseas2km_ERAI(daily     = False, 
@@ -160,11 +272,11 @@ def EGshelfIIseas2km_ERAI(daily     = False,
                             'dTempFrz_dS': -5.75E-02,              # freezing temp. of sea water (slope)
                             })
     od = od.set_projection('Mercator', 
-                           central_longitude=od.dataset['X'].mean().values, 
-                           min_latitude=od.dataset['Y'].min().values, 
-                           max_latitude=od.dataset['Y'].max().values, 
+                           central_longitude=float(od.dataset['X'].mean().values), 
+                           min_latitude=float(od.dataset['Y'].min().values), 
+                           max_latitude=float(od.dataset['Y'].max().values), 
                            globe=None, 
-                           latitude_true_scale=od.dataset['Y'].mean().values)
+                           latitude_true_scale=float(od.dataset['Y'].mean().values))
     
     return od
 
@@ -304,11 +416,11 @@ def EGshelfIIseas2km_ASR(cropped   = False,
                             'dTempFrz_dS': -5.75E-02,              # freezing temp. of sea water (slope)
                             })
     od = od.set_projection('Mercator', 
-                           central_longitude=od.dataset['X'].mean().values, 
-                           min_latitude=od.dataset['Y'].min().values, 
-                           max_latitude=od.dataset['Y'].max().values, 
+                           central_longitude=float(od.dataset['X'].mean().values), 
+                           min_latitude=float(od.dataset['Y'].min().values), 
+                           max_latitude=float(od.dataset['Y'].max().values), 
                            globe=None, 
-                           latitude_true_scale=od.dataset['Y'].mean().values)
+                           latitude_true_scale=float(od.dataset['Y'].mean().values))
         
     return od        
 
@@ -541,11 +653,11 @@ def EGshelfSJsec500m(Hydrostatic = True,
     if Hydrostatic is False:
         od = od.set_parameters({'eps_nh': 1})
     od = od.set_projection('Mercator', 
-                           central_longitude=od.dataset['X'].mean().values, 
-                           min_latitude=od.dataset['Y'].min().values, 
-                           max_latitude=od.dataset['Y'].max().values, 
+                           central_longitude=float(od.dataset['X'].mean().values), 
+                           min_latitude=float(od.dataset['Y'].min().values), 
+                           max_latitude=float(od.dataset['Y'].max().values), 
                            globe=None, 
-                           latitude_true_scale=od.dataset['Y'].mean().values)
+                           latitude_true_scale=float(od.dataset['Y'].mean().values))
     
     return od
 

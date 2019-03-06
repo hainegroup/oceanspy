@@ -831,7 +831,7 @@ class OceanDataset:
         if projection is not None:
             if not hasattr(_ccrs, projection):
                 raise TypeError("{} is not a cartopy projection".format(projection))
-            projection = '{}(**{{}})'.format(projection, kwargs)
+            projection = '{}(**{})'.format(projection, kwargs)
         else: 
             projection = str(projection) 
 
@@ -1214,7 +1214,7 @@ class OceanDataset:
     # ------------
     # Compute
 
-    def merge_gradient(self, overwrite=None, **kwargs):
+    def merge_gradient(self, overwrite=True, **kwargs):
         """
         Shortcut for compute.gradient and OceanDataset.merge_into_oceandataset.
         
@@ -1236,7 +1236,7 @@ class OceanDataset:
         
         return self
     
-    def merge_divergence(self, overwrite=None, **kwargs):
+    def merge_divergence(self, overwrite=True, **kwargs):
         """
         Shortcut for compute.divergence and OceanDataset.merge_into_oceandataset.
         
@@ -1258,7 +1258,7 @@ class OceanDataset:
         
         return self
     
-    def merge_curl(self, overwrite=None, **kwargs):
+    def merge_curl(self, overwrite=True, **kwargs):
         """
         Shortcut for compute.curl and OceanDataset.merge_into_oceandataset.
         
@@ -1280,7 +1280,7 @@ class OceanDataset:
         
         return self
     
-    def merge_laplacian(self, overwrite=None, **kwargs):
+    def merge_laplacian(self, overwrite=True, **kwargs):
         """
         Shortcut for compute.laplacian and OceanDataset.merge_into_oceandataset.
         
@@ -1302,7 +1302,7 @@ class OceanDataset:
         
         return self
     
-    def merge_volume_cells(self, overwrite=None, **kwargs):
+    def merge_volume_cells(self, overwrite=True, **kwargs):
         """
         Shortcut for compute.volume_cells and OceanDataset.merge_into_oceandataset.
         
@@ -1324,7 +1324,7 @@ class OceanDataset:
         
         return self
     
-    def merge_volume_weighted_mean(self, overwrite=None, **kwargs):
+    def merge_volume_weighted_mean(self, overwrite=True, **kwargs):
         """
         Shortcut for compute.volume_weighted_mean and OceanDataset.merge_into_oceandataset.
         
@@ -1347,7 +1347,7 @@ class OceanDataset:
         return self
     
     
-    def merge_potential_density_anomaly(self, overwrite=None, **kwargs):
+    def merge_potential_density_anomaly(self, overwrite=True, **kwargs):
         """
         Shortcut for compute.potential_density_anomaly and OceanDataset.merge_into_oceandataset.
         
@@ -1369,7 +1369,7 @@ class OceanDataset:
         
         return self
     
-    def merge_Brunt_Vaisala_frequency(self, overwrite=None, **kwargs):
+    def merge_Brunt_Vaisala_frequency(self, overwrite=True, **kwargs):
         """
         Shortcut for compute.Brunt_Vaisala_frequency and OceanDataset.merge_into_oceandataset.
         
@@ -1391,7 +1391,7 @@ class OceanDataset:
         
         return self
     
-    def merge_vertical_relative_vorticity(self, overwrite=None, **kwargs):
+    def merge_vertical_relative_vorticity(self, overwrite=True, **kwargs):
         """
         Shortcut for compute.vertical_relative_vorticity and OceanDataset.merge_into_oceandataset.
         
@@ -1413,7 +1413,7 @@ class OceanDataset:
         
         return self
     
-    def merge_relative_vorticity(self, overwrite=None, **kwargs):
+    def merge_relative_vorticity(self, overwrite=True, **kwargs):
         """
         Shortcut for compute.relative_vorticity and OceanDataset.merge_into_oceandataset.
         
@@ -1435,7 +1435,7 @@ class OceanDataset:
         
         return self
     
-    def merge_kinetic_energy(self, overwrite=None, **kwargs):
+    def merge_kinetic_energy(self, overwrite=True, **kwargs):
         """
         Shortcut for compute.kinetic_energy and OceanDataset.merge_into_oceandataset.
         
@@ -1457,7 +1457,7 @@ class OceanDataset:
         
         return self
     
-    def merge_eddy_kinetic_energy(self, overwrite=None, **kwargs):
+    def merge_eddy_kinetic_energy(self, overwrite=True, **kwargs):
         """
         Shortcut for compute.eddy_kinetic_energy and OceanDataset.merge_into_oceandataset.
         
@@ -1479,7 +1479,7 @@ class OceanDataset:
         
         return self
     
-    def merge_horizontal_divergence_velocity(self, overwrite=None, **kwargs):
+    def merge_horizontal_divergence_velocity(self, overwrite=True, **kwargs):
         """
         Shortcut for compute.horizontal_divergence_velocity and OceanDataset.merge_into_oceandataset.
         
@@ -1501,7 +1501,7 @@ class OceanDataset:
         
         return self
     
-    def merge_shear_strain(self, overwrite=None, **kwargs):
+    def merge_shear_strain(self, overwrite=True, **kwargs):
         """
         Shortcut for compute.shear_strain and OceanDataset.merge_into_oceandataset.
         
@@ -1523,7 +1523,7 @@ class OceanDataset:
         
         return self
     
-    def merge_normal_strain(self, overwrite=None, **kwargs):
+    def merge_normal_strain(self, overwrite=True, **kwargs):
         """
         Shortcut for compute.normal_strain and OceanDataset.merge_into_oceandataset.
         
@@ -1545,7 +1545,7 @@ class OceanDataset:
         
         return self
     
-    def merge_Okubo_Weiss_parameter(self, overwrite=None, **kwargs):
+    def merge_Okubo_Weiss_parameter(self, overwrite=True, **kwargs):
         """
         Shortcut for compute.Okubo_Weiss_parameter and OceanDataset.merge_into_oceandataset.
         
@@ -1567,7 +1567,7 @@ class OceanDataset:
         
         return self
     
-    def merge_Ertel_potential_vorticity(self, overwrite=None, **kwargs):
+    def merge_Ertel_potential_vorticity(self, overwrite=True, **kwargs):
         """
         Shortcut for compute.Ertel_potential_vorticity and OceanDataset.merge_into_oceandataset.
         
@@ -1589,7 +1589,7 @@ class OceanDataset:
         
         return self
     
-    def merge_mooring_horizontal_volume_transport(self, overwrite=None, **kwargs):
+    def merge_mooring_horizontal_volume_transport(self, overwrite=True, **kwargs):
         """
         Shortcut for compute.mooring_horizontal_volume_transport and OceanDataset.merge_into_oceandataset.
         
@@ -1611,7 +1611,7 @@ class OceanDataset:
         
         return self
     
-    def merge_heat_budget(self, overwrite=None, **kwargs):
+    def merge_heat_budget(self, overwrite=True, **kwargs):
         """
         Shortcut for compute.heat_budget and OceanDataset.merge_into_oceandataset.
         
@@ -1633,7 +1633,7 @@ class OceanDataset:
         
         return self
     
-    def merge_salt_budget(self, overwrite=None, **kwargs):
+    def merge_salt_budget(self, overwrite=True, **kwargs):
         """
         Shortcut for compute.salt_budget and OceanDataset.merge_into_oceandataset.
         
@@ -1655,7 +1655,7 @@ class OceanDataset:
         
         return self
     
-    def merge_geographical_aligned_velocities(self, overwrite=None, **kwargs):
+    def merge_geographical_aligned_velocities(self, overwrite=True, **kwargs):
         """
         Shortcut for compute.geographical_aligned_velocities and OceanDataset.merge_into_oceandataset.
         
@@ -1677,7 +1677,7 @@ class OceanDataset:
         
         return self
         
-    def merge_survey_aligned_velocities(self, overwrite=None, **kwargs):
+    def merge_survey_aligned_velocities(self, overwrite=True, **kwargs):
         """
         Shortcut for compute.survey_aligned_velocities and OceanDataset.merge_into_oceandataset.
         

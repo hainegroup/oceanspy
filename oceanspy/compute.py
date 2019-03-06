@@ -106,7 +106,7 @@ def _add_missing_variables(od, varList, FUNC2VARS = _FUNC2VARS, raiseError=True)
     ds = ds.drop([var for var in ds.variables if var not in varList])
     
     # Merge to od
-    od = od.merge_Dataset(ds)
+    od = od.merge_into_oceandataset(ds)
     
     return od
 
@@ -1836,7 +1836,7 @@ def heat_budget(od):
     
     # Total tendency
     z_star_scale = (1+Eta/Depth)
-    od = od.add_DataArray((Temp*z_star_scale).where(HFacC!=0).rename('Tscaled'))
+    od = od.merge_into_oceandataset((Temp*z_star_scale).where(HFacC!=0).rename('Tscaled'))
     units = 'degC/s'
     ds['tendH'] = gradient(od, 'Tscaled', 'time')['dTscaled_dtime']
     ds['tendH'].attrs['units']     = units
@@ -1968,7 +1968,7 @@ def salt_budget(od):
     
     # Total tendency
     z_star_scale = (1+Eta/Depth)
-    od = od.add_DataArray((S*z_star_scale).where(HFacC!=0).rename('Sscaled'))
+    od = od.merge_into_oceandataset((S*z_star_scale).where(HFacC!=0).rename('Sscaled'))
     units = 'psu/s'
     ds['tendS'] = gradient(od, 'Sscaled', 'time')['dSscaled_dtime']
     ds['tendS'].attrs['units']     = units
