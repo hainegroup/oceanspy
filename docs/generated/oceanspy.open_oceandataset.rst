@@ -14,6 +14,7 @@ oceanspy.open\_oceandataset
       EGshelfSJsec500m
       exp_Arctic_Control
       from_netcdf
+      get_started
    
    
 
