@@ -1,6 +1,7 @@
 import pytest
 import xarray as xr
 import numpy as np
+import pandas as pd
 from oceanspy import OceanDataset
 
 class Datasets:
@@ -35,7 +36,7 @@ class Datasets:
         YV, XV = xr.broadcast(Yp1  , X+0.5)
 
         # Time Dimension
-        time   = xr.DataArray(np.arange(0, self.NT, dtype='datetime64[D]'), dims = 'time')
+        time   = xr.DataArray(pd.date_range('2000-01-01', freq='M', periods=self.NT), dims = 'time')
         
         # Add some nan due to exch2
         rX = np.random.randint(self.NX)
@@ -82,7 +83,7 @@ class Datasets:
         YV, XV = xr.broadcast(Yp1  , X+0.5)
 
         # Time Dimension
-        time   = xr.DataArray(np.arange(0, self.NT, dtype='datetime64[D]'), dims = 'time')
+        time   = xr.DataArray(pd.date_range('2000-01-01', freq='M', periods=self.NT), dims = 'time')
         
         # Add some nan due to exch2
         rX = np.random.randint(self.NX)
@@ -138,7 +139,7 @@ class Datasets:
         Zl     = xr.DataArray(-np.arange(self.NZ),     dims = 'Zl')
         
         # Time Dimension
-        time   = xr.DataArray(np.arange(0, self.NT, dtype='datetime64[D]'), dims = 'time')
+        time   = xr.DataArray(pd.date_range('2000-01-01', freq='M', periods=self.NT), dims = 'time')
         
         return xr.Dataset({'X'   : X,    'Xp1': Xp1, 
                            'Y'   : Y,    'Yp1': Yp1,
@@ -149,12 +150,12 @@ class Datasets:
     
     
 datasets = {'MITgcm_rect_nc' : Datasets().MITgcm_rect_nc(),
-            'MITgcm_rect_bin': Datasets().MITgcm_rect_nc(),
+            'MITgcm_rect_bin': Datasets().MITgcm_rect_bin(),
             'MITgcm_curv_nc' : Datasets().MITgcm_curv_nc()}
 
 oceandatasets = {'MITgcm_rect_nc' : OceanDataset(datasets['MITgcm_rect_nc']).import_MITgcm_rect_nc(),
-                 'MITgcm_rect_bin': OceanDataset(datasets['MITgcm_rect_nc']).import_MITgcm_rect_nc(),
-                 'MITgcm_curv_nc' : OceanDataset(datasets['MITgcm_rect_nc']).import_MITgcm_rect_nc()}
+                 'MITgcm_rect_bin': OceanDataset(datasets['MITgcm_rect_bin']).import_MITgcm_rect_bin(),
+                 'MITgcm_curv_nc' : OceanDataset(datasets['MITgcm_curv_nc']).import_MITgcm_curv_nc()}
 
 aliased_ods = {}
 for od_name in oceandatasets:

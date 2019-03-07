@@ -4,6 +4,7 @@ import xgcm     as _xgcm
 import numpy    as _np
 import warnings as _warnings
 import sys      as _sys
+from . import subsample as _subsample
 from . import compute   as _compute
 from . import plot      as _plot
 from . import animate   as _animate
@@ -527,7 +528,7 @@ class OceanDataset:
     
     def set_parameters(self, parameters):
         """
-        Set model parameters used by OceanSpy (see oceanspy.DEFAULT_PARAMETERS)
+        Set model parameters used by OceanSpy.
         
         Parameters
         ----------
@@ -588,14 +589,14 @@ class OceanDataset:
     
     def set_grid_coords(self, grid_coords, add_midp=False, overwrite=None):
         """
-        Set grid coordinates used by xgcm.Grid (see oceanspy.OCEANSPY_AXES).
+        Set grid coordinates used by xgcm.Grid.
         
         Parameters
         ----------
         grid_coords: str
             Grid coordinates used by xgcm.Grid.  
             Keys are axis, and values are dict with key=dim and value=c_grid_axis_shift.
-            Available c_grid_axis_shift are {0.5, None, -0.5}
+            Available axis are {'X', 'Y', 'Z', 'time'}, and available c_grid_axis_shift are {0.5, None, -0.5}
         add_midp: bool
             If true, add inner dimension (mid points) to axis with outer dimension only.
             The new dimension will be called as the outer dimension + '_midp'
@@ -664,7 +665,7 @@ class OceanDataset:
                     
             self = self._store_as_global_attr(name      = 'grid_coords',
                                               attr      =  grid_coords,
-                                              overwrite =  False)
+                                              overwrite =  True)
         return self
     
     
@@ -1092,12 +1093,16 @@ class OceanDataset:
         if not overwrite and name in self._ds.attrs:
             prev_attr = self._ds.attrs[name]
             if prev_attr[0] == "{" and prev_attr[-1] == "}":
-                attr = {**eval(prev_attr), **attr}
+                attr = {**attr, **eval(prev_attr)}
             elif prev_attr[0] == "[" and prev_attr[-1] == "]":
                 attr = list(set(eval(prev_attr) + attr))
             else:
                 attr = prev_attr + '_' + attr
                 
+        if overwrite and name in self._ds.attrs:
+            prev_attr = self._ds.attrs[name]
+            if prev_attr[0] == "{" and prev_attr[-1] == "}":
+                attr = {**eval(prev_attr), **attr}
         self._ds.attrs[name] = str(attr) 
 
         return self
@@ -1139,18 +1144,79 @@ class OceanDataset:
     # SHORTCUTS
     # ===========
     
-    @property
-    def subsample(self):
+    # ------------
+    # Subsample
+    def cutout(self, **kwargs):
         """
-        Access subsampling functions
+        Shortcut for subsample.cutout
         
-        Examples
+        Parameters
+        ----------
+        **kwargs: 
+            Arguments for subsample.cutout
+            
+        See Also
         --------
-        >>> od = ospy.open_oceandataset.get_started()
-        >>> od.subsample.cutout(ZRange=[0, -100], varList=['Temp'])
+        subsample.cutout
         """
         
-        return _subsampleMethdos(self)
+        self = _subsample.cutout(od = self, **kwargs)
+        
+        return self
+    
+    def mooring_array(self, **kwargs):
+        """
+        Shortcut for subsample.mooring_array
+        
+        Parameters
+        ----------
+        **kwargs: 
+            Arguments for subsample.mooring_array
+            
+        See Also
+        --------
+        subsample.mooring_array
+        """
+        
+        self = _subsample.mooring_array(od = self, **kwargs)
+        
+        return self
+    
+    def survey_stations(self, **kwargs):
+        """
+        Shortcut for subsample.survey_stations
+        
+        Parameters
+        ----------
+        **kwargs: 
+            Arguments for subsample.survey_stations
+            
+        See Also
+        --------
+        subsample.survey_stations
+        """
+        
+        self = _subsample.survey_stations(od = self, **kwargs)
+        
+        return self
+    
+    def particle_properties(self, **kwargs):
+        """
+        Shortcut for subsample.particle_properties
+        
+        Parameters
+        ----------
+        **kwargs: 
+            Arguments for subsample.particle_properties
+            
+        See Also
+        --------
+        subsample.particle_properties
+        """
+        
+        self = _subsample.particle_properties(od = self, **kwargs)
+        
+        return self
 
     
     # ------------

@@ -199,8 +199,8 @@ def test_grid_coords():
     
     test_dict = {'Y': {'Y': 0.5, 'Yp1': None}, 
                  'X': {'X': None, 'Xp1': 0.5}}
-    assert od_out.set_grid_coords(test_dict, overwrite=False).grid_coords == {**test_dict, **od_out.grid_coords}
-    assert od_out.set_grid_coords(test_dict, overwrite=True).grid_coords  == {**od_out.grid_coords, **test_dict}
+    assert od_out.set_grid_coords(test_dict, overwrite=False).grid_coords == {**od_out.grid_coords, **test_dict}
+    assert od_out.set_grid_coords(test_dict, overwrite=True).grid_coords  == test_dict
     
     # Midp
     assert od_in.set_grid_coords({'X': {'X': None}} , add_midp=True).dataset == od_in.dataset
@@ -265,7 +265,11 @@ def test_grid():
     assert od_out.grid is not None
     assert od_out.grid.axes['X']._periodic is False
     assert od_out.grid.axes['X'].coords['center'].name == 'X'
-    assert od_out.grid.axes['X'].coords['outer'].name  == 'Xp1'
+    if 'outer' in od_out.grid.axes['X'].coords:
+        assert od_out.grid.axes['X'].coords['outer'].name  == 'Xp1'
+    elif 'right' in od_out.grid.axes['X'].coords:
+        assert od_out.grid.axes['X'].coords['right'].name  == 'Xp1'
+    else: assert False
     od_out = od_out.set_grid_periodic(['X'])
     assert od_out.grid.axes['X']._periodic is True
     
@@ -284,9 +288,14 @@ def test_grid():
     od_alias  = OceanDataset(od_in.dataset.rename(test_dict))
     od_out    = od_in.set_aliases(test_dict).set_grid_coords({'X': {'x': None, 'xp1': 0.5}})
     assert od_out.grid.axes['X'].coords['center'].name == 'x'
-    assert od_out.grid.axes['X'].coords['outer'].name  == 'xp1'
     assert od_out._grid.axes['X'].coords['center'].name == 'X'
-    assert od_out._grid.axes['X'].coords['outer'].name  == 'Xp1'
+    if 'outer' in od_out.grid.axes['X'].coords:
+        assert od_out.grid.axes['X'].coords['outer'].name  == 'xp1'
+        assert od_out._grid.axes['X'].coords['outer'].name  == 'Xp1'
+    elif 'right' in od_out.grid.axes['X'].coords:
+        assert od_out.grid.axes['X'].coords['right'].name  == 'xp1'
+        assert od_out._grid.axes['X'].coords['right'].name  == 'Xp1'
+    else: assert False
     
 def test_projection():
 

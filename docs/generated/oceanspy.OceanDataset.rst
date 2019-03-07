@@ -15,15 +15,12 @@ oceanspy.OceanDataset
    
       ~OceanDataset.TS_diagram
       ~OceanDataset.__init__
-      ~OceanDataset.add_DataArray
       ~OceanDataset.create_tree
-      ~OceanDataset.cutout
       ~OceanDataset.horizontal_section
       ~OceanDataset.import_MITgcm_curv_nc
       ~OceanDataset.import_MITgcm_rect_bin
       ~OceanDataset.import_MITgcm_rect_nc
       ~OceanDataset.merge_Brunt_Vaisala_frequency
-      ~OceanDataset.merge_Dataset
       ~OceanDataset.merge_Ertel_potential_vorticity
       ~OceanDataset.merge_Okubo_Weiss_parameter
       ~OceanDataset.merge_curl
@@ -33,6 +30,7 @@ oceanspy.OceanDataset
       ~OceanDataset.merge_gradient
       ~OceanDataset.merge_heat_budget
       ~OceanDataset.merge_horizontal_divergence_velocity
+      ~OceanDataset.merge_into_oceandataset
       ~OceanDataset.merge_kinetic_energy
       ~OceanDataset.merge_laplacian
       ~OceanDataset.merge_mooring_horizontal_volume_transport
@@ -45,8 +43,6 @@ oceanspy.OceanDataset
       ~OceanDataset.merge_vertical_relative_vorticity
       ~OceanDataset.merge_volume_cells
       ~OceanDataset.merge_volume_weighted_mean
-      ~OceanDataset.mooring_array
-      ~OceanDataset.particle_properties
       ~OceanDataset.set_aliases
       ~OceanDataset.set_coords
       ~OceanDataset.set_description
@@ -55,7 +51,6 @@ oceanspy.OceanDataset
       ~OceanDataset.set_name
       ~OceanDataset.set_parameters
       ~OceanDataset.set_projection
-      ~OceanDataset.survey_stations
       ~OceanDataset.time_series
       ~OceanDataset.to_netcdf
       ~OceanDataset.vertical_section
@@ -77,5 +72,6 @@ oceanspy.OceanDataset
       ~OceanDataset.name
       ~OceanDataset.parameters
       ~OceanDataset.projection
+      ~OceanDataset.subsample
    
    

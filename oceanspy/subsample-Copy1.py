@@ -18,7 +18,6 @@ import numpy    as _np
 import copy     as _copy
 import warnings as _warnings
 import oceanspy as _ospy
-import functools as _functools
 
 from . import utils as _utils
 
@@ -76,12 +75,6 @@ def cutout(od,
     -------
     od: OceanDataset
         Subsampled oceandataset
-        
-    Note
-    ----
-    If any of the horizontal ranges is not None, 
-    the horizontal dimensions of the cutout will have len(Xp1)>len(X) and len(Yp1)>len(Y) 
-    even if the original oceandataset had len(Xp1)==len(X) or len(Yp1)==len(Y). 
     """
     
     # Convert variables to numpy arrays and make some check
@@ -113,13 +106,7 @@ def cutout(od,
         ZRange = _np.asarray(ZRange, dtype=od._ds['Zp1'].dtype)
         if ZRange.ndim == 0: ZRange = ZRange.reshape(1)
         elif ZRange.ndim >1: raise TypeError('Invalid `ZRange`')
-        # Only check ZRange because it's a common mistake
-        Zmax = od._ds['Zp1'].max().values
-        Zmin = od._ds['Zp1'].min().values
-        if any(ZRange<Zmin) or any(ZRange>Zmax):
-            _warnings.warn("\nThe depth range is: {}"
-                           "\nZRange has values outside the vertical range of the oceandataset.".format([Zmin, Zmax]), stacklevel=2)
-            
+    
     if timeRange is not None:
         timeRange  = _np.asarray(timeRange, dtype=od._ds['time'].dtype)
         if timeRange.ndim == 0: timeRange = timeRange.reshape(1)
@@ -128,10 +115,9 @@ def cutout(od,
     if not isinstance(timeFreq, (str, type(None))):
         raise TypeError('`timeFreq` must None or str')
         
-    sampMethod_list = ['snapshot', 'mean']
+    sampMethod_list = ['snapshot', 'list']
     if sampMethod not in sampMethod_list:
-        raise ValueError('[{}] is not an available `sampMethod`.'
-                         '\nOptions: {}'.format(sampMethod, sampMethod_list))
+        raise ValueError('[{}] is not an available `sampMethod`.\nOptions: {}'.format(sampMethod, sampMethod_list))
         
     if not isinstance(dropAxes, bool):
         dropAxes = _np.asarray(dropAxes, dtype='str')
@@ -175,7 +161,7 @@ def cutout(od,
         add_Hbdr = 0
       
     if add_Vbdr is True:
-        add_Vbdr = _np.fabs(od._ds['Zp1'].diff('Zp1')).max().values
+        add_Vbdr = _xr.ufuncs.fabs(od._ds['Zp1'].diff('Zp1')).max().values
     elif add_Vbdr is False:
         add_Vbdr = 0
         
@@ -189,9 +175,9 @@ def cutout(od,
 
             # Get the closest 
             for i, Y in enumerate(YRange):
-                diff = _np.fabs(ds['YG']-Y)
+                diff = _xr.ufuncs.fabs(ds['YG']-Y)
                 YRange[i] = ds['YG'].where(diff==diff.min()).min().values     
-            maskH = maskH.where(_np.logical_and(ds['YG']>=YRange[0], ds['YG']<=YRange[-1]), 0)
+            maskH = maskH.where(_xr.ufuncs.logical_and(ds['YG']>=YRange[0], ds['YG']<=YRange[-1]), 0)
             maskHY = maskH
 
         if XRange is not None:
@@ -200,12 +186,19 @@ def cutout(od,
 
             # Get the closest 
             for i, X in enumerate(XRange):
-                diff = _np.fabs(ds['XG']-X)
+                diff = _xr.ufuncs.fabs(ds['XG']-X)
                 XRange[i] = ds['XG'].where(diff==diff.min()).min().values     
-            maskH = maskH.where(_np.logical_and(ds['XG']>=XRange[0], ds['XG']<=XRange[-1]), 0)
+            maskH = maskH.where(_xr.ufuncs.logical_and(ds['XG']>=XRange[0], ds['XG']<=XRange[-1]), 0)
 
         # Can't be all zeros
-        if maskH.sum()==0: raise ValueError('Zero grid points in the horizontal range')
+        # TODO: do something better!
+        if maskH.sum()==0:
+            closest = _xr.zeros_like(ds['XG']) 
+            if YRange is not None:
+                closest = closest + _xr.ufuncs.fabs(ds['YG']-_np.mean(YRange))
+            if XRange is not None:
+                closest = closest + _xr.ufuncs.fabs(ds['XG']-_np.mean(XRange))
+            maskH   = _xr.where(closest==closest.min(),1,0)
 
         # Find horizontal indexes
         maskH['Yp1'].values = _np.arange(len(maskH['Yp1']))
@@ -229,7 +222,6 @@ def cutout(od,
                 else:       iY[1]=iY[1]+1
         else: dropAxes.pop('Y', None)
                     
-
         if iX[0]==iX[1]:
             if 'X' not in dropAxes:
                 if iX[0]>0: iX[0]=iX[0]-1
@@ -241,20 +233,14 @@ def cutout(od,
                      Xp1 = slice(iX[0], iX[1]+1))
         
         if 'X' in dropAxes:
-            if iX[0]==len(ds['X']):
-                iX[0]=iX[0]-1
-                iX[1]=iX[1]-1
             ds = ds.isel(X = slice(iX[0], iX[1]+1))
         elif (('outer' in od._grid.axes['X'].coords and od._grid.axes['X'].coords['outer'].name == 'Xp1') or  
               ('left'  in od._grid.axes['X'].coords and od._grid.axes['X'].coords['left'].name  == 'Xp1')):
             ds = ds.isel(X = slice(iX[0], iX[1]))
         elif   'right' in od._grid.axes['X'].coords and od._grid.axes['X'].coords['right'].name =='Xp1':
             ds = ds.isel(X = slice(iX[0]+1, iX[1]+1))   
-        
+            
         if 'Y' in dropAxes:
-            if iY[0]==len(ds['Y']):
-                iY[0]=iY[0]-1
-                iY[1]=iY[1]-1
             ds = ds.isel(Y = slice(iY[0], iY[1]+1))
         elif (('outer' in od._grid.axes['Y'].coords and od._grid.axes['Y'].coords['outer'].name == 'Yp1') or  
               ('left'  in od._grid.axes['Y'].coords and od._grid.axes['Y'].coords['left'].name  == 'Yp1')):
@@ -279,9 +265,9 @@ def cutout(od,
         
         # Get the closest 
         for i, Z in enumerate(ZRange):
-            diff = _np.fabs(ds['Zp1']-Z)
+            diff = _xr.ufuncs.fabs(ds['Zp1']-Z)
             ZRange[i] = ds['Zp1'].where(diff==diff.min()).min().values     
-        maskV = maskV.where(_np.logical_and(ds['Zp1']>=ZRange[0], ds['Zp1']<=ZRange[-1]), 0)                        
+        maskV = maskV.where(_xr.ufuncs.logical_and(ds['Zp1']>=ZRange[0], ds['Zp1']<=ZRange[-1]), 0)                        
     
         # Find vertical indexes
         maskV['Zp1'].values = _np.arange(len(maskV['Zp1']))
@@ -303,9 +289,6 @@ def cutout(od,
         # Cutout
         ds = ds.isel(Zp1 = slice(iZ[0], iZ[1]+1))
         if 'Z' in dropAxes:
-            if iZ[0]==len(ds['Z']):
-                iZ[0]=iZ[0]-1
-                iZ[1]=iZ[1]-1
             ds = ds.isel(Z = slice(iZ[0], iZ[1]+1))
         else:
             ds = ds.isel(Z = slice(iZ[0], iZ[1]))
@@ -334,12 +317,12 @@ def cutout(od,
         # Get the closest 
         for i, time in enumerate(timeRange):
             if _np.issubdtype(ds['time'].dtype, _np.datetime64):
-                diff = _np.fabs(ds['time'].astype('float64') - time.astype('float64'))
+                diff = _xr.ufuncs.fabs(ds['time'].astype('float64') - time.astype('float64'))
             else:
-                diff = _np.fabs(ds['time']-time)
+                diff = _xr.ufuncs.fabs(ds['time']-time)
             timeRange[i] = ds['time'].where(diff==diff.min()).min().values     
         # return maskT, ds['time'], timeRange[0], timeRange[-1]
-        maskT = maskT.where(_np.logical_and(ds['time']>=timeRange[0], ds['time']<=timeRange[-1]), 0)  
+        maskT = maskT.where(_xr.ufuncs.logical_and(ds['time']>=timeRange[0], ds['time']<=timeRange[-1]), 0)  
         
         # Find vertical indexes
         maskT['time'].values = _np.arange(len(maskT['time']))
@@ -361,9 +344,6 @@ def cutout(od,
         # Cutout
         ds = ds.isel(time = slice(iT[0], iT[1]+1))
         if 'time' in dropAxes:
-            if iT[0]==len(ds['time_midp']):
-                iT[0]=iT[0]-1
-                iT[1]=iT[1]-1
             ds = ds.isel(time_midp = slice(iT[0], iT[1]+1))
         else:
             ds = ds.isel(time_midp = slice(iT[0], iT[1]))
@@ -381,16 +361,17 @@ def cutout(od,
         if XRange is not None: minX = XRange[0]; maxX = XRange[1]
         else:                  minX = ds['XG'].min().values; maxX = ds['XG'].max().values    
         
-        maskC = _xr.where(_np.logical_and(_np.logical_and(ds['YC']>=minY, ds['YC']<=maxY),
-                                          _np.logical_and(ds['XC']>=minX, ds['XC']<=maxX)), 1,0).persist()
-        maskG = _xr.where(_np.logical_and(_np.logical_and(ds['YG']>=minY, ds['YG']<=maxY),
-                                                 _np.logical_and(ds['XG']>=minX, ds['XG']<=maxX)), 1,0).persist()
-        maskU = _xr.where(_np.logical_and(_np.logical_and(ds['YU']>=minY, ds['YU']<=maxY),
-                                                 _np.logical_and(ds['XU']>=minX, ds['XU']<=maxX)), 1,0).persist()
-        maskV = _xr.where(_np.logical_and(_np.logical_and(ds['YV']>=minY, ds['YV']<=maxY),
-                                                 _np.logical_and(ds['XV']>=minX, ds['XV']<=maxX)), 1,0).persist()
-        for var in ds.data_vars:
-            if   set(['X',   'Y']).issubset(ds[var].dims):   ds[var] = ds[var].where(maskC)
+        maskC = _xr.where(_xr.ufuncs.logical_and(_xr.ufuncs.logical_and(ds['YC']>=minY, ds['YC']<=maxY),
+                                                 _xr.ufuncs.logical_and(ds['XC']>=minX, ds['XC']<=maxX)), 1,0).persist()
+        maskG = _xr.where(_xr.ufuncs.logical_and(_xr.ufuncs.logical_and(ds['YG']>=minY, ds['YG']<=maxY),
+                                                 _xr.ufuncs.logical_and(ds['XG']>=minX, ds['XG']<=maxX)), 1,0).persist()
+        maskU = _xr.where(_xr.ufuncs.logical_and(_xr.ufuncs.logical_and(ds['YU']>=minY, ds['YU']<=maxY),
+                                                 _xr.ufuncs.logical_and(ds['XU']>=minX, ds['XU']<=maxX)), 1,0).persist()
+        maskV = _xr.where(_xr.ufuncs.logical_and(_xr.ufuncs.logical_and(ds['YV']>=minY, ds['YV']<=maxY),
+                                                 _xr.ufuncs.logical_and(ds['XV']>=minX, ds['XV']<=maxX)), 1,0).persist()
+        for var in ds.variables:
+            if var in ds.coords: continue
+            elif set(['X',   'Y']).issubset(ds[var].dims):   ds[var] = ds[var].where(maskC)
             elif set(['Xp1', 'Yp1']).issubset(ds[var].dims): ds[var] = ds[var].where(maskG)
             elif set(['Xp1', 'Y']).issubset(ds[var].dims):   ds[var] = ds[var].where(maskU)
             elif set(['X',   'Yp1']).issubset(ds[var].dims): ds[var] = ds[var].where(maskV)
@@ -407,16 +388,14 @@ def cutout(od,
             
         # Same frequency: Skip
         if timeFreq==inFreq:
-            _warnings.warn("\nInput time freq: [{}] = Output time frequency: [{}]:"
-                           "\nSkip time resampling.".format(inFreq, timeFreq), stacklevel=2)
+            _warnings.warn("\nInput time freq: [{}] = Output time frequency: [{}]: \nSkip time resampling.".format(inFreq, timeFreq), stacklevel=2)
         
         else:
         
             # Remove time_midp and warn
             vars2drop = [var for var in ds.variables if 'time_midp' in ds[var].dims]
             if vars2drop:
-                _warnings.warn("\nTime resampling drops variables on `time_midp` dimension."
-                               "\nDropped variables: {}.".format(vars2drop), stacklevel=2)
+                _warnings.warn("\nTime resampling drops variables on `time_midp` dimension. \nDropped variables: {}.".format(vars2drop), stacklevel=2)
                 ds = ds.drop(vars2drop)
             if 'time_midp' in ds.dims: ds = ds.drop('time_midp')
                 
@@ -462,7 +441,7 @@ def cutout(od,
     
     # Add time midp
     if timeFreq and 'time' not in dropAxes:
-        od = od.set_grid_coords({**od.grid_coords, 'time' : {'time': -0.5}}, add_midp=True, overwrite=True)
+        od = od.set_grid_coords({'time' : {'time': -0.5}}, add_midp=True, overwrite=False)
 
     # Drop axes
     grid_coords = od.grid_coords
@@ -473,6 +452,8 @@ def cutout(od,
     # Cut axis can't be periodic 
     od = od.set_grid_periodic(periodic, overwrite = True)
     
+    
+        
     return od
 
 
@@ -513,7 +494,7 @@ def mooring_array(od, Ymoor, Xmoor,
     if "YRange"   not in kwargs: kwargs['YRange']   = Ymoor
     if "XRange"   not in kwargs: kwargs['XRange']   = Xmoor
     if "add_Hbdr" not in kwargs: kwargs['add_Hbdr'] = True
-    od = od.subsample.cutout(**kwargs)
+    od = od.cutout(**kwargs)
 
     # Message
     print('Extracting mooring array')
@@ -810,7 +791,7 @@ def survey_stations(od, Ysurv, Xsurv, delta,
     if "YRange"  not in kwargs: kwargs['YRange']    = Y_surv
     if "XRange"  not in kwargs: kwargs['XRange']    = X_surv
     if "add_Hbdr" not in kwargs: kwargs['add_Hbdr'] = True
-    od = od.subsample.cutout(**kwargs)
+    od = od.cutout(**kwargs)
     
     # Message
     print('Carrying out survey') 
@@ -941,7 +922,7 @@ def particle_properties(od, times, Ypart, Xpart, Zpart, **kwargs):
     if "ZRange"    not in kwargs: kwargs['ZRange']    = [_np.min(Zpart), _np.max(Zpart)]
     if "add_Hbdr"  not in kwargs: kwargs['add_Hbdr']  = True
     if "add_Vbdr"  not in kwargs: kwargs['add_Vbdr']  = True    
-    od = od.subsample.cutout(**kwargs)
+    od = od.cutout(**kwargs)
     
     # Message
     print('Extracting Eulerian properties of particles.')
@@ -1034,30 +1015,3 @@ def particle_properties(od, times, Ypart, Xpart, Zpart, **kwargs):
     od = od.set_grid_coords({'time' : {'time': -0.5}}, add_midp=True, overwrite=True)
     
     return od
-
-
-class _subsampleMethdos(object):
-    """
-    Enables use of oceanspy.subsample functions as attributes on a OceanDataset.
-    For example, OceanDataset.subsample.cutout
-    """
-    
-    def __init__(self, od):
-        self._od = od
-
-    @_functools.wraps(cutout)
-    def cutout(self, **kwargs):
-        return cutout(self._od, **kwargs)
-    
-    @_functools.wraps(mooring_array)
-    def mooring_array(self, **kwargs):
-        return cutout(self._od, **kwargs)
-    
-    @_functools.wraps(survey_stations)
-    def survey_stations(self, **kwargs):
-        return cutout(self._od, **kwargs)
-    
-    @_functools.wraps(particle_properties)
-    def particle_properties(self, **kwargs):
-        return cutout(self._od, **kwargs)
-

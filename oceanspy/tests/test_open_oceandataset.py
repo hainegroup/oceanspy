@@ -62,8 +62,8 @@ def test_import_MITgcm_rect_bin():
     
     # From open_oceandataset
     od = OceanDataset(ds).import_MITgcm_rect_bin()
-    check_coords = {'Y':    'center', 'Yp1': 'outer', 
-                    'X':    'center', 'Xp1': 'outer', 
+    check_coords = {'Y':    'center', 'Yp1': 'right', 
+                    'X':    'center', 'Xp1': 'right', 
                     'Z':    'center', 'Zp1': 'outer', 'Zu': 'right', 'Zl': 'left',
                     'time': 'outer', 'time_midp': 'center'} 
     
