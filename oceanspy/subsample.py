@@ -781,8 +781,8 @@ def survey_stations(od, Ysurv, Xsurv, delta,
     Notes
     -----
     By default, kwargs['add_Hbdr'] = True. Try to play with add_Hbdr values if zeros/nans are returned.
-    THIS FUNCTION DOES NOT SUPPORT LAZY COMPUTATION!
-    ospy.survey_stations interpolates using xesmf.regridder. 
+    ospy.survey_stations interpolates using xesmf.regridder. THIS FUNCTION DOES NOT SUPPORT LAZY COMPUTATION!
+    
     xesmf.regridder currently dosen't allow to set the coordinates system (default is spherical).
     Surveys using cartesian coordinates can be made by changing the xesmf source code as explained here: https://github.com/JiaweiZhuang/xESMF/issues/39
     """
