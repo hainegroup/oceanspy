@@ -2,6 +2,7 @@ import pytest
 import pandas as pd
 import numpy as np
 import xarray as xr
+from oceanspy.subsample import *
 from oceanspy.utils import great_circle_path
 from . datasets import (aliased_ods, oceandatasets)
 
@@ -54,8 +55,10 @@ def test_cutout_time(timeRange, timeFreq, sampMethod):
     elif timeFreq is not None:
         with pytest.warns(UserWarning):
             od_out = od_in.subsample.cutout(timeRange=timeRange, timeFreq=timeFreq, sampMethod=sampMethod)
+            od_out = cutout(od_in, timeRange=timeRange, timeFreq=timeFreq, sampMethod=sampMethod)
     else:
         od_out = od_in.subsample.cutout(timeRange=timeRange, timeFreq=timeFreq, sampMethod=sampMethod)
+        od_out = cutout(od_in, timeRange=timeRange, timeFreq=timeFreq, sampMethod=sampMethod)
     
     # Check dimensions
     for dim in ['time', 'time_midp']:
@@ -84,6 +87,7 @@ def test_cutout_Z(ZRange):
     
     # Run cutout
     od_out = od_in.subsample.cutout(ZRange=ZRange)
+    od_out = cutout(od_in, ZRange=ZRange)
     
     for dim in [dim for dim in od_in.dataset.dims if dim[0]=='Z' ]:
         if ZRange is None:
@@ -122,7 +126,7 @@ def test_cutout_horizontal(od_name, XRange, YRange, mask_outside):
         if (XRange is not None and len(XRange)==1) or (YRange is not None and len(YRange)==1):
             pytest.skip('Might hit zero grid points in the horizontal range')
     od_out = od_in.subsample.cutout(XRange=XRange, YRange=YRange, mask_outside=mask_outside)
-    
+    od_out = cutout(od_in, XRange=XRange, YRange=YRange, mask_outside=mask_outside)
     
     if 'rect' in od_name and 'nc' in od_name:
         for dim in ['X', 'Y']:
@@ -160,6 +164,7 @@ def test_cutout_dropAxes(XRange, dropAxes):
         
     # Run cutout
     od_out = od_in.subsample.cutout(XRange=XRange, dropAxes=dropAxes)
+    od_out = cutout(od_in, XRange=XRange, dropAxes=dropAxes)
     
     # Check cut
     if XRange is not None:
@@ -202,6 +207,7 @@ def test_mooring_array(od_name):
     
     # Run mooring
     od_out = od_in.subsample.mooring_array(Xmoor=Xmoor, Ymoor=Ymoor)
+    od_out = mooring_array(od_in, Xmoor=Xmoor, Ymoor=Ymoor)
     
     # Check dimensions
     for dim in ['mooring', 'mooring_midp']:
@@ -244,6 +250,7 @@ def test_survey_stations(od_name, delta):
     # Run survey
     with pytest.warns(UserWarning):
         od_out = od_in.subsample.survey_stations(Xsurv=Xsurv, Ysurv=Ysurv, delta=delta)
+        od_out = survey_stations(od_in, Xsurv=Xsurv, Ysurv=Ysurv, delta=delta)
 
     # Check dimensions
     for dim in ['station', 'station_midp']:
@@ -287,6 +294,7 @@ def test_particle_properties():
     # Warning due to midp
     with pytest.warns(UserWarning):
         od_out = od_in.subsample.particle_properties(times=times, Xpart=Xpart, Ypart=Ypart, Zpart=Zpart)
+        od_out = particle_properties(od_in, times=times, Xpart=Xpart, Ypart=Ypart, Zpart=Zpart)
     
     # Check dimensions
     assert 'particle' in od_out.dataset.dims
