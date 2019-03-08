@@ -133,9 +133,9 @@ def vertical_section(od,
     if subsamp_kwargs is not None:
         # Subsample first
         if subsampMethod=='mooring_array':
-            od = od.mooring_array(**subsamp_kwargs)
+            od = od.subsample.mooring_array(**subsamp_kwargs)
         elif subsampMethod=='survey_stations':
-            od = od.survey_stations(**subsamp_kwargs)
+            od = od.subsample.survey_stations(**subsamp_kwargs)
     time = od._ds['time']
     
     # Fix colorbar
@@ -216,7 +216,7 @@ def horizontal_section(od,
     
     # First cutout and get time
     cutout_kwargs = kwargs.pop('cutout_kwargs', None)
-    if cutout_kwargs is not None: od = od.cutout(**cutout_kwargs)
+    if cutout_kwargs is not None: od = od.subsample.cutout(**cutout_kwargs)
     time = od._ds['time']
     
     # Fix colorbar
@@ -299,7 +299,7 @@ def TS_diagram(od,
     
     # First cutout and get time
     cutout_kwargs = kwargs.pop('cutout_kwargs', None)
-    if cutout_kwargs is not None: od = od.cutout(**cutout_kwargs)
+    if cutout_kwargs is not None: od = od.subsample.cutout(**cutout_kwargs)
     time = od._ds['time']
     
     # Check Temp and S

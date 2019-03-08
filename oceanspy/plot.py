@@ -151,14 +151,14 @@ def vertical_section(od,
     # TODO: take out useless variables?
     if cutout_kwargs is not None:     
         # Cutout first (needed)
-        od = od.cutout(**cutout_kwargs)
+        od = od.subsample.cutout(**cutout_kwargs)
     
     # Subsample first
     if subsamp_kwargs is not None:
         if subsampMethod=='mooring_array':
-            od = od.mooring_array(**subsamp_kwargs)
+            od = od.subsample.mooring_array(**subsamp_kwargs)
         elif subsampMethod=='survey_stations':
-            od = od.survey_stations(**subsamp_kwargs)
+            od = od.subsample.survey_stations(**subsamp_kwargs)
         
     # Check variables and add
     listName = [varName]
@@ -409,7 +409,7 @@ def horizontal_section(od,
     if cutout_kwargs   is None: cutout_kwargs = {}
         
     # Cutout first
-    od = od.cutout(**cutout_kwargs)
+    od = od.subsample.cutout(**cutout_kwargs)
     
     # Check variables and add
     listName = [varName]
@@ -667,7 +667,7 @@ def time_series(od,
     if cutout_kwargs is None:  cutout_kwargs = {}
     
     # Cutout first
-    od = od.cutout(**cutout_kwargs)
+    od = od.subsample.cutout(**cutout_kwargs)
     
     # Variable name 
     _varName =  _compute._rename_aliased(od, varName)
@@ -820,7 +820,7 @@ def TS_diagram(od,
     if cutout_kwargs is None:  cutout_kwargs = {}
         
     # Cutout first
-    od = od.cutout(**cutout_kwargs)
+    od = od.subsample.cutout(**cutout_kwargs)
         
     # Check and extract T and S
     varList = ['Temp', 'S']

@@ -137,7 +137,7 @@ def great_circle_path(lat1, lon1, lat2, lon2, delta_km=None, R = None):
 
         # Determine the set of arc angles to use 
         # (approximately spaced by delta_km)
-        angs2use = _np.linspace(0,total_arc_angle_1_to_2,_np.ceil(total_arc_angle_1_to_2/(delta_km/R))); # radians
+        angs2use = _np.linspace(0,total_arc_angle_1_to_2, int(_np.ceil(total_arc_angle_1_to_2/(delta_km/R)))); # radians
         M = angs2use.size;
 
         # Now find the unit radials of the entire "trajectory"

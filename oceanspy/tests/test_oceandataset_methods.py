@@ -4,8 +4,6 @@ from . datasets import (aliased_ods, oceandatasets)
 
 od_in = oceandatasets['MITgcm_rect_nc']
 
-
-
 # Check both rectilinear and curvilinear
 @pytest.mark.parametrize("od_name", ['MITgcm_rect_nc', 'MITgcm_curv_nc'])
 @pytest.mark.parametrize("grid_pos", ['C', 'G', 'U', 'V', 'wrong'])
