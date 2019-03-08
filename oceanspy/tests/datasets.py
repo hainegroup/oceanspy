@@ -113,6 +113,7 @@ class Datasets:
         
         # Horizontal Dimensions (use xarray tutorial)
         ds  = xr.tutorial.open_dataset('rasm')
+        ds['xc'] = xr.where(ds['xc']>180, ds['xc']-180, ds['xc'])
         X   = ds['x'].isel(x=slice(self.NX)).values
         Xp1 = ds['x'].isel(x=slice(self.NX+1)).values
         Y   = ds['y'].isel(y=slice(self.NY)).values

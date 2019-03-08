@@ -7,10 +7,8 @@ Subsample OceanDataset objects.
 # 2) Only use od._ds and od._grid
 # 3) Make sure you don't lose global attributes (e.g., when merging)
 # 4) Cutout as much as possible, and use **kwargs for customized cutouts
-# 5) Add new functions in docs/api.rst under subsample 
-# 6) Create a shortcut in _oceandataset and add the shortcut in docs/api.rst under OceanDataset - Shortcuts
-
-# TODO: warnings when limits are out of bound
+# 5) Add new functions in _subsampleMethdos
+# 6) Add new functions in docs/api.rst
 
 import xarray   as _xr
 import pandas   as _pd
@@ -21,6 +19,11 @@ import oceanspy as _ospy
 import functools as _functools
 
 from . import utils as _utils
+
+try: from geopy.distance import great_circle as _great_circle
+except: pass
+try: import xesmf as _xe
+except: pass
 
 def cutout(od,
            varList      = None,
@@ -77,12 +80,17 @@ def cutout(od,
     od: OceanDataset
         Subsampled oceandataset
         
-    Note
-    ----
+    Notes
+    -----
     If any of the horizontal ranges is not None, 
     the horizontal dimensions of the cutout will have len(Xp1)>len(X) and len(Yp1)>len(Y) 
     even if the original oceandataset had len(Xp1)==len(X) or len(Yp1)==len(Y). 
     """
+    
+    # Check
+    for wrong_dim in ['mooring', 'station', 'particle']:
+        if wrong_dim in od._ds.dims and (XRange is not None or YRange is not None):
+            raise ValueError('`cutout` cannot subsample in the horizontal plain oceandatasets with dimension [{}]'.format(wrong_dim))
     
     # Convert variables to numpy arrays and make some check
     if not isinstance(od, _ospy.OceanDataset):
@@ -498,7 +506,16 @@ def mooring_array(od, Ymoor, Xmoor,
     -------
     od: OceanDataset
         Subsampled oceandataset
+        
+    See Also
+    --------
+    subsample.cutout
     """       
+    
+    # Check
+    for wrong_dim in ['mooring', 'station', 'particle']:
+        if wrong_dim in od._ds.dims:
+            raise ValueError('`mooring_array` cannot subsample oceandatasets with dimension [{}]'.format(wrong_dim))
     
     # Convert variables to numpy arrays and make some check
     Ymoor = _np.asarray(Ymoor, dtype=od._ds['YC'].dtype)
@@ -531,7 +548,6 @@ def mooring_array(od, Ymoor, Xmoor,
     
     # Convert to cartesian if spherical
     if R is not None:
-        from geopy.distance import great_circle as _great_circle
         x, y, z = _utils.spherical2cartesian(Y = Ymoor, X = Xmoor, R = R)
     else:
         x = Xmoor; y = Ymoor; z = _np.zeros(Ymoor.shape)
@@ -729,8 +745,6 @@ def survey_stations(od, Ysurv, Xsurv, delta,
     """
     Extract survey stations with regular spacing.
     Trajectories are great circle paths when coordinates are spherical.
-    By default, kwargs['add_Hbdr'] = True. Try to play with add_Hbdr values if zeros/nans are returned.
-    THIS FUNCTION DOES NOT SUPPORT LAZY COMPUTATION!
     
     Parameters
     ----------
@@ -755,18 +769,29 @@ def survey_stations(od, Ysurv, Xsurv, delta,
     -------
     od: OceanDataset
         Subsampled oceandataset
-        
+       
+    See Also
+    --------
+    subsample.cutout
+    
     References
     ----------
     https://xesmf.readthedocs.io/en/stable/user_api.html#regridder
     
     Notes
     -----
+    By default, kwargs['add_Hbdr'] = True. Try to play with add_Hbdr values if zeros/nans are returned.
+    THIS FUNCTION DOES NOT SUPPORT LAZY COMPUTATION!
     ospy.survey_stations interpolates using xesmf.regridder. 
     xesmf.regridder currently dosen't allow to set the coordinates system (default is spherical).
     Surveys using cartesian coordinates can be made by changing the xesmf source code as explained here: https://github.com/JiaweiZhuang/xESMF/issues/39
     """
     
+    # Check
+    for wrong_dim in ['mooring', 'station', 'particle']:
+        if wrong_dim in od._ds.dims:
+            raise ValueError('`survey_stations` cannot subsample oceandatasets with dimension [{}]'.format(wrong_dim))
+            
     # Convert variables to numpy arrays and make some check
     Ysurv = _np.asarray(Ysurv, dtype=od._ds['YC'].dtype)
     if   Ysurv.ndim == 0: Ysurv = Ysurv.reshape(1)
@@ -782,7 +807,10 @@ def survey_stations(od, Ysurv, Xsurv, delta,
     # Earth Radius
     R = od.parameters['rSphere']
     if R is None:
-        _warnings.warn("\nospy.survey_stations interpolates using xesmf.regridder. \nxesmf.regridder currently dosen't allow to set the coordinates system (default is spherical). \nSurveys using cartesian coordinates can be made by changing the xesmf source code as explained here: https://github.com/JiaweiZhuang/xESMF/issues/39", stacklevel=2)
+        _warnings.warn("\nospy.survey_stations interpolates using xesmf.regridder."
+                       "\nxesmf.regridder currently dosen't allow to set the coordinates system (default is spherical)."
+                       "\nSurveys using cartesian coordinates can be made by changing the xesmf source code as explained here:"
+                       "https://github.com/JiaweiZhuang/xESMF/issues/39", stacklevel=2)
     
     # Compute trajectory
     for i, (lat0, lon0, lat1, lon1) in enumerate(zip(Ysurv[:-1], Xsurv[:-1], Ysurv[1:], Xsurv[1:])):
@@ -819,6 +847,8 @@ def survey_stations(od, Ysurv, Xsurv, delta,
     ds   = od._ds
     grid = od._grid
     
+    # TODO: This is probably slowing everything down, and perhaps adding some extra error.
+    #       I think we should have separate xesmf interpolations for different grids, then merge.
     # Move all variables on same spatial grid
     for var in [var for var in ds.variables if var not in ds.dims]:
         for dim in ['Xp1', 'Yp1']:
@@ -838,10 +868,12 @@ def survey_stations(od, Ysurv, Xsurv, delta,
                      attrs = ds.attrs)
 
     # Interpolate
-    import xesmf as _xe
     regridder = _xe.Regridder(ds_in, ds, **xesmf_regridder_kwargs) 
-    for var in [var for var in ds_in.variables if var not in ['lon', 'lat', 'X', 'Y']]:
-        if set(['X', 'Y']).issubset(ds_in[var].dims): 
+    interp_vars = [var for var in ds_in.variables if var not in ['lon', 'lat', 'X', 'Y']]
+    print('Variables to interpolate: {}'.format([var for var in interp_vars if set(['X', 'Y']).issubset(ds_in[var].dims)]))
+    for var in interp_vars:
+        if set(['X', 'Y']).issubset(ds_in[var].dims):
+            print('Interpolating [{}]'.format(var))
             attrs   = ds_in[var].attrs
             ds[var] = regridder(ds_in[var])
             ds[var].attrs = attrs
@@ -891,7 +923,7 @@ def survey_stations(od, Ysurv, Xsurv, delta,
 def particle_properties(od, times, Ypart, Xpart, Zpart, **kwargs):
     
     """
-    Extract Eulerian properties of particles.
+    Extract Eulerian properties of particles using nearest-neighbor interpolation.
     
     Parameters
     ----------
@@ -900,11 +932,11 @@ def particle_properties(od, times, Ypart, Xpart, Zpart, **kwargs):
     times: 1D array_like or scalar
         time of particles.
     Ypart: 2D array_like or 1D array_like if times is scalar
-        Y coordinates of particles. 
+        Y coordinates of particles. Dimensions order: (time, particle)
     Xpart: 2D array_like or 1D array_like if times is scalar
-        X coordinates of particles.
+        X coordinates of particles. Dimensions order: (time, particle)
     Zpart: 2D array_like or 1D array_like if times is scalar
-        Z of particles.
+        Z of particles. Dimensions order: (time, particle)
     **kwargs: 
         Keyword arguments for subsample.cutout
 
@@ -912,8 +944,19 @@ def particle_properties(od, times, Ypart, Xpart, Zpart, **kwargs):
     -------
     od: OceanDataset
         Subsampled oceandataset
+        
+    See Also
+    --------
+    subsample.cutout
+    OceanDataset.create_tree
     """
+    # TODO: add different interpolations. Renske already has some code.
     
+    # Check
+    for wrong_dim in ['mooring', 'station', 'particle']:
+        if wrong_dim in od._ds.dims:
+            raise ValueError('`particle_properties` cannot subsample oceandatasets with dimension [{}]'.format(wrong_dim))
+            
     # Convert variables to numpy arrays and make some check
     times  = _np.asarray(times, dtype = od._ds['time'].dtype)
     if times.ndim == 0: times = times.reshape(1)
@@ -921,15 +964,15 @@ def particle_properties(od, times, Ypart, Xpart, Zpart, **kwargs):
     
     Ypart  = _np.asarray(Ypart)
     if Ypart.ndim <2 and Ypart.size==1: Ypart = Ypart.reshape((1, Ypart.size))
-    elif Ypart >2: raise TypeError('Invalid `Ypart`')
+    elif Ypart.ndim >2: raise TypeError('Invalid `Ypart`')
         
     Xpart  = _np.asarray(Xpart)
     if Xpart.ndim <2 and Xpart.size==1: Xpart = Xpart.reshape((1, Xpart.size))
-    elif Xpart >2: raise TypeError('Invalid `Xpart`')
+    elif Xpart.ndim >2: raise TypeError('Invalid `Xpart`')
       
     Zpart  = _np.asarray(Zpart)
     if Zpart.ndim <2 and Zpart.size==1: Zpart = Zpart.reshape((1, Zpart.size))
-    elif Zpart >2: raise TypeError('Invalid `Zpart`')
+    elif Zpart.ndim >2: raise TypeError('Invalid `Zpart`')
 
     if (not Ypart.ndim==Xpart.ndim==Zpart.ndim or not times.size==Ypart.shape[0]):
         TypeError('`times`, `Xpart`, `Ypart`, and `Zpart` have inconsistent shape')
@@ -1051,13 +1094,13 @@ class _subsampleMethdos(object):
     
     @_functools.wraps(mooring_array)
     def mooring_array(self, **kwargs):
-        return cutout(self._od, **kwargs)
+        return mooring_array(self._od, **kwargs)
     
     @_functools.wraps(survey_stations)
     def survey_stations(self, **kwargs):
-        return cutout(self._od, **kwargs)
+        return survey_stations(self._od, **kwargs)
     
     @_functools.wraps(particle_properties)
     def particle_properties(self, **kwargs):
-        return cutout(self._od, **kwargs)
+        return particle_properties(self._od, **kwargs)
 

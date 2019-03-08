@@ -2,12 +2,14 @@ import pytest
 import pandas as pd
 import numpy as np
 import xarray as xr
+from oceanspy.utils import great_circle_path
 from . datasets import (aliased_ods, oceandatasets)
 
 
 
-
-
+# =======
+# CUTOUT
+# =======
 
 @pytest.mark.parametrize("varList", [None,
                                      lambda od_in: np.random.choice(od_in.dataset.data_vars, 1),
@@ -177,8 +179,128 @@ def test_cutout_dropAxes(XRange, dropAxes):
         
         
         
+        
+        
+# =======
+# MOORING
+# =======
 
+@pytest.mark.parametrize("od_name", ['MITgcm_curv_nc'])
+def test_mooring_array(od_name):
     
+    # Extract od
+    od_in = oceandatasets[od_name]
+    indY, indX = xr.broadcast(od_in.dataset['Y'], od_in.dataset['X'])
+    od_in = od_in.merge_into_oceandataset(xr.Dataset({'indX': indX, 'indY': indY}))
     
+    # Get random coords
+    X = od_in.dataset['XC'].stack(XY=('X', 'Y')).values
+    Y = od_in.dataset['YC'].stack(XY=('X', 'Y')).values
+    inds = np.random.choice(len(X), 3)
+    Xmoor = X[inds]
+    Ymoor = Y[inds]
     
+    # Run mooring
+    od_out = od_in.subsample.mooring_array(Xmoor=Xmoor, Ymoor=Ymoor)
     
+    # Check dimensions
+    for dim in ['mooring', 'mooring_midp']:
+        assert dim in od_out.dataset.dims and dim in od_out.grid_coords['mooring']
+    assert len(od_out.dataset['X'])==len(od_out.dataset['Y'])==1
+    assert len(od_out.dataset['Xp1'])==len(od_out.dataset['Yp1'])==2
+    
+    # Check verteces
+    assert od_out.dataset['XC'].isel(mooring=0).values==Xmoor[0] and od_out.dataset['XC'].isel(mooring=-1).values==Xmoor[-1]
+    assert od_out.dataset['YC'].isel(mooring=0).values==Ymoor[0] and od_out.dataset['YC'].isel(mooring=-1).values==Ymoor[-1]
+    
+    # Check path
+    diffX = od_out.grid.diff(od_out.dataset['indX'], 'mooring')
+    diffY = od_out.grid.diff(od_out.dataset['indY'], 'mooring')
+    assert np.count_nonzero(diffX.values*diffY.values)==0
+    assert np.count_nonzero(diffX.values+diffY.values)==len(od_out.dataset['mooring_midp'])
+    
+
+# =======
+# SURVEY
+# =======
+    
+@pytest.mark.parametrize("od_name", ['MITgcm_curv_nc'])
+@pytest.mark.parametrize("delta",   [None, True])
+def test_survey_stations(od_name, delta):
+    
+    # Extract od
+    od_in = oceandatasets[od_name]
+    
+    # Get random coords
+    Xsurv = [od_in.dataset['XC'].isel(X=0,  Y=0).values,
+             od_in.dataset['XC'].isel(X=-1, Y=-1).values]
+    Ysurv = [od_in.dataset['YC'].isel(X=0,  Y=0).values,
+             od_in.dataset['YC'].isel(X=-1, Y=-1).values]
+    
+    if delta is True:
+        _, _, delta = great_circle_path(float(Ysurv[0]), float(Xsurv[0]), float(Ysurv[1]), float(Xsurv[1]))
+        delta = float(delta[1]/10)
+    
+    # Run survey
+    with pytest.warns(UserWarning):
+        od_out = od_in.subsample.survey_stations(Xsurv=Xsurv, Ysurv=Ysurv, delta=delta)
+
+    # Check dimensions
+    for dim in ['station', 'station_midp']:
+        assert dim in od_out.dataset.dims and dim in od_out.grid_coords['station']
+    for dim in ['X', 'Y', 'Xp1', 'Yp1']:
+        assert dim not in od_out.dataset.dims 
+    
+    # Check verteces
+    if delta is None:
+        assert od_out.dataset['XC'].isel(station=0).values==Xsurv[0] and od_out.dataset['XC'].isel(station=-1).values==Xsurv[-1]
+        assert od_out.dataset['YC'].isel(station=0).values==Ysurv[0] and od_out.dataset['YC'].isel(station=-1).values==Ysurv[-1]
+        assert len(od_out.dataset['station'])==2
+    else:
+        assert len(od_out.dataset['station'])>2
+
+        
+# ==========
+# PARTICLES
+# ==========
+
+od_in = oceandatasets['MITgcm_curv_nc']
+points =  ['C', 'G', 'U', 'V']
+for point in points:
+    od_in = od_in.merge_into_oceandataset(od_in.dataset['X'+point].drop(od_in.dataset['X'+point].coords).rename('test'+point))
+data = xr.DataArray(np.random.randn(2, 3), coords={'x': ['a', 'b']}, dims=('x', 'y'))
+times = od_in.dataset['time'].isel(time=slice(2,-2))
+npart = 10
+X = od_in.dataset['XC'].stack(XY=('X', 'Y')).values
+Y = od_in.dataset['YC'].stack(XY=('X', 'Y')).values
+Xpart = np.empty((len(times), npart))
+Ypart = np.empty((len(times), npart))
+Zpart = np.empty((len(times), npart))
+for t in range(len(times)):
+    inds = np.random.choice(len(X), npart)
+    Ypart[t, :] = Y[inds]
+    Xpart[t, :] = X[inds]
+    Zpart[t, :] = np.random.choice(od_in.dataset['Z'], npart)
+    
+def test_particle_properties():
+    
+    # Warning due to midp
+    with pytest.warns(UserWarning):
+        od_out = od_in.subsample.particle_properties(times=times, Xpart=Xpart, Ypart=Ypart, Zpart=Zpart)
+    
+    # Check dimensions
+    assert 'particle' in od_out.dataset.dims
+    for dim in ['X', 'Y', 'Xp1', 'Yp1']:
+        assert dim not in od_out.dataset.dims 
+    assert len(od_out.dataset['time'])==len(times)
+    assert len(od_out.dataset['particle'])==npart
+    
+    # Check variables
+    assert od_out.dataset ==0
+    assert np.array_equal(od_out.dataset['time'].values, times) 
+    assert np.array_equal(od_out.dataset['XC'].values, Xpart) 
+    assert np.array_equal(od_out.dataset['YC'].values, Ypart) 
+    assert np.array_equal(od_out.dataset['Z'].values, Zpart) 
+    for var in od_out.dataset.variables:
+        if var not in ['time', 'time_midp', 'particle']:
+            assert od_out.dataset[var].shape == Xpart.shape
