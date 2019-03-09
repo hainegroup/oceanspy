@@ -6,9 +6,10 @@ Subsample OceanDataset objects.
 # 1) Every function operates on od, and returns od.
 # 2) Only use od._ds and od._grid 
 # 3) Make sure you don't lose global attributes (e.g., when merging)
-# 4) Cutout as much as possible, and use **kwargs for customized cutouts
+# 4) Always cutout at the beginning, and use **kwargs for customized cutouts
 # 5) Add new functions in _subsampleMethdos
 # 6) Add new functions in docs/api.rst
+# 7) Add tests
 
 import xarray   as _xr
 import pandas   as _pd
