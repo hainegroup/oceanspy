@@ -8,7 +8,7 @@ dependencies:
   - numpydoc
   - sphinx
   - sphinx_rtd_theme
+  - nbsphinx
   - pip:
     - xgcm
-    - nbsphinx
     - pyyaml
