@@ -4,7 +4,7 @@ Subsample OceanDataset objects.
 
 # Instructions for developers:
 # 1) Every function operates on od, and returns od.
-# 2) Only use od._ds and od._grid
+# 2) Only use od._ds and od._grid 
 # 3) Make sure you don't lose global attributes (e.g., when merging)
 # 4) Cutout as much as possible, and use **kwargs for customized cutouts
 # 5) Add new functions in _subsampleMethdos
@@ -21,9 +21,9 @@ import functools as _functools
 from . import utils as _utils
 
 try: from geopy.distance import great_circle as _great_circle
-except: pass
+except ImportError: pass
 try: import xesmf as _xe
-except: pass
+except ImportError: pass
 
 def cutout(od,
            varList      = None,
