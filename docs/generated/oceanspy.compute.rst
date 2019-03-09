@@ -29,8 +29,7 @@ oceanspy.compute
       shear_strain
       survey_aligned_velocities
       vertical_relative_vorticity
-      volume_cells
-      volume_weighted_mean
+      weighted_mean
    
    
 

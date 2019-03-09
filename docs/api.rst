@@ -69,6 +69,7 @@ Shortcuts
    :toctree: generated/
    
    OceanDataset.subsample
+   OceanDataset.compute
    
    
 
@@ -130,8 +131,8 @@ Computing
    
    compute
    
-Functions
----------
+Dynamic
+-------
 
 .. autosummary::
    :toctree: generated/
@@ -140,8 +141,14 @@ Functions
    compute.divergence
    compute.curl
    compute.laplacian
-   compute.volume_cells
-   compute.volume_weighted_mean
+   compute.weighted_mean
+   
+Static
+------
+
+.. autosummary::
+   :toctree: generated/
+   
    compute.potential_density_anomaly
    compute.Brunt_Vaisala_frequency
    compute.vertical_relative_vorticity

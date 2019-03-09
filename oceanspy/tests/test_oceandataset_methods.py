@@ -39,10 +39,10 @@ def test_merge_into_oceandataset():
     
     # da
     da = xr.zeros_like(od_in.dataset['XC'])
-    with pytest.raises(ValueError):
+    with pytest.warns(UserWarning):
         od_out = od_in.merge_into_oceandataset(da)
-        
-    od_out = od_in.merge_into_oceandataset(da, overwrite=True)
+    with pytest.warns(UserWarning):
+        od_out = od_in.merge_into_oceandataset(da, overwrite=True)
     
     
     

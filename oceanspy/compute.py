@@ -2,11 +2,12 @@
 Create new variables using OceanDataset objects.
 """
 
-import xarray   as _xr
-import oceanspy as _ospy
-import numpy    as _np
-import warnings as _warnings
-import copy     as _copy
+import xarray    as _xr
+import oceanspy  as _ospy
+import numpy     as _np
+import warnings  as _warnings
+import copy      as _copy
+import functools as _functools
 from . import utils as _utils
 
 # Instructions for developers:
@@ -53,9 +54,8 @@ _FUNC2VARS = {'potential_density_anomaly'     : ['Sigma0'],
              'salt_budget'                    : ['tendS', 'adv_hConvS', 'adv_vConvS', 'dif_vConvS', 'kpp_vConvS', 'forcS'],
              'geographical_aligned_velocities': ['U_zonal', 'V_merid'],
              'survey_aligned_velocities'      : ['rot_ang_Vel', 'tan_Vel', 'ort_Vel']}
-
-
-
+    
+    
 def _add_missing_variables(od, varList, FUNC2VARS = _FUNC2VARS, raiseError=True):
     """
     If any variable in varList is missing in the oceandataset, try to compute it.
@@ -154,6 +154,10 @@ def _rename_aliased(od, varNameList):
     return varNameListIN
 
 
+
+# ==================
+# DYNAMIC VARIABLES
+# ==================
 def gradient(od, varNameList, axesList=None, aliased = True):
     """
     Compute gradient along specified axes, returning all terms (not summed).
@@ -176,7 +180,7 @@ def gradient(od, varNameList, axesList=None, aliased = True):
     Returns
     -------
     ds: xarray.Dataset 
-        Contains all terms named as dvarName_daxis
+        | d[varName]_d[axis]
     
     Examples
     --------
@@ -350,7 +354,7 @@ def divergence(od, iName=None, jName=None, kName=None, aliased = True):
     Returns
     -------
     ds: xarray.Dataset 
-        Contains all terms named as dName_daxis
+        | d[varName]_d[axis]
     
     Examples
     --------
@@ -478,7 +482,9 @@ def curl(od, iName=None, jName=None, kName=None, aliased = True):
     Returns
     -------
     ds: xarray.Dataset 
-        Contains all terms named as dName_daxis-dName_daxis
+        | d[jName]_dX-d[iName]_dY
+        | d[kName]_dY-d[jName]_dZ
+        | d[iName]_dZ-d[kName]_dX
     
     Examples
     --------
@@ -624,7 +630,7 @@ def laplacian(od, varNameList, axesList=None, aliased = True):
     Returns
     -------
     ds: xarray.Dataset 
-        Contains all terms named as ddvarName_daxis_daxis
+        | dd[varName]_d[axis]_ds[axis]
         
     See Also
     --------
@@ -742,7 +748,8 @@ def weighted_mean(od, varNameList=None, axesList=None, storeWeights=True, aliase
     Returns
     -------
     ds: xarray.Dataset 
-        Contains means named as w_mean_varName and weights named as w_mean_varName
+        | w_mean_[varName]
+        | weight_[varName]
     
     Examples
     --------
@@ -940,7 +947,9 @@ def weighted_mean(od, varNameList=None, axesList=None, storeWeights=True, aliase
     return _xr.Dataset(means, attrs=od.dataset.attrs)           
             
     
-    
+# ================
+# STATIC VARIABLES
+# ================    
 
 def potential_density_anomaly(od):
     """
@@ -2246,3 +2255,36 @@ def survey_aligned_velocities(od):
 
 
 
+class _computeMethdos(object):
+    """
+    Enables use of oceanspy.compute functions as attributes on a OceanDataset.
+    For example, OceanDataset.subsample.gradient
+    """
+    
+    def __init__(self, od):
+        self._od = od
+
+    @_functools.wraps(gradient)
+    def gradient(self, overwrite=False, **kwargs):
+        ds = gradient(self._od, **kwargs)
+        return self._od.merge_into_oceandataset(ds, overwrite=overwrite)
+    
+    @_functools.wraps(divergence)
+    def divergence(self, overwrite=False, **kwargs):
+        ds = divergence(self._od, **kwargs)
+        return self._od.merge_into_oceandataset(ds, overwrite=overwrite)
+    
+    @_functools.wraps(curl)
+    def curl(self, overwrite=False, **kwargs):
+        ds = curl(self._od, **kwargs)
+        return self._od.merge_into_oceandataset(ds, overwrite=overwrite)
+    
+    @_functools.wraps(laplacian)
+    def laplacian(self, overwrite=False, **kwargs):
+        ds = laplacian(self._od, **kwargs)
+        return self._od.merge_into_oceandataset(ds, overwrite=overwrite)
+    
+    @_functools.wraps(weighted_mean)
+    def weighted_mean(self, overwrite=False, **kwargs):
+        ds = weighted_mean(self._od, **kwargs)
+        return self._od.merge_into_oceandataset(ds, overwrite=overwrite)
