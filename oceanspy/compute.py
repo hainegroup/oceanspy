@@ -131,6 +131,11 @@ def _rename_aliased(od, varNameList):
     if not isinstance(od, _ospy.OceanDataset):
         raise TypeError('`od` must be OceanDataset')
         
+    # Check if input is a string
+    if isinstance(varNameList, str): isstr=True
+    else: isstr=False
+    
+    # Move to numpy array
     varNameList = _np.asarray(varNameList, dtype='str')
     if varNameList.ndim == 0: varNameList = varNameList.reshape(1)
     elif varNameList.ndim >1: raise TypeError('Invalid `varList`')
@@ -141,8 +146,8 @@ def _rename_aliased(od, varNameList):
     else: 
         varNameListIN = varNameList
         
-    if isinstance(varNameList, str):
-        varNameListIN = varNameListIN[0]
+    # Same input type
+    if isstr: varNameListIN = varNameListIN[0]
         
     return varNameListIN
 
@@ -196,6 +201,7 @@ def gradient(od, varNameList, axesList=None, aliased = True):
             
     Notes
     -----
+    Denominator is delta of time for time gradients (units: s)
     Denominator is delta of distances for mooring and survey (units: km)
     
     References
@@ -286,7 +292,7 @@ def gradient(od, varNameList, axesList=None, aliased = True):
                         dden = dden * HFac
                         continue
 
-            # Vertical gradient
+            # Time gradient
             if axis == 'time':
                 
                 # Compute and conver in s
@@ -378,7 +384,7 @@ def divergence(od, iName=None, jName=None, kName=None, aliased = True):
         else:
             NameIN = Name
         NameOUT = Name
-
+        
         # Add missing variables
         varList = ['HFacC', 'rA', 'dyG', 'HFacW', NameIN]
         od = _add_missing_variables(od, varList)

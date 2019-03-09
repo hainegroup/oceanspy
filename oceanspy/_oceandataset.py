@@ -12,9 +12,9 @@ from . import utils     as _utils
 from . subsample import _subsampleMethdos
 
 try: import cartopy.crs as _ccrs
-except: pass
+except ImportError: pass
 try: from scipy import spatial as _spatial
-except: pass
+except ImportError: pass
 
 # TODO: add more xgcm options. E.g., default boundary method.
 # TODO: add attributes to new coordinates (XU, XV, ...)

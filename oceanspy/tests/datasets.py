@@ -12,6 +12,81 @@ class Datasets:
         self.NZ = 11
         self.NT = 12
         
+    def sinusoidal(self):
+        
+        moreval = 1
+        step    = 0.1
+        
+        # Horizontal Dimensions
+        X      = xr.DataArray( np.arange(self.NX*moreval),       dims = 'X')  * step
+        Xp1    = xr.DataArray( np.arange(self.NX*moreval+1)-0.5, dims = 'Xp1')* step
+        Y      = xr.DataArray( np.arange(self.NY*moreval),       dims = 'Y')  * step
+        Yp1    = xr.DataArray( np.arange(self.NY*moreval+1)-0.5, dims = 'Yp1')* step
+        
+        # Vertical Dimensions
+        Z      = xr.DataArray(-np.arange(self.NZ*moreval)-0.5, dims = 'Z')  * step
+        Zp1    = xr.DataArray(-np.arange(self.NZ*moreval+1),   dims = 'Zp1')* step
+        Zu     = xr.DataArray(-np.arange(self.NZ*moreval)-1,   dims = 'Zu') * step
+        Zl     = xr.DataArray(-np.arange(self.NZ*moreval),     dims = 'Zl') * step
+        
+        # Space Coordinates
+        YC, XC = xr.broadcast(Y,   X)
+        YG, XG = xr.broadcast(Yp1, Xp1)
+        YU, XU = xr.broadcast(Y  , Xp1)
+        YV, XV = xr.broadcast(Yp1, X)
+        
+        # Spacing
+        drC = xr.full_like(Zp1, step)
+        drF = xr.full_like(Z  , step)
+        dxC = xr.full_like(XU,  step)
+        dyC = xr.full_like(XV,  step)
+        dxF = xr.full_like(XC,  step)
+        dyF = xr.full_like(XC,  step)
+        dxG = xr.full_like(XV,  step)
+        dyG = xr.full_like(XU,  step)
+        dxV = xr.full_like(XG,  step)
+        dyU = xr.full_like(XG,  step)
+        
+        # Areas
+        rA  = dxF * dyF
+        rAw = dxC * dyG
+        rAs = dxG * dyC 
+        rAz = dxV * dyU 
+
+        # HFac
+        HFacC, _ = xr.broadcast(xr.full_like(Z, 1), xr.full_like(XC, 1))
+        HFacW, _ = xr.broadcast(xr.full_like(Z, 1), xr.full_like(XU, 1))
+        HFacS, _ = xr.broadcast(xr.full_like(Z, 1), xr.full_like(XV, 1))
+        
+        # Sin C points
+        sinZ, sinY, sinX = xr.broadcast(np.sin(Z), np.sin(Y), np.sin(X))
+        
+        # Sin vel points
+        sinUZ, sinUY , sinUX = xr.broadcast(np.sin(Z) , np.sin(Y)  , np.sin(Xp1))
+        sinVZ, sinVY , sinVX = xr.broadcast(np.sin(Z) , np.sin(Yp1), np.sin(X))
+        sinWZ, sinWY , sinWX = xr.broadcast(np.sin(Zl), np.sin(Y)  , np.sin(X))
+        
+
+        return xr.Dataset({'X'     : X,      'Xp1'   : Xp1, 
+                           'Y'     : Y,      'Yp1'   : Yp1,
+                           'Z'     : Z,      'Zp1'   : Zp1, 'Zu': Zu, 'Zl': Zl,
+                           'YC'    : YC,     'XC'    : XC, 
+                           'YG'    : YG,     'XG'    : XG, 
+                           'YU'    : YU,     'XU'    : XU, 
+                           'YV'    : YV,     'XV'    : XV,
+                           'drC'   : drC,    'drF'   : drF,
+                           'dxC'   : dxC,    'dyC'   : dyC,
+                           'dxF'   : dxF,    'dyF'   : dyF,
+                           'dxG'   : dxG,    'dyG'   : dyG,
+                           'dxV'   : dxV,    'dyU'   : dyU,
+                           'rA'    : rA,     'rAw'   : rAw,
+                           'rAs'   : rAs,    'rAz'   : rAz,
+                           'HFacC' : HFacC,  'HFacW' : HFacW, 'HFacS' : HFacS,
+                           'sinZ'  : sinZ,   'sinY'  : sinY,  'sinX'  : sinX,
+                           'sinUZ' : sinUZ,  'sinUY' : sinUY, 'sinUX' : sinUX,
+                           'sinVZ' : sinVZ,  'sinVY' : sinVY, 'sinVX' : sinVX,
+                           'sinWZ' : sinWZ,  'sinWY' : sinWY, 'sinWX' : sinWX})
+        
     def MITgcm_rect_nc(self):
         """
         Similar to exp_ASR and exp_ERAI
@@ -164,3 +239,8 @@ for od_name in oceandatasets:
     aliases = {var: 'alias_'+var for var in dataset.variables}
     dataset = dataset.rename(aliases)
     aliased_ods[od_name] = OceanDataset(dataset).set_aliases(aliases)
+
+    
+sin_od = OceanDataset(Datasets().sinusoidal()).set_grid_coords({'Y'    : {'Y': None, 'Yp1': 0.5},
+                                                                'X'    : {'X': None, 'Xp1': 0.5},
+                                                                'Z'    : {'Z': None, 'Zp1': 0.5, 'Zu': 0.5, 'Zl': -0.5}})
