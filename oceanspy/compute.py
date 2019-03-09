@@ -1045,7 +1045,7 @@ def Brunt_Vaisala_frequency(od):
     od = _add_missing_variables(od, varList)
     
     # Parameters
-    paramsList = ['eq_state']
+    paramsList = ['g', 'rho0']
     params2use = {par:od.parameters[par] for par in od.parameters if par in paramsList}
     
     # Extract parameters
@@ -2287,4 +2287,14 @@ class _computeMethdos(object):
     @_functools.wraps(weighted_mean)
     def weighted_mean(self, overwrite=False, **kwargs):
         ds = weighted_mean(self._od, **kwargs)
+        return self._od.merge_into_oceandataset(ds, overwrite=overwrite)
+
+    @_functools.wraps(potential_density_anomaly)
+    def potential_density_anomaly(self, overwrite=False, **kwargs):
+        ds = potential_density_anomaly(self._od, **kwargs)
+        return self._od.merge_into_oceandataset(ds, overwrite=overwrite)
+    
+    @_functools.wraps(Brunt_Vaisala_frequency)
+    def Brunt_Vaisala_frequency(self, overwrite=False, **kwargs):
+        ds = Brunt_Vaisala_frequency(self._od, **kwargs)
         return self._od.merge_into_oceandataset(ds, overwrite=overwrite)
