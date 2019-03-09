@@ -27,7 +27,9 @@ from . import utils as _utils
 # TODO: add area weighted mean for 2D variables, e.g. SSH (are_weighted_mean, SI, ...), or vertical sections
 # TODO: add error when function will fail (e.g., divergence of W fails when only one level is available)
 # TODO: compute transport for survey
-# TODO: add integrals?
+# TODO: add integrals
+# TODO: add weighted means
+# TODO: check variables (e.g., curl only works with fields on the velocity grid)
 
 # Hard coded  list of variables outputed by functions
 _FUNC2VARS = {'potential_density_anomaly'     : ['Sigma0'],
@@ -157,7 +159,7 @@ def gradient(od, varNameList, axesList=None, aliased = True):
     Compute gradient along specified axes, returning all terms (not summed).
     
     .. math::
-        \\nabla\\chi = \\sum\limits_{i=1}^n\\frac{\\partial \\chi}{\\partial x_i}\\hat{\\mathbf{x}}_i
+        \\nabla\\chi = \\sum\\limits_{i=1}^n\\frac{\\partial\\chi}{\\partial x_i}\\hat{\\mathbf{x}}_i
 
     Parameters
     ----------
@@ -165,6 +167,8 @@ def gradient(od, varNameList, axesList=None, aliased = True):
         oceandataset used to compute 
     varNameList: 1D array_like, str
         List of variables to differenciate
+    axesList: None, list
+        List of axes. If None, compute gradient along all axes.
     aliased: bool
         Set it False when working with ._ds and ._grid.
         Otherwise, aliased must be True
@@ -176,40 +180,45 @@ def gradient(od, varNameList, axesList=None, aliased = True):
     
     Examples
     --------
-    >>> od = ospy.open_oceandataset.EGshelfIIseas2km_ASR()
+    >>> od = ospy.open_oceandataset.get_started()
     >>> ospy.compute.gradient(od, 'Temp')
     <xarray.Dataset>
-    Dimensions:      (X: 960, Xp1: 961, Y: 880, Yp1: 881, Z: 216, Zl: 216, time: 1464, time_midp: 1463)
+    Dimensions:      (X: 341, Xp1: 342, Y: 262, Yp1: 263, Z: 139, Zl: 139, time: 40, time_midp: 39)
     Coordinates:
-      * time         (time) datetime64[ns] 2007-09-01 ... 2008-08-31T18:00:00
-      * Z            (Z) float64 -1.0 -3.5 -7.0 ... -3.112e+03 -3.126e+03 -3.142e+03
-      * Yp1          (Yp1) float64 56.79 56.83 56.87 56.91 ... 76.43 76.46 76.5
-      * X            (X) float64 -46.92 -46.83 -46.74 -46.65 ... 1.156 1.244 1.332
-        XV           (Yp1, X) float64 dask.array<shape=(881, 960), chunksize=(881, 960)>
-        YV           (Yp1, X) float64 dask.array<shape=(881, 960), chunksize=(881, 960)>
-      * Y            (Y) float64 56.81 56.85 56.89 56.93 ... 76.37 76.41 76.44 76.48
-      * Xp1          (Xp1) float64 -46.96 -46.87 -46.78 -46.7 ... 1.2 1.288 1.376
-        XU           (Y, Xp1) float64 dask.array<shape=(880, 961), chunksize=(880, 961)>
-        YU           (Y, Xp1) float64 dask.array<shape=(880, 961), chunksize=(880, 961)>
-      * Zl           (Zl) float64 0.0 -2.0 -5.0 ... -3.104e+03 -3.119e+03 -3.134e+03
-      * time_midp    (time_midp) datetime64[ns] 2007-09-01T03:00:00 ... 2008-08-31T15:00:00
+      * time         (time) datetime64[ns] 2007-09-01 ... 2007-09-10T18:00:00
+      * Z            (Z) float64 -1.0 -3.5 -7.0 ... -1.956e+03 -1.972e+03 -1.986e+03
+      * Yp1          (Yp1) float64 66.0 66.02 66.04 66.06 ... 70.94 70.96 70.98 71.0
+      * X            (X) float64 -29.98 -29.94 -29.89 ... -15.12 -15.07 -15.03
+        XV           (Yp1, X) float64 dask.array<shape=(263, 341), chunksize=(263, 341)>
+        YV           (Yp1, X) float64 dask.array<shape=(263, 341), chunksize=(263, 341)>
+      * Y            (Y) float64 66.01 66.03 66.05 66.07 ... 70.93 70.95 70.97 70.99
+      * Xp1          (Xp1) float64 -30.0 -29.96 -29.92 ... -15.1 -15.05 -15.01
+        XU           (Y, Xp1) float64 dask.array<shape=(262, 342), chunksize=(262, 342)>
+        YU           (Y, Xp1) float64 dask.array<shape=(262, 342), chunksize=(262, 342)>
+      * Zl           (Zl) float64 0.0 -2.0 -5.0 ... -1.949e+03 -1.964e+03 -1.979e+03
+      * time_midp    (time_midp) datetime64[ns] 2007-09-01T03:00:00 ... 2007-09-10T15:00:00
     Data variables:
-        dTemp_dY     (time, Z, Yp1, X) float64 dask.array<shape=(1464, 216, 881, 960), chunksize=(40, 216, 1, 960)>
-        dTemp_dX     (time, Z, Y, Xp1) float64 dask.array<shape=(1464, 216, 880, 961), chunksize=(40, 216, 880, 1)>
-        dTemp_dZ     (time, Zl, Y, X) float64 dask.array<shape=(1464, 216, 880, 960), chunksize=(40, 1, 880, 960)>
-        dTemp_dtime  (time_midp, Z, Y, X) float64 dask.array<shape=(1463, 216, 880, 960), chunksize=(39, 216, 880, 960)>
+        dTemp_dY     (time, Z, Yp1, X) float64 dask.array<shape=(40, 139, 263, 341), chunksize=(40, 139, 1, 341)>
+        dTemp_dX     (time, Z, Y, Xp1) float64 dask.array<shape=(40, 139, 262, 342), chunksize=(40, 139, 262, 1)>
+        dTemp_dZ     (time, Zl, Y, X) float64 dask.array<shape=(40, 139, 262, 341), chunksize=(40, 1, 262, 341)>
+        dTemp_dtime  (time_midp, Z, Y, X) float64 dask.array<shape=(39, 139, 262, 341), chunksize=(39, 139, 262, 341)>
+    Attributes:
+        OceanSpy_grid_coords:    {'Y': {'Y': None, 'Yp1': 0.5}, 'X': {'X': None, ...
+        OceanSpy_name:           Getting Started with OceanSpy
+        OceanSpy_description:    A small cutout from EGshelfIIseas2km_ASR.
+        OceanSpy_parameters:     {'rSphere': 6371.0, 'eq_state': 'jmd95', 'rho0':...
+        OceanSpy_projection:     Mercator(**{'central_longitude': -23.92803909531...
+        OceanSpy_grid_periodic:  []
             
     Notes
     -----
-    Denominator is delta of time for time gradients (units: s)
+    Denominator is delta of time for time gradients (units: s).
     Denominator is delta of distances for mooring and survey (units: km)
     
     References
     ----------
     MITgcm: https://mitgcm.readthedocs.io/en/latest/algorithm/algorithm.html#notation
     """
-    # TODO: should I remove summatory in doc?
-    # TODO: check aliased
     
     # Check input
     if not isinstance(od, _ospy.OceanDataset):
@@ -242,6 +251,9 @@ def gradient(od, varNameList, axesList=None, aliased = True):
 
     # Add missing variables
     od = _add_missing_variables(od, list(varNameListIN))
+    
+    # Message
+    print('Computing gradient.')
     
     # Loop through variables
     grad = {}
@@ -309,11 +321,11 @@ def gradient(od, varNameList, axesList=None, aliased = True):
             grad['d'+varNameOUT+'_d'+axis] = dnum / dden
             del dnum, dden
             
-    return _xr.Dataset(grad)
+    return _xr.Dataset(grad, attrs=od.dataset.attrs)
                 
 def divergence(od, iName=None, jName=None, kName=None, aliased = True):
     """
-    Compute divergence of a vector field 
+    Compute divergence of a vector field. 
 
     .. math::
         \\nabla \\cdot \\overline{F} = 
@@ -342,22 +354,33 @@ def divergence(od, iName=None, jName=None, kName=None, aliased = True):
     
     Examples
     --------
-    >>> od = ospy.open_oceandataset.EGshelfIIseas2km_ASR()
+    >>> od = ospy.open_oceandataset.get_started()
     >>> ospy.compute.divergence(od, 'U', 'V', 'W')
     <xarray.Dataset>
-    Dimensions:  (X: 960, Y: 880, Z: 216, time: 1464)
+    Dimensions:  (X: 341, Y: 262, Z: 139, time: 40)
     Coordinates:
-      * time     (time) datetime64[ns] 2007-09-01 ... 2008-08-31T18:00:00
-      * Z        (Z) float64 -1.0 -3.5 -7.0 ... -3.112e+03 -3.126e+03 -3.142e+03
-      * Y        (Y) float64 56.81 56.85 56.89 56.93 ... 76.37 76.41 76.44 76.48
-      * X        (X) float64 -46.92 -46.83 -46.74 -46.65 ... 1.069 1.156 1.244 1.332
-        XC       (Y, X) float64 dask.array<shape=(880, 960), chunksize=(880, 960)>
-        YC       (Y, X) float64 dask.array<shape=(880, 960), chunksize=(880, 960)>
+      * time     (time) datetime64[ns] 2007-09-01 ... 2007-09-10T18:00:00
+      * Z        (Z) float64 -1.0 -3.5 -7.0 ... -1.956e+03 -1.972e+03 -1.986e+03
+      * Y        (Y) float64 66.01 66.03 66.05 66.07 ... 70.93 70.95 70.97 70.99
+      * X        (X) float64 -29.98 -29.94 -29.89 -29.85 ... -15.12 -15.07 -15.03
+        XC       (Y, X) float64 dask.array<shape=(262, 341), chunksize=(262, 341)>
+        YC       (Y, X) float64 dask.array<shape=(262, 341), chunksize=(262, 341)>
     Data variables:
-        dU_dX    (time, Z, Y, X) float64 dask.array<shape=(1464, 216, 880, 960), chunksize=(40, 216, 880, 960)>
-        dV_dY    (time, Z, Y, X) float64 dask.array<shape=(1464, 216, 880, 960), chunksize=(40, 216, 880, 960)>
-        dW_dZ    (time, Z, Y, X) float64 dask.array<shape=(1464, 216, 880, 960), chunksize=(40, 215, 880, 960)>
-        
+        dU_dX    (time, Z, Y, X) float64 dask.array<shape=(40, 139, 262, 341), chunksize=(40, 139, 262, 341)>
+        dV_dY    (time, Z, Y, X) float64 dask.array<shape=(40, 139, 262, 341), chunksize=(40, 139, 262, 341)>
+        dW_dZ    (time, Z, Y, X) float64 dask.array<shape=(40, 139, 262, 341), chunksize=(40, 138, 262, 341)>
+    Attributes:
+        OceanSpy_grid_coords:    {'Y': {'Y': None, 'Yp1': 0.5}, 'X': {'X': None, ...
+        OceanSpy_name:           Getting Started with OceanSpy
+        OceanSpy_description:    A small cutout from EGshelfIIseas2km_ASR.
+        OceanSpy_parameters:     {'rSphere': 6371.0, 'eq_state': 'jmd95', 'rho0':...
+        OceanSpy_projection:     Mercator(**{'central_longitude': -23.92803909531...
+        OceanSpy_grid_periodic:  []
+    
+    See Also
+    --------
+    gradient
+    
     References
     ----------
     MITgcm: https://mitgcm.readthedocs.io/en/latest/algorithm/algorithm.html#notation
@@ -375,6 +398,9 @@ def divergence(od, iName=None, jName=None, kName=None, aliased = True):
     if not isinstance(aliased, bool):
         raise TypeError('`aliased` must be bool')
         
+    # Message
+    print('Computing divergence.')
+    
     div = {}
     if iName is not None:
         # Handle aliases
@@ -423,11 +449,11 @@ def divergence(od, iName=None, jName=None, kName=None, aliased = True):
         # Add div (same of gradient)
         div['d'+NameOUT+'_dZ'] = gradient(od, varNameList = NameIN, axesList='Z', aliased=False)['d'+NameIN+'_dZ']
     
-    return _xr.Dataset(div)
+    return _xr.Dataset(div, attrs=od.dataset.attrs)
                                                         
 def curl(od, iName=None, jName=None, kName=None, aliased = True):
     """
-    Compute curl of a vector field 
+    Compute curl of a vector field.
 
     .. math::
         \\nabla \\times \\overline{F} = 
@@ -456,29 +482,40 @@ def curl(od, iName=None, jName=None, kName=None, aliased = True):
     
     Examples
     --------
-    >>> od = ospy.open_oceandataset.EGshelfIIseas2km_ASR()
+    >>> ood = ospy.open_oceandataset.get_started()
     >>> ospy.compute.curl(od, 'U', 'V', 'W')
     <xarray.Dataset>
-    Dimensions:      (X: 960, Xp1: 961, Y: 880, Yp1: 881, Z: 216, Zl: 216, time: 1464)
+    Dimensions:      (X: 341, Xp1: 342, Y: 262, Yp1: 263, Z: 139, Zl: 139, time: 40)
     Coordinates:
-      * time         (time) datetime64[ns] 2007-09-01 ... 2008-08-31T18:00:00
-      * Z            (Z) float64 -1.0 -3.5 -7.0 ... -3.112e+03 -3.126e+03 -3.142e+03
-      * Yp1          (Yp1) float64 56.79 56.83 56.87 56.91 ... 76.43 76.46 76.5
-      * Xp1          (Xp1) float64 -46.96 -46.87 -46.78 -46.7 ... 1.2 1.288 1.376
-        XG           (Yp1, Xp1) float64 dask.array<shape=(881, 961), chunksize=(881, 961)>
-        YG           (Yp1, Xp1) float64 dask.array<shape=(881, 961), chunksize=(881, 961)>
-      * Zl           (Zl) float64 0.0 -2.0 -5.0 ... -3.104e+03 -3.119e+03 -3.134e+03
-      * X            (X) float64 -46.92 -46.83 -46.74 -46.65 ... 1.156 1.244 1.332
-        XV           (Yp1, X) float64 dask.array<shape=(881, 960), chunksize=(881, 960)>
-        YV           (Yp1, X) float64 dask.array<shape=(881, 960), chunksize=(881, 960)>
-      * Y            (Y) float64 56.81 56.85 56.89 56.93 ... 76.37 76.41 76.44 76.48
-        XU           (Y, Xp1) float64 dask.array<shape=(880, 961), chunksize=(880, 961)>
-        YU           (Y, Xp1) float64 dask.array<shape=(880, 961), chunksize=(880, 961)>
+      * time         (time) datetime64[ns] 2007-09-01 ... 2007-09-10T18:00:00
+      * Z            (Z) float64 -1.0 -3.5 -7.0 ... -1.956e+03 -1.972e+03 -1.986e+03
+      * Yp1          (Yp1) float64 66.0 66.02 66.04 66.06 ... 70.94 70.96 70.98 71.0
+      * Xp1          (Xp1) float64 -30.0 -29.96 -29.92 ... -15.1 -15.05 -15.01
+        XG           (Yp1, Xp1) float64 dask.array<shape=(263, 342), chunksize=(263, 342)>
+        YG           (Yp1, Xp1) float64 dask.array<shape=(263, 342), chunksize=(263, 342)>
+      * Zl           (Zl) float64 0.0 -2.0 -5.0 ... -1.949e+03 -1.964e+03 -1.979e+03
+      * X            (X) float64 -29.98 -29.94 -29.89 ... -15.12 -15.07 -15.03
+        XV           (Yp1, X) float64 dask.array<shape=(263, 341), chunksize=(263, 341)>
+        YV           (Yp1, X) float64 dask.array<shape=(263, 341), chunksize=(263, 341)>
+      * Y            (Y) float64 66.01 66.03 66.05 66.07 ... 70.93 70.95 70.97 70.99
+        XU           (Y, Xp1) float64 dask.array<shape=(262, 342), chunksize=(262, 342)>
+        YU           (Y, Xp1) float64 dask.array<shape=(262, 342), chunksize=(262, 342)>
     Data variables:
-        dV_dX-dU_dY  (time, Z, Yp1, Xp1) float64 dask.array<shape=(1464, 216, 881, 961), chunksize=(40, 216, 1, 1)>
-        dW_dY-dV_dZ  (time, Zl, Yp1, X) float64 dask.array<shape=(1464, 216, 881, 960), chunksize=(40, 1, 1, 960)>
-        dU_dZ-dW_dX  (time, Zl, Y, Xp1) float64 dask.array<shape=(1464, 216, 880, 961), chunksize=(40, 1, 880, 1)>
-        
+        dV_dX-dU_dY  (time, Z, Yp1, Xp1) float64 dask.array<shape=(40, 139, 263, 342), chunksize=(40, 139, 1, 1)>
+        dW_dY-dV_dZ  (time, Zl, Yp1, X) float64 dask.array<shape=(40, 139, 263, 341), chunksize=(40, 1, 1, 341)>
+        dU_dZ-dW_dX  (time, Zl, Y, Xp1) float64 dask.array<shape=(40, 139, 262, 342), chunksize=(40, 1, 262, 1)>
+    Attributes:
+        OceanSpy_grid_coords:    {'Y': {'Y': None, 'Yp1': 0.5}, 'X': {'X': None, ...
+        OceanSpy_name:           Getting Started with OceanSpy
+        OceanSpy_description:    A small cutout from EGshelfIIseas2km_ASR.
+        OceanSpy_parameters:     {'rSphere': 6371.0, 'eq_state': 'jmd95', 'rho0':...
+        OceanSpy_projection:     Mercator(**{'central_longitude': -23.92803909531...
+        OceanSpy_grid_periodic:  []
+    
+    See Also
+    --------
+    gradient
+    
     References
     ----------
     MITgcm: https://mitgcm.readthedocs.io/en/latest/algorithm/algorithm.html#notation
@@ -495,7 +532,12 @@ def curl(od, iName=None, jName=None, kName=None, aliased = True):
         raise TypeError('`kName` must be str or None')
     if not isinstance(aliased, bool):
         raise TypeError('`aliased` must be bool')
-        
+    if sum(x is None for x in [iName, jName, kName])>=2:
+        raise ValueError('At least 2 out of 3 components must be provided.')
+    
+    # Message
+    print('Computing curl.')
+    
     crl = {}
     if iName is not None and jName is not None:
         # Handle aliases
@@ -558,7 +600,7 @@ def curl(od, iName=None, jName=None, kName=None, aliased = True):
         crl[Name] =(gradient(od, iNameIN, 'Z', aliased=False)['d'+iNameIN+'_dZ'] -
                     gradient(od, kNameIN, 'X', aliased=False)['d'+kNameIN+'_dX'])
         
-    return _xr.Dataset(crl)           
+    return _xr.Dataset(crl, attrs=od.dataset.attrs)           
 
 def laplacian(od, varNameList, axesList=None, aliased = True):
     """
@@ -573,6 +615,8 @@ def laplacian(od, varNameList, axesList=None, aliased = True):
         oceandataset used to compute 
     varNameList: 1D array_like, str
         Name of variables to differenciate
+    axesList: None, list
+        List of axes. If None, compute gradient along all space axes.
     aliased: bool
         Set it False when working with ._ds and ._grid.
         Otherwise, aliased must be True
@@ -581,24 +625,36 @@ def laplacian(od, varNameList, axesList=None, aliased = True):
     -------
     ds: xarray.Dataset 
         Contains all terms named as ddvarName_daxis_daxis
+        
+    See Also
+    --------
+    gradient
+    divergence
     
     Examples
     --------
-    >>> od = ospy.open_oceandataset.EGshelfIIseas2km_ASR()
+    >>> od = ospy.open_oceandataset.get_started()
     >>> ospy.compute.laplacian(od, 'Temp')
     <xarray.Dataset>
-    Dimensions:       (X: 960, Y: 880, Z: 216, time: 1464)
+    Dimensions:       (X: 341, Y: 262, Z: 139, time: 40)
     Coordinates:
-      * time          (time) datetime64[ns] 2007-09-01 ... 2008-08-31T18:00:00
-      * Z             (Z) float64 -1.0 -3.5 -7.0 ... -3.126e+03 -3.142e+03
-      * Y             (Y) float64 56.81 56.85 56.89 56.93 ... 76.41 76.44 76.48
-      * X             (X) float64 -46.92 -46.83 -46.74 -46.65 ... 1.156 1.244 1.332
-        XC            (Y, X) float64 dask.array<shape=(880, 960), chunksize=(880, 960)>
-        YC            (Y, X) float64 dask.array<shape=(880, 960), chunksize=(880, 960)>
+      * time          (time) datetime64[ns] 2007-09-01 ... 2007-09-10T18:00:00
+      * Z             (Z) float64 -1.0 -3.5 -7.0 ... -1.972e+03 -1.986e+03
+      * Y             (Y) float64 66.01 66.03 66.05 66.07 ... 70.95 70.97 70.99
+      * X             (X) float64 -29.98 -29.94 -29.89 ... -15.12 -15.07 -15.03
+        XC            (Y, X) float64 dask.array<shape=(262, 341), chunksize=(262, 341)>
+        YC            (Y, X) float64 dask.array<shape=(262, 341), chunksize=(262, 341)>
     Data variables:
-        ddTemp_dX_dX  (time, Z, Y, X) float64 dask.array<shape=(1464, 216, 880, 960), chunksize=(40, 216, 880, 1)>
-        ddTemp_dY_dY  (time, Z, Y, X) float64 dask.array<shape=(1464, 216, 880, 960), chunksize=(40, 216, 1, 960)>
-        ddTemp_dZ_dZ  (time, Z, Y, X) float64 dask.array<shape=(1464, 216, 880, 960), chunksize=(40, 1, 880, 960)>
+        ddTemp_dX_dX  (time, Z, Y, X) float64 dask.array<shape=(40, 139, 262, 341), chunksize=(40, 139, 262, 1)>
+        ddTemp_dY_dY  (time, Z, Y, X) float64 dask.array<shape=(40, 139, 262, 341), chunksize=(40, 139, 1, 341)>
+        ddTemp_dZ_dZ  (time, Z, Y, X) float64 dask.array<shape=(40, 139, 262, 341), chunksize=(40, 1, 262, 341)>
+    Attributes:
+        OceanSpy_grid_coords:    {'Y': {'Y': None, 'Yp1': 0.5}, 'X': {'X': None, ...
+        OceanSpy_name:           Getting Started with OceanSpy
+        OceanSpy_description:    A small cutout from EGshelfIIseas2km_ASR.
+        OceanSpy_parameters:     {'rSphere': 6371.0, 'eq_state': 'jmd95', 'rho0':...
+        OceanSpy_projection:     Mercator(**{'central_longitude': -23.92803909531...
+        OceanSpy_grid_periodic:  []
             
     References
     ----------
@@ -623,6 +679,9 @@ def laplacian(od, varNameList, axesList=None, aliased = True):
     else:
         varNameListIN = varNameList
     varNameListOUT = varNameList
+    
+    # Message
+    print('Computing laplacian.')
     
     # Loop through variables
     div = []
@@ -654,152 +713,28 @@ def laplacian(od, varNameList, axesList=None, aliased = True):
 
         div = div + [divergence(od, **compNames, aliased=False).rename(rename_dict)]
         
-    return _xr.merge(div)
+    # Merge
+    ds = _xr.merge(div)
+    ds.attrs = od.dataset.attrs
+    
+    return ds
      
 
-def volume_cells(od, varNameList = None, aliased = True):
+def weighted_mean(od, varNameList=None, axesList=None, storeWeights=True, aliased = True):
     """
-    Compute volume of cells.
+    Compute weighted means using volumes, surfaces, or distances.
 
     Parameters
     ----------
     od: OceanDataset
         oceandataset used to compute 
     varNameList: 1D array_like, str, or None
-        List of variables (strings).  
-        If None, compute volumes for each grid in the dataset.
-        Otherwise, compute volumes for grids of requested variables
-    aliased: bool
-        Set it False when working with ._ds and ._grid.
-        Otherwise, aliased must be True
-    
-    Notes
-    -----
-    This function will take a few seconds when it need to check all variables. Use `varNameList` to make it quicker.  
-    
-    Examples
-    --------
-    >>> od = ospy.open_oceandataset.EGshelfIIseas2km_ASR()
-    >>> ospy.compute.volume_cells(od)
-    <xarray.Dataset>
-    Dimensions:      (X: 960, Xp1: 961, Y: 880, Yp1: 881, Z: 216, Zl: 216)
-    Coordinates:
-      * Z            (Z) float64 -1.0 -3.5 -7.0 ... -3.112e+03 -3.126e+03 -3.142e+03
-      * X            (X) float64 -46.92 -46.83 -46.74 -46.65 ... 1.156 1.244 1.332
-      * Y            (Y) float64 56.81 56.85 56.89 56.93 ... 76.37 76.41 76.44 76.48
-        XC           (Y, X) float64 dask.array<shape=(880, 960), chunksize=(880, 960)>
-        YC           (Y, X) float64 dask.array<shape=(880, 960), chunksize=(880, 960)>
-      * Xp1          (Xp1) float64 -46.96 -46.87 -46.78 -46.7 ... 1.2 1.288 1.376
-        XU           (Y, Xp1) float64 dask.array<shape=(880, 961), chunksize=(880, 961)>
-        YU           (Y, Xp1) float64 dask.array<shape=(880, 961), chunksize=(880, 961)>
-      * Yp1          (Yp1) float64 56.79 56.83 56.87 56.91 ... 76.43 76.46 76.5
-        XV           (Yp1, X) float64 dask.array<shape=(881, 960), chunksize=(881, 960)>
-        YV           (Yp1, X) float64 dask.array<shape=(881, 960), chunksize=(881, 960)>
-      * Zl           (Zl) float64 0.0 -2.0 -5.0 ... -3.104e+03 -3.119e+03 -3.134e+03
-    Data variables:
-        cellVolC_Z   (Z, Y, X) float64 dask.array<shape=(216, 880, 960), chunksize=(216, 880, 960)>
-        cellVolW_Z   (Z, Y, Xp1) float64 dask.array<shape=(216, 880, 961), chunksize=(216, 880, 961)>
-        cellVolS_Z   (Z, Yp1, X) float64 dask.array<shape=(216, 881, 960), chunksize=(216, 881, 960)>
-        cellVolC_Zl  (Zl, Y, X) float64 dask.array<shape=(216, 880, 960), chunksize=(1, 880, 960)>
-    """
-    
-    # Check input
-    if not isinstance(od, _ospy.OceanDataset):
-        raise TypeError('`od` must be OceanDataset')
-        
-    if varNameList is not None:
-        varNameList = _np.asarray(varNameList, dtype='str')
-        if varNameList.ndim == 0: varNameList = varNameList.reshape(1)
-        elif varNameList.ndim >1: raise TypeError('Invalid `varNameList`')
-    else:
-        # Check all variables is varNameList is not provided
-        varNameList = od._ds.data_vars
-    
-    if not isinstance(aliased, bool):
-        raise TypeError('`aliased` must be bool')
-        
-    # Add missing variables
-    # TODO: We don't really need to always check all of them!
-    varList = ['HFacC', 'HFacW', 'HFacS', 'rA', 'rAs', 'rAw', 'rAz', 'drF', 'drC']
-    od = _add_missing_variables(od, varList)
- 
-    # Loop through all variables
-    dims_done = []
-    vols = {}
-    cont = False
-    for varName in varNameList:
-        for dims in dims_done:
-            if set(dims).issubset(od._ds[varName].dims) or len(od._ds[varName].dims)<3: 
-                cont = True
-                continue
-        if cont: 
-            cont = False
-            continue
-        
-        # Check dimensions
-        for axis in ['X', 'Y', 'Z']:
-            dims = [od._grid.axes[axis].coords[coord].name for coord in od._grid.axes[axis].coords]
-            if not any(dim in od._ds[varName].dims for dim in dims): 
-                cont = True
-                continue
-        if cont:
-            cont = False
-            continue
-        
-        # Extract HFac
-        point = None
-        if   set(['X', 'Y']).issubset(od._ds[varName].dims)  :   point = 'C'
-        elif set(['Xp1', 'Y']).issubset(od._ds[varName].dims):   point = 'W'
-        elif set(['X', 'Yp1']).issubset(od._ds[varName].dims):   point = 'S'
-        elif set(['Xp1', 'Yp1']).issubset(od._ds[varName].dims): point = 'G'
-            
-        if point is None: continue
-        elif point=='G':
-            # TODO: MITgcm actualy compute HFacW and S using the minimum of adjacent values.
-            # We could do something similar using rolling. But HFacG is not actually used by the model,
-            # and what to do at the boundaries? Let's use xgcm with extent boundary for now.
-            HFac = od._grid.interp(od._grid.interp(od._ds['HFacC'], 'X', boundary='extend'), 'Y', boundary='extend')
-        else:
-            HFac = od._ds['HFac'+point]
-            
-        
-        # Extract rA
-        rA = None
-        for Aname in ['rA', 'rAs', 'rAw', 'rAz']:
-            if set(od._ds[Aname].dims).issubset(od._ds[varName].dims): rA = od._ds[Aname]
-        if rA is None: continue
-
-        # Extract dr
-        dr = None
-        for rName in ['drF', 'drC']:
-            if set(od._ds[rName].dims).issubset(od._ds[varName].dims):  dr = od._ds[rName]
-        for coord in od._grid.axes['Z'].coords:
-            if od._grid.axes['Z'].coords[coord].name in od._ds[varName].dims and coord!='center':
-                HFac = od._grid.interp(HFac, 'Z', to=coord, boundary='fill', fill_value=_np.nan)
-                if coord!='outer':
-                    dr = od._grid.interp(od._ds['drF'], 'Z', to=coord, boundary='fill', fill_value=_np.nan)
-        if dr is None: continue
-
-        # Compute Volume
-        cellVol = dr * HFac * rA
-        name = 'cellVol'+point+'_'+dr.dims[0]
-        
-        # Add to dataset
-        vols[name] = cellVol
-        dims_done = dims_done + [cellVol.dims]
-    
-    return _xr.Dataset(vols)
-    
-def volume_weighted_mean(od, varNameList, aliased = True):
-    """
-    Compute volume weighted mean.
-
-    Parameters
-    ----------
-    od: OceanDataset
-        oceandataset used to compute 
-    varNameList: 1D array_like, str
-        List of variables (strings). 
+        If None, compute weighted means of all variables.
+    axesList: None, list
+        List of axes. If None, compute average along all axes (excluding mooring and station)
+    storeWeights: bool
+        True:  store weight values.
+        False: drop weight values.
     aliased: bool
         Set it False when working with ._ds and ._grid.
         Otherwise, aliased must be True
@@ -807,37 +742,57 @@ def volume_weighted_mean(od, varNameList, aliased = True):
     Returns
     -------
     ds: xarray.Dataset 
-        Contains averaged variable named as varName_vw_mean
-    
-    See Also
-    --------
-    volume_cells
+        Contains means named as w_mean_varName and weights named as w_mean_varName
     
     Examples
     --------
-    >>> od = ospy.open_oceandataset.EGshelfIIseas2km_ASR()
-    >>> ospy.compute.volume_weighted_mean(od, 'Temp')
+    >>> od = ospy.open_oceandataset.get_started()
+    >>> ospy.compute.weighted_mean(od, varNameList = 'Temp')
     <xarray.Dataset>
-    Dimensions:       (time: 1464)
+    Dimensions:      (X: 341, Y: 262, Z: 139)
     Coordinates:
-      * time          (time) datetime64[ns] 2007-09-01 ... 2008-08-31T18:00:00
+      * Z            (Z) float64 -1.0 -3.5 -7.0 ... -1.956e+03 -1.972e+03 -1.986e+03
+      * X            (X) float64 -29.98 -29.94 -29.89 ... -15.12 -15.07 -15.03
+      * Y            (Y) float64 66.01 66.03 66.05 66.07 ... 70.93 70.95 70.97 70.99
+        XC           (Y, X) float64 dask.array<shape=(262, 341), chunksize=(262, 341)>
+        YC           (Y, X) float64 dask.array<shape=(262, 341), chunksize=(262, 341)>
     Data variables:
-        Temp_vw_mean  (time) float64 dask.array<shape=(1464,), chunksize=(40,)>
+        w_mean_Temp  float64 dask.array<shape=(), chunksize=()>
+        weight_Temp  (Z, Y, X) float64 dask.array<shape=(139, 262, 341), chunksize=(139, 262, 341)>
+    Attributes:
+        OceanSpy_grid_coords:    {'Y': {'Y': None, 'Yp1': 0.5}, 'X': {'X': None, ...
+        OceanSpy_name:           Getting Started with OceanSpy
+        OceanSpy_description:    A small cutout from EGshelfIIseas2km_ASR.
+        OceanSpy_parameters:     {'rSphere': 6371.0, 'eq_state': 'jmd95', 'rho0':...
+        OceanSpy_projection:     Mercator(**{'central_longitude': -23.92803909531...
+        OceanSpy_grid_periodic:  []
     """
     
     # Check input
     if not isinstance(od, _ospy.OceanDataset):
         raise TypeError('`od` must be OceanDataset')
-        
+    
+    if varNameList is None: varNameList = list(od._ds.data_vars)
     varNameList = _np.asarray(varNameList, dtype='str')
     if varNameList.ndim == 0: varNameList = varNameList.reshape(1)
     elif varNameList.ndim >1: raise TypeError('Invalid `varNameList`')
+    if axesList is not None:
+        axesList = _np.asarray(axesList, dtype='str')
+        if axesList.ndim == 0: axesList = axesList.reshape(1)
+        elif axesList.ndim >1: raise TypeError('Invalid `axesList`')
+            
+    allAxes = [coord for coord in od.grid_coords if coord not in ['mooring', 'station']]
+    if axesList is None: 
+        axesList = allAxes
+    else:
+        err_axes = [axis for axis in axesList if axis not in allAxes]
+        if len(err_axes)!=0: raise ValueError('{} are not available. Available axes are {}'.format(err_axes, allAxes))
     
+    if not isinstance(storeWeights, bool):
+        raise TypeError('`storeWeights` must be bool')
+        
     if not isinstance(aliased, bool):
         raise TypeError('`aliased` must be bool')
-    
-    # Message
-    print('Computing volume weighted means')
     
     # Handle aliases
     if aliased:
@@ -849,21 +804,141 @@ def volume_weighted_mean(od, varNameList, aliased = True):
     # Add missing variables
     od = _add_missing_variables(od, list(varNameListIN))
     
+    # Message
+    print('Computing weighted averages.')
+    
     # Loop through variables
-    mean = {}
+    means   = {}
     for _, (varName, varNameOUT) in enumerate(zip(varNameListIN, varNameListOUT)):
-
-        # Compute Volume
-        cellVol = volume_cells(od, varName)
-        Volname = [var for var in cellVol.data_vars][0]
-        cellVol = cellVol[Volname]
-
-        # Add 
-        mean[varNameOUT+'_vw_mean'] = ((od._ds[varName]*cellVol).sum(cellVol.dims)/
-                                    cellVol.where(~od._ds[varName].isnull()).sum(cellVol.dims))
-        mean[varNameOUT+'_vw_mean'].attrs = od._ds[varName].attrs
+        weight = 1
+        units  = 0
+        attrs  = od._ds[varName].attrs
+        wMean  = od._ds[varName]
         
-    return _xr.Dataset(mean)
+        # ====
+        # TIME
+        # ====
+        # Tipically models have regular deta time
+        if set(['time']).issubset(axesList):
+            for t in ['time', 'time_midp']:
+                if t in wMean.dims: wMean = wMean.mean(t)
+        
+        
+        # ==========
+        # HORIZONTAL
+        # ==========
+        
+        # Area
+        if set(['X', 'Y']).issubset(axesList):
+            
+            # Add missing variables
+            areaList = ['rA', 'rAw', 'rAs', 'rAz']
+            od = _add_missing_variables(od, areaList)
+            
+            for area in areaList:
+                if set(od._ds[area].dims).issubset(wMean.dims): 
+                    weight  = od._ds[area] * weight
+                    units   = units + 2
+                    foundArea = True
+                    continue
+        
+        # Y
+        elif set(['Y']).issubset(axesList):
+            
+            # Add missing variables
+            yList = ['dyC', 'dyF', 'dyG', 'dyU']
+            od = _add_missing_variables(od, yList)
+            
+            for y in yList:
+                if set(od._ds[y].dims).issubset(wMean.dims): 
+                    weight  = od._ds[y] * weight
+                    units   = units + 1
+                    foundY  = True
+                    continue
+        
+        # X
+        elif set(['X']).issubset(axesList):
+            
+            # Add missing variables
+            xList = ['dxC', 'dxF', 'dxG', 'dxV',]
+            od = _add_missing_variables(od, xList)
+            
+            for x in xList:
+                if set(od._ds[x].dims).issubset(wMean.dims): 
+                    weight  = od._ds[x] * weight
+                    units   = units + 1
+                    foundX  = True
+                    continue
+        
+        # ========
+        # VERTICAL
+        # ========
+        if set(['Z']).issubset(axesList):
+            
+            # Add missing variables
+            HFacList = ['HFacC', 'HFacW', 'HFacS']
+            od = _add_missing_variables(od, HFacList)
+
+            # Extract HFac
+            if   set(['X'  , 'Y']  ).issubset(wMean.dims): HFac = od._ds['HFacC']
+            elif set(['Xp1', 'Y']  ).issubset(wMean.dims): HFac = od._ds['HFacW']
+            elif set(['X'  , 'Yp1']).issubset(wMean.dims): HFac = od._ds['HFacS']
+            elif set(['Xp1', 'Yp1']).issubset(wMean.dims): 
+                HFac = od._grid.interp(od._grid.interp(od._ds['HFacC'], 'X', boundary='extend'), 'Y', boundary='extend')
+            else: 
+                HFac = None
+
+            # Add missing variables
+            zList = ['drC', 'drF']
+            od = _add_missing_variables(od, zList)
+            
+            foundZ = False
+            for z in zList:
+                if set(od._ds[z].dims).issubset(wMean.dims):
+                    if z=='drC' and HFac is not None:
+                        HFac = od.grid.interp(HFac, 'Z', to='outer', boundary='extend')
+                    if HFac is None: HFac= 1
+                    weight = od._ds[z] * HFac * weight
+                    units  = units + 1
+                    foundZ=True
+                    continue
+                    
+            if foundZ is False:    
+                for coord in od._grid.axes['Z'].coords:
+                    z = od._grid.axes['Z'].coords[coord].name
+                    if set([z]).issubset(wMean.dims): 
+                        dr = od.grid.interp(od.dataset['drF'], 'Z', to=coord, boundary='extend')
+                        if HFac is not None: 
+                            HFac = od._grid.interp(HFac, 'Z', to=coord, boundary='extend')
+                        else: 
+                            HFac = 1
+                        weight = dr * HFac * weight
+                        units  = units + 1
+                        foundZ = True
+                        continue
+            
+        # Compute weighted mean
+        if isinstance(weight, _xr.DataArray):
+            dims2ave = weight.dims
+            _, weight = _xr.broadcast(wMean, weight) # Keep dimension in the right order
+            weight = weight.where(~wMean.isnull())
+            wMean = ((wMean * weight).sum(dims2ave)) / (weight.sum(dims2ave))
+        else: storeWeights = False
+
+        # Store wMean
+        wMean.attrs = attrs
+        means['w_mean_'+varNameOUT] = wMean
+        
+        # Store weights
+        if storeWeights: 
+            weight.attrs['long_name']   = 'Weights for space dimensions'
+            weight.attrs['units']       = 'm^'+str(units)
+            means['weight_'+varNameOUT] = weight
+        """elif any(x in ['X', 'Y', 'Z'] for x in axesList):
+            _warnings.warn("\n[{}] has NOT been averaged along X-Y-Z axes".format(varNameOUT), stacklevel=2)"""
+    
+    return _xr.Dataset(means, attrs=od.dataset.attrs)           
+            
     
     
 

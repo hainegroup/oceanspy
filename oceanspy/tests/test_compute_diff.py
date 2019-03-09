@@ -89,7 +89,12 @@ def test_curl():
         assert_allclose(var.where(mask).values, check.where(mask).values, 1.E-3)
 
     
+def test_weighted_mean():
     
+    for var in sin_od.dataset.data_vars:
+        wmean = weighted_mean(sin_od, varNameList=var, storeWeights=False).to_array().squeeze().values
+        check = sin_od.dataset[var].mean().squeeze().values
+        assert np.float32(wmean)==np.float32(check)
 
                 
             
