@@ -876,7 +876,7 @@ def TS_diagram(od,
         t, s = _xr.broadcast(_xr.DataArray(_np.linspace(Tlim[0], Tlim[-1], 100), dims= ('t')),
                              _xr.DataArray(_np.linspace(Slim[0], Slim[-1], 100), dims= ('s')))
         odSigma0 = _ospy.OceanDataset(_xr.Dataset({'Temp': t, 'S': s})).set_parameters(od.parameters)
-        odSigma0 = odSigma0.merge_potential_density_anomaly()
+        odSigma0 = odSigma0.compute.potential_density_anomaly()
         odSigma0._ds = odSigma0._ds.set_coords(['Temp', 'S'])
         
         # Freezing point
