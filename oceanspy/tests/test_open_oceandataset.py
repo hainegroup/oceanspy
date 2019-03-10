@@ -26,7 +26,9 @@ def test_import_MITgcm_rect_nc():
     assert set(od.dataset.variables).issubset(od.dataset.coords)
     
     # Check NaNs
-    assert any(od.dataset.isnull()) == False    
+    for coord in od.dataset.coords:
+        if 'time' not in coord:
+            assert not np.isnan(od.dataset[coord].values).any()
     
     # Check new dimensions
     assert np.array_equal(od.dataset['XC'].isel(Y=0).values,   od.dataset['X'].values)
