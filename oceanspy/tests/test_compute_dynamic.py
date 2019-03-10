@@ -127,5 +127,21 @@ def test_weighted_mean():
         assert np.min(weight)==np.max(weight)
 
                 
+def test_integral():
+    
+    for varName in ['sinZ', 'sinY', 'sinX']:
+        ints  = integral(sin_od, varNameList=varName)
+        wmean = weighted_mean(sin_od, varNameList=varName)
+        
+        # Test shortcut
+        od = sin_od.compute.integral(varNameList=varName)
+        assert set(ints.data_vars).issubset(od.dataset.data_vars)
+        
+        # Check with weighted mean
+        int_var = ints['I('+varName+')dXdYdZ']
+        weight = wmean['weight_'+varName]
+        wmean  = wmean['w_mean_'+varName]
+        assert_allclose(int_var.values/weight.sum(), wmean.values)
+        
             
 
