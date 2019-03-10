@@ -19,18 +19,14 @@ from . import utils as _utils
 # 6) Create a shortcut in _oceandataset (merge+name of functions) and add the shortcut in docs/api.rst under OceanDataset - Shortcuts
 # 7) Add function name, and variables returned in _FUNC2VARS
 
-
+# TODO: weighted_mean should use integral! Rewrite the function avoiding copy and paste. 
 # TODO: add functions to compute dx, dy, dr, rA, ... when not available (maybe add in utils?)
 # TODO: add functions to compute AngleCS and AngleSN when not available (maybe add in utils?)
 #       http://mailman.mitgcm.org/pipermail/mitgcm-support/2014-January/008797.html
 #       https://github.com/dcherian/tools/blob/master/mitgcm/matlab/cs_grid/cubeCalcAngle.m
 # TODO: any time velocities are mutiplied by hfac, we should use mass weighted velocities if available (mass_weighted function?)
-# TODO: add area weighted mean for 2D variables, e.g. SSH (are_weighted_mean, SI, ...), or vertical sections
 # TODO: add error when function will fail (e.g., divergence of W fails when only one level is available)
 # TODO: compute transport for survey
-# TODO: add integrals
-# TODO: add weighted means
-# TODO: check variables (e.g., curl only works with fields on the velocity grid)
 
 # Hard coded  list of variables outputed by functions
 _FUNC2VARS = {'potential_density_anomaly'     : ['Sigma0'],
@@ -307,11 +303,12 @@ def gradient(od, varNameList, axesList=None, aliased = True):
                         # Apply HFac
                         dden = dden * HFac
                         continue
-
+            
+            # TODO: will fail for midp!
             # Time gradient
             if axis == 'time':
                 
-                # Compute and conver in s
+                # Compute and convert in s
                 dden = od._grid.diff(od._ds['time'], axis, boundary='fill', fill_value=_np.nan)
                 dden = dden / _np.timedelta64(1, 's')
                 
@@ -729,7 +726,10 @@ def laplacian(od, varNameList, axesList=None, aliased = True):
 def weighted_mean(od, varNameList=None, axesList=None, storeWeights=True, aliased = True):
     """
     Compute weighted means using volumes, surfaces, or distances.
-
+    
+    .. math::
+        \\overline{\\chi} = \\sum\\limits_{i=1}^n\\frac{\\sum w\\chi\\Delta x_i}{\\sum w}
+        
     Parameters
     ----------
     od: OceanDataset
@@ -750,6 +750,10 @@ def weighted_mean(od, varNameList=None, axesList=None, storeWeights=True, aliase
     ds: xarray.Dataset 
         | w_mean_[varName]
         | weight_[varName]
+        
+    Notes
+    -----
+    This function assumes equally spaced time dimension.
     
     Examples
     --------
@@ -817,10 +821,11 @@ def weighted_mean(od, varNameList=None, axesList=None, storeWeights=True, aliase
     # Loop through variables
     means   = {}
     for _, (varName, varNameOUT) in enumerate(zip(varNameListIN, varNameListOUT)):
-        weight = 1
-        units  = 0
-        attrs  = od._ds[varName].attrs
-        wMean  = od._ds[varName]
+        weight   = 1
+        units    = 0
+        attrs    = od._ds[varName].attrs
+        wMean    = od._ds[varName]
+        dims2ave = []
         
         # ====
         # TIME
@@ -844,8 +849,9 @@ def weighted_mean(od, varNameList=None, axesList=None, storeWeights=True, aliase
             
             for area in areaList:
                 if set(od._ds[area].dims).issubset(wMean.dims): 
-                    weight  = od._ds[area] * weight
-                    units   = units + 2
+                    weight    = od._ds[area] * weight
+                    units     = units + 2
+                    dims2ave  = dims2ave + list(od._ds[area].dims)
                     foundArea = True
                     continue
         
@@ -858,9 +864,10 @@ def weighted_mean(od, varNameList=None, axesList=None, storeWeights=True, aliase
             
             for y in yList:
                 if set(od._ds[y].dims).issubset(wMean.dims): 
-                    weight  = od._ds[y] * weight
-                    units   = units + 1
-                    foundY  = True
+                    weight   = od._ds[y] * weight
+                    units    = units + 1
+                    dims2ave = list(od._ds[y].dims)
+                    foundY   = True
                     continue
         
         # X
@@ -872,9 +879,10 @@ def weighted_mean(od, varNameList=None, axesList=None, storeWeights=True, aliase
             
             for x in xList:
                 if set(od._ds[x].dims).issubset(wMean.dims): 
-                    weight  = od._ds[x] * weight
-                    units   = units + 1
-                    foundX  = True
+                    weight   = od._ds[x] * weight
+                    units    = units + 1
+                    dims2ave = dims2ave + list(od._ds[x].dims)
+                    foundX   = True
                     continue
         
         # ========
@@ -905,9 +913,10 @@ def weighted_mean(od, varNameList=None, axesList=None, storeWeights=True, aliase
                     if z=='drC' and HFac is not None:
                         HFac = od.grid.interp(HFac, 'Z', to='outer', boundary='extend')
                     if HFac is None: HFac= 1
-                    weight = od._ds[z] * HFac * weight
-                    units  = units + 1
-                    foundZ=True
+                    weight   = od._ds[z] * HFac * weight
+                    units    = units + 1
+                    dims2ave = dims2ave + list(od._ds[z].dims)
+                    foundZ   =True
                     continue
                     
             if foundZ is False:    
@@ -921,12 +930,12 @@ def weighted_mean(od, varNameList=None, axesList=None, storeWeights=True, aliase
                             HFac = 1
                         weight = dr * HFac * weight
                         units  = units + 1
+                        dims2ave = dims2ave + list(dr.dims)
                         foundZ = True
                         continue
             
         # Compute weighted mean
         if isinstance(weight, _xr.DataArray):
-            dims2ave = weight.dims
             _, weight = _xr.broadcast(wMean, weight) # Keep dimension in the right order
             weight = weight.where(~wMean.isnull())
             wMean = ((wMean * weight).sum(dims2ave)) / (weight.sum(dims2ave))
@@ -941,11 +950,228 @@ def weighted_mean(od, varNameList=None, axesList=None, storeWeights=True, aliase
             weight.attrs['long_name']   = 'Weights for space dimensions'
             weight.attrs['units']       = 'm^'+str(units)
             means['weight_'+varNameOUT] = weight
-        """elif any(x in ['X', 'Y', 'Z'] for x in axesList):
-            _warnings.warn("\n[{}] has NOT been averaged along X-Y-Z axes".format(varNameOUT), stacklevel=2)"""
     
     return _xr.Dataset(means, attrs=od.dataset.attrs)           
+       
+    
+def integral(od, varNameList=None, axesList=None, aliased = True):
+    """
+    Compute integrals along specified axes.
+    
+    .. math::
+        \\int{\\chi}dx = \\sum\\limits_{i=1}^n\\left(\\sum\\chi \\Delta x_i\\right)
+
+    Parameters
+    ----------
+    od: OceanDataset
+        oceandataset used to compute 
+    varNameList: 1D array_like, str, or None
+        If None, compute integral of all variables.
+    axesList: None, list
+        List of axes. If None, compute integral along all axes (excluding mooring and station)
+    aliased: bool
+        Set it False when working with ._ds and ._grid.
+        Otherwise, aliased must be True
+    
+    Returns
+    -------
+    ds: xarray.Dataset 
+        | I([varName])d[axis]
+        
+    Examples
+    --------
+    >>> od = ospy.open_oceandataset.get_started()
+    >>> ospy.compute.integral(od, 'U', ['Z'])
+    <xarray.Dataset>
+    Dimensions:  (Xp1: 342, Y: 262, time: 40)
+    Coordinates:
+      * Y        (Y) float64 66.01 66.03 66.05 66.07 ... 70.93 70.95 70.97 70.99
+      * Xp1      (Xp1) float64 -30.0 -29.96 -29.92 -29.87 ... -15.1 -15.05 -15.01
+        XU       (Y, Xp1) float64 dask.array<shape=(262, 342), chunksize=(262, 342)>
+        YU       (Y, Xp1) float64 dask.array<shape=(262, 342), chunksize=(262, 342)>
+      * time     (time) datetime64[ns] 2007-09-01 ... 2007-09-10T18:00:00
+    Data variables:
+        I(U)dZ   (time, Y, Xp1) float64 dask.array<shape=(40, 262, 342), chunksize=(40, 262, 342)>
+    Attributes:
+        OceanSpy_grid_coords:    {'Y': {'Y': None, 'Yp1': 0.5}, 'X': {'X': None, ...
+        OceanSpy_name:           Getting Started with OceanSpy
+        OceanSpy_description:    A small cutout from EGshelfIIseas2km_ASR.
+        OceanSpy_parameters:     {'rSphere': 6371.0, 'eq_state': 'jmd95', 'rho0':...
+        OceanSpy_projection:     Mercator(**{'central_longitude': -23.92803909531...
+        OceanSpy_grid_periodic:  []
+    """
+    
+    # Check input
+    if not isinstance(od, _ospy.OceanDataset):
+        raise TypeError('`od` must be OceanDataset')
+    
+    if varNameList is None: varNameList = list(od._ds.data_vars)
+    varNameList = _np.asarray(varNameList, dtype='str')
+    if varNameList.ndim == 0: varNameList = varNameList.reshape(1)
+    elif varNameList.ndim >1: raise TypeError('Invalid `varNameList`')
+    if axesList is not None:
+        axesList = _np.asarray(axesList, dtype='str')
+        if axesList.ndim == 0: axesList = axesList.reshape(1)
+        elif axesList.ndim >1: raise TypeError('Invalid `axesList`')
             
+    allAxes = [coord for coord in od.grid_coords if coord not in ['mooring', 'station']]
+    if axesList is None: 
+        axesList = allAxes
+    else:
+        err_axes = [axis for axis in axesList if axis not in allAxes]
+        if len(err_axes)!=0: raise ValueError('{} are not available. Available axes are {}'.format(err_axes, allAxes))
+        
+    if not isinstance(aliased, bool):
+        raise TypeError('`aliased` must be bool')
+    
+    # Handle aliases
+    if aliased:
+        varNameListIN = _rename_aliased(od, varNameList)
+    else:
+        varNameListIN = varNameList
+    varNameListOUT = varNameList
+
+    # Add missing variables
+    od = _add_missing_variables(od, list(varNameListIN))
+    
+    # Message
+    print('Computing integrals.')
+    
+    # Loop through variables
+    ints = {}
+    for _, (varName, varNameOUT) in enumerate(zip(varNameListIN, varNameListOUT)):
+        delta = 1
+        suf   = []
+        units = []
+        dims2sum = []
+        attrs = od._ds[varName].attrs
+        Int   = od._ds[varName]
+        
+        # ====
+        # TIME
+        # ====
+        # Tipically models have regular deta time
+        if set(['time']).issubset(axesList):
+            for t in ['time', 'time_midp']:
+                if t in Int.dims: 
+                    delta = delta * od._grid.interp(od._grid.diff(od._ds[t], 'time', boundary='extend') / _np.timedelta64(1, 's'), 'time',
+                                             boundary='extend')
+                    dims2sum = dims2sum + list(od._ds[t].dims)
+                    suf      = suf  + ['dtime']
+                    units    = units+ ['s']
+
+        # ==========
+        # HORIZONTAL
+        # ==========
+        
+        # Area
+        if set(['X', 'Y']).issubset(axesList):
+            
+            # Add missing variables
+            areaList = ['rA', 'rAw', 'rAs', 'rAz']
+            od = _add_missing_variables(od, areaList)
+            
+            for area in areaList:
+                if set(od._ds[area].dims).issubset(Int.dims): 
+                    delta = delta * od._ds[area]
+                    dims2sum = dims2sum + list(od._ds[area].dims)
+                    suf   = suf  + ['dXdY']
+                    units = units+ ['m^2']
+                    foundArea = True
+                    continue
+        
+        # Y
+        elif set(['Y']).issubset(axesList):
+            
+            # Add missing variables
+            yList = ['dyC', 'dyF', 'dyG', 'dyU']
+            od = _add_missing_variables(od, yList)
+            
+            for y in yList:
+                if set(od._ds[y].dims).issubset(Int.dims): 
+                    delta = delta * od._ds[y]
+                    dims2sum = dims2sum + list(od._ds[y].dims)
+                    suf   = suf  + ['dY']
+                    units = units+ ['m']
+                    foundY  = True
+                    continue
+        
+        # X
+        elif set(['X']).issubset(axesList):
+            
+            # Add missing variables
+            xList = ['dxC', 'dxF', 'dxG', 'dxV',]
+            od = _add_missing_variables(od, xList)
+            
+            for x in xList:
+                if set(od._ds[x].dims).issubset(Int.dims): 
+                    delta  = delta * od._ds[x]
+                    dims2sum = dims2sum + list(od._ds[x].dims)
+                    suf    = suf  + ['dX']
+                    units  = units+ ['m']
+                    foundX = True
+                    continue
+        
+        # ========
+        # VERTICAL
+        # ========
+        if set(['Z']).issubset(axesList):
+            
+            # Add missing variables
+            HFacList = ['HFacC', 'HFacW', 'HFacS']
+            od = _add_missing_variables(od, HFacList)
+
+            # Extract HFac
+            if   set(['X'  , 'Y']  ).issubset(Int.dims): HFac = od._ds['HFacC']
+            elif set(['Xp1', 'Y']  ).issubset(Int.dims): HFac = od._ds['HFacW']
+            elif set(['X'  , 'Yp1']).issubset(Int.dims): HFac = od._ds['HFacS']
+            elif set(['Xp1', 'Yp1']).issubset(Int.dims): 
+                HFac = od._grid.interp(od._grid.interp(od._ds['HFacC'], 'X', boundary='extend'), 'Y', boundary='extend')
+            else: 
+                HFac = None
+
+            # Add missing variables
+            zList = ['drC', 'drF']
+            od = _add_missing_variables(od, zList)
+            
+            foundZ = False
+            for z in zList:
+                if set(od._ds[z].dims).issubset(Int.dims):
+                    if z=='drC' and HFac is not None:
+                        HFac = od.grid.interp(HFac, 'Z', to='outer', boundary='extend')
+                    if HFac is None: HFac= 1
+                    delta  = delta * od._ds[z] * HFac
+                    dims2sum = dims2sum + list(od._ds[z].dims)
+                    suf    = suf  + ['dZ']
+                    units  = units+ ['m']
+                    foundZ = True
+                    continue
+                    
+            if foundZ is False:    
+                for coord in od._grid.axes['Z'].coords:
+                    z = od._grid.axes['Z'].coords[coord].name
+                    if set([z]).issubset(Int.dims): 
+                        dr = od.grid.interp(od.dataset['drF'], 'Z', to=coord, boundary='extend')
+                        if HFac is not None: 
+                            HFac = od._grid.interp(HFac, 'Z', to=coord, boundary='extend')
+                        else: 
+                            HFac = 1
+                        delta    = delta * dr * HFac
+                        dims2sum = dims2sum + list(dr.dims)
+                        suf      = suf  + ['dZ']
+                        units    = units+ ['m']
+                        foundZ   = True
+                        continue 
+
+        # Compute integral
+        Int = (Int * delta).sum(dims2sum)
+        ints['I('+varNameOUT+')'+''.join(suf)] = Int
+        if 'units' in attrs:
+            Int.attrs['units'] = attrs['units'] + '*' + '*'.join(units)
+        else:
+            Int.attrs['units'] = '*'.join(units)
+    
+    return _xr.Dataset(ints, attrs=od.dataset.attrs) 
     
 # ================
 # STATIC VARIABLES
@@ -2286,6 +2512,11 @@ class _computeMethdos(object):
     @_functools.wraps(weighted_mean)
     def weighted_mean(self, overwrite=False, **kwargs):
         ds = weighted_mean(self._od, **kwargs)
+        return self._od.merge_into_oceandataset(ds, overwrite=overwrite)
+    
+    @_functools.wraps(integral)
+    def integral(self, overwrite=False, **kwargs):
+        ds = integral(self._od, **kwargs)
         return self._od.merge_into_oceandataset(ds, overwrite=overwrite)
 
     @_functools.wraps(potential_density_anomaly)

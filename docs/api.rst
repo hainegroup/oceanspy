@@ -141,6 +141,7 @@ Dynamic
    compute.divergence
    compute.curl
    compute.laplacian
+   compute.integral
    compute.weighted_mean
    
 Static
