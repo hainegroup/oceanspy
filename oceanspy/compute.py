@@ -1101,7 +1101,7 @@ def vertical_relative_vorticity(od):
     crl      = curl(od, iName='U', jName='V', kName=None, aliased = False)
     momVort3 = crl['dV_dX-dU_dY']
     momVort3.attrs['units']      = 's^-1'
-    momVort3.attrs['long_name']  = 'Vertical component of relative vorticity'
+    momVort3.attrs['long_name']  = 'vertical component of relative vorticity'
     
     # Create ds
     ds = _xr.Dataset({'momVort3': momVort3}, attrs=od.dataset.attrs)
@@ -1129,7 +1129,7 @@ def relative_vorticity(od):
     -------
     ds: xarray.Dataset
         | momVort1: i-component of relative vorticity
-        | momVort2: j-component of relative vorticity\
+        | momVort2: j-component of relative vorticity
         | momVort3: k-component of relative vorticity
             
     See Also
@@ -1419,7 +1419,7 @@ def shear_strain(od):
     grid = od._grid
     
     # Message
-    print('Computing shear component of strain')
+    print('Computing shear component of strain.')
         
     # Create DataArray
     # Same of vertical relative vorticity with + instead of -
@@ -1467,7 +1467,7 @@ def normal_strain(od):
     # Same of horizontal divergence of velocity field with - instead of +
     div = divergence(od, iName='U', jName='V', kName=None, aliased = False)
     n_strain = div['dU_dX'] - div['dV_dY'] 
-    n_strain.attrs['units']      = 'm s^-2'
+    n_strain.attrs['units']      = 's^-1'
     n_strain.attrs['long_name']  = 'normal component of strain'
     
     # Create ds
@@ -1521,7 +1521,7 @@ def Okubo_Weiss_parameter(od):
     grid = od._grid
     
     # Message
-    print('Computing Okubo-Weiss parameter')
+    print('Computing Okubo-Weiss parameter.')
     
     # Interpolate to C grid points
     momVort3 = grid.interp(grid.interp(momVort3, 'X'), 'Y')
@@ -1674,7 +1674,7 @@ def mooring_horizontal_volume_transport(od):
         raise TypeError('`od` must be OceanDataset')
         
     if 'mooring' not in od._ds.dims:
-        raise TypeError('oceadatasets must be subsampled using `subsample.mooring_array`')
+        raise ValueError('oceadatasets must be subsampled using `subsample.mooring_array`')
         
     # Add missing variables    
     varList  = ['XC', 'YC', 'dyG', 'dxG', 'drF', 'U', 'V', 'HFacS', 'HFacW', 'XU', 'YU', 'XV', 'YV']
@@ -1834,7 +1834,166 @@ def mooring_horizontal_volume_transport(od):
     
     return _ospy.OceanDataset(ds).dataset
     
+
+def geographical_aligned_velocities(od):
+    """
+    Compute zonal and meridional velocities from U and V on orthogonal curvilinear grid.
     
+    .. math::
+        (u_{zonal}, v_{merid}) = (u\\cos{\\phi} - v\\sin{\\phi}, u\\sin{\\phi} + v\\cos{\\phi})
+        
+    Parameters
+    ----------
+    od: OceanDataset
+        oceandataset used to compute
+        
+    Returns
+    -------
+    ds: xarray.Dataset
+        | U_zonal: zonal velocity
+        | V_merid: meridional velocity 
+    """
+    
+    # Check input
+    if not isinstance(od, _ospy.OceanDataset):
+        raise TypeError('`od` must be OceanDataset')
+        
+    # Add missing variables
+    varList = ['U', 'V', 'AngleCS', 'AngleSN']
+    od = _add_missing_variables(od, varList)
+    
+    # Message
+    print('Computing geographical aligned velocities.')
+    
+    # Extract Variables
+    U = od._ds['U']
+    V = od._ds['V']
+    AngleCS = od._ds['AngleCS']
+    AngleSN = od._ds['AngleSN']
+    
+    # Extract grid
+    grid = od._grid
+    
+    # Move to C grid
+    U = grid.interp(U, 'X')
+    V = grid.interp(V, 'Y')
+    
+    # Compute velocities
+    U_zonal = U * AngleCS - V * AngleSN
+    if 'units' in od._ds['U'].attrs: U_zonal.attrs['units'] = od._ds['U'].attrs['units']
+    U_zonal.attrs['long_name'] = 'zonal velocity'
+    U_zonal.attrs['direction'] = 'positive: eastwards'
+    
+    V_merid = U * AngleSN + V * AngleCS
+    if 'units' in od._ds['V'].attrs: V_merid.attrs['units'] = od._ds['V'].attrs['units']
+    V_merid.attrs['long_name'] = 'meridional velocity'
+    V_merid.attrs['direction'] = 'positive: northwards'
+    
+    # Create ds
+    ds = _xr.Dataset({'U_zonal': U_zonal,
+                      'V_merid': V_merid,}, attrs=od.dataset.attrs)
+    
+    return _ospy.OceanDataset(ds).dataset
+
+
+def survey_aligned_velocities(od):
+    """
+    Compute horizontal velocities orthogonal and tengential to a survey.
+    
+    .. math::
+        (v_{tan}, v_{ort}) = (u\\cos{\\phi} + v\\sin{\\phi}, v\\cos{\\phi} - u\\sin{\\phi})
+        
+    Parameters
+    ----------
+    od: OceanDataset
+        oceandataset used to compute
+        
+    Returns
+    -------
+    ds: xarray.Dataset
+        | rot_ang_Vel: Angle used to rotate geographical to survey aligned velocities
+        | tan_Vel: Velocity component tangential to survey
+        | ort_Vel: Velocity component orthogonal to survey
+    """
+    
+    # Check input
+    if not isinstance(od, _ospy.OceanDataset):
+        raise TypeError('`od` must be OceanDataset')
+        
+    if 'station' not in od._ds.dims:
+        raise ValueError('oceadatasets must be subsampled using `subsample.survey_stations`')
+        
+    # Get zonal and meridional velocities
+    var_list = ['lat', 'lon']
+    try:
+        # Add missing variables
+        varList = ['U_zonal', 'V_merid'] + var_list
+        od = _add_missing_variables(od, varList)
+        
+        # Extract variables
+        U = od._ds['U_zonal']
+        V = od._ds['V_merid'] 
+    except Exception as e:
+        # Assume U=U_zonal and V=V_zonal
+        _warnings.warn(("\n{}"
+                        "\nAssuming U=U_zonal and V=V_merid"
+                        "\nIf you are using curvilinear coordinates, run `compute.geographical_aligned_velocities` before `subsample.survey_stations`").format(e), stacklevel=2)
+        
+        # Add missing variables
+        varList = ['U', 'V'] + var_list
+        od = _add_missing_variables(od, varList)
+        
+        # Extract variables
+        U = od._ds['U']
+        V = od._ds['V']
+        
+    # Extract varibles
+    lat = _np.deg2rad(od._ds['lat'])
+    lon = _np.deg2rad(od._ds['lon'])
+    
+    # Extract grid
+    grid = od._grid
+    
+    # Message
+    print('Computing survey aligned velocities.')
+    
+    # Compute azimuth
+    # Translated from matlab: https://www.mathworks.com/help/map/ref/azimuth.html
+    az = _np.arctan2(_np.cos(lat[1:]).values  * _np.sin(grid.diff(lon, 'station')),
+                 _np.cos(lat[:-1]).values * _np.sin(lat[1:]).values - 
+                 _np.sin(lat[:-1]).values * _np.cos(lat[1:]).values * _np.cos(grid.diff(lon, 'station'))) 
+    az = grid.interp(az, 'station', boundary = 'extend')
+    az = _xr.where(_np.rad2deg(az)<0, _np.pi*2 + az, az)
+    
+    # Compute rotation angle
+    rot_ang_rad = _np.pi/2 - az
+    rot_ang_rad = _xr.where(rot_ang_rad < 0, _np.pi*2 + rot_ang_rad, rot_ang_rad)
+    rot_ang_deg =_np.rad2deg(rot_ang_rad)
+    rot_ang_Vel = rot_ang_deg
+    rot_ang_Vel.attrs['long_name'] = 'Angle used to rotate geographical to survey aligned velocities'
+    rot_ang_Vel.attrs['units']     = 'deg (+: counterclockwise)'
+    
+    # Rotate velocities
+    tan_Vel =  U*_np.cos(rot_ang_rad) + V*_np.sin(rot_ang_rad)
+    tan_Vel.attrs['long_name'] = 'Velocity component tangential to survey'
+    if 'units' in U.attrs: units = U.attrs['units']
+    else:                  units = ''
+    tan_Vel.attrs['units'] = units + ' (+: flow towards station indexed with higher number)'
+    
+    ort_Vel =  V*_np.cos(rot_ang_rad) - U*_np.sin(rot_ang_rad)
+    ort_Vel.attrs['long_name'] = 'Velocity component orthogonal to survey'
+    if 'units' in V.attrs: units = V.attrs['units']
+    else:                  units = ''
+    ort_Vel.attrs['units'] = units + ' (+: flow keeps station indexed with higher number to the right'
+    
+    # Create ds
+    ds = _xr.Dataset({'rot_ang_Vel': rot_ang_Vel, 
+                      'ort_Vel'    : ort_Vel,
+                      'tan_Vel'    : tan_Vel,}, attrs=od.dataset.attrs)
+    
+    return _ospy.OceanDataset(ds).dataset
+
+
 def heat_budget(od):
     """
     Compute terms to close heat budget as explained by [Pie17]_.
@@ -1944,8 +2103,8 @@ def heat_budget(od):
                                                           ['adv_vConvH', 'dif_vConvH', 'kpp_vConvH'], 
                                                           ['advective', 'diffusive', 'kpp'])):
         ds[name_out] = grid.diff(var_in, 'Z', boundary='fill', fill_value=_np.nan).where(HFacC!=0)/CellVol
-        ds[name_out].attrs['units'] = units
-        ds[name_out].attrs['units'] = 'Heat vertical {} convergence'.format(long_name)
+        ds[name_out].attrs['units']     = units
+        ds[name_out].attrs['long_name'] = 'Heat vertical {} convergence'.format(long_name)
         ds[name_out].attrs['OceanSpy_parameters'] = str(params2use)
         
     
@@ -2042,7 +2201,7 @@ def salt_budget(od):
     rA        = od._ds['rA']
     Zp1        = od._ds['Zp1']
     
-    # Extrac parameters
+    # Extract parameters
     rho0 = od.parameters['rho0']
     
     # Extract grid
@@ -2075,8 +2234,9 @@ def salt_budget(od):
                                                           ['adv_vConvS', 'dif_vConvS', 'kpp_vConvS'], 
                                                           ['advective', 'diffusive', 'kpp'])):
         ds[name_out] = grid.diff(var_in, 'Z', boundary='fill', fill_value=_np.nan).where(HFacC!=0)/CellVol
-        ds[name_out].attrs['units'] = units
-        ds[name_out].attrs['units'] = 'Salt vertical {} convergence'.format(long_name)
+        ds[name_out].attrs['units']     = units
+        ds[name_out].attrs['long_name'] = 'Salt vertical {} convergence'.format(long_name)
+        ds[name_out].attrs['OceanSpy_parameters'] = str(params2use)
 
     # Surface flux    
     forcS = oceSPtnd
@@ -2092,167 +2252,6 @@ def salt_budget(od):
     ds['forcS'].attrs['OceanSpy_parameters'] = str(params2use)
     
     return _ospy.OceanDataset(ds).dataset
-
-def geographical_aligned_velocities(od):
-    """
-    Compute zonal and meridional velocities from U and V on orthogonal curvilinear grid.
-    
-    .. math::
-        (u_{zonal}, v_{merid}) = (u\\cos{\\phi} - v\\sin{\\phi}, u\\sin{\\phi} + v\\cos{\\phi})
-        
-    Parameters
-    ----------
-    od: OceanDataset
-        oceandataset used to compute
-        
-    Returns
-    -------
-    ds: xarray.Dataset
-        | U_zonal: zonal velocity
-        | V_merid: meridional velocity 
-    """
-    
-    # Check input
-    if not isinstance(od, _ospy.OceanDataset):
-        raise TypeError('`od` must be OceanDataset')
-        
-    # Add missing variables
-    varList = ['U', 'V', 'AngleCS', 'AngleSN']
-    od = _add_missing_variables(od, varList)
-    
-    # Message
-    print('Computing geographical aligned velocities.')
-    
-    # Extract Variables
-    U = od._ds['U']
-    V = od._ds['V']
-    AngleCS = od._ds['AngleCS']
-    AngleSN = od._ds['AngleSN']
-    
-    # Extract grid
-    grid = od._grid
-    
-    # Move to C grid
-    U = grid.interp(U, 'X')
-    V = grid.interp(V, 'Y')
-    
-    # Compute velocities
-    U_zonal = U * AngleCS - V * AngleSN
-    if 'units' in od._ds['U'].attrs: U_zonal.attrs['units'] = od._ds['U'].attrs['units']
-    U_zonal.attrs['long_name'] = 'zonal velocity'
-    U_zonal.attrs['direction'] = 'positive: eastwards'
-    
-    V_merid = U * AngleSN + V * AngleCS
-    if 'units' in od._ds['V'].attrs: V_merid.attrs['units'] = od._ds['V'].attrs['units']
-    V_merid.attrs['long_name'] = 'meridional velocity'
-    V_merid.attrs['direction'] = 'positive: northwards'
-    
-    # Create ds
-    ds = _xr.Dataset({'U_zonal': U_zonal,
-                      'V_merid': V_merid,}, attrs=od.dataset.attrs)
-    
-    return _ospy.OceanDataset(ds).dataset
-
-
-def survey_aligned_velocities(od):
-    """
-    Compute horizontal velocities orthogonal and tengential to a survey.
-    
-    .. math::
-        (v_{tan}, v_{ort}) = (u\\cos{\\phi} + v\\sin{\\phi}, v\\cos{\\phi} - u\\sin{\\phi})
-        
-    Parameters
-    ----------
-    od: OceanDataset
-        oceandataset used to compute
-        
-    Returns
-    -------
-    ds: xarray.Dataset
-        | rot_ang_Vel: Angle used to rotate geographical to survey aligned velocities
-        | tan_Vel: Velocity component tangential to survey
-        | ort_Vel: Velocity component orthogonal to survey
-    """
-    
-    # Check input
-    if not isinstance(od, _ospy.OceanDataset):
-        raise TypeError('`od` must be OceanDataset')
-        
-    if 'station' not in od._ds.dims:
-        raise TypeError('oceadatasets must be subsampled using `subsample.survey_stations`')
-        
-    # Get zonal and meridional velocities
-    var_list = ['lat', 'lon']
-    try:
-        # Add missing variables
-        varList = ['U_zonal', 'V_merid'] + var_list
-        od = _add_missing_variables(od, varList)
-        
-        # Extract variables
-        U = od._ds['U_zonal']
-        V = od._ds['V_merid'] 
-    except Exception as e:
-        # Assume U=U_zonal and V=V_zonal
-        _warnings.warn(("\n{}"
-                        "\nAssuming U=U_zonal and V=V_merid"
-                        "\nIf you are using curvilinear coordinates, run `compute.geographical_aligned_velocities` before `subsample.survey_stations`").format(e), stacklevel=2)
-        
-        # Add missing variables
-        varList = ['U', 'V'] + var_list
-        od = _add_missing_variables(od, varList)
-        
-        # Extract variables
-        U = od._ds['U']
-        V = od._ds['V']
-        
-    # Extract varibles
-    lat = _np.deg2rad(od._ds['lat'])
-    lon = _np.deg2rad(od._ds['lon'])
-    
-    # Extract grid
-    grid = od._grid
-    
-    # Message
-    print('Computing survey aligned velocities.')
-    
-    # Compute azimuth
-    # Translated from matlab: https://www.mathworks.com/help/map/ref/azimuth.html
-    az = _np.arctan2(_np.cos(lat[1:]).values  * _np.sin(grid.diff(lon, 'station')),
-                 _np.cos(lat[:-1]).values * _np.sin(lat[1:]).values - 
-                 _np.sin(lat[:-1]).values * _np.cos(lat[1:]).values * _np.cos(grid.diff(lon, 'station'))) 
-    az = grid.interp(az, 'station', boundary = 'extend')
-    az = _xr.where(_np.rad2deg(az)<0, _np.pi*2 + az, az)
-    
-    # Compute rotation angle
-    rot_ang_rad = _np.pi/2 - az
-    rot_ang_rad = _xr.where(rot_ang_rad < 0, _np.pi*2 + rot_ang_rad, rot_ang_rad)
-    rot_ang_deg =_np.rad2deg(rot_ang_rad)
-    rot_ang_Vel = rot_ang_deg
-    rot_ang_Vel.attrs['long_name'] = 'Angle used to rotate geographical to survey aligned velocities'
-    rot_ang_Vel.attrs['units']     = 'deg (+: counterclockwise)'
-    
-    # Rotate velocities
-    tan_Vel =  U*_np.cos(rot_ang_rad) + V*_np.sin(rot_ang_rad)
-    tan_Vel.attrs['long_name'] = 'Velocity component tangential to survey'
-    if 'units' in U.attrs: units = U.attrs['units']
-    else:                  units = ''
-    tan_Vel.attrs['units'] = units + ' (+: flow towards station indexed with higher number)'
-    
-    ort_Vel =  V*_np.cos(rot_ang_rad) - U*_np.sin(rot_ang_rad)
-    ort_Vel.attrs['long_name'] = 'Velocity component orthogonal to survey'
-    if 'units' in V.attrs: units = V.attrs['units']
-    else:                  units = ''
-    ort_Vel.attrs['units'] = units + ' (+: flow keeps station indexed with higher number to the right'
-    
-    # Create ds
-    ds = _xr.Dataset({'rot_ang_Vel': rot_ang_Vel, 
-                      'ort_Vel'    : ort_Vel,
-                      'tan_Vel'    : tan_Vel,}, attrs=od.dataset.attrs)
-    
-    return _ospy.OceanDataset(ds).dataset
-
-
-
 
 
 class _computeMethdos(object):
@@ -2297,4 +2296,64 @@ class _computeMethdos(object):
     @_functools.wraps(Brunt_Vaisala_frequency)
     def Brunt_Vaisala_frequency(self, overwrite=False, **kwargs):
         ds = Brunt_Vaisala_frequency(self._od, **kwargs)
+        return self._od.merge_into_oceandataset(ds, overwrite=overwrite)
+    
+    @_functools.wraps(vertical_relative_vorticity)
+    def vertical_relative_vorticity(self, overwrite=False, **kwargs):
+        ds = vertical_relative_vorticity(self._od, **kwargs)
+        return self._od.merge_into_oceandataset(ds, overwrite=overwrite)
+    
+    @_functools.wraps(relative_vorticity)
+    def relative_vorticity(self, overwrite=False, **kwargs):
+        ds = relative_vorticity(self._od, **kwargs)
+        return self._od.merge_into_oceandataset(ds, overwrite=overwrite)
+    
+    @_functools.wraps(kinetic_energy)
+    def kinetic_energy(self, overwrite=False, **kwargs):
+        ds = kinetic_energy(self._od, **kwargs)
+        return self._od.merge_into_oceandataset(ds, overwrite=overwrite)
+    
+    @_functools.wraps(eddy_kinetic_energy)
+    def eddy_kinetic_energy(self, overwrite=False, **kwargs):
+        ds = eddy_kinetic_energy(self._od, **kwargs)
+        return self._od.merge_into_oceandataset(ds, overwrite=overwrite)
+    
+    @_functools.wraps(horizontal_divergence_velocity)
+    def horizontal_divergence_velocity(self, overwrite=False, **kwargs):
+        ds = horizontal_divergence_velocity(self._od, **kwargs)
+        return self._od.merge_into_oceandataset(ds, overwrite=overwrite)
+    
+    @_functools.wraps(shear_strain)
+    def shear_strain(self, overwrite=False, **kwargs):
+        ds = shear_strain(self._od, **kwargs)
+        return self._od.merge_into_oceandataset(ds, overwrite=overwrite)
+    
+    @_functools.wraps(normal_strain)
+    def normal_strain(self, overwrite=False, **kwargs):
+        ds = normal_strain(self._od, **kwargs)
+        return self._od.merge_into_oceandataset(ds, overwrite=overwrite)
+    
+    @_functools.wraps(Ertel_potential_vorticity)
+    def Ertel_potential_vorticity(self, overwrite=False, **kwargs):
+        ds = Ertel_potential_vorticity(self._od, **kwargs)
+        return self._od.merge_into_oceandataset(ds, overwrite=overwrite)
+    
+    @_functools.wraps(mooring_horizontal_volume_transport)
+    def mooring_horizontal_volume_transport(self, overwrite=False, **kwargs):
+        ds = mooring_horizontal_volume_transport(self._od, **kwargs)
+        return self._od.merge_into_oceandataset(ds, overwrite=overwrite)
+    
+    @_functools.wraps(survey_aligned_velocities)
+    def survey_aligned_velocities(self, overwrite=False, **kwargs):
+        ds = survey_aligned_velocities(self._od, **kwargs)
+        return self._od.merge_into_oceandataset(ds, overwrite=overwrite)
+    
+    @_functools.wraps(heat_budget)
+    def heat_budget(self, overwrite=False, **kwargs):
+        ds = heat_budget(self._od, **kwargs)
+        return self._od.merge_into_oceandataset(ds, overwrite=overwrite)
+    
+    @_functools.wraps(salt_budget)
+    def salt_budget(self, overwrite=False, **kwargs):
+        ds = salt_budget(self._od, **kwargs)
         return self._od.merge_into_oceandataset(ds, overwrite=overwrite)
