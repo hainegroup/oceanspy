@@ -5,7 +5,7 @@ from oceanspy.compute import *
 from oceanspy import utils, open_oceandataset
 from numpy.testing import assert_array_equal, assert_allclose
 import numpy as np
-from . test_compute_static import check_params, ds_out_IN_od_out
+from .test_compute_static import check_params, ds_out_IN_od_out
 
 # Add variables
 od_in = open_oceandataset.from_netcdf('./oceanspy/tests/Data/budgets.nc')

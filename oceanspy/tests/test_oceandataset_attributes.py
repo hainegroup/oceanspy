@@ -6,7 +6,7 @@ import sys
 
 from oceanspy import OceanDataset
 from oceanspy._oceandataset import _setter_error_message, _wrong_axes_error_message
-from . datasets import datasets
+from .datasets import datasets
 from oceanspy   import DEFAULT_PARAMETERS, AVAILABLE_PARAMETERS, TYPE_PARAMETERS, OCEANSPY_AXES
 
 OVERWRITE_ERROR_MESSAGE = "has been previously set: `overwrite` must be bool"

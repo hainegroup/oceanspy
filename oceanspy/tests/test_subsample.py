@@ -4,7 +4,7 @@ import numpy as np
 import xarray as xr
 from oceanspy.subsample import *
 from oceanspy.utils import great_circle_path
-from . datasets import (aliased_ods, oceandatasets)
+from .datasets import (aliased_ods, oceandatasets)
 
 
 

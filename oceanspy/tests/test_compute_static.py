@@ -1,7 +1,7 @@
 import pytest
 import xarray as xr
 import copy
-from . datasets import oceandatasets
+from .datasets import oceandatasets
 from oceanspy.compute import *
 from oceanspy import utils
 from numpy.random import rand, uniform

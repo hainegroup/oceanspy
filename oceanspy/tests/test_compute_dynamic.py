@@ -1,5 +1,5 @@
 import pytest
-from . datasets import sin_od
+from .datasets import sin_od
 from oceanspy.compute import *
 import numpy as np
 import xarray as xr
