@@ -11,13 +11,13 @@ import functools as _functools
 from . import utils as _utils
 
 # Instructions for developers:
-# 1) Every function operates on od, and returns ds 
-# 2) Return ds as _ospy.OceanDataset(ds).dataset, so aliases are applied
-# 3) Only use od._ds and od._grid
-# 4) Make sure you don't lose global attributes (e.g., when creating a dataset)
-# 5) Add new functions in docs/api.rst under subsample 
-# 6) Create a shortcut in _oceandataset (merge+name of functions) and add the shortcut in docs/api.rst under OceanDataset - Shortcuts
-# 7) Add function name, and variables returned in _FUNC2VARS
+# 1) Every function operates on od, and returns ds
+# 2) Only use od._ds and od._grid 
+# 4) There are 2 sections: dynamic (name of the variables depends on input) and static
+# 5) Static functions return ds as _ospy.OceanDataset(ds).dataset, so aliases are applied
+# 6) Add new functions in _computeMethdos (using ,merge_into_oceandataset)
+# 7) Add new functions in docs/api.rst
+# 8) Add tests in test_compute_static, test_compute_dynamic, or test_compute_budget
 
 # TODO: weighted_mean should use integral! Rewrite the function avoiding copy and paste. 
 # TODO: add functions to compute dx, dy, dr, rA, ... when not available (maybe add in utils?)
@@ -1172,6 +1172,12 @@ def integral(od, varNameList=None, axesList=None, aliased = True):
             Int.attrs['units'] = '*'.join(units)
     
     return _xr.Dataset(ints, attrs=od.dataset.attrs) 
+    
+    
+    
+    
+    
+    
     
 # ================
 # STATIC VARIABLES
