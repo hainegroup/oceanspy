@@ -4,7 +4,7 @@ import pandas as pd
 
 from oceanspy import OceanDataset
 from oceanspy.open_oceandataset import from_netcdf
-from . datasets import (datasets, oceandatasets)
+from .datasets import (datasets, oceandatasets)
 
 
 def test_import_MITgcm_rect_nc():

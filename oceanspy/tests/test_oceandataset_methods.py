@@ -1,6 +1,6 @@
 import pytest
 import xarray as xr
-from . datasets import (aliased_ods, oceandatasets)
+from .datasets import (aliased_ods, oceandatasets)
 
 od_in = oceandatasets['MITgcm_rect_nc']
 
