@@ -8,6 +8,7 @@ exclude_lines =
     raise NotImplementedError
     if __name__ == .__main__.:
 ignore_errors = True
-omit = oceanspy/test/*
+omit = oceanspy/tests/*
        oceanspy/__init__.py
        oceanspy/open_oceandataset.py
+       oceanspy/utils.py
