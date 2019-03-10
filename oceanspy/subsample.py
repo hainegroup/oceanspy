@@ -740,7 +740,7 @@ def mooring_array(od, Ymoor, Xmoor,
 
     return od
 
-def survey_stations(od, Ysurv, Xsurv, delta,
+def survey_stations(od, Ysurv, Xsurv, delta=None,
                     xesmf_regridder_kwargs = {'method': 'bilinear'}, **kwargs):
     
     """

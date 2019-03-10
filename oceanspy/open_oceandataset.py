@@ -34,6 +34,14 @@ def from_netcdf(path):
     # Open
     print('Opening dataset from [{}]'.format(path))
     ds = _xr.open_dataset(path)
+    
+    # Put back coordinates attribute that to_netcdf didn't like
+    for var in ds.variables:
+        attrs = ds[var].attrs
+        coordinates = attrs.pop('_coordinates', None)
+        ds[var].attrs = attrs
+        if coordinates is not None: ds[var].attrs['coordinates'] = coordinates
+                
     od = _OceanDataset(ds)
     
     return od
