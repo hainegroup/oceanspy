@@ -4,7 +4,7 @@ import copy
 from . datasets import oceandatasets
 from oceanspy.compute import *
 from oceanspy import utils
-from numpy.random import rand
+from numpy.random import rand, uniform
 from numpy.testing import assert_array_equal, assert_allclose
 import numpy as np
 
@@ -106,7 +106,9 @@ varDims = {
 'phiHydLow': ['time', 'Y', 'X'],
 'surForcT': ['time', 'Y', 'X'],
 'surForcS': ['time', 'Y', 'X'],
-'time_midp': ['time_midp'],}
+'time_midp': ['time_midp'],
+'AngleCS':   ['Y', 'X'],
+'AngleSN':   ['Y', 'X'],}
 
 
 
@@ -116,13 +118,17 @@ varNeeded = ['Temp', 'S',
              'dyC', 'dxC', 'dxF', 'dyF', 'dxG', 'dyG', 'dxV', 'dyU',
              'drF', 
              'U', 'V', 'W',
-             'fCoriG']
+             'fCoriG',
+             'AngleCS', 'AngleSN']
 
 ds_dict = {}
 for name, dimList in varDims.items():
     if name not in varNeeded: continue
     dimSize = [len(od_in.dataset[dim]) for dim in dimList]
-    ds_dict[name] = xr.DataArray(rand(*dimSize), dims=dimList)
+    if name in ['AngleCS', 'AngleSN']:
+        ds_dict[name] = xr.DataArray(np.ones(dimSize), dims=dimList)
+    else:
+        ds_dict[name] = xr.DataArray(rand(*dimSize), dims=dimList)
 ds_in = xr.Dataset(ds_dict)
 od_in = od_in.merge_into_oceandataset(ds_in)    
 
@@ -363,7 +369,9 @@ def test_survey_aligned_velocities():
 
         # Align velocities
         ds_out = survey_aligned_velocities(od_surv)
-    assert np.all(np.round(ds_out['rot_ang_Vel'].values)==90)
+    assert np.all(np.round(ds_out['rot_ang_Vel'].values)==90) 
+    # TODO: looks like this doesn't need round (exactly 90°)
+    #       Keep round for consistency with the case below
     
     # Zonal
     Xsurv = X[[0, -1]]
@@ -375,14 +383,30 @@ def test_survey_aligned_velocities():
 
         # Align velocities
         ds_out = survey_aligned_velocities(od_surv)
-    assert np.all(np.round(ds_out['rot_ang_Vel'].values)==0)
+    assert np.all(np.round(ds_out['rot_ang_Vel'].values)==0) 
+    # TODO: why do I need to round? Shouldn't it be exactly zero?
     
     # Test shortcut
     with pytest.warns(UserWarning):
         od_out=od_surv.compute.survey_aligned_velocities()
     ds_out_IN_od_out(ds_out, od_out)
+
+def test_geographical_aligned_velocities():
     
+    # Compute KE
+    ds_out = geographical_aligned_velocities(od_in)
+    assert ds_out['U_zonal'].attrs['long_name'] == 'zonal velocity' 
+    assert ds_out['U_zonal'].attrs['direction'] == 'positive: eastwards'
+    assert ds_out['V_merid'].attrs['long_name'] == 'meridional velocity' 
+    assert ds_out['V_merid'].attrs['direction'] == 'positive: northwards'
     
+    # Check values
+    # TODO: Add check for velocity values (similar to survey aligned)
+    #       This function was implemented by Renske, maybe she has something ready
+    
+    # Test shortcut
+    od_out=od_in.compute.geographical_aligned_velocities()
+    ds_out_IN_od_out(ds_out, od_out)
     
 def check_params(ds, varName, params):
     for par in params:

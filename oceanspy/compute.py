@@ -2343,6 +2343,11 @@ class _computeMethdos(object):
         ds = mooring_horizontal_volume_transport(self._od, **kwargs)
         return self._od.merge_into_oceandataset(ds, overwrite=overwrite)
     
+    @_functools.wraps(geographical_aligned_velocities)
+    def geographical_aligned_velocities(self, overwrite=False, **kwargs):
+        ds = geographical_aligned_velocities(self._od, **kwargs)
+        return self._od.merge_into_oceandataset(ds, overwrite=overwrite)
+    
     @_functools.wraps(survey_aligned_velocities)
     def survey_aligned_velocities(self, overwrite=False, **kwargs):
         ds = survey_aligned_velocities(self._od, **kwargs)
