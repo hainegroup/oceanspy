@@ -12,6 +12,7 @@ from . import utils     as _utils
 from . subsample import _subsampleMethdos
 from . compute   import _computeMethdos
 from . plot      import _plotMethdos
+from . animate   import _animateMethdos
 
 try: import cartopy.crs as _ccrs
 except ImportError: pass
@@ -1186,6 +1187,19 @@ class OceanDataset:
         """
         
         return _plotMethdos(self)
+    
+    @property
+    def animate(self):
+        """
+        Access animating functions.
+        
+        Examples
+        --------
+        >>> od = ospy.open_oceandataset.get_started()
+        >>> od.animate.TS_diagram(meanAxes=['time', 'Z'], cutout_kwargs={'ZRange': [0, -100]})
+        """
+        
+        return _animateMethdos(self)
 
         
     
