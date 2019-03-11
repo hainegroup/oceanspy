@@ -1,10 +1,28 @@
-import xarray   as _xr
-import numpy    as _np
-import warnings as _warnings
-import oceanspy as _ospy
+import xarray    as _xr
+import numpy     as _np
+import warnings  as _warnings
+import oceanspy  as _ospy
+import functools as _functools
 
 from . import compute as _compute
 from . import plot as _plot
+
+try:
+    import matplotlib as _matplotlib
+    _matplotlib.use('agg')
+    import matplotlib.pyplot as _plt
+    from matplotlib.animation import FuncAnimation as _FuncAnimation
+except ImportError: pass
+
+try:
+    from IPython.utils import   io      as _io
+    from IPython.display import HTML    as _HTML 
+    from IPython.display import display as _display
+except ImportError: pass
+
+try:
+    from tqdm import tqdm as _tqdm
+except ImportError: pass
 
 def _create_animation(od, time, plot_func, func_kwargs, display, **kwargs):
     """
@@ -57,32 +75,25 @@ def _create_animation(od, time, plot_func, func_kwargs, display, **kwargs):
     
     # Handle kwargs
     if func_kwargs is None: func_kwargs = {}
-        
-    # Packages
-    import matplotlib.pyplot as plt
-    from matplotlib.animation import FuncAnimation
-    from IPython.utils import io
-    from tqdm import tqdm
-    
+
     # Animate function 
     def animate(i):
-        plt.clf()
+        _plt.clf()
         func_kwargs['cutout_kwargs'] = {'timeRange': time.isel({time.dims[0]: i}).values, 'dropAxes': 'time'}
-        with io.capture_output() as captured:
+        with _io.capture_output() as captured:
             plot_func(od, **func_kwargs)
         if 'pbar' in locals(): pbar.update(1)
-        
+     
     # Create animation object
-    anim = FuncAnimation(**{'fig': plt.gcf(), 'func': animate, 'frames': len(time), **kwargs})
+    anim = _FuncAnimation(**{'fig': _plt.gcf(), 'func': animate, 'frames': len(time), **kwargs})
     
     # Display
     if display is True:
-        from IPython.display import HTML, display
-        pbar = tqdm(total=len(time))
-        display(HTML(anim.to_html5_video()))
+        pbar = _tqdm(total=len(time))
+        _display(_HTML(anim.to_html5_video()))
         pbar.close()
         del pbar
-        
+    
     return anim
 
 
@@ -133,9 +144,9 @@ def vertical_section(od,
     if subsamp_kwargs is not None:
         # Subsample first
         if subsampMethod=='mooring_array':
-            od = od.mooring_array(**subsamp_kwargs)
+            od = od.subsample.mooring_array(**subsamp_kwargs)
         elif subsampMethod=='survey_stations':
-            od = od.survey_stations(**subsamp_kwargs)
+            od = od.subsample.survey_stations(**subsamp_kwargs)
     time = od._ds['time']
     
     # Fix colorbar
@@ -216,7 +227,7 @@ def horizontal_section(od,
     
     # First cutout and get time
     cutout_kwargs = kwargs.pop('cutout_kwargs', None)
-    if cutout_kwargs is not None: od = od.cutout(**cutout_kwargs)
+    if cutout_kwargs is not None: od = od.subsample.cutout(**cutout_kwargs)
     time = od._ds['time']
     
     # Fix colorbar
@@ -252,8 +263,6 @@ def horizontal_section(od,
                              **FuncAnimation_kwargs)
     
     return anim
-
-
 
 
 def TS_diagram(od, 
@@ -299,7 +308,7 @@ def TS_diagram(od,
     
     # First cutout and get time
     cutout_kwargs = kwargs.pop('cutout_kwargs', None)
-    if cutout_kwargs is not None: od = od.cutout(**cutout_kwargs)
+    if cutout_kwargs is not None: od = od.subsample.cutout(**cutout_kwargs)
     time = od._ds['time']
     
     # Check Temp and S
@@ -324,7 +333,7 @@ def TS_diagram(od,
         t, s = _xr.broadcast(_xr.DataArray(_np.linspace(Tlim[0], Tlim[-1], 100), dims= ('t')),
                              _xr.DataArray(_np.linspace(Slim[0], Slim[-1], 100), dims= ('s')))
         odSigma0 = _ospy.OceanDataset(_xr.Dataset({'Temp': t, 'S': s})).set_parameters(od.parameters)
-        odSigma0 = odSigma0.merge_potential_density_anomaly()
+        odSigma0 = odSigma0.compute.potential_density_anomaly()
         odSigma0._ds = odSigma0._ds.set_coords(['Temp', 'S'])
         
         # Freezing point
@@ -362,7 +371,6 @@ def TS_diagram(od,
         _warnings.warn("\n`ax` can not be provided for animations. "
                        "This function will use the current axis", stacklevel=2)
         
-    
     # Animation
     anim = _create_animation(od          = od, 
                              time        = time, 
@@ -374,3 +382,23 @@ def TS_diagram(od,
     
     return anim
     
+class _animateMethdos(object):
+    """
+    Enables use of oceanspy.animate functions as attributes on a OceanDataset.
+    For example, OceanDataset.animate.TS_diagram
+    """
+    
+    def __init__(self, od):
+        self._od = od
+
+    @_functools.wraps(TS_diagram)
+    def TS_diagram(self, **kwargs):
+        return TS_diagram(self._od, **kwargs)
+    
+    @_functools.wraps(horizontal_section)
+    def horizontal_section(self, **kwargs):
+        return horizontal_section(self._od, **kwargs)
+    
+    @_functools.wraps(vertical_section)
+    def vertical_section(self, **kwargs):
+        return vertical_section(self._od, **kwargs)

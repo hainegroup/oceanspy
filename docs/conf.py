@@ -22,6 +22,7 @@ import os
 import sys
 sys.path.insert(0, os.path.abspath('..'))
 
+
 import oceanspy
 
 # -- General configuration ---------------------------------------------
@@ -39,7 +40,7 @@ extensions = ['sphinx.ext.mathjax',
               'sphinx.ext.viewcode',
               'sphinx.ext.extlinks',
               'sphinx.ext.intersphinx',
-              'sphinx.ext.imgconverter',
+              # 'sphinx.ext.imgconverter',
               'numpydoc',
               'nbsphinx',
               'IPython.sphinxext.ipython_directive',

@@ -28,83 +28,48 @@ Attributes
     OceanDataset.grid_periodic
     OceanDataset.projection
 
-Methods
--------
+Set
+----
 
 .. autosummary::
    :toctree: generated/
    
-    OceanDataset.add_DataArray
-    OceanDataset.merge_Dataset
-    OceanDataset.to_netcdf
     OceanDataset.set_name
     OceanDataset.set_description
     OceanDataset.set_parameters
     OceanDataset.set_aliases
     OceanDataset.set_grid_coords
     OceanDataset.set_grid_periodic
-    OceanDataset.set_coords
     OceanDataset.set_projection
-    OceanDataset.create_tree
 
+Import
+------
+
+.. autosummary::
+   :toctree: generated/
+   
+    OceanDataset.import_MITgcm_rect_nc
+    OceanDataset.import_MITgcm_rect_bin
+    OceanDataset.import_MITgcm_curv_nc
+    
+Others
+------
+
+.. autosummary::
+   :toctree: generated/
+   
+    OceanDataset.merge_into_oceandataset
+    OceanDataset.to_netcdf
+    OceanDataset.create_tree
+    
 Shortcuts
 ---------
 
-
-Subsample
-^^^^^^^^^
-
 .. autosummary::
    :toctree: generated/
    
-   OceanDataset.cutout
-   OceanDataset.mooring_array
-   OceanDataset.survey_stations
-   OceanDataset.particle_properties
-
-
-Compute
-^^^^^^^
-
-.. autosummary::
-   :toctree: generated/
-   
-   OceanDataset.merge_gradient
-   OceanDataset.merge_divergence
-   OceanDataset.merge_curl
-   OceanDataset.merge_laplacian
-   OceanDataset.merge_volume_cells
-   OceanDataset.merge_volume_weighted_mean
-   OceanDataset.merge_potential_density_anomaly
-   OceanDataset.merge_Brunt_Vaisala_frequency
-   OceanDataset.merge_vertical_relative_vorticity
-   OceanDataset.merge_relative_vorticity
-   OceanDataset.merge_kinetic_energy
-   OceanDataset.merge_eddy_kinetic_energy
-   OceanDataset.merge_horizontal_divergence_velocity
-   OceanDataset.merge_shear_strain
-   OceanDataset.merge_normal_strain
-   OceanDataset.merge_Okubo_Weiss_parameter
-   OceanDataset.merge_Ertel_potential_vorticity
-   OceanDataset.merge_mooring_horizontal_volume_transport
-   OceanDataset.merge_heat_budget
-   OceanDataset.merge_salt_budget
-   OceanDataset.merge_geographical_aligned_velocities
-   OceanDataset.merge_survey_aligned_velocities
-   
-Plot
-^^^^
-
-.. autosummary::
-   :toctree: generated/
-   
-   OceanDataset.vertical_section
-   OceanDataset.horizontal_section
-   OceanDataset.time_series
-   OceanDataset.TS_diagram
-   
-   
-   
+   OceanDataset.subsample
+   OceanDataset.compute
    
    
 
@@ -114,21 +79,26 @@ Opening
 .. autosummary::
    :toctree: generated/
    
-   open_oceandataset
+    open_oceandataset
    
-Functions
+SciServer
 ---------
 
 .. autosummary::
    :toctree: generated/
    
-   open_oceandataset.from_netcdf
-   open_oceandataset.EGshelfIIseas2km_ERAI
-   open_oceandataset.EGshelfIIseas2km_ASR
-   open_oceandataset.EGshelfSJsec500m
+    open_oceandataset.get_started
+    open_oceandataset.EGshelfIIseas2km_ERAI
+    open_oceandataset.EGshelfIIseas2km_ASR
+    open_oceandataset.EGshelfSJsec500m
    
+Others
+------
    
+.. autosummary::
+   :toctree: generated/
 
+    open_oceandataset.from_netcdf
 
 
 
@@ -143,7 +113,6 @@ Subsampling
    
 Functions
 ---------
-
 .. autosummary::
    :toctree: generated/
    
@@ -162,8 +131,8 @@ Computing
    
    compute
    
-Functions
----------
+Dynamic
+-------
 
 .. autosummary::
    :toctree: generated/
@@ -172,8 +141,15 @@ Functions
    compute.divergence
    compute.curl
    compute.laplacian
-   compute.volume_cells
-   compute.volume_weighted_mean
+   compute.integral
+   compute.weighted_mean
+   
+Static
+------
+
+.. autosummary::
+   :toctree: generated/
+   
    compute.potential_density_anomaly
    compute.Brunt_Vaisala_frequency
    compute.vertical_relative_vorticity

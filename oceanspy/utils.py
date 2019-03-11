@@ -48,7 +48,7 @@ def spherical2cartesian(Y, X, R = None):
     return x, y, z
 
     
-def great_circle_path(lat1, lon1, lat2, lon2, delta_km, R = None):
+def great_circle_path(lat1, lon1, lat2, lon2, delta_km=None, R = None):
     """
     Generate a great circle trajectory specifying the distance resolution.
     
@@ -62,8 +62,9 @@ def great_circle_path(lat1, lon1, lat2, lon2, delta_km, R = None):
         Latitude of vertex 2 [degrees N]
     lon2: scalar
         Longitude of vertex 2 [degrees E]
-    delta_km: scalar
+    delta_km: scalar, None
         Distance resolution [km]
+        If None, only use vertices and return distance
     R: scalar
         Earth radius in km
         If None, use geopy default
@@ -84,83 +85,88 @@ def great_circle_path(lat1, lon1, lat2, lon2, delta_km, R = None):
     
     # Check parameters
     if not isinstance(lat1, _np.ScalarType):    
-        raise TypeError('`lat1` must be a scalar')
+        raise TypeError('`lat1` must be scalar')
     if not isinstance(lon1, _np.ScalarType):    
-        raise TypeError('`lon1` must be a scalar')
+        raise TypeError('`lon1` must be scalar')
     if not isinstance(lat2, _np.ScalarType):    
-        raise TypeError('`lat2` must be a scalar')
+        raise TypeError('`lat2` must be scalar')
     if not isinstance(lon2, _np.ScalarType):    
-        raise TypeError('`lon2` must be a scalar')
-    if not isinstance(delta_km, _np.ScalarType):    
-        raise TypeError('`delta_km` must be a scalar')
+        raise TypeError('`lon2` must be scalar')
+    if not isinstance(delta_km, (type(None), _np.ScalarType)):    
+        raise TypeError('`delta_km` must be scalar or None')
     if not isinstance(R, (_np.ScalarType, type(None))):    
-        raise TypeError('`R` must be a scalar or None')
+        raise TypeError('`R` must be scalar or None')
     if lat1==lat2 and lon1==lon2:
         raise TypeError('Vertexes are overlapping')
-    if delta_km<=0:
+    if delta_km is not None and delta_km<=0:
         raise TypeError('`delta_km` can not be zero or negative')
                         
     # Check parameters
     if R is None:
         from geopy.distance import EARTH_RADIUS
         R = EARTH_RADIUS
-    elif not isinstance(R, _np.ScalarType):
-        raise TypeError('R must be None or numpy.scalar')
     
     # Import packages
     from geopy.distance import great_circle as _great_circle
     
-    # Convert to radians
-    lat1 = _np.deg2rad(lat1); lon1 = _np.deg2rad(lon1)
-    lat2 = _np.deg2rad(lat2); lon2 = _np.deg2rad(lon2)
+    if delta_km is not None:
+        # Convert to radians
+        lat1 = _np.deg2rad(lat1); lon1 = _np.deg2rad(lon1)
+        lat2 = _np.deg2rad(lat2); lon2 = _np.deg2rad(lon2)
 
-    # Using the right-handed coordinate frame with Z toward (lat,lon)=(0,0) and 
-    # Y toward (lat,lon)=(90,0), the unit_radial of a (lat,lon) is given by:
-    # 
-    #               [ cos(lat)*sin(lon) ]
-    # unit_radial = [     sin(lat)      ]
-    #               [ cos(lat)*cos(lon) ]
-    unit_radial_1 = _np.array([_np.cos(lat1)*_np.sin(lon1), _np.sin(lat1), _np.cos(lat1)*_np.cos(lon1)])
-    unit_radial_2 = _np.array([_np.cos(lat2)*_np.sin(lon2), _np.sin(lat2), _np.cos(lat2)*_np.cos(lon2)])
+        # Using the right-handed coordinate frame with Z toward (lat,lon)=(0,0) and 
+        # Y toward (lat,lon)=(90,0), the unit_radial of a (lat,lon) is given by:
+        # 
+        #               [ cos(lat)*sin(lon) ]
+        # unit_radial = [     sin(lat)      ]
+        #               [ cos(lat)*cos(lon) ]
+        unit_radial_1 = _np.array([_np.cos(lat1)*_np.sin(lon1), _np.sin(lat1), _np.cos(lat1)*_np.cos(lon1)])
+        unit_radial_2 = _np.array([_np.cos(lat2)*_np.sin(lon2), _np.sin(lat2), _np.cos(lat2)*_np.cos(lon2)])
 
-    # Define the vector that is normal to both unit_radial_1 & unit_radial_2
-    normal_vec  = _np.cross(unit_radial_1,unit_radial_2); 
-    unit_normal = normal_vec / _np.sqrt(_np.sum(normal_vec**2))
+        # Define the vector that is normal to both unit_radial_1 & unit_radial_2
+        normal_vec  = _np.cross(unit_radial_1,unit_radial_2); 
+        unit_normal = normal_vec / _np.sqrt(_np.sum(normal_vec**2))
 
-    # Define the vector that is tangent to the great circle flight path at
-    # (lat1,lon1)
-    tangent_1_vec  = _np.cross(unit_normal,unit_radial_1)
-    unit_tangent_1 = tangent_1_vec / _np.sqrt(_np.sum(tangent_1_vec**2))
+        # Define the vector that is tangent to the great circle flight path at
+        # (lat1,lon1)
+        tangent_1_vec  = _np.cross(unit_normal,unit_radial_1)
+        unit_tangent_1 = tangent_1_vec / _np.sqrt(_np.sum(tangent_1_vec**2))
 
-    # Determine the total arc distance from 1 to 2 
-    total_arc_angle_1_to_2 = _np.arccos(unit_radial_1.dot(unit_radial_2)) # radians
+        # Determine the total arc distance from 1 to 2 
+        total_arc_angle_1_to_2 = _np.arccos(unit_radial_1.dot(unit_radial_2)) # radians
 
-    # Determine the set of arc angles to use 
-    # (approximately spaced by delta_km)
-    angs2use = _np.linspace(0,total_arc_angle_1_to_2,_np.ceil(total_arc_angle_1_to_2/(delta_km/R))); # radians
-    M = angs2use.size;
+        # Determine the set of arc angles to use 
+        # (approximately spaced by delta_km)
+        angs2use = _np.linspace(0,total_arc_angle_1_to_2, int(_np.ceil(total_arc_angle_1_to_2/(delta_km/R)))); # radians
+        M = angs2use.size;
 
-    # Now find the unit radials of the entire "trajectory"
-    #                                                              [ cos(angs2use(m)) -sin(angs2use(m)) 0 ]   [ 1 ]
-    # unit_radial_m = [unit_radial_1 unit_tangent_1 unit_normal] * [ sin(angs2use(m))  cos(angs2use(m)) 0 ] * [ 0 ]
-    #                                                              [        0                 0         1 ]   [ 0 ]
-    # equals
-    #                                                              [ cos(angs2use(m)) ]
-    # unit_radial_m = [unit_radial_1 unit_tangent_1 unit_normal] * [ sin(angs2use(m)) ]
-    #                                                              [        0         ]
-    # equals
-    #
-    # unit_radial_m = [unit_radial_1*cos(angs2use(m)) + unit_tangent_1*sin(angs2use(m)) + 0]
-    #
-    # unit_radials is a 3xM array of M unit radials
-    unit_radials = _np.array([unit_radial_1]).transpose().dot(_np.ones((1,M))) *\
-                   _np.ones((3,1)).dot(_np.array([_np.cos(angs2use)])) +\
-                   _np.array([unit_tangent_1]).transpose().dot(_np.ones((1,M))) *\
-                   _np.ones((3,1)).dot(_np.array([_np.sin(angs2use)]))
+        # Now find the unit radials of the entire "trajectory"
+        #                                                              [ cos(angs2use(m)) -sin(angs2use(m)) 0 ]   [ 1 ]
+        # unit_radial_m = [unit_radial_1 unit_tangent_1 unit_normal] * [ sin(angs2use(m))  cos(angs2use(m)) 0 ] * [ 0 ]
+        #                                                              [        0                 0         1 ]   [ 0 ]
+        # equals
+        #                                                              [ cos(angs2use(m)) ]
+        # unit_radial_m = [unit_radial_1 unit_tangent_1 unit_normal] * [ sin(angs2use(m)) ]
+        #                                                              [        0         ]
+        # equals
+        #
+        # unit_radial_m = [unit_radial_1*cos(angs2use(m)) + unit_tangent_1*sin(angs2use(m)) + 0]
+        #
+        # unit_radials is a 3xM array of M unit radials
+        unit_radials = _np.array([unit_radial_1]).transpose().dot(_np.ones((1,M))) *\
+                       _np.ones((3,1)).dot(_np.array([_np.cos(angs2use)])) +\
+                       _np.array([unit_tangent_1]).transpose().dot(_np.ones((1,M))) *\
+                       _np.ones((3,1)).dot(_np.array([_np.sin(angs2use)]))
 
-    # Convert to latitudes and longitudes
-    lats = _np.rad2deg(_np.arcsin(unit_radials[1,:]))
-    lons = _np.rad2deg(_np.arctan2(unit_radials[0,:],unit_radials[2,:]))
+        # Convert to latitudes and longitudes
+        lats = _np.rad2deg(_np.arcsin(unit_radials[1,:]))
+        lons = _np.rad2deg(_np.arctan2(unit_radials[0,:],unit_radials[2,:]))
+    
+    else:
+        
+        # Use input lon and lat
+        lats = _np.concatenate((_np.reshape(lat1, 1), _np.reshape(lat2, 1)))
+        lons = _np.concatenate((_np.reshape(lon1, 1), _np.reshape(lon2, 1)))
     
     # Compute distance
     dists = _np.zeros(lons.shape)
@@ -170,10 +176,11 @@ def great_circle_path(lat1, lon1, lat2, lon2, delta_km, R = None):
         dists[i] = _great_circle(coord1,coord2, radius = R).km
     dists = _np.cumsum(dists)
     
+        
     return lats, lons, dists
 
 
-def cartesian_path(x1, y1, x2, y2, delta):
+def cartesian_path(x1, y1, x2, y2, delta=None):
     """
     Generate a trajectory specifying the distance resolution.
     
@@ -189,7 +196,7 @@ def cartesian_path(x1, y1, x2, y2, delta):
         y coordinate of vertex 2 
     delta: scalar
         Distance resolution (same units of x and y)
-        
+        If None, only use vertices and return distance
     Returns
     -------
     xs: 1D numpy.ndarray
@@ -202,23 +209,26 @@ def cartesian_path(x1, y1, x2, y2, delta):
     
     # Check parameters
     if not isinstance(x1, _np.ScalarType):    
-        raise TypeError('`x1` must be a scalar')
+        raise TypeError('`x1` must be scalar')
     if not isinstance(y1, _np.ScalarType):    
-        raise TypeError('`y1` must be a scalar')
+        raise TypeError('`y1` must be scalar')
     if not isinstance(x2, _np.ScalarType):    
-        raise TypeError('`x2` must be a scalar')
+        raise TypeError('`x2` must be scalar')
     if not isinstance(y2, _np.ScalarType):    
-        raise TypeError('`y2` must be a scalar')
-    if not isinstance(delta, _np.ScalarType):    
-        raise TypeError('`delta` must be a scalar')
+        raise TypeError('`y2` must be scalar')
+    if not isinstance(delta, (type(None), _np.ScalarType)):    
+        raise TypeError('`delta` must be scalar or None')
     if x1==x2 and x1==x2:
         raise TypeError('Vertexes are overlapping')
-    if delta<=0:
+    if delta is not None and delta<=0:
         raise TypeError('`delta` can not be zero or negative')
         
     # Interpolate
     dist_tot = _np.sqrt((x2 - x1)**2 + (y2 - y1)**2)
-    coefs    = _np.linspace(0, 1, round(dist_tot/delta))
+    if delta is None:
+        coefs = _np.linspace(0, 1, 2)
+    else:
+        coefs = _np.linspace(0, 1, round(dist_tot/delta))
     xs       = x1 + coefs * (x2 - x1)
     ys       = y1 + coefs * (y2 - y1)
     dists    = coefs*dist_tot
