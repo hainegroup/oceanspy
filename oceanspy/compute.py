@@ -842,7 +842,7 @@ def weighted_mean(od, varNameList=None, axesList=None, storeWeights=True, aliase
         
         # Area
         if set(['X', 'Y']).issubset(axesList):
-            
+
             # Add missing variables
             areaList = ['rA', 'rAw', 'rAs', 'rAz']
             od = _add_missing_variables(od, areaList)
@@ -866,7 +866,7 @@ def weighted_mean(od, varNameList=None, axesList=None, storeWeights=True, aliase
                 if set(od._ds[y].dims).issubset(wMean.dims): 
                     weight   = od._ds[y] * weight
                     units    = units + 1
-                    dims2ave = list(od._ds[y].dims)
+                    dims2ave = dims2ave + [dim for dim in od._ds[y].dims if dim[0]=='Y']
                     foundY   = True
                     continue
         
@@ -881,7 +881,7 @@ def weighted_mean(od, varNameList=None, axesList=None, storeWeights=True, aliase
                 if set(od._ds[x].dims).issubset(wMean.dims): 
                     weight   = od._ds[x] * weight
                     units    = units + 1
-                    dims2ave = dims2ave + list(od._ds[x].dims)
+                    dims2ave = dims2ave + [dim for dim in od._ds[x].dims if dim[0]=='X']
                     foundX   = True
                     continue
         
@@ -942,6 +942,10 @@ def weighted_mean(od, varNameList=None, axesList=None, storeWeights=True, aliase
         else: storeWeights = False
 
         # Store wMean
+        if 'long_name' in attrs:
+            attrs['long_name']   = '<{}>'.format(attrs['long_name'])
+        if 'description' in attrs:
+            attrs['description'] = '<{}>'.format(attrs['description'])
         wMean.attrs = attrs
         means['w_mean_'+varNameOUT] = wMean
         
@@ -1090,7 +1094,7 @@ def integral(od, varNameList=None, axesList=None, aliased = True):
             for y in yList:
                 if set(od._ds[y].dims).issubset(Int.dims): 
                     delta = delta * od._ds[y]
-                    dims2sum = dims2sum + list(od._ds[y].dims)
+                    dims2sum = dims2sum + [dim for dim in od._ds[y].dims if dim[0]=='Y']
                     suf   = suf  + ['dY']
                     units = units+ ['m']
                     foundY  = True
@@ -1106,7 +1110,7 @@ def integral(od, varNameList=None, axesList=None, aliased = True):
             for x in xList:
                 if set(od._ds[x].dims).issubset(Int.dims): 
                     delta  = delta * od._ds[x]
-                    dims2sum = dims2sum + list(od._ds[x].dims)
+                    dims2sum = dims2sum + [dim for dim in od._ds[x].dims if dim[0]=='X']
                     suf    = suf  + ['dX']
                     units  = units+ ['m']
                     foundX = True

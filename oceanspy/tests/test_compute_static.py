@@ -1,7 +1,7 @@
 import pytest
 import xarray as xr
 import copy
-from .datasets import oceandatasets
+from .datasets import oceandatasets, MITgcmVarDims
 from oceanspy.compute import *
 from oceanspy import utils
 from numpy.random import rand, uniform
@@ -11,107 +11,7 @@ import numpy as np
 # Add variables
 od_in = copy.copy(oceandatasets['MITgcm_rect_nc'])
 
-# Add Temp and S
-varDims = {
-'Z': ['Z'],
-'Zp1': ['Zp1'],
-'Zu': ['Zu'],
-'Zl': ['Zl'],
-'drC': ['Zp1'],
-'drF': ['Z'],
-'X': ['X'],
-'Y': ['Y'],
-'XC': ['Y', 'X'],
-'YC': ['Y', 'X'],
-'Xp1': ['Xp1'],
-'XU': ['Y', 'Xp1'],
-'YU': ['Y', 'Xp1'],
-'Yp1': ['Yp1'],
-'XV': ['Yp1', 'X'],
-'YV': ['Yp1', 'X'],
-'XG': ['Yp1', 'Xp1'],
-'YG': ['Yp1', 'Xp1'],
-'dxC': ['Y', 'Xp1'],
-'dyC': ['Yp1', 'X'],
-'dxF': ['Y', 'X'],
-'dyF': ['Y', 'X'],
-'dxG': ['Yp1', 'X'],
-'dyG': ['Y', 'Xp1'],
-'dxV': ['Yp1', 'Xp1'],
-'dyU': ['Yp1', 'Xp1'],
-'rA': ['Y', 'X'],
-'rAw': ['Y', 'Xp1'],
-'rAs': ['Yp1', 'X'],
-'rAz': ['Yp1', 'Xp1'],
-'fCori': ['Y', 'X'],
-'fCoriG': ['Yp1', 'Xp1'],
-'R_low': ['Y', 'X'],
-'Ro_surf': ['Y', 'X'],
-'Depth': ['Y', 'X'],
-'HFacC': ['Z', 'Y', 'X'],
-'HFacW': ['Z', 'Y', 'Xp1'],
-'HFacS': ['Z', 'Yp1', 'X'],
-'KPPGHAT': ['Z', 'Y', 'X'],
-'KPPHBL': ['Y', 'X'],
-'KPPdiffKzS': ['Z', 'Y', 'X'],
-'KPPdiffKzT': ['Z', 'Y', 'X'],
-'KPPviscAz': ['Z', 'Y', 'X'],
-'EXFaqh': ['time', 'Y', 'X'],
-'EXFatemp': ['time', 'Y', 'X'],
-'EXFempmr': ['time', 'Y', 'X'],
-'EXFevap': ['time', 'Y', 'X'],
-'EXFhl': ['time', 'Y', 'X'],
-'EXFhs': ['time', 'Y', 'X'],
-'EXFlwnet': ['time', 'Y', 'X'],
-'EXFpreci': ['time', 'Y', 'X'],
-'EXFpress': ['time', 'Y', 'X'],
-'EXFqnet': ['time', 'Y', 'X'],
-'EXFroff': ['time', 'Y', 'X'],
-'EXFroft': ['time', 'Y', 'X'],
-'EXFsnow': ['time', 'Y', 'X'],
-'EXFswnet': ['time', 'Y', 'X'],
-'EXFtaux': ['time', 'Y', 'X'],
-'EXFtauy': ['time', 'Y', 'X'],
-'EXFuwind': ['time', 'Y', 'X'],
-'EXFvwind': ['time', 'Y', 'X'],
-'time': ['time'],
-'Eta': ['time', 'Y', 'X'],
-'S': ['time', 'Z', 'Y', 'X'],
-'Temp': ['time', 'Z', 'Y', 'X'],
-'U': ['time', 'Z', 'Y', 'Xp1'],
-'V': ['time', 'Z', 'Yp1', 'X'],
-'W': ['time', 'Zl', 'Y', 'X'],
-'KPPhbl': ['time', 'Y', 'X'],
-'MXLDEPTH': ['time', 'Y', 'X'],
-'RHOAnoma': ['time', 'Z', 'Y', 'X'],
-'SIarea': ['time', 'Y', 'X'],
-'SIheff': ['time', 'Y', 'X'],
-'SIhsnow': ['time', 'Y', 'X'],
-'SIhsalt': ['time', 'Y', 'X'],
-'SIuice': ['time', 'Y', 'Xp1'],
-'SIvice': ['time', 'Yp1', 'X'],
-'TRELAX': ['time', 'Y', 'X'],
-'SRELAX': ['time', 'Y', 'X'],
-'momVort3': ['time', 'Z', 'Yp1', 'Xp1'],
-'oceTAUX': ['time', 'Y', 'Xp1'],
-'oceTAUY': ['time', 'Yp1', 'X'],
-'oceFWflx': ['time', 'Y', 'X'],
-'oceSflux': ['time', 'Y', 'X'],
-'oceQnet': ['time', 'Y', 'X'],
-'oceQsw': ['time', 'Y', 'X'],
-'oceFreez': ['time', 'Y', 'X'],
-'oceSPflx': ['time', 'Y', 'X'],
-'oceSPDep': ['time', 'Y', 'X'],
-'phiHyd': ['time', 'Z', 'Y', 'X'],
-'phiHydLow': ['time', 'Y', 'X'],
-'surForcT': ['time', 'Y', 'X'],
-'surForcS': ['time', 'Y', 'X'],
-'time_midp': ['time_midp'],
-'AngleCS':   ['Y', 'X'],
-'AngleSN':   ['Y', 'X'],}
-
-
-
+# Add random values
 varNeeded = ['Temp', 'S', 
              'HFacC', 'HFacW', 'HFacS',
              'rAz', 'rA',
@@ -122,7 +22,7 @@ varNeeded = ['Temp', 'S',
              'AngleCS', 'AngleSN']
 
 ds_dict = {}
-for name, dimList in varDims.items():
+for name, dimList in MITgcmVarDims.items():
     if name not in varNeeded: continue
     dimSize = [len(od_in.dataset[dim]) for dim in dimList]
     if name in ['AngleCS', 'AngleSN']:
