@@ -1,8 +1,8 @@
 .. _readme:
 
-============================================================
-OceanSpy - A Python Package for Oceanographic Investigations
-============================================================
+================================================================================
+OceanSpy - A Python package for easy ocean model data analysis and visualization
+================================================================================
 
 .. list-table::
     :stub-columns: 1
@@ -39,18 +39,19 @@ OceanSpy - A Python Package for Oceanographic Investigations
    :alt: License
    :target: https://github.com/malmans2/oceanspy
 
+**OceanSpy** is an open-source and user-friendly Python package that aims to enable scientists and interested amateurs to use oceanographic data sets with out-of-the-box analysis tools. 
+OceanSpy builds on software packages developed by the Pangeo_ community, in particular xarray_, dask_, and xgcm_. 
+It can be used as a stand-alone package if the user has access to oceanographic model output, or it can be run on the Johns Hopkins University SciServer_ system, where a year-long high-resolution regional model solution is publicly available; 
+moreover, the analysis can be done on the SciServer system, negating the need for the user to own a computing cluster or even download the data.   
 
-**OceanSpy** is an open-source and user-friendly Python package that aims to enable scientists and interested amateurs to use oceanographic datasets as virtual sandboxes.
-OceanSpy builds on software packages developed by the Pangeo_ community, and exploits the Johns Hopkins University SciServer_ system.
+OceanSpy aims to fill two needs:
 
-Our goal is to create a collaborative research environment where users can access and process high-resolution datasets.
-For example, OceanSpy and SciServer allow to quickly analyze important aspects of model events in conjunction with observational data.
-
-OceanSpy is currently suited to facilitate extracting information from Ocean General Circulation Models set up and run by the research group of `Prof. Tom Haine`_.
-Users can either download subsets of data on their own machines, or run OceanSpy online storing post-processing files on SciServer.
+1. Extraction of model data for direct comparison with observational programs.  
+2. Facilitating a complete 4D analysis that complements in situ or remote observations, and enable a kinematic and dynamic analysis of diagnostics that cannot be obtained from observations directly.   
 
 
-.. _Prof. Tom Haine: http://sites.krieger.jhu.edu/haine
 .. _Pangeo: http://pangeo-data.github.io
+.. _xarray: http://xarray.pydata.org
+.. _dask: https://dask.org
+.. _xgcm: https://xgcm.readthedocs.io
 .. _SciServer: http://www.sciserver.org
-

@@ -11,7 +11,7 @@ with open('README.rst') as readme_file:
 with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
-requirements = ['numpy', 
+requirements = ['dask', 
                 'xarray', 
                 'xgcm']
 
@@ -31,7 +31,7 @@ setup(
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
     ],
-    description="A Python package to extract information from ocean model outputs stored on SciServer",
+    description="OceanSpy: A Python package for easy ocean model data analysis and visualization",
     install_requires=requirements,
     license="MIT license",
     long_description=readme + '\n\n' + history,

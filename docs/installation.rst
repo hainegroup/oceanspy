@@ -28,9 +28,6 @@ Several Apps_ are available on SciServer: use Compute to analyze data with inter
 .. note::
     Users won't need to install OceanSpy and its dependencies on SciServer in the future.  
 
-.. warning::
-    OceanSpy's interactive plots are currently available for Classical Jupyter only, but they will be available on JupyterLab in the future.
-
 Install OceanSpy from Terminal
 ------------------------------
 The easiest way to install most of OceanSpy's dependencies is to use conda-forge_.
@@ -40,14 +37,8 @@ First open a terminal (Jupyter Notebook: click on ``New`` + ``Terminal``), then 
 
     conda config --remove channels defaults
     conda config --add channels conda-forge
-    conda install dask distributed bottleneck netCDF4 xarray cartopy esmpy ffmpeg
-    pip install geopy xgcm xesmf xmitgcm
-
-To install OceanSpy, run this command in your terminal:
-
-.. code-block:: bash
-
-    pip install oceanspy
+    conda install -y dask distributed bottleneck netCDF4 xarray cartopy esmpy ffmpeg cmocean eofs
+    pip install geopy xgcm xesmf xmitgcm oceanspy
 
 This is the preferred method to install OceanSpy, as it will always install the most recent stable release.
 Run the following command to install the latest version:
@@ -56,9 +47,6 @@ Run the following command to install the latest version:
 
     pip install git+https://github.com/malmans2/oceanspy.git
 
-.. note::
-    Use ``Shift``\+right click to paste into JupyterLab terminal.  
-    
 Install from Jupyter Notebook
 -----------------------------
 
@@ -70,7 +58,7 @@ This cell installs OceanSpy and its dependencies from a Jupyter Notebook:
     %%bash
     conda config --remove channels defaults
     conda config --add channels conda-forge
-    conda install dask distributed bottleneck netCDF4 xarray cartopy esmpy ffmpeg
+    conda install dask distributed bottleneck netCDF4 xarray cartopy esmpy ffmpeg cmocean eofs
     pip install geopy xgcm xesmf xmitgcm oceanspy
 
 .. note::
