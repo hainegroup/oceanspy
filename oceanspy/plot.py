@@ -1,6 +1,7 @@
 """
 Plot using OceanDataset objects.
 """
+# TODO: add test that check squeezing!
 
 import xarray    as _xr
 import oceanspy  as _ospy
@@ -80,6 +81,7 @@ def TS_diagram(od,
     See also
     --------
     subsample.coutout
+    animate.TS_diagram
     
     References
     ----------
@@ -423,6 +425,7 @@ def horizontal_section(od,
     See also
     --------
     subsample.coutout
+    animate.horizontal_section
     
     References
     ----------
@@ -481,6 +484,9 @@ def horizontal_section(od,
     # Apply mean and sum
     da, varName = _compute_mean_and_int(od, varName, meanAxes, intAxes)
     
+    # SQUEEZE! Otherwise animation don't show up because xarray make a faceted plot
+    da = da.squeeze()
+    
     # Get dimension names
     X_name = [dim for dim in od.grid_coords['X'] if dim in da.dims][0]
     Y_name = [dim for dim in od.grid_coords['Y'] if dim in da.dims][0]
@@ -490,6 +496,9 @@ def horizontal_section(od,
 
         # Apply mean and sum
         da_contour, contourName = _compute_mean_and_int(od, contourName, meanAxes, intAxes)
+        
+        # SQUEEZE! Otherwise animation don't show up because xarray make a faceted plot
+        da_contour = da_contour.squeeze()
         
         # Get dimension names
         X_name_cont = [dim for dim in od.grid_coords['X'] if dim in da_contour.dims][0]
@@ -614,7 +623,7 @@ def horizontal_section(od,
 
 def vertical_section(od, 
                      varName, 
-                     plotType       = 'contourf',
+                     plotType       = 'pcolormesh',
                      use_dist       = True,
                      subsampMethod  = None,
                      contourName    = None,
@@ -670,6 +679,9 @@ def vertical_section(od,
     See also
     --------
     subsample.coutout
+    subsample.mooring_array
+    subsample.survey_stations
+    animate.vertical_section
     
     References
     ----------
@@ -742,10 +754,21 @@ def vertical_section(od,
     da = od.dataset[varName]
     if 'time' in da.dims or 'time_midp' in da.dims:
         da, varName = _compute_mean_and_int(od, varName, meanAxes, intAxes)
+        
+    # SQUEEZE! Otherwise animation don't show up because xarray make a faceted plot
     da = da.squeeze()
     
     # Get dimension names
+    # TODO: make interpolation work with aliases
+    
     if 'mooring' in od.grid_coords:
+        if 'Xp1' in da.dims:
+            print('Regridding [{}] along [{}]-axis.'.format(varName, 'X'))
+            da = od.grid.interp(da, 'X')
+        if 'Yp1' in da.dims:
+            print('Regridding [{}] along [{}]-axis.'.format(varName, 'Y'))
+            da = od.grid.interp(da, 'Y')
+        da = da.squeeze()
         hor_name = [dim for dim in od.grid_coords['mooring'] if dim in da.dims][0]
     elif 'station' in od.grid_coords:
         hor_name = [dim for dim in od.grid_coords['station'] if dim in da.dims][0]
@@ -761,10 +784,20 @@ def vertical_section(od,
         da_contour = od.dataset[contourName]
         if 'time' in da_contour.dims or 'time_midp' in da_contour.dims:
             da_contour, contourName = _compute_mean_and_int(od, contourName, meanAxes, intAxes)
+        
+        # SQUEEZE! Otherwise animation don't show up because xarray make a faceted plot
         da_contour = da_contour.squeeze()
 
         # Get dimension names
+        # TODO: make interpolation work with aliases
         if 'mooring' in od.grid_coords:
+            if 'Xp1' in da_contour.dims:
+                print('Regridding [{}] along [{}]-axis.'.format(contourName, 'X'))
+                da_contour = od.grid.interp(da_contour, 'X')
+            if 'Yp1' in da.dims:
+                print('Regridding [{}] along [{}]-axis.'.format(contourName, 'Y'))
+                da_contour = od.grid.interp(da_contour, 'Y')
+            da_contour = da_contour.squeeze()
             hor_name_cont = [dim for dim in od.grid_coords['mooring'] if dim in da_contour.dims][0]
         elif 'station' in od.grid_coords:
             hor_name_cont = [dim for dim in od.grid_coords['station'] if dim in da_contour.dims][0]
@@ -863,7 +896,7 @@ class _plotMethdos(object):
         return vertical_section(self._od, **kwargs)
 
     
-    
+# TODO: document this private functions!    
     
 def _check_mean_and_int_axes(od, meanAxes, intAxes, exclude):
 
