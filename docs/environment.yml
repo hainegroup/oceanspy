@@ -12,5 +12,6 @@ dependencies:
   - sphinx_rtd_theme
   - nbsphinx
   - pip:
+    - sphinxcontrib-svg2pdfconverter
     - xgcm
     - pyyaml
