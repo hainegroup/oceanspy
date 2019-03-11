@@ -13,7 +13,7 @@ DEFAULT_PARAMETERS = {'rSphere'    : 6.371E3,                # km or None: carte
                       'eps_nh'     : 0,                      # 0 is hydrostatic, 1 is non-hydrostatic
                       'omega'      : 7.292123516990375E-05,  # rad/s
                       'c_p'        : 3.986E3,                # specific heat [J/kg/K]
-                      'tempFrz0'   : 9.01E-02,               # freezing temp. of sea water (intercept)
+                      'tempFrz0'   : 0,#9.01E-02,               # freezing temp. of sea water (intercept)
                       'dTempFrz_dS': -5.75E-02,              # freezing temp. of sea water (slope)
                       }
 

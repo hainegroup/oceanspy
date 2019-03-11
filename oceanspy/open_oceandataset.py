@@ -32,7 +32,7 @@ def from_netcdf(path):
         raise TypeError('`path` must be str')
     
     # Open
-    print('Opening dataset from [{}]'.format(path))
+    print('Opening dataset from [{}].'.format(path))
     ds = _xr.open_dataset(path)
     
     # Put back coordinates attribute that to_netcdf didn't like
@@ -64,7 +64,7 @@ def get_started():
     # Message
     name = 'Getting Started with OceanSpy'
     description = 'A small cutout from EGshelfIIseas2km_ASR.'
-    print('Opening [{}]:\n[{}]'.format(name, description))
+    print('Opening [{}]:\n[{}].'.format(name, description))
     
     # Paths
     gridpath = '/home/idies/workspace/OceanCirculation/exp_ASR/grid_glued.nc'
@@ -202,7 +202,7 @@ def EGshelfIIseas2km_ERAI(daily     = False,
     # Message
     name = 'EGshelfIIseas2km_ERAI'
     description = 'High-resolution (~2km) numerical simulation covering the east Greenland shelf (EGshelf), and the Iceland and Irminger Seas (IIseas). Citation: Almansi et al., 2017 - JPO.'
-    print('Opening [{}]:\n[{}]'.format(name, description))
+    print('Opening [{}]:\n[{}].'.format(name, description))
     
     # Open, concatenate, and merge
     gridset = _xr.open_dataset(gridpath,
@@ -332,7 +332,7 @@ def EGshelfIIseas2km_ASR(cropped   = False,
     # Message
     name = 'EGshelfIIseas2km_ASR'
     description = 'High-resolution (~2km) numerical simulation covering the east Greenland shelf (EGshelf), and the Iceland and Irminger Seas (IIseas). Citation: Almansi et al., 2017 - JPO.'
-    print('Opening [{}]:\n[{}]'.format(name, description))
+    print('Opening [{}]:\n[{}].'.format(name, description))
     
     # Open, concatenate, and merge
     gridset = _xr.open_dataset(gridpath,
@@ -463,7 +463,7 @@ def exp_Arctic_Control(gridpath  = '/home/idies/workspace/OceanCirculation/exp_A
     # Message
     name = 'exp_Arctic_Control'
     description = 'Curvilinear grid test. Setup by Dr. Renske Gelderloos'
-    print('Opening [{}]:\n[{}]'.format(name, description))
+    print('Opening [{}]:\n[{}].'.format(name, description))
     
     # TODO: inform Renske!
     # It looks like there's something weird with SIGMA0 and xarray can't infer the concat dimension.
@@ -584,7 +584,7 @@ def EGshelfSJsec500m(Hydrostatic = True,
     # Message
     name = 'EGshelfSJsec500m'
     description = 'Very high-resolution (500m) numerical simulation covering the east Greenland shelf (EGshelf) and the Spill Jet section (SJsec). Citation: Magaldi and Haine, 2015 - DSR.'
-    print('Opening [{}]:\n[{}]'.format(name, description))
+    print('Opening [{}]:\n[{}].'.format(name, description))
     
     # We can't open everything at once because: EXF and state have different frequency, 
     # and PH and PHL are missing the first iter.

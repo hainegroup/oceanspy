@@ -160,7 +160,7 @@ def cutout(od,
         dropAxes = {}
             
     # Message
-    print('Cutting out the oceandataset')
+    print('Cutting out the oceandataset.')
                      
     # Unpack from oceandataset
     od = _copy.copy(od)
@@ -534,7 +534,7 @@ def mooring_array(od, Ymoor, Xmoor,
     od = od.subsample.cutout(**kwargs)
 
     # Message
-    print('Extracting mooring array')
+    print('Extracting mooring array.')
     
     # Unpack ds
     ds = od._ds
@@ -842,7 +842,7 @@ def survey_stations(od, Ysurv, Xsurv, delta=None,
     od = od.subsample.cutout(**kwargs)
     
     # Message
-    print('Carrying out survey') 
+    print('Carrying out survey.') 
     
     # Unpack ds and grid
     ds   = od._ds
@@ -871,10 +871,10 @@ def survey_stations(od, Ysurv, Xsurv, delta=None,
     # Interpolate
     regridder = _xe.Regridder(ds_in, ds, **xesmf_regridder_kwargs) 
     interp_vars = [var for var in ds_in.variables if var not in ['lon', 'lat', 'X', 'Y']]
-    print('Variables to interpolate: {}'.format([var for var in interp_vars if set(['X', 'Y']).issubset(ds_in[var].dims)]))
+    print('Variables to interpolate: {}.'.format([var for var in interp_vars if set(['X', 'Y']).issubset(ds_in[var].dims)]))
     for var in interp_vars:
         if set(['X', 'Y']).issubset(ds_in[var].dims):
-            print('Interpolating [{}]'.format(var))
+            print('Interpolating [{}].'.format(var))
             attrs   = ds_in[var].attrs
             ds[var] = regridder(ds_in[var])
             ds[var].attrs = attrs

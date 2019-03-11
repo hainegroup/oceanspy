@@ -11,6 +11,7 @@ from . import utils     as _utils
 
 from . subsample import _subsampleMethdos
 from . compute   import _computeMethdos
+from . plot      import _plotMethdos
 
 try: import cartopy.crs as _ccrs
 except ImportError: pass
@@ -928,7 +929,6 @@ class OceanDataset:
                 raise ValueError("xarray.DataArray doesn't have a name. Set it using da.rename()")
             else:
                 obj = obj.to_dataset()
-                print(obj)
                 
         if not isinstance(overwrite, bool):
             raise TypeError("`overwrite` must be bool")
@@ -1150,7 +1150,7 @@ class OceanDataset:
     @property
     def subsample(self):
         """
-        Access subsampling functions
+        Access subsampling functions.
         
         Examples
         --------
@@ -1173,124 +1173,22 @@ class OceanDataset:
         """
         
         return _computeMethdos(self)
+    
+    @property
+    def plot(self):
+        """
+        Access plotting functions.
+        
+        Examples
+        --------
+        >>> od = ospy.open_oceandataset.get_started()
+        >>> od.plot.TS_diagram(meanAxes=['time', 'Z'], cutout_kwargs={'ZRange': [0, -100]})
+        """
+        
+        return _plotMethdos(self)
 
         
-    # ------------
-    # plot
     
-    def vertical_section(self, animate=False, **kwargs):
-        """
-        Shortcut for plot.vertical_section or animate.vertical_section.
-        
-        Parameters
-        ----------
-        animate: bool
-            False: use plot.vertical_section
-            True:  use animate.vertical_section
-        **kwargs: 
-            Keyword arguments for plot.vertical_section
-            
-        Returns
-        -------
-        Axes or Animation object
-    
-        See Also
-        --------
-        plot.vertical_section
-        animate.vertical_section
-        """
-        
-        # Check parameters
-        if not isinstance(animate, bool):
-            raise TypeError('`animate` must be bool')
-            
-        if animate:
-            return _animate.vertical_section(self, **kwargs)
-        else:
-            return _plot.vertical_section(self, **kwargs)
-        
-    
-    def horizontal_section(self, animate=False, **kwargs):
-        """
-        Shortcut for plot.horizontal_section or animate.horizontal_section.
-        
-        Parameters
-        ----------
-        animate: bool
-            False: use plot.horizontal_section
-            True:  use animate.horizontal_section
-        **kwargs: 
-            Keyword arguments for plot.horizontal_section
-            
-        Returns
-        -------
-        Axes or Animation object
-    
-        See Also
-        --------
-        plot.horizontal_section
-        animate.horizontal_section
-        """
-        
-        # Check parameters
-        if not isinstance(animate, bool):
-            raise TypeError('`animate` must be bool')
-            
-        if animate:
-            return _animate.horizontal_section(self, **kwargs)
-        else:
-            return _plot.horizontal_section(self, **kwargs)
-    
-    def time_series(self, **kwargs):
-        """
-        Shortcut for plot.time_series.
-        
-        Parameters
-        ----------
-        **kwargs: 
-            Keyword arguments for plot.time_series
-            
-        Returns
-        -------
-        Axes object
-    
-        See Also
-        --------
-        plot.time_series
-        """
-                
-        return _plot.time_series(self, **kwargs)
-    
-    def TS_diagram(self, animate=False, **kwargs):
-        """
-        Shortcut for plot.TS_diagram or animate.TS_diagram.
-        
-        Parameters
-        ----------
-        animate: bool
-            False: use plot.TS_diagram
-            True:  use animate.TS_diagram
-        **kwargs: 
-            Keyword arguments for plot.TS_diagram
-            
-        Returns
-        -------
-        Axes or Animation object
-    
-        See Also
-        --------
-        plot.TS_diagram
-        animate.TS_diagram
-        """
-        
-        # Check parameters
-        if not isinstance(animate, bool):
-            raise TypeError('`animate` must be bool')
-            
-        if animate:
-            return _animate.TS_diagram(self, **kwargs)
-        else:
-            return _plot.TS_diagram(self, **kwargs)
 
         
         
@@ -1356,6 +1254,5 @@ def _create_grid(dataset, coords, periodic):
         grid = None
         
     return grid
-
 
 
