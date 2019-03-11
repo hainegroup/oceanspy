@@ -4,14 +4,7 @@
 History
 =======
 
-0.0.10 (2018-08-09)
+0.0.11 (2019-03-11)
 -------------------
 
-* 1st version for SciServer image
-* PV bugs fixed
-* Doc OK
-
-0.0.9 (2018-08-07)
-------------------
-
-* OceanSpy skeleton: start collaborating with Haine group.
+* Almost ready for dissemination
