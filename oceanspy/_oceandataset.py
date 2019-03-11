@@ -3,14 +3,27 @@ import copy     as _copy
 import xgcm     as _xgcm
 import numpy    as _np
 import warnings as _warnings
-from . import subsample as _subsample
+import sys      as _sys
 from . import compute   as _compute
 from . import plot      as _plot
 from . import animate   as _animate
 from . import utils     as _utils
 
-# TODO: add parameters check in set_parameters
-# TODO: add more xgcm options. E.g., boundary method.
+from . subsample import _subsampleMethdos
+from . compute   import _computeMethdos
+from . plot      import _plotMethdos
+from . animate   import _animateMethdos
+
+try: import cartopy.crs as _ccrs
+except ImportError: pass
+try: from scipy import spatial as _spatial
+except ImportError: pass
+
+# TODO: add more xgcm options. E.g., default boundary method.
+# TODO: add attributes to new coordinates (XU, XV, ...)
+# TODO: implement xgcm autogenerate in _set_coords, set_grid_coords, set_coords when released
+# TODO: _create_grid will be useless with the future release of xgcm. We will pass dictionary in xgcm.Grid,
+#       and we can have the option of usining comodo attributes (currently cleaned up so switched off)
 
 class OceanDataset:
     """
@@ -22,9 +35,7 @@ class OceanDataset:
     """
     
     def __init__(self, 
-                 dataset,
-                 name = None,
-                 description = None):
+                 dataset):
         """
         Parameters
         ----------
@@ -66,13 +77,13 @@ class OceanDataset:
         
         main_info = ['<oceanspy.OceanDataset>']
         main_info.append('\nMain attributes:')
-        if self.dataset:
+        if self.dataset is not None:
             main_info.append("   .dataset: %s"    % self.dataset.__repr__()[self.dataset.__repr__().find('<'):
                                                                             self.dataset.__repr__().find('>')+1]) 
-        if self.grid_coords:
+        if self.grid is not None:
             main_info.append("   .grid: %s"       % self.grid.__repr__()[self.grid.__repr__().find('<'):
                                                                          self.grid.__repr__().find('>')+1]) 
-        if self.projection:
+        if self.projection is not None:
             main_info.append("   .projection: %s" % self.projection.__repr__()[self.projection.__repr__().find('<'):
                                                                                self.projection.__repr__().find('>')+1]) 
             
@@ -95,7 +106,194 @@ class OceanDataset:
             info = info+'\n'.join(more_info)
         return info
             
+    # ==================================
+    # IMPORT (used by open_oceandataset)
+    # ==================================
     
+    def _shift_averages(self):
+        """
+        Shift average variables to time_midp.
+        Average variables must have attribute original_output = 'average'.
+        """
+        for var in self._ds.data_vars:
+            original_output = self._ds[var].attrs.pop('original_output', None)
+            if original_output == 'average':
+                self._ds[var] = self._ds[var].drop('time').isel(time=slice(1, None)).rename({'time': 'time_midp'})
+            if original_output is not None:
+                self._ds[var].attrs['original_output'] = original_output
+        return self
+    
+    def _set_coords(self, fillna=False, coords1Dfrom2D=False, coords2Dfrom1D=False, coordsUVfromG=False):
+        """
+        Set dataset coordinates: dimensions + 2D horizontal coordinates.        
+        
+        Parameters
+        ----------
+        fillna: bool
+            If True, fill NaNs in 2D coordinates propagating backward and forward.  
+        coords1Dfrom2D: bool
+            If True, compute 1D coordinates from 2D coordinates (means). 
+            Use with rectilinear grid only!
+        coords2Dfrom1D: bool
+            If True, compute 2D coordinates from 1D coordinates (brodacast). 
+        coordsUVfromCG: bool
+            If True, compute missing coords (U and V points) from G points.
+        """
+        
+        # Check parameters
+        if not isinstance(fillna, bool):
+            raise TypeError('`fillna` must be bool')
+        if not isinstance(coords1Dfrom2D, bool):
+            raise TypeError('`coords1Dfrom2D` must be bool')
+        if not isinstance(coordsUVfromG, bool):
+            raise TypeError('`coordsUVfromG` must be bool')
+        if coords1Dfrom2D and coords2Dfrom1D:
+            raise TypeError('`coords1Dfrom2D` and `coords2Dfrom1D` can not be both True')
+            
+        # Copy because the dataset will change
+        self = _copy.copy(self)
+
+        # Coordinates are dimensions only
+        self._ds = self._ds.reset_coords()
+        
+        # Fill nans (e.g., because of exch2)
+        if fillna:
+            coords = ['YC', 'XC', 'YG', 'XG', 'YU', 'XU', 'YV', 'XV'] 
+            dims   = ['X', 'Y', 'Xp1', 'Yp1', 'Xp1', 'Y', 'X', 'Yp1']
+            
+            for i, (coord, dim) in enumerate(zip(coords, dims)):
+                if coord in self._ds.variables:
+                    self._ds[coord] = self._ds[coord].ffill(dim).bfill(dim).persist()
+
+        
+        # Get U and V by rolling G
+        if coordsUVfromG:
+
+            for i, (point_pos, dim2roll) in enumerate(zip(['U', 'V'], ['Yp1', 'Xp1'])):
+                for dim in ['Y', 'X']:
+                    coord = self._ds[dim+'G'].rolling(**{dim2roll: 2}).mean().dropna(dim2roll)
+                    coord = coord.drop(coord.coords).rename({dim2roll: dim2roll[0]})
+                    self._ds[dim+point_pos] = coord
+                    if 'units' in self._ds[dim+'G'].attrs:
+                        self._ds[dim+point_pos].attrs['units'] = self._ds[dim+'G'].attrs['units']
+                        
+        # For cartesian grid we can use 1D coordinates
+        if coords1Dfrom2D:
+            # Take mean
+            self._ds['Y']   = self._ds['YC'].mean('X', keep_attrs=True).persist()
+            self._ds['X']   = self._ds['XC'].mean('Y', keep_attrs=True).persist()
+            self._ds['Yp1'] = self._ds['YG'].mean('Xp1', keep_attrs=True).persist()
+            self._ds['Xp1'] = self._ds['XG'].mean('Yp1', keep_attrs=True).persist()
+        
+        # Get 2D coordinates broadcasting 1D
+        if coords2Dfrom1D:
+            # Broadcast
+            self._ds['YC'], self._ds['XC'] = _xr.broadcast(self._ds['Y'],   self._ds['X'])
+            self._ds['YG'], self._ds['XG'] = _xr.broadcast(self._ds['Yp1'], self._ds['Xp1'])
+            self._ds['YU'], self._ds['XU'] = _xr.broadcast(self._ds['Y'],   self._ds['Xp1'])
+            self._ds['YV'], self._ds['XV'] = _xr.broadcast(self._ds['Yp1'], self._ds['X'])
+            
+            # Add units
+            for i, (D2, D1) in enumerate(zip(['YC', 'XC', 'YG',  'XG',  'YU', 'XU',  'YV',  'XV'],
+                                             ['Y',  'X',  'Yp1', 'Xp1', 'Y',  'Xp1', 'Yp1', 'X'])):
+                if 'units' in self._ds[D1].attrs: self._ds[D2].attrs['units'] = self._ds[D1].attrs['units']
+            
+        # Set 2D coordinates
+        self._ds = self._ds.set_coords(['YC', 'XC',
+                                        'YG', 'XG',
+                                        'YU', 'XU',
+                                        'YV', 'XV'])
+        return self
+    
+    def import_MITgcm_rect_nc(self, shift_averages = True):
+        """
+        Set coordinates of a dataset from a MITgcm run with rectilinear grid and data stored in NetCDF format.
+        Open and concatentate dataset before running this function.
+        
+        Parameters
+        ----------
+        shift_averages: bool
+            If True, shift average variable to time_midp. 
+            Average variables must have attribute original_output = 'average'
+        """
+        
+        # Check parameters
+        if not isinstance(shift_averages, bool):
+            raise TypeError('`shift_averages` must be bool')
+                
+        # Shift averages
+        if shift_averages is True:
+            self = self._shift_averages()
+        
+        # Set coordinates
+        self = self._set_coords(fillna=True, coords1Dfrom2D=True)
+        grid_coords = {'Y'    : {'Y': None, 'Yp1': 0.5},
+                       'X'    : {'X': None, 'Xp1': 0.5},
+                       'Z'    : {'Z': None, 'Zp1': 0.5, 'Zu': 0.5, 'Zl': -0.5},
+                       'time' : {'time': -0.5}}
+        self = self.set_grid_coords(grid_coords = grid_coords, add_midp=True)
+        
+        return self
+    
+    def import_MITgcm_rect_bin(self, shift_averages = True):
+        """
+        Set coordinates of a dataset from a MITgcm run with rectilinear grid and data stored in bin format.
+        Open and concatentate dataset before running this function.
+        
+        Parameters
+        ----------
+        shift_averages: bool
+            If True, shift average variable to time_midp. 
+            Average variables must have attribute original_output = 'average'
+        """
+        
+        # Check parameters
+        if not isinstance(shift_averages, bool):
+            raise TypeError('`shift_averages` must be bool')
+                
+        # Shift averages
+        if shift_averages is True:
+            self = self._shift_averages()
+        # Set coordinates
+        self = self._set_coords(coords2Dfrom1D=True)
+        grid_coords = {'Y'    : {'Y': None, 'Yp1': 0.5},
+                       'X'    : {'X': None, 'Xp1': 0.5},
+                       'Z'    : {'Z': None, 'Zp1': 0.5, 'Zu': 0.5, 'Zl': -0.5},
+                       'time' : {'time': -0.5}}
+        self = self.set_grid_coords(grid_coords = grid_coords, add_midp=True)
+        
+        return self
+    
+    def import_MITgcm_curv_nc(self, shift_averages = True):
+        """
+        Set coordinates of a dataset from a MITgcm run with curvilinear grid and data stored in NetCDF format.
+        Open and concatentate dataset before running this function.
+        
+        Parameters
+        ----------
+        shift_averages: bool
+            If True, shift average variable to time_midp. 
+            Average variables must have attribute original_output = 'average'
+        """
+        
+        # Check parameters
+        if not isinstance(shift_averages, bool):
+            raise TypeError('`shift_averages` must be bool')
+                
+        # Shift averages
+        if shift_averages is True:
+            self = self._shift_averages()
+        # Set coordinates
+        self = self._set_coords(coordsUVfromG=True)
+        grid_coords = {'Y'    : {'Y': None, 'Yp1': 0.5},
+                       'X'    : {'X': None, 'Xp1': 0.5},
+                       'Z'    : {'Z': None, 'Zp1': 0.5, 'Zu': 0.5, 'Zl': -0.5},
+                       'time' : {'time': -0.5}}
+        self = self.set_grid_coords(grid_coords = grid_coords, add_midp=True)
+        
+        return self
+        
+        
     # ===========
     # ATTRIBUTES
     # ===========
@@ -119,7 +317,7 @@ class OceanDataset:
         Inhibit setter
         """
         
-        raise AttributeError("Set new `name` using .set_name")
+        raise AttributeError(_setter_error_message('name'))
     
     def set_name(self, name, overwrite=None):
         """
@@ -167,7 +365,7 @@ class OceanDataset:
         Inhibit setter
         """
         
-        raise AttributeError("Set new `description` using .set_description")
+        raise AttributeError(_setter_error_message('description'))
     
     def set_description(self, description, overwrite=None):
         """
@@ -223,8 +421,310 @@ class OceanDataset:
         Inhibit setter
         """
         
-        raise AttributeError("Do not set a new `dataset`, but initilize a new OceanDataset: oceanspy.OceanDataset(dataset)")
+        raise AttributeError("Set a new dataset using `oceanspy.OceanDataset(dataset)`")
+    
+    # -------------------
+    # aliases
+    # -------------------
+    
+    @property
+    def aliases(self):
+        """
+        A dictionary to connect custom variable names to OceanSpy reference names.
+        Keys are OceanSpy names, values are custom names: {'ospy_name': 'custom_name'}
+        """
         
+        aliases = self._read_from_global_attr('aliases')
+        
+        return aliases
+    
+    @property
+    def _aliases_flipped(self):
+        """
+        Flip aliases: Keys are values names, values are ospy_name names: {'ospy_name': 'custom_name'}
+        """
+        if self.aliases:
+            aliases_flipped = {custom: ospy for ospy, custom in self.aliases.items()}
+        else: return self.aliases
+        
+        return aliases_flipped
+    
+    @aliases.setter
+    def aliases(self, aliases):
+        """
+        Inhibit setter
+        """
+        
+        raise AttributeError(_setter_error_message('aliases'))
+    
+    def set_aliases(self, aliases, overwrite=None):
+        """
+        Set aliases to connect custom variables names to OceanSpy reference names.
+        
+        Parameters
+        ----------
+        aliases: dict
+            Keys are OceanSpy names, values are custom names: {'ospy_name': 'custom_name'}
+        overwrite: bool or None
+            If None, raise error if aliases has been previously set.
+            If True, overwrite previous aliases.  
+            If False, combine with previous aliases.
+        """
+        
+        # Check parameters
+        if not isinstance(aliases, dict):
+            raise TypeError("`aliases` must be dict")
+            
+        # Set aliases
+        self = self._store_as_global_attr(name      = 'aliases', 
+                                          attr      = aliases,
+                                          overwrite = overwrite) 
+        
+        # Apply aliases
+        self = self._apply_aliases()
+        
+        return self
+    
+    def _apply_aliases(self):
+        """
+        Check if there are variables with custom name in _ds, and rename to ospy name
+        """
+        if self._aliases_flipped:                    
+            aliases = {custom: ospy for custom, ospy in self._aliases_flipped.items() 
+                       if custom in self._ds.variables 
+                       or custom in self._ds.dims}
+            self._ds = self._ds.rename(aliases)
+            
+        return self
+    
+    # -------------------
+    # parameters
+    # -------------------
+    
+    @property
+    def parameters(self):
+        """
+        A dictionary defining model parameters that are used by OceanSpy.
+        {'parameter_name': parameter value}
+        If a parameter is not available, use default.
+        """
+        
+        from oceanspy import DEFAULT_PARAMETERS
+        parameters = self._read_from_global_attr('parameters')
+        
+        if parameters is None:
+            parameters = DEFAULT_PARAMETERS
+        else:
+            parameters = {**DEFAULT_PARAMETERS, **parameters}
+        
+        
+        return parameters
+    
+    @parameters.setter
+    def parameters(self, parameters):
+        """
+        Inhibit setter
+        """
+        
+        raise AttributeError(_setter_error_message('parameters'))
+    
+    def set_parameters(self, parameters):
+        """
+        Set model parameters used by OceanSpy (see oceanspy.DEFAULT_PARAMETERS)
+        
+        Parameters
+        ----------
+        parameters: dict
+            {'parameter_name': parameter_value}
+        """
+        from oceanspy import DEFAULT_PARAMETERS, AVAILABLE_PARAMETERS, TYPE_PARAMETERS
+        
+        # Check parameters
+        if not isinstance(parameters, dict):
+            raise TypeError("`parameters` must be dict")
+                
+        # Check parameters
+        warn_params = []
+        for key, value in parameters.items():
+            if key not in DEFAULT_PARAMETERS.keys(): warn_params = warn_params + [key]
+            else:
+                if not isinstance(value, TYPE_PARAMETERS[key]):
+                    raise TypeError("Invalid [{}]. Check oceanspy.TYPE_PARAMETERS".format(key))
+                if key in AVAILABLE_PARAMETERS.keys() and value not in AVAILABLE_PARAMETERS[key]:
+                    raise ValueError("Requested [{}] not available. Check oceanspy.AVAILABLE_PARAMETERS".format(key))
+                    
+        if len(warn_params)!=0:
+            _warnings.warn(("{} are not OceanSpy parameters").format(warn_params), stacklevel=2)
+        
+        # Set parameters
+        self = self._store_as_global_attr(name      = 'parameters', 
+                                          attr      = parameters,
+                                          overwrite = True) 
+        
+        return self
+    
+    # -------------------
+    # grid_coords
+    # -------------------
+    @property
+    def grid_coords(self):
+        """
+        Grid coordinates used by xgcm.Grid
+        
+        References
+        ----------
+        https://xgcm.readthedocs.io/en/stable/grids.html#Grid-Metadata
+        """
+        
+        grid_coords = self._read_from_global_attr('grid_coords')
+        
+        return grid_coords
+
+    @grid_coords.setter
+    def grid_coords(self, grid_coords):
+        """
+        Inhibit setter
+        """
+        
+        raise AttributeError(_setter_error_message('grid_coords'))
+    
+    
+    def set_grid_coords(self, grid_coords, add_midp=False, overwrite=None):
+        """
+        Set grid coordinates used by xgcm.Grid (see oceanspy.OCEANSPY_AXES).
+        
+        Parameters
+        ----------
+        grid_coords: str
+            Grid coordinates used by xgcm.Grid.  
+            Keys are axis, and values are dict with key=dim and value=c_grid_axis_shift.
+            Available c_grid_axis_shift are {0.5, None, -0.5}
+        add_midp: bool
+            If true, add inner dimension (mid points) to axis with outer dimension only.
+            The new dimension will be called as the outer dimension + '_midp'
+        overwrite: bool or None
+            If None, raise error if grid_coords has been previously set.
+            If True, overwrite previous grid_coors.  
+            If False, combine with previous grid_coors.
+            
+        References
+        ----------
+        https://xgcm.readthedocs.io/en/stable/grids.html#Grid-Metadata
+        """
+        
+        # Check parameters
+        if not isinstance(grid_coords, dict):
+            raise TypeError("`grid_coords` must be dict")
+        
+        if not isinstance(add_midp, (bool, type(None))):
+            raise TypeError("`add_midp` must be bool")
+            
+        # Check axes
+        _check_oceanspy_axes(list(grid_coords.keys()))
+            
+        # Check shifts
+        list_shift = [0.5, None, -0.5]
+        for axis in grid_coords:
+            if grid_coords[axis] is None: continue
+            elif not isinstance(grid_coords[axis], dict):
+                example_grid_coords = {'Y'    : {'Y': None, 'Yp1': 0.5}}
+                raise TypeError("Invalid grid_coords. grid_coords example: {}".format(example_grid_coords))
+            else:
+                for dim in grid_coords[axis]:
+                    if grid_coords[axis][dim] not in list_shift:
+                        raise ValueError("[{}] not a valid c_grid_axis_shift."
+                                         " Available options are {}".format(grid_coords[axis][dim],
+                                                                            list_shift))
+        
+            
+        # Set grid_coords
+        self = self._store_as_global_attr(name      = 'grid_coords', 
+                                          attr      =  grid_coords,
+                                          overwrite =  overwrite) 
+        
+        if add_midp:
+            grid_coords = {}
+            for axis in self.grid_coords:
+                if len(self.grid_coords[axis])==1 and list(self.grid_coords[axis].values())[0] is not None:
+                    
+                    # Deal with aliases
+                    dim  = list(self.grid_coords[axis].keys())[0]    
+                    if self._aliases_flipped and dim in self._aliases_flipped:
+                        _dim = self._aliases_flipped[dim]
+                        self = self.set_aliases({_dim+'_midp': dim+'_midp'}, overwrite=False)
+                    else: _dim = dim
+                    
+                    # Midpoints are averages of outpoints
+                    midp = (self._ds[_dim].values[:-1]+self._ds[_dim].diff(_dim)/2).rename({_dim: _dim+'_midp'})
+                    self._ds[_dim+'_midp'] = _xr.DataArray(midp,
+                                                           dims=(_dim+'_midp'))
+                    if 'units' in self._ds[_dim].attrs:
+                        self._ds[_dim+'_midp'].attrs['units'] = self._ds[_dim].attrs['units']
+                        
+                    # Update grid_coords
+                    grid_coords[axis] = {**self.grid_coords[axis], dim+'_midp': None}
+                    
+                    
+            self = self._store_as_global_attr(name      = 'grid_coords',
+                                              attr      =  grid_coords,
+                                              overwrite =  False)
+        return self
+    
+    
+    # -------------------
+    # grid_periodic
+    # -------------------
+    @property
+    def grid_periodic(self):
+        """
+        List of xgcm.Grid axes that are periodic
+        """
+        
+        grid_periodic = self._read_from_global_attr('grid_periodic')
+        if not grid_periodic:
+            grid_periodic = []
+            
+        return grid_periodic
+
+    @grid_periodic.setter
+    def grid_periodic(self, grid_periodic):
+        """
+        Inhibit setter
+        """
+        
+        raise AttributeError(_setter_error_message('grid_periodic'))
+    
+    def set_grid_periodic(self, grid_periodic, overwrite=None):
+        """
+        Set grid axes that need to be treated as periodic by xgcm.Grid.
+        Axis that are not set periodic are non-periodic by default.  
+        Note that this is opposite than xgcm, which sets periodic=True by default.
+        
+        Parameters
+        ----------
+        grid_periodic: list
+            List of periodic axes.
+            Available axis are {'X', 'Y', 'Z', 'time'}.
+        overwrite: bool or None
+            If None, raise error if grid_periodic has been previously set.
+            If True, overwrite previous grid_periodic.  
+            If False, combine with previous grid_periodic.
+        """
+        
+        # Check parameters
+        if not isinstance(grid_periodic, list):
+            raise TypeError("`grid_periodic` must be list")
+            
+        # Check axes
+        _check_oceanspy_axes(grid_periodic)
+            
+        # Set grid_periodic
+        self = self._store_as_global_attr(name      = 'grid_periodic', 
+                                          attr      = grid_periodic,
+                                          overwrite = overwrite) 
+        
+        return self
+    
     # -------------------
     # grid
     # -------------------
@@ -276,304 +776,17 @@ class OceanDataset:
         """
         Inhibit setter
         """
-        
-        raise AttributeError("You can't change directly `grid`, but you must change OceanSpy's attributes (e.g., using .set_grid_coords and .set_periodic)")
-        
-        
-    # -------------------
-    # aliases
-    # -------------------
-    # TODO: add list of available aliases
-    
-    @property
-    def aliases(self):
-        """
-        A dictionary to connect custom variable names to OceanSpy reference names.
-        Keys are OceanSpy names, values are custom names: {'ospy_name': 'custom_name'}
-        """
-        
-        aliases = self._read_from_global_attr('aliases')
-        
-        return aliases
-    
-    @property
-    def _aliases_flipped(self):
-        """
-        Flip aliases: Keys are values names, values are ospy_name names: {'ospy_name': 'custom_name'}
-        """
-        if self.aliases:
-            aliases_flipped = {custom: ospy for ospy, custom in self.aliases.items()}
-        else: return self.aliases
-        
-        return aliases_flipped
-    
-    @aliases.setter
-    def aliases(self, aliases):
-        """
-        Inhibit setter
-        """
-        
-        raise AttributeError("Set new `aliases` using .set_aliases")
-    
-    def set_aliases(self, aliases, overwrite=None):
-        """
-        Set aliases to connect custom variables names to OceanSpy reference names.
-        
-        Parameters
-        ----------
-        aliases: dict
-            Keys are OceanSpy names, values are custom names: {'ospy_name': 'custom_name'}
-        overwrite: bool or None
-            If None, raise error if aliases has been previously set.
-            If True, overwrite previous aliases.  
-            If False, combine with previous aliases.
-        """
-        
-        # Check parameters
-        if not isinstance(aliases, dict):
-            raise TypeError("`aliases` must be dict")
-            
-        # Set aliases
-        self = self._store_as_global_attr(name      = 'aliases', 
-                                          attr      = aliases,
-                                          overwrite = overwrite) 
-        
-        # Apply aliases
-        self = self._apply_aliases()
-        
-        return self
-    
-    def _apply_aliases(self):
-        """
-        Check if there are variables with custom name in _ds, and rename to ospy name
-        """
-        # TODO: maybe add some check? E.g., raise error if alias is already available?
-        if self._aliases_flipped:                    
-            aliases = {custom: ospy for custom, ospy in self._aliases_flipped.items() 
-                       if custom in self._ds 
-                       or custom in self._ds.dims}
-            self._ds = self._ds.rename(aliases)
-            
-        return self
-    
-    # -------------------
-    # parameters
-    # -------------------
-    # TODO: add list of available parameters and documentation
-    
-    @property
-    def parameters(self):
-        """
-        A dictionary defining model parameters that are used by OceanSpy.
-        {'parameter_name': parameter value}
-        If a parameter is not available, use default.
-        """
-        
-        from oceanspy import DEFAULT_PARAMETERS
-        parameters = self._read_from_global_attr('parameters')
-        
-        if parameters is None:
-            parameters = DEFAULT_PARAMETERS
-        else:
-            parameters = {**DEFAULT_PARAMETERS, **parameters}
-        
-        
-        return parameters
-    
-    @parameters.setter
-    def parameters(self, parameters):
-        """
-        Inhibit setter
-        """
-        
-        raise AttributeError("Set new `parameters` using .set_parameters")
-    
-    def set_parameters(self, parameters):
-        """
-        Set model parameters used by OceanSpy.
-        
-        Parameters
-        ----------
-        parameters: dict
-            {'parameter_name': parameter_value}
-        """
-        
-        # Check parameters
-        if not isinstance(parameters, dict):
-            raise TypeError("`parameters` must be dict")
-            
-        # Set parameters
-        self = self._store_as_global_attr(name      = 'parameters', 
-                                          attr      = parameters,
-                                          overwrite = False) 
-        
-        return self
-    
-    # -------------------
-    # grid_coords
-    # -------------------
-    @property
-    def grid_coords(self):
-        """
-        Grid coordinates used by xgcm.Grid
-        
-        References
-        ----------
-        https://xgcm.readthedocs.io/en/stable/grids.html#Grid-Metadata
-        """
-        
-        grid_coords = self._read_from_global_attr('grid_coords')
-        
-        return grid_coords
 
-    @grid_coords.setter
-    def grid_coords(self, grid_coords):
+        raise AttributeError("Set a new grid using .set_grid_coords and .set_periodic")
+    
+    @_grid.setter
+    def _grid(self, grid):
         """
         Inhibit setter
         """
-        
-        raise AttributeError("Set new `grid_coords` using .set_grid_coords")
-    
-    def set_grid_coords(self, grid_coords, add_midp=False, overwrite=None):
-        """
-        Set grid coordinates used by xgcm.Grid.
-        
-        Parameters
-        ----------
-        grid_coords: str
-            Grid coordinates used by xgcm.Grid.  
-            Keys are axis, and values are dict with key=dim and value=c_grid_axis_shift.
-            Available axis are {'X', 'Y', 'Z', 'time'}, and available c_grid_axis_shift are {0.5, None, -0.5}
-        add_midp: bool
-            If true, add inner dimension (mid points) to axis with outer dimension only.
-            The new dimension will be called as the outer dimension + '_midp'
-        overwrite: bool or None
-            If None, raise error if grid_coords has been previously set.
-            If True, overwrite previous grid_coors.  
-            If False, combine with previous grid_coors.
-            
-        References
-        ----------
-        https://xgcm.readthedocs.io/en/stable/grids.html#Grid-Metadata
-        """
-        
-        # Check parameters
-        if not isinstance(grid_coords, dict):
-            raise TypeError("`grid_coords` must be dict")
-            
-        list_axis  = ['X', 'Y', 'Z', 'time', 'mooring', 'station']
-        list_dims  = [dim for dim in self.dataset.dims]
-        list_shift = [0.5, None, -0.5]
-        for axis in grid_coords:
-            if axis not in list_axis:
-                raise ValueError("[{}] not an OceanSpy axis. Available options are {}".format(axis, 
-                                                                                       list_axis))
-            if grid_coords[axis] is None: continue
-            for dim in grid_coords[axis]:
-                if dim not in list_dims:
-                    raise ValueError("[{}] not a valid dimension. Available options are {}".format(dim,
-                                                                                                 list_dims))
-                if grid_coords[axis][dim] not in list_shift:
-                    raise ValueError("[{}] not a valid c_grid_axis_shift. Available options are {}".format(grid_coords[axis][dim], 
-                                                                                                         list_shift))
-        if not isinstance(add_midp, (bool, type(None))):
-            raise TypeError("`add_midp` must be bool")
-            
-        # Set grid_coords
-        self = self._store_as_global_attr(name      = 'grid_coords', 
-                                          attr      =  grid_coords,
-                                          overwrite =  overwrite) 
-        
-        # Add midpoints
-        # TODO: this is pretty much what the new xgcm functionality autogenerate does.
-        #       We should implement it when there will be a stable release
-        # TODO: add attributes
-        if add_midp:
-            grid_coords = {}
-            for axis in self.grid_coords:
-                if len(self.grid_coords[axis])==1 and list(self.grid_coords[axis].values())[0]==-0.5:
-                    
-                    # Deal with aliases
-                    dim  = list(self.grid_coords[axis].keys())[0]    
-                    if self._aliases_flipped and dim in self._aliases_flipped:
-                        _dim = self._aliases_flipped[dim]
-                        self = self.set_aliases({_dim+'_midp': dim+'_midp'}, overwrite=False)
-                    else: _dim = dim
-                    
-                    # Midpoints are averages of outpoints
-                    midp = (self._ds[_dim].values[:-1]+self._ds[_dim].diff(_dim)/2).rename({_dim: _dim+'_midp'})
-                    self._ds[_dim+'_midp'] = _xr.DataArray(midp,
-                                                           dims=(_dim+'_midp'))
-                    if 'units' in self._ds[_dim].attrs:
-                        self._ds[_dim+'_midp'].attrs['units'] = self._ds[_dim].attrs['units']
-                        
-                    # Update grid_coords
-                    grid_coords[axis] = {**self.grid_coords[axis], dim+'_midp': None}
-                    
-                    
-            self = self._store_as_global_attr(name      = 'grid_coords',
-                                              attr      =  grid_coords,
-                                              overwrite =  False)
-        return self
-    
-    
-    
-    # -------------------
-    # grid_periodic
-    # -------------------
-    @property
-    def grid_periodic(self):
-        """
-        List of xgcm.Grid axes that are periodic
-        """
-        
-        grid_periodic = self._read_from_global_attr('grid_periodic')
-        if not grid_periodic:
-            grid_periodic = []
-            
-        return grid_periodic
 
-    @grid_periodic.setter
-    def grid_periodic(self, grid_periodic):
-        """
-        Inhibit setter
-        """
-        
-        raise AttributeError("Set new `grid_periodic` using .set_grid_periodic")
+        raise AttributeError("Set a new _grid using .set_grid_coords and .set_periodic")
     
-    def set_grid_periodic(self, grid_periodic, overwrite=None):
-        """
-        Set grid axes that need to be treated as periodic by xgcm.Grid.
-        Axis that are not set periodic are non-periodic by default.  
-        Note that this is opposite than xgcm, which sets periodic=True by default.
-        
-        Parameters
-        ----------
-        grid_periodic: list
-            List of periodic axes.
-            Available axis are {'X', 'Y', 'Z', 'time'}.
-        overwrite: bool or None
-            If None, raise error if grid_periodic has been previously set.
-            If True, overwrite previous grid_periodic.  
-            If False, combine with previous grid_periodic.
-        """
-        
-        # Check parameters
-        if not isinstance(grid_periodic, list):
-            raise TypeError("`grid_periodic` must be str")
-            
-        list_axis  = ['X', 'Y', 'Z', 'time']
-        for axis in grid_periodic:
-            if axis not in list_axis:
-                raise ValueError("[{}] not an OceanSpy axis. Available options are [{}]".format(axis, 
-                                                                                            list_axis))
-            
-        # Set grid_periodic
-        self = self._store_as_global_attr(name      = 'grid_periodic', 
-                                          attr      = grid_periodic,
-                                          overwrite = overwrite) 
-        
-        return self
     
     # -------------------
     # projection
@@ -589,8 +802,11 @@ class OceanDataset:
             if projection=='None':
                 projection = eval(projection)
             else:
-                import cartopy.crs as ccrs
-                projection = eval('ccrs.{}'.format(projection))
+                if 'cartopy' not in _sys.modules:
+                    _warnings.warn(("cartopy is not available, so projection is None").format(da.name), stacklevel=2)
+                    projection = None
+                else:
+                    projection = eval('_ccrs.{}'.format(projection))
             
         return projection
 
@@ -600,7 +816,7 @@ class OceanDataset:
         Inhibit setter
         """
         
-        raise AttributeError("Set new `projection` using .set_projection")
+        raise AttributeError(_setter_error_message('projection'))
     
     def set_projection(self, projection, **kwargs):
         """
@@ -620,13 +836,12 @@ class OceanDataset:
         
         # Check parameters
         if not isinstance(projection, (type(None), str)):
-            raise TypeError("`projection` must be str")
+            raise TypeError("`projection` must be str or None")
         
         if projection is not None:
-            import cartopy.crs as ccrs
-            if not hasattr(ccrs, projection):
+            if not hasattr(_ccrs, projection):
                 raise TypeError("{} is not a cartopy projection".format(projection))
-            projection = '{}(**{{}})'.format(projection, kwargs)
+            projection = '{}(**{})'.format(projection, kwargs)
         else: 
             projection = str(projection) 
 
@@ -642,91 +857,96 @@ class OceanDataset:
     # ===========
     # METHODS
     # ===========
-    def add_DataArray(self, da, overwrite=None):
+    def create_tree(self, grid_pos = 'C'):
         """
-        Add DataArray to the oceandataset
+        Create a scipy.spatial.cKDTree for quick nearest-neighbor lookup.
         
         Parameters
-        ----------
-        da: xarray.DataArray
-            xarray.DataArray to be added
-        overwrite: bool or None
-            If None, raise error if da already exists.
-            If True, overwrite existing da.  
-            If False, do not add existing da.
-        """
-        if not isinstance(da, _xr.DataArray):
-            raise TypeError('`da` must be xarray.DataArray')
-        
-        if not isinstance(overwrite, (bool, type(None))):
-            raise TypeError("`overwrite` must be bool or None")
-        
-        # Check if da exists
-        if da.name in self.dataset.variables:  
-            if overwrite is None:
-                raise ValueError("[{}] already exists: `overwrite` must be bool ".format(da.name))
-            elif overwrite is False:
-                _warnings.warn(("\n[{}] already exists:"
-                               "`da` will NOT be added to the oceandataset").format(da.name), stacklevel=2)
-                return self
-        
-        # Only add if overwrite True, or da not in the oceandataset
-        attrs   = self.dataset.attrs
-        dataset = _xr.merge([self.dataset, da])
-        dataset.attrs = attrs
-        self = OceanDataset(dataset)
-        
-        return self
-        
-    def merge_Dataset(self, ds, overwrite=None):
-        """
-        Merge Dataset to the oceandataset
-        
-        Parameters
-        ----------
-        ds: xarray.Dataset
-            xarray.Dataset to be merged
-        overwrite: bool or None
-            If None, raise error if any xarray.DataArray already exists.
-            If True, overwrite existing xarray.DataArray.  
-            If False, do not add existing xarray.DataArray.
+        -----------
+        grid_pos: str
+            Grid position. Option: {'C', 'G', 'U', 'V'}
+            Reference grid: https://mitgcm.readthedocs.io/en/latest/algorithm/horiz-grid.html
         
         Returns
         -------
-        ds: xarray.Dataset 
-            Contains cell volumes named as cellVol[grid point]_[Z dim]
+        tree: scipy.spatial.cKDTree
+            Return tree that can be used to query a point.
+            
+        References
+        ----------
+        https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.cKDTree.html
         """
-        if not isinstance(ds, _xr.Dataset):
-            raise TypeError('`ds` must be xarray.Dataset')
         
-        if not isinstance(overwrite, (bool, type(None))):
-            raise TypeError("`overwrite` must be bool or None")
-                               
-        existing_da = [da for da in ds.variables if da in self.dataset.data_vars]          
-        if len(existing_da)!=0:
-            if overwrite is None:
-                raise ValueError(("{} already exist: "
-                                  "`overwrite` must be bool.").format(existing_da))
-            elif overwrite is False:
-                _warnings.warn(("\n{} already exist "
-                                "and will NOT be added to the oceandataset.").format(existing_da), stacklevel=2)
-                dataset = self.dataset
-                ds      = ds.drop(existing_da)
+        if 'scipy' not in _sys.modules:
+            raise ImportError("cKDTree can not be created because scipy is not installed")
+        
+        # Check parameters
+        if not isinstance(grid_pos, str):
+            raise TypeError('`grid_pos` must be str')
+        grid_pos_list = ['C', 'G', 'U', 'V']
+        if grid_pos not in grid_pos_list:
+            raise ValueError(("`grid_pos` must be on of {}:"
+                              "\nhttps://mitgcm.readthedocs.io/en/latest/algorithm/horiz-grid.html").format(grid_pos_list))
+        
+        # Convert if is not cartesian
+        Y = self._ds['Y'+grid_pos]
+        X = self._ds['X'+grid_pos]
+        R = self.parameters['rSphere']
+        if R: x, y, z = _utils.spherical2cartesian(Y = Y, X = X, R = R)
+        else: x = X; y = Y; z = _xr.zeros_like(Y)
+
+        # Stack
+        x_stack = x.stack(points=x.dims).values
+        y_stack = y.stack(points=y.dims).values
+        z_stack = z.stack(points=z.dims).values
+        
+        # Construct KD-tree
+        tree = _spatial.cKDTree(_np.column_stack((x_stack, y_stack, z_stack)))
+    
+        return tree
+    
+    
+    
+    def merge_into_oceandataset(self, obj, overwrite=False):
+        """
+        Merge a dataset or DataArray into the oceandataset
+        
+        Parameters
+        ----------
+        obj: xarray.DataArray or xarray.Dataset
+            xarray object to merge
+        overwrite: bool or None
+            If True, overwrite existing DataArrays with same name.  
+            If False, use xarray.merge
+        """
+        
+        # Check and make dataset
+        if not isinstance(obj, (_xr.DataArray, _xr.Dataset)):
+            raise TypeError('`obj` must be xarray.DataArray or xarray.Dataset')
+        
+        obj = obj.drop(obj.coords)
+        if isinstance(obj, _xr.DataArray):
+            if obj.name is None:
+                raise ValueError("xarray.DataArray doesn't have a name. Set it using da.rename()")
             else:
-                _warnings.warn(("\n{} already exist "
-                                "and will be replaced.").format(existing_da), stacklevel=2)
-                dataset = self.dataset.drop(existing_da)
-        else:   dataset = self.dataset
+                obj = obj.to_dataset()
+                
+        if not isinstance(overwrite, bool):
+            raise TypeError("`overwrite` must be bool")
         
-        # Save attributes and merge dataset (raise error if dimension indexes are not matching)
-        attrs   = dataset.attrs
-        chunks  = dataset.chunks
-        dataset = _xr.merge([dataset, ds]) 
-        dataset = dataset.chunk(chunks)
-        dataset.attrs = attrs
-        self = OceanDataset(dataset)
+        # Merge
+        dataset  = self.dataset
+        var2drop = [var for var in obj.variables if var in dataset]     
+        if overwrite is False:
+            obj = obj.drop(var2drop)
+            if len(var2drop)!=0: _warnings.warn('{} will not be merged.'
+                                                '\nSet `overwrite=True` if you wish otherwise.'.format(var2drop), stacklevel=2)
+        else:
+            if len(var2drop)!=0: _warnings.warn('{} will be overwritten.'.format(var2drop), stacklevel=2)
+        for var in obj.data_vars:
+            dataset[var] = obj[var]
         
-        return self
+        return OceanDataset(dataset)
     
     def set_coords(self, fillna=False, coords1Dfrom2D=False, coords2Dfrom1D=False, coordsUVfromG=False):
         """
@@ -744,15 +964,6 @@ class OceanDataset:
         coordsUVfromCG: bool
             If True, compute missing coords (U and V points) from G points.
         """
-        
-        # TODO: Add some check,
-        #       like raise error if coords1Dfrom2D is used with curvilinare grids?
-        
-        # TODO: Add history and attributes to the new variables?
-        
-        # TODO: Most of this function can be easily replaced by xgcm.autogenerate,
-        #       which is way better because it has been designed to work with any grid.
-        #       As soon as a new xgcm version will be released, implemente autogenerate.
         
         # Check parameters
         if not isinstance(fillna, bool):
@@ -783,6 +994,7 @@ class OceanDataset:
         
         # Get U and V by rolling G
         if coordsUVfromG:
+
             for i, (point_pos, dim2roll) in enumerate(zip(['U', 'V'], ['Yp1', 'Xp1'])):
                 for dim in ['Y', 'X']:
                     coord = self._ds[dim+'G'].rolling(**{dim2roll: 2}).mean().dropna(dim2roll)
@@ -838,57 +1050,18 @@ class OceanDataset:
         
         from dask.diagnostics import ProgressBar as _ProgressBar
         
+        # to_netcdf doesn't like coordinates attribute
+        dataset = self.dataset
+        for var in dataset.variables:
+            attrs = dataset[var].attrs
+            coordinates = attrs.pop('coordinates', None)
+            dataset[var].attrs = attrs
+            if coordinates is not None: dataset[var].attrs['_coordinates'] = coordinates
+        
         print('Writing dataset to '+path)
-        delayed_obj = self.dataset.to_netcdf(path, compute=False)
+        delayed_obj = dataset.to_netcdf(path, compute=False)
         with _ProgressBar():
             results = delayed_obj.compute()
-        
-    def create_tree(self, grid_pos = 'C'):
-        """
-        Create a scipy.spatial.cKDTree for quick nearest-neighbor lookup.
-        
-        Parameters
-        -----------
-        grid_pos: str
-            Grid position. Option: {'C', 'G', 'U', 'V'}
-            Reference grid: https://mitgcm.readthedocs.io/en/latest/algorithm/horiz-grid.html
-        
-        Returns
-        -------
-        tree: scipy.spatial.cKDTree
-            Return tree that can be used to query a point.
-            
-        References
-        ----------
-        https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.cKDTree.html
-        """
-        
-        # Check parameters
-        grid_pos_list = ['C', 'G', 'U', 'V']
-        if grid_pos not in grid_pos_list:
-            raise ValueError("`grid_pos` must be on of {}. \nReference grid: https://mitgcm.readthedocs.io/en/latest/algorithm/horiz-grid.html".format(grid_pos_list))
-            
-        # Import package
-        from scipy import spatial as _spatial
-        
-        # Convert if is not cartesian
-        Y = self._ds['Y'+grid_pos]
-        X = self._ds['X'+grid_pos]
-        R = self.parameters['rSphere']
-        if R:
-            x, y, z = _utils.spherical2cartesian(Y = Y, X = X, R = R)
-        else:
-            x = X; y = Y; z = _xr.zeros_like(Y)
-
-        # Stack
-        x_stack = x.stack(points=x.dims).values
-        y_stack = y.stack(points=y.dims).values
-        z_stack = z.stack(points=z.dims).values
-        
-        # Construct KD-tree
-        tree = _spatial.cKDTree(_np.column_stack((x_stack, y_stack, z_stack)))
-    
-        return tree
         
     def _store_as_global_attr(self, name, attr, overwrite):
         """
@@ -918,7 +1091,8 @@ class OceanDataset:
         name = 'OceanSpy_'+name
         
         if overwrite is None and name in self._ds.attrs:
-            raise ValueError("[{}] has been previously set: `overwrite` must be bool ".format(name))
+            raise ValueError("[{}] has been previously set: "
+                             "`overwrite` must be bool".format(name.replace("OceanSpy_", "")))
             
         # Copy because attributes are added to _ds
         self = _copy.copy(self)
@@ -932,6 +1106,7 @@ class OceanDataset:
                 attr = list(set(eval(prev_attr) + attr))
             else:
                 attr = prev_attr + '_' + attr
+                
         self._ds.attrs[name] = str(attr) 
 
         return self
@@ -968,698 +1143,103 @@ class OceanDataset:
         
         return attr
       
+        
     # ===========
     # SHORTCUTS
     # ===========
     
-    # ------------
-    # Subsample
-    def cutout(self, **kwargs):
+    @property
+    def subsample(self):
         """
-        Shortcut for subsample.cutout
+        Access subsampling functions.
         
-        Parameters
-        ----------
-        **kwargs: 
-            Arguments for subsample.cutout
-            
-        See Also
+        Examples
         --------
-        subsample.cutout
+        >>> od = ospy.open_oceandataset.get_started()
+        >>> od.subsample.cutout(ZRange=[0, -100], varList=['Temp'])
         """
         
-        self = _subsample.cutout(od = self, **kwargs)
-        
-        return self
-    
-    def mooring_array(self, **kwargs):
-        """
-        Shortcut for subsample.mooring_array
-        
-        Parameters
-        ----------
-        **kwargs: 
-            Arguments for subsample.mooring_array
-            
-        See Also
-        --------
-        subsample.mooring_array
-        """
-        
-        self = _subsample.mooring_array(od = self, **kwargs)
-        
-        return self
-    
-    def survey_stations(self, **kwargs):
-        """
-        Shortcut for subsample.survey_stations
-        
-        Parameters
-        ----------
-        **kwargs: 
-            Arguments for subsample.survey_stations
-            
-        See Also
-        --------
-        subsample.survey_stations
-        """
-        
-        self = _subsample.survey_stations(od = self, **kwargs)
-        
-        return self
-    
-    def particle_properties(self, **kwargs):
-        """
-        Shortcut for subsample.particle_properties
-        
-        Parameters
-        ----------
-        **kwargs: 
-            Arguments for subsample.particle_properties
-            
-        See Also
-        --------
-        subsample.particle_properties
-        """
-        
-        self = _subsample.particle_properties(od = self, **kwargs)
-        
-        return self
+        return _subsampleMethdos(self)
 
+    @property
+    def compute(self):
+        """
+        Access computing functions, and merge the computed dataset into the oceandataset.
+        Set overwrite=True to overwrite DataArrays already existing in the oceandataset.
+        
+        Examples
+        --------
+        >>> od = ospy.open_oceandataset.get_started()
+        >>> od.compute.gradient(varNameList='Temp', overwrite=True)
+        """
+        
+        return _computeMethdos(self)
     
-    # ------------
-    # Compute
+    @property
+    def plot(self):
+        """
+        Access plotting functions.
+        
+        Examples
+        --------
+        >>> od = ospy.open_oceandataset.get_started()
+        >>> od.plot.TS_diagram(meanAxes=['time', 'Z'], cutout_kwargs={'ZRange': [0, -100]})
+        """
+        
+        return _plotMethdos(self)
+    
+    @property
+    def animate(self):
+        """
+        Access animating functions.
+        
+        Examples
+        --------
+        >>> od = ospy.open_oceandataset.get_started()
+        >>> od.animate.TS_diagram(meanAxes=['time', 'Z'], cutout_kwargs={'ZRange': [0, -100]})
+        """
+        
+        return _animateMethdos(self)
 
-    def merge_gradient(self, overwrite=None, **kwargs):
-        """
-        Shortcut for compute.gradient and OceanDataset.merge_Dataset.
-        
-        Parameters
-        ----------
-        overwrite: bool or None
-            If None, raise error if any xarray.DataArray already exists.  
-            If True, overwrite existing xarray.DataArray.    
-            If False, do not add existing xarray.DataArray.  
-        **kwargs: 
-            Keyword arguments for compute.gradient
-            
-        See Also
-        --------
-        compute.gradient
-        """
-        
-        self = self.merge_Dataset(_compute.gradient(self, **kwargs), overwrite)
-        
-        return self
-    
-    def merge_divergence(self, overwrite=None, **kwargs):
-        """
-        Shortcut for compute.divergence and OceanDataset.merge_Dataset.
-        
-        Parameters
-        ----------
-        overwrite: bool or None
-            If None, raise error if any xarray.DataArray already exists.  
-            If True, overwrite existing xarray.DataArray.    
-            If False, do not add existing xarray.DataArray.  
-        **kwargs: 
-            Keyword arguments for compute.divergence
-            
-        See Also
-        --------
-        compute.divergence
-        """
-        
-        self = self.merge_Dataset(_compute.divergence(self, **kwargs), overwrite)
-        
-        return self
-    
-    def merge_curl(self, overwrite=None, **kwargs):
-        """
-        Shortcut for compute.curl and OceanDataset.merge_Dataset.
-        
-        Parameters
-        ----------
-        overwrite: bool or None
-            If None, raise error if any xarray.DataArray already exists.  
-            If True, overwrite existing xarray.DataArray.    
-            If False, do not add existing xarray.DataArray.  
-        **kwargs: 
-            Keyword arguments for compute.curl
-            
-        See Also
-        --------
-        compute.curl
-        """
-        
-        self = self.merge_Dataset(_compute.curl(self, **kwargs), overwrite)
-        
-        return self
-    
-    def merge_laplacian(self, overwrite=None, **kwargs):
-        """
-        Shortcut for compute.laplacian and OceanDataset.merge_Dataset.
-        
-        Parameters
-        ----------
-        overwrite: bool or None
-            If None, raise error if any xarray.DataArray already exists.  
-            If True, overwrite existing xarray.DataArray.    
-            If False, do not add existing xarray.DataArray.  
-        **kwargs: 
-            Keyword arguments for compute.laplacian
-            
-        See Also
-        --------
-        compute.laplacian
-        """
-        
-        self = self.merge_Dataset(_compute.laplacian(self, **kwargs), overwrite)
-        
-        return self
-    
-    def merge_volume_cells(self, overwrite=None, **kwargs):
-        """
-        Shortcut for compute.volume_cells and OceanDataset.merge_Dataset.
-        
-        Parameters
-        ----------
-        overwrite: bool or None
-            If None, raise error if any xarray.DataArray already exists.  
-            If True, overwrite existing xarray.DataArray.    
-            If False, do not add existing xarray.DataArray.  
-        **kwargs: 
-            Keyword arguments for compute.volume_cells
-            
-        See Also
-        --------
-        compute.volume_cells
-        """
-        
-        self = self.merge_Dataset(_compute.volume_cells(self, **kwargs), overwrite)
-        
-        return self
-    
-    def merge_volume_weighted_mean(self, overwrite=None, **kwargs):
-        """
-        Shortcut for compute.volume_weighted_mean and OceanDataset.merge_Dataset.
-        
-        Parameters
-        ----------
-        overwrite: bool or None
-            If None, raise error if any xarray.DataArray already exists.  
-            If True, overwrite existing xarray.DataArray.    
-            If False, do not add existing xarray.DataArray.  
-        **kwargs: 
-            Keyword arguments for compute.volume_weighted_mean
-            
-        See Also
-        --------
-        compute.volume_weighted_mean
-        """
-        
-        self = self.merge_Dataset(_compute.volume_weighted_mean(self, **kwargs), overwrite)
-        
-        return self
-    
-    
-    def merge_potential_density_anomaly(self, overwrite=None, **kwargs):
-        """
-        Shortcut for compute.potential_density_anomaly and OceanDataset.merge_Dataset.
-        
-        Parameters
-        ----------
-        overwrite: bool or None
-            If None, raise error if any xarray.DataArray already exists.  
-            If True, overwrite existing xarray.DataArray.    
-            If False, do not add existing xarray.DataArray.  
-        **kwargs: 
-            Keyword arguments for compute.potential_density_anomaly 
-            
-        See Also
-        --------
-        compute.potential_density_anomaly
-        """
-        
-        self = self.merge_Dataset(_compute.potential_density_anomaly(self, **kwargs), overwrite)
-        
-        return self
-    
-    def merge_Brunt_Vaisala_frequency(self, overwrite=None, **kwargs):
-        """
-        Shortcut for compute.Brunt_Vaisala_frequency and OceanDataset.merge_Dataset.
-        
-        Parameters
-        ----------
-        overwrite: bool or None
-            If None, raise error if any xarray.DataArray already exists.  
-            If True, overwrite existing xarray.DataArray.    
-            If False, do not add existing xarray.DataArray.  
-        **kwargs: 
-            Keyword arguments for compute.Brunt_Vaisala_frequency
-            
-        See Also
-        --------
-        compute.Brunt_Vaisala_frequency
-        """
-        
-        self = self.merge_Dataset(_compute.Brunt_Vaisala_frequency(self, **kwargs), overwrite)
-        
-        return self
-    
-    def merge_vertical_relative_vorticity(self, overwrite=None, **kwargs):
-        """
-        Shortcut for compute.vertical_relative_vorticity and OceanDataset.merge_Dataset.
-        
-        Parameters
-        ----------
-        overwrite: bool or None
-            If None, raise error if any xarray.DataArray already exists.  
-            If True, overwrite existing xarray.DataArray.    
-            If False, do not add existing xarray.DataArray.  
-        **kwargs: 
-            Keyword arguments for compute.vertical_relative_vorticity 
-            
-        See Also
-        --------
-        compute.vertical_relative_vorticity
-        """
-        
-        self = self.merge_Dataset(_compute.vertical_relative_vorticity(self, **kwargs), overwrite)
-        
-        return self
-    
-    def merge_relative_vorticity(self, overwrite=None, **kwargs):
-        """
-        Shortcut for compute.relative_vorticity and OceanDataset.merge_Dataset.
-        
-        Parameters
-        ----------
-        overwrite: bool or None
-            If None, raise error if any xarray.DataArray already exists.  
-            If True, overwrite existing xarray.DataArray.    
-            If False, do not add existing xarray.DataArray.  
-        **kwargs: 
-            Keyword arguments for compute.relative_vorticity
-            
-        See Also
-        --------
-        compute.relative_vorticity
-        """
-        
-        self = self.merge_Dataset(_compute.relative_vorticity(self, **kwargs), overwrite)
-        
-        return self
-    
-    def merge_kinetic_energy(self, overwrite=None, **kwargs):
-        """
-        Shortcut for compute.kinetic_energy and OceanDataset.merge_Dataset.
-        
-        Parameters
-        ----------
-        overwrite: bool or None
-            If None, raise error if any xarray.DataArray already exists.  
-            If True, overwrite existing xarray.DataArray.    
-            If False, do not add existing xarray.DataArray.  
-        **kwargs: 
-            Keyword arguments for compute.kinetic_energy
-            
-        See Also
-        --------
-        compute.kinetic_energy
-        """
-        
-        self = self.merge_Dataset(_compute.kinetic_energy(self, **kwargs), overwrite)
-        
-        return self
-    
-    def merge_eddy_kinetic_energy(self, overwrite=None, **kwargs):
-        """
-        Shortcut for compute.eddy_kinetic_energy and OceanDataset.merge_Dataset.
-        
-        Parameters
-        ----------
-        overwrite: bool or None
-            If None, raise error if any xarray.DataArray already exists.  
-            If True, overwrite existing xarray.DataArray.    
-            If False, do not add existing xarray.DataArray.  
-        **kwargs: 
-            Keyword arguments for compute.eddy_kinetic_energy 
-            
-        See Also
-        --------
-        compute.eddy_kinetic_energy
-        """
-        
-        self = self.merge_Dataset(_compute.eddy_kinetic_energy(self, **kwargs), overwrite)
-        
-        return self
-    
-    def merge_horizontal_divergence_velocity(self, overwrite=None, **kwargs):
-        """
-        Shortcut for compute.horizontal_divergence_velocity and OceanDataset.merge_Dataset.
-        
-        Parameters
-        ----------
-        overwrite: bool or None
-            If None, raise error if any xarray.DataArray already exists.  
-            If True, overwrite existing xarray.DataArray.  
-            If False, do not add existing xarray.DataArray.  
-        **kwargs: 
-            Keyword arguments for compute.horizontal_divergence_velocity
-            
-        See Also
-        --------
-        compute.horizontal_divergence_velocity
-        """
-        
-        self = self.merge_Dataset(_compute.horizontal_divergence_velocity(self, **kwargs), overwrite)
-        
-        return self
-    
-    def merge_shear_strain(self, overwrite=None, **kwargs):
-        """
-        Shortcut for compute.shear_strain and OceanDataset.merge_Dataset.
-        
-        Parameters
-        ----------
-        overwrite: bool or None
-            If None, raise error if any xarray.DataArray already exists.  
-            If True, overwrite existing xarray.DataArray.   
-            If False, do not add existing xarray.DataArray.  
-        **kwargs: 
-            Keyword arguments for compute.shear_strain
-            
-        See Also
-        --------
-        compute.shear_strain
-        """
-        
-        self = self.merge_Dataset(_compute.shear_strain(self, **kwargs), overwrite)
-        
-        return self
-    
-    def merge_normal_strain(self, overwrite=None, **kwargs):
-        """
-        Shortcut for compute.normal_strain and OceanDataset.merge_Dataset.
-        
-        Parameters
-        ----------
-        overwrite: bool or None
-            If None, raise error if any xarray.DataArray already exists.  
-            If True, overwrite existing xarray.DataArray.    
-            If False, do not add existing xarray.DataArray.  
-        **kwargs: 
-            Keyword arguments for compute.normal_strain
-            
-        See Also
-        --------
-        compute.normal_strain
-        """
-        
-        self = self.merge_Dataset(_compute.normal_strain(self, **kwargs), overwrite)
-        
-        return self
-    
-    def merge_Okubo_Weiss_parameter(self, overwrite=None, **kwargs):
-        """
-        Shortcut for compute.Okubo_Weiss_parameter and OceanDataset.merge_Dataset.
-        
-        Parameters
-        ----------
-        overwrite: bool or None
-            If None, raise error if any xarray.DataArray already exists.  
-            If True, overwrite existing xarray.DataArray.    
-            If False, do not add existing xarray.DataArray.  
-        **kwargs: 
-            Keyword arguments for compute.Okubo_Weiss_parameter
-            
-        See Also
-        --------
-        compute.Okubo_Weiss_parameter
-        """
-        
-        self = self.merge_Dataset(_compute.Okubo_Weiss_parameter(self, **kwargs), overwrite)
-        
-        return self
-    
-    def merge_Ertel_potential_vorticity(self, overwrite=None, **kwargs):
-        """
-        Shortcut for compute.Ertel_potential_vorticity and OceanDataset.merge_Dataset.
-        
-        Parameters
-        ----------
-        overwrite: bool or None
-            If None, raise error if any xarray.DataArray already exists.  
-            If True, overwrite existing xarray.DataArray.   
-            If False, do not add existing xarray.DataArray.  
-        **kwargs: 
-            Keyword arguments for compute.Ertel_potential_vorticity
-            
-        See Also
-        --------
-        compute.Ertel_potential_vorticity
-        """
-        
-        self = self.merge_Dataset(_compute.Ertel_potential_vorticity(self, **kwargs), overwrite)
-        
-        return self
-    
-    def merge_mooring_horizontal_volume_transport(self, overwrite=None, **kwargs):
-        """
-        Shortcut for compute.mooring_horizontal_volume_transport and OceanDataset.merge_Dataset.
-        
-        Parameters
-        ----------
-        overwrite: bool or None
-            If None, raise error if any xarray.DataArray already exists.  
-            If True, overwrite existing xarray.DataArray.   
-            If False, do not add existing xarray.DataArray.  
-        **kwargs: 
-            Keyword arguments for compute.mooring_horizontal_volume_transport 
-            
-        See Also
-        --------
-        compute.mooring_horizontal_volume_transport
-        """
-        
-        self = self.merge_Dataset(_compute.mooring_horizontal_volume_transport(self, **kwargs), overwrite)
-        
-        return self
-    
-    def merge_heat_budget(self, overwrite=None, **kwargs):
-        """
-        Shortcut for compute.heat_budget and OceanDataset.merge_Dataset.
-        
-        Parameters
-        ----------
-        overwrite: bool or None
-            If None, raise error if any xarray.DataArray already exists.  
-            If True, overwrite existing xarray.DataArray.   
-            If False, do not add existing xarray.DataArray.  
-        **kwargs: 
-            Keyword arguments for compute.heat_budget
-            
-        See Also
-        --------
-        compute.heat_budget
-        """
-        
-        self = self.merge_Dataset(_compute.heat_budget(self, **kwargs), overwrite)
-        
-        return self
-    
-    def merge_salt_budget(self, overwrite=None, **kwargs):
-        """
-        Shortcut for compute.salt_budget and OceanDataset.merge_Dataset.
-        
-        Parameters
-        ----------
-        overwrite: bool or None
-            If None, raise error if any xarray.DataArray already exists.  
-            If True, overwrite existing xarray.DataArray.    
-            If False, do not add existing xarray.DataArray.  
-        **kwargs: 
-            Keyword arguments for compute.salt_budget 
-            
-        See Also
-        --------
-        compute.salt_budget
-        """
-        
-        self = self.merge_Dataset(_compute.salt_budget(self, **kwargs), overwrite)
-        
-        return self
-    
-    def merge_geographical_aligned_velocities(self, overwrite=None, **kwargs):
-        """
-        Shortcut for compute.geographical_aligned_velocities and OceanDataset.merge_Dataset.
-        
-        Parameters
-        ----------
-        overwrite: bool or None
-            If None, raise error if any xarray.DataArray already exists.  
-            If True, overwrite existing xarray.DataArray.    
-            If False, do not add existing xarray.DataArray.  
-        **kwargs: 
-            Keyword arguments for compute.geographical_aligned_velocities
-            
-        See Also
-        --------
-        compute.geographical_aligned_velocities
-        """
-        
-        self = self.merge_Dataset(_compute.geographical_aligned_velocities(self, **kwargs), overwrite)
-        
-        return self
-        
-    def merge_survey_aligned_velocities(self, overwrite=None, **kwargs):
-        """
-        Shortcut for compute.survey_aligned_velocities and OceanDataset.merge_Dataset.
-        
-        Parameters
-        ----------
-        overwrite: bool or None
-            If None, raise error if any xarray.DataArray already exists.  
-            If True, overwrite existing xarray.DataArray.    
-            If False, do not add existing xarray.DataArray.  
-        **kwargs: 
-            Keyword arguments for compute.survey_aligned_velocities
-            
-        See Also
-        --------
-        compute.survey_aligned_velocities
-        """
-        
-        self = self.merge_Dataset(_compute.survey_aligned_velocities(self, **kwargs), overwrite)
-        
-        return self
-        
-    # ------------
-    # plot
-    
-    def vertical_section(self, animate=False, **kwargs):
-        """
-        Shortcut for plot.vertical_section or animate.vertical_section.
-        
-        Parameters
-        ----------
-        animate: bool
-            False: use plot.vertical_section
-            True:  use animate.vertical_section
-        **kwargs: 
-            Keyword arguments for plot.vertical_section
-            
-        Returns
-        -------
-        Axes or Animation object
-    
-        See Also
-        --------
-        plot.vertical_section
-        animate.vertical_section
-        """
-        
-        # Check parameters
-        if not isinstance(animate, bool):
-            raise TypeError('`animate` must be bool')
-            
-        if animate:
-            return _animate.vertical_section(self, **kwargs)
-        else:
-            return _plot.vertical_section(self, **kwargs)
         
     
-    def horizontal_section(self, animate=False, **kwargs):
-        """
-        Shortcut for plot.horizontal_section or animate.horizontal_section.
+
         
-        Parameters
-        ----------
-        animate: bool
-            False: use plot.horizontal_section
-            True:  use animate.horizontal_section
-        **kwargs: 
-            Keyword arguments for plot.horizontal_section
-            
-        Returns
-        -------
-        Axes or Animation object
-    
-        See Also
-        --------
-        plot.horizontal_section
-        animate.horizontal_section
-        """
         
-        # Check parameters
-        if not isinstance(animate, bool):
-            raise TypeError('`animate` must be bool')
-            
-        if animate:
-            return _animate.horizontal_section(self, **kwargs)
-        else:
-            return _plot.horizontal_section(self, **kwargs)
-    
-    def time_series(self, **kwargs):
-        """
-        Shortcut for plot.time_series.
         
-        Parameters
-        ----------
-        **kwargs: 
-            Keyword arguments for plot.time_series
-            
-        Returns
-        -------
-        Axes object
-    
-        See Also
-        --------
-        plot.time_series
-        """
-                
-        return _plot.time_series(self, **kwargs)
-    
-    def TS_diagram(self, animate=False, **kwargs):
-        """
-        Shortcut for plot.TS_diagram or animate.TS_diagram.
         
-        Parameters
-        ----------
-        animate: bool
-            False: use plot.TS_diagram
-            True:  use animate.TS_diagram
-        **kwargs: 
-            Keyword arguments for plot.TS_diagram
-            
-        Returns
-        -------
-        Axes or Animation object
-    
-        See Also
-        --------
-        plot.TS_diagram
-        animate.TS_diagram
-        """
         
-        # Check parameters
-        if not isinstance(animate, bool):
-            raise TypeError('`animate` must be bool')
-            
-        if animate:
-            return _animate.TS_diagram(self, **kwargs)
-        else:
-            return _plot.TS_diagram(self, **kwargs)
+        
+        
+        
+        
+        
+        
+# ERROR HANDLING
+def _check_oceanspy_axes(axes2check):
+    """
+    Check axes
+    """
+    from oceanspy import OCEANSPY_AXES
+    
+    for axis in axes2check:
+        if axis not in OCEANSPY_AXES:
+            raise ValueError(_wrong_axes_error_message(axes2check))
+    
+def _wrong_axes_error_message(axes2check):
+    from oceanspy import OCEANSPY_AXES
+    return ("{} contains non-valid axes."
+            " OceanSpy axes are: {}").format(axes2check, OCEANSPY_AXES)
+
+def _setter_error_message(attribute_name):
+    """
+    Use the same error message for attributes
+    """
+    return "Set new `{}` using .set_{}".format(attribute_name, attribute_name)    
     
     
-    
-    
-    
-    
+# USEFUL FUNCTIONS
 def _create_grid(dataset, coords, periodic):
-
-    # TODO: add option to infer axis using comodo since we're currently cleaning up comodo attributes by default
     
     # Clean up comodo (currently force user to specify axis using set_coords).      
     for dim in dataset.dims:
@@ -1668,18 +1248,25 @@ def _create_grid(dataset, coords, periodic):
 
     # Add comodo attributes. 
     # We won't need this step in the future because future versions of xgcm will allow to pass coords in Grid.
+    warn_dims = []
     if coords:
         for axis in coords:
             for dim in coords[axis]:
                 shift = coords[axis][dim]
-                dataset[dim].attrs['axis'] = axis
-                if shift:
-                    dataset[dim].attrs['c_grid_axis_shift'] = str(shift)
-    
+                if dim in dataset.dims:
+                    dataset[dim].attrs['axis'] = axis
+                    if shift:
+                        dataset[dim].attrs['c_grid_axis_shift'] = str(shift)
+                else:
+                    warn_dims = warn_dims + [dim]
+    if len(warn_dims)!=0: 
+        _warnings.warn('{} are not dimensions of the dataset and will be omitted'.format(warn_dims), stacklevel=2)
+                    
     # Create grid
     grid = _xgcm.Grid(dataset, periodic = periodic)
-
+    if len(grid.axes)==0: 
+        grid = None
+        
     return grid
-
 
 
