@@ -109,3 +109,5 @@ ENV/
 # vim tmp
 .*.swp
 
+# Tests
+oceanspy/tests/__pycache__/
