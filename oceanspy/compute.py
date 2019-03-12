@@ -1230,7 +1230,7 @@ def potential_density_anomaly(od):
     Temp = od._ds['Temp']
     
     # Message
-    print('Computing potential density anomaly using the following parameters: {}'.format(params2use))
+    print('Computing potential density anomaly using the following parameters: {}.'.format(params2use))
     
     # Create DataArray
     Sigma0 = eval('_utils.dens{}(S, Temp, 0)-1000'.format(params2use['eq_state']))
@@ -1289,7 +1289,7 @@ def Brunt_Vaisala_frequency(od):
     rho0 = od.parameters['rho0']
     
     # Message
-    print('Computing Brunt-Väisälä Frequency using the following parameters: {}'.format(params2use))
+    print('Computing Brunt-Väisälä Frequency using the following parameters: {}.'.format(params2use))
     
     # Create DataArray
     grad = gradient(od, varNameList = 'Sigma0', axesList= 'Z', aliased = False)
@@ -1331,7 +1331,7 @@ def vertical_relative_vorticity(od):
         raise TypeError('`od` must be OceanDataset')
         
     # Message
-    print('Computing vertical component of relative vorticity')
+    print('Computing vertical component of relative vorticity.')
     
     # Create DataArray
     crl      = curl(od, iName='U', jName='V', kName=None, aliased = False)
@@ -1441,7 +1441,7 @@ def kinetic_energy(od):
     eps_nh = od.parameters['eps_nh']
     
     # Message
-    print('Computing kinetic energy using the following parameters: {}'.format(params2use))
+    print('Computing kinetic energy using the following parameters: {}.'.format(params2use))
     
     # Interpolate horizontal velocities
     U = grid.interp(U, 'X')
@@ -1530,7 +1530,7 @@ def eddy_kinetic_energy(od):
     eps_nh = od.parameters['eps_nh']
     
     # Message
-    print('Computing kinetic energy using the following parameters: {}'.format(params2use))
+    print('Computing kinetic energy using the following parameters: {}.'.format(params2use))
     
     # Interpolate horizontal velocities
     U = grid.interp(U, 'X')
@@ -1598,7 +1598,7 @@ def horizontal_divergence_velocity(od):
         raise TypeError('`od` must be OceanDataset')
         
     # Message
-    print('Computing horizontal divergence of the velocity field')
+    print('Computing horizontal divergence of the velocity field.')
     
     # Create DataArray
     div = divergence(od, iName='U', jName='V', kName=None, aliased = False)
@@ -1697,7 +1697,7 @@ def normal_strain(od):
         raise TypeError('`od` must be OceanDataset')
         
     # Message
-    print('Computing normal component of strain')
+    print('Computing normal component of strain.')
     
     # Create DataArray
     # Same of horizontal divergence of velocity field with - instead of +
@@ -1843,7 +1843,7 @@ def Ertel_potential_vorticity(od, full=True):
     grid = od._grid
     
     # Message
-    print('Computing Ertel potential vorticity using the following parameters: {}'.format(params2use))
+    print('Computing Ertel potential vorticity using the following parameters: {}.'.format(params2use))
     
     # Compute Sigma0 gradients
     Sigma0_grads = gradient(od, varNameList='Sigma0', axesList=['X', 'Y'], aliased = False)
@@ -1917,7 +1917,7 @@ def mooring_horizontal_volume_transport(od):
     od = _add_missing_variables(od, varList)
     
     # Message
-    print('Computing horizontal volume transport')
+    print('Computing horizontal volume transport.')
     
     # Extract variables
     mooring = od._ds['mooring']
@@ -2284,7 +2284,7 @@ def heat_budget(od):
     params2use = {par:od.parameters[par] for par in od.parameters if par in paramsList}
                   
     # Message
-    print('Computing heat budget terms using the following parameters: {}'.format(params2use))
+    print('Computing heat budget terms using the following parameters: {}.'.format(params2use))
     
     # Extract variables
     Temp       = od._ds['Temp']
@@ -2417,7 +2417,7 @@ def salt_budget(od):
     params2use = {par:od.parameters[par] for par in od.parameters if par in paramsList}
                   
     # Message
-    print('Computing salt budget terms using the following parameters: {}'.format(params2use))
+    print('Computing salt budget terms using the following parameters: {}.'.format(params2use))
     
     # Extract variables
     S         = od._ds['S']
