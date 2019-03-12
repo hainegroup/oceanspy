@@ -773,12 +773,18 @@ def vertical_section(od,
     if 'mooring' in od.grid_coords:
         if 'Xp1' in da.dims:
             print('Regridding [{}] along [{}]-axis.'.format(varName, 'X'))
+            da_attrs = da.attrs
             da = od.grid.interp(da, 'X')
+            da.attrs = da_attrs
         if 'Yp1' in da.dims:
             print('Regridding [{}] along [{}]-axis.'.format(varName, 'Y'))
+            da_attrs = da.attrs
             da = od.grid.interp(da, 'Y')
+            da_attrs = da.attrs
         da = da.squeeze()
         hor_name = [dim for dim in od.grid_coords['mooring'] if dim in da.dims][0]
+        if hor_name+'_dist' in od._ds.coords:
+            da = da.assign_coords(**{hor_name+'_dist': od._ds[hor_name+'_dist']})
     elif 'station' in od.grid_coords:
         hor_name = [dim for dim in od.grid_coords['station'] if dim in da.dims][0]
     else: 
@@ -802,12 +808,18 @@ def vertical_section(od,
         if 'mooring' in od.grid_coords:
             if 'Xp1' in da_contour.dims:
                 print('Regridding [{}] along [{}]-axis.'.format(contourName, 'X'))
+                da_contour_attrs = da_contour.attrs
                 da_contour = od.grid.interp(da_contour, 'X')
+                da_contour.attrs = da_contour.attrs
             if 'Yp1' in da.dims:
                 print('Regridding [{}] along [{}]-axis.'.format(contourName, 'Y'))
+                da_contour_attrs = da_contour.attrs
                 da_contour = od.grid.interp(da_contour, 'Y')
+                da_contour.attrs = da_contour.attrs
             da_contour = da_contour.squeeze()
             hor_name_cont = [dim for dim in od.grid_coords['mooring'] if dim in da_contour.dims][0]
+            if hor_name+'_dist' in od._ds.coords:
+                da_contour = da_contour.assign_coords(**{hor_name+'_dist': od._ds[hor_name+'_dist']})
         elif 'station' in od.grid_coords:
             hor_name_cont = [dim for dim in od.grid_coords['station'] if dim in da_contour.dims][0]
         ver_name_cont = [dim for dim in od.grid_coords['Z'] if dim in da_contour.dims][0]
