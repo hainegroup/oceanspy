@@ -113,8 +113,8 @@ def cutout(od,
         YRange  = _np.asarray(YRange, dtype=od._ds['YG'].dtype)
         if YRange.ndim == 0: YRange = YRange.reshape(1)
         elif YRange.ndim >1: raise TypeError('Invalid `YRange`')
-        Ymax = od._ds['Yp1'].max().values
-        Ymin = od._ds['Yp1'].min().values
+        Ymax = od._ds['YG'].max().values
+        Ymin = od._ds['YG'].min().values
         if any(YRange<Ymin) or any(YRange>Ymax):
             _warnings.warn("\nThe Y range of the oceandataset is: {}"
                            "\nYRange has values outside the oceandataset range.".format([Ymin, Ymax]), stacklevel=2)
@@ -123,8 +123,8 @@ def cutout(od,
         XRange = _np.asarray(XRange, dtype=od._ds['XG'].dtype)
         if XRange.ndim == 0: XRange = XRange.reshape(1)
         elif XRange.ndim >1: raise TypeError('Invalid `XRange`')
-        Xmax = od._ds['Xp1'].max().values
-        Xmin = od._ds['Xp1'].min().values
+        Xmax = od._ds['XG'].max().values
+        Xmin = od._ds['XG'].min().values
         if any(XRange<Xmin) or any(XRange>Xmax):
             _warnings.warn("\nThe X range of the oceandataset is: {}"
                            "\nXRange has values outside the oceandataset range.".format([Xmin, Xmax]), stacklevel=2)

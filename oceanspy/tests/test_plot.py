@@ -29,7 +29,7 @@ for name, dimList in MITgcmVarDims.items():
 ds_in = xr.Dataset(ds_dict)
 od_in = od_in.merge_into_oceandataset(ds_in)
 
-od_in = od_in.subsample.cutout(timeRange=0)
+od_in = od_in.subsample.cutout(timeRange=od_in.dataset['time'].isel(time=0))
 
 @pytest.mark.filterwarnings('ignore::UserWarning')
 @pytest.mark.parametrize("subs", [None, 'survey', 'mooring'])
