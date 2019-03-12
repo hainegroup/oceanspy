@@ -503,7 +503,6 @@ def cutout(od,
         # Drop useless
         od._ds = od._ds.drop([v for v in od._ds.variables if (v not in od._ds.dims and v not in od._ds.coords and v not in varList)])
         
-    
     return od
 
 
@@ -862,7 +861,7 @@ def survey_stations(od, Ysurv, Xsurv, delta=None,
     if "XRange"  not in kwargs: kwargs['XRange']    = X_surv
     if "add_Hbdr" not in kwargs: kwargs['add_Hbdr'] = True
     od = od.subsample.cutout(**kwargs)
-    
+
     # Message
     print('Carrying out survey.') 
     
@@ -929,7 +928,11 @@ def survey_stations(od, Ysurv, Xsurv, delta=None,
     
     # Return od
     od._ds = ds
-    od = od.set_grid_coords({'Z': od.grid_coords.pop('Z', None), 'time': od.grid_coords.pop('time', None), 'station': {'station': -0.5}}, add_midp=True, overwrite=True)
+    grid_coords = od.grid_coords
+    grid_coords.pop('X', None)
+    grid_coords.pop('Y', None)
+    od = od.set_grid_coords(grid_coords, overwrite=True)
+    od = od.set_grid_coords({'station': {'station': -0.5}}, add_midp=True, overwrite=False)
     
     # Create dist_midp
     dist_midp = _xr.DataArray(od._grid.interp(od._ds['station_dist'], 'station'),

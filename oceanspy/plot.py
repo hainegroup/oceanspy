@@ -766,10 +766,7 @@ def vertical_section(od,
         
     # SQUEEZE! Otherwise animation don't show up because xarray make a faceted plot
     da = da.squeeze()
-    
-    # Get dimension names
-    # TODO: make interpolation work with aliases
-    
+    time_coords = {timeName: da[timeName] for timeName in ['time', 'time_midp'] if timeName in da.coords}
     if 'mooring' in od.grid_coords:
         if 'Xp1' in da.dims:
             print('Regridding [{}] along [{}]-axis.'.format(varName, 'X'))
@@ -780,17 +777,19 @@ def vertical_section(od,
             print('Regridding [{}] along [{}]-axis.'.format(varName, 'Y'))
             da_attrs = da.attrs
             da = od.grid.interp(da, 'Y')
-            da_attrs = da.attrs
-        da = da.squeeze()
+            da.attrs = da_attrs
         hor_name = [dim for dim in od.grid_coords['mooring'] if dim in da.dims][0]
+        da = da.assign_coords(**time_coords)
         if hor_name+'_dist' in od._ds.coords:
             da = da.assign_coords(**{hor_name+'_dist': od._ds[hor_name+'_dist']})
+        for toRem in ['X', 'Y', 'Xp1', 'Yp1']:
+            if toRem in da.coords: da=da.drop(toRem)
     elif 'station' in od.grid_coords:
         hor_name = [dim for dim in od.grid_coords['station'] if dim in da.dims][0]
     else: 
         raise ValueError('The oceandataset must be subsampled using mooring or survey')
     ver_name = [dim for dim in od.grid_coords['Z'] if dim in da.dims][0]
-
+    da = da.squeeze()
     
     # CONTOURNAME
     if contourName is not None: 
@@ -810,19 +809,21 @@ def vertical_section(od,
                 print('Regridding [{}] along [{}]-axis.'.format(contourName, 'X'))
                 da_contour_attrs = da_contour.attrs
                 da_contour = od.grid.interp(da_contour, 'X')
-                da_contour.attrs = da_contour.attrs
+                da_contour.attrs = da_contour_attrs
             if 'Yp1' in da.dims:
                 print('Regridding [{}] along [{}]-axis.'.format(contourName, 'Y'))
                 da_contour_attrs = da_contour.attrs
                 da_contour = od.grid.interp(da_contour, 'Y')
-                da_contour.attrs = da_contour.attrs
-            da_contour = da_contour.squeeze()
+                da_contour.attrs = da_contour_attrs
             hor_name_cont = [dim for dim in od.grid_coords['mooring'] if dim in da_contour.dims][0]
             if hor_name+'_dist' in od._ds.coords:
                 da_contour = da_contour.assign_coords(**{hor_name+'_dist': od._ds[hor_name+'_dist']})
+            for toRem in ['X', 'Y', 'Xp1', 'Yp1']:
+                if toRem in da_contour.coords: da_contour=da_contour.drop(toRem)
         elif 'station' in od.grid_coords:
             hor_name_cont = [dim for dim in od.grid_coords['station'] if dim in da_contour.dims][0]
         ver_name_cont = [dim for dim in od.grid_coords['Z'] if dim in da_contour.dims][0]
+        da_contour = da_contour.squeeze()
                 
     # Check dimensions
     dims = list(da.dims)
