@@ -12,7 +12,7 @@ from matplotlib import animation
 
 # Add variables
 od_in = copy.copy(oceandatasets['MITgcm_rect_nc'])
-od_in = od_in.subsample.cutout(timeRange=0)
+od_in = od_in.subsample.cutout(timeRange=od_in.dataset['time'].isel(time=0))
 
 # Add random values
 varNeeded = ['Temp', 'S', 
