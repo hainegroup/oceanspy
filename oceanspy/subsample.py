@@ -112,27 +112,40 @@ def cutout(od,
         YRange  = _np.asarray(YRange, dtype=od._ds['YG'].dtype)
         if YRange.ndim == 0: YRange = YRange.reshape(1)
         elif YRange.ndim >1: raise TypeError('Invalid `YRange`')
-    
+        Ymax = od._ds['Yp1'].max().values
+        Ymin = od._ds['Yp1'].min().values
+        if any(YRange<Ymin) or any(YRange>Ymax):
+            _warnings.warn("\nThe Y range of the oceandataset is: {}"
+                           "\nYRange has values outside the oceandataset range.".format([Ymin, Ymax]), stacklevel=2)
+            
     if XRange is not None:
         XRange = _np.asarray(XRange, dtype=od._ds['XG'].dtype)
         if XRange.ndim == 0: XRange = XRange.reshape(1)
         elif XRange.ndim >1: raise TypeError('Invalid `XRange`')
-    
+        Xmax = od._ds['Xp1'].max().values
+        Xmin = od._ds['Xp1'].min().values
+        if any(XRange<Xmin) or any(XRange>Xmax):
+            _warnings.warn("\nThe X range of the oceandataset is: {}"
+                           "\nXRange has values outside the oceandataset range.".format([Xmin, Xmax]), stacklevel=2)
     if ZRange is not None:
         ZRange = _np.asarray(ZRange, dtype=od._ds['Zp1'].dtype)
         if ZRange.ndim == 0: ZRange = ZRange.reshape(1)
         elif ZRange.ndim >1: raise TypeError('Invalid `ZRange`')
-        # Only check ZRange because it's a common mistake
         Zmax = od._ds['Zp1'].max().values
         Zmin = od._ds['Zp1'].min().values
         if any(ZRange<Zmin) or any(ZRange>Zmax):
-            _warnings.warn("\nThe depth range is: {}"
-                           "\nZRange has values outside the vertical range of the oceandataset.".format([Zmin, Zmax]), stacklevel=2)
+            _warnings.warn("\nThe Z range of the oceandataset is: {}"
+                           "\nZRange has values outside the the oceandataset range.".format([Zmin, Zmax]), stacklevel=2)
             
     if timeRange is not None:
         timeRange  = _np.asarray(timeRange, dtype=od._ds['time'].dtype)
         if timeRange.ndim == 0: timeRange = timeRange.reshape(1)
         elif timeRange.ndim >1: raise TypeError('Invalid `timeRange`')
+        timemax = od._ds['time'].max().values
+        timemin = od._ds['time'].min().values
+        if any(timeRange<timemin) or any(timeRange>timemax):
+            _warnings.warn("\nThe time range of the oceandataset is: {}"
+                           "\ntimeRange has values outside the the oceandataset range.".format([timemin, timemax]), stacklevel=2)
     
     if not isinstance(timeFreq, (str, type(None))):
         raise TypeError('`timeFreq` must None or str')
@@ -319,10 +332,10 @@ def cutout(od,
         else:
             ds = ds.isel(Z = slice(iZ[0], iZ[1]))
         
-        if 'Zu' in ds.dims:
+        if 'Zu' in ds.dims and len(ds['Zu'])>1:
             ds = ds.sel(Zu = slice(ds['Zp1'].isel(Zp1=0).values,   ds['Zp1'].isel(Zp1=-1).values))
         
-        if 'Zl' in ds.dims:
+        if 'Zl' in ds.dims and len(ds['Zl'])>1:
             ds = ds.sel(Zl = slice(ds['Zp1'].isel(Zp1=0).values,  ds['Z'].isel(Z=-1).values))
         
         # Cut axis can't be periodic
