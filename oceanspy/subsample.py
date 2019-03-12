@@ -20,6 +20,7 @@ import oceanspy as _ospy
 import functools as _functools
 
 from . import utils as _utils
+from . import compute as _compute
 
 try: from geopy.distance import great_circle as _great_circle
 except ImportError: pass
@@ -175,15 +176,12 @@ def cutout(od,
     # Message
     print('Cutting out the oceandataset.')
                      
-    # Unpack from oceandataset
+    # Copy
     od = _copy.copy(od)
+    
+    # Unpack
     ds = od._ds
     periodic = od.grid_periodic
-    
-    # Drop variables
-    if varList is not None: 
-        if isinstance(varList, str): varList = [varList]
-        ds = ds.drop([v for v in ds.variables if (v not in ds.dims and v not in ds.coords and v not in varList)])
     
     # ---------------------------
     # Horizontal CUTOUT
@@ -494,6 +492,17 @@ def cutout(od,
     
     # Cut axis can't be periodic 
     od = od.set_grid_periodic(periodic, overwrite = True)
+    
+    # Drop variables
+    if varList is not None: 
+        if isinstance(varList, str): varList = [varList]
+            
+        # Compute missing variables
+        od = _compute._add_missing_variables(od, varList)
+        
+        # Drop useless
+        od._ds = od._ds.drop([v for v in od._ds.variables if (v not in od._ds.dims and v not in od._ds.coords and v not in varList)])
+        
     
     return od
 
