@@ -7,7 +7,7 @@ Welcome to OceanSpy's documentation!
 
    readme
    installation
-   Tutorials
+   Tutorial_OceanDataset
    contributing
    api
    people

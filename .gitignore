@@ -67,6 +67,7 @@ instance/
 docs/_build/
 docs/generated/
 docs/tmp/
+docs/*.nc
 
 # PyBuilder
 target/

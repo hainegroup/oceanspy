@@ -14,10 +14,18 @@ from . compute   import _computeMethdos
 from . plot      import _plotMethdos
 from . animate   import _animateMethdos
 
-try: import cartopy.crs as _ccrs
-except ImportError: pass
-try: from scipy import spatial as _spatial
-except ImportError: pass
+try: 
+    import cartopy.crs as _ccrs
+except ImportError: 
+    pass
+try: 
+    from scipy import spatial as _spatial
+except ImportError: 
+    pass
+try: 
+    from dask.diagnostics import ProgressBar as _ProgressBar
+except ImportError:
+    pass
 
 # TODO: add more xgcm options. E.g., default boundary method.
 # TODO: add attributes to new coordinates (XU, XV, ...)
@@ -1031,7 +1039,7 @@ class OceanDataset:
                                         'YV', 'XV'])
         return self
     
-    def to_netcdf(self, path):
+    def to_netcdf(self, path, **kwargs):
         """
         Write dataset contents to a netCDF file.
         
@@ -1039,6 +1047,8 @@ class OceanDataset:
         ----------
         path: str
             Path to which to save this dataset.
+        **kwargs:
+            Keyword arguments for xarray.DataSet.to_netcdf()
         
         References
         ----------
@@ -1048,8 +1058,6 @@ class OceanDataset:
         if not isinstance(path, str):
             raise TypeError('`path` must be str')
         
-        from dask.diagnostics import ProgressBar as _ProgressBar
-        
         # to_netcdf doesn't like coordinates attribute
         dataset = self.dataset
         for var in dataset.variables:
@@ -1058,10 +1066,14 @@ class OceanDataset:
             dataset[var].attrs = attrs
             if coordinates is not None: dataset[var].attrs['_coordinates'] = coordinates
         
-        print('Writing dataset to '+path)
-        delayed_obj = dataset.to_netcdf(path, compute=False)
-        with _ProgressBar():
-            results = delayed_obj.compute()
+        compute = kwargs.pop('compute', None)
+        print('Writing dataset to [{}].'.format(path))
+        if compute is None or compute is False:
+            delayed_obj = dataset.to_netcdf(path, compute=False, **kwargs)
+            with _ProgressBar():
+                results = delayed_obj.compute()
+        else:
+            dataset.to_netcdf(path, compute=compute, **kwargs)
         
     def _store_as_global_attr(self, name, attr, overwrite):
         """
