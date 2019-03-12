@@ -136,7 +136,8 @@ def TS_diagram(od,
     if cutout_kwargs  is None: cutout_kwargs  = {}
         
     # Cutout first
-    od = od.subsample.cutout(**cutout_kwargs)
+    if len(cutout_kwargs)!=0:
+        od = od.subsample.cutout(**cutout_kwargs)
         
     # Check and extract T and S
     varList = ['Temp', 'S']
@@ -346,7 +347,8 @@ def time_series(od,
     if cutout_kwargs is None:  cutout_kwargs = {}
     
     # Cutout first
-    od = od.subsample.cutout(**cutout_kwargs)
+    if len(cutout_kwargs)!=0:
+        od = od.subsample.cutout(**cutout_kwargs)
     
     # Variable name 
     _varName =  _compute._rename_aliased(od, varName)
@@ -473,7 +475,8 @@ def horizontal_section(od,
     if cutout_kwargs   is None: cutout_kwargs  = {}
         
     # Cutout first
-    od = od.subsample.cutout(**cutout_kwargs)
+    if len(cutout_kwargs)!=0:
+        od = od.subsample.cutout(**cutout_kwargs)
     
     # Check variables and add
     listName = [varName]
@@ -734,13 +737,13 @@ def vertical_section(od,
         raise TypeError('`subsamp_kwargs` must be None or dict')
         
     # Handle kwargs
-    if contour_kwargs  is None: contour_kwargs = {}
-    if clabel_kwargs   is None: clabel_kwargs  = {}
+    if contour_kwargs is None: contour_kwargs = {}
+    if clabel_kwargs  is None: clabel_kwargs  = {}
+    if cutout_kwargs  is None: cutout_kwargs = {}     
     
     # For animation purposes.
     # TODO: take out useless variables?
-    if cutout_kwargs is not None:     
-        # Cutout first (needed)
+    if len(cutout_kwargs)!=0:     
         od = od.subsample.cutout(**cutout_kwargs)
     
     # Subsample first
