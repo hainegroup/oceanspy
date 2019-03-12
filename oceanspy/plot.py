@@ -546,6 +546,12 @@ def horizontal_section(od,
         # Add ax
         if ax is None:
             ax = _plt.axes(projection=od.projection);
+        elif od.projection is not None and not hasattr(ax, 'projection'):
+            od = od.set_projection(None)
+            _warnings.warn("\nSwitching projection off."
+                           "If ax is passed, it needs to be initialiazed with a projection."
+                           "\nE.g., fig, ax=plt.subplots(1, 1, subplot_kw={'projection': od.projection}", stacklevel=2)
+            
         kwargs['ax'] = ax
             
     elif len(dims)==1:
