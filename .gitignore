@@ -68,6 +68,7 @@ docs/_build/
 docs/generated/
 docs/tmp/
 docs/*.nc
+docs/.nfs*
 
 # PyBuilder
 target/
