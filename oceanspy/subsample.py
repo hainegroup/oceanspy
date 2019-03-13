@@ -327,14 +327,19 @@ def cutout(od,
                 iZ[0]=iZ[0]-1
                 iZ[1]=iZ[1]-1
             ds = ds.isel(Z = slice(iZ[0], iZ[1]+1))
+            if 'Zu' in ds.dims and len(ds['Zu'])>1:
+                ds = ds.sel(Zu=ds['Zp1'].values, method='nearest')
+            if 'Zl' in ds.dims and len(ds['Zl'])>1:
+                ds = ds.sel(Zl=ds['Zp1'].values, method='nearest')
+            
         else:
             ds = ds.isel(Z = slice(iZ[0], iZ[1]))
         
-        if 'Zu' in ds.dims and len(ds['Zu'])>1:
-            ds = ds.sel(Zu = slice(ds['Zp1'].isel(Zp1=0).values,   ds['Zp1'].isel(Zp1=-1).values))
-        
-        if 'Zl' in ds.dims and len(ds['Zl'])>1:
-            ds = ds.sel(Zl = slice(ds['Zp1'].isel(Zp1=0).values,  ds['Z'].isel(Z=-1).values))
+            if 'Zu' in ds.dims and len(ds['Zu'])>1:
+                ds = ds.sel(Zu = slice(ds['Zp1'].isel(Zp1=0).values,   ds['Zp1'].isel(Zp1=-1).values))
+
+            if 'Zl' in ds.dims and len(ds['Zl'])>1:
+                ds = ds.sel(Zl = slice(ds['Zp1'].isel(Zp1=0).values,  ds['Z'].isel(Z=-1).values))
         
         # Cut axis can't be periodic
         if (len(ds['Z']) < lenZ or 'Z' in dropAxes) and 'Z' in periodic: periodic.remove('Z')
