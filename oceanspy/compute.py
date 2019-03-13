@@ -27,6 +27,7 @@ from . import utils as _utils
 # TODO: any time velocities are mutiplied by hfac, we should use mass weighted velocities if available (mass_weighted function?)
 # TODO: add error when function will fail (e.g., divergence of W fails when only one level is available)
 # TODO: compute transport for survey
+# TODO: units for divergence, curl, laplacian
 
 # Hard coded  list of variables outputed by functions
 _FUNC2VARS = {'potential_density_anomaly'     : ['Sigma0'],
@@ -319,7 +320,16 @@ def gradient(od, varNameList, axesList=None, aliased = True):
                 dden = od._grid.diff(od._ds[axis+'_dist'], axis, boundary='fill', fill_value=_np.nan)
                     
             # Add and clear
-            grad['d'+varNameOUT+'_d'+axis] = dnum / dden
+            outName = 'd'+varNameOUT+'_d'+axis
+            grad[outName] = dnum / dden
+            add_units = {'X': ' m', 'Y': ' m', 'Z': ' m', 'time': ' s', 'station': ' km', 'mooring': ' km'}
+            if 'units' in od._ds[varName].attrs:
+                    if od._ds[varName].attrs!='-':
+                        grad[outName].attrs['units'] = od._ds[varName].attrs['units']+add_units[axis]+'^-1'
+                    else:
+                        grad[outName].attrs['units'] = add_units[axis]+'^-1'
+                    
+                
             del dnum, dden
             
     return _xr.Dataset(grad, attrs=od.dataset.attrs)
@@ -942,10 +952,10 @@ def weighted_mean(od, varNameList=None, axesList=None, storeWeights=True, aliase
         else: storeWeights = False
 
         # Store wMean
-        if 'long_name' in attrs:
+        """if 'long_name' in attrs:
             attrs['long_name']   = '<{}>'.format(attrs['long_name'])
         if 'description' in attrs:
-            attrs['description'] = '<{}>'.format(attrs['description'])
+            attrs['description'] = '<{}>'.format(attrs['description'])"""
         wMean.attrs = attrs
         means['w_mean_'+varNameOUT] = wMean
         
