@@ -20,6 +20,7 @@ import oceanspy as _ospy
 import functools as _functools
 
 from . import utils as _utils
+from . import compute as _compute
 
 try: from geopy.distance import great_circle as _great_circle
 except ImportError: pass
@@ -112,27 +113,40 @@ def cutout(od,
         YRange  = _np.asarray(YRange, dtype=od._ds['YG'].dtype)
         if YRange.ndim == 0: YRange = YRange.reshape(1)
         elif YRange.ndim >1: raise TypeError('Invalid `YRange`')
-    
+        Ymax = od._ds['YG'].max().values
+        Ymin = od._ds['YG'].min().values
+        if any(YRange<Ymin) or any(YRange>Ymax):
+            _warnings.warn("\nThe Y range of the oceandataset is: {}"
+                           "\nYRange has values outside the oceandataset range.".format([Ymin, Ymax]), stacklevel=2)
+            
     if XRange is not None:
         XRange = _np.asarray(XRange, dtype=od._ds['XG'].dtype)
         if XRange.ndim == 0: XRange = XRange.reshape(1)
         elif XRange.ndim >1: raise TypeError('Invalid `XRange`')
-    
+        Xmax = od._ds['XG'].max().values
+        Xmin = od._ds['XG'].min().values
+        if any(XRange<Xmin) or any(XRange>Xmax):
+            _warnings.warn("\nThe X range of the oceandataset is: {}"
+                           "\nXRange has values outside the oceandataset range.".format([Xmin, Xmax]), stacklevel=2)
     if ZRange is not None:
         ZRange = _np.asarray(ZRange, dtype=od._ds['Zp1'].dtype)
         if ZRange.ndim == 0: ZRange = ZRange.reshape(1)
         elif ZRange.ndim >1: raise TypeError('Invalid `ZRange`')
-        # Only check ZRange because it's a common mistake
         Zmax = od._ds['Zp1'].max().values
         Zmin = od._ds['Zp1'].min().values
         if any(ZRange<Zmin) or any(ZRange>Zmax):
-            _warnings.warn("\nThe depth range is: {}"
-                           "\nZRange has values outside the vertical range of the oceandataset.".format([Zmin, Zmax]), stacklevel=2)
+            _warnings.warn("\nThe Z range of the oceandataset is: {}"
+                           "\nZRange has values outside the the oceandataset range.".format([Zmin, Zmax]), stacklevel=2)
             
     if timeRange is not None:
         timeRange  = _np.asarray(timeRange, dtype=od._ds['time'].dtype)
         if timeRange.ndim == 0: timeRange = timeRange.reshape(1)
         elif timeRange.ndim >1: raise TypeError('Invalid `timeRange`')
+        timemax = od._ds['time'].max().values
+        timemin = od._ds['time'].min().values
+        if any(timeRange<timemin) or any(timeRange>timemax):
+            _warnings.warn("\nThe time range of the oceandataset is: {}"
+                           "\ntimeRange has values outside the the oceandataset range.".format([timemin, timemax]), stacklevel=2)
     
     if not isinstance(timeFreq, (str, type(None))):
         raise TypeError('`timeFreq` must None or str')
@@ -162,15 +176,12 @@ def cutout(od,
     # Message
     print('Cutting out the oceandataset.')
                      
-    # Unpack from oceandataset
+    # Copy
     od = _copy.copy(od)
+    
+    # Unpack
     ds = od._ds
     periodic = od.grid_periodic
-    
-    # Drop variables
-    if varList is not None: 
-        if isinstance(varList, str): varList = [varList]
-        ds = ds.drop([v for v in ds.variables if (v not in ds.dims and v not in ds.coords and v not in varList)])
     
     # ---------------------------
     # Horizontal CUTOUT
@@ -316,14 +327,19 @@ def cutout(od,
                 iZ[0]=iZ[0]-1
                 iZ[1]=iZ[1]-1
             ds = ds.isel(Z = slice(iZ[0], iZ[1]+1))
+            if 'Zu' in ds.dims and len(ds['Zu'])>1:
+                ds = ds.sel(Zu=ds['Zp1'].values, method='nearest')
+            if 'Zl' in ds.dims and len(ds['Zl'])>1:
+                ds = ds.sel(Zl=ds['Zp1'].values, method='nearest')
+            
         else:
             ds = ds.isel(Z = slice(iZ[0], iZ[1]))
         
-        if 'Zu' in ds.dims:
-            ds = ds.sel(Zu = slice(ds['Zp1'].isel(Zp1=0).values,   ds['Zp1'].isel(Zp1=-1).values))
-        
-        if 'Zl' in ds.dims:
-            ds = ds.sel(Zl = slice(ds['Zp1'].isel(Zp1=0).values,  ds['Z'].isel(Z=-1).values))
+            if 'Zu' in ds.dims and len(ds['Zu'])>1:
+                ds = ds.sel(Zu = slice(ds['Zp1'].isel(Zp1=0).values,   ds['Zp1'].isel(Zp1=-1).values))
+
+            if 'Zl' in ds.dims and len(ds['Zl'])>1:
+                ds = ds.sel(Zl = slice(ds['Zp1'].isel(Zp1=0).values,  ds['Z'].isel(Z=-1).values))
         
         # Cut axis can't be periodic
         if (len(ds['Z']) < lenZ or 'Z' in dropAxes) and 'Z' in periodic: periodic.remove('Z')
@@ -482,6 +498,16 @@ def cutout(od,
     # Cut axis can't be periodic 
     od = od.set_grid_periodic(periodic, overwrite = True)
     
+    # Drop variables
+    if varList is not None: 
+        if isinstance(varList, str): varList = [varList]
+            
+        # Compute missing variables
+        od = _compute._add_missing_variables(od, varList)
+        
+        # Drop useless
+        od._ds = od._ds.drop([v for v in od._ds.variables if (v not in od._ds.dims and v not in od._ds.coords and v not in varList)])
+        
     return od
 
 
@@ -840,7 +866,7 @@ def survey_stations(od, Ysurv, Xsurv, delta=None,
     if "XRange"  not in kwargs: kwargs['XRange']    = X_surv
     if "add_Hbdr" not in kwargs: kwargs['add_Hbdr'] = True
     od = od.subsample.cutout(**kwargs)
-    
+
     # Message
     print('Carrying out survey.') 
     
@@ -907,7 +933,11 @@ def survey_stations(od, Ysurv, Xsurv, delta=None,
     
     # Return od
     od._ds = ds
-    od = od.set_grid_coords({'Z': od.grid_coords.pop('Z', None), 'time': od.grid_coords.pop('time', None), 'station': {'station': -0.5}}, add_midp=True, overwrite=True)
+    grid_coords = od.grid_coords
+    grid_coords.pop('X', None)
+    grid_coords.pop('Y', None)
+    od = od.set_grid_coords(grid_coords, overwrite=True)
+    od = od.set_grid_coords({'station': {'station': -0.5}}, add_midp=True, overwrite=False)
     
     # Create dist_midp
     dist_midp = _xr.DataArray(od._grid.interp(od._ds['station_dist'], 'station'),

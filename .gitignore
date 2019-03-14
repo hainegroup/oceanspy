@@ -67,6 +67,10 @@ instance/
 docs/_build/
 docs/generated/
 docs/tmp/
+docs/*.nc
+docs/.nfs*
+docs/.ipynb_checkpoints/
+docs/Figs/
 
 # PyBuilder
 target/
@@ -107,3 +111,5 @@ ENV/
 # vim tmp
 .*.swp
 
+# Tests
+oceanspy/tests/__pycache__/

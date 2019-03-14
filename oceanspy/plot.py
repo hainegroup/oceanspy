@@ -136,7 +136,8 @@ def TS_diagram(od,
     if cutout_kwargs  is None: cutout_kwargs  = {}
         
     # Cutout first
-    od = od.subsample.cutout(**cutout_kwargs)
+    if len(cutout_kwargs)!=0:
+        od = od.subsample.cutout(**cutout_kwargs)
         
     # Check and extract T and S
     varList = ['Temp', 'S']
@@ -346,7 +347,8 @@ def time_series(od,
     if cutout_kwargs is None:  cutout_kwargs = {}
     
     # Cutout first
-    od = od.subsample.cutout(**cutout_kwargs)
+    if len(cutout_kwargs)!=0:
+        od = od.subsample.cutout(**cutout_kwargs)
     
     # Variable name 
     _varName =  _compute._rename_aliased(od, varName)
@@ -473,7 +475,8 @@ def horizontal_section(od,
     if cutout_kwargs   is None: cutout_kwargs  = {}
         
     # Cutout first
-    od = od.subsample.cutout(**cutout_kwargs)
+    if len(cutout_kwargs)!=0:
+        od = od.subsample.cutout(**cutout_kwargs)
     
     # Check variables and add
     listName = [varName]
@@ -546,6 +549,12 @@ def horizontal_section(od,
         # Add ax
         if ax is None:
             ax = _plt.axes(projection=od.projection);
+        elif od.projection is not None and not hasattr(ax, 'projection'):
+            od = od.set_projection(None)
+            _warnings.warn("\nSwitching projection off."
+                           "If ax is passed, it needs to be initialiazed with a projection."
+                           "\nE.g., fig, ax=plt.subplots(1, 1, subplot_kw={'projection': od.projection}", stacklevel=2)
+            
         kwargs['ax'] = ax
             
     elif len(dims)==1:
@@ -728,13 +737,13 @@ def vertical_section(od,
         raise TypeError('`subsamp_kwargs` must be None or dict')
         
     # Handle kwargs
-    if contour_kwargs  is None: contour_kwargs = {}
-    if clabel_kwargs   is None: clabel_kwargs  = {}
+    if contour_kwargs is None: contour_kwargs = {}
+    if clabel_kwargs  is None: clabel_kwargs  = {}
+    if cutout_kwargs  is None: cutout_kwargs = {}     
     
     # For animation purposes.
     # TODO: take out useless variables?
-    if cutout_kwargs is not None:     
-        # Cutout first (needed)
+    if len(cutout_kwargs)!=0:     
         od = od.subsample.cutout(**cutout_kwargs)
     
     # Subsample first
@@ -757,25 +766,30 @@ def vertical_section(od,
         
     # SQUEEZE! Otherwise animation don't show up because xarray make a faceted plot
     da = da.squeeze()
-    
-    # Get dimension names
-    # TODO: make interpolation work with aliases
-    
+    time_coords = {timeName: da[timeName] for timeName in ['time', 'time_midp'] if timeName in da.coords}
     if 'mooring' in od.grid_coords:
         if 'Xp1' in da.dims:
             print('Regridding [{}] along [{}]-axis.'.format(varName, 'X'))
+            da_attrs = da.attrs
             da = od.grid.interp(da, 'X')
+            da.attrs = da_attrs
         if 'Yp1' in da.dims:
             print('Regridding [{}] along [{}]-axis.'.format(varName, 'Y'))
+            da_attrs = da.attrs
             da = od.grid.interp(da, 'Y')
-        da = da.squeeze()
+            da.attrs = da_attrs
         hor_name = [dim for dim in od.grid_coords['mooring'] if dim in da.dims][0]
+        da = da.assign_coords(**time_coords)
+        if hor_name+'_dist' in od._ds.coords:
+            da = da.assign_coords(**{hor_name+'_dist': od._ds[hor_name+'_dist']})
+        for toRem in ['X', 'Y', 'Xp1', 'Yp1']:
+            if toRem in da.coords: da=da.drop(toRem)
     elif 'station' in od.grid_coords:
         hor_name = [dim for dim in od.grid_coords['station'] if dim in da.dims][0]
     else: 
         raise ValueError('The oceandataset must be subsampled using mooring or survey')
     ver_name = [dim for dim in od.grid_coords['Z'] if dim in da.dims][0]
-
+    da = da.squeeze()
     
     # CONTOURNAME
     if contourName is not None: 
@@ -793,15 +807,23 @@ def vertical_section(od,
         if 'mooring' in od.grid_coords:
             if 'Xp1' in da_contour.dims:
                 print('Regridding [{}] along [{}]-axis.'.format(contourName, 'X'))
+                da_contour_attrs = da_contour.attrs
                 da_contour = od.grid.interp(da_contour, 'X')
+                da_contour.attrs = da_contour_attrs
             if 'Yp1' in da.dims:
                 print('Regridding [{}] along [{}]-axis.'.format(contourName, 'Y'))
+                da_contour_attrs = da_contour.attrs
                 da_contour = od.grid.interp(da_contour, 'Y')
-            da_contour = da_contour.squeeze()
+                da_contour.attrs = da_contour_attrs
             hor_name_cont = [dim for dim in od.grid_coords['mooring'] if dim in da_contour.dims][0]
+            if hor_name+'_dist' in od._ds.coords:
+                da_contour = da_contour.assign_coords(**{hor_name+'_dist': od._ds[hor_name+'_dist']})
+            for toRem in ['X', 'Y', 'Xp1', 'Yp1']:
+                if toRem in da_contour.coords: da_contour=da_contour.drop(toRem)
         elif 'station' in od.grid_coords:
             hor_name_cont = [dim for dim in od.grid_coords['station'] if dim in da_contour.dims][0]
         ver_name_cont = [dim for dim in od.grid_coords['Z'] if dim in da_contour.dims][0]
+        da_contour = da_contour.squeeze()
                 
     # Check dimensions
     dims = list(da.dims)
