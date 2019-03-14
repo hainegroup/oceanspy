@@ -27,6 +27,7 @@ from . import utils as _utils
 # TODO: any time velocities are mutiplied by hfac, we should use mass weighted velocities if available (mass_weighted function?)
 # TODO: add error when function will fail (e.g., divergence of W fails when only one level is available)
 # TODO: compute transport for survey
+# TODO: units for divergence, curl, laplacian
 
 # Hard coded  list of variables outputed by functions
 _FUNC2VARS = {'potential_density_anomaly'     : ['Sigma0'],
@@ -319,7 +320,16 @@ def gradient(od, varNameList, axesList=None, aliased = True):
                 dden = od._grid.diff(od._ds[axis+'_dist'], axis, boundary='fill', fill_value=_np.nan)
                     
             # Add and clear
-            grad['d'+varNameOUT+'_d'+axis] = dnum / dden
+            outName = 'd'+varNameOUT+'_d'+axis
+            grad[outName] = dnum / dden
+            add_units = {'X': ' m', 'Y': ' m', 'Z': ' m', 'time': ' s', 'station': ' km', 'mooring': ' km'}
+            if 'units' in od._ds[varName].attrs:
+                    if od._ds[varName].attrs!='-':
+                        grad[outName].attrs['units'] = od._ds[varName].attrs['units']+add_units[axis]+'^-1'
+                    else:
+                        grad[outName].attrs['units'] = add_units[axis]+'^-1'
+                    
+                
             del dnum, dden
             
     return _xr.Dataset(grad, attrs=od.dataset.attrs)
@@ -942,10 +952,10 @@ def weighted_mean(od, varNameList=None, axesList=None, storeWeights=True, aliase
         else: storeWeights = False
 
         # Store wMean
-        if 'long_name' in attrs:
+        """if 'long_name' in attrs:
             attrs['long_name']   = '<{}>'.format(attrs['long_name'])
         if 'description' in attrs:
-            attrs['description'] = '<{}>'.format(attrs['description'])
+            attrs['description'] = '<{}>'.format(attrs['description'])"""
         wMean.attrs = attrs
         means['w_mean_'+varNameOUT] = wMean
         
@@ -1230,7 +1240,7 @@ def potential_density_anomaly(od):
     Temp = od._ds['Temp']
     
     # Message
-    print('Computing potential density anomaly using the following parameters: {}'.format(params2use))
+    print('Computing potential density anomaly using the following parameters: {}.'.format(params2use))
     
     # Create DataArray
     Sigma0 = eval('_utils.dens{}(S, Temp, 0)-1000'.format(params2use['eq_state']))
@@ -1289,7 +1299,7 @@ def Brunt_Vaisala_frequency(od):
     rho0 = od.parameters['rho0']
     
     # Message
-    print('Computing Brunt-Väisälä Frequency using the following parameters: {}'.format(params2use))
+    print('Computing Brunt-Väisälä Frequency using the following parameters: {}.'.format(params2use))
     
     # Create DataArray
     grad = gradient(od, varNameList = 'Sigma0', axesList= 'Z', aliased = False)
@@ -1331,7 +1341,7 @@ def vertical_relative_vorticity(od):
         raise TypeError('`od` must be OceanDataset')
         
     # Message
-    print('Computing vertical component of relative vorticity')
+    print('Computing vertical component of relative vorticity.')
     
     # Create DataArray
     crl      = curl(od, iName='U', jName='V', kName=None, aliased = False)
@@ -1441,7 +1451,7 @@ def kinetic_energy(od):
     eps_nh = od.parameters['eps_nh']
     
     # Message
-    print('Computing kinetic energy using the following parameters: {}'.format(params2use))
+    print('Computing kinetic energy using the following parameters: {}.'.format(params2use))
     
     # Interpolate horizontal velocities
     U = grid.interp(U, 'X')
@@ -1530,7 +1540,7 @@ def eddy_kinetic_energy(od):
     eps_nh = od.parameters['eps_nh']
     
     # Message
-    print('Computing kinetic energy using the following parameters: {}'.format(params2use))
+    print('Computing kinetic energy using the following parameters: {}.'.format(params2use))
     
     # Interpolate horizontal velocities
     U = grid.interp(U, 'X')
@@ -1598,7 +1608,7 @@ def horizontal_divergence_velocity(od):
         raise TypeError('`od` must be OceanDataset')
         
     # Message
-    print('Computing horizontal divergence of the velocity field')
+    print('Computing horizontal divergence of the velocity field.')
     
     # Create DataArray
     div = divergence(od, iName='U', jName='V', kName=None, aliased = False)
@@ -1697,7 +1707,7 @@ def normal_strain(od):
         raise TypeError('`od` must be OceanDataset')
         
     # Message
-    print('Computing normal component of strain')
+    print('Computing normal component of strain.')
     
     # Create DataArray
     # Same of horizontal divergence of velocity field with - instead of +
@@ -1843,7 +1853,7 @@ def Ertel_potential_vorticity(od, full=True):
     grid = od._grid
     
     # Message
-    print('Computing Ertel potential vorticity using the following parameters: {}'.format(params2use))
+    print('Computing Ertel potential vorticity using the following parameters: {}.'.format(params2use))
     
     # Compute Sigma0 gradients
     Sigma0_grads = gradient(od, varNameList='Sigma0', axesList=['X', 'Y'], aliased = False)
@@ -1917,7 +1927,7 @@ def mooring_horizontal_volume_transport(od):
     od = _add_missing_variables(od, varList)
     
     # Message
-    print('Computing horizontal volume transport')
+    print('Computing horizontal volume transport.')
     
     # Extract variables
     mooring = od._ds['mooring']
@@ -2284,7 +2294,7 @@ def heat_budget(od):
     params2use = {par:od.parameters[par] for par in od.parameters if par in paramsList}
                   
     # Message
-    print('Computing heat budget terms using the following parameters: {}'.format(params2use))
+    print('Computing heat budget terms using the following parameters: {}.'.format(params2use))
     
     # Extract variables
     Temp       = od._ds['Temp']
@@ -2417,7 +2427,7 @@ def salt_budget(od):
     params2use = {par:od.parameters[par] for par in od.parameters if par in paramsList}
                   
     # Message
-    print('Computing salt budget terms using the following parameters: {}'.format(params2use))
+    print('Computing salt budget terms using the following parameters: {}.'.format(params2use))
     
     # Extract variables
     S         = od._ds['S']

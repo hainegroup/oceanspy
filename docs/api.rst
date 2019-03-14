@@ -131,8 +131,8 @@ Computing
    
    compute
    
-Dynamic
--------
+Input required
+--------------
 
 .. autosummary::
    :toctree: generated/
@@ -144,8 +144,8 @@ Dynamic
    compute.integral
    compute.weighted_mean
    
-Static
-------
+OceanDataset only
+-----------------
 
 .. autosummary::
    :toctree: generated/

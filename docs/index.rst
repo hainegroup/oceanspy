@@ -7,7 +7,12 @@ Welcome to OceanSpy's documentation!
 
    readme
    installation
-   Tutorials
+   Demo1_OceanDataset
+   Demo2_Subsample
+   Demo3a_Compute
+   Demo3b_ComputeHS
+   Demo3c_ComputeVS
+   Demo4_Plots
    contributing
    api
    people
