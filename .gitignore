@@ -69,6 +69,8 @@ docs/generated/
 docs/tmp/
 docs/*.nc
 docs/.nfs*
+docs/.ipynb_checkpoints/
+docs/Figs/
 
 # PyBuilder
 target/
