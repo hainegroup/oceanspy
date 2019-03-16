@@ -568,7 +568,7 @@ def EGshelfSJsec500m(Hydrostatic = True,
         
     References
     ----------
-    .. [MaHa15] Marcello G. Magaldi, Thomas W.N. Haine, Hydrostatic and non-hydrostatic simulations of dense waters cascading off a shelf: The East Greenland case, Deep Sea Research Part I: Oceanographic Research Papers, Volume 96, 2015, Pages 89-104, ISSN 0967-0637, https://doi.org/10.1016/j.dsr.2014.10.008.
+    .. [MaHa15] Marcello G. Magaldi, Thomas W.N. Haine, Hydrostatic and non-hydrostatic simulations of dense waters cascading off a shelf: The East Greenland case, Deep Sea Research Part I: Oceanographic Research Papers, Volume 96, 2015, Pages 89-104, ISSN 0967-0637, https://doi.org/10.1016/j.dsr.2014.10.008
     """
     
     # Check input
@@ -642,12 +642,11 @@ def EGshelfSJsec500m(Hydrostatic = True,
         else:               Time = 'snapshot'
         ds[var].attrs.update({'original_output': Time}) 
     
-    # Rename variables (We could use aliases instead)
-    ds = ds.rename({'XC': 'X', 'YC': 'Y', 'XG': 'Xp1', 'YG': 'Yp1',
-                    'T': 'Temp', 'hFacC': 'HFacC', 'hFacW': 'HFacW', 'hFacS': 'HFacS'})
+    # Rename variables
+    ds = ds.rename({'XC': 'X', 'YC': 'Y', 'XG': 'Xp1', 'YG': 'Yp1'})
     
     # Add missing units
-    for varName in ['HFacC', 'HFacW', 'HFacS', 'iter']:
+    for varName in ['hFacC', 'hFacW', 'hFacS', 'iter']:
         ds[varName].attrs['units'] = '-'
         
     # Consistent chunkink
@@ -660,6 +659,10 @@ def EGshelfSJsec500m(Hydrostatic = True,
     od = od.set_name(name).set_description(description)
     if Hydrostatic is False:
         od = od.set_parameters({'eps_nh': 1})
+    od = od.set_aliases({'T'    : 'Temp', 
+                         'hFacC': 'HFacC', 
+                         'hFacW': 'HFacW', 
+                         'hFacS': 'HFacS'})
     od = od.set_projection('Mercator', 
                            central_longitude=float(od.dataset['X'].mean().values), 
                            min_latitude=float(od.dataset['Y'].min().values), 
@@ -670,3 +673,83 @@ def EGshelfSJsec500m(Hydrostatic = True,
     return od
 
 
+def KangerFjord(resultpath  = '/home/idies/workspace/OceanCirculation/fromNeil/'):
+    """
+    A realistic numerical model constructed to simulate the oceanic conditions and circulation in a large southeast Greenland fjord (Kangerdlugssuaq) and the adjacent shelf sea region during winter 2007–2008.
+    
+    Model setup: [FIMH18]_.
+
+    Parameters
+    ----------
+    resultpath: str
+        Path containing .data and .meta files. Default is SciServer's path.
+        
+    Returns
+    -------
+    od: OceanDataset
+        
+    References
+    ----------
+    .. [FIMH18]  Fraser, N. J., Inall, M. E., Magaldi, M. G., Haine, T. W. N., & Jones, S. C. ( 2018). Wintertime fjord‐shelf interaction and ice sheet melting in southeast Greenland. Journal of Geophysical Research: Oceans, 123, 9156– 9177. https://doi.org/10.1029/2018JC014435
+    """
+    
+    # Check input
+    if not isinstance(resultpath, str):   raise TypeError('`resultpath` must be str')
+    
+    # Message
+    name = 'KangerFjord'
+    description = 'A realistic numerical model constructed to simulate the oceanic conditions and circulation in a large southeast Greenland fjord (Kangerdlugssuaq) and the adjacent shelf sea region during winter 2007–2008.'
+    print('Opening [{}]:\n[{}].'.format(name, description))
+    
+    # Open dataset (ignore xmitgcm warnings)
+    with _warnings.catch_warnings():
+        _warnings.simplefilter("ignore")
+        ds = _xmitgcm.open_mdsdataset(resultpath,
+                                      iters    = list(range(1730160, 3300480+2160, 2160)), 
+                                      delta_t  = 5,
+                                      geometry = 'sphericalpolar',
+                                      ref_date = '2007-08-21:30',
+                                      ignore_unknown_vars=True)
+    
+    # Vertical dimensions
+    for dim in ['Z', 'Zp1', 'Zu', 'Zl']: ds[dim].attrs.update({'positive': 'up'})
+    
+    # Add attribute (snapshot vs average)
+    for var in [var for var in ds.variables if ('time' in ds[var].coords and var!='time')]:
+        Time = 'average'
+        ds[var].attrs.update({'original_output': Time}) 
+    
+    # Rename variables (We could use aliases instead)
+    ds = ds.rename({'XC'   : 'X', 
+                    'YC'   : 'Y', 
+                    'XG'   : 'Xp1', 
+                    'YG'   : 'Yp1'})
+    
+    # Add missing units
+    for varName in ['hFacC', 'hFacW', 'hFacS', 'iter']:
+        ds[varName].attrs['units'] = '-'
+        
+    # Consistent chunkink
+    chunks = {**ds.sizes,
+              'time': ds['Ttave'].chunks[ds['Ttave'].dims.index('time')]}
+    ds = ds.chunk(chunks)
+    
+    # Initialize OceanDataset
+    od = _OceanDataset(ds).import_MITgcm_rect_bin(shift_averages=False)
+    od = od.set_name(name).set_description(description)
+    od = od.set_aliases({'S'    : 'Stave',
+                         'V'    : 'uVeltave',
+                         'U'    : 'vVeltave',
+                         'Eta'  : 'ETAtave',
+                         'Temp' : 'Ttave',
+                         'hFacC': 'HFacC', 
+                         'hFacW': 'HFacW', 
+                         'hFacS': 'HFacS'})
+    od = od.set_projection('Mercator', 
+                           central_longitude=float(od.dataset['X'].mean().values), 
+                           min_latitude=float(od.dataset['Y'].min().values), 
+                           max_latitude=float(od.dataset['Y'].max().values), 
+                           globe=None, 
+                           latitude_true_scale=float(od.dataset['Y'].mean().values))
+    
+    return od

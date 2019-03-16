@@ -1,19 +1,22 @@
+# Required dependencies
 import xarray   as _xr
 import copy     as _copy
 import xgcm     as _xgcm
 import numpy    as _np
 import warnings as _warnings
 import sys      as _sys
+
+# From OceanSpy
 from . import compute   as _compute
 from . import plot      as _plot
 from . import animate   as _animate
 from . import utils     as _utils
-
 from . subsample import _subsampleMethdos
 from . compute   import _computeMethdos
 from . plot      import _plotMethdos
 from . animate   import _animateMethdos
 
+# Recommended dependencies
 try: 
     import cartopy.crs as _ccrs
 except ImportError: 
@@ -39,7 +42,7 @@ class OceanDataset:
 
     Additional objects are attached to the xarray.Dataset as global attributes.
     
-    OceanDataset adds, reads, and decodes dataset global attributes.
+    OceanDataset adds, reads, and decodes global attributes of the dataset object.
     """
     
     def __init__(self, 
