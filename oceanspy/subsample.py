@@ -496,7 +496,7 @@ def cutout(od,
     od = od.set_grid_coords(grid_coords, overwrite=True)
     
     # Cut axis can't be periodic 
-    od = od.set_grid_periodic(periodic, overwrite = True)
+    od = od.set_grid_periodic(periodic)
     
     # Drop variables
     if varList is not None: 
