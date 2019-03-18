@@ -9,3 +9,11 @@ cut_od = od.subsample.cutout(XRange=[-18, -17.5],
                              timeRange=['2007-09-01', '2007-09-05'])
 cut_od.to_netcdf('Data/'+filename)
 
+# MITgcm curvilinear grid stored in NetCDF format
+filename = 'MITgcm_curv_nc.nc'
+od = ospy.open_oceandataset.exp_Arctic_Control()
+cut_od = od.subsample.cutout(XRange=[-18, -10],
+                             YRange=[70, 71],
+                             ZRange=[0, -40],
+                             timeRange=['2028-02-08', '2029-02-08'])
+cut_od.to_netcdf('Data/'+filename)

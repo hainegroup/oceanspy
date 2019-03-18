@@ -1,13 +1,17 @@
+# General Packages
 import pytest
 import numpy  as np
 import pandas as pd
 
+# OceanSpy
 from oceanspy import OceanDataset
-from oceanspy.open_oceandataset import from_netcdf
-from .datasets import (datasets, oceandatasets)
+
+# Data
+from .MITgcm_datasets import datasets
 
 
-def test_import_MITgcm_rect_nc():
+@pytest.mark.parametrize("shift_averages", [True, False])    
+def test_import_MITgcm_rect_nc(shift_averages):
     """
     Testing Almansi et al. 2017 (ASR and ERAI)
     """
@@ -15,15 +19,21 @@ def test_import_MITgcm_rect_nc():
     # Dataset
     ds = datasets['MITgcm_rect_nc']
     
+    # Add average and snapshot
+    ds['time_ave'] = ds['time']
+    ds['time_ave'].attrs['original_output'] = 'average'
+    ds['time_snap'] = ds['time']
+    ds['time_snap'].attrs['original_output'] = 'snapshot'
+    
     # From open_oceandataset
-    od = OceanDataset(ds).import_MITgcm_rect_nc()
+    od = OceanDataset(ds).import_MITgcm_rect_nc(shift_averages=shift_averages)
     check_coords = {'Y':    'center', 'Yp1': 'outer', 
                     'X':    'center', 'Xp1': 'outer', 
                     'Z':    'center', 'Zp1': 'outer', 'Zu': 'right', 'Zl': 'left',
                     'time': 'outer', 'time_midp': 'center'}
     
     # All coordinates
-    assert set(od.dataset.variables).issubset(od.dataset.coords)
+    assert (set(od.dataset.variables)-set(['time_ave', 'time_snap'])).issubset(od.dataset.coords)
     
     # Check NaNs
     for coord in od.dataset.coords:
@@ -96,6 +106,7 @@ def test_import_MITgcm_rect_bin():
     assert np.array_equal(od_time, my_time)
     assert np.array_equal(od_time_midp, my_time_midp)
     
+    
 def test_import_MITgcm_curv():
     """
     Testing exp_Arctic_Control
@@ -103,6 +114,10 @@ def test_import_MITgcm_curv():
     
     # Dataset
     ds = datasets['MITgcm_curv_nc']
+    
+    # Add units to G
+    ds['XG'].attrs['units'] = 'degE'
+    ds['YG'].attrs['units'] = 'degN'
     
     # From open_oceandataset
     od = OceanDataset(ds).import_MITgcm_curv_nc()
@@ -137,24 +152,3 @@ def test_import_MITgcm_curv():
     my_time_midp = (my_time[:-1] + my_time[1:])/2
     assert np.array_equal(od_time, my_time)
     assert np.array_equal(od_time_midp, my_time_midp)
-    
-def test_from_netcdf():  
-    
-    # Dataset
-    orig_od = oceandatasets['MITgcm_rect_nc']
-
-    # Save
-    filename = 'tmp_oceandataset.nc'
-    orig_od.to_netcdf(filename)
-    
-    # Open
-    open_od = from_netcdf(filename)
-    
-    assert orig_od.dataset.equals(open_od.dataset)
-    assert orig_od._ds.equals(open_od._ds)
-    
-    # Clean up
-    import os
-    os.remove(filename)
-    
-
