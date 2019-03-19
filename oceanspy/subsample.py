@@ -660,9 +660,11 @@ def mooring_array(od, Ymoor, Xmoor,
                           attrs = ds.attrs)
     
     # Loop and take out (looping is faster than apply to the whole dataset)
+    all_vars = {var: new_ds[var] for var in new_ds}
     for var in ds.variables:
         if var in ['X', 'Y', 'Xp1', 'Yp1']:
-            new_ds[var].attrs.update({attr: ds[var].attrs[attr] for attr in ds[var].attrs if attr not in ['units', 'long_name']})
+            da = new_ds[var]
+            da.attrs.update({attr: ds[var].attrs[attr] for attr in ds[var].attrs if attr not in ['units', 'long_name']})
             continue
         elif not any(dim in ds[var].dims for dim in ['X', 'Y', 'Xp1', 'Yp1']):   
             da = ds[var]
@@ -675,8 +677,10 @@ def mooring_array(od, Ymoor, Xmoor,
                                                   {'iy': iy, 'ix': ix, 'iyp1': iyp1, 'ixp1': ixp1}) for dim in this_dims})
                     da = da.drop(this_dims).rename({dim.lower():dim for dim in this_dims})
 
-        # Merge
-        new_ds = _xr.merge([new_ds, da.reset_coords()])
+        # Add to dictionary
+        all_vars = {**all_vars, **{var: da}}
+    
+    new_ds = _xr.Dataset(all_vars)
         
     # Merge removes the attributes: put them back!    
     new_ds.attrs = ds.attrs
@@ -1015,18 +1019,20 @@ def particle_properties(od, times, Ypart, Xpart, Zpart, **kwargs):
         x, y, z = _utils.spherical2cartesian(Y = Ypart, X = Xpart, R = R)
     else:
         x = Xpart; y = Ypart; z = _np.zeros(Y.shape)
-    
+
     # Find horizontal indexes
+    all_vars = {}
     for grid_pos in ['C', 'U', 'V', 'G']:
         
         # Don't create tree if no variables
-        var_grid_pos = [var for var     in ds.variables 
-                            if  var not in ds.coords and set(['X'+grid_pos, 'Y'+grid_pos]).issubset(ds[var].coords)]
-        if not var_grid_pos: continue
+        var_grid_pos = [var for var in ds.data_vars if set(['X'+grid_pos, 'Y'+grid_pos]).issubset(ds[var].coords)]
+        if not var_grid_pos: 
+            continue
+        this_ds = _xr.Dataset({var: od._ds[var] for var in var_grid_pos})
         
         # Useful variables
-        Y = od._ds['Y' + grid_pos]
-        X = od._ds['X' + grid_pos]
+        Y = this_ds['Y' + grid_pos]
+        X = this_ds['X' + grid_pos]
         shape  = X.shape
         Yname  = [dim for dim in Y.dims if dim[0]=='Y'][0]
         Xname  = [dim for dim in X.dims if dim[0]=='X'][0]
@@ -1035,7 +1041,7 @@ def particle_properties(od, times, Ypart, Xpart, Zpart, **kwargs):
         
         # Create tree
         tree = od.create_tree(grid_pos = grid_pos)
-
+        
         # Indexes of nearest grid points
         _, indexes = tree.query(_np.column_stack((x.flatten(), y.flatten(), z.flatten())))
         indexes    = _np.unravel_index(indexes, shape)
@@ -1049,14 +1055,11 @@ def particle_properties(od, times, Ypart, Xpart, Zpart, **kwargs):
         i_ds['i'+Xname] = iX
         
         # Subsample (looping is faster)
-        for var in var_grid_pos:
-            i_ds[var] = ds[var].isel({dim: i_ds['i'+dim] for dim in ds[var].dims})
-    
-    # Remove indexes
-    i_ds = i_ds.drop([var for var in i_ds.variables if var not in ds.variables and var not in i_ds.dims])
+        isel_dict = {dim: i_ds['i'+dim] for dim in this_ds.dims}
+        all_vars = {**all_vars, **{var: this_ds[var].isel(isel_dict).drop([Xname, Yname]) for var in this_ds.data_vars}}
     
     # Recreate od
-    od._ds = i_ds
+    od._ds = _xr.Dataset(all_vars)
     
     # Add time midp
     od = od.set_grid_coords({'time' : {'time': -0.5}}, add_midp=True, overwrite=True)
