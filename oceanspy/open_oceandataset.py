@@ -651,7 +651,7 @@ def EGshelfSJsec500m(Hydrostatic = True,
         
     # Consistent chunkink
     chunks = {**ds.sizes,
-              'time': ds['Temp'].chunks[ds['Temp'].dims.index('time')]}
+              'time': ds['T'].chunks[ds['T'].dims.index('time')]}
     ds = ds.chunk(chunks)
     
     # Initialize OceanDataset
@@ -659,10 +659,10 @@ def EGshelfSJsec500m(Hydrostatic = True,
     od = od.set_name(name).set_description(description)
     if Hydrostatic is False:
         od = od.set_parameters({'eps_nh': 1})
-    od = od.set_aliases({'T'    : 'Temp', 
-                         'hFacC': 'HFacC', 
-                         'hFacW': 'HFacW', 
-                         'hFacS': 'HFacS'})
+    od = od.set_aliases({'Temp' : 'T', 
+                         'HFacC': 'hFacC', 
+                         'HFacW': 'hFacW', 
+                         'HFacS': 'hFacS'})
     od = od.set_projection('Mercator', 
                            central_longitude=float(od.dataset['X'].mean().values), 
                            min_latitude=float(od.dataset['Y'].min().values), 

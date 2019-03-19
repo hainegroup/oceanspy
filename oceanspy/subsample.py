@@ -2,30 +2,28 @@
 Subsample OceanDataset objects.
 """
 
-# Instructions for developers:
-# 1) Every function operates on od, and returns od.
-# 2) Only use od._ds and od._grid 
-# 3) Make sure you don't lose global attributes (e.g., when merging)
-# 4) Always cutout at the beginning, and use **kwargs for customized cutouts
-# 5) Add new functions in _subsampleMethdos
-# 6) Add new functions in docs/api.rst
-# 7) Add tests
-
-import xarray   as _xr
-import pandas   as _pd
-import numpy    as _np
-import copy     as _copy
-import warnings as _warnings
-import oceanspy as _ospy
+# Required dependencies
+import xarray    as _xr
+import pandas    as _pd
+import numpy     as _np
+import copy      as _copy
+import warnings  as _warnings
+import oceanspy  as _ospy
 import functools as _functools
 
+# From OceanSpy
 from . import utils as _utils
 from . import compute as _compute
 
-try: from geopy.distance import great_circle as _great_circle
-except ImportError: pass
-try: import xesmf as _xe
-except ImportError: pass
+# Recommended dependencies
+try: 
+    from geopy.distance import great_circle as _great_circle
+except ImportError: # pragma: no cover
+    pass
+try: 
+    import xesmf as _xe
+except ImportError: # pragma: no cover
+    pass
 
 def cutout(od,
            varList      = None,
@@ -64,6 +62,10 @@ def cutout(od,
     ZRange: 1D array_like, scalar, or None
         Z axis limits.  
         If len(ZRange)>2, max and min values are used.
+    add_Vbdr: bool, scal
+        If scalar, add (subtract) add_Vbdr to the max (min) values of the vertical range.
+        If True, automatically estimate add_Vbdr.
+        If False, add_Vbdr is set to zero.
     timeRange: 1D array_like np.ScalarType, or None
         time axis limits.  
         If len(timeRange)>2, max and min values are used.
@@ -89,80 +91,43 @@ def cutout(od,
     even if the original oceandataset had len(Xp1)==len(X) or len(Yp1)==len(Y). 
     """
     
-    # Check
-    for wrong_dim in ['mooring', 'station', 'particle']:
-        if wrong_dim in od._ds.dims and (XRange is not None or YRange is not None):
-            raise ValueError('`cutout` cannot subsample in the horizontal plain oceandatasets with dimension [{}]'.format(wrong_dim))
-    
-    # Convert variables to numpy arrays and make some check
-    if not isinstance(od, _ospy.OceanDataset):
-        raise TypeError('`od` must be OceanDataset')
-    
-    if varList is not None:
-        varList = _np.asarray(varList, dtype='str')
-        if varList.ndim == 0: varList = varList.reshape(1)
-        elif varList.ndim >1: raise TypeError('Invalid `varList`')
-    
-    if not isinstance(add_Hbdr, (float, int, bool)):
-        raise TypeError('`add_Hbdr` must be float, int, or bool')
-    
-    if not isinstance(mask_outside, bool):
-        raise TypeError('`add_Hbdr` must be bool')
+    # Checks
+    unsupported_dims = ['mooring', 'particle', 'station']
+    if (XRange is not None or YRange is not None) and any([dim in unsupported_dims for dim in od._ds.dims]):
+        _warnings.warn("\nHorizontal cutout not supported for moorings, surveys, and particles", stacklevel=2)
+        XRange = None
+        YRange = None
         
+    _check_instance({'od'          : od,
+                     'add_Hbdr'    : add_Hbdr,
+                     'mask_outside': mask_outside}, 
+                    {'od'          : '_ospy.OceanDataset',
+                     'add_Hbdr'    : '(float, int, bool)',
+                     'mask_outside': 'bool'})
+    if varList is not None:
+        varList = _check_list_of_string(varList, 'varList')  
     if YRange is not None:
-        YRange  = _np.asarray(YRange, dtype=od._ds['YG'].dtype)
-        if YRange.ndim == 0: YRange = YRange.reshape(1)
-        elif YRange.ndim >1: raise TypeError('Invalid `YRange`')
-        Ymax = od._ds['YG'].max().values
-        Ymin = od._ds['YG'].min().values
-        if any(YRange<Ymin) or any(YRange>Ymax):
-            _warnings.warn("\nThe Y range of the oceandataset is: {}"
-                           "\nYRange has values outside the oceandataset range.".format([Ymin, Ymax]), stacklevel=2)
-            
+        YRange = _check_range(od, YRange, 'YRange')
     if XRange is not None:
-        XRange = _np.asarray(XRange, dtype=od._ds['XG'].dtype)
-        if XRange.ndim == 0: XRange = XRange.reshape(1)
-        elif XRange.ndim >1: raise TypeError('Invalid `XRange`')
-        Xmax = od._ds['XG'].max().values
-        Xmin = od._ds['XG'].min().values
-        if any(XRange<Xmin) or any(XRange>Xmax):
-            _warnings.warn("\nThe X range of the oceandataset is: {}"
-                           "\nXRange has values outside the oceandataset range.".format([Xmin, Xmax]), stacklevel=2)
+        XRange = _check_range(od, XRange, 'XRange')
     if ZRange is not None:
-        ZRange = _np.asarray(ZRange, dtype=od._ds['Zp1'].dtype)
-        if ZRange.ndim == 0: ZRange = ZRange.reshape(1)
-        elif ZRange.ndim >1: raise TypeError('Invalid `ZRange`')
-        Zmax = od._ds['Zp1'].max().values
-        Zmin = od._ds['Zp1'].min().values
-        if any(ZRange<Zmin) or any(ZRange>Zmax):
-            _warnings.warn("\nThe Z range of the oceandataset is: {}"
-                           "\nZRange has values outside the the oceandataset range.".format([Zmin, Zmax]), stacklevel=2)
-            
+        ZRange = _check_range(od, ZRange, 'ZRange')
     if timeRange is not None:
-        timeRange  = _np.asarray(timeRange, dtype=od._ds['time'].dtype)
-        if timeRange.ndim == 0: timeRange = timeRange.reshape(1)
-        elif timeRange.ndim >1: raise TypeError('Invalid `timeRange`')
-        timemax = od._ds['time'].max().values
-        timemin = od._ds['time'].min().values
-        if any(timeRange<timemin) or any(timeRange>timemax):
-            _warnings.warn("\nThe time range of the oceandataset is: {}"
-                           "\ntimeRange has values outside the the oceandataset range.".format([timemin, timemax]), stacklevel=2)
-    
-    if not isinstance(timeFreq, (str, type(None))):
-        raise TypeError('`timeFreq` must None or str')
+        timeRange = _check_range(od, timeRange, 'timeRange')
+    if timeFreq is not None:
+        _check_instance({'timeFreq': timeFreq}, 'str')
         
     sampMethod_list = ['snapshot', 'mean']
     if sampMethod not in sampMethod_list:
-        raise ValueError('[{}] is not an available `sampMethod`.'
-                         '\nOptions: {}'.format(sampMethod, sampMethod_list))
+        raise ValueError('`sampMethod` [{}] is not supported.'
+                         '\nAvailable options: {}'.format(sampMethod, sampMethod_list))
         
     if not isinstance(dropAxes, bool):
-        dropAxes = _np.asarray(dropAxes, dtype='str')
-        if dropAxes.ndim == 0: dropAxes = dropAxes.reshape(1)
-        elif dropAxes.ndim >1: raise TypeError('Invalid `dropAxes`')
-        axis_error = [axis for axis in dropAxes if axis not in od.grid_coords]
-        if len(axis_error)!=0:
-            raise ValueError('{} are not in od.grid_coords and can not be dropped'.format(axis_error))
+        dropAxes  = _check_list_of_string(dropAxes, 'dropAxes') 
+        axes_warn = [axis for axis in dropAxes if axis not in od.grid_coords]
+        if len(axes_warn)!=0:
+            _warnings.warn("\n{} are not axes of the oceandataset".format(axes_warn), stacklevel=2)
+            dropAxes = list(set(dropAxes)-set(axes_warn))
         dropAxes = {d: od.grid_coords[d] for d in dropAxes}
     elif dropAxes is True:
         dropAxes = od.grid_coords
@@ -327,19 +292,19 @@ def cutout(od,
                 iZ[0]=iZ[0]-1
                 iZ[1]=iZ[1]-1
             ds = ds.isel(Z = slice(iZ[0], iZ[1]+1))
+        else:
+            ds = ds.isel(Z = slice(iZ[0], iZ[1]))
+            
+        if len(ds['Zp1'])==1:
             if 'Zu' in ds.dims and len(ds['Zu'])>1:
                 ds = ds.sel(Zu=ds['Zp1'].values, method='nearest')
             if 'Zl' in ds.dims and len(ds['Zl'])>1:
                 ds = ds.sel(Zl=ds['Zp1'].values, method='nearest')
-            
         else:
-            ds = ds.isel(Z = slice(iZ[0], iZ[1]))
-        
             if 'Zu' in ds.dims and len(ds['Zu'])>1:
-                ds = ds.sel(Zu = slice(ds['Zp1'].isel(Zp1=0).values,   ds['Zp1'].isel(Zp1=-1).values))
-
+                ds = ds.isel(Zu = slice(iZ[0], iZ[1]))
             if 'Zl' in ds.dims and len(ds['Zl'])>1:
-                ds = ds.sel(Zl = slice(ds['Zp1'].isel(Zp1=0).values,  ds['Z'].isel(Z=-1).values))
+                ds = ds.isel(Zl = slice(iZ[0], iZ[1]))
         
         # Cut axis can't be periodic
         if (len(ds['Z']) < lenZ or 'Z' in dropAxes) and 'Z' in periodic: periodic.remove('Z')
@@ -363,7 +328,6 @@ def cutout(od,
             else:
                 diff = _np.fabs(ds['time']-time)
             timeRange[i] = ds['time'].where(diff==diff.min()).min().values     
-        # return maskT, ds['time'], timeRange[0], timeRange[-1]
         maskT = maskT.where(_np.logical_and(ds['time']>=timeRange[0], ds['time']<=timeRange[-1]), 0)  
         
         # Find vertical indexes
@@ -456,8 +420,6 @@ def cutout(od,
                 if all(inds_diff==inds_diff[0]): 
                     ds = ds.isel(time = slice(inds[0], inds[-1]+1, inds_diff[0]))
                 else: 
-                    # TODO: is this an xarray bug od just bad chunking/bad coding/bad SciServe compute performances?
-                    #       Make test case and open issue!
                     attrs = ds.attrs
                     ds = _xr.concat([ds.sel(time = time) for i, time in enumerate(newtime)], dim='time')
                     ds.attrs = attrs
@@ -506,7 +468,7 @@ def cutout(od,
         od = _compute._add_missing_variables(od, varList)
         
         # Drop useless
-        od._ds = od._ds.drop([v for v in od._ds.variables if (v not in od._ds.dims and v not in od._ds.coords and v not in varList)])
+        od._ds = od._ds.drop([v for v in od._ds.data_vars if v not in varList])
         
     return od
 
@@ -540,18 +502,14 @@ def mooring_array(od, Ymoor, Xmoor,
     """       
     
     # Check
-    for wrong_dim in ['mooring', 'station', 'particle']:
+    wrong_dims = ['mooring', 'station', 'particle']
+    for wrong_dim in wrong_dims:
         if wrong_dim in od._ds.dims:
-            raise ValueError('`mooring_array` cannot subsample oceandatasets with dimension [{}]'.format(wrong_dim))
+            raise ValueError('`mooring_array` cannot subsample {} oceandatasets'.format(wrong_dims))
     
     # Convert variables to numpy arrays and make some check
-    Ymoor = _np.asarray(Ymoor, dtype=od._ds['YC'].dtype)
-    if   Ymoor.ndim == 0: Ymoor = Ymoor.reshape(1)
-    elif Ymoor.ndim>1: raise TypeError('Invalid `Y`')
-
-    Xmoor = _np.asarray(Xmoor, dtype=od._ds['XC'].dtype)
-    if   Xmoor.ndim == 0: Xmoor = Xmoor.reshape(1)
-    elif Xmoor.ndim >1: raise TypeError('Invalid `X`')
+    Ymoor = _check_range(od, Ymoor, 'Ymoor')
+    Xmoor = _check_range(od, Xmoor, 'Xmoor')
             
     # Cutout
     if "YRange"   not in kwargs: kwargs['YRange']   = Ymoor
@@ -815,21 +773,17 @@ def survey_stations(od, Ysurv, Xsurv, delta=None,
     """
     
     # Check
-    for wrong_dim in ['mooring', 'station', 'particle']:
+    wrong_dims = ['mooring', 'station', 'particle']
+    for wrong_dim in wrong_dims:
         if wrong_dim in od._ds.dims:
-            raise ValueError('`survey_stations` cannot subsample oceandatasets with dimension [{}]'.format(wrong_dim))
+            raise ValueError('`survey_stations` cannot subsample {} oceandatasets'.format(wrong_dims))
             
     # Convert variables to numpy arrays and make some check
-    Ysurv = _np.asarray(Ysurv, dtype=od._ds['YC'].dtype)
-    if   Ysurv.ndim == 0: Ysurv = Ysurv.reshape(1)
-    elif Ysurv.ndim>1: raise TypeError('Invalid `Y`')
-
-    Xsurv = _np.asarray(Xsurv, dtype=od._ds['XC'].dtype)
-    if   Xsurv.ndim == 0: Xsurv = Xsurv.reshape(1)
-    elif Xsurv.ndim >1: raise TypeError('Invalid `X`')
+    Ysurv = _check_range(od, Ysurv, 'Ysurv')
+    Xsurv = _check_range(od, Xsurv, 'Xsurv')
         
-    if not isinstance(xesmf_regridder_kwargs, dict):
-        raise TypeError('`xesmf_regridder_kwargs` must be dict')
+    # Check xesmf arguments
+    _check_instance({'xesmf_regridder_kwargs': xesmf_regridder_kwargs}, 'dict')
         
     # Earth Radius
     R = od.parameters['rSphere']
@@ -844,7 +798,7 @@ def survey_stations(od, Ysurv, Xsurv, delta=None,
         if R is not None:
             # SPHERICAL: follow great circle path
             this_Y, this_X, this_dists = _utils.great_circle_path(lat0,lon0,lat1,lon1,delta, R=R)
-        else:
+        else: # pragma: no cover
             # CARTESIAN: just a simple interpolation
             this_Y, this_X, this_dists = _utils.cartesian_path(lat0,lon0,lat1,lon1,delta)
         if i==0: 
@@ -925,7 +879,7 @@ def survey_stations(od, Ysurv, Xsurv, delta=None,
     if R is not None:
         # SPHERICAL
         ds['station_dist'].attrs['units'] = 'km'
-    else:
+    else: # pragma: no cover
         # CARTESIAN
         if 'units' in ds['lat'].attrs:
             ds['station_dist'].attrs['units'] = ds['lat'].attrs['units']
@@ -1134,4 +1088,49 @@ class _subsampleMethdos(object):
     @_functools.wraps(particle_properties)
     def particle_properties(self, **kwargs):
         return particle_properties(self._od, **kwargs)
+
+# ================
+# USEFUL FUNCTIONS
+# ================
+def _check_instance(objs, classinfos):
+    for key, value in objs.items():
+        if isinstance(classinfos, str): classinfo=classinfos
+        else                          : classinfo=classinfos[key]
+
+        if not eval('isinstance(value, {})'.format(classinfo)):
+            if classinfo[0]=='_': classinfo = classinfo[1:]
+            raise TypeError("`{}` must be {}".format(key, classinfo))
+
+def _check_list_of_string(obj, objName):
+    obj = _np.asarray(obj, dtype='str')
+    if obj.ndim == 0: 
+        obj = obj.reshape(1)
+    elif obj.ndim >1: 
+        raise TypeError('Invalid `{}`'.format(objName))
+    return obj
+
+def _check_range(od, obj, objName):
+    if   'Y'    in objName:
+        pref    = 'Y'
+        valchek = od._ds['YG']
+    elif 'X'    in objName:
+        pref    = 'X'
+        valchek = od._ds['XG']
+    elif 'Z'    in objName:
+        pref    = 'Z'
+        valchek = od._ds['Zp1']
+    elif 'time' in objName:
+        pref    = 'time'
+        valchek = od._ds['time']
+    
+    obj  = _np.asarray(obj, dtype=valchek.dtype)
+    if obj.ndim == 0: obj = obj.reshape(1)
+    elif obj.ndim >1: 
+        raise TypeError('Invalid `{}`'.format(objName))
+    maxcheck = valchek.max().values
+    mincheck = valchek.min().values
+    if any(obj<mincheck) or any(obj>maxcheck):
+        _warnings.warn("\n{}Range of the oceandataset is: {}"
+                       "\nRequested {} has values outside this range.".format(pref, [mincheck, maxcheck], objName), stacklevel=2)
+    return obj
 
