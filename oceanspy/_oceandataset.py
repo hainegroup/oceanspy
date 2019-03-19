@@ -1104,9 +1104,6 @@ def _wrong_axes_error_message(axes2check):
             " OceanSpy axes are: {}").format(axes2check, OCEANSPY_AXES)
 
 def _setter_error_message(attribute_name):
-    """
-    Use the same error message for attributes
-    """
     return "Set new `{}` using .set_{}".format(attribute_name, attribute_name)    
     
 def _create_grid(dataset, coords, periodic):
