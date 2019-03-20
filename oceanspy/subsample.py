@@ -502,10 +502,7 @@ def mooring_array(od, Ymoor, Xmoor,
     """       
     
     # Check
-    wrong_dims = ['mooring', 'station', 'particle']
-    for wrong_dim in wrong_dims:
-        if wrong_dim in od._ds.dims:
-            raise ValueError('`mooring_array` cannot subsample {} oceandatasets'.format(wrong_dims))
+    _check_native_grid(od, 'mooring_array')
     
     # Convert variables to numpy arrays and make some check
     Ymoor = _check_range(od, Ymoor, 'Ymoor')
@@ -777,10 +774,7 @@ def survey_stations(od, Ysurv, Xsurv, delta=None,
     """
     
     # Check
-    wrong_dims = ['mooring', 'station', 'particle']
-    for wrong_dim in wrong_dims:
-        if wrong_dim in od._ds.dims:
-            raise ValueError('`survey_stations` cannot subsample {} oceandatasets'.format(wrong_dims))
+    _check_native_grid(od, 'survey_stations')
             
     # Convert variables to numpy arrays and make some check
     Ysurv = _check_range(od, Ysurv, 'Ysurv')
@@ -905,10 +899,6 @@ def survey_stations(od, Ysurv, Xsurv, delta=None,
     
     return od
 
-
-
-
-
 def particle_properties(od, times, Ypart, Xpart, Zpart, **kwargs):
     
     """
@@ -939,32 +929,19 @@ def particle_properties(od, times, Ypart, Xpart, Zpart, **kwargs):
     subsample.cutout
     OceanDataset.create_tree
     """
-    # TODO: add different interpolations. Renske already has some code.
     
-    # Check
-    for wrong_dim in ['mooring', 'station', 'particle']:
-        if wrong_dim in od._ds.dims:
-            raise ValueError('`particle_properties` cannot subsample oceandatasets with dimension [{}]'.format(wrong_dim))
-            
-    # Convert variables to numpy arrays and make some check
-    times  = _np.asarray(times, dtype = od._ds['time'].dtype)
-    if times.ndim == 0: times = times.reshape(1)
-    elif times.ndim >1: raise TypeError('Invalid `times`')
-    
-    Ypart  = _np.asarray(Ypart)
-    if Ypart.ndim <2 and Ypart.size==1: Ypart = Ypart.reshape((1, Ypart.size))
-    elif Ypart.ndim >2: raise TypeError('Invalid `Ypart`')
-        
-    Xpart  = _np.asarray(Xpart)
-    if Xpart.ndim <2 and Xpart.size==1: Xpart = Xpart.reshape((1, Xpart.size))
-    elif Xpart.ndim >2: raise TypeError('Invalid `Xpart`')
-      
-    Zpart  = _np.asarray(Zpart)
-    if Zpart.ndim <2 and Zpart.size==1: Zpart = Zpart.reshape((1, Zpart.size))
-    elif Zpart.ndim >2: raise TypeError('Invalid `Zpart`')
-
-    if (not Ypart.ndim==Xpart.ndim==Zpart.ndim or not times.size==Ypart.shape[0]):
-        TypeError('`times`, `Xpart`, `Ypart`, and `Zpart` have inconsistent shape')
+    # Checks
+    _check_native_grid(od, 'particle_properties')
+    InputDict = _check_part_position(od, {'times': times,
+                                          'Ypart': Ypart,
+                                          'Xpart': Xpart,
+                                          'Zpart': Zpart})
+    times = InputDict['times']
+    Ypart = InputDict['Ypart']
+    Xpart = InputDict['Xpart']
+    Zpart = InputDict['Zpart']
+    if (not Ypart.shape==Xpart.shape==Zpart.shape or not times.size==Ypart.shape[0]):
+        raise TypeError('`times`, `Xpart`, `Ypart`, and `Zpart` have inconsistent shape')
     
     # Cutout
     if "timeRange" not in kwargs: kwargs['timeRange'] = times
@@ -1007,7 +984,9 @@ def particle_properties(od, times, Ypart, Xpart, Zpart, **kwargs):
         elif dim[0]=='Z':
             tmp = _xr.DataArray(Zpart,
                                 dims = ('time', 'particle'))
-        else: continue
+        else: 
+            locals().pop('tmp', None)
+            continue
         itmp = _xr.DataArray(_np.arange(len(ds[dim])),
                              coords = {dim: ds[dim].values},
                              dims   = {dim})
@@ -1018,7 +997,7 @@ def particle_properties(od, times, Ypart, Xpart, Zpart, **kwargs):
     if R is not None:
         x, y, z = _utils.spherical2cartesian(Y = Ypart, X = Xpart, R = R)
     else:
-        x = Xpart; y = Ypart; z = _np.zeros(Y.shape)
+        x = Xpart; y = Ypart; z = _np.zeros(y.shape)
 
     # Find horizontal indexes
     all_vars = {}
@@ -1055,8 +1034,7 @@ def particle_properties(od, times, Ypart, Xpart, Zpart, **kwargs):
         i_ds['i'+Xname] = iX
         
         # Subsample (looping is faster)
-        isel_dict = {dim: i_ds['i'+dim] for dim in this_ds.dims}
-        all_vars = {**all_vars, **{var: this_ds[var].isel(isel_dict).drop([Xname, Yname]) for var in this_ds.data_vars}}
+        all_vars = {**all_vars, **{var: this_ds[var].isel({dim: i_ds['i'+dim] for dim in this_ds[var].dims}).drop([Xname, Yname]) for var in this_ds.data_vars}}
     
     # Recreate od
     od._ds = _xr.Dataset(all_vars)
@@ -1137,3 +1115,26 @@ def _check_range(od, obj, objName):
                        "\nRequested {} has values outside this range.".format(pref, [mincheck, maxcheck], objName), stacklevel=2)
     return obj
 
+def _check_native_grid(od, func_name):
+    wrong_dims = ['mooring', 'station', 'particle']
+    for wrong_dim in wrong_dims:
+        if wrong_dim in od._ds.dims:
+            raise ValueError('`{}` cannot subsample {} oceandatasets'.format(func_name, wrong_dims))
+            
+def _check_part_position(od, InputDict):
+    for InputName, InputField in InputDict.items():
+        if 'time' in InputName:
+            InputField = _np.asarray(InputField, dtype = od._ds['time'].dtype)
+            if InputField.ndim == 0: 
+                InputField = InputField.reshape(1)
+            ndim = 1
+        else:
+            InputField  = _np.asarray(InputField)
+            if InputField.ndim <2 and InputField.size==1: 
+                InputField = InputField.reshape((1, InputField.size))
+            ndim = 2
+        if InputField.ndim > ndim: 
+            raise TypeError('Invalid `{}`'.format(InputName))
+        else: 
+            InputDict[InputName] = InputField
+    return InputDict
