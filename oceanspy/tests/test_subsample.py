@@ -1,6 +1,8 @@
 import pytest
 import numpy  as np
 
+from numpy.testing import assert_array_equal
+
 from oceanspy.subsample import cutout
 from oceanspy           import open_oceandataset, OceanDataset
 
@@ -9,7 +11,6 @@ from oceanspy           import open_oceandataset, OceanDataset
 MITgcm_curv_nc  = open_oceandataset.from_netcdf('./oceanspy/tests/Data/MITgcm_curv_nc.nc')
 MITgcm_rect_bin = open_oceandataset.from_netcdf('./oceanspy/tests/Data/MITgcm_rect_bin.nc')
 MITgcm_rect_nc  = open_oceandataset.from_netcdf('./oceanspy/tests/Data/MITgcm_rect_nc.nc')
-
 
 # =======
 # CUTOUT
@@ -28,7 +29,7 @@ dropAxes  = ['Y', 'X', 'Z', 'time']
 dropwarn  = 'mooring'
 @pytest.mark.parametrize("od, YRange, XRange, ZRange, timeRange, dropAxes", 
                          [(od     , YRange  , XRange , ZRange   , timeRange , dropwarn),
-                          (od     , Ywarn   , XRange , ZRange   , timeRange , True),
+                          (od     , Ywarn   , XRange , ZRange   , timeRange , ['time']),
                           (od     , YRange  , Xwarn  , ZRange   , timeRange , True),
                           (od     , YRange  , XRange , Zwarn    , timeRange , True),
                           (od     , YRange  , XRange , ZRange   , Twarn     , True),
@@ -43,12 +44,14 @@ def test_cutout_warnings(od, YRange, XRange , ZRange , timeRange, dropAxes):
 
 
 od = MITgcm_curv_nc                
-@pytest.mark.parametrize("od, varList, timeFreq", 
-                         [(od, np.zeros((2,2)), None),
-                          (od, None           , 1)])
-def test_cutout_type_errors(od, varList, timeFreq):
+@pytest.mark.parametrize("od, varList, XRange, timeFreq", 
+                         [(od, np.zeros((2,2)), None, None),
+                          (od, None           , None, 1),
+                          (od, None           , np.zeros((2,2)), None),])
+def test_cutout_type_errors(od, varList, XRange, timeFreq):
     with pytest.raises(TypeError):
         od.subsample.cutout(varList=varList,
+                            XRange=XRange,
                             timeFreq=timeFreq)
 
 od = MITgcm_curv_nc
@@ -60,12 +63,10 @@ def test_cutout_value_errors(od, varList, sampMethod):
         od.subsample.cutout(varList=varList, sampMethod=sampMethod)
 
         
-        
-        
-
-@pytest.mark.parametrize("od", [MITgcm_curv_nc, MITgcm_rect_bin])
+@pytest.mark.parametrize("od", [MITgcm_curv_nc, 
+                                MITgcm_rect_bin])
 @pytest.mark.parametrize("dropAxes", [True, False])
-@pytest.mark.parametrize("add_Hbdr", [True, False])
+@pytest.mark.parametrize("add_Hbdr", [True, False, 1])
 def test_horizontal_cutout(od, dropAxes, add_Hbdr):
     
     # Cover both case first inde and any index
@@ -121,7 +122,7 @@ def test_horizontal_mask(od, mask_outside, XRange, YRange):
 
 @pytest.mark.parametrize("od", [MITgcm_rect_bin])
 @pytest.mark.parametrize("dropAxes", [True, False])
-@pytest.mark.parametrize("add_Vbdr", [True, False])
+@pytest.mark.parametrize("add_Vbdr", [True, False, 1])
 def test_vertical_cutout(od, dropAxes, add_Vbdr):
     # Cover both case first index and any index
     for i in range(2):
@@ -254,3 +255,62 @@ def test_survey(od, cartesian, delta):
         assert 'station_dist' in new_od.dataset.coords
         assert 'station' in new_od.grid_coords
         new_od.grid
+        
+# =========
+# PARTICLES
+# =========
+od = MITgcm_rect_nc
+moor_od = OceanDataset(od.dataset.expand_dims('mooring'))
+n_parts = 10
+times   = od.dataset['time']
+Ypart   = np.empty((len(times), n_parts))
+Xpart   = np.empty((len(times), n_parts))
+Zpart   = np.zeros((len(times), n_parts))
+for p in range(n_parts):
+        Ypart[:, p]= np.random.choice(od.dataset['Y'], len(times))
+        Xpart[:, p]= np.random.choice(od.dataset['X'], len(times))
+        Zpart[:, p]= np.random.choice(od.dataset['Z'], len(times))
+
+@pytest.mark.parametrize("od, Ypart, Xpart, Zpart, times", 
+                         [(od     , 1, Xpart, Zpart, times),
+                          (od     , Ypart, Xpart, Zpart, times[0]),
+                          (od     , np.zeros((2,2,2)), Xpart, Zpart, times)])
+def test_particle_errors(od, Ypart, Xpart, Zpart, times):
+    with pytest.raises(TypeError):
+        new_od = od.subsample.particle_properties(times=times, 
+                                                  Ypart=Ypart, 
+                                                  Xpart=Xpart, 
+                                                  Zpart=Zpart)
+
+        
+        
+@pytest.mark.parametrize("od",        [MITgcm_rect_nc])
+@pytest.mark.parametrize("cartesian", [True, False])
+@pytest.mark.parametrize("varList",   [None, ['Temp']])
+def test_particles(od, cartesian, varList):
+    
+    this_od = od
+    if cartesian:
+        this_od = this_od.set_parameters({'rSphere': None})
+        
+    # Create 10 random paths
+    times   = this_od.dataset['time']
+    n_parts = 10
+    Ypart = np.empty((len(times), n_parts))
+    Xpart = np.empty((len(times), n_parts))
+    Zpart = np.zeros((len(times), n_parts))
+    for p in range(n_parts):
+        Ypart[:, p]= np.random.choice(this_od.dataset['Y'], len(times))
+        Xpart[:, p]= np.random.choice(this_od.dataset['X'], len(times))
+        
+    # Extract particles
+    # Warning due to time_midp
+    with pytest.warns(UserWarning):
+        new_od = this_od.subsample.particle_properties(times=times, 
+                                                       Ypart=Ypart, 
+                                                       Xpart=Xpart, 
+                                                       Zpart=Zpart,
+                                                       varList=varList)
+        
+    assert_array_equal(np.float32(new_od.dataset['XC'].values), np.float32(Xpart))
+    assert_array_equal(np.float32(new_od.dataset['YC'].values), np.float32(Ypart))
