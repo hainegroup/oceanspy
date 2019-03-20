@@ -2,13 +2,17 @@
 Create new variables using OceanDataset objects.
 """
 
+# Required dependencies
 import xarray    as _xr
 import oceanspy  as _ospy
 import numpy     as _np
 import warnings  as _warnings
 import copy      as _copy
 import functools as _functools
+
+# From OceanSpy
 from . import utils as _utils
+from .subsample import _check_instance, _check_list_of_string
 
 # Instructions for developers:
 # 1) Every function operates on od, and returns ds
@@ -33,7 +37,9 @@ from . import utils as _utils
 _FUNC2VARS = {'potential_density_anomaly'     : ['Sigma0'],
               'Brunt_Vaisala_frequency'       : ['N2'],
               'vertical_relative_vorticity'   : ['momVort3'],
-              'relative_vorticity'            : ['momVort1', 'momVort2', 'momVort3'],
+              'relative_vorticity'            : ['momVort1', 
+                                                 'momVort2', 
+                                                 'momVort3'],
               'kinetic_energy'                : ['KE'],
               'eddy_kinetic_energy'           : ['EKE'],
               'horizontal_divergence_velocity': ['hor_div_vel'],
@@ -42,18 +48,36 @@ _FUNC2VARS = {'potential_density_anomaly'     : ['Sigma0'],
               'Okubo_Weiss_parameter'         : ['Okubo_Weiss'],
               'Ertel_potential_vorticity'     : ['Ertel_PV'],
               'mooring_horizontal_volume_transport' : ['transport', 
-                                                       'Vtransport',     'Utransport', 
-                                                       'Y_transport',    'X_transport', 
-                                                       'Y_Utransport',   'X_Utransport',
-                                                       'Y_Vtransport',   'X_Vtransport',
-                                                       'dir_Utransport', 'dir_Vtransport'],
-             'heat_budget'                    : ['tendH', 'adv_hConvH', 'adv_vConvH', 'dif_vConvH', 'kpp_vConvH', 'forcH'],
-             'salt_budget'                    : ['tendS', 'adv_hConvS', 'adv_vConvS', 'dif_vConvS', 'kpp_vConvS', 'forcS'],
-             'geographical_aligned_velocities': ['U_zonal', 'V_merid'],
-             'survey_aligned_velocities'      : ['rot_ang_Vel', 'tan_Vel', 'ort_Vel']}
+                                                       'Vtransport',     
+                                                       'Utransport', 
+                                                       'Y_transport',    
+                                                       'X_transport', 
+                                                       'Y_Utransport',   
+                                                       'X_Utransport',
+                                                       'Y_Vtransport',   
+                                                       'X_Vtransport',
+                                                       'dir_Utransport', 
+                                                       'dir_Vtransport'],
+             'heat_budget'                    : ['tendH', 
+                                                 'adv_hConvH', 
+                                                 'adv_vConvH', 
+                                                 'dif_vConvH', 
+                                                 'kpp_vConvH', 
+                                                 'forcH'],
+             'salt_budget'                    : ['tendS', 
+                                                 'adv_hConvS', 
+                                                 'adv_vConvS', 
+                                                 'dif_vConvS', 
+                                                 'kpp_vConvS', 
+                                                 'forcS'],
+             'geographical_aligned_velocities': ['U_zonal', 
+                                                 'V_merid'],
+             'survey_aligned_velocities'      : ['rot_ang_Vel', 
+                                                 'tan_Vel', 
+                                                 'ort_Vel']}
     
     
-def _add_missing_variables(od, varList, FUNC2VARS = _FUNC2VARS, raiseError=True):
+def _add_missing_variables(od, varList, FUNC2VARS = _FUNC2VARS):
     """
     If any variable in varList is missing in the oceandataset, try to compute it.
     
@@ -74,27 +98,20 @@ def _add_missing_variables(od, varList, FUNC2VARS = _FUNC2VARS, raiseError=True)
     """
     
     # Check parameters
-    if not isinstance(od, _ospy.OceanDataset):
-        raise TypeError('`od` must be OceanDataset')
-    
-    varList = _np.asarray(varList, dtype='str')
-    if varList.ndim == 0: varList = varList.reshape(1)
-    elif varList.ndim >1: raise TypeError('Invalid `varList`')
+    _check_instance({'od': od}, ' _ospy.OceanDataset')
+    varList = _check_list_of_string(varList, 'varList')
     
     # Return here if all variables already exist
     varList = [var for var in varList if var not in od._ds.variables]
-    if len(varList)==0:
+    if len(varList)==0: 
         return od
     
     # Raise error if variable not availabe
     VAR2FUNC  = {VAR: FUNC for FUNC in FUNC2VARS  for VAR in FUNC2VARS[FUNC]}
     var_error = [var for var in varList if var not in VAR2FUNC]
     if len(var_error)!=0:
-        message = 'These variables are not available and can not be computed: {}'.format(var_error)
-        if raiseError:
-            raise ValueError(message)
-        else: 
-            _warnings.warn(message, stacklevel=2)
+        raise ValueError('These variables are not available '
+                         'and can not be computed: {}'.format(var_error))
             
     # Compute new variables
     funcList = list(set([VAR2FUNC[var] for var in varList if var in VAR2FUNC]))
@@ -111,7 +128,8 @@ def _add_missing_variables(od, varList, FUNC2VARS = _FUNC2VARS, raiseError=True)
 
 def _rename_aliased(od, varNameList):
     """
-    Check if there are aliases, and return the name of variables in the private dataset
+    Check if there are aliases, and return the name of variables in the private dataset.
+    This is used by smart-naming functions, where user asks for aliased variables.
     
     Parameters
     ----------
@@ -127,34 +145,36 @@ def _rename_aliased(od, varNameList):
     """
     
     # Check parameters
-    if not isinstance(od, _ospy.OceanDataset):
-        raise TypeError('`od` must be OceanDataset')
+    _check_instance({'od': od}, ' _ospy.OceanDataset')
         
     # Check if input is a string
-    if isinstance(varNameList, str): isstr=True
-    else: isstr=False
+    if isinstance(varNameList, str): 
+        isstr=True
+    else: 
+        isstr=False
     
     # Move to numpy array
-    varNameList = _np.asarray(varNameList, dtype='str')
-    if varNameList.ndim == 0: varNameList = varNameList.reshape(1)
-    elif varNameList.ndim >1: raise TypeError('Invalid `varList`')
+    varNameList = _check_list_of_string(varNameList, 'varNameList')
     
     # Get _ds names
     if od._aliases_flipped is not None:
-        varNameListIN  =[od._aliases_flipped[varName] if varName in od._aliases_flipped else varName for varName in list(varNameList)]
+        varNameListIN  =[od._aliases_flipped[varName] 
+                         if varName in od._aliases_flipped 
+                         else varName for varName in list(varNameList)]
     else: 
         varNameListIN = varNameList
         
-    # Same input type
-    if isstr: varNameListIN = varNameListIN[0]
+    # Same type of input
+    if isstr: 
+        varNameListIN = varNameListIN[0]
         
     return varNameListIN
 
 
 
-# ==================
-# DYNAMIC VARIABLES
-# ==================
+# ======================
+# SMART-NAMING VARIABLES
+# ======================
 def gradient(od, varNameList, axesList=None, aliased = True):
     """
     Compute gradient along specified axes, returning all terms (not summed).
@@ -210,45 +230,36 @@ def gradient(od, varNameList, axesList=None, aliased = True):
         OceanSpy_parameters:     {'rSphere': 6371.0, 'eq_state': 'jmd95', 'rho0':...
         OceanSpy_projection:     Mercator(**{'central_longitude': -23.92803909531...
         OceanSpy_grid_periodic:  []
-            
-    Notes
-    -----
-    Denominator is delta of time for time gradients (units: s).
-    Denominator is delta of distances for mooring and survey (units: km)
     
     References
     ----------
     MITgcm: https://mitgcm.readthedocs.io/en/latest/algorithm/algorithm.html#notation
     """
+    # TODO: We are assuming default units, while we should actually read from metadata.
+    #       m for space, time in datetime64 format, and VSections distances in km.
     
-    # Check input
-    if not isinstance(od, _ospy.OceanDataset):
-        raise TypeError('`od` must be OceanDataset')
+    # Check parameters
+    _check_instance({'od'     : od,
+                     'aliased': aliased}, 
+                    {'od'     : ' _ospy.OceanDataset',
+                     'aliased': 'bool'})
     
-    varNameList = _np.asarray(varNameList, dtype='str')
-    if varNameList.ndim == 0: varNameList = varNameList.reshape(1)
-    elif varNameList.ndim >1: raise TypeError('Invalid `varNameList`')
+    varNameList = _check_list_of_string(varNameList, 'varNameList')
+    
     if axesList is not None:
-        axesList = _np.asarray(axesList, dtype='str')
-        if axesList.ndim == 0: axesList = axesList.reshape(1)
-        elif axesList.ndim >1: raise TypeError('Invalid `axesList`')
+        axesList = _check_list_of_string(axesList, 'varNameList')
             
     grid_axes = [coord for coord in od.grid_coords]
     if axesList is None: 
         axesList = grid_axes
     else:
         err_axes = [axis for axis in axesList if axis not in grid_axes]
-        if len(err_axes)!=0: raise ValueError('{} are not available. Available axes are {}'.format(err_axes, grid_axes))
-     
-    if not isinstance(aliased, bool):
-        raise TypeError('`aliased` must be bool')
+        if len(err_axes)!=0: 
+            raise ValueError('{} are not available. '
+                             'Available axes are {}'.format(err_axes, grid_axes))
     
     # Handle aliases
-    if aliased:
-        varNameListIN = _rename_aliased(od, varNameList)
-    else:
-        varNameListIN = varNameList
-    varNameListOUT = varNameList
+    varNameListIN, varNameListOUT = _handle_aliased(od, aliased, varNameList)
 
     # Add missing variables
     od = _add_missing_variables(od, list(varNameListIN))
@@ -261,20 +272,25 @@ def gradient(od, varNameList, axesList=None, aliased = True):
     for _, (varName, varNameOUT) in enumerate(zip(varNameListIN, varNameListOUT)):
         
         for axis in axesList:
+            
             # Numerator
             dnum = od._grid.diff(od._ds[varName], axis, boundary='fill', fill_value=_np.nan)
 
             # Horizontal gradient
             if axis in ['X', 'Y']:
-
-                # Add missing variables
-                varList = ['dxC', 'dxF', 'dxG', 'dxV', 'dyC', 'dyF', 'dyG', 'dyU']
-                od = _add_missing_variables(od, varList)
-
-                # Select d
+                
+                # Select denominator
                 pointList = ['C', 'F', 'G']
-                if   axis=='X': pointList = pointList+['V']
-                elif axis=='Y': pointList = pointList+['U']
+                if   axis=='X': 
+                    # Add missing variables
+                    varList   = ['dxC', 'dxF', 'dxG', 'dxV']
+                    od        = _add_missing_variables(od, varList)
+                    pointList = pointList+['V']
+                elif axis=='Y': 
+                    # Add missing variables
+                    varList   = ['dyC', 'dyF', 'dyG', 'dyU']
+                    od        = _add_missing_variables(od, varList)
+                    pointList = pointList+['U']
                 ddenNames = ['d'+axis.lower()+point for point in pointList]
                 for ddenName in ddenNames:
                     if set(od._ds[ddenName].dims).issubset(dnum.dims): 
@@ -299,37 +315,38 @@ def gradient(od, varNameList, axesList=None, aliased = True):
                         dden = od._grid.diff(od._ds[dim], axis, boundary='fill', fill_value=_np.nan)
                         for coord in od._grid.axes[axis].coords:
                             if od._grid.axes[axis].coords[coord].name in dden.dims and coord!='center':
-                                HFac = od._grid.interp(HFac, axis, to=coord, boundary='fill', fill_value=_np.nan)
+                                HFac = od._grid.interp(HFac, axis, 
+                                                       to=coord, boundary='fill', fill_value=_np.nan)
                                 continue
                         # Apply HFac
                         dden = dden * HFac
                         continue
-            
-            # TODO: will fail for midp!
-            # Time gradient
-            if axis == 'time':
-                
-                # Compute and convert in s
-                dden = od._grid.diff(od._ds['time'], axis, boundary='fill', fill_value=_np.nan)
-                dden = dden / _np.timedelta64(1, 's')
-                
-            # Vertical survey and mooring
-            if axis in ['mooring', 'station']:
-        
-                # Compute and conver in s
-                dden = od._grid.diff(od._ds[axis+'_dist'], axis, boundary='fill', fill_value=_np.nan)
+                        
+            # Time and vertical sections
+            if axis in ['mooring', 'station', 'time']:
+                if axis in ['mooring', 'station']: 
+                    convert_units = 1.E-3
+                    add_dist = '_dist'
+                else: 
+                    convert_units = _np.timedelta64(1, 's')
+                    add_dist = ''
                     
+                if axis in dnum.dims:
+                    dden = od._grid.diff(od._ds[axis+'_midp'+add_dist], axis, boundary='fill', fill_value=_np.nan)
+                elif axis+'_midp' in dnum.dims:
+                    dden = od._grid.diff(od._ds[axis+add_dist], axis, boundary='fill', fill_value=_np.nan)
+                dden = dden / convert_units
+                
             # Add and clear
             outName = 'd'+varNameOUT+'_d'+axis
             grad[outName] = dnum / dden
-            add_units = {'X': ' m', 'Y': ' m', 'Z': ' m', 'time': ' s', 'station': ' km', 'mooring': ' km'}
+            add_units = {'X': ' m', 'Y': ' m', 'Z': ' m', 'time': ' s', 'station': ' m', 'mooring': ' m'}
             if 'units' in od._ds[varName].attrs:
-                    if od._ds[varName].attrs!='-':
-                        grad[outName].attrs['units'] = od._ds[varName].attrs['units']+add_units[axis]+'^-1'
-                    else:
-                        grad[outName].attrs['units'] = add_units[axis]+'^-1'
-                    
-                
+                if od._ds[varName].attrs!='-':
+                    grad[outName].attrs['units'] = od._ds[varName].attrs['units']+add_units[axis]+'^-1'
+                else:
+                    grad[outName].attrs['units'] = add_units[axis]+'^-1'
+                        
             del dnum, dden
             
     return _xr.Dataset(grad, attrs=od.dataset.attrs)
@@ -397,71 +414,78 @@ def divergence(od, iName=None, jName=None, kName=None, aliased = True):
     MITgcm: https://mitgcm.readthedocs.io/en/latest/algorithm/algorithm.html#notation
     """
     
-    # Check input
-    if not isinstance(od, _ospy.OceanDataset):
-        raise TypeError('`od` must be OceanDataset')
-    if not isinstance(iName, (str, type(None))):
-        raise TypeError('`iName` must be str or None')
-    if not isinstance(jName, (str, type(None))):
-        raise TypeError('`jName` must be str or None')
-    if not isinstance(kName, (str, type(None))):
-        raise TypeError('`kName` must be str or None')
-    if not isinstance(aliased, bool):
-        raise TypeError('`aliased` must be bool')
-        
+    # Check parameters
+    _check_instance({'od'     : od,
+                     'iName'  : iName,
+                     'jName'  : jName,
+                     'kName'  : kName,
+                     'aliased': aliased}, 
+                    {'od'     : ' _ospy.OceanDataset',
+                     'iName'  : '(str, type(None))',
+                     'jName'  : '(str, type(None))',
+                     'kName'  : '(str, type(None))',
+                     'aliased': 'bool'})
+    
     # Message
     print('Computing divergence.')
     
-    div = {}
+    div  = {}
+    pref = 'd'
     if iName is not None:
+        
         # Handle aliases
-        Name = iName
-        if aliased:
-            NameIN = _rename_aliased(od, Name)
-        else:
-            NameIN = Name
-        NameOUT = Name
+        NameIN, NameOUT = _handle_aliased(od, aliased, iName)
         
         # Add missing variables
         varList = ['HFacC', 'rA', 'dyG', 'HFacW', NameIN]
         od = _add_missing_variables(od, varList)
         
         # Add div
-        div['d'+NameOUT+'_dX'] = (od._grid.diff(od._ds[NameIN]*od._ds['HFacW']*od._ds['dyG'], 'X') / 
-                                   (od._ds['HFacC'] * od._ds['rA']))
+        suf = '_dX'
+        div[pref+NameOUT+suf] = (od._grid.diff(od._ds[NameIN]*od._ds['HFacW']*od._ds['dyG'], suf[-1]) / 
+                                (od._ds['HFacC'] * od._ds['rA']))
+        
+        # Units
+        if 'units' in od._ds[NameIN].attrs:
+            if od._ds[NameIN].attrs!='-':
+                div[pref+NameOUT+suf].attrs['units'] = od._ds[NameIN].attrs['units']+' m^-1'
+            else:
+                div[pref+NameOUT+suf].attrs['units'] = 'm^-1'
+                
     if jName is not None:
         # Handle aliases
-        Name = jName
-        if aliased:
-            NameIN = _rename_aliased(od, Name)
-        else:
-            NameIN = Name
-        NameOUT = Name
+        NameIN, NameOUT = _handle_aliased(od, aliased, jName)
         
         # Add missing variables
         varList = ['HFacC', 'rA', 'dxG', 'HFacS', NameIN]
         od = _add_missing_variables(od, varList)
         
         # Add div
-        div['d'+NameOUT+'_dY'] = (od._grid.diff(od._ds[NameIN]*od._ds['HFacS']*od._ds['dxG'], 'Y') / 
-                                 (od._ds['HFacC'] * od._ds['rA']))
+        suf = '_dY'
+        div[pref+NameOUT+suf] = (od._grid.diff(od._ds[NameIN]*od._ds['HFacS']*od._ds['dxG'], suf[-1]) / 
+                                (od._ds['HFacC'] * od._ds['rA']))
+        # Units
+        if 'units' in od._ds[NameIN].attrs:
+            if od._ds[NameIN].attrs!='-':
+                div[pref+NameOUT+suf].attrs['units'] = od._ds[NameIN].attrs['units']+' m^-1'
+            else:
+                div[pref+NameOUT+suf].attrs['units'] = 'm^-1'
+                
     if kName is not None:
         # Handle aliases
-        Name = kName
-        if aliased:
-            NameIN = _rename_aliased(od, Name)
-        else:
-            NameIN = Name
-        NameOUT = Name
+        NameIN, NameOUT = _handle_aliased(od, aliased, kName)
         
         # Add missing variables
         od = _add_missing_variables(od, NameIN)
         
         # Add div (same of gradient)
-        div['d'+NameOUT+'_dZ'] = gradient(od, varNameList = NameIN, axesList='Z', aliased=False)['d'+NameIN+'_dZ']
-    
+        suf = '_dZ'
+        div[pref+NameOUT+suf] = gradient(od, varNameList = NameIN, axesList=suf[-1], 
+                                         aliased=False)[pref+NameIN+suf]
+                
     return _xr.Dataset(div, attrs=od.dataset.attrs)
-                                                        
+                                                       
+    
 def curl(od, iName=None, jName=None, kName=None, aliased = True):
     """
     Compute curl of a vector field.
@@ -534,17 +558,17 @@ def curl(od, iName=None, jName=None, kName=None, aliased = True):
     MITgcm: https://mitgcm.readthedocs.io/en/latest/algorithm/algorithm.html#notation
     """
     
-    # Check input
-    if not isinstance(od, _ospy.OceanDataset):
-        raise TypeError('`od` must be OceanDataset')
-    if not isinstance(iName, (str, type(None))):
-        raise TypeError('`iName` must be str or None')
-    if not isinstance(jName, (str, type(None))):
-        raise TypeError('`jName` must be str or None')
-    if not isinstance(kName, (str, type(None))):
-        raise TypeError('`kName` must be str or None')
-    if not isinstance(aliased, bool):
-        raise TypeError('`aliased` must be bool')
+    # Check parameters
+    _check_instance({'od'     : od,
+                     'iName'  : iName,
+                     'jName'  : jName,
+                     'kName'  : kName,
+                     'aliased': aliased}, 
+                    {'od'     : ' _ospy.OceanDataset',
+                     'iName'  : '(str, type(None))',
+                     'jName'  : '(str, type(None))',
+                     'kName'  : '(str, type(None))',
+                     'aliased': 'bool'})
     if sum(x is None for x in [iName, jName, kName])>=2:
         raise ValueError('At least 2 out of 3 components must be provided.')
     
@@ -553,15 +577,10 @@ def curl(od, iName=None, jName=None, kName=None, aliased = True):
     
     crl = {}
     if iName is not None and jName is not None:
+        
         # Handle aliases
-        if aliased:
-            iNameIN = _rename_aliased(od, iName)
-            jNameIN = _rename_aliased(od, jName)
-        else:
-            iNameIN = iName
-            jNameIN = jName
-        iNameOUT = iName
-        jNameOUT = jName
+        iNameIN, iNameOUT = _handle_aliased(od, aliased, iName)
+        jNameIN, jNameOUT = _handle_aliased(od, aliased, jName)
     
         # Add missing variables
         varList = ['rAz', 'dyC', 'dxC', iNameIN, jNameIN]
@@ -573,17 +592,21 @@ def curl(od, iName=None, jName=None, kName=None, aliased = True):
                                    boundary='fill', fill_value=_np.nan) -
                      od._grid.diff(od._ds[iNameIN]*od._ds['dxC'], 'Y',
                                    boundary='fill', fill_value=_np.nan)) / od._ds['rAz']
+        
+        # Units
+        if ('units' in od._ds[iNameIN].attrs and 
+            'units' in od._ds[jNameIN].attrs and
+            od._ds[iNameIN].attrs['units']==od._ds[jNameIN].attrs['units']):
+            if od._ds[iNameIN].attrs!='-':
+                crl[Name].attrs['units'] = od._ds[iNameIN].attrs['units']+' m^-1'
+            else:
+                crl[Name].attrs['units'] = 'm^-1'
                          
     if jName is not None and kName is not None:
+        
         # Handle aliases
-        if aliased:
-            jNameIN = _rename_aliased(od, jName)
-            kNameIN = _rename_aliased(od, kName)
-        else:
-            jNameIN = jName
-            kNameIN = kName
-        jNameOUT = jName
-        kNameOUT = kName
+        jNameIN, jNameOUT = _handle_aliased(od, aliased, jName)
+        kNameIN, kNameOUT = _handle_aliased(od, aliased, kName)
         
         # Add missing variables
         varList = [jNameIN, kNameIN]
@@ -593,16 +616,21 @@ def curl(od, iName=None, jName=None, kName=None, aliased = True):
         Name = 'd'+kNameOUT+'_dY-d'+jNameOUT+'_dZ'
         crl[Name] =(gradient(od, kNameIN, 'Y', aliased=False)['d'+kNameIN+'_dY'] -
                     gradient(od, jNameIN, 'Z', aliased=False)['d'+jNameIN+'_dZ'])
+        
+        # Units
+        if ('units' in od._ds[jNameIN].attrs and 
+            'units' in od._ds[kNameIN].attrs and
+            od._ds[jNameIN].attrs['units']==od._ds[kNameIN].attrs['units']):
+            if od._ds[jNameIN].attrs!='-':
+                crl[Name].attrs['units'] = od._ds[jNameIN].attrs['units']+' m^-1'
+            else:
+                crl[Name].attrs['units'] = 'm^-1'
+                
     if kName is not None and iName is not None:
+        
         # Handle aliases
-        if aliased:
-            iNameIN = _rename_aliased(od, iName)
-            kNameIN = _rename_aliased(od, kName)
-        else:
-            iNameIN = iName
-            kNameIN = kName
-        iNameOUT = iName
-        kNameOUT = kName
+        iNameIN, iNameOUT = _handle_aliased(od, aliased, iName)
+        kNameIN, kNameOUT = _handle_aliased(od, aliased, kName)
         
         # Add missing variables
         varList = [iNameIN, kNameIN]
@@ -612,6 +640,15 @@ def curl(od, iName=None, jName=None, kName=None, aliased = True):
         Name = 'd'+iNameOUT+'_dZ-d'+kNameOUT+'_dX' 
         crl[Name] =(gradient(od, iNameIN, 'Z', aliased=False)['d'+iNameIN+'_dZ'] -
                     gradient(od, kNameIN, 'X', aliased=False)['d'+kNameIN+'_dX'])
+        
+        # Units
+        if ('units' in od._ds[iNameIN].attrs and 
+            'units' in od._ds[kNameIN].attrs and
+            od._ds[iNameIN].attrs['units']==od._ds[kNameIN].attrs['units']):
+            if od._ds[iNameIN].attrs!='-':
+                crl[Name].attrs['units'] = od._ds[iNameIN].attrs['units']+' m^-1'
+            else:
+                crl[Name].attrs['units'] = 'm^-1'
         
     return _xr.Dataset(crl, attrs=od.dataset.attrs)           
 
@@ -674,30 +711,44 @@ def laplacian(od, varNameList, axesList=None, aliased = True):
     MITgcm: https://mitgcm.readthedocs.io/en/latest/algorithm/algorithm.html#notation
     """
     
-    # Check input
-    if not isinstance(od, _ospy.OceanDataset):
-        raise TypeError('`od` must be OceanDataset')
+    # Check parameters
+    _check_instance({'od'     : od,
+                     'aliased': aliased}, 
+                    {'od'     : ' _ospy.OceanDataset',
+                     'aliased': 'bool'})
     
-    varNameList = _np.asarray(varNameList, dtype='str')
-    if varNameList.ndim == 0: varNameList = varNameList.reshape(1)
-    elif varNameList.ndim >1: raise TypeError('Invalid `varNameList`')
+    varNameList = _check_list_of_string(varNameList, 'varNameList')
     
-    if not isinstance(aliased, bool):
-        raise TypeError('`aliased` must be bool')
-        
-        
-    # Handle aliases
-    if aliased:
-        varNameListIN = _rename_aliased(od, varNameList)
+    if axesList is not None:
+        axesList = _check_list_of_string(axesList, 'varNameList')
+            
+    good_axes = ['X', 'Y', 'Z']
+    grid_axes = [coord for coord in od.grid_coords if coord in good_axes]
+    if axesList is None: 
+        axesList = grid_axes
     else:
-        varNameListIN = varNameList
-    varNameListOUT = varNameList
+        err_axes = [axis for axis in axesList if axis not in grid_axes]
+        if len(err_axes)!=0: 
+            raise ValueError('These axes are not supported: {}.'
+                            '\nThe laplacian operator is currently implemented '
+                            'for the following axes only: {}'.format(err_axes, good_axes))
     
+    # Handle aliases
+    varNameListIN, varNameListOUT = _handle_aliased(od, aliased, varNameList)
+    
+    # Check scalars
+    for axis in list(grid_axes):
+        for _, (varIN, varOUT) in enumerate(zip(list(varNameListIN), list(varNameListOUT))):
+            if axis not in od._ds[varIN].dims:
+                raise ValueError('[{}] has wrong dimensions.'
+                                 '\nThe laplacian operator along the axis [{}] '
+                                 'currently only supports variables with dimension [{}].'.format(varOUT, axis, axis))
+                
     # Message
     print('Computing laplacian.')
     
     # Loop through variables
-    div = []
+    lap = []
     for _, (varName, varNameOUT) in enumerate(zip(varNameListIN, varNameListOUT)):
 
         # Compute gradients
@@ -724,10 +775,10 @@ def laplacian(od, varNameList, axesList=None, aliased = True):
                 compNames['kName'] = compName
                 rename_dict['dd{}_dZ_dZ'.format(varName)] = 'dd{}_dZ_dZ'.format(varNameOUT)
 
-        div = div + [divergence(od, **compNames, aliased=False).rename(rename_dict)]
+        lap = lap + [divergence(od, **compNames, aliased=False).rename(rename_dict)]
         
     # Merge
-    ds = _xr.merge(div)
+    ds = _xr.merge(lap)
     ds.attrs = od.dataset.attrs
     
     return ds
@@ -789,186 +840,15 @@ def weighted_mean(od, varNameList=None, axesList=None, storeWeights=True, aliase
         OceanSpy_grid_periodic:  []
     """
     
-    # Check input
-    if not isinstance(od, _ospy.OceanDataset):
-        raise TypeError('`od` must be OceanDataset')
-    
-    if varNameList is None: varNameList = list(od._ds.data_vars)
-    varNameList = _np.asarray(varNameList, dtype='str')
-    if varNameList.ndim == 0: varNameList = varNameList.reshape(1)
-    elif varNameList.ndim >1: raise TypeError('Invalid `varNameList`')
-    if axesList is not None:
-        axesList = _np.asarray(axesList, dtype='str')
-        if axesList.ndim == 0: axesList = axesList.reshape(1)
-        elif axesList.ndim >1: raise TypeError('Invalid `axesList`')
-            
-    allAxes = [coord for coord in od.grid_coords if coord not in ['mooring', 'station']]
-    if axesList is None: 
-        axesList = allAxes
-    else:
-        err_axes = [axis for axis in axesList if axis not in allAxes]
-        if len(err_axes)!=0: raise ValueError('{} are not available. Available axes are {}'.format(err_axes, allAxes))
-    
-    if not isinstance(storeWeights, bool):
-        raise TypeError('`storeWeights` must be bool')
-        
-    if not isinstance(aliased, bool):
-        raise TypeError('`aliased` must be bool')
-    
-    # Handle aliases
-    if aliased:
-        varNameListIN = _rename_aliased(od, varNameList)
-    else:
-        varNameListIN = varNameList
-    varNameListOUT = varNameList
-
-    # Add missing variables
-    od = _add_missing_variables(od, list(varNameListIN))
-    
-    # Message
-    print('Computing weighted averages.')
-    
-    # Loop through variables
-    means   = {}
-    for _, (varName, varNameOUT) in enumerate(zip(varNameListIN, varNameListOUT)):
-        weight   = 1
-        units    = 0
-        attrs    = od._ds[varName].attrs
-        wMean    = od._ds[varName]
-        dims2ave = []
-        
-        # ====
-        # TIME
-        # ====
-        # Tipically models have regular deta time
-        if set(['time']).issubset(axesList):
-            for t in ['time', 'time_midp']:
-                if t in wMean.dims: wMean = wMean.mean(t)
-        
-        
-        # ==========
-        # HORIZONTAL
-        # ==========
-        
-        # Area
-        if set(['X', 'Y']).issubset(axesList):
-
-            # Add missing variables
-            areaList = ['rA', 'rAw', 'rAs', 'rAz']
-            od = _add_missing_variables(od, areaList)
-            
-            for area in areaList:
-                if set(od._ds[area].dims).issubset(wMean.dims): 
-                    weight    = od._ds[area] * weight
-                    units     = units + 2
-                    dims2ave  = dims2ave + list(od._ds[area].dims)
-                    foundArea = True
-                    continue
-        
-        # Y
-        elif set(['Y']).issubset(axesList):
-            
-            # Add missing variables
-            yList = ['dyC', 'dyF', 'dyG', 'dyU']
-            od = _add_missing_variables(od, yList)
-            
-            for y in yList:
-                if set(od._ds[y].dims).issubset(wMean.dims): 
-                    weight   = od._ds[y] * weight
-                    units    = units + 1
-                    dims2ave = dims2ave + [dim for dim in od._ds[y].dims if dim[0]=='Y']
-                    foundY   = True
-                    continue
-        
-        # X
-        elif set(['X']).issubset(axesList):
-            
-            # Add missing variables
-            xList = ['dxC', 'dxF', 'dxG', 'dxV',]
-            od = _add_missing_variables(od, xList)
-            
-            for x in xList:
-                if set(od._ds[x].dims).issubset(wMean.dims): 
-                    weight   = od._ds[x] * weight
-                    units    = units + 1
-                    dims2ave = dims2ave + [dim for dim in od._ds[x].dims if dim[0]=='X']
-                    foundX   = True
-                    continue
-        
-        # ========
-        # VERTICAL
-        # ========
-        if set(['Z']).issubset(axesList):
-            
-            # Add missing variables
-            HFacList = ['HFacC', 'HFacW', 'HFacS']
-            od = _add_missing_variables(od, HFacList)
-
-            # Extract HFac
-            if   set(['X'  , 'Y']  ).issubset(wMean.dims): HFac = od._ds['HFacC']
-            elif set(['Xp1', 'Y']  ).issubset(wMean.dims): HFac = od._ds['HFacW']
-            elif set(['X'  , 'Yp1']).issubset(wMean.dims): HFac = od._ds['HFacS']
-            elif set(['Xp1', 'Yp1']).issubset(wMean.dims): 
-                HFac = od._grid.interp(od._grid.interp(od._ds['HFacC'], 'X', boundary='extend'), 'Y', boundary='extend')
-            else: 
-                HFac = None
-
-            # Add missing variables
-            zList = ['drC', 'drF']
-            od = _add_missing_variables(od, zList)
-            
-            foundZ = False
-            for z in zList:
-                if set(od._ds[z].dims).issubset(wMean.dims):
-                    if z=='drC' and HFac is not None:
-                        HFac = od.grid.interp(HFac, 'Z', to='outer', boundary='extend')
-                    if HFac is None: HFac= 1
-                    weight   = od._ds[z] * HFac * weight
-                    units    = units + 1
-                    dims2ave = dims2ave + list(od._ds[z].dims)
-                    foundZ   =True
-                    continue
-                    
-            if foundZ is False:    
-                for coord in od._grid.axes['Z'].coords:
-                    z = od._grid.axes['Z'].coords[coord].name
-                    if set([z]).issubset(wMean.dims): 
-                        dr = od.grid.interp(od.dataset['drF'], 'Z', to=coord, boundary='extend')
-                        if HFac is not None: 
-                            HFac = od._grid.interp(HFac, 'Z', to=coord, boundary='extend')
-                        else: 
-                            HFac = 1
-                        weight = dr * HFac * weight
-                        units  = units + 1
-                        dims2ave = dims2ave + list(dr.dims)
-                        foundZ = True
-                        continue
-            
-        # Compute weighted mean
-        if isinstance(weight, _xr.DataArray):
-            _, weight = _xr.broadcast(wMean, weight) # Keep dimension in the right order
-            weight = weight.where(~wMean.isnull())
-            wMean = ((wMean * weight).sum(dims2ave)) / (weight.sum(dims2ave))
-        else: storeWeights = False
-
-        # Store wMean
-        """if 'long_name' in attrs:
-            attrs['long_name']   = '<{}>'.format(attrs['long_name'])
-        if 'description' in attrs:
-            attrs['description'] = '<{}>'.format(attrs['description'])"""
-        wMean.attrs = attrs
-        means['w_mean_'+varNameOUT] = wMean
-        
-        # Store weights
-        if storeWeights: 
-            weight.attrs['long_name']   = 'Weights for space dimensions'
-            weight.attrs['units']       = 'm^'+str(units)
-            means['weight_'+varNameOUT] = weight
-    
-    return _xr.Dataset(means, attrs=od.dataset.attrs)           
+    return _integral_and_mean(od, 
+                              varNameList  = varNameList, 
+                              axesList     = axesList, 
+                              storeWeights = storeWeights, 
+                              aliased      = aliased, 
+                              operation    = 'weighted_mean')           
        
     
-def integral(od, varNameList=None, axesList=None, aliased = True):
+def integral(od, varNameList=None, axesList=None, aliased = True):    
     """
     Compute integrals along specified axes.
     
@@ -1014,45 +894,47 @@ def integral(od, varNameList=None, axesList=None, aliased = True):
         OceanSpy_projection:     Mercator(**{'central_longitude': -23.92803909531...
         OceanSpy_grid_periodic:  []
     """
+    return _integral_and_mean(od, 
+                              varNameList  = varNameList, 
+                              axesList     = axesList, 
+                              aliased      = aliased, 
+                              operation    = 'integral') 
+
+def _integral_and_mean(od, operation='integral', varNameList=None, axesList=None, aliased = True, storeWeights=True):
     
-    # Check input
-    if not isinstance(od, _ospy.OceanDataset):
-        raise TypeError('`od` must be OceanDataset')
+    # Check parameters
+    _check_instance({'od'          : od,
+                     'aliased'     : aliased,
+                     'storeWeights': storeWeights}, 
+                    {'od'          : ' _ospy.OceanDataset',
+                     'aliased'     : 'bool',
+                     'storeWeights': 'bool'})
     
-    if varNameList is None: varNameList = list(od._ds.data_vars)
-    varNameList = _np.asarray(varNameList, dtype='str')
-    if varNameList.ndim == 0: varNameList = varNameList.reshape(1)
-    elif varNameList.ndim >1: raise TypeError('Invalid `varNameList`')
+    varNameList = _check_list_of_string(varNameList, 'varNameList')
+    
     if axesList is not None:
-        axesList = _np.asarray(axesList, dtype='str')
-        if axesList.ndim == 0: axesList = axesList.reshape(1)
-        elif axesList.ndim >1: raise TypeError('Invalid `axesList`')
+        axesList = _check_list_of_string(axesList, 'varNameList')
             
-    allAxes = [coord for coord in od.grid_coords if coord not in ['mooring', 'station']]
+    grid_axes = [coord for coord in od.grid_coords]
     if axesList is None: 
-        axesList = allAxes
+        axesList = grid_axes
     else:
-        err_axes = [axis for axis in axesList if axis not in allAxes]
-        if len(err_axes)!=0: raise ValueError('{} are not available. Available axes are {}'.format(err_axes, allAxes))
-        
-    if not isinstance(aliased, bool):
-        raise TypeError('`aliased` must be bool')
+        err_axes = [axis for axis in axesList if axis not in grid_axes]
+        if len(err_axes)!=0: 
+            raise ValueError('{} are not available. '
+                             'Available axes are {}'.format(err_axes, grid_axes))
     
     # Handle aliases
-    if aliased:
-        varNameListIN = _rename_aliased(od, varNameList)
-    else:
-        varNameListIN = varNameList
-    varNameListOUT = varNameList
+    varNameListIN, varNameListOUT = _handle_aliased(od, aliased, varNameList)
 
     # Add missing variables
     od = _add_missing_variables(od, list(varNameListIN))
     
     # Message
-    print('Computing integrals.')
+    print('Computing {}.'.format(operation))
     
     # Loop through variables
-    ints = {}
+    to_return = {}
     for _, (varName, varNameOUT) in enumerate(zip(varNameListIN, varNameListOUT)):
         delta = 1
         suf   = []
@@ -1064,15 +946,38 @@ def integral(od, varNameList=None, axesList=None, aliased = True):
         # ====
         # TIME
         # ====
-        # Tipically models have regular deta time
         if set(['time']).issubset(axesList):
             for t in ['time', 'time_midp']:
                 if t in Int.dims: 
-                    delta = delta * od._grid.interp(od._grid.diff(od._ds[t], 'time', boundary='extend') / _np.timedelta64(1, 's'), 'time',
-                                             boundary='extend')
+                    delta = delta * od._grid.interp(od._grid.diff(od._ds[t], 'time', boundary='extend') 
+                                                    / _np.timedelta64(1, 's'), 'time', boundary='extend')
                     dims2sum = dims2sum + list(od._ds[t].dims)
                     suf      = suf  + ['dtime']
                     units    = units+ ['s']
+              
+        # =======
+        # MOORING
+        # =======
+        if set(['mooring']).issubset(axesList):
+            for m in ['mooring', 'mooring_midp']:
+                if m in Int.dims: 
+                    delta = delta * od._grid.interp(od._grid.diff(od._ds[m+'_dist'], 'mooring', boundary='extend') 
+                                                    / 1.E-3, 'mooring', boundary='extend')
+                    dims2sum = dims2sum + list(od._ds[m+'_dist'].dims)
+                    suf      = suf  + ['dmoor']
+                    units    = units+ ['m']
+                    
+        # =======
+        # STATION
+        # =======
+        if set(['station']).issubset(axesList):
+            for s in ['station', 'station_midp']:
+                if s in Int.dims: 
+                    delta = delta * od._grid.interp(od._grid.diff(od._ds[s+'_dist'], 'station', boundary='extend') 
+                                                    / 1.E-3, 'station', boundary='extend')
+                    dims2sum = dims2sum + list(od._ds[s+'_dist'].dims)
+                    suf      = suf  + ['dstat']
+                    units    = units+ ['m']
 
         # ==========
         # HORIZONTAL
@@ -1177,15 +1082,34 @@ def integral(od, varNameList=None, axesList=None, aliased = True):
                         foundZ   = True
                         continue 
 
-        # Compute integral
-        Int = (Int * delta).sum(dims2sum)
-        ints['I('+varNameOUT+')'+''.join(suf)] = Int
-        if 'units' in attrs:
-            Int.attrs['units'] = attrs['units'] + '*' + '*'.join(units)
-        else:
-            Int.attrs['units'] = '*'.join(units)
+        if operation is 'integral':
+            # Compute integral
+            Int = (Int * delta).sum(dims2sum)
+            to_return['I('+varNameOUT+')'+''.join(suf)] = Int
+            if 'units' in attrs:
+                Int.attrs['units'] = attrs['units'] + '*' + '*'.join(units)
+            else:
+                Int.attrs['units'] = '*'.join(units)
+            
+        elif operation is 'weighted_mean':
+            
+            # Compute weighted mean
+            wMean    = Int
+            weight   = delta 
+            dims2ave = list(delta.dims)
+            _, weight = _xr.broadcast(wMean, weight) # Keep dimensions in the right order
+            weight = weight.where(~wMean.isnull())
+            wMean = ((wMean * weight).sum(dims2ave)) / (weight.sum(dims2ave))
+
+            # Store wMean
+            wMean.attrs = attrs
+            to_return['w_mean_'+varNameOUT] = wMean
+            if storeWeights is True:
+                weight.attrs['long_name']   = 'Weights for average'
+                weight.attrs['units']       = '*'.join(units)
+                to_return['weight_'+varNameOUT] = weight
     
-    return _xr.Dataset(ints, attrs=od.dataset.attrs) 
+    return _xr.Dataset(to_return, attrs=od.dataset.attrs) 
     
     
     
@@ -1223,9 +1147,8 @@ def potential_density_anomaly(od):
     utils.densmdjwf
     """
     
-    # Check input
-    if not isinstance(od, _ospy.OceanDataset):
-        raise TypeError('`od` must be OceanDataset')
+    # Check parameters
+    _check_instance({'od': od}, ' _ospy.OceanDataset')
         
     # Parameters
     paramsList = ['eq_state']
@@ -1282,9 +1205,8 @@ def Brunt_Vaisala_frequency(od):
     gradient
     """
     
-    # Check input
-    if not isinstance(od, _ospy.OceanDataset):
-        raise TypeError('`od` must be OceanDataset')
+    # Check parameters
+    _check_instance({'od': od}, ' _ospy.OceanDataset')
         
     # Add missing variables
     varList = ['Sigma0']
@@ -1336,9 +1258,8 @@ def vertical_relative_vorticity(od):
     curl
     """
     
-    # Check input
-    if not isinstance(od, _ospy.OceanDataset):
-        raise TypeError('`od` must be OceanDataset')
+    # Check parameters
+    _check_instance({'od': od}, ' _ospy.OceanDataset')
         
     # Message
     print('Computing vertical component of relative vorticity.')
@@ -1383,9 +1304,8 @@ def relative_vorticity(od):
     curl
     """
     
-    # Check input
-    if not isinstance(od, _ospy.OceanDataset):
-        raise TypeError('`od` must be OceanDataset')
+    # Check parameters
+    _check_instance({'od': od}, ' _ospy.OceanDataset')
         
     # Message
     print('Computing relative vorticity')
@@ -1428,9 +1348,8 @@ def kinetic_energy(od):
     MITgcm: https://mitgcm.readthedocs.io/en/latest/algorithm/algorithm.html#kinetic-energy
     """
     
-    # Check input
-    if not isinstance(od, _ospy.OceanDataset):
-        raise TypeError('`od` must be OceanDataset')
+    # Check parameters
+    _check_instance({'od': od}, ' _ospy.OceanDataset')
      
     # Add missing variables
     varList = ['U', 'V']
@@ -1513,9 +1432,8 @@ def eddy_kinetic_energy(od):
     MITgcm: https://mitgcm.readthedocs.io/en/latest/algorithm/algorithm.html#kinetic-energy
     """
     
-    # Check input
-    if not isinstance(od, _ospy.OceanDataset):
-        raise TypeError('`od` must be OceanDataset')
+    # Check parameters
+    _check_instance({'od': od}, ' _ospy.OceanDataset')
      
     # Add missing variables
     varList = ['U', 'V']
@@ -1603,9 +1521,8 @@ def horizontal_divergence_velocity(od):
     divergence
     """
     
-    # Check input
-    if not isinstance(od, _ospy.OceanDataset):
-        raise TypeError('`od` must be OceanDataset')
+    # Check parameters
+    _check_instance({'od': od}, ' _ospy.OceanDataset')
         
     # Message
     print('Computing horizontal divergence of the velocity field.')
@@ -1646,9 +1563,8 @@ def shear_strain(od):
     curl
     """
     
-    # Check input
-    if not isinstance(od, _ospy.OceanDataset):
-        raise TypeError('`od` must be OceanDataset')
+    # Check parameters
+    _check_instance({'od': od}, ' _ospy.OceanDataset')
     
     # Add missing variables
     varList = ['rAz', 'dyC', 'dxC', 'U', 'V']
@@ -1702,9 +1618,8 @@ def normal_strain(od):
     divergence
     """
     
-    # Check input
-    if not isinstance(od, _ospy.OceanDataset):
-        raise TypeError('`od` must be OceanDataset')
+    # Check parameters
+    _check_instance({'od': od}, ' _ospy.OceanDataset')
         
     # Message
     print('Computing normal component of strain.')
@@ -1750,9 +1665,8 @@ def Okubo_Weiss_parameter(od):
     vertical_relative_vorticity
     """
     
-    # Check input
-    if not isinstance(od, _ospy.OceanDataset):
-        raise TypeError('`od` must be OceanDataset')
+    # Check parameters
+    _check_instance({'od': od}, ' _ospy.OceanDataset')
         
     # Add missing variables
     varList = ['momVort3', 's_strain', 'n_strain']
@@ -1819,9 +1733,8 @@ def Ertel_potential_vorticity(od, full=True):
     utils.Coriolis_parameter
     """
     
-    # Check input
-    if not isinstance(od, _ospy.OceanDataset):
-        raise TypeError('`od` must be OceanDataset')
+    # Check parameters
+    _check_instance({'od': od}, ' _ospy.OceanDataset')
     if not isinstance(full, bool):
         raise TypeError('`full` must be bool')
         
@@ -1915,9 +1828,8 @@ def mooring_horizontal_volume_transport(od):
     subsample.mooring_array
     """
     
-    # Check input
-    if not isinstance(od, _ospy.OceanDataset):
-        raise TypeError('`od` must be OceanDataset')
+    # Check parameters
+    _check_instance({'od': od}, ' _ospy.OceanDataset')
         
     if 'mooring' not in od._ds.dims:
         raise ValueError('oceadatasets must be subsampled using `subsample.mooring_array`')
@@ -2100,9 +2012,8 @@ def geographical_aligned_velocities(od):
         | V_merid: meridional velocity 
     """
     
-    # Check input
-    if not isinstance(od, _ospy.OceanDataset):
-        raise TypeError('`od` must be OceanDataset')
+    # Check parameters
+    _check_instance({'od': od}, ' _ospy.OceanDataset')
         
     # Add missing variables
     varList = ['U', 'V', 'AngleCS', 'AngleSN']
@@ -2162,9 +2073,8 @@ def survey_aligned_velocities(od):
         | ort_Vel: Velocity component orthogonal to survey
     """
     
-    # Check input
-    if not isinstance(od, _ospy.OceanDataset):
-        raise TypeError('`od` must be OceanDataset')
+    # Check parameters
+    _check_instance({'od': od}, ' _ospy.OceanDataset')
         
     if 'station' not in od._ds.dims:
         raise ValueError('oceadatasets must be subsampled using `subsample.survey_stations`')
@@ -2280,9 +2190,8 @@ def heat_budget(od):
     .. [AHPM17] Almansi, M., T.W. Haine, R.S. Pickart, M.G. Magaldi, R. Gelderloos, and D. Mastropole, 2017: High-Frequency Variability in the Circulation and Hydrography of the Denmark Strait Overflow from a High-Resolution Numerical Model. J. Phys. Oceanogr., 47, 2999–3013, https://doi.org/10.1175/JPO-D-17-0129.1
     """
   
-    # Check input
-    if not isinstance(od, _ospy.OceanDataset):
-        raise TypeError('`od` must be OceanDataset')
+    # Check parameters
+    _check_instance({'od': od}, ' _ospy.OceanDataset')
         
     # Add missing variables
     varList = ['Temp', 'Eta', 'Depth', 'ADVx_TH', 'ADVy_TH', 'ADVr_TH', 'DFrI_TH', 'KPPg_TH', 'TFLUX', 'oceQsw_AVG', 
@@ -2413,9 +2322,8 @@ def salt_budget(od):
     .. [AHPM17] Almansi, M., T.W. Haine, R.S. Pickart, M.G. Magaldi, R. Gelderloos, and D. Mastropole, 2017: High-Frequency Variability in the Circulation and Hydrography of the Denmark Strait Overflow from a High-Resolution Numerical Model. J. Phys. Oceanogr., 47, 2999–3013, https://doi.org/10.1175/JPO-D-17-0129.1
     """
   
-    # Check input
-    if not isinstance(od, _ospy.OceanDataset):
-        raise TypeError('`od` must be OceanDataset')
+    # Check parameters
+    _check_instance({'od': od}, ' _ospy.OceanDataset')
         
     # Add missing variables
     varList = ['S', 'Eta', 'Depth', 'ADVx_SLT', 'ADVy_SLT', 'ADVr_SLT', 'DFrI_SLT', 'KPPg_SLT', 'SFLUX', 'oceSPtnd', 
@@ -2498,6 +2406,20 @@ def salt_budget(od):
     ds['forcS'].attrs['OceanSpy_parameters'] = str(params2use)
     
     return _ospy.OceanDataset(ds).dataset
+
+
+
+
+
+# Handle aliases
+def _handle_aliased(od, aliased, varNameList):
+    if aliased:
+        varNameListIN = _rename_aliased(od, varNameList)
+    else:
+        varNameListIN = varNameList
+    varNameListOUT = varNameList
+    return varNameListIN, varNameListOUT
+
 
 
 class _computeMethdos(object):

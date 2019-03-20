@@ -12,7 +12,7 @@ import oceanspy  as _ospy
 import functools as _functools
 
 # From OceanSpy
-from . import utils as _utils
+from . import utils   as _utils
 from . import compute as _compute
 
 # Recommended dependencies
