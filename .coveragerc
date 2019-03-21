@@ -12,3 +12,5 @@ omit = oceanspy/tests/*
        oceanspy/__init__.py
        oceanspy/open_oceandataset.py
        oceanspy/utils.py
+       oceanspy/plot.py
+	   oceanspy/animate.py
