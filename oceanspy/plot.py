@@ -932,8 +932,6 @@ def _check_mean_and_int_axes(od, meanAxes, intAxes, exclude):
         axis_error = [axis for axis in meanAxes if axis not in od.grid_coords]
         if len(axis_error)!=0:
             raise ValueError('{} are not in od.grid_coords and can not be averaged'.format(axis_error))
-        elif 'time' in meanAxes:
-            raise ValueError('`time` can not be in `meanAxes`')
     elif meanAxes is True:
         meanAxes = [coord for coord in od.grid_coords if coord not in exclude]
     else:
@@ -946,8 +944,6 @@ def _check_mean_and_int_axes(od, meanAxes, intAxes, exclude):
         axis_error = [axis for axis in intAxes if axis not in od.grid_coords]
         if len(axis_error)!=0:
             raise ValueError('{} are not in od.grid_coords and can not be averaged'.format(axis_error))
-        elif 'time' in intAxes:
-            raise ValueError('`time` can not be in `intAxes`')
     elif intAxes is True:
         intAxes = [coord for coord in od.grid_coords if coord not in exclude]
     else:

@@ -4,6 +4,9 @@ __pycache__/
 *$py.class
 oceanspy/__pycache__/
 
+# .nfs
+.nfs*
+
 # C extensions
 *.so
 

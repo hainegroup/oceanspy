@@ -23,15 +23,12 @@ from .subsample import _check_instance, _check_list_of_string
 # 7) Add new functions in docs/api.rst
 # 8) Add tests in test_compute_static, test_compute_dynamic, or test_compute_budget
 
-# TODO: weighted_mean should use integral! Rewrite the function avoiding copy and paste. 
 # TODO: add functions to compute dx, dy, dr, rA, ... when not available (maybe add in utils?)
 # TODO: add functions to compute AngleCS and AngleSN when not available (maybe add in utils?)
 #       http://mailman.mitgcm.org/pipermail/mitgcm-support/2014-January/008797.html
 #       https://github.com/dcherian/tools/blob/master/mitgcm/matlab/cs_grid/cubeCalcAngle.m
 # TODO: any time velocities are mutiplied by hfac, we should use mass weighted velocities if available (mass_weighted function?)
-# TODO: add error when function will fail (e.g., divergence of W fails when only one level is available)
 # TODO: compute transport for survey
-# TODO: units for divergence, curl, laplacian
 
 # Hard coded  list of variables outputed by functions
 _FUNC2VARS = {'potential_density_anomaly'     : ['Sigma0'],
@@ -271,22 +268,25 @@ def gradient(od, varNameList, axesList=None, aliased = True):
     grad = {}
     for _, (varName, varNameOUT) in enumerate(zip(varNameListIN, varNameListOUT)):
         
+        # Skip if variable doesn't have axis!
         for axis in axesList:
-            
+            S1 = set(od._ds[varName].dims)
+            S2 = set([dim for dim in od.grid_coords[axis].keys()])
+            if len(S1.intersection(S2))==0: continue
+                
             # Numerator
             dnum = od._grid.diff(od._ds[varName], axis, boundary='fill', fill_value=_np.nan)
 
             # Horizontal gradient
             if axis in ['X', 'Y']:
-                
                 # Select denominator
                 pointList = ['C', 'F', 'G']
-                if   axis=='X': 
+                if axis=='X': 
                     # Add missing variables
                     varList   = ['dxC', 'dxF', 'dxG', 'dxV']
                     od        = _add_missing_variables(od, varList)
                     pointList = pointList+['V']
-                elif axis=='Y': 
+                else: 
                     # Add missing variables
                     varList   = ['dyC', 'dyF', 'dyG', 'dyU']
                     od        = _add_missing_variables(od, varList)
@@ -299,7 +299,7 @@ def gradient(od, varNameList, axesList=None, aliased = True):
 
             # Vertical gradient
             if axis == 'Z':
-
+                    
                 # Add missing variables
                 varList = ['HFacC', 'HFacW', 'HFacS']
                 od = _add_missing_variables(od, varList)
@@ -308,15 +308,21 @@ def gradient(od, varNameList, axesList=None, aliased = True):
                 if set(['X', 'Y']).issubset(dnum.dims):     HFac = od._ds['HFacC']
                 elif set(['Xp1', 'Y']).issubset(dnum.dims): HFac = od._ds['HFacW']
                 elif set(['X', 'Yp1']).issubset(dnum.dims): HFac = od._ds['HFacS']
+                elif set(['Xp1', 'Yp1']).issubset(dnum.dims): 
+                    HFac = od._grid.interp(od._grid.interp(od._ds['HFacC'], 'X', 
+                                                           boundary='extend'), 'Y', boundary='extend')
+                else:
+                    HFac = 1
 
                 # Don't use dr, but compute 
                 for dim in [od._grid.axes[axis].coords[coord].name for coord in od._grid.axes[axis].coords]:
                     if dim in od._ds[varName].dims:
                         dden = od._grid.diff(od._ds[dim], axis, boundary='fill', fill_value=_np.nan)
-                        for coord in od._grid.axes[axis].coords:
-                            if od._grid.axes[axis].coords[coord].name in dden.dims and coord!='center':
-                                HFac = od._grid.interp(HFac, axis, 
-                                                       to=coord, boundary='fill', fill_value=_np.nan)
+                        if HFac is not 1:
+                            for coord in od._grid.axes[axis].coords:
+                                if od._grid.axes[axis].coords[coord].name in dden.dims and coord!='center':
+                                    HFac = od._grid.interp(HFac, axis, 
+                                                           to=coord, boundary='fill', fill_value=_np.nan)
                                 continue
                         # Apply HFac
                         dden = dden * HFac
@@ -324,16 +330,18 @@ def gradient(od, varNameList, axesList=None, aliased = True):
                         
             # Time and vertical sections
             if axis in ['mooring', 'station', 'time']:
+                    
                 if axis in ['mooring', 'station']: 
                     convert_units = 1.E-3
                     add_dist = '_dist'
                 else: 
                     convert_units = _np.timedelta64(1, 's')
                     add_dist = ''
-                    
+
                 if axis in dnum.dims:
                     dden = od._grid.diff(od._ds[axis+'_midp'+add_dist], axis, boundary='fill', fill_value=_np.nan)
-                elif axis+'_midp' in dnum.dims:
+                else:
+                    # midp
                     dden = od._grid.diff(od._ds[axis+add_dist], axis, boundary='fill', fill_value=_np.nan)
                 dden = dden / convert_units
                 
@@ -342,10 +350,7 @@ def gradient(od, varNameList, axesList=None, aliased = True):
             grad[outName] = dnum / dden
             add_units = {'X': ' m', 'Y': ' m', 'Z': ' m', 'time': ' s', 'station': ' m', 'mooring': ' m'}
             if 'units' in od._ds[varName].attrs:
-                if od._ds[varName].attrs!='-':
-                    grad[outName].attrs['units'] = od._ds[varName].attrs['units']+add_units[axis]+'^-1'
-                else:
-                    grad[outName].attrs['units'] = add_units[axis]+'^-1'
+                grad[outName].attrs['units'] = od._ds[varName].attrs['units']+add_units[axis]+'^-1'
                         
             del dnum, dden
             
@@ -426,6 +431,9 @@ def divergence(od, iName=None, jName=None, kName=None, aliased = True):
                      'kName'  : '(str, type(None))',
                      'aliased': 'bool'})
     
+    if iName==jName==kName==None:
+        raise ValueError('At least 1 component must be provided.')
+    
     # Message
     print('Computing divergence.')
     
@@ -435,6 +443,7 @@ def divergence(od, iName=None, jName=None, kName=None, aliased = True):
         
         # Handle aliases
         NameIN, NameOUT = _handle_aliased(od, aliased, iName)
+        _check_ijk_components(od, iName=NameIN)
         
         # Add missing variables
         varList = ['HFacC', 'rA', 'dyG', 'HFacW', NameIN]
@@ -447,14 +456,13 @@ def divergence(od, iName=None, jName=None, kName=None, aliased = True):
         
         # Units
         if 'units' in od._ds[NameIN].attrs:
-            if od._ds[NameIN].attrs!='-':
-                div[pref+NameOUT+suf].attrs['units'] = od._ds[NameIN].attrs['units']+' m^-1'
-            else:
-                div[pref+NameOUT+suf].attrs['units'] = 'm^-1'
+            div[pref+NameOUT+suf].attrs['units'] = od._ds[NameIN].attrs['units']+' m^-1'
                 
     if jName is not None:
+        
         # Handle aliases
         NameIN, NameOUT = _handle_aliased(od, aliased, jName)
+        _check_ijk_components(od, jName=NameIN)
         
         # Add missing variables
         varList = ['HFacC', 'rA', 'dxG', 'HFacS', NameIN]
@@ -466,14 +474,13 @@ def divergence(od, iName=None, jName=None, kName=None, aliased = True):
                                 (od._ds['HFacC'] * od._ds['rA']))
         # Units
         if 'units' in od._ds[NameIN].attrs:
-            if od._ds[NameIN].attrs!='-':
-                div[pref+NameOUT+suf].attrs['units'] = od._ds[NameIN].attrs['units']+' m^-1'
-            else:
-                div[pref+NameOUT+suf].attrs['units'] = 'm^-1'
+            div[pref+NameOUT+suf].attrs['units'] = od._ds[NameIN].attrs['units']+' m^-1'
                 
     if kName is not None:
+        
         # Handle aliases
         NameIN, NameOUT = _handle_aliased(od, aliased, kName)
+        _check_ijk_components(od, kName=NameIN)
         
         # Add missing variables
         od = _add_missing_variables(od, NameIN)
@@ -482,6 +489,10 @@ def divergence(od, iName=None, jName=None, kName=None, aliased = True):
         suf = '_dZ'
         div[pref+NameOUT+suf] = gradient(od, varNameList = NameIN, axesList=suf[-1], 
                                          aliased=False)[pref+NameIN+suf]
+        
+        # Units
+        if 'units' in od._ds[NameIN].attrs:
+            div[pref+NameOUT+suf].attrs['units'] = od._ds[NameIN].attrs['units']+' m^-1'
                 
     return _xr.Dataset(div, attrs=od.dataset.attrs)
                                                        
@@ -581,6 +592,7 @@ def curl(od, iName=None, jName=None, kName=None, aliased = True):
         # Handle aliases
         iNameIN, iNameOUT = _handle_aliased(od, aliased, iName)
         jNameIN, jNameOUT = _handle_aliased(od, aliased, jName)
+        _check_ijk_components(od, iName=iNameIN, jName=jNameIN)
     
         # Add missing variables
         varList = ['rAz', 'dyC', 'dxC', iNameIN, jNameIN]
@@ -597,16 +609,14 @@ def curl(od, iName=None, jName=None, kName=None, aliased = True):
         if ('units' in od._ds[iNameIN].attrs and 
             'units' in od._ds[jNameIN].attrs and
             od._ds[iNameIN].attrs['units']==od._ds[jNameIN].attrs['units']):
-            if od._ds[iNameIN].attrs!='-':
-                crl[Name].attrs['units'] = od._ds[iNameIN].attrs['units']+' m^-1'
-            else:
-                crl[Name].attrs['units'] = 'm^-1'
+            crl[Name].attrs['units'] = od._ds[iNameIN].attrs['units']+' m^-1'
                          
     if jName is not None and kName is not None:
         
         # Handle aliases
         jNameIN, jNameOUT = _handle_aliased(od, aliased, jName)
         kNameIN, kNameOUT = _handle_aliased(od, aliased, kName)
+        _check_ijk_components(od, jName=jNameIN, kName=kNameIN)
         
         # Add missing variables
         varList = [jNameIN, kNameIN]
@@ -621,16 +631,14 @@ def curl(od, iName=None, jName=None, kName=None, aliased = True):
         if ('units' in od._ds[jNameIN].attrs and 
             'units' in od._ds[kNameIN].attrs and
             od._ds[jNameIN].attrs['units']==od._ds[kNameIN].attrs['units']):
-            if od._ds[jNameIN].attrs!='-':
-                crl[Name].attrs['units'] = od._ds[jNameIN].attrs['units']+' m^-1'
-            else:
-                crl[Name].attrs['units'] = 'm^-1'
+            crl[Name].attrs['units'] = od._ds[jNameIN].attrs['units']+' m^-1'
                 
     if kName is not None and iName is not None:
         
         # Handle aliases
         iNameIN, iNameOUT = _handle_aliased(od, aliased, iName)
         kNameIN, kNameOUT = _handle_aliased(od, aliased, kName)
+        _check_ijk_components(od, iName=iNameIN, kName=kNameIN)
         
         # Add missing variables
         varList = [iNameIN, kNameIN]
@@ -645,10 +653,7 @@ def curl(od, iName=None, jName=None, kName=None, aliased = True):
         if ('units' in od._ds[iNameIN].attrs and 
             'units' in od._ds[kNameIN].attrs and
             od._ds[iNameIN].attrs['units']==od._ds[kNameIN].attrs['units']):
-            if od._ds[iNameIN].attrs!='-':
-                crl[Name].attrs['units'] = od._ds[iNameIN].attrs['units']+' m^-1'
-            else:
-                crl[Name].attrs['units'] = 'm^-1'
+            crl[Name].attrs['units'] = od._ds[iNameIN].attrs['units']+' m^-1'
         
     return _xr.Dataset(crl, attrs=od.dataset.attrs)           
 
@@ -1081,7 +1086,9 @@ def _integral_and_mean(od, operation='integral', varNameList=None, axesList=None
                         units    = units+ ['m']
                         foundZ   = True
                         continue 
-
+        
+        dims2sum = list(set(dims2sum))
+        dims2ave = dims2sum
         if operation is 'integral':
             # Compute integral
             Int = (Int * delta).sum(dims2sum)
@@ -1096,7 +1103,6 @@ def _integral_and_mean(od, operation='integral', varNameList=None, axesList=None
             # Compute weighted mean
             wMean    = Int
             weight   = delta 
-            dims2ave = list(delta.dims)
             _, weight = _xr.broadcast(wMean, weight) # Keep dimensions in the right order
             weight = weight.where(~wMean.isnull())
             wMean = ((wMean * weight).sum(dims2ave)) / (weight.sum(dims2ave))
@@ -1389,7 +1395,7 @@ def kinetic_energy(od):
         W = od._ds['W']
         
         # Interpolate vertical velocity
-        W = grid.interp(W, 'Z')
+        W = grid.interp(W, 'Z', to='center', boundary='fill', fill_value=_np.nan)
         
         # Sum squared values
         sum2 = sum2 + eps_nh * _np.power(W, 2)
@@ -1480,7 +1486,7 @@ def eddy_kinetic_energy(od):
         W = W - W.mean('time')
         
         # Interpolate vertical velocity
-        W = grid.interp(W, 'Z')
+        W = grid.interp(W, 'Z', to='center', boundary='fill', fill_value=_np.nan)
         
         # Sum squared values
         sum2 = sum2 + eps_nh * _np.power(W, 2)
@@ -1734,9 +1740,11 @@ def Ertel_potential_vorticity(od, full=True):
     """
     
     # Check parameters
-    _check_instance({'od': od}, ' _ospy.OceanDataset')
-    if not isinstance(full, bool):
-        raise TypeError('`full` must be bool')
+    _check_instance({'od'  : od,
+                     'full': full,}, 
+                    {'od'  : '_ospy.OceanDataset',
+                     'full': 'bool'})
+
         
     # Add missing variables
     varList = ['fCoriG', 'momVort3', 'N2']
@@ -2133,13 +2141,13 @@ def survey_aligned_velocities(od):
     tan_Vel =  U*_np.cos(rot_ang_rad) + V*_np.sin(rot_ang_rad)
     tan_Vel.attrs['long_name'] = 'Velocity component tangential to survey'
     if 'units' in U.attrs: units = U.attrs['units']
-    else:                  units = ''
+    else:                  units = ' '
     tan_Vel.attrs['units'] = units + ' (+: flow towards station indexed with higher number)'
     
     ort_Vel =  V*_np.cos(rot_ang_rad) - U*_np.sin(rot_ang_rad)
     ort_Vel.attrs['long_name'] = 'Velocity component orthogonal to survey'
     if 'units' in V.attrs: units = V.attrs['units']
-    else:                  units = ''
+    else:                  units = ' '
     ort_Vel.attrs['units'] = units + ' (+: flow keeps station indexed with higher number to the right'
     
     # Create ds
@@ -2421,7 +2429,13 @@ def _handle_aliased(od, aliased, varNameList):
     return varNameListIN, varNameListOUT
 
 
-
+def _check_ijk_components(od, iName=None, jName=None, kName=None):
+    # Check dimensions
+    ds = od._ds
+    for _, (Name, dim) in enumerate(zip([iName, jName, kName], ['Xp1', 'Yp1', 'Zl'])):
+        if Name is not None and dim not in ds[Name].dims:
+            raise ValueError('[{}] must have dimension [{}]'.format(Name, dim))
+                
 class _computeMethdos(object):
     """
     Enables use of oceanspy.compute functions as attributes on a OceanDataset.
@@ -2504,6 +2518,11 @@ class _computeMethdos(object):
     @_functools.wraps(normal_strain)
     def normal_strain(self, overwrite=False, **kwargs):
         ds = normal_strain(self._od, **kwargs)
+        return self._od.merge_into_oceandataset(ds, overwrite=overwrite)
+    
+    @_functools.wraps(Okubo_Weiss_parameter)
+    def Okubo_Weiss_parameter(self, overwrite=False, **kwargs):
+        ds = Okubo_Weiss_parameter(self._od, **kwargs)
         return self._od.merge_into_oceandataset(ds, overwrite=overwrite)
     
     @_functools.wraps(Ertel_potential_vorticity)

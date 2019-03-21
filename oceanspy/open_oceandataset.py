@@ -116,7 +116,7 @@ def get_started():
     for varName in ['Depth']:
         ds[varName].attrs['units'] = 'm'
     for varName in ['HFacC', 'HFacW', 'HFacS']:
-        ds[varName].attrs['units'] = '-'
+        ds[varName].attrs['units'] = ' '
     for varName in ['S']:
         ds[varName].attrs['units'] = 'psu'
     for varName in ['phiHyd', 'phiHydLow']:
@@ -255,7 +255,7 @@ def EGshelfIIseas2km_ERAI(daily     = False,
     for varName in ['Depth']:
         ds[varName].attrs['units'] = 'm'
     for varName in ['HFacC', 'HFacW', 'HFacS']:
-        ds[varName].attrs['units'] = '-'
+        ds[varName].attrs['units'] = ' '
     for varName in ['S']:
         ds[varName].attrs['units'] = 'psu'
     for varName in ['phiHyd', 'phiHydLow']:
@@ -399,7 +399,7 @@ def EGshelfIIseas2km_ASR(cropped   = False,
     for varName in ['Depth']:
         ds[varName].attrs['units'] = 'm'
     for varName in ['HFacC', 'HFacW', 'HFacS']:
-        ds[varName].attrs['units'] = '-'
+        ds[varName].attrs['units'] = ' '
     for varName in ['S']:
         ds[varName].attrs['units'] = 'psu'
     for varName in ['phiHyd', 'phiHydLow']:
@@ -514,11 +514,11 @@ def exp_Arctic_Control(gridpath  = '/home/idies/workspace/OceanCirculation/exp_A
     for varName in ['Depth']:
         ds[varName].attrs['units'] = 'm'
     for varName in ['HFacC', 'HFacW', 'HFacS']:
-        ds[varName].attrs['units'] = '-'
+        ds[varName].attrs['units'] = ' '
     for varName in ['S']:
         ds[varName].attrs['units'] = 'psu'
     for varName in ['AngleCS', 'AngleSN']:
-        ds[varName].attrs['units'] = '-'
+        ds[varName].attrs['units'] = ' '
     
     # Consistent chunkink
     chunks = {**ds.sizes,
@@ -647,7 +647,7 @@ def EGshelfSJsec500m(Hydrostatic = True,
     
     # Add missing units
     for varName in ['hFacC', 'hFacW', 'hFacS', 'iter']:
-        ds[varName].attrs['units'] = '-'
+        ds[varName].attrs['units'] = ' '
         
     # Consistent chunkink
     chunks = {**ds.sizes,
@@ -727,7 +727,7 @@ def KangerFjord(resultpath  = '/home/idies/workspace/OceanCirculation/fromNeil/'
     
     # Add missing units
     for varName in ['hFacC', 'hFacW', 'hFacS', 'iter']:
-        ds[varName].attrs['units'] = '-'
+        ds[varName].attrs['units'] = ' '
         
     # Consistent chunkink
     chunks = {**ds.sizes,
