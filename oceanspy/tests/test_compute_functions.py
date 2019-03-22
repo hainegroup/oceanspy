@@ -23,6 +23,24 @@ alias_od = OceanDataset(ds).set_aliases(aliases)
 # Budgets
 od_bdg = open_oceandataset.from_netcdf('./oceanspy/tests/Data/budgets.nc')
 
+
+
+@pytest.mark.parametrize("od_in", [od])
+def test_missing_horizontal_spacing(od_in):
+    
+    # Compute
+    od_in = od_in.subsample.cutout(varList = ['dxC', 'dxG', 'dyC', 'dyG'])
+    ds = missing_horizontal_spacing(od_in)
+    for varName in ds.variables:
+        var   = ds[varName]
+        check = od.dataset[varName]
+        mask  = xr.where(np.logical_or(check.isnull(), var.isnull()), 0, 1)
+        assert_allclose(check.where(mask, drop=True).values, var.where(mask, drop=True).values, equal_nan=False) 
+    
+    # Test shortcut
+    od_in.compute.missing_horizontal_spacing()
+
+
 @pytest.mark.parametrize("od_in", [od, alias_od])
 @pytest.mark.parametrize("eq_state", AVAILABLE_PARAMETERS['eq_state'])
 def test_potential_density_anomaly(od_in, eq_state):

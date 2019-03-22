@@ -468,7 +468,7 @@ def cutout(od,
         od = _compute._add_missing_variables(od, varList)
         
         # Drop useless
-        od._ds = od._ds.drop([v for v in od._ds.data_vars if v not in varList])
+        od._ds  = od._ds.drop([v for v in od._ds.data_vars if v not in varList])
         
     return od
 

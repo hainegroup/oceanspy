@@ -23,20 +23,17 @@ from .subsample import _check_instance, _check_list_of_string
 # 7) Add new functions in docs/api.rst
 # 8) Add tests in test_compute_static, test_compute_dynamic, or test_compute_budget
 
-# TODO: add functions to compute dx, dy, dr, rA, ... when not available (maybe add in utils?)
-# TODO: add functions to compute AngleCS and AngleSN when not available (maybe add in utils?)
-#       http://mailman.mitgcm.org/pipermail/mitgcm-support/2014-January/008797.html
-#       https://github.com/dcherian/tools/blob/master/mitgcm/matlab/cs_grid/cubeCalcAngle.m
+
 # TODO: any time velocities are mutiplied by hfac, we should use mass weighted velocities if available (mass_weighted function?)
 # TODO: compute transport for survey
 
 # Hard coded  list of variables outputed by functions
 _FUNC2VARS = {'potential_density_anomaly'     : ['Sigma0'],
               'Brunt_Vaisala_frequency'       : ['N2'],
-              'vertical_relative_vorticity'   : ['momVort3'],
               'relative_vorticity'            : ['momVort1', 
                                                  'momVort2', 
                                                  'momVort3'],
+              'vertical_relative_vorticity'   : ['momVort3'], # Keep it below relative vorticity.
               'kinetic_energy'                : ['KE'],
               'eddy_kinetic_energy'           : ['EKE'],
               'horizontal_divergence_velocity': ['hor_div_vel'],
@@ -71,7 +68,11 @@ _FUNC2VARS = {'potential_density_anomaly'     : ['Sigma0'],
                                                  'V_merid'],
              'survey_aligned_velocities'      : ['rot_ang_Vel', 
                                                  'tan_Vel', 
-                                                 'ort_Vel']}
+                                                 'ort_Vel'],
+             'missing_horizontal_spacing'     : ['dxF', 
+                                                 'dxV', 
+                                                 'dyF', 
+                                                 'dyU']}
     
     
 def _add_missing_variables(od, varList, FUNC2VARS = _FUNC2VARS):
@@ -108,7 +109,10 @@ def _add_missing_variables(od, varList, FUNC2VARS = _FUNC2VARS):
     var_error = [var for var in varList if var not in VAR2FUNC]
     if len(var_error)!=0:
         raise ValueError('These variables are not available '
-                         'and can not be computed: {}'.format(var_error))
+                         'and can not be computed: {}'
+                         '\nIf you think that OceanSpy should be able to compute them, '
+                         'please open an issue on GitHub:'
+                         '\n https://github.com/malmans2/oceanspy/issues'.format(var_error))
             
     # Compute new variables
     funcList = list(set([VAR2FUNC[var] for var in varList if var in VAR2FUNC]))
@@ -309,8 +313,8 @@ def gradient(od, varNameList, axesList=None, aliased = True):
                 elif set(['Xp1', 'Y']).issubset(dnum.dims): HFac = od._ds['HFacW']
                 elif set(['X', 'Yp1']).issubset(dnum.dims): HFac = od._ds['HFacS']
                 elif set(['Xp1', 'Yp1']).issubset(dnum.dims): 
-                    HFac = od._grid.interp(od._grid.interp(od._ds['HFacC'], 'X', 
-                                                           boundary='extend'), 'Y', boundary='extend')
+                    HFac = od._grid.interp(od._grid.interp(od._ds['HFacC'], 'X', boundary='extend'), 
+                                                                            'Y', boundary='extend')
                 else:
                     HFac = 1
 
@@ -451,8 +455,9 @@ def divergence(od, iName=None, jName=None, kName=None, aliased = True):
         
         # Add div
         suf = '_dX'
-        div[pref+NameOUT+suf] = (od._grid.diff(od._ds[NameIN]*od._ds['HFacW']*od._ds['dyG'], suf[-1]) / 
-                                (od._ds['HFacC'] * od._ds['rA']))
+        div[pref+NameOUT+suf] = (od._grid.diff(od._ds[NameIN]*od._ds['HFacW']*od._ds['dyG'], suf[-1],
+                                               boundary='fill', fill_value=_np.nan) / 
+                                 (od._ds['HFacC'] * od._ds['rA']))
         
         # Units
         if 'units' in od._ds[NameIN].attrs:
@@ -470,8 +475,9 @@ def divergence(od, iName=None, jName=None, kName=None, aliased = True):
         
         # Add div
         suf = '_dY'
-        div[pref+NameOUT+suf] = (od._grid.diff(od._ds[NameIN]*od._ds['HFacS']*od._ds['dxG'], suf[-1]) / 
-                                (od._ds['HFacC'] * od._ds['rA']))
+        div[pref+NameOUT+suf] = (od._grid.diff(od._ds[NameIN]*od._ds['HFacS']*od._ds['dxG'], suf[-1],
+                                               boundary='fill', fill_value=_np.nan) / 
+                                 (od._ds['HFacC'] * od._ds['rA']))
         # Units
         if 'units' in od._ds[NameIN].attrs:
             div[pref+NameOUT+suf].attrs['units'] = od._ds[NameIN].attrs['units']+' m^-1'
@@ -1050,7 +1056,8 @@ def _integral_and_mean(od, operation='integral', varNameList=None, axesList=None
             elif set(['Xp1', 'Y']  ).issubset(Int.dims): HFac = od._ds['HFacW']
             elif set(['X'  , 'Yp1']).issubset(Int.dims): HFac = od._ds['HFacS']
             elif set(['Xp1', 'Yp1']).issubset(Int.dims): 
-                HFac = od._grid.interp(od._grid.interp(od._ds['HFacC'], 'X', boundary='extend'), 'Y', boundary='extend')
+                HFac = od._grid.interp(od._grid.interp(od._ds['HFacC'], 'X', boundary='extend'), 
+                                                                        'Y', boundary='extend')
             else: 
                 HFac = None
 
@@ -1102,15 +1109,16 @@ def _integral_and_mean(od, operation='integral', varNameList=None, axesList=None
             
             # Compute weighted mean
             wMean    = Int
-            weight   = delta 
-            _, weight = _xr.broadcast(wMean, weight) # Keep dimensions in the right order
-            weight = weight.where(~wMean.isnull())
-            wMean = ((wMean * weight).sum(dims2ave)) / (weight.sum(dims2ave))
+            weight   = delta
+            if weight is not 1:
+                _, weight = _xr.broadcast(wMean, weight) # Keep dimensions in the right order
+                weight = weight.where(~wMean.isnull())
+                wMean = ((wMean * weight).sum(dims2ave)) / (weight.sum(dims2ave))
 
             # Store wMean
             wMean.attrs = attrs
             to_return['w_mean_'+varNameOUT] = wMean
-            if storeWeights is True:
+            if storeWeights is True and weight is not 1:
                 weight.attrs['long_name']   = 'Weights for average'
                 weight.attrs['units']       = '*'.join(units)
                 to_return['weight_'+varNameOUT] = weight
@@ -1379,8 +1387,8 @@ def kinetic_energy(od):
     print('Computing kinetic energy using the following parameters: {}.'.format(params2use))
     
     # Interpolate horizontal velocities
-    U = grid.interp(U, 'X')
-    V = grid.interp(V, 'Y')
+    U = grid.interp(U, 'X', boundary='fill', fill_value=_np.nan)
+    V = grid.interp(V, 'Y', boundary='fill', fill_value=_np.nan)
     
     # Sum squared values
     sum2 = _np.power(U, 2) + _np.power(V, 2)
@@ -1467,8 +1475,8 @@ def eddy_kinetic_energy(od):
     print('Computing kinetic energy using the following parameters: {}.'.format(params2use))
     
     # Interpolate horizontal velocities
-    U = grid.interp(U, 'X')
-    V = grid.interp(V, 'Y')
+    U = grid.interp(U, 'X', boundary='fill', fill_value=_np.nan)
+    V = grid.interp(V, 'Y', boundary='fill', fill_value=_np.nan)
     
     # Sum squared values
     sum2 = _np.power(U, 2) + _np.power(V, 2)
@@ -1690,8 +1698,10 @@ def Okubo_Weiss_parameter(od):
     print('Computing Okubo-Weiss parameter.')
     
     # Interpolate to C grid points
-    momVort3 = grid.interp(grid.interp(momVort3, 'X'), 'Y')
-    s_strain = grid.interp(grid.interp(s_strain, 'X'), 'Y')
+    momVort3 = grid.interp(grid.interp(momVort3, 'X', boundary='fill', fill_value=_np.nan), 
+                                                 'Y', boundary='fill', fill_value=_np.nan)
+    s_strain = grid.interp(grid.interp(s_strain, 'X', boundary='fill', fill_value=_np.nan), 
+                                                 'Y', boundary='fill', fill_value=_np.nan)
     
     # Create DataArray
     Okubo_Weiss = _np.square(s_strain) + _np.square(n_strain) - _np.square(momVort3)
@@ -1780,13 +1790,14 @@ def Ertel_potential_vorticity(od, full=True):
     Sigma0_grads = gradient(od, varNameList='Sigma0', axesList=['X', 'Y'], aliased = False)
     
     # Interpolate fields
-    fpluszeta  = grid.interp(grid.interp(momVort3 + fCoriG, 'X'), 'Y')
+    fpluszeta  = grid.interp(grid.interp(momVort3 + fCoriG, 'X', boundary='fill', fill_value=_np.nan), 
+                                                            'Y', boundary='fill', fill_value=_np.nan)
     N2         = grid.interp(N2, 'Z', to='center', boundary='fill', fill_value=_np.nan)
     if full:
         momVort1   = grid.interp(grid.interp(momVort1, 'Y'), 'Z', to='center', boundary='fill', fill_value=_np.nan)
         momVort2   = grid.interp(grid.interp(momVort2, 'X'), 'Z', to='center', boundary='fill', fill_value=_np.nan)
-        dSigma0_dX = grid.interp(Sigma0_grads['dSigma0_dX'], 'X')  
-        dSigma0_dY = grid.interp(Sigma0_grads['dSigma0_dY'], 'Y')  
+        dSigma0_dX = grid.interp(Sigma0_grads['dSigma0_dX'], 'X', boundary='fill', fill_value=_np.nan)  
+        dSigma0_dY = grid.interp(Sigma0_grads['dSigma0_dY'], 'Y', boundary='fill', fill_value=_np.nan)  
         _, e = _utils.Coriolis_parameter(YC, omega)
     
     # Create DataArray
@@ -2040,8 +2051,8 @@ def geographical_aligned_velocities(od):
     grid = od._grid
     
     # Move to C grid
-    U = grid.interp(U, 'X')
-    V = grid.interp(V, 'Y')
+    U = grid.interp(U, 'X', boundary='fill', fill_value=_np.nan)
+    V = grid.interp(V, 'Y', boundary='fill', fill_value=_np.nan)
     
     # Compute velocities
     U_zonal = U * AngleCS - V * AngleSN
@@ -2256,7 +2267,8 @@ def heat_budget(od):
 
     
     # Horizontal convergence
-    ds['adv_hConvH'] = -(grid.diff(ADVx_TH.where(HFacW!=0),'X') +  grid.diff(ADVy_TH.where(HFacS!=0),'Y'))/CellVol
+    ds['adv_hConvH'] = -(  grid.diff(ADVx_TH.where(HFacW!=0),'X', boundary='fill', fill_value=_np.nan) 
+                         + grid.diff(ADVy_TH.where(HFacS!=0),'Y', boundary='fill', fill_value=_np.nan))/CellVol
     ds['adv_hConvH'].attrs['units']     = units
     ds['adv_hConvH'].attrs['long_name'] = 'Heat horizontal advective convergence'
     ds['adv_hConvH'].attrs['OceanSpy_parameters'] = str(params2use)
@@ -2386,7 +2398,8 @@ def salt_budget(od):
     ds['tendS'].attrs['OceanSpy_parameters'] = str(params2use)
     
     # Horizontal convergence
-    ds['adv_hConvS'] = -(grid.diff(ADVx_SLT.where(HFacW!=0),'X') +  grid.diff(ADVy_SLT.where(HFacS!=0),'Y'))/CellVol
+    ds['adv_hConvS'] = -(grid.diff(ADVx_SLT.where(HFacW!=0),'X', boundary='fill', fill_value=_np.nan) 
+                       + grid.diff(ADVy_SLT.where(HFacS!=0),'Y', boundary='fill', fill_value=_np.nan))/CellVol
     ds['adv_hConvS'].attrs['units']     = units
     ds['adv_hConvS'].attrs['long_name'] = 'Salt horizontal advective convergence'
     ds['adv_hConvS'].attrs['OceanSpy_parameters'] = str(params2use)
@@ -2416,7 +2429,69 @@ def salt_budget(od):
     return _ospy.OceanDataset(ds).dataset
 
 
-
+def missing_horizontal_spacing(od):
+    """
+    Return horizontal spacing computing missing deltas.
+        
+    Parameters
+    ----------
+    od: OceanDataset
+        oceandataset used to compute
+        
+    Returns
+    -------
+    ds: xarray.Dataset
+        | dxF: x cell face separation  
+        | dxV: x v-velocity separation   
+        | dyF: y cell face separation 
+        | dyU: y u-velocity separation  
+    """
+  
+    # Check parameters
+    _check_instance({'od': od}, ' _ospy.OceanDataset')
+        
+    # Add missing variables
+    varList = ['dxC', 'dxG', 'dyC', 'dyG']
+    od = _add_missing_variables(od, varList)
+    
+    # Unpack
+    ds   = od._ds
+    grid = od._grid
+    
+    # Compute
+    deltas = {}
+    for var in [var for var in ['dxF', 'dxV', 'dyF', 'dyU'] if var not in ds.variables]:
+        
+        # Pick dx
+        if 'x' in var:
+            pref = 'dx'
+            axis = 'X'
+        else:
+            pref = 'dy'
+            axis = 'Y'
+        if 'F' in var:
+            suf = 'C'
+        else:
+            suf = 'G'
+            
+        # Interpolate
+        deltas[var] = grid.interp(ds[pref+suf], axis,  boundary='extend')
+        
+        # Add attributes
+        if   'U' in var:
+            add_vel = 'u-velocity'
+        elif 'V' in var:
+            add_vel = 'v-velocity'
+        else:
+            add_vel = 'cell face'
+        deltas[var].attrs['description'] = '{} {} separation'.format(axis.lower(), add_vel)
+        if 'units' in ds[pref+suf].attrs:
+            deltas[var].attrs['units'] = ds[pref+suf].attrs['units']
+    
+    # Create dataset
+    ds = _xr.Dataset(deltas)
+    
+    return _ospy.OceanDataset(ds).dataset
 
 
 # Handle aliases
@@ -2553,4 +2628,9 @@ class _computeMethdos(object):
     @_functools.wraps(salt_budget)
     def salt_budget(self, overwrite=False, **kwargs):
         ds = salt_budget(self._od, **kwargs)
+        return self._od.merge_into_oceandataset(ds, overwrite=overwrite)
+
+    @_functools.wraps(missing_horizontal_spacing)
+    def missing_horizontal_spacing(self, overwrite=False, **kwargs):
+        ds = missing_horizontal_spacing(self._od, **kwargs)
         return self._od.merge_into_oceandataset(ds, overwrite=overwrite)

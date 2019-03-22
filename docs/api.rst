@@ -70,6 +70,8 @@ Shortcuts
    
    OceanDataset.subsample
    OceanDataset.compute
+   OceanDataset.plot
+   OceanDataset.animate
    
    
 
@@ -91,6 +93,7 @@ SciServer
     open_oceandataset.EGshelfIIseas2km_ERAI
     open_oceandataset.EGshelfIIseas2km_ASR
     open_oceandataset.EGshelfSJsec500m
+    open_oceandataset.KangerFjord
    
 Others
 ------
@@ -166,6 +169,7 @@ OceanDataset only
    compute.salt_budget
    compute.geographical_aligned_velocities
    compute.survey_aligned_velocities
+   compute.missing_horizontal_spacing
    
    
    

@@ -988,6 +988,9 @@ class OceanDataset:
                        'Z'    : {'Z': None, 'Zp1': 0.5, 'Zu': 0.5, 'Zl': -0.5},
                        'time' : {'time': -0.5}}
         self = self.set_grid_coords(grid_coords = grid_coords, add_midp=True)
+        self = self.set_aliases({'HFacC': 'hFacC', 
+                                 'HFacW': 'hFacW', 
+                                 'HFacS': 'hFacS'}, overwrite=False)
         
         return self
     

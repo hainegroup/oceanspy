@@ -659,10 +659,7 @@ def EGshelfSJsec500m(Hydrostatic = True,
     od = od.set_name(name).set_description(description)
     if Hydrostatic is False:
         od = od.set_parameters({'eps_nh': 1})
-    od = od.set_aliases({'Temp' : 'T', 
-                         'HFacC': 'hFacC', 
-                         'HFacW': 'hFacW', 
-                         'HFacS': 'hFacS'})
+    od = od.set_aliases({'Temp' : 'T'}, overwrite=False)
     od = od.set_projection('Mercator', 
                            central_longitude=float(od.dataset['X'].mean().values), 
                            min_latitude=float(od.dataset['Y'].min().values), 
@@ -698,7 +695,7 @@ def KangerFjord(resultpath  = '/home/idies/workspace/OceanCirculation/fromNeil/'
     
     # Message
     name = 'KangerFjord'
-    description = 'A realistic numerical model constructed to simulate the oceanic conditions and circulation in a large southeast Greenland fjord (Kangerdlugssuaq) and the adjacent shelf sea region during winter 2007–2008.'
+    description = 'A realistic numerical model constructed to simulate the oceanic conditions and circulation in a large southeast Greenland fjord (Kangerdlugssuaq) and the adjacent shelf sea region during winter 2007–2008. Citation: Fraser et al., 2018 - JGR.'
     print('Opening [{}]:\n[{}].'.format(name, description))
     
     # Open dataset (ignore xmitgcm warnings)
@@ -738,13 +735,10 @@ def KangerFjord(resultpath  = '/home/idies/workspace/OceanCirculation/fromNeil/'
     od = _OceanDataset(ds).import_MITgcm_rect_bin(shift_averages=False)
     od = od.set_name(name).set_description(description)
     od = od.set_aliases({'S'    : 'Stave',
-                         'V'    : 'uVeltave',
-                         'U'    : 'vVeltave',
+                         'V'    : 'vVeltave',
+                         'U'    : 'uVeltave',
                          'Eta'  : 'ETAtave',
-                         'Temp' : 'Ttave',
-                         'hFacC': 'HFacC', 
-                         'hFacW': 'HFacW', 
-                         'hFacS': 'HFacS'})
+                         'Temp' : 'Ttave'}, overwrite=False)
     od = od.set_projection('Mercator', 
                            central_longitude=float(od.dataset['X'].mean().values), 
                            min_latitude=float(od.dataset['Y'].min().values), 
