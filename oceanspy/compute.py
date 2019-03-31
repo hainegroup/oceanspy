@@ -109,7 +109,7 @@ def _add_missing_variables(od, varList, FUNC2VARS = _FUNC2VARS):
     var_error = [var for var in varList if var not in VAR2FUNC]
     if len(var_error)!=0:
         raise ValueError('These variables are not available '
-                         'and can not be computed: {}'
+                         'and can not be computed: {}.'
                          '\nIf you think that OceanSpy should be able to compute them, '
                          'please open an issue on GitHub:'
                          '\n https://github.com/malmans2/oceanspy/issues'.format(var_error))
@@ -447,11 +447,14 @@ def divergence(od, iName=None, jName=None, kName=None, aliased = True):
         
         # Handle aliases
         NameIN, NameOUT = _handle_aliased(od, aliased, iName)
-        _check_ijk_components(od, iName=NameIN)
         
         # Add missing variables
         varList = ['HFacC', 'rA', 'dyG', 'HFacW', NameIN]
         od = _add_missing_variables(od, varList)
+        
+        # Check components
+        _check_ijk_components(od, iName=NameIN)
+        
         
         # Add div
         suf = '_dX'
@@ -467,11 +470,13 @@ def divergence(od, iName=None, jName=None, kName=None, aliased = True):
         
         # Handle aliases
         NameIN, NameOUT = _handle_aliased(od, aliased, jName)
-        _check_ijk_components(od, jName=NameIN)
         
         # Add missing variables
         varList = ['HFacC', 'rA', 'dxG', 'HFacS', NameIN]
         od = _add_missing_variables(od, varList)
+        
+        # Check components
+        _check_ijk_components(od, jName=NameIN)
         
         # Add div
         suf = '_dY'
@@ -486,10 +491,12 @@ def divergence(od, iName=None, jName=None, kName=None, aliased = True):
         
         # Handle aliases
         NameIN, NameOUT = _handle_aliased(od, aliased, kName)
-        _check_ijk_components(od, kName=NameIN)
         
         # Add missing variables
         od = _add_missing_variables(od, NameIN)
+        
+        # Check components
+        _check_ijk_components(od, kName=NameIN)
         
         # Add div (same of gradient)
         suf = '_dZ'
@@ -598,11 +605,13 @@ def curl(od, iName=None, jName=None, kName=None, aliased = True):
         # Handle aliases
         iNameIN, iNameOUT = _handle_aliased(od, aliased, iName)
         jNameIN, jNameOUT = _handle_aliased(od, aliased, jName)
-        _check_ijk_components(od, iName=iNameIN, jName=jNameIN)
     
         # Add missing variables
         varList = ['rAz', 'dyC', 'dxC', iNameIN, jNameIN]
         od = _add_missing_variables(od, varList)
+        
+        # Check components
+        _check_ijk_components(od, iName=iNameIN, jName=jNameIN)
         
         # Add curl
         Name = 'd'+jNameOUT+'_dX-d'+iNameOUT+'_dY'
@@ -622,11 +631,13 @@ def curl(od, iName=None, jName=None, kName=None, aliased = True):
         # Handle aliases
         jNameIN, jNameOUT = _handle_aliased(od, aliased, jName)
         kNameIN, kNameOUT = _handle_aliased(od, aliased, kName)
-        _check_ijk_components(od, jName=jNameIN, kName=kNameIN)
         
         # Add missing variables
         varList = [jNameIN, kNameIN]
         od = _add_missing_variables(od, varList)
+        
+        # Check components
+        _check_ijk_components(od, jName=jNameIN, kName=kNameIN)
         
         # Add curl using gradients
         Name = 'd'+kNameOUT+'_dY-d'+jNameOUT+'_dZ'
@@ -644,11 +655,13 @@ def curl(od, iName=None, jName=None, kName=None, aliased = True):
         # Handle aliases
         iNameIN, iNameOUT = _handle_aliased(od, aliased, iName)
         kNameIN, kNameOUT = _handle_aliased(od, aliased, kName)
-        _check_ijk_components(od, iName=iNameIN, kName=kNameIN)
         
         # Add missing variables
         varList = [iNameIN, kNameIN]
         od = _add_missing_variables(od, varList)
+        
+        # Check components
+        _check_ijk_components(od, iName=iNameIN, kName=kNameIN)
         
         # Add curl using gradients
         Name = 'd'+iNameOUT+'_dZ-d'+kNameOUT+'_dX' 

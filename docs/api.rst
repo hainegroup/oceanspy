@@ -92,6 +92,7 @@ SciServer
     open_oceandataset.get_started
     open_oceandataset.EGshelfIIseas2km_ERAI
     open_oceandataset.EGshelfIIseas2km_ASR
+    open_oceandataset.Arctic_Control
     open_oceandataset.EGshelfSJsec500m
     open_oceandataset.KangerFjord
    
