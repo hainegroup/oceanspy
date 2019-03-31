@@ -851,8 +851,8 @@ class OceanDataset:
         
         Parameters
         ----------
-        shif_averages: bool
-            True to shift, False otherwise
+        shif_averages: bool or None
+            True to shift
         """
         if shift_averages:
             for var in self._ds.data_vars:
@@ -983,8 +983,8 @@ class OceanDataset:
         
         # Set coordinates
         self = self._set_coords(coords2Dfrom1D=True)
-        grid_coords = {'Y'    : {'Y': None, 'Yp1': 0.5},
-                       'X'    : {'X': None, 'Xp1': 0.5},
+        grid_coords = {'Y'    : {'Y': None, 'Yp1': -0.5},
+                       'X'    : {'X': None, 'Xp1': -0.5},
                        'Z'    : {'Z': None, 'Zp1': 0.5, 'Zu': 0.5, 'Zl': -0.5},
                        'time' : {'time': -0.5}}
         self = self.set_grid_coords(grid_coords = grid_coords, add_midp=True)
