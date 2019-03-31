@@ -12,7 +12,7 @@ import functools as _functools
 
 # From OceanSpy
 from . import utils as _utils
-from .subsample import _check_instance, _check_list_of_string
+from ._ospy_utils import *
 
 # Instructions for developers:
 # 1) Every function operates on od, and returns ds
@@ -2507,22 +2507,7 @@ def missing_horizontal_spacing(od):
     return _ospy.OceanDataset(ds).dataset
 
 
-# Handle aliases
-def _handle_aliased(od, aliased, varNameList):
-    if aliased:
-        varNameListIN = _rename_aliased(od, varNameList)
-    else:
-        varNameListIN = varNameList
-    varNameListOUT = varNameList
-    return varNameListIN, varNameListOUT
 
-
-def _check_ijk_components(od, iName=None, jName=None, kName=None):
-    # Check dimensions
-    ds = od._ds
-    for _, (Name, dim) in enumerate(zip([iName, jName, kName], ['Xp1', 'Yp1', 'Zl'])):
-        if Name is not None and dim not in ds[Name].dims:
-            raise ValueError('[{}] must have dimension [{}]'.format(Name, dim))
                 
 class _computeMethdos(object):
     """

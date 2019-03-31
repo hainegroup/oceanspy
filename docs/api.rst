@@ -48,9 +48,8 @@ Import
 .. autosummary::
    :toctree: generated/
    
-    OceanDataset.import_MITgcm_rect_nc
-    OceanDataset.import_MITgcm_rect_bin
-    OceanDataset.import_MITgcm_curv_nc
+    OceanDataset.shift_averages
+    OceanDataset.manipulate_coords
     
 Others
 ------
@@ -82,29 +81,12 @@ Opening
    :toctree: generated/
    
     open_oceandataset
-   
-SciServer
----------
 
 .. autosummary::
    :toctree: generated/
    
-    open_oceandataset.get_started
-    open_oceandataset.EGshelfIIseas2km_ERAI
-    open_oceandataset.EGshelfIIseas2km_ASR
-    open_oceandataset.Arctic_Control
-    open_oceandataset.EGshelfSJsec500m
-    open_oceandataset.KangerFjord
-   
-Others
-------
-   
-.. autosummary::
-   :toctree: generated/
-
     open_oceandataset.from_netcdf
-
-
+    open_oceandataset.from_catalog
 
 
 Subsampling

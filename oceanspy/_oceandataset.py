@@ -11,6 +11,7 @@ from . import compute   as _compute
 from . import plot      as _plot
 from . import animate   as _animate
 from . import utils     as _utils
+from ._ospy_utils import *
 from . subsample import _subsampleMethdos
 from . compute   import _computeMethdos
 from . plot      import _plotMethdos
@@ -844,28 +845,33 @@ class OceanDataset:
     # IMPORT (used by open_oceandataset)
     # ==================================
     
-    def _shift_averages(self, shift_averages):
+    def shift_averages(self, averageList=None):
         """
         Shift average variables to time_midp.
-        Average variables must have attribute original_output = 'average'.
-        
+        Average variables have attribute [original_output='average'] or are in averageList.
+                
         Parameters
         ----------
-        shif_averages: bool or None
-            True to shift
+        averageList: 1D array_like, str, or None
+            List of variables (strings).
         """
-        if shift_averages:
-            for var in self._ds.data_vars:
-                original_output = self._ds[var].attrs.pop('original_output', None)
-                if original_output == 'average':
-                    self._ds[var] = self._ds[var].drop('time').isel(time=slice(1, None)).rename({'time': 'time_midp'})
-                if original_output is not None:
-                    self._ds[var].attrs['original_output'] = original_output
+        
+        if averageList is not None:
+            averageList = _check_list_of_string(averageList, 'averageList') 
+        else:
+            averageList = []
+
+        for var in self._ds.data_vars:
+            original_output = self._ds[var].attrs.pop('original_output', None)
+            if original_output == 'average' or var in averageList:
+                self._ds[var] = self._ds[var].drop('time').isel(time=slice(1, None)).rename({'time': 'time_midp'})
+            if original_output is not None:
+                self._ds[var].attrs['original_output'] = original_output
         return self
     
-    def _set_coords(self, fillna=False, coords1Dfrom2D=False, coords2Dfrom1D=False, coordsUVfromG=False):
+    def manipulate_coords(self, fillna=False, coords1Dfrom2D=False, coords2Dfrom1D=False, coordsUVfromG=False):
         """
-        Set dataset coordinates: dimensions + 2D horizontal coordinates.        
+        Manipulate coordinates to make them campatible with oceanspy.
         
         Parameters
         ----------
@@ -934,93 +940,7 @@ class OceanDataset:
                                         'YU', 'XU',
                                         'YV', 'XV'])
         return self
-    
-    def import_MITgcm_rect_nc(self, shift_averages = True):
-        """
-        Set coordinates of a dataset from a MITgcm run with rectilinear grid and data stored in NetCDF format.
-        Open and concatentate dataset before running this function.
-        
-        Parameters
-        ----------
-        shift_averages: bool
-            If True, shift average variable to time_midp. 
-            Average variables must have attribute original_output = 'average'
-        """
-        
-        # Check parameters
-        _check_instance({'shift_averages': shift_averages}, 'bool')
-                
-        # Shift averages
-        self = self._shift_averages(shift_averages=shift_averages)
-        
-        # Set coordinates
-        self = self._set_coords(fillna=True, coords1Dfrom2D=True)
-        grid_coords = {'Y'    : {'Y': None, 'Yp1': 0.5},
-                       'X'    : {'X': None, 'Xp1': 0.5},
-                       'Z'    : {'Z': None, 'Zp1': 0.5, 'Zu': 0.5, 'Zl': -0.5},
-                       'time' : {'time': -0.5}}
-        self = self.set_grid_coords(grid_coords = grid_coords, add_midp=True)
-        
-        return self
-    
-    def import_MITgcm_rect_bin(self, shift_averages = True):
-        """
-        Set coordinates of a dataset from a MITgcm run with rectilinear grid and data stored in bin format.
-        Open and concatentate dataset before running this function.
-        
-        Parameters
-        ----------
-        shift_averages: bool
-            If True, shift average variable to time_midp. 
-            Average variables must have attribute original_output = 'average'
-        """
-        
-        # Check parameters
-        _check_instance({'shift_averages': shift_averages}, 'bool')
-                
-        # Shift averages
-        self = self._shift_averages(shift_averages=shift_averages)
-        
-        # Set coordinates
-        self = self._set_coords(coords2Dfrom1D=True)
-        grid_coords = {'Y'    : {'Y': None, 'Yp1': -0.5},
-                       'X'    : {'X': None, 'Xp1': -0.5},
-                       'Z'    : {'Z': None, 'Zp1': 0.5, 'Zu': 0.5, 'Zl': -0.5},
-                       'time' : {'time': -0.5}}
-        self = self.set_grid_coords(grid_coords = grid_coords, add_midp=True)
-        self = self.set_aliases({'HFacC': 'hFacC', 
-                                 'HFacW': 'hFacW', 
-                                 'HFacS': 'hFacS'}, overwrite=False)
-        
-        return self
-    
-    def import_MITgcm_curv_nc(self, shift_averages = True):
-        """
-        Set coordinates of a dataset from a MITgcm run with curvilinear grid and data stored in NetCDF format.
-        Open and concatentate dataset before running this function.
-        
-        Parameters
-        ----------
-        shift_averages: bool
-            If True, shift average variable to time_midp. 
-            Average variables must have attribute original_output = 'average'
-        """
-        
-        # Check parameters
-        _check_instance({'shift_averages': shift_averages}, 'bool')
-                
-        ## Shift averages
-        self = self._shift_averages(shift_averages=shift_averages)
-        
-        # Set coordinates
-        self = self._set_coords(coordsUVfromG=True)
-        grid_coords = {'Y'    : {'Y': None, 'Yp1': 0.5},
-                       'X'    : {'X': None, 'Xp1': 0.5},
-                       'Z'    : {'Z': None, 'Zp1': 0.5, 'Zu': 0.5, 'Zl': -0.5},
-                       'time' : {'time': -0.5}}
-        self = self.set_grid_coords(grid_coords = grid_coords, add_midp=True)
-        
-        return self
+
         
     # ===========
     # SHORTCUTS
