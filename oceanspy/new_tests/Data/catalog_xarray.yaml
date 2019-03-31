@@ -1,0 +1,29 @@
+plugins:
+  source:
+    - module: intake_xarray
+sources:
+
+  # ===========================
+  # xarray test
+  xarray:
+    description: xarray
+    driver: netcdf
+    args: 
+      urlpath: ./oceanspy/new_tests/Data/rasm.nc
+      engine: netcdf4
+    metadata:  
+      rename:
+        x: X 
+        y: Y 
+      aliases:
+        xc: XC
+        yc: YC
+      original_output: snapshot
+      shift_averages:
+        averageList: 
+      isel: 
+        X: slice(None, None)
+        Y: slice(None, None)
+      name: xarray
+      description: |
+        https://github.com/pydata/xarray-data/blob/master/rasm.nc

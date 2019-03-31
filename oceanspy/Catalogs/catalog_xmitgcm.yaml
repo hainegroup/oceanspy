@@ -24,7 +24,7 @@ KangerFjord:
       HFacC: hFacC
       HFacS: hFacS
       HFacW: hFacW
-    coords:
+    manipulate_coords:
       coords2Dfrom1D: True
     grid_coords: 
       add_midp: True
@@ -42,7 +42,6 @@ KangerFjord:
          Zl: -0.5
         time: 
           time: -0.5
-    shift_averages: False
     original_output: average
     name: KangerFjord
     description: |
@@ -69,7 +68,7 @@ xmitgcm_snap:
       HFacC: hFacC
       HFacS: hFacS
       HFacW: hFacW
-    coords:
+    manipulate_coords:
       coords2Dfrom1D: True
     grid_coords: 
       grid_coords:
@@ -111,7 +110,7 @@ EGshelfSJsec500m_3H_hydro:
       HFacC: hFacC
       HFacS: hFacS
       HFacW: hFacW
-    coords:
+    manipulate_coords:
       coords2Dfrom1D: True
     grid_coords:
       add_midp: True
@@ -168,7 +167,7 @@ fldEGshelfSJsec500m_6H_hydro:
       HFacC: hFacC
       HFacS: hFacS
       HFacW: hFacW
-    coords:
+    manipulate_coords:
       coords2Dfrom1D: True
     grid_coords:
       add_midp: True
@@ -240,7 +239,7 @@ EGshelfSJsec500m_3H_NONhydro:
       HFacC: hFacC
       HFacS: hFacS
       HFacW: hFacW
-    coords:
+    manipulate_coords:
       coords2Dfrom1D: True
     grid_coords:
       add_midp: True
@@ -297,7 +296,7 @@ fldEGshelfSJsec500m_6H_NONhydro:
       HFacC: hFacC
       HFacS: hFacS
       HFacW: hFacW
-    coords:
+    manipulate_coords:
       coords2Dfrom1D: True
     grid_coords:
       add_midp: True

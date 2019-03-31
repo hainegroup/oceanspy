@@ -3,7 +3,7 @@ __email__ = 'mattia.almansi@jhu.edu'
 __version__ = '0.0.11'
 
 from ._oceandataset import OceanDataset
-from . import open_oceandataset, subsample, compute, plot, animate, utils
+from . import open_oceandataset, subsample, compute, plot, animate, utils, _ospy_utils
 import numpy as _np
 
 DEFAULT_PARAMETERS = {'rSphere'    : 6.371E3,                # km or None: cartesian

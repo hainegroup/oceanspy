@@ -13,7 +13,7 @@ sources:
       engine: netcdf4
       drop_variables: ['RC', 'RF', 'RU', 'RL']
     metadata:
-      coords:
+      manipulate_coords:
         fillna: True
         coords1Dfrom2D: True
       grid_coords: 
@@ -32,7 +32,8 @@ sources:
            Zl: -0.5
           time: 
             time: -0.5
-      shift_averages: True
+      shift_averages: 
+        averageList:
       isel: 
         Z: slice(None, 55)
         Zp1: slice(None, 56)
@@ -120,7 +121,7 @@ sources:
       engine: netcdf4
       drop_variables: ['RC', 'RF', 'RU', 'RL']
     metadata:
-      coords:
+      manipulate_coords:
         fillna: True
         coords1Dfrom2D: True
       grid_coords: 
@@ -191,7 +192,7 @@ sources:
       engine: netcdf4
       drop_variables: ['RC', 'RF', 'RU', 'RL']
     metadata:
-      coords:
+      manipulate_coords:
         fillna: True
         coords1Dfrom2D: True
       grid_coords: 
@@ -277,7 +278,7 @@ sources:
       engine: netcdf4
       drop_variables: ['RC', 'RF', 'RU', 'RL']
     metadata:
-      coords:
+      manipulate_coords:
         fillna: True
         coords1Dfrom2D: True
       grid_coords: 
@@ -348,7 +349,7 @@ sources:
       engine: netcdf4
       drop_variables: ['RC', 'RF', 'RU', 'RL']
     metadata:
-      coords:
+      manipulate_coords:
         fillna: True
         coords1Dfrom2D: True
       grid_coords: 
@@ -367,7 +368,8 @@ sources:
            Zl: -0.5
           time: 
             time: -0.5
-      shift_averages: True
+      shift_averages: 
+        averageList:
       isel: 
         Z: slice(None, 55)
         Zp1: slice(None, 56)
@@ -454,7 +456,7 @@ sources:
       engine: netcdf4
       drop_variables: ['RC', 'RF', 'RU', 'RL']
     metadata:
-      coords:
+      manipulate_coords:
         coordsUVfromG: True
       grid_coords: 
         add_midp: True
@@ -472,7 +474,8 @@ sources:
            Zl: -0.5
           time: 
             time: -0.5
-      shift_averages: True
+      shift_averages: 
+        averageList:
       parameters:
         rSphere: 6.371e+03
         eq_state: jmd95
