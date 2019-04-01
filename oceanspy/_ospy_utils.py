@@ -1,3 +1,5 @@
+import numpy as _np
+
 # ================
 # USEFUL FUNCTIONS
 # ================
