@@ -1,0 +1,15 @@
+ simulation = { 'global_oce_latlon' };
+ nDims = [   2 ];
+ dimList = [
+    90,    1,   90,
+    40,    1,   40
+ ];
+ dataprec = [ 'float32' ];
+ nrecords = [     4 ];
+ timeStepNumber = [      39600 ];
+ timeInterval = [  3.110400000000E+09  3.421440000000E+09 ];
+ missingValue = [ -9.99000000000000E+02 ];
+ nFlds = [    4 ];
+ fldList = {
+ 'TFLUX   ' 'surForcT' 'SFLUX   ' 'surForcS'
+ };

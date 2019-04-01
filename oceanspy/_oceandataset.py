@@ -36,6 +36,7 @@ except ImportError:  # pragma: no cover
 #       We will pass dictionary in xgcm.Grid,
 #       and we can have the option of usining comodo attributes
 #       (currently cleaned up so switched off)
+# TODO: handle attributes as xmitgcm
 
 
 class OceanDataset:

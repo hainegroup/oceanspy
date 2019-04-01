@@ -1,0 +1,16 @@
+ simulation = { 'global_oce_latlon' };
+ nDims = [   3 ];
+ dimList = [
+    90,    1,   90,
+    40,    1,   40,
+    30,    1,   30
+ ];
+ dataprec = [ 'float32' ];
+ nrecords = [     3 ];
+ timeStepNumber = [      39600 ];
+ timeInterval = [  3.421440000000E+09 ];
+ missingValue = [ -9.99000000000000E+02 ];
+ nFlds = [    3 ];
+ fldList = {
+ 'LaHs1RHO' 'LaHw1RHO' 'LaHc1RHO'
+ };

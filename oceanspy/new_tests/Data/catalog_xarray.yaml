@@ -27,3 +27,46 @@ sources:
       name: xarray
       description: |
         https://github.com/pydata/xarray-data/blob/master/rasm.nc
+
+  # ===========================
+  # rect
+  grd_rect:
+    description: Rectilinear grid
+    driver: netcdf
+    args:
+      urlpath: ./oceanspy/new_tests/Data/grid_sample_rect.nc
+      engine: netcdf4
+    metadata:
+      manipulate_coords:
+        fillna: True
+        coords1Dfrom2D: True
+      grid_coords: 
+        add_midp: True
+        grid_coords:
+          Y:
+            Y: 
+            Yp1: 0.5
+          X:
+            X: 
+            Xp1: 0.5
+            
+  # ===========================
+  # curv
+  grd_curv:
+    description: Curvilinear grid
+    driver: netcdf
+    args:
+      urlpath: ./oceanspy/new_tests/Data/grid_sample_curv.nc
+      engine: netcdf4
+    metadata:
+      manipulate_coords:
+        coordsUVfromG: True
+      grid_coords: 
+        add_midp: True
+        grid_coords:
+          Y:
+            Y: 
+            Yp1: 0.5
+          X:
+            X: 
+            Xp1: 0.5

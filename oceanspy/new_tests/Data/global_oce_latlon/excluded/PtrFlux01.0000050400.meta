@@ -1,0 +1,9 @@
+ simulation = { 'global_oce_latlon' };
+ nDims = [   2 ];
+ dimList = [
+    90,    1,   90,
+    40,    1,   40
+ ];
+ dataprec = [ 'float32' ];
+ nrecords = [     1 ];
+ timeStepNumber = [      50400 ];

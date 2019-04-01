@@ -4,6 +4,72 @@ xmitgcm_iters:
   description: xmitgcm_iters
   args: 
     data_dir: ./oceanspy/new_tests/Data/global_oce_latlon
+  metadata:  
+    rename:
+      XC: X 
+      YC: Y 
+      XG: Xp1 
+      YG: Yp1
+    aliases:
+      HFacC: hFacC
+      HFacS: hFacS
+      HFacW: hFacW
+    manipulate_coords:
+      coords2Dfrom1D: True
+    shift_averages:
+        averageList: 
+          - Convtave
+          - sFluxtave
+          - uFluxtave
+          - vFluxtave
+          - WTtave
+          - Eta2tave
+          - Stave
+          - UStave
+          - VStave
+          - wVeltave
+          - ETAtave
+          - Tdiftave
+          - UTtave
+          - VTtave
+          - PhHytave
+          - tFluxtave
+          - UUtave
+          - vVeltave
+          - PHL2tave
+          - Ttave
+          - uVeltave
+          - VVtave
+          - PHLtave 
+          - TTtave
+          - UVtave
+          - WStave
+    grid_coords: 
+      add_midp: True
+      grid_coords:
+        Y:
+          Y: 
+          Yp1: -0.5
+        X:
+          X: 
+          Xp1: -0.5
+        Z:
+          Z: 
+          Zp1: 0.5
+          Zu: 0.5
+          Zl: -0.5
+        time:
+          time: 0.5
+    name: xmitgcm_iters
+    description: |
+      curl -L -J -O https://ndownloader.figshare.com/files/6494718 
+    projection: Robinson
+
+# xmitgcm no iters
+xmitgcm_no_iters:
+  description: xmitgcm_no_iters
+  args: 
+    data_dir: ./oceanspy/new_tests/Data/global_oce_latlon
     iters: range(39600, 39600+1, 1)
   metadata:  
     rename:
@@ -26,45 +92,10 @@ xmitgcm_iters:
           X: 
           Xp1: -0.5
         Z:
-         Z: 
-         Zp1: 0.5
-         Zu: 0.5
-         Zl: -0.5
-    name: xmitgcm_iters
-    description: |
-      curl -L -J -O https://ndownloader.figshare.com/files/6494718 
-    projection: Robinson
-
-# xmitgcm no iters
-xmitgcm_no_iters:
-  description: xmitgcm_no_iters
-  args: 
-    data_dir: ./oceanspy/new_tests/Data/global_oce_latlon
-  metadata:  
-    rename:
-      XC: X 
-      YC: Y 
-      XG: Xp1 
-      YG: Yp1
-    aliases:
-      HFacC: hFacC
-      HFacS: hFacS
-      HFacW: hFacW
-    manipulate_coords:
-      coords2Dfrom1D: True
-    grid_coords: 
-      grid_coords:
-        Y:
-          Y: 
-          Yp1: -0.5
-        X:
-          X: 
-          Xp1: -0.5
-        Z:
-         Z: 
-         Zp1: 0.5
-         Zu: 0.5
-         Zl: -0.5
+          Z: 
+          Zp1: 0.5
+          Zu: 0.5
+          Zl: -0.5
     name: _iters
     description: |
       curl -L -J -O https://ndownloader.figshare.com/files/6494718 

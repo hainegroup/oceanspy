@@ -1,0 +1,16 @@
+ simulation = { 'global_oce_latlon' };
+ nDims = [   3 ];
+ dimList = [
+    90,    1,   90,
+    40,    1,   40,
+    15,    1,   15
+ ];
+ dataprec = [ 'float32' ];
+ nrecords = [    11 ];
+ timeStepNumber = [      39600 ];
+ timeInterval = [  3.110400000000E+09  3.421440000000E+09 ];
+ missingValue = [ -9.99000000000000E+02 ];
+ nFlds = [   11 ];
+ fldList = {
+ 'TOTSTEND' 'ADVr_SLT' 'ADVx_SLT' 'ADVy_SLT' 'DFrE_SLT' 'DFxE_SLT' 'DFyE_SLT' 'DFrI_SLT' 'USLTMASS' 'VSLTMASS' 'WSLTMASS'
+ };
