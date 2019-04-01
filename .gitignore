@@ -116,3 +116,5 @@ ENV/
 
 # Tests
 oceanspy/tests/__pycache__/
+oceanspy/tests/Data/
+oceanspy/new_tests/Data/
