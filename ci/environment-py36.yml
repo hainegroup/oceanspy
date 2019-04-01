@@ -11,12 +11,13 @@ dependencies:
   - cartopy 
   - esmpy 
   - ffmpeg
+  - intake-xarray
   - pytest
   - pip:
     - geopy 
     - xgcm 
     - xesmf 
-    - xmitgcm
-    - xgcm
+    - git+https://github.com/xgcm/xmitgcm.git
+    - xgcm>=0.2
     - codecov
     - pytest-cov
