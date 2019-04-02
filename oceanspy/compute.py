@@ -582,7 +582,7 @@ def curl(od, iName=None, jName=None, kName=None, aliased=True):
         # Units
         checks = ['units' in od._ds[iNameIN].attrs,
                   'units' in od._ds[kNameIN].attrs]
-        if all(checks) and (od._ds[iNameIN].attrs['units'] 
+        if all(checks) and (od._ds[iNameIN].attrs['units']
                             == od._ds[kNameIN].attrs['units']):
             crl[Name].attrs['units'] = od._ds[iNameIN].attrs['units']+' m^-1'
 
@@ -697,7 +697,8 @@ def laplacian(od, varNameList, axesList=None, aliased=True):
                 nameA = 'dd{}_dY_dY'.format(varName)
                 nameB = 'dd{}_dY_dY'.format(varNameOUT)
                 rename_dict[nameA] = nameB
-            elif compName[-1] == 'Z':
+            else:
+                # Z
                 compNames['kName'] = compName
                 nameA = 'dd{}_dZ_dZ'.format(varName)
                 nameB = 'dd{}_dZ_dZ'.format(varNameOUT)
@@ -1004,7 +1005,8 @@ def _integral_and_mean(od, operation='integral',
             else:
                 Int.attrs['units'] = '*'.join(units)
 
-        elif operation == 'weighted_mean':
+        else:
+            # Weighted mean
             # Compute weighted mean
             wMean = Int
             weight = delta
