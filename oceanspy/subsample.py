@@ -305,9 +305,6 @@ def cutout(od,
         iZ = [_np.min(dZp1), _np.max(dZp1)]
         maskV['Zp1'] = ds['Zp1']
 
-        # Original length
-        lenZ = len(ds['Zp1'])
-
         # Indexis
         if iZ[0] == iZ[1]:
             if 'Z' not in dropAxes:
@@ -339,10 +336,6 @@ def cutout(od,
             if 'Zl' in ds.dims and len(ds['Zl']) > 1:
                 ds = ds.isel(Zl=slice(iZ[0], iZ[1]))
 
-        # Cut axis can't be periodic
-        if (len(ds['Z']) < lenZ or 'Z' in dropAxes) and 'Z' in periodic:
-            periodic.remove('Z')
-
     # ---------------------------
     # Time CUTOUT
     # ---------------------------
@@ -373,9 +366,6 @@ def cutout(od,
         iT = [min(dtime), max(dtime)]
         maskT['time'] = ds['time']
 
-        # Original length
-        lenT = len(ds['time'])
-
         # Indexis
         if iT[0] == iT[1]:
             if 'time' not in dropAxes:
@@ -388,17 +378,14 @@ def cutout(od,
 
         # Cutout
         ds = ds.isel(time=slice(iT[0], iT[1]+1))
-        if 'time' in dropAxes:
-            if iT[0] == len(ds['time_midp']):
-                iT[0] = iT[0]-1
-                iT[1] = iT[1]-1
-            ds = ds.isel(time_midp=slice(iT[0], iT[1]+1))
-        else:
-            ds = ds.isel(time_midp=slice(iT[0], iT[1]))
-
-        # Cut axis can't be periodic
-        if (len(ds['time']) < lenT or 'T' in dropAxes) and 'time' in periodic:
-            periodic.remove('time')
+        if 'time_midp' in ds.dims:
+            if 'time' in dropAxes:
+                if iT[0] == len(ds['time_midp']):
+                    iT[0] = iT[0]-1
+                    iT[1] = iT[1]-1
+                ds = ds.isel(time_midp=slice(iT[0], iT[1]+1))
+            else:
+                ds = ds.isel(time_midp=slice(iT[0], iT[1]))
 
     # ---------------------------
     # Horizontal MASK
@@ -478,8 +465,6 @@ def cutout(od,
                                "\nDropped variables: {}."
                                "".format(vars2drop), stacklevel=2)
                 ds = ds.drop(vars2drop)
-            if 'time_midp' in ds.dims:
-                ds = ds.drop('time_midp')
 
             # Snapshot
             if sampMethod == 'snapshot':
@@ -503,9 +488,8 @@ def cutout(od,
                                     dim='time')
                     ds.attrs = attrs
 
-            # Mean
-            elif sampMethod == 'mean':
-
+            else:
+                # Mean
                 # Separate time and timeless
                 attrs = ds.attrs
                 ds_dims = ds.drop([var
@@ -552,8 +536,8 @@ def cutout(od,
 
     # Drop variables
     if varList is not None:
-        if isinstance(varList, str):
-            varList = [varList]
+        # Make sure it's a list
+        varList = list(varList)
 
         # Compute missing variables
         od = _compute._add_missing_variables(od, varList)
@@ -1148,8 +1132,6 @@ def particle_properties(od, times, Ypart, Xpart, Zpart, **kwargs):
                        "\nDropped variables: {}.".format(vars2drop),
                        stacklevel=2)
         ds = ds.drop(vars2drop)
-    if 'time_midp' in ds.dims:
-        ds = ds.drop('time_midp')
 
     # New dimensions
     time = _xr.DataArray(times,
