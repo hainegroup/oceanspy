@@ -1,4 +1,6 @@
-import numpy as _np
+import numpy 
+import oceanspy
+import warnings
 
 # ================
 # USEFUL FUNCTIONS
@@ -13,7 +15,7 @@ def _check_instance(objs, classinfos):
             raise TypeError("`{}` must be {}".format(key, classinfo))
 
 def _check_list_of_string(obj, objName):
-    obj = _np.asarray(obj, dtype='str')
+    obj = numpy.asarray(obj, dtype='str')
     if obj.ndim == 0: 
         obj = obj.reshape(1)
     elif obj.ndim >1: 
@@ -34,15 +36,15 @@ def _check_range(od, obj, objName):
         pref    = 'time'
         valchek = od._ds['time']
     
-    obj  = _np.asarray(obj, dtype=valchek.dtype)
+    obj  = numpy.asarray(obj, dtype=valchek.dtype)
     if obj.ndim == 0: obj = obj.reshape(1)
     elif obj.ndim >1: 
         raise TypeError('Invalid `{}`'.format(objName))
     maxcheck = valchek.max().values
     mincheck = valchek.min().values
     if any(obj<mincheck) or any(obj>maxcheck):
-        _warnings.warn("\n{}Range of the oceandataset is: {}"
-                       "\nRequested {} has values outside this range.".format(pref, [mincheck, maxcheck], objName), stacklevel=2)
+        warnings.warn("\n{}Range of the oceandataset is: {}"
+                      "\nRequested {} has values outside this range.".format(pref, [mincheck, maxcheck], objName), stacklevel=2)
     return obj
 
 def _check_native_grid(od, func_name):
@@ -54,12 +56,12 @@ def _check_native_grid(od, func_name):
 def _check_part_position(od, InputDict):
     for InputName, InputField in InputDict.items():
         if 'time' in InputName:
-            InputField = _np.asarray(InputField, dtype = od._ds['time'].dtype)
+            InputField = numpy.asarray(InputField, dtype = od._ds['time'].dtype)
             if InputField.ndim == 0: 
                 InputField = InputField.reshape(1)
             ndim = 1
         else:
-            InputField  = _np.asarray(InputField)
+            InputField  = numpy.asarray(InputField)
             if InputField.ndim <2 and InputField.size==1: 
                 InputField = InputField.reshape((1, InputField.size))
             ndim = 2

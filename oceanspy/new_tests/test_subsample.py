@@ -5,7 +5,7 @@ from numpy.testing import assert_array_equal
 
 from oceanspy.subsample import cutout
 from oceanspy           import open_oceandataset, OceanDataset
-from oceanspy._ospy_utils import _check_instance
+
 
 # Test oceandataset
 MITgcm_curv_nc  = open_oceandataset.from_netcdf('./oceanspy/tests/Data/MITgcm_curv_nc.nc')

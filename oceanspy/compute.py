@@ -13,6 +13,7 @@ import functools as _functools
 # From OceanSpy
 from . import utils as _utils
 from ._ospy_utils import *
+from ._ospy_utils import _check_instance, _check_list_of_string
 
 # Instructions for developers:
 # 1) Every function operates on od, and returns ds
@@ -96,7 +97,7 @@ def _add_missing_variables(od, varList, FUNC2VARS = _FUNC2VARS):
     """
     
     # Check parameters
-    _check_instance({'od': od}, ' _ospy.OceanDataset')
+    _check_instance({'od': od}, ' oceanspy.OceanDataset')
     varList = _check_list_of_string(varList, 'varList')
     
     # Return here if all variables already exist
@@ -146,7 +147,7 @@ def _rename_aliased(od, varNameList):
     """
     
     # Check parameters
-    _check_instance({'od': od}, ' _ospy.OceanDataset')
+    _check_instance({'od': od}, 'oceanspy.OceanDataset')
         
     # Check if input is a string
     if isinstance(varNameList, str): 
@@ -242,7 +243,7 @@ def gradient(od, varNameList, axesList=None, aliased = True):
     # Check parameters
     _check_instance({'od'     : od,
                      'aliased': aliased}, 
-                    {'od'     : ' _ospy.OceanDataset',
+                    {'od'     : 'oceanspy.OceanDataset',
                      'aliased': 'bool'})
     
     varNameList = _check_list_of_string(varNameList, 'varNameList')
@@ -429,7 +430,7 @@ def divergence(od, iName=None, jName=None, kName=None, aliased = True):
                      'jName'  : jName,
                      'kName'  : kName,
                      'aliased': aliased}, 
-                    {'od'     : ' _ospy.OceanDataset',
+                    {'od'     : 'oceanspy.OceanDataset',
                      'iName'  : '(str, type(None))',
                      'jName'  : '(str, type(None))',
                      'kName'  : '(str, type(None))',
@@ -588,7 +589,7 @@ def curl(od, iName=None, jName=None, kName=None, aliased = True):
                      'jName'  : jName,
                      'kName'  : kName,
                      'aliased': aliased}, 
-                    {'od'     : ' _ospy.OceanDataset',
+                    {'od'     : 'oceanspy.OceanDataset',
                      'iName'  : '(str, type(None))',
                      'jName'  : '(str, type(None))',
                      'kName'  : '(str, type(None))',
@@ -738,7 +739,7 @@ def laplacian(od, varNameList, axesList=None, aliased = True):
     # Check parameters
     _check_instance({'od'     : od,
                      'aliased': aliased}, 
-                    {'od'     : ' _ospy.OceanDataset',
+                    {'od'     : 'oceanspy.OceanDataset',
                      'aliased': 'bool'})
     
     varNameList = _check_list_of_string(varNameList, 'varNameList')
@@ -930,7 +931,7 @@ def _integral_and_mean(od, operation='integral', varNameList=None, axesList=None
     _check_instance({'od'          : od,
                      'aliased'     : aliased,
                      'storeWeights': storeWeights}, 
-                    {'od'          : ' _ospy.OceanDataset',
+                    {'od'          : 'oceanspy.OceanDataset',
                      'aliased'     : 'bool',
                      'storeWeights': 'bool'})
     
@@ -1175,7 +1176,7 @@ def potential_density_anomaly(od):
     """
     
     # Check parameters
-    _check_instance({'od': od}, ' _ospy.OceanDataset')
+    _check_instance({'od': od}, 'oceanspy.OceanDataset')
         
     # Parameters
     paramsList = ['eq_state']
@@ -1233,7 +1234,7 @@ def Brunt_Vaisala_frequency(od):
     """
     
     # Check parameters
-    _check_instance({'od': od}, ' _ospy.OceanDataset')
+    _check_instance({'od': od}, 'oceanspy.OceanDataset')
         
     # Add missing variables
     varList = ['Sigma0']
@@ -1286,7 +1287,7 @@ def vertical_relative_vorticity(od):
     """
     
     # Check parameters
-    _check_instance({'od': od}, ' _ospy.OceanDataset')
+    _check_instance({'od': od}, 'oceanspy.OceanDataset')
         
     # Message
     print('Computing vertical component of relative vorticity.')
@@ -1332,7 +1333,7 @@ def relative_vorticity(od):
     """
     
     # Check parameters
-    _check_instance({'od': od}, ' _ospy.OceanDataset')
+    _check_instance({'od': od}, 'oceanspy.OceanDataset')
         
     # Message
     print('Computing relative vorticity')
@@ -1376,7 +1377,7 @@ def kinetic_energy(od):
     """
     
     # Check parameters
-    _check_instance({'od': od}, ' _ospy.OceanDataset')
+    _check_instance({'od': od}, 'oceanspy.OceanDataset')
      
     # Add missing variables
     varList = ['U', 'V']
@@ -1460,7 +1461,7 @@ def eddy_kinetic_energy(od):
     """
     
     # Check parameters
-    _check_instance({'od': od}, ' _ospy.OceanDataset')
+    _check_instance({'od': od}, 'oceanspy.OceanDataset')
      
     # Add missing variables
     varList = ['U', 'V']
@@ -1549,7 +1550,7 @@ def horizontal_divergence_velocity(od):
     """
     
     # Check parameters
-    _check_instance({'od': od}, ' _ospy.OceanDataset')
+    _check_instance({'od': od}, 'oceanspy.OceanDataset')
         
     # Message
     print('Computing horizontal divergence of the velocity field.')
@@ -1591,7 +1592,7 @@ def shear_strain(od):
     """
     
     # Check parameters
-    _check_instance({'od': od}, ' _ospy.OceanDataset')
+    _check_instance({'od': od}, 'oceanspy.OceanDataset')
     
     # Add missing variables
     varList = ['rAz', 'dyC', 'dxC', 'U', 'V']
@@ -1646,7 +1647,7 @@ def normal_strain(od):
     """
     
     # Check parameters
-    _check_instance({'od': od}, ' _ospy.OceanDataset')
+    _check_instance({'od': od}, 'oceanspy.OceanDataset')
         
     # Message
     print('Computing normal component of strain.')
@@ -1693,7 +1694,7 @@ def Okubo_Weiss_parameter(od):
     """
     
     # Check parameters
-    _check_instance({'od': od}, ' _ospy.OceanDataset')
+    _check_instance({'od': od}, 'oceanspy.OceanDataset')
         
     # Add missing variables
     varList = ['momVort3', 's_strain', 'n_strain']
@@ -1765,7 +1766,7 @@ def Ertel_potential_vorticity(od, full=True):
     # Check parameters
     _check_instance({'od'  : od,
                      'full': full,}, 
-                    {'od'  : '_ospy.OceanDataset',
+                    {'od'  : 'oceanspy.OceanDataset',
                      'full': 'bool'})
 
         
@@ -1861,7 +1862,7 @@ def mooring_horizontal_volume_transport(od):
     """
     
     # Check parameters
-    _check_instance({'od': od}, ' _ospy.OceanDataset')
+    _check_instance({'od': od}, 'oceanspy.OceanDataset')
         
     if 'mooring' not in od._ds.dims:
         raise ValueError('oceadatasets must be subsampled using `subsample.mooring_array`')
@@ -2045,7 +2046,7 @@ def geographical_aligned_velocities(od):
     """
     
     # Check parameters
-    _check_instance({'od': od}, ' _ospy.OceanDataset')
+    _check_instance({'od': od}, 'oceanspy.OceanDataset')
         
     # Add missing variables
     varList = ['U', 'V', 'AngleCS', 'AngleSN']
@@ -2106,7 +2107,7 @@ def survey_aligned_velocities(od):
     """
     
     # Check parameters
-    _check_instance({'od': od}, ' _ospy.OceanDataset')
+    _check_instance({'od': od}, 'oceanspy.OceanDataset')
         
     if 'station' not in od._ds.dims:
         raise ValueError('oceadatasets must be subsampled using `subsample.survey_stations`')
@@ -2223,7 +2224,7 @@ def heat_budget(od):
     """
   
     # Check parameters
-    _check_instance({'od': od}, ' _ospy.OceanDataset')
+    _check_instance({'od': od}, 'oceanspy.OceanDataset')
         
     # Add missing variables
     varList = ['Temp', 'Eta', 'Depth', 'ADVx_TH', 'ADVy_TH', 'ADVr_TH', 'DFrI_TH', 'KPPg_TH', 'TFLUX', 'oceQsw_AVG', 
@@ -2356,7 +2357,7 @@ def salt_budget(od):
     """
   
     # Check parameters
-    _check_instance({'od': od}, ' _ospy.OceanDataset')
+    _check_instance({'od': od}, 'oceanspy.OceanDataset')
         
     # Add missing variables
     varList = ['S', 'Eta', 'Depth', 'ADVx_SLT', 'ADVy_SLT', 'ADVr_SLT', 'DFrI_SLT', 'KPPg_SLT', 'SFLUX', 'oceSPtnd', 
@@ -2461,7 +2462,7 @@ def missing_horizontal_spacing(od):
     """
   
     # Check parameters
-    _check_instance({'od': od}, ' _ospy.OceanDataset')
+    _check_instance({'od': od}, 'oceanspy.OceanDataset')
         
     # Add missing variables
     varList = ['dxC', 'dxG', 'dyC', 'dyG']
