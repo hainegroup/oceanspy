@@ -84,3 +84,47 @@ def _check_ijk_components(od, iName=None, jName=None, kName=None):
     for _, (Name, dim) in enumerate(zip([iName, jName, kName], ['Xp1', 'Yp1', 'Zl'])):
         if Name is not None and dim not in ds[Name].dims:
             raise ValueError('[{}] must have dimension [{}]'.format(Name, dim))
+            
+def _rename_aliased(od, varNameList):
+    """
+    Check if there are aliases, and return the name of variables in the private dataset.
+    This is used by smart-naming functions, where user asks for aliased variables.
+    
+    Parameters
+    ----------
+    od: OceanDataset
+        oceandataset to check for missing variables
+    varNameList: 1D array_like, str
+        List of variables (strings).     
+        
+    Returns
+    -------
+    varNameListIN: list of variables
+        List of variable name to use on od._ds
+    """
+    
+    # Check parameters
+    _check_instance({'od': od}, 'oceanspy.OceanDataset')
+        
+    # Check if input is a string
+    if isinstance(varNameList, str): 
+        isstr=True
+    else: 
+        isstr=False
+    
+    # Move to numpy array
+    varNameList = _check_list_of_string(varNameList, 'varNameList')
+    
+    # Get _ds names
+    if od._aliases_flipped is not None:
+        varNameListIN  =[od._aliases_flipped[varName] 
+                         if varName in od._aliases_flipped 
+                         else varName for varName in list(varNameList)]
+    else: 
+        varNameListIN = varNameList
+        
+    # Same type of input
+    if isstr: 
+        varNameListIN = varNameListIN[0]
+        
+    return varNameListIN
