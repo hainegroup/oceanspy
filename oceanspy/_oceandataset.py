@@ -1,14 +1,15 @@
 # Required dependencies
 import xarray as _xr
 import copy as _copy
-import xgcm as _xgcm
 import numpy as _np
 import warnings as _warnings
 import sys as _sys
 
 # From OceanSpy
 from . import utils as _utils
-from ._ospy_utils import _check_list_of_string
+from ._ospy_utils import (_check_instance, _check_oceanspy_axes,
+                          _setter_error_message, _check_list_of_string,
+                          _create_grid)
 from . subsample import _subsampleMethdos
 from . compute import _computeMethdos
 from . plot import _plotMethdos
@@ -63,7 +64,7 @@ class OceanDataset:
         """
 
         # Check parameters
-        _check_instance({'dataset': dataset}, '_xr.Dataset')
+        _check_instance({'dataset': dataset}, 'xarray.Dataset')
 
         # Initialize dataset
         self._ds = dataset.copy()
@@ -1036,70 +1037,3 @@ class OceanDataset:
         """
 
         return _animateMethdos(self)  # pragma: no cover
-
-
-# ================
-# USEFUL FUNCTIONS
-# ================
-def _check_instance(objs, classinfos):
-    for key, value in objs.items():
-        if isinstance(classinfos, str):
-            classinfo = classinfos
-        else:
-            classinfo = classinfos[key]
-
-        if not eval('isinstance(value, {})'.format(classinfo)):
-            if classinfo[0] == '_':
-                classinfo = classinfo[1:]
-            raise TypeError("`{}` must be {}".format(key, classinfo))
-
-
-def _check_oceanspy_axes(axes2check):
-    from oceanspy import OCEANSPY_AXES
-
-    for axis in axes2check:
-        if axis not in OCEANSPY_AXES:
-            raise ValueError(_wrong_axes_error_message(axes2check))
-
-
-def _wrong_axes_error_message(axes2check):
-    from oceanspy import OCEANSPY_AXES
-    return ("{} contains non-valid axes."
-            " OceanSpy axes are: {}").format(axes2check, OCEANSPY_AXES)
-
-
-def _setter_error_message(attribute_name):
-    return "Set new `{}` using .set_{}".format(attribute_name, attribute_name)
-
-
-def _create_grid(dataset, coords, periodic):
-    # Clean up comodo (currently force user to specify axis using set_coords).
-    for dim in dataset.dims:
-        dataset[dim].attrs.pop('axis', None)
-        dataset[dim].attrs.pop('c_grid_axis_shift', None)
-
-    # Add comodo attributes.
-    # TODO: it is possible to pass grid dict in xgcm.
-    #       Should we implement it?
-    warn_dims = []
-    if coords:
-        for axis in coords:
-            for dim in coords[axis]:
-                if dim not in dataset.dims:
-                    warn_dims = warn_dims+[dim]
-                else:
-                    shift = coords[axis][dim]
-                    dataset[dim].attrs['axis'] = axis
-                    if shift:
-                        dataset[dim].attrs['c_grid_axis_shift'] = str(shift)
-    if len(warn_dims) != 0:
-        _warnings.warn(("{} are not dimensions"
-                        " and are not added"
-                        " to the grid object.").format(warn_dims),
-                       stacklevel=2)
-    # Create grid
-    grid = _xgcm.Grid(dataset, periodic=periodic)
-    if len(grid.axes) == 0:
-        grid = None
-
-    return grid
