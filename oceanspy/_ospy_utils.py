@@ -45,11 +45,18 @@ def _check_instance(objs, classinfos):
         else:
             classinfo = classinfos[key]
 
-        if '.' in classinfo:
-            package = classinfo.split('.')[0]
-            exec('import {}'.format(package))
+        if isinstance(classinfo, str):
+            classinfo = [classinfo]
 
-        if not eval('isinstance(value, {})'.format(classinfo)):
+        check = []
+        for this_classinfo in classinfo:
+            if '.' in this_classinfo:
+                package = this_classinfo.split('.')[0]
+                exec('import {}'.format(package))
+
+            check = check + [eval('isinstance(value, {})'.format(this_classinfo))]
+
+        if not any(check):
             raise TypeError("`{}` must be {}".format(key, classinfo))
 
 

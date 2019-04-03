@@ -470,69 +470,66 @@ def densmdjwf(s,t,p):
                     -3.03175128e-16,
                     -1.27934137e-17,
                      1.00000000e+00 ]
-    
-    
-    p1 = _copy.copy(p);
-    
-    t1 = _copy.copy(t);
-    t2 = t*t;
-    
-    s1 = _copy.copy(s);
 
-    #if np.any(s1<0):
-    #    sys.stderr.write('negative salinity values! setting to nan\n')
-        # # the sqrt will take care of this
-        # if s.ndim > 0:
-        #     s[s<0] = np.nan
-        # else:
-        #     s = np.nan
-            
+    p1 = _copy.copy(p)
+    t1 = _copy.copy(t)
+    t2 = t*t
+    s1 = _copy.copy(s)
     sp5 = _np.sqrt(s1)
-    p1t1=p1*t1
+    p1t1 = p1 * t1
 
-    num = ( eosMDJWFnum[11] 
-            + t1*(eosMDJWFnum[0]
-                  + t1*(eosMDJWFnum[1] + eosMDJWFnum[2]*t1) )
-	    + s1*(eosMDJWFnum[3]
-                  + eosMDJWFnum[4]*t1  + eosMDJWFnum[5]*s1)
-	    + p1*(eosMDJWFnum[6] + eosMDJWFnum[7]*t2
-                  + eosMDJWFnum[8]*s1
-	          + p1*(eosMDJWFnum[9] + eosMDJWFnum[10]*t2) )
-    )
-    den = ( eosMDJWFden[12]
-            + t1*(eosMDJWFden[0]
-	          + t1*(eosMDJWFden[1]
-	                + t1*(eosMDJWFden[2] + t1*eosMDJWFden[3] ) ) )
-            + s1*(eosMDJWFden[4]
-	          + t1*(eosMDJWFden[5]
-	                + eosMDJWFden[6]*t2)
-	          + sp5*(eosMDJWFden[7] + eosMDJWFden[8]*t2) )
-	    + p1*(eosMDJWFden[9]
-	          + p1t1*(eosMDJWFden[10]*t2 + eosMDJWFden[11]*p1) )
-    )
-  
+    num = (eosMDJWFnum[11]
+           + t1*(eosMDJWFnum[0]
+                 + t1*(eosMDJWFnum[1]
+                       + eosMDJWFnum[2]*t1))
+           + s1*(eosMDJWFnum[3]
+                 + eosMDJWFnum[4]*t1
+                 + eosMDJWFnum[5]*s1)
+           + p1*(eosMDJWFnum[6]
+                 + eosMDJWFnum[7]*t2
+                 + eosMDJWFnum[8]*s1
+                 + p1*(eosMDJWFnum[9]
+                       + eosMDJWFnum[10]*t2)))
+
+    den = (eosMDJWFden[12]
+           + t1*(eosMDJWFden[0]
+                 + t1*(eosMDJWFden[1]
+                       + t1*(eosMDJWFden[2]
+                             + t1*eosMDJWFden[3])))
+           + s1*(eosMDJWFden[4]
+                 + t1*(eosMDJWFden[5]
+                       + eosMDJWFden[6]*t2)
+                 + sp5*(eosMDJWFden[7]
+                        + eosMDJWFden[8]*t2))
+           + p1*(eosMDJWFden[9]
+                 + p1t1*(eosMDJWFden[10]*t2
+                         + eosMDJWFden[11]*p1)))
+
     epsln = 0
     denom = 1.0/(epsln+den)
-    rho = num*denom;
+    rho = num*denom
 
     return rho
 
 
-def Coriolis_parameter(Y, omega = 7.2921E-5):
+def Coriolis_parameter(Y, omega=7.2921E-5):
     """
     Compute Coriolis parameter (both vertical and horizontal components).
-    
+
     .. math::
-        (f, e) = (\\hat{\\mathbf{z}}\\cdot\\left(2\\mathbf{\\Omega}\\right), \\hat{\\mathbf{y}}\\cdot\\left(2\\mathbf{\\Omega}\\right))
-               = (2|\\mathbf{\\Omega}|\\sin{\\theta}, 2|\\mathbf{\\Omega}|\\cos{\\theta})
-        
+        (f, e) = (\\hat{\\mathbf{z}}\\cdot
+        \\left(2\\mathbf{\\Omega}\\right),
+        \\hat{\\mathbf{y}}\\cdot\\left(2\\mathbf{\\Omega}\\right))
+        = (2|\\mathbf{\\Omega}|\\sin{\\theta},
+        2|\\mathbf{\\Omega}|\\cos{\\theta})
+
     Parameters
     ----------
     Y: _xr.DataArray or array_like
         Y coordinate (latitude)
     omega: scalar
         Rotation rate of Earth (rad/s)
-        
+
     Returns
     -------
     f: _xr.DataArray or array_like
@@ -546,5 +543,5 @@ def Coriolis_parameter(Y, omega = 7.2921E-5):
     Y_rad = _np.deg2rad(Y)
     f = 2 * omega * _np.sin(Y_rad)
     e = 2 * omega * _np.cos(Y_rad)
-        
+
     return f, e

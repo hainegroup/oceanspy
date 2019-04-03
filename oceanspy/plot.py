@@ -9,20 +9,23 @@ import oceanspy as _ospy
 import numpy as _np
 import warnings as _warnings
 import functools as _functools
+import pandas as _pd
 
 # From oceanspy
 from . import compute as _compute
+from ._ospy_utils import (_rename_aliased, _check_instance)
+from .compute import (_add_missing_variables)
 
 # Additional dependencies
 try:
     import matplotlib as _matplotlib
     _matplotlib.use('agg')
     import matplotlib.pyplot as _plt
-except ImportError:
+except ImportError:  # pragma: no cover
     pass
 try:
     import cartopy.crs as _ccrs
-except ImportError:
+except ImportError:  # pragma: no cover
     pass
 
 
@@ -94,49 +97,42 @@ def TS_diagram(od,
     """
 
     # Check parameters
-    if not isinstance(od, _ospy.OceanDataset):
-        raise TypeError('`od` must be OceanDataset')
+    _check_instance({'od': od,
+                     'colorName': colorName,
+                     'plotFreez': plotFreez,
+                     'ax': ax,
+                     'cmap_kwargs': cmap_kwargs,
+                     'contour_kwargs': contour_kwargs,
+                     'clabel_kwargs': clabel_kwargs,
+                     'cutout_kwargs': cutout_kwargs,
+                     'dens': dens},
+                    {'od': 'oceanspy.OceanDataset',
+                     'colorName': ['type(None)', 'str'],
+                     'plotFreez': 'bool',
+                     'ax': ['type(None)', 'matplotlib.pyplot.Axes'],
+                     'cmap_kwargs': ['type(None)', 'dict'],
+                     'contour_kwargs': ['type(None)', 'dict'],
+                     'clabel_kwargs': ['type(None)', 'dict'],
+                     'cutout_kwargs': ['type(None)', 'dict'],
+                     'dens': ['type(None)', 'xarray.DataArray']
+                     })
 
     if Tlim is not None:
         Tlim = _np.asarray(Tlim)
         if Tlim.size != 2:
-            raise TypeError('`Tlim` must contain 2 elements')
+            raise ValueError('`Tlim` must contain 2 elements')
         Tlim = Tlim.reshape(2)
 
     if Slim is not None:
         Slim = _np.asarray(Slim)
         if Slim.size != 2:
-            raise TypeError('`Slim` must contain 2 elements')
+            raise ValueError('`Slim` must contain 2 elements')
         Slim = Slim.reshape(2)
 
-    if dens is not None:
-        if not isinstance(dens, _xr.DataArray):
-            raise TypeError('`dens` must be xarray.DataArray')
-        elif not set(['Temp', 'S']).issubset(dens.coords):
-            raise ValueError('`dens` must have coordinates (Temp, S)')
+    if dens is not None and not set(['Temp', 'S']).issubset(dens.coords):
+        raise ValueError('`dens` must have coordinates (Temp, S)')
 
-    if not isinstance(colorName, (type(None), str)):
-        raise TypeError('`colorName` must be str or None')
-
-    if not isinstance(plotFreez, bool):
-        raise TypeError('`plotFreez` must be bool')
-
-    if not isinstance(ax, (type(None), _plt.Axes)):
-        raise TypeError('`ax` must be matplotlib.pyplot.Axes')
-
-    if not isinstance(cmap_kwargs, (type(None), dict)):
-        raise TypeError('`cmap_kwargs` must be None or dict')
-
-    if not isinstance(contour_kwargs, (type(None), dict)):
-        raise TypeError('`contour_kwargs` must be None or dict')
-
-    if not isinstance(clabel_kwargs, (type(None), dict)):
-        raise TypeError('`clabel_kwargs` must be None or dict')
-
-    if not isinstance(cutout_kwargs, (type(None), dict)):
-        raise TypeError('`cutout_kwargs` must be None or dict')
-
-    # Handle kwargs
+    # Change None in empty dict
     if cmap_kwargs is None:
         cmap_kwargs = {}
     if contour_kwargs is None:
@@ -152,7 +148,7 @@ def TS_diagram(od,
 
     # Check and extract T and S
     varList = ['Temp', 'S']
-    od = _compute._add_missing_variables(od, varList)
+    od = _add_missing_variables(od, varList)
 
     # Compute mean
     if meanAxes is not None:
@@ -161,23 +157,23 @@ def TS_diagram(od,
                                          storeWeights=False, aliased=False)
         T = mean_ds['w_mean_Temp'].rename('Temp')
         S = mean_ds['w_mean_S'].rename('S')
-        lost_dims = list(set(od._ds['Temp'].dims)-set(T.dims))
+        lost_coords = list(set(od._ds['Temp'].dims)-set(T.coords))
     else:
         T = od._ds['Temp']
         S = od._ds['S']
-        lost_dims = []
+        lost_coords = []
 
     # Extract color field, and interpolate if needed
     if colorName is not None:
 
         # Add missing variables (use private)
-        _colorName = _compute._rename_aliased(od, colorName)
-        od = _compute._add_missing_variables(od, _colorName)
+        _colorName = _rename_aliased(od, colorName)
+        od = _add_missing_variables(od, _colorName)
 
         # Extract color (use public)
         color = od.dataset[colorName]
         if meanAxes is not None:
-            mean_ds = _compute.weighted_mean(od, varNameList=list(_colorName),
+            mean_ds = _compute.weighted_mean(od, varNameList=_colorName,
                                              axesList=meanAxes,
                                              storeWeights=False,
                                              aliased=False)
@@ -190,7 +186,7 @@ def TS_diagram(od,
         # Interpolation
         for dim in dims2interp:
             for axis in od.grid.axes.keys():
-                if dim in [od.grid.axes[axis].coords[k].name
+                if dim in [od.grid.axes[axis].coords[k]
                            for k in od.grid.axes[axis].coords.keys()]:
                     print('Interpolating [{}] along [{}]-axis.'
                           ''.format(colorName, axis))
@@ -205,11 +201,12 @@ def TS_diagram(od,
     # Compute density
     T = T.persist()
     S = S.persist()
+
     if Tlim is None:
         Tlim = [T.min().values, T.max().values]
+
     if Slim is None:
         Slim = [S.min().values, S.max().values]
-
     if dens is None:
         print('Isopycnals: ', end='')
         tlin = _xr.DataArray(_np.linspace(Tlim[0], Tlim[-1], 100), dims=('t'))
@@ -232,10 +229,6 @@ def TS_diagram(od,
         # Extract Density
         dens = odSigma0._ds['Sigma0'].where(odSigma0._ds['Temp'] > freez_point)
 
-    # Extract temp and salinity
-    t = dens['Temp']
-    s = dens['S']
-
     # Create axis
     if ax is None:
         ax = _plt.gca()
@@ -251,6 +244,7 @@ def TS_diagram(od,
         color = color.where(_np.logical_and(S > min(Slim), T < max(Slim)))
         color = color.stack(all_dims=color.dims)
         c = color.values
+
         # Create colorbar (stolen from xarray)
         cmap_kwargs['plot_data'] = c
         cmap_params = _xr.plot.utils._determine_cmap_params(**cmap_kwargs)
@@ -263,6 +257,8 @@ def TS_diagram(od,
                       extend=extend)
 
     # Plot isopycnals
+    t = dens['Temp']
+    s = dens['S']
     default_contour_kwargs = {'colors': 'gray'}
     contour_kwargs = {**default_contour_kwargs, **contour_kwargs}
     CS = ax.contour(s.values, t.values, dens.values, **contour_kwargs)
@@ -286,28 +282,41 @@ def TS_diagram(od,
     ax.set_ylim(Tlim)
 
     # Set title
-    title = ''
-    T = od._ds['Temp']
-    for dim in list(T.dims):
-        dim2rem = [d for d in T.dims if len(T[d]) == 1 and d != dim]
-        tit0 = T.squeeze(dim2rem).drop(dim2rem).isel({dim: 0})
-        tit0 = tit0._title_for_slice()
-        tit1 = T.squeeze(dim2rem).drop(dim2rem).isel({dim: -1})
-        tit1 = tit1._title_for_slice()
-        if tit0 == tit1:
-            tit = tit0
-        else:
-            if dim in lost_dims:
-                tit0 = tit0.replace(dim+' = ', dim+': mean from ')
+    title = []
+    all_coords = list(lost_coords) + list(T.coords)
+    skip_coords = ['X', 'Y', 'Xp1', 'Yp1']
+    if any([dim in od._ds.dims for dim in ['mooring', 'station', 'particle']]):
+        skip_coords = [coord
+                       for coord in od._ds.coords
+                       if 'X' in coord
+                       or 'Y' in coord]
+    for coord in all_coords:
+        if coord not in skip_coords:
+            if coord in list(lost_coords):
+                da = od._ds['Temp']
+                pref = '<'
+                suf = '>'
             else:
-                tit0 = tit0.replace(dim+' = ', dim+': from ')
-            tit1 = tit1.replace(dim+' = ', ' to ')
-            tit = tit0 + tit1
-        if title == '':
-            title = title + tit
-        else:
-            title = title + '\n' + tit
-    ax.set_title(title)
+                da = T
+                pref = ''
+                suf = ''
+            rng = [da[coord].min().values, da[coord].max().values]
+            units = da[coord].attrs.pop('units', '')
+            if units.lower() == 'none':
+                units = ''
+            if 'time' in coord:
+                for i, v in enumerate(rng):
+                    ts = _pd.to_datetime(str(v))
+                    rng[i] = ts.strftime('%Y-%m-%d %r')
+
+            if rng[0] == rng[-1]:
+                rng = '{}'.format(rng[0])
+            else:
+                rng = 'from {} to {}'.format(rng[0], rng[1])
+            title = title + ['{}{}{}: {} {}'
+                             ''.format(pref, coord, suf, rng, units)]
+
+    ax.set_title('\n'.join(title))
     _plt.tight_layout()
 
     return ax
@@ -382,8 +391,8 @@ def time_series(od,
         od = od.subsample.cutout(**cutout_kwargs)
 
     # Variable name
-    _varName = _compute._rename_aliased(od, varName)
-    od = _compute._add_missing_variables(od, _varName)
+    _varName = _rename_aliased(od, varName)
+    od = _add_missing_variables(od, _varName)
 
     # Get time name
     time_name = [dim
@@ -517,8 +526,8 @@ def horizontal_section(od, varName,
     listName = [varName]
     if contourName is not None:
         listName = listName + [contourName]
-    _listName = _compute._rename_aliased(od, listName)
-    od = _compute._add_missing_variables(od, _listName)
+    _listName = _rename_aliased(od, listName)
+    od = _add_missing_variables(od, _listName)
 
     # Apply mean and sum
     da, varName = _compute_mean_and_int(od, varName, meanAxes, intAxes)
@@ -825,8 +834,8 @@ def vertical_section(od,
     listName = [varName]
     if contourName is not None:
         listName = listName + [contourName]
-    _listName = _compute._rename_aliased(od, listName)
-    od = _compute._add_missing_variables(od, _listName)
+    _listName = _rename_aliased(od, listName)
+    od = _add_missing_variables(od, _listName)
 
     # Apply mean and sum
     da = od.dataset[varName]
