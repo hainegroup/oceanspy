@@ -13,8 +13,11 @@ import pandas as _pd
 
 # From oceanspy
 from . import compute as _compute
-from ._ospy_utils import (_rename_aliased, _check_instance)
+from ._ospy_utils import (_rename_aliased, _check_instance,
+                          _check_mean_and_int_axes)
 from .compute import (_add_missing_variables)
+from .compute import weighted_mean as _weighted_mean
+from .compute import integral as _integral
 
 # Additional dependencies
 try:
@@ -114,8 +117,7 @@ def TS_diagram(od,
                      'contour_kwargs': ['type(None)', 'dict'],
                      'clabel_kwargs': ['type(None)', 'dict'],
                      'cutout_kwargs': ['type(None)', 'dict'],
-                     'dens': ['type(None)', 'xarray.DataArray']
-                     })
+                     'dens': ['type(None)', 'xarray.DataArray']})
 
     if Tlim is not None:
         Tlim = _np.asarray(Tlim)
@@ -341,12 +343,12 @@ def time_series(od,
     meanAxes: 1D array_like, str, or bool
         List of axes over which to apply mean.
         If True,
-         set meanAxes=od.grid_coords (excluding time, mooring, station).
+         set meanAxes=od.grid_coords.
         If False, does not apply mean.
     intAxes: 1D array_like, str, or bool
         List of axes over which to integrate.
         Integration is performed after mean.
-        If True, set intAxes=od.grid_coords (excluding time, mooring, station).
+        If True, set intAxes=od.grid_coords.
         If False, does not apply int.
     cutout_kwargs: dict
         Keyword arguments for subsample.cutout
@@ -365,22 +367,20 @@ def time_series(od,
     ----------
     http://xarray.pydata.org/en/stable/generated/xarray.plot.line.html#xarray.plot.line
     """
+
     # Check parameters
-    if not isinstance(od, _ospy.OceanDataset):
-        raise TypeError('`od` must be OceanDataset')
+    _check_instance({'od': od,
+                     'varName': varName,
+                     'cutout_kwargs': cutout_kwargs},
+                    {'od': 'oceanspy.OceanDataset',
+                     'varName': 'str',
+                     'cutout_kwargs': ['type(None)', 'dict']})
 
-    if not isinstance(varName, str):
-        raise TypeError('`varName` must be str')
-
+    # Check mean and int axes
     meanAxes, intAxes = _check_mean_and_int_axes(od=od,
                                                  meanAxes=meanAxes,
                                                  intAxes=intAxes,
-                                                 exclude=['time',
-                                                          'mooring',
-                                                          'station'])
-
-    if not isinstance(cutout_kwargs, (dict, type(None))):
-        raise ValueError('`cutout_kwargs` must be dict or None')
+                                                 exclude=['time'])
 
     # Handle kwargs
     if cutout_kwargs is None:
@@ -394,13 +394,17 @@ def time_series(od,
     _varName = _rename_aliased(od, varName)
     od = _add_missing_variables(od, _varName)
 
+    # Mean and sum
+    da, varName = _compute_mean_and_int(od, varName, meanAxes, intAxes)
+
     # Get time name
     time_name = [dim
                  for dim in od.grid_coords['time']
-                 if dim in od.dataset[varName].dims][0]
-
-    # Mean and sum
-    da, varName = _compute_mean_and_int(od, varName, meanAxes, intAxes)
+                 if dim in da.dims]
+    if len(time_name) != 1:
+        raise ValueError("Couldn't find time dimension")
+    else:
+        time_name = time_name[0]
 
     # Check
     if len(da.shape) > 2:
@@ -994,6 +998,27 @@ def vertical_section(od,
         return p
 
 
+def _compute_mean_and_int(od, varName, meanAxes, intAxes):
+
+    # Mean and sum
+    if meanAxes is not False:
+        ds = _weighted_mean(od, varNameList=[varName],
+                            axesList=meanAxes, storeWeights=False)
+        for var in ds.data_vars:
+            varName = var
+        od = od.merge_into_oceandataset(ds)
+
+    if intAxes is not False:
+        ds = _integral(od, varNameList=[varName], axesList=intAxes)
+        for var in ds.data_vars:
+            varName = var
+        od = od.merge_into_oceandataset(ds)
+
+    # Extract da
+    da = od.dataset[varName]
+    return da, varName
+
+
 class _plotMethdos(object):
     """
     Enables use of oceanspy.plot functions as attributes on a OceanDataset.
@@ -1018,70 +1043,3 @@ class _plotMethdos(object):
     @_functools.wraps(vertical_section)
     def vertical_section(self, **kwargs):
         return vertical_section(self._od, **kwargs)
-
-
-def _check_mean_and_int_axes(od, meanAxes, intAxes, exclude):
-    check1 = (meanAxes is True and intAxes is not False)
-    check2 = (intAxes is True and meanAxes is not False)
-    if check1 or check2:
-        raise ValueError('If one between `meanAxes` and `intAxes` is True,'
-                         ' the other must be False')
-
-    if not isinstance(meanAxes, bool):
-        meanAxes = _np.asarray(meanAxes, dtype='str')
-        if meanAxes.ndim == 0:
-            meanAxes = meanAxes.reshape(1)
-        elif meanAxes.ndim > 1:
-            raise TypeError('Invalid `meanAxes`')
-        axis_error = [axis for axis in meanAxes if axis not in od.grid_coords]
-        if len(axis_error) != 0:
-            raise ValueError('{} are not in od.grid_coords'
-                             ' and can not be averaged'.format(axis_error))
-    elif meanAxes is True:
-        meanAxes = [coord for coord in od.grid_coords if coord not in exclude]
-    else:
-        meanAxes = []
-
-    if not isinstance(intAxes, bool):
-        intAxes = _np.asarray(intAxes, dtype='str')
-        if intAxes.ndim == 0:
-            intAxes = intAxes.reshape(1)
-        elif intAxes.ndim > 1:
-            raise TypeError('Invalid `meanAxes`')
-        axis_error = [axis for axis in intAxes if axis not in od.grid_coords]
-        if len(axis_error) != 0:
-            raise ValueError('{} are not in od.grid_coords'
-                             ' and can not be averaged'.format(axis_error))
-    elif intAxes is True:
-        intAxes = [coord
-                   for coord in od.grid_coords
-                   if coord not in exclude]
-    else:
-        intAxes = []
-
-    if len(intAxes) > 0 and len(meanAxes) > 0:
-        if set(meanAxes).issubset(intAxes) or set(intAxes).issubset(meanAxes):
-            raise ValueError('`meanAxes` and `intAxes`'
-                             ' can not contain the same Axes')
-
-    return meanAxes, intAxes
-
-
-def _compute_mean_and_int(od, varName, meanAxes, intAxes):
-    # Mean and sum
-    if len(meanAxes) != 0:
-        ds = _compute.weighted_mean(od, varNameList=[varName],
-                                    axesList=meanAxes, storeWeights=False)
-        for var in ds.data_vars:
-            varName = var
-        od = od.merge_into_oceandataset(ds)
-
-    if len(intAxes) != 0:
-        ds = _compute.integral(od, varNameList=[varName], axesList=intAxes)
-        for var in ds.data_vars:
-            varName = var
-        od = od.merge_into_oceandataset(ds)
-
-    # Extract da
-    da = od.dataset[varName]
-    return da, varName

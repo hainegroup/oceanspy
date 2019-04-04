@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 # From OceanSpy
 from oceanspy import open_oceandataset
-from oceanspy.plot import TS_diagram
+from oceanspy.plot import TS_diagram, time_series
 
 # Directory
 Datadir = './oceanspy/new_tests/Data/'
@@ -103,8 +103,38 @@ def test_TS_diagram_field(od_in, meanAxes, colorName):
     assert isinstance(ax, plt.Axes)
 
 
+# Time series
+@pytest.mark.parametrize("od_in", [od])
+@pytest.mark.parametrize("varName, meanAxes, intAxes",
+                         [('Depth', True, False),
+                          ('Temp', None, False),
+                          ('Temp', ['X'], False),
+                          ('Temp', True, True)])
+def test_timeSeries_error(od_in, varName, meanAxes, intAxes):
+    if meanAxes is None:
+        with pytest.raises(TypeError):
+            time_series(od_in, varName=varName,
+                        meanAxes=meanAxes, intAxes=intAxes)
+    else:
+        with pytest.raises(ValueError):
+            time_series(od_in, varName=varName,
+                        meanAxes=meanAxes, intAxes=intAxes)
+
+
+@pytest.mark.parametrize("od_in", [od, od_moor, od_surv, od_part])
+def test_timeSeries(od_in):
+    cutout_kwargs = {'XRange': [od_in.dataset['XC'].min().values,
+                                od_in.dataset['XC'].max().values]}
+    ax = time_series(od_in, varName='Temp', intAxes=True,
+                     cutout_kwargs=cutout_kwargs)
+    assert isinstance(ax, plt.Axes)
+
+
 @pytest.mark.parametrize("od_in", [od])
 def test_shortcuts(od_in):
 
     ax = od_in.plot.TS_diagram()
+    assert isinstance(ax, plt.Axes)
+
+    ax = od_in.plot.time_series(varName='Temp', meanAxes=True)
     assert isinstance(ax, plt.Axes)
