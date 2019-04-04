@@ -54,7 +54,8 @@ def _check_instance(objs, classinfos):
                 package = this_classinfo.split('.')[0]
                 exec('import {}'.format(package))
 
-            check = check + [eval('isinstance(value, {})'.format(this_classinfo))]
+            check = check + [eval('isinstance(value, {})'
+                                  ''.format(this_classinfo))]
 
         if not any(check):
             raise TypeError("`{}` must be {}".format(key, classinfo))
@@ -205,3 +206,42 @@ def _rename_aliased(od, varNameList):
         varNameListIN = varNameListIN[0]
 
     return varNameListIN
+
+
+def _check_mean_and_int_axes(od, meanAxes, intAxes, exclude):
+
+    # Check type
+    _check_instance({'meanAxes': meanAxes,
+                     'intAxes': intAxes,
+                     'exclude': exclude},
+                    {'meanAxes': ['bool', 'list', 'str'],
+                     'intAxes': ['bool', 'list', 'str'],
+                     'exclude': 'list'})
+    if not isinstance(meanAxes, bool):
+        meanAxes = _check_list_of_string(meanAxes, 'meanAxes')
+        if isinstance(meanAxes, str):
+            meanAxes = [meanAxes]
+    if not isinstance(intAxes, bool):
+        intAxes = _check_list_of_string(intAxes, 'intAxes')
+        if isinstance(intAxes, str):
+            intAxes = [intAxes]
+
+    # Check both True
+    check1 = (meanAxes is True and intAxes is not False)
+    check2 = (intAxes is True and meanAxes is not False)
+    if check1 or check2:
+        raise ValueError('If one between `meanAxes` and `intAxes` is True,'
+                         ' the other must be False')
+
+    # Get axes to pass
+    if meanAxes is True:
+        meanAxes = [coord
+                    for coord in od.grid_coords
+                    if coord not in exclude]
+
+    if intAxes is True:
+        intAxes = [coord
+                   for coord in od.grid_coords
+                   if coord not in exclude]
+
+    return meanAxes, intAxes
