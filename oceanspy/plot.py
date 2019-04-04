@@ -1,8 +1,6 @@
 """
 Plot using OceanDataset objects.
 """
-# TODO: add test that check squeezing!
-
 # Required dependencies
 import xarray as _xr
 import oceanspy as _ospy
@@ -14,7 +12,7 @@ import pandas as _pd
 # From oceanspy
 from . import compute as _compute
 from ._ospy_utils import (_rename_aliased, _check_instance,
-                          _check_mean_and_int_axes)
+                          _check_mean_and_int_axes, _check_options)
 from .compute import (_add_missing_variables)
 from .compute import weighted_mean as _weighted_mean
 from .compute import integral as _integral
@@ -477,42 +475,36 @@ def horizontal_section(od, varName,
     ----------
     http://xarray.pydata.org/en/stable/plotting.html
     """
+
     # Check parameters
-    if 'mooring' in od.grid_coords or 'station' in od.grid_coords:
-        raise ValueError('`od` can not be a mooring or a survey')
+    _check_instance({'od': od,
+                     'varName': varName,
+                     'plotType': plotType,
+                     'use_coords': use_coords,
+                     'contourName': contourName,
+                     'contour_kwargs': contour_kwargs,
+                     'clabel_kwargs': clabel_kwargs,
+                     'cutout_kwargs': cutout_kwargs},
+                    {'od': 'oceanspy.OceanDataset',
+                     'varName': 'str',
+                     'plotType': 'str',
+                     'use_coords': 'bool',
+                     'contourName': ['type(None)', 'str'],
+                     'contour_kwargs': ['type(None)', 'dict'],
+                     'clabel_kwargs': ['type(None)', 'dict'],
+                     'cutout_kwargs': ['type(None)', 'dict']})
 
-    if not isinstance(od, _ospy.OceanDataset):
-        raise TypeError('`od` must be OceanDataset')
+    # Check oceandataset
+    wrong_dims = ['mooring', 'station', 'particle']
+    if any([dim in od._ds.dims for dim in wrong_dims]):
+        raise ValueError('`plot.vertical_section` does not support'
+                         ' `od` with the following dimensions: '
+                         '{}'.format(wrong_dims))
 
-    if not isinstance(varName, str):
-        raise TypeError('`varName` must be str')
-
-    plotTypes = ['contourf', 'contour', 'imshow', 'pcolormesh']
-    if not isinstance(plotType, str):
-        raise TypeError('`plotType` must be str')
-    elif plotType not in plotTypes:
-        raise TypeError('plotType [{}] not available.'
-                        ' Options are: {}'.format(plotType, plotTypes))
-
-    if not isinstance(use_coords, bool):
-        raise TypeError('`use_coords` must be bool')
-
-    if not isinstance(contourName, (type(None), str)):
-        raise TypeError('`contourName` must be str or None')
-
-    meanAxes, intAxes = _check_mean_and_int_axes(od=od,
-                                                 meanAxes=meanAxes,
-                                                 intAxes=intAxes,
-                                                 exclude=['X', 'Y'])
-
-    if not isinstance(contour_kwargs, (type(None), dict)):
-        raise TypeError('`contour_kwargs` must be None or dict')
-
-    if not isinstance(clabel_kwargs, (type(None), dict)):
-        raise TypeError('`clabel_kwargs` must be None or dict')
-
-    if not isinstance(cutout_kwargs, (type(None), dict)):
-        raise TypeError('`cutout_kwargs` must be None or dict')
+    # Check plot
+    _check_options(name='plotType',
+                   selected=plotType,
+                   options=['contourf', 'contour', 'imshow', 'pcolormesh'])
 
     # Handle kwargs
     if contour_kwargs is None:
@@ -533,11 +525,17 @@ def horizontal_section(od, varName,
     _listName = _rename_aliased(od, listName)
     od = _add_missing_variables(od, _listName)
 
+    # Check mean and int axes
+    meanAxes, intAxes = _check_mean_and_int_axes(od=od,
+                                                 meanAxes=meanAxes,
+                                                 intAxes=intAxes,
+                                                 exclude=['X', 'Y'])
+
     # Apply mean and sum
     da, varName = _compute_mean_and_int(od, varName, meanAxes, intAxes)
 
     # SQUEEZE! Otherwise animation don't show up
-    # because xarray make a faceted plot
+    # because xarray makes a faceted plot
     da = da.squeeze()
 
     # Get dimension names
@@ -553,7 +551,7 @@ def horizontal_section(od, varName,
                                                         intAxes)
 
         # SQUEEZE! Otherwise animation don't show up
-        # because xarray make a faceted plot
+        # because xarray makes a faceted plot
         da_contour = da_contour.squeeze()
 
         # Get dimension names
@@ -564,39 +562,42 @@ def horizontal_section(od, varName,
                        for dim in od.grid_coords['Y']
                        if dim in da_contour.dims][0]
 
-    # Check dimensions
+    # Get dimensions
     dims = list(da.dims)
     dims.remove(X_name)
     dims.remove(Y_name)
 
     # Use coordinates
     if use_coords:
-        if X_name == 'X' and Y_name == 'Y':
+        al_dim = {}
+        for dim in ['X', 'Y', 'Xp1', 'Yp1']:
+            al_dim[dim] = _rename_aliased(od, varNameList=dim)
+
+        if X_name == al_dim['X'] and Y_name == al_dim['Y']:
             point = 'C'
-        elif X_name == 'Xp1' and Y_name == 'Y':
+        elif X_name == al_dim['Xp1'] and Y_name == al_dim['Y']:
             point = 'U'
-        elif X_name == 'X' and Y_name == 'Yp1':
+        elif X_name == al_dim['X'] and Y_name == al_dim['Yp1']:
             point = 'V'
-        elif X_name == 'Xp1' and Y_name == 'Yp1':
+        else:
             point = 'G'
-        X_name = 'X'+point
-        Y_name = 'Y'+point
+        X_name = _rename_aliased(od, varNameList='X'+point)
+        Y_name = _rename_aliased(od, varNameList='Y'+point)
 
         if contourName is not None:
-            if all([X_name_cont == 'X',
-                    Y_name_cont == 'Y']):
+            if all([X_name_cont == al_dim['X'],
+                    Y_name_cont == al_dim['Y']]):
                 point_cont = 'C'
-            elif all([X_name_cont == 'Xp1',
-                      Y_name_cont == 'Y']):
+            elif all([X_name_cont == al_dim['Xp1'],
+                      Y_name_cont == al_dim['Y']]):
                 point_cont = 'U'
-            elif all([X_name_cont == 'X',
-                      Y_name_cont == 'Yp1']):
+            elif all([X_name_cont == al_dim['X'],
+                      Y_name_cont == al_dim['Yp1']]):
                 point_cont = 'V'
-            elif all([X_name_cont == 'Xp1',
-                      Y_name_cont == 'Yp1']):
+            else:
                 point_cont = 'G'
-            X_name_cont = 'X'+point_cont
-            Y_name_cont = 'Y'+point_cont
+            X_name_cont = _rename_aliased(od, varNameList='X'+point_cont)
+            Y_name_cont = _rename_aliased(od, varNameList='Y'+point_cont)
 
     # Pop from kwargs
     ax = kwargs.pop('ax', None)
@@ -649,6 +650,13 @@ def horizontal_section(od, varName,
             subplot_kws = {'projection': od.projection}
         kwargs['subplot_kws'] = subplot_kws
 
+    else:
+        raise ValueError('There are too many dimensions: {}.'
+                         'A maximum of 3 dimensions (including time)'
+                         ' are supported.'
+                         'Reduce the number of dimensions using'
+                         '`meanAxes` and/or `intAxes`'.format(dims))
+
     # Add transform
     if transform is None and od.projection is not None:
         kwargs['transform'] = _ccrs.PlateCarree()
@@ -672,8 +680,8 @@ def horizontal_section(od, varName,
                 'add_labels': False,
                 **contour_kwargs}
         if ax is not None:
-            cont = da_contour.plot.contour(**args, **clabel_kwargs)
-            _plt.clabel(cont)
+            cont = da_contour.plot.contour(**args)
+            _plt.clabel(cont, **clabel_kwargs)
         else:
             for i, thisax in enumerate(p.axes.flat):
                 if extra_name in da_contour.dims:
@@ -686,17 +694,18 @@ def horizontal_section(od, varName,
     # Labels and return
     add_labels = kwargs.pop('add_labels', None)
     if ax is not None:
-        if add_labels is not False:
-            try:
-                gl = ax.gridlines(crs=transform,
-                                  draw_labels=True)
-                gl.xlabels_top = False
-                gl.ylabels_right = False
-            except TypeError:
-                # Gridlines don't work with all projections
-                pass
         if od.projection is None:
             _plt.tight_layout()
+        else:
+            if add_labels is not False:
+                try:
+                    gl = ax.gridlines(crs=transform,
+                                      draw_labels=True)
+                    gl.xlabels_top = False
+                    gl.ylabels_right = False
+                except TypeError:
+                    # Gridlines don't work with all projections
+                    pass
         return ax
     else:
         return p
@@ -769,50 +778,38 @@ def vertical_section(od,
     ----------
     http://xarray.pydata.org/en/stable/plotting.html
     """
+
     # Check parameters
-    if not isinstance(od, _ospy.OceanDataset):
-        raise TypeError('`od` must be OceanDataset')
+    _check_instance({'od': od,
+                     'varName': varName,
+                     'plotType': plotType,
+                     'use_dist': use_dist,
+                     'subsampMethod': subsampMethod,
+                     'contourName': contourName,
+                     'contour_kwargs': contour_kwargs,
+                     'clabel_kwargs': clabel_kwargs,
+                     'subsamp_kwargs': subsamp_kwargs},
+                    {'od': 'oceanspy.OceanDataset',
+                     'varName': 'str',
+                     'plotType': 'str',
+                     'use_dist': 'bool',
+                     'subsampMethod': ['type(None)', 'str'],
+                     'contourName': ['type(None)', 'str'],
+                     'contour_kwargs': ['type(None)', 'dict'],
+                     'clabel_kwargs': ['type(None)', 'dict'],
+                     'subsamp_kwargs': ['type(None)', 'dict']})
 
-    if not isinstance(varName, str):
-        raise TypeError('`varName` must be str')
+    # Check plot
+    _check_options(name='plotType',
+                   selected=plotType,
+                   options=['contourf', 'contour', 'imshow', 'pcolormesh'])
 
-    plotTypes = ['contourf', 'contour', 'imshow', 'pcolormesh']
-    if not isinstance(plotType, str):
-        raise TypeError('`plotType` must be str')
-    elif plotType not in plotTypes:
-        raise TypeError('plotType [{}] not available. Options are:'
-                        ' {}'.format(plotType, plotTypes))
-
-    if not isinstance(use_dist, bool):
-        raise TypeError('`use_dist` must be bool')
-
+    # Check subsample
     if subsampMethod is not None:
-        subsampMethods = ['mooring_array', 'survey_stations']
-        if not isinstance(subsampMethod, str):
-            raise TypeError('`subsampMethod` must be str or None')
-        elif subsampMethod not in subsampMethods:
-            raise TypeError('subsampMethod [{}] not available.'
-                            ' Options are: {}'.format(subsampMethod,
-                                                      subsampMethods))
-
-    if not isinstance(contourName, (type(None), str)):
-        raise TypeError('`contourName` must be str or None')
-
-    meanAxes, intAxes = _check_mean_and_int_axes(od=od,
-                                                 meanAxes=meanAxes,
-                                                 intAxes=intAxes,
-                                                 exclude=['mooring',
-                                                          'station',
-                                                          'X', 'Y', 'Z'])
-
-    if not isinstance(contour_kwargs, (type(None), dict)):
-        raise TypeError('`contour_kwargs` must be None or dict')
-
-    if not isinstance(clabel_kwargs, (type(None), dict)):
-        raise TypeError('`clabel_kwargs` must be None or dict')
-
-    if not isinstance(subsamp_kwargs, (type(None), dict)):
-        raise TypeError('`subsamp_kwargs` must be None or dict')
+        # Check plot
+        _check_options(name='subsampMethod',
+                       selected=subsampMethod,
+                       options=['mooring_array', 'survey_stations'])
 
     # Handle kwargs
     if contour_kwargs is None:
@@ -823,7 +820,6 @@ def vertical_section(od,
         cutout_kwargs = {}
 
     # For animation purposes.
-    # TODO: take out useless variables?
     if len(cutout_kwargs) != 0:
         od = od.subsample.cutout(**cutout_kwargs)
 
@@ -831,8 +827,16 @@ def vertical_section(od,
     if subsamp_kwargs is not None:
         if subsampMethod == 'mooring_array':
             od = od.subsample.mooring_array(**subsamp_kwargs)
-        elif subsampMethod == 'survey_stations':
+        else:
+            # survey_stations
             od = od.subsample.survey_stations(**subsamp_kwargs)
+
+    # Check oceandataset
+    needed_dims = ['mooring', 'station']
+    if not any([dim in od.grid_coords.keys() for dim in needed_dims]):
+        raise ValueError('`plot.vertical_section` only supports'
+                         ' `od` with one of the following grid coordinates: '
+                         '{}'.format(needed_dims))
 
     # Check variables and add
     listName = [varName]
@@ -841,45 +845,21 @@ def vertical_section(od,
     _listName = _rename_aliased(od, listName)
     od = _add_missing_variables(od, _listName)
 
+    # Check mean and int axes
+    meanAxes, intAxes = _check_mean_and_int_axes(od=od,
+                                                 meanAxes=meanAxes,
+                                                 intAxes=intAxes,
+                                                 exclude=['mooring',
+                                                          'station',
+                                                          'X', 'Y', 'Z'])
+
     # Apply mean and sum
-    da = od.dataset[varName]
-    if 'time' in da.dims or 'time_midp' in da.dims:
-        da, varName = _compute_mean_and_int(od, varName, meanAxes, intAxes)
+    da, varName = _compute_mean_and_int(od, varName, meanAxes, intAxes)
 
     # SQUEEZE! Otherwise animation don't show up
-    # because xarray make a faceted plot
+    # because xarray makes a faceted plot
     da = da.squeeze()
-    time_coords = {timeName: da[timeName]
-                   for timeName in ['time', 'time_midp']
-                   if timeName in da.coords}
-    if 'mooring' in od.grid_coords:
-        if 'Xp1' in da.dims:
-            print('Regridding [{}] along [{}]-axis.'.format(varName, 'X'))
-            da_attrs = da.attrs
-            da = od.grid.interp(da, 'X')
-            da.attrs = da_attrs
-        if 'Yp1' in da.dims:
-            print('Regridding [{}] along [{}]-axis.'.format(varName, 'Y'))
-            da_attrs = da.attrs
-            da = od.grid.interp(da, 'Y')
-            da.attrs = da_attrs
-        hor_name = [dim
-                    for dim in od.grid_coords['mooring']
-                    if dim in da.dims][0]
-        da = da.assign_coords(**time_coords)
-        if hor_name+'_dist' in od._ds.coords:
-            da = da.assign_coords(**{hor_name+'_dist':
-                                     od._ds[hor_name+'_dist']})
-        for toRem in ['X', 'Y', 'Xp1', 'Yp1']:
-            if toRem in da.coords:
-                da = da.drop(toRem)
-    elif 'station' in od.grid_coords:
-        hor_name = [dim
-                    for dim in od.grid_coords['station']
-                    if dim in da.dims][0]
-    else:
-        raise ValueError('The oceandataset must be subsampled'
-                         ' using mooring or survey')
+    da, hor_name = _Vsection_regrid(od, da, varName)
     ver_name = [dim for dim in od.grid_coords['Z'] if dim in da.dims][0]
     da = da.squeeze()
 
@@ -888,45 +868,24 @@ def vertical_section(od,
 
         # Apply mean and sum
         da_contour = od.dataset[contourName]
-        if 'time' in da_contour.dims or 'time_midp' in da_contour.dims:
-            da_contour, contourName = _compute_mean_and_int(od, contourName,
-                                                            meanAxes, intAxes)
+        da_contour, contourName = _compute_mean_and_int(od, contourName,
+                                                        meanAxes, intAxes)
 
         # SQUEEZE! Otherwise animation don't show up
-        # because xarray make a faceted plot
+        # because xarray makes a faceted plot
         da_contour = da_contour.squeeze()
 
         # Get dimension names
-        # TODO: make interpolation work with aliases
-        if 'mooring' in od.grid_coords:
-            if 'Xp1' in da_contour.dims:
-                print('Regridding [{}] along [{}]-axis.'
-                      ''.format(contourName, 'X'))
-                da_contour_attrs = da_contour.attrs
-                da_contour = od.grid.interp(da_contour, 'X')
-                da_contour.attrs = da_contour_attrs
-            if 'Yp1' in da.dims:
-                print('Regridding [{}] along [{}]-axis.'
-                      ''.format(contourName, 'Y'))
-                da_contour_attrs = da_contour.attrs
-                da_contour = od.grid.interp(da_contour, 'Y')
-                da_contour.attrs = da_contour_attrs
-            hor_name_cont = [dim
-                             for dim in od.grid_coords['mooring']
-                             if dim in da_contour.dims][0]
-            if hor_name+'_dist' in od._ds.coords:
-                toassign = {hor_name+'_dist': od._ds[hor_name+'_dist']}
-                da_contour = da_contour.assign_coords(**toassign)
-            for toRem in ['X', 'Y', 'Xp1', 'Yp1']:
-                if toRem in da_contour.coords:
-                    da_contour = da_contour.drop(toRem)
-        elif 'station' in od.grid_coords:
-            hor_name_cont = [dim
-                             for dim in od.grid_coords['station']
-                             if dim in da_contour.dims][0]
+        da_contour, hor_name_cont = _Vsection_regrid(od,
+                                                     da_contour, contourName)
         ver_name_cont = [dim
                          for dim in od.grid_coords['Z']
-                         if dim in da_contour.dims][0]
+                         if dim in da_contour.dims]
+        if len(ver_name_cont) != 1:
+            raise ValueError("Couldn't find Z dimension of [{}]"
+                             "".format(contourName))
+        else:
+            ver_name_cont = ver_name_cont[0]
         da_contour = da_contour.squeeze()
 
     # Check dimensions
@@ -936,14 +895,9 @@ def vertical_section(od,
 
     # Use distances
     if use_dist:
-        if contourName is None:
-            if hor_name + '_dist' in da.coords:
-                hor_name = hor_name + '_dist'
-        else:
-            check1 = hor_name + '_dist' in da.coords
-            if check1 and hor_name_cont + '_dist' in da_contour.coords:
-                hor_name = hor_name + '_dist'
-                hor_name_cont = hor_name_cont + '_dist'
+        if hor_name + '_dist' in da.coords:
+            hor_name = hor_name + '_dist'
+            hor_name_cont = hor_name
 
     # Pop from kwargs
     ax = kwargs.pop('ax', None)
@@ -955,8 +909,7 @@ def vertical_section(od,
         if ax is None:
             ax = _plt.axes()
         kwargs['ax'] = ax
-
-    elif len(dims) == 1:
+    else:
         # Multiple plots:
         extra_name = dims[0]
 
@@ -979,8 +932,8 @@ def vertical_section(od,
                 'colors': 'gray',
                 'add_labels': False, **contour_kwargs}
         if ax is not None:
-            cont = da_contour.plot.contour(**args, **clabel_kwargs)
-            _plt.clabel(cont)
+            cont = da_contour.plot.contour(**args)
+            _plt.clabel(cont, **clabel_kwargs)
         else:
             for i, thisax in enumerate(p.axes.flat):
                 if extra_name in da_contour.dims:
@@ -1017,6 +970,56 @@ def _compute_mean_and_int(od, varName, meanAxes, intAxes):
     # Extract da
     da = od.dataset[varName]
     return da, varName
+
+
+def _Vsection_regrid(od, da, varName):
+
+    if 'mooring' in od.grid_coords:
+        # Time coordinates
+        time_coords = {timeName: da[timeName]
+                       for timeName in od.grid_coords['time'].keys()
+                       if timeName in da.coords}
+
+        # Regrid to center dim
+        for axis in ['X', 'Y']:
+            dim2regrid = [dim
+                          for dim in od.grid_coords[axis]
+                          if (od.grid_coords[axis][dim] is not None
+                              and dim in da.dims)]
+            if len(dim2regrid) != 0:
+                print('Regridding [{}] along [{}]-axis.'
+                      ''.format(varName, axis))
+                da_attrs = da.attrs
+                da = od.grid.interp(da, axis)
+                da.attrs = da_attrs
+            hor_name = [dim
+                        for dim in od.grid_coords['mooring']
+                        if dim in da.dims]
+            if len(hor_name) != 1:
+                raise ValueError("Couldn't find `mooring` dimension of [{}]"
+                                 "".format(varName))
+            else:
+                hor_name = hor_name[0]
+            da = da.assign_coords(**time_coords)
+            if hor_name+'_dist' in od._ds.coords:
+                da = da.assign_coords(**{hor_name+'_dist':
+                                         od._ds[hor_name+'_dist']})
+            for toRem in ['X', 'Y', 'Xp1', 'Yp1']:
+                toRem = _rename_aliased(od, varNameList=toRem)
+                if toRem in da.coords:
+                    da = da.drop(toRem)
+    else:
+        # Station
+        hor_name = [dim
+                    for dim in od.grid_coords['station']
+                    if dim in da.dims]
+        if len(hor_name) != 1:
+            raise ValueError("Couldn't find `station` dimension of [{}]"
+                             "".format(varName))
+        else:
+            hor_name = hor_name[0]
+
+    return da, hor_name
 
 
 class _plotMethdos(object):

@@ -218,13 +218,13 @@ def _check_mean_and_int_axes(od, meanAxes, intAxes, exclude):
                      'intAxes': ['bool', 'list', 'str'],
                      'exclude': 'list'})
     if not isinstance(meanAxes, bool):
-        meanAxes = _check_list_of_string(meanAxes, 'meanAxes')
-        if isinstance(meanAxes, str):
-            meanAxes = [meanAxes]
+        meanAxes = _check_list_of_string(meanAxes, 'meanAxes') 
     if not isinstance(intAxes, bool):
         intAxes = _check_list_of_string(intAxes, 'intAxes')
-        if isinstance(intAxes, str):
-            intAxes = [intAxes]
+    if isinstance(meanAxes, str):
+        meanAxes = [meanAxes]
+    if isinstance(intAxes, str):
+        intAxes = [intAxes]
 
     # Check both True
     check1 = (meanAxes is True and intAxes is not False)
@@ -232,16 +232,30 @@ def _check_mean_and_int_axes(od, meanAxes, intAxes, exclude):
     if check1 or check2:
         raise ValueError('If one between `meanAxes` and `intAxes` is True,'
                          ' the other must be False')
-
+    
     # Get axes to pass
     if meanAxes is True:
         meanAxes = [coord
                     for coord in od.grid_coords
                     if coord not in exclude]
+    elif not isinstance(meanAxes, bool):
+        if any([axis in exclude for axis in meanAxes]):
+            raise ValueError('These axes can not be in `meanAxes`:'
+                             ' {}'.format(exclude))
 
     if intAxes is True:
         intAxes = [coord
                    for coord in od.grid_coords
                    if coord not in exclude]
+    elif not isinstance(intAxes, bool):
+        if any([axis in exclude for axis in intAxes]):
+            raise ValueError('These axes can not be in `intAxes`:'
+                             ' {}'.format(exclude))
 
     return meanAxes, intAxes
+
+
+def _check_options(name, selected, options):
+    if selected not in options:
+        raise ValueError('`{}` [{}] not available.'
+                         ' Options are: {}'.format(name, selected, options))
