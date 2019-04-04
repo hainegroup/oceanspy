@@ -385,37 +385,33 @@ def densjmd95(s,t,p):
                        )
                )
     # secant bulk modulus of sea water at pressure p
-    bulkmod = ( bulkmod
-              + p*(   eosJMDCKP[0]
+    bulkmod = (bulkmod
+               + p*(eosJMDCKP[0]
                     + eosJMDCKP[1]*t
                     + eosJMDCKP[2]*t2
-                    + eosJMDCKP[3]*t3
-                  )
-              + p*s*(   eosJMDCKP[4]
+                    + eosJMDCKP[3]*t3)
+               + p*s*(eosJMDCKP[4]
                       + eosJMDCKP[5]*t
-                      + eosJMDCKP[6]*t2
-                    )
-              + p*s3o2*eosJMDCKP[7]
-              + p2*(   eosJMDCKP[8]
+                      + eosJMDCKP[6]*t2)
+               + p*s3o2*eosJMDCKP[7]
+               + p2*(eosJMDCKP[8]
                      + eosJMDCKP[9]*t
-                     + eosJMDCKP[10]*t2
-                   )
-              + p2*s*(  eosJMDCKP[11]
+                     + eosJMDCKP[10]*t2)
+              + p2*s*(eosJMDCKP[11]
                       + eosJMDCKP[12]*t
-                      + eosJMDCKP[13]*t2
-                     )
-               )
-    
+                      + eosJMDCKP[13]*t2))
     rho = rho / (1. - p/bulkmod)
 
     return rho
 
 
-def densmdjwf(s,t,p):
+def densmdjwf(s, t, p):
     """
-    Density of Sea Water using McDougall et al. 2003 (JAOT 20) polynomial (Gibbs Potential) [McJa03]_.
-    mdjwf.py: https://github.com/MITgcm/MITgcm/blob/master/utils/python/MITgcmutils/MITgcmutils/mdjwf.py
-    
+    Density of Sea Water using McDougall et al. 2003 (JAOT 20)
+     polynomial (Gibbs Potential) [McJa03]_.
+    mdjwf.py: https://github.com/
+     MITgcm/MITgcm/blob/master/utils/python/MITgcmutils/MITgcmutils/mdjwf.py
+
     Parameters
     ----------
     s: xarray.DatArray, array-like
@@ -425,51 +421,62 @@ def densmdjwf(s,t,p):
     p: xarray.DatArray, array-like
         pressure [dbar]
         (p may have dims 1x1, mx1, 1xn or mxn for S(mxn) )
-        
+
     Returns
     -------
     rho: xarray.DatArray, array-like
         density  [kg/m^3]
-        
+
     References
-    ----------    
-    .. [McJa03] McDougall, T.J., D.R. Jackett, D.G. Wright, and R. Feistel, 2003: Accurate and Computationally Efficient Algorithms for Potential Temperature and Density of Seawater. J. Atmos. Oceanic Technol., 20, 730–741, https://doi.org/10.1175/1520-0426(2003)20<730:AACEAF>2.0.CO;2
+    ----------
+    .. [McJa03]
+     McDougall, T.J., D.R. Jackett, D.G. Wright, and R. Feistel, 2003:
+     Accurate and Computationally Efficient Algorithms for
+      Potential Temperature and Density of Seawater.
+      J. Atmos. Oceanic Technol., 20, 730–741,
+      https://doi.org/10.1175/1520-0426(2003)20<730:AACEAF>2.0.CO;2
     """
-    
-    if isinstance(s, _xr.DataArray): s = s.astype('float') 
-    else:                            s = _np.asfarray(s)
-    if isinstance(t, _xr.DataArray): t = t.astype('float') 
-    else:                            t = _np.asfarray(t)
-    if isinstance(p, _xr.DataArray): p = p.astype('float') 
-    else:                            p = _np.asfarray(p)
+
+    if isinstance(s, _xr.DataArray):
+        s = s.astype('float')
+    else:
+        s = _np.asfarray(s)
+    if isinstance(t, _xr.DataArray):
+        t = t.astype('float')
+    else:
+        t = _np.asfarray(t)
+    if isinstance(p, _xr.DataArray):
+        p = p.astype('float')
+    else:
+        p = _np.asfarray(p)
 
     # coefficients nonlinear equation of state in pressure coordinates for
-    eosMDJWFnum =  [ 7.35212840e+00,
-                    -5.45928211e-02,
-                     3.98476704e-04,
-                     2.96938239e+00,
-                    -7.23268813e-03,
-                     2.12382341e-03,
-                     1.04004591e-02,
-                     1.03970529e-07,
-                     5.18761880e-06,
-                    -3.24041825e-08,
-                    -1.23869360e-11,
-                     9.99843699e+02 ]
+    eosMDJWFnum = [7.35212840e+00,
+                   -5.45928211e-02,
+                   3.98476704e-04,
+                   2.96938239e+00,
+                   -7.23268813e-03,
+                   2.12382341e-03,
+                   1.04004591e-02,
+                   1.03970529e-07,
+                   5.18761880e-06,
+                   -3.24041825e-08,
+                   -1.23869360e-11,
+                   9.99843699e+02]
 
-    eosMDJWFden =  [ 7.28606739e-03,
-                    -4.60835542e-05,
-                     3.68390573e-07,
-                     1.80809186e-10,
-                     2.14691708e-03,
-                    -9.27062484e-06,
-                    -1.78343643e-10,
-                     4.76534122e-06,
-                     1.63410736e-09,
-                     5.30848875e-06,
-                    -3.03175128e-16,
-                    -1.27934137e-17,
-                     1.00000000e+00 ]
+    eosMDJWFden = [7.28606739e-03,
+                   -4.60835542e-05,
+                   3.68390573e-07,
+                   1.80809186e-10,
+                   2.14691708e-03,
+                   -9.27062484e-06,
+                   -1.78343643e-10,
+                   4.76534122e-06,
+                   1.63410736e-09,
+                   5.30848875e-06,
+                   -3.03175128e-16,
+                   -1.27934137e-17,
+                   1.00000000e+00]
 
     p1 = _copy.copy(p)
     t1 = _copy.copy(t)

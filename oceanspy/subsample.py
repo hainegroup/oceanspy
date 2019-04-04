@@ -796,8 +796,8 @@ def mooring_array(od, Ymoor, Xmoor,
             dists[i] = _great_circle(coord1, coord2, radius=R).km
         else:
             # CARTESIAN
-            dists[i] = _np.sqrt((coord2[0]-coord1[0])**2 +
-                                (coord2[1]-coord1[1])**2)
+            dists[i] = _np.sqrt((coord2[0]-coord1[0])**2
+                                + (coord2[1]-coord1[1])**2)
 
     dists = _np.cumsum(dists)
     distance = _xr.DataArray(dists,
@@ -829,8 +829,8 @@ def mooring_array(od, Ymoor, Xmoor,
                               attrs=od._ds['mooring_dist'].attrs)
     od = od.merge_into_oceandataset(dist_midp.rename('mooring_midp_dist'))
     od._ds = od._ds.set_coords([coord
-                                for coord in od._ds.coords] +
-                               ['mooring_midp_dist'])
+                                for coord in od._ds.coords]
+                               + ['mooring_midp_dist'])
 
     return od
 
@@ -1047,8 +1047,8 @@ def survey_stations(od, Ysurv, Xsurv,
                               attrs=od._ds['station_dist'].attrs)
     od = od.merge_into_oceandataset(dist_midp.rename('station_midp_dist'))
     od._ds = od._ds.set_coords([coord
-                                for coord in od._ds.coords] +
-                               ['station_midp_dist'])
+                                for coord in od._ds.coords]
+                               + ['station_midp_dist'])
 
     return od
 
