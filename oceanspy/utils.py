@@ -229,9 +229,9 @@ def cartesian_path(x1, y1, x2, y2, delta=None):
                      'delta': ['type(None)', 'numpy.ScalarType']})
 
     if x1 == x2 and x1 == x2:
-        raise TypeError('Vertexes are overlapping')
+        raise ValueError('Vertexes are overlapping')
     if delta is not None and delta <= 0:
-        raise TypeError('`delta` can not be zero or negative')
+        raise ValueError('`delta` can not be zero or negative')
 
     # Interpolate
     dist_tot = _np.sqrt((x2 - x1)**2 + (y2 - y1)**2)

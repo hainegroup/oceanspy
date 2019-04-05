@@ -211,10 +211,6 @@ def _check_mean_and_int_axes(od, meanAxes, intAxes, exclude):
         meanAxes = _check_list_of_string(meanAxes, 'meanAxes')
     if not isinstance(intAxes, bool):
         intAxes = _check_list_of_string(intAxes, 'intAxes')
-    if isinstance(meanAxes, str):
-        meanAxes = [meanAxes]
-    if isinstance(intAxes, str):
-        intAxes = [intAxes]
 
     # Check both True
     check1 = (meanAxes is True and intAxes is not False)
