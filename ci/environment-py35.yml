@@ -3,21 +3,21 @@ channels:
   - conda-forge  
 dependencies:
   - python=3.5
-  - dask 
-  - distributed 
-  - bottleneck 
-  - netCDF4 
-  - xarray 
-  - cartopy 
-  - esmpy 
-  - ffmpeg
+  - dask
+  - distributed
+  - bottleneck
+  - netCDF4
+  - xarray>=0.11.3
+  - cartopy
+  - esmpy
   - intake-xarray
+  - ffmpeg
   - pytest
   - pip:
-    - geopy 
-    - xgcm 
-    - xesmf 
+    - geopy
+    - xgcm>=0.2.0
+    - xesmf
+    - xgcm
     - git+https://github.com/xgcm/xmitgcm.git
-    - xgcm>=0.2
     - codecov
     - pytest-cov

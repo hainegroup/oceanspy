@@ -7,17 +7,17 @@ dependencies:
   - distributed 
   - bottleneck 
   - netCDF4 
-  - xarray 
+  - xarray>=0.11.3
   - cartopy 
   - esmpy 
-  - ffmpeg
   - intake-xarray
+  - ffmpeg
   - pytest
   - pip:
     - geopy 
-    - xgcm 
+    - xgcm>=0.2.0
     - xesmf 
+    - xgcm
     - git+https://github.com/xgcm/xmitgcm.git
-    - xgcm>=0.2
     - codecov
     - pytest-cov
