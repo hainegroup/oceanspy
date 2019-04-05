@@ -115,8 +115,11 @@ def test_TS_diagram_field(od_in, meanAxes, colorName):
 @pytest.mark.parametrize("varName, meanAxes, intAxes",
                          [('Depth', True, False),
                           ('Temp', None, False),
-                          ('Temp', ['X'], False),
-                          ('Temp', True, True)])
+                          ('Temp', 'X', False),
+                          ('Temp', False, 'X'),
+                          ('Temp', True, True),
+                          ('Temp', 'time', False),
+                          ('Temp', False, 'time')])
 def test_timeSeries_error(od_in, varName, meanAxes, intAxes):
     if meanAxes is None:
         with pytest.raises(TypeError):
