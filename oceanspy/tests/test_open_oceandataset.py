@@ -30,12 +30,7 @@ def test_opening_and_saving(name, catalog_url):
             from_catalog(name, catalog_url)
     else:
         # Open oceandataset
-        if name == 'grd_rect':
-            # Dask warning (I think because od NaNs)
-            with pytest.warns(UserWarning):
-                od1 = from_catalog(name, catalog_url)
-        else:
-            od1 = from_catalog(name, catalog_url)
+        od1 = from_catalog(name, catalog_url)
 
         # Check dimensions
         if name != 'xarray':
