@@ -103,7 +103,11 @@ ENV/
 # mypy
 .mypy_cache/
 
+# Flake
+flake-report
+
 # Useless or heavy stuff
+*.zip
 *__cache__*
 *.swp*
 *ipynb_checkpoints*
