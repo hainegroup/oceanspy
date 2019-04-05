@@ -218,7 +218,7 @@ def _check_mean_and_int_axes(od, meanAxes, intAxes, exclude):
                      'intAxes': ['bool', 'list', 'str'],
                      'exclude': 'list'})
     if not isinstance(meanAxes, bool):
-        meanAxes = _check_list_of_string(meanAxes, 'meanAxes') 
+        meanAxes = _check_list_of_string(meanAxes, 'meanAxes')
     if not isinstance(intAxes, bool):
         intAxes = _check_list_of_string(intAxes, 'intAxes')
     if isinstance(meanAxes, str):
@@ -232,7 +232,7 @@ def _check_mean_and_int_axes(od, meanAxes, intAxes, exclude):
     if check1 or check2:
         raise ValueError('If one between `meanAxes` and `intAxes` is True,'
                          ' the other must be False')
-    
+
     # Get axes to pass
     if meanAxes is True:
         meanAxes = [coord
