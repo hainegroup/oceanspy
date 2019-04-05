@@ -317,7 +317,6 @@ def TS_diagram(od,
                              ''.format(pref, coord, suf, rng, units)]
 
     ax.set_title('\n'.join(title))
-    _plt.tight_layout()
 
     return ax
 
@@ -824,7 +823,7 @@ def vertical_section(od,
         od = od.subsample.cutout(**cutout_kwargs)
 
     # Subsample first
-    if subsamp_kwargs is not None:
+    if subsamp_kwargs is not None and subsampMethod is not None:
         if subsampMethod == 'mooring_array':
             od = od.subsample.mooring_array(**subsamp_kwargs)
         else:
@@ -976,9 +975,12 @@ def _Vsection_regrid(od, da, varName):
 
     if 'mooring' in od.grid_coords:
         # Time coordinates
-        time_coords = {timeName: da[timeName]
-                       for timeName in od.grid_coords['time'].keys()
-                       if timeName in da.coords}
+        if 'time' in od.grid_coords.keys():
+            time_coords = {timeName: da[timeName]
+                           for timeName in od.grid_coords['time'].keys()
+                           if timeName in da.coords}
+        else:
+            time_coords = {}
 
         # Regrid to center dim
         for axis in ['X', 'Y']:

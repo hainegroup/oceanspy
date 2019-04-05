@@ -4,9 +4,6 @@ __pycache__/
 *$py.class
 oceanspy/__pycache__/
 
-# .nfs
-.nfs*
-
 # C extensions
 *.so
 
@@ -70,16 +67,10 @@ instance/
 docs/_build/
 docs/generated/
 docs/tmp/
-docs/*.nc
-docs/.nfs*
-docs/.ipynb_checkpoints/
 docs/Figs/
 
 # PyBuilder
 target/
-
-# Jupyter Notebook
-.ipynb_checkpoints
 
 # pyenv
 .python-version
@@ -111,10 +102,15 @@ ENV/
 # mypy
 .mypy_cache/
 
-# vim tmp
-.*.swp
-
 # Tests
-oceanspy/tests/__pycache__/
 oceanspy/tests/Data/
-oceanspy/new_tests/Data/
+
+# Useless or heavy stuff
+*__cache__*
+*.swp*
+*ipynb_checkpoints*
+*.nfs*
+*.nc
+*.data
+*.meta
+

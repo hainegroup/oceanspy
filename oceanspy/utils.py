@@ -12,7 +12,7 @@ from ._ospy_utils import _check_instance
 # Recommended dependencies
 try:
     from geopy.distance import great_circle as _great_circle
-except ImportError:
+except ImportError:  # pragma: no cover
     pass
 
 
@@ -39,14 +39,14 @@ def spherical2cartesian(Y, X, R=None):
     z: scalar
         Cartesian z coordinate
     """
-    # TODO: check Y and X
+    # Check parameters
+    _check_instance({'R': R},
+                    {'R': ['type(None)', 'numpy.ScalarType']})
 
     # Check parameters
     if R is None:
         from geopy.distance import EARTH_RADIUS
         R = EARTH_RADIUS
-    elif not isinstance(R, _np.ScalarType):
-        raise TypeError('R must be None or numpy.scalar')
 
     # Convert
     Y_rad = _np.deg2rad(Y)
@@ -98,22 +98,24 @@ def great_circle_path(lat1, lon1, lat2, lon2,
     """
 
     # Check parameters
-    if not isinstance(lat1, _np.ScalarType):
-        raise TypeError('`lat1` must be scalar')
-    if not isinstance(lon1, _np.ScalarType):
-        raise TypeError('`lon1` must be scalar')
-    if not isinstance(lat2, _np.ScalarType):
-        raise TypeError('`lat2` must be scalar')
-    if not isinstance(lon2, _np.ScalarType):
-        raise TypeError('`lon2` must be scalar')
-    if not isinstance(delta_km, (type(None), _np.ScalarType)):
-        raise TypeError('`delta_km` must be scalar or None')
-    if not isinstance(R, (_np.ScalarType, type(None))):
-        raise TypeError('`R` must be scalar or None')
+    _check_instance({'lat1': lat1,
+                     'lon1': lon1,
+                     'lat2': lat2,
+                     'lon2': lon2,
+                     'delta_km': delta_km,
+                     'R': R},
+                    {'lat1': 'numpy.ScalarType',
+                     'lon1': 'numpy.ScalarType',
+                     'lat2': 'numpy.ScalarType',
+                     'lon2': 'numpy.ScalarType',
+                     'delta_km': ['type(None)', 'numpy.ScalarType'],
+                     'R': ['type(None)', 'numpy.ScalarType']})
+
+    # Check parameters
     if lat1 == lat2 and lon1 == lon2:
-        raise TypeError('Vertexes are overlapping')
+        raise ValueError('Vertexes are overlapping')
     if delta_km is not None and delta_km <= 0:
-        raise TypeError('`delta_km` can not be zero or negative')
+        raise ValueError('`delta_km` can not be zero or negative')
 
     # Check parameters
     if R is None:
@@ -221,9 +223,9 @@ def cartesian_path(x1, y1, x2, y2, delta=None):
                      'y2': y2,
                      'delta': delta},
                     {'x1': 'numpy.ScalarType',
-                     'x1': 'numpy.ScalarType',
-                     'x1': 'numpy.ScalarType',
-                     'x1': 'numpy.ScalarType',
+                     'x2': 'numpy.ScalarType',
+                     'y1': 'numpy.ScalarType',
+                     'y2': 'numpy.ScalarType',
                      'delta': ['type(None)', 'numpy.ScalarType']})
 
     if x1 == x2 and x1 == x2:
@@ -278,10 +280,11 @@ def densjmd95(s, t, p):
 
     # make sure arguments are floating point
     for var in [s, t, p]:
-        if isinstance(s, _xr.DataArray):
+        if isinstance(var, _xr.DataArray):
             var = var.astype('float')
         else:
-            var = _np.asfarray('float')
+            print(var)
+            var = _np.asfarray(var)
 
     # coefficients nonlinear equation of state in pressure coordinates for
     # 1. density of fresh water at p = 0
@@ -436,10 +439,10 @@ def densmdjwf(s, t, p):
 
     # make sure arguments are floating point
     for var in [s, t, p]:
-        if isinstance(s, _xr.DataArray):
+        if isinstance(var, _xr.DataArray):
             var = var.astype('float')
         else:
-            var = _np.asfarray('float')
+            var = _np.asfarray(var)
 
     # coefficients nonlinear equation of state in pressure coordinates for
     eosMDJWFnum = [7.35212840e+00,
