@@ -12,12 +12,12 @@ dependencies:
   - esmpy
   - intake-xarray
   - ffmpeg
+  - geopy
   - pytest
   - pytest-cov
   - pytest-env
   - codecov
   - pip:
-    - geopy
     - xgcm>=0.2.0
     - xesmf
     - xgcm
