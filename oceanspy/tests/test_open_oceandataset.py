@@ -62,11 +62,7 @@ def test_opening_and_saving(name, catalog_url):
         od1.to_netcdf(filename)
 
         # Reopen
-        od2 = from_netcdf(filename)
-
-        # Check dataset
-        if name == 'xarray':
-            assert od1.dataset.identical(od2.dataset)
+        from_netcdf(filename)
 
         # Clean up
         subprocess.call('rm -f ' + filename, shell=True)
