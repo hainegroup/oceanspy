@@ -104,7 +104,10 @@ ENV/
 .mypy_cache/
 
 # Flake
-flake-report
+flake-report/
+
+# Editor
+.editorconfig
 
 # Useless or heavy stuff
 *.zip

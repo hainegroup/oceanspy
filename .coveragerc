@@ -9,6 +9,5 @@ exclude_lines =
     if __name__ == .__main__.:
 ignore_errors = True
 omit = oceanspy/tests/*
-       oceanspy/new_tests/*
        oceanspy/Catalogs/*
        oceanspy/__init__.py
