@@ -5,7 +5,6 @@ Animate using oceanspy plot functions.
 # Required dependencies
 import xarray as _xr
 import numpy as _np
-import warnings as _warnings
 import oceanspy as _ospy
 import functools as _functools
 
@@ -13,7 +12,8 @@ import functools as _functools
 from xarray.plot.utils import _determine_cmap_params
 from . import compute as _compute
 from . import plot as _plot  # noqa: F401
-from ._ospy_utils import _check_instance
+from ._ospy_utils import (_check_instance, _rename_aliased,
+                          _ax_warning, _check_options)
 
 # Recommended dependencies
 try:
@@ -21,19 +21,19 @@ try:
     _matplotlib.use('agg')
     import matplotlib.pyplot as _plt
     from matplotlib.animation import FuncAnimation as _FuncAnimation
-except ImportError:
+except ImportError:  # pragma: no cover
     pass
 
 try:
     from IPython.utils import io as _io
     from IPython.display import HTML as _HTML
     from IPython.display import display as _display
-except ImportError:
+except ImportError:  # pragma: no cover
     pass
 
 try:
     from tqdm import tqdm as _tqdm
-except ImportError:
+except ImportError:  # pragma: no cover
     pass
 
 
@@ -156,19 +156,28 @@ def vertical_section(od,
     # First cutout and get time
     subsamp_kwargs = kwargs.pop('subsamp_kwargs', None)
     subsampMethod = kwargs.pop('subsampMethod', None)
+
+    if subsampMethod is not None:
+        # Check plot
+        _check_options(name='subsampMethod',
+                       selected=subsampMethod,
+                       options=['mooring_array', 'survey_stations'])
+
     if subsamp_kwargs is not None:
         # Subsample first
         if subsampMethod == 'mooring_array':
             od = od.subsample.mooring_array(**subsamp_kwargs)
-        elif subsampMethod == 'survey_stations':
+        else:
+            # 'survey_stations'
             od = od.subsample.survey_stations(**subsamp_kwargs)
+
     time = od._ds['time']
 
     # Fix colorbar
     varName = kwargs.pop('varName', None)
 
     # Add missing variables (use private)
-    _varName = _compute._rename_aliased(od, varName)
+    _varName = _rename_aliased(od, varName)
     od = _compute._add_missing_variables(od, _varName)
 
     # Extract color (use public)
@@ -183,11 +192,8 @@ def vertical_section(od,
     cmap_kwargs = _xr.plot.utils._determine_cmap_params(**cmap_kwargs)
     kwargs = {'varName': varName, **kwargs, **cmap_kwargs}
 
-    # Pop ax, it doesn't work for animation
-    ax = kwargs.pop('ax', None)
-    if ax is not None:
-        _warnings.warn("\n`ax` can not be provided for animations. "
-                       "This function will use the current axis", stacklevel=2)
+    # Remove ax
+    _ax_warning(kwargs)
 
     # Animation
     anim = _create_animation(od=od,
@@ -251,7 +257,7 @@ def horizontal_section(od,
     varName = kwargs.pop('varName', None)
 
     # Add missing variables (use private)
-    _varName = _compute._rename_aliased(od, varName)
+    _varName = _rename_aliased(od, varName)
     od = _compute._add_missing_variables(od, _varName)
 
     # Extract color (use public)
@@ -267,11 +273,8 @@ def horizontal_section(od,
     cmap_kwargs = _xr.plot.utils._determine_cmap_params(**cmap_kwargs)
     kwargs = {'varName': varName, **kwargs, **cmap_kwargs}
 
-    # Pop ax, it doesn't work for animation
-    ax = kwargs.pop('ax', None)
-    if ax is not None:
-        _warnings.warn("\n`ax` can not be provided for animations. "
-                       "This function will use the current axis", stacklevel=2)
+    # Remove ax
+    _ax_warning(kwargs)
 
     # Animation
     anim = _create_animation(od=od,
@@ -383,7 +386,7 @@ def TS_diagram(od,
     if colorName is not None:
 
         # Add missing variables (use private)
-        _colorName = _compute._rename_aliased(od, colorName)
+        _colorName = _rename_aliased(od, colorName)
         od = _compute._add_missing_variables(od, _colorName)
 
         # Extract color (use public)
@@ -397,11 +400,8 @@ def TS_diagram(od,
         kwargs['cmap_kwargs'] = _determine_cmap_params(**cmap_kwargs)
     kwargs['colorName'] = colorName
 
-    # Pop ax, it doesn't work for animation
-    ax = kwargs.pop('ax', None)
-    if ax is not None:
-        _warnings.warn("\n`ax` can not be provided for animations. "
-                       "This function will use the current axis", stacklevel=2)
+    # Remove ax
+    _ax_warning(kwargs)
 
     # Animation
     anim = _create_animation(od=od,

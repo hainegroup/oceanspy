@@ -13,7 +13,7 @@ from oceanspy.plot import (TS_diagram, time_series,
                            vertical_section)
 
 # Directory
-Datadir = './oceanspy/new_tests/Data/'
+Datadir = './oceanspy/tests/Data/'
 
 # Test oceandataset
 od = open_oceandataset.from_netcdf('{}MITgcm_rect_nc.nc'

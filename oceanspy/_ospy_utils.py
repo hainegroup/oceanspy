@@ -3,9 +3,6 @@ import warnings
 import xgcm
 
 
-# ================
-# USEFUL FUNCTIONS
-# ================
 def _create_grid(dataset, coords, periodic):
     # Clean up comodo (currently force user to specify axis using set_coords).
     for dim in dataset.dims:
@@ -89,19 +86,12 @@ def _check_list_of_string(obj, objName):
 
 
 def _check_range(od, obj, objName):
-    if 'Y' in objName:
-        pref = 'Y'
-        valchek = od._ds['YG']
-    elif 'X' in objName:
-        pref = 'X'
-        valchek = od._ds['XG']
-    elif 'Z' in objName:
-        pref = 'Z'
-        valchek = od._ds['Zp1']
-    elif 'time' in objName:
-        pref = 'time'
-        valchek = od._ds['time']
-
+    prefs = ['Y', 'X', 'Z', 'time']
+    coords = ['YG', 'XG', 'Zp1', 'time']
+    for _, (pref, coord) in enumerate(zip(prefs, coords)):
+        if pref in objName:
+            valchek = od._ds[coord]
+            continue
     obj = numpy.asarray(obj, dtype=valchek.dtype)
     if obj.ndim == 0:
         obj = obj.reshape(1)
@@ -259,3 +249,11 @@ def _check_options(name, selected, options):
     if selected not in options:
         raise ValueError('`{}` [{}] not available.'
                          ' Options are: {}'.format(name, selected, options))
+
+
+def _ax_warning(kwargs):
+    ax = kwargs.pop('ax', None)
+    if ax is not None:
+        warnings.warn("\n`ax` can not be provided for animations. "
+                      "This function will use the current axis", stacklevel=2)
+    return kwargs
