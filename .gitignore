@@ -2,7 +2,6 @@
 __pycache__/
 *.py[cod]
 *$py.class
-oceanspy/__pycache__/
 
 # C extensions
 *.so
@@ -38,6 +37,7 @@ pip-delete-this-directory.txt
 
 # Unit test / coverage reports
 htmlcov/
+cov_html/
 .tox/
 .coverage
 .coverage.*
@@ -47,6 +47,7 @@ coverage.xml
 *.cover
 .hypothesis/
 .pytest_cache/
+oceanspy/tests/Data/
 
 # Translations
 *.mo
@@ -101,9 +102,6 @@ ENV/
 
 # mypy
 .mypy_cache/
-
-# Tests
-oceanspy/tests/Data/
 
 # Useless or heavy stuff
 *__cache__*

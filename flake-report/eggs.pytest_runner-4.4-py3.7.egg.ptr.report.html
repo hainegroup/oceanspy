@@ -1,0 +1,1093 @@
+<!DOCTYPE html>
+<html>
+   <head>
+      <title>flake8 violations: .eggs/pytest_runner-4.4-py3.7.egg/ptr.py</title>
+      <meta http-equiv="Content-Type" value="text/html; charset=UTF-8">
+      <link rel="stylesheet" href="styles.css">
+<script>
+function bindHandler(link) {
+   var code = link.getAttribute('data-code');
+   var key = location.pathname + '#' + code;
+
+   var ul = link.parentNode.querySelector('.details');
+   if (sessionStorage[key] != 'open') {
+      ul.style.display = 'none';
+   }
+   link.addEventListener('click', function (event) {
+      if (!ul.style.display || ul.style.display == 'none') {
+         ul.style.display = 'block';
+         sessionStorage[key] = 'open';
+      } else {
+         ul.style.display = 'none';
+         sessionStorage[key] = 'closed';
+      }
+   });
+}
+
+window.addEventListener('DOMContentLoaded', function () {
+   var links = document.querySelectorAll('#index > li > a');
+   for (var i = 0; i < links.length; i++) {
+      bindHandler(links[i]);
+   }
+});
+</script>
+   </head>
+   <body>
+      <div id="masthead" class="sev-2"></div>
+      <div id="page">
+         <p id="srclink">
+            <a title="View full annotated source"
+               href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html">
+               <img src="file.svg" alt="&#x2261;">
+            </a></p>
+         <h1>
+            <a href="index.html">
+               <img src="back.svg" alt="&#x2B05;">
+               .eggs/pytest_runner-4.4-py3.7.egg/ptr.py
+            </a>
+         </h1>
+
+         <ul id="index">
+         
+         <li>
+            <a data-code="W191">
+               <span class="count sev-2">
+                  153
+               </span>
+               <strong>W191:</strong> indentation contains tabs
+               
+            </a>
+            <ul class="details">
+            <li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l14">
+                  <tt><i>14</i> 	<span class="c1"># ensure that map has the same meaning on Python 2</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l15">
+                  <tt><i>15</i> 	<span class="kn">from</span> <span class="nn">future_builtins</span> <span class="kn">import</span> <span class="nb">map</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l17">
+                  <tt><i>17</i> 	<span class="k">pass</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l26">
+                  <tt><i>26</i> 	<span class="n">saved</span> <span class="o">=</span> <span class="n">_sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[:]</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l27">
+                  <tt><i>27</i> 	<span class="k">if</span> <span class="n">repl</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l28">
+                  <tt><i>28</i> 		<span class="n">_sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">repl</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l29">
+                  <tt><i>29</i> 	<span class="k">try</span><span class="p">:</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l30">
+                  <tt><i>30</i> 		<span class="k">yield</span> <span class="n">saved</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l31">
+                  <tt><i>31</i> 	<span class="k">finally</span><span class="p">:</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l32">
+                  <tt><i>32</i> 		<span class="n">_sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">saved</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l37">
+                  <tt><i>37</i> 	<span class="n">allow_hosts</span> <span class="o">=</span> <span class="bp">None</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l38">
+                  <tt><i>38</i> 	<span class="n">index_url</span> <span class="o">=</span> <span class="bp">None</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l40">
+                  <tt><i>40</i> 	<span class="k">def</span> <span class="nf">fetch_build_egg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">req</span><span class="p">):</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l42">
+                  <tt><i>42</i> <span class="sd">		that respects respects allow_hosts and index_url. &quot;&quot;&quot;</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l43">
+                  <tt><i>43</i> 		<span class="kn">from</span> <span class="nn">setuptools.command.easy_install</span> <span class="kn">import</span> <span class="n">easy_install</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l44">
+                  <tt><i>44</i> 		<span class="n">dist</span> <span class="o">=</span> <span class="n">Distribution</span><span class="p">({</span><span class="s1">&#39;script_args&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;easy_install&#39;</span><span class="p">]})</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l45">
+                  <tt><i>45</i> 		<span class="n">dist</span><span class="o">.</span><span class="n">parse_config_files</span><span class="p">()</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l46">
+                  <tt><i>46</i> 		<span class="n">opts</span> <span class="o">=</span> <span class="n">dist</span><span class="o">.</span><span class="n">get_option_dict</span><span class="p">(</span><span class="s1">&#39;easy_install&#39;</span><span class="p">)</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l47">
+                  <tt><i>47</i> 		<span class="n">keep</span> <span class="o">=</span> <span class="p">(</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l48">
+                  <tt><i>48</i> 			<span class="s1">&#39;find_links&#39;</span><span class="p">,</span> <span class="s1">&#39;site_dirs&#39;</span><span class="p">,</span> <span class="s1">&#39;index_url&#39;</span><span class="p">,</span> <span class="s1">&#39;optimize&#39;</span><span class="p">,</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l49">
+                  <tt><i>49</i> 			<span class="s1">&#39;site_dirs&#39;</span><span class="p">,</span> <span class="s1">&#39;allow_hosts&#39;</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l50">
+                  <tt><i>50</i> 		<span class="p">)</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l51">
+                  <tt><i>51</i> 		<span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">opts</span><span class="p">):</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l52">
+                  <tt><i>52</i> 			<span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">keep</span><span class="p">:</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l53">
+                  <tt><i>53</i> 				<span class="k">del</span> <span class="n">opts</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>  <span class="c1"># don&#39;t use any other settings</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l54">
+                  <tt><i>54</i> 		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dependency_links</span><span class="p">:</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l55">
+                  <tt><i>55</i> 			<span class="n">links</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dependency_links</span><span class="p">[:]</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l56">
+                  <tt><i>56</i> 			<span class="k">if</span> <span class="s1">&#39;find_links&#39;</span> <span class="ow">in</span> <span class="n">opts</span><span class="p">:</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l57">
+                  <tt><i>57</i> 				<span class="n">links</span> <span class="o">=</span> <span class="n">opts</span><span class="p">[</span><span class="s1">&#39;find_links&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()</span> <span class="o">+</span> <span class="n">links</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l58">
+                  <tt><i>58</i> 			<span class="n">opts</span><span class="p">[</span><span class="s1">&#39;find_links&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;setup&#39;</span><span class="p">,</span> <span class="n">links</span><span class="p">)</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l59">
+                  <tt><i>59</i> 		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">allow_hosts</span><span class="p">:</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l60">
+                  <tt><i>60</i> 			<span class="n">opts</span><span class="p">[</span><span class="s1">&#39;allow_hosts&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">allow_hosts</span><span class="p">)</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l61">
+                  <tt><i>61</i> 		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">index_url</span><span class="p">:</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l62">
+                  <tt><i>62</i> 			<span class="n">opts</span><span class="p">[</span><span class="s1">&#39;index_url&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">index_url</span><span class="p">)</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l63">
+                  <tt><i>63</i> 		<span class="n">install_dir_func</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;get_egg_cache_dir&#39;</span><span class="p">,</span> <span class="n">_os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">)</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l64">
+                  <tt><i>64</i> 		<span class="n">install_dir</span> <span class="o">=</span> <span class="n">install_dir_func</span><span class="p">()</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l65">
+                  <tt><i>65</i> 		<span class="n">cmd</span> <span class="o">=</span> <span class="n">easy_install</span><span class="p">(</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l66">
+                  <tt><i>66</i> 			<span class="n">dist</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">],</span> <span class="n">install_dir</span><span class="o">=</span><span class="n">install_dir</span><span class="p">,</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l67">
+                  <tt><i>67</i> 			<span class="n">exclude_scripts</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l68">
+                  <tt><i>68</i> 			<span class="n">always_copy</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">build_directory</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">editable</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l69">
+                  <tt><i>69</i> 			<span class="n">upgrade</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">multi_version</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">no_report</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="bp">False</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l70">
+                  <tt><i>70</i> 		<span class="p">)</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l71">
+                  <tt><i>71</i> 		<span class="n">cmd</span><span class="o">.</span><span class="n">ensure_finalized</span><span class="p">()</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l72">
+                  <tt><i>72</i> 		<span class="k">return</span> <span class="n">cmd</span><span class="o">.</span><span class="n">easy_install</span><span class="p">(</span><span class="n">req</span><span class="p">)</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l77">
+                  <tt><i>77</i> <span class="sd">	&gt;&gt;&gt; import setuptools</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l78">
+                  <tt><i>78</i> <span class="sd">	&gt;&gt;&gt; dist = setuptools.Distribution()</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l79">
+                  <tt><i>79</i> <span class="sd">	&gt;&gt;&gt; cmd = PyTest(dist)</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l80">
+                  <tt><i>80</i> <span class="sd">	&quot;&quot;&quot;</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l82">
+                  <tt><i>82</i> 	<span class="n">user_options</span> <span class="o">=</span> <span class="p">[</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l83">
+                  <tt><i>83</i> 		<span class="p">(</span><span class="s1">&#39;extras&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="s2">&quot;Install (all) setuptools extras when running tests&quot;</span><span class="p">),</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l84">
+                  <tt><i>84</i> 		<span class="p">(</span><span class="s1">&#39;index-url=&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="s2">&quot;Specify an index url from which to retrieve &quot;</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l85">
+                  <tt><i>85</i> 			<span class="s2">&quot;dependencies&quot;</span><span class="p">),</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l86">
+                  <tt><i>86</i> 		<span class="p">(</span><span class="s1">&#39;allow-hosts=&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="s2">&quot;Whitelist of comma-separated hosts to allow &quot;</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l87">
+                  <tt><i>87</i> 			<span class="s2">&quot;when retrieving dependencies&quot;</span><span class="p">),</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l88">
+                  <tt><i>88</i> 		<span class="p">(</span><span class="s1">&#39;addopts=&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="s2">&quot;Additional options to be passed verbatim to the &quot;</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l89">
+                  <tt><i>89</i> 			<span class="s2">&quot;pytest runner&quot;</span><span class="p">)</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l90">
+                  <tt><i>90</i> 	<span class="p">]</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l92">
+                  <tt><i>92</i> 	<span class="k">def</span> <span class="nf">initialize_options</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l93">
+                  <tt><i>93</i> 		<span class="bp">self</span><span class="o">.</span><span class="n">extras</span> <span class="o">=</span> <span class="bp">False</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l94">
+                  <tt><i>94</i> 		<span class="bp">self</span><span class="o">.</span><span class="n">index_url</span> <span class="o">=</span> <span class="bp">None</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l95">
+                  <tt><i>95</i> 		<span class="bp">self</span><span class="o">.</span><span class="n">allow_hosts</span> <span class="o">=</span> <span class="bp">None</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l96">
+                  <tt><i>96</i> 		<span class="bp">self</span><span class="o">.</span><span class="n">addopts</span> <span class="o">=</span> <span class="p">[]</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l97">
+                  <tt><i>97</i> 		<span class="bp">self</span><span class="o">.</span><span class="n">ensure_setuptools_version</span><span class="p">()</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l99">
+                  <tt><i>99</i> 	<span class="nd">@staticmethod</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l100">
+                  <tt><i>100</i> 	<span class="k">def</span> <span class="nf">ensure_setuptools_version</span><span class="p">():</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l102">
+                  <tt><i>102</i> <span class="sd">		Due to the fact that pytest-runner is often required (via</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l103">
+                  <tt><i>103</i> <span class="sd">		setup-requires directive) by toolchains that never invoke</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l104">
+                  <tt><i>104</i> <span class="sd">		it (i.e. they&#39;re only installing the package, not testing it),</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l105">
+                  <tt><i>105</i> <span class="sd">		instead of declaring the dependency in the package</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l106">
+                  <tt><i>106</i> <span class="sd">		metadata, assert the requirement at run time.</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l107">
+                  <tt><i>107</i> <span class="sd">		&quot;&quot;&quot;</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l108">
+                  <tt><i>108</i> 		<span class="n">pkg_resources</span><span class="o">.</span><span class="n">require</span><span class="p">(</span><span class="s1">&#39;setuptools&gt;=27.3&#39;</span><span class="p">)</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l110">
+                  <tt><i>110</i> 	<span class="k">def</span> <span class="nf">finalize_options</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l111">
+                  <tt><i>111</i> 		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">addopts</span><span class="p">:</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l112">
+                  <tt><i>112</i> 			<span class="bp">self</span><span class="o">.</span><span class="n">addopts</span> <span class="o">=</span> <span class="n">_shlex</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">addopts</span><span class="p">)</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l114">
+                  <tt><i>114</i> 	<span class="nd">@staticmethod</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l115">
+                  <tt><i>115</i> 	<span class="k">def</span> <span class="nf">marker_passes</span><span class="p">(</span><span class="n">marker</span><span class="p">):</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l117">
+                  <tt><i>117</i> <span class="sd">		Given an environment marker, return True if the marker is valid</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l118">
+                  <tt><i>118</i> <span class="sd">		and matches this environment.</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l119">
+                  <tt><i>119</i> <span class="sd">		&quot;&quot;&quot;</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l120">
+                  <tt><i>120</i> 		<span class="k">return</span> <span class="p">(</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l121">
+                  <tt><i>121</i> 			<span class="ow">not</span> <span class="n">marker</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l122">
+                  <tt><i>122</i> 			<span class="ow">or</span> <span class="ow">not</span> <span class="n">pkg_resources</span><span class="o">.</span><span class="n">invalid_marker</span><span class="p">(</span><span class="n">marker</span><span class="p">)</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l123">
+                  <tt><i>123</i> 			<span class="ow">and</span> <span class="n">pkg_resources</span><span class="o">.</span><span class="n">evaluate_marker</span><span class="p">(</span><span class="n">marker</span><span class="p">)</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l124">
+                  <tt><i>124</i> 		<span class="p">)</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l126">
+                  <tt><i>126</i> 	<span class="k">def</span> <span class="nf">install_dists</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dist</span><span class="p">):</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l128">
+                  <tt><i>128</i> <span class="sd">		Extend install_dists to include extras support</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l129">
+                  <tt><i>129</i> <span class="sd">		&quot;&quot;&quot;</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l130">
+                  <tt><i>130</i> 		<span class="k">return</span> <span class="n">_itertools</span><span class="o">.</span><span class="n">chain</span><span class="p">(</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l131">
+                  <tt><i>131</i> 			<span class="n">orig</span><span class="o">.</span><span class="n">test</span><span class="o">.</span><span class="n">install_dists</span><span class="p">(</span><span class="n">dist</span><span class="p">),</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l132">
+                  <tt><i>132</i> 			<span class="bp">self</span><span class="o">.</span><span class="n">install_extra_dists</span><span class="p">(</span><span class="n">dist</span><span class="p">),</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l133">
+                  <tt><i>133</i> 		<span class="p">)</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l135">
+                  <tt><i>135</i> 	<span class="k">def</span> <span class="nf">install_extra_dists</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dist</span><span class="p">):</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l137">
+                  <tt><i>137</i> <span class="sd">		Install extras that are indicated by markers or</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l138">
+                  <tt><i>138</i> <span class="sd">		install all extras if &#39;--extras&#39; is indicated.</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l139">
+                  <tt><i>139</i> <span class="sd">		&quot;&quot;&quot;</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l140">
+                  <tt><i>140</i> 		<span class="n">extras_require</span> <span class="o">=</span> <span class="n">dist</span><span class="o">.</span><span class="n">extras_require</span> <span class="ow">or</span> <span class="p">{}</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l142">
+                  <tt><i>142</i> 		<span class="n">spec_extras</span> <span class="o">=</span> <span class="p">(</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l143">
+                  <tt><i>143</i> 			<span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">),</span> <span class="n">reqs</span><span class="p">)</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l144">
+                  <tt><i>144</i> 			<span class="k">for</span> <span class="n">spec</span><span class="p">,</span> <span class="n">reqs</span> <span class="ow">in</span> <span class="n">extras_require</span><span class="o">.</span><span class="n">items</span><span class="p">()</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l145">
+                  <tt><i>145</i> 		<span class="p">)</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l146">
+                  <tt><i>146</i> 		<span class="n">matching_extras</span> <span class="o">=</span> <span class="p">(</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l147">
+                  <tt><i>147</i> 			<span class="n">reqs</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l148">
+                  <tt><i>148</i> 			<span class="k">for</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">sep</span><span class="p">,</span> <span class="n">marker</span><span class="p">),</span> <span class="n">reqs</span> <span class="ow">in</span> <span class="n">spec_extras</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l149">
+                  <tt><i>149</i> 			<span class="c1"># include unnamed extras or all if self.extras indicated</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l150">
+                  <tt><i>150</i> 			<span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">name</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">extras</span><span class="p">)</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l151">
+                  <tt><i>151</i> 			<span class="c1"># never include extras that fail to pass marker eval</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l152">
+                  <tt><i>152</i> 			<span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">marker_passes</span><span class="p">(</span><span class="n">marker</span><span class="p">)</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l153">
+                  <tt><i>153</i> 		<span class="p">)</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l154">
+                  <tt><i>154</i> 		<span class="n">results</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">dist</span><span class="o">.</span><span class="n">fetch_build_eggs</span><span class="p">,</span> <span class="n">matching_extras</span><span class="p">))</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l155">
+                  <tt><i>155</i> 		<span class="k">return</span> <span class="n">_itertools</span><span class="o">.</span><span class="n">chain</span><span class="o">.</span><span class="n">from_iterable</span><span class="p">(</span><span class="n">results</span><span class="p">)</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l157">
+                  <tt><i>157</i> 	<span class="nd">@staticmethod</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l158">
+                  <tt><i>158</i> 	<span class="k">def</span> <span class="nf">_warn_old_setuptools</span><span class="p">():</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l159">
+                  <tt><i>159</i> 		<span class="n">msg</span> <span class="o">=</span> <span class="p">(</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l160">
+                  <tt><i>160</i> 			<span class="s2">&quot;pytest-runner will stop working on this version of setuptools; &quot;</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l161">
+                  <tt><i>161</i> 			<span class="s2">&quot;please upgrade to setuptools 30.4 or later or pin to &quot;</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l162">
+                  <tt><i>162</i> 			<span class="s2">&quot;pytest-runner &lt; 5.&quot;</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l163">
+                  <tt><i>163</i> 		<span class="p">)</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l164">
+                  <tt><i>164</i> 		<span class="n">ver_str</span> <span class="o">=</span> <span class="n">pkg_resources</span><span class="o">.</span><span class="n">get_distribution</span><span class="p">(</span><span class="s1">&#39;setuptools&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">version</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l165">
+                  <tt><i>165</i> 		<span class="n">ver</span> <span class="o">=</span> <span class="n">pkg_resources</span><span class="o">.</span><span class="n">parse_version</span><span class="p">(</span><span class="n">ver_str</span><span class="p">)</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l166">
+                  <tt><i>166</i> 		<span class="k">if</span> <span class="n">ver</span> <span class="o">&lt;</span> <span class="n">pkg_resources</span><span class="o">.</span><span class="n">parse_version</span><span class="p">(</span><span class="s1">&#39;30.4&#39;</span><span class="p">):</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l167">
+                  <tt><i>167</i> 			<span class="n">_warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l169">
+                  <tt><i>169</i> 	<span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l171">
+                  <tt><i>171</i> <span class="sd">		Override run to ensure requirements are available in this session (but</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l172">
+                  <tt><i>172</i> <span class="sd">		don&#39;t install them anywhere).</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l173">
+                  <tt><i>173</i> <span class="sd">		&quot;&quot;&quot;</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l174">
+                  <tt><i>174</i> 		<span class="bp">self</span><span class="o">.</span><span class="n">_warn_old_setuptools</span><span class="p">()</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l175">
+                  <tt><i>175</i> 		<span class="n">dist</span> <span class="o">=</span> <span class="n">CustomizedDist</span><span class="p">()</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l176">
+                  <tt><i>176</i> 		<span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="s1">&#39;allow_hosts index_url&#39;</span><span class="o">.</span><span class="n">split</span><span class="p">():</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l177">
+                  <tt><i>177</i> 			<span class="nb">setattr</span><span class="p">(</span><span class="n">dist</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">))</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l178">
+                  <tt><i>178</i> 		<span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="p">(</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l179">
+                  <tt><i>179</i> 			<span class="s1">&#39;dependency_links install_requires &#39;</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l180">
+                  <tt><i>180</i> 			<span class="s1">&#39;tests_require extras_require &#39;</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l181">
+                  <tt><i>181</i> 		<span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">():</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l182">
+                  <tt><i>182</i> 			<span class="nb">setattr</span><span class="p">(</span><span class="n">dist</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="p">,</span> <span class="n">attr</span><span class="p">))</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l183">
+                  <tt><i>183</i> 		<span class="n">installed_dists</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">install_dists</span><span class="p">(</span><span class="n">dist</span><span class="p">)</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l184">
+                  <tt><i>184</i> 		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dry_run</span><span class="p">:</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l185">
+                  <tt><i>185</i> 			<span class="bp">self</span><span class="o">.</span><span class="n">announce</span><span class="p">(</span><span class="s1">&#39;skipping tests (dry run)&#39;</span><span class="p">)</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l186">
+                  <tt><i>186</i> 			<span class="k">return</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l187">
+                  <tt><i>187</i> 		<span class="n">paths</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="n">_operator</span><span class="o">.</span><span class="n">attrgetter</span><span class="p">(</span><span class="s1">&#39;location&#39;</span><span class="p">),</span> <span class="n">installed_dists</span><span class="p">)</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l188">
+                  <tt><i>188</i> 		<span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">paths_on_pythonpath</span><span class="p">(</span><span class="n">paths</span><span class="p">):</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l189">
+                  <tt><i>189</i> 			<span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">project_on_sys_path</span><span class="p">():</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l190">
+                  <tt><i>190</i> 				<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_tests</span><span class="p">()</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l192">
+                  <tt><i>192</i> 	<span class="nd">@property</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l193">
+                  <tt><i>193</i> 	<span class="k">def</span> <span class="nf">_argv</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l194">
+                  <tt><i>194</i> 		<span class="k">return</span> <span class="p">[</span><span class="s1">&#39;pytest&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">addopts</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l196">
+                  <tt><i>196</i> 	<span class="k">def</span> <span class="nf">run_tests</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l198">
+                  <tt><i>198</i> <span class="sd">		Invoke pytest, replacing argv. Return result code.</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l199">
+                  <tt><i>199</i> <span class="sd">		&quot;&quot;&quot;</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l200">
+                  <tt><i>200</i> 		<span class="k">with</span> <span class="n">_save_argv</span><span class="p">(</span><span class="n">_sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[:</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">addopts</span><span class="p">):</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l201">
+                  <tt><i>201</i> 			<span class="n">result_code</span> <span class="o">=</span> <span class="nb">__import__</span><span class="p">(</span><span class="s1">&#39;pytest&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">main</span><span class="p">()</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l202">
+                  <tt><i>202</i> 			<span class="k">if</span> <span class="n">result_code</span><span class="p">:</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l203">
+                  <tt><i>203</i> 				<span class="k">raise</span> <span class="ne">SystemExit</span><span class="p">(</span><span class="n">result_code</span><span class="p">)</span></tt>
+               </a>
+            </li>
+            </ul>
+         </li>
+         
+         <li>
+            <a data-code="E117">
+               <span class="count sev-2">
+                  35
+               </span>
+               <strong>E117:</strong> over-indented (comment)
+               
+                  (and 1 similar)
+               
+            </a>
+            <ul class="details">
+            <li>
+               
+               <p>Over-indented (comment):</p>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l14">
+                  <tt><i>14</i> 	<span class="c1"># ensure that map has the same meaning on Python 2</span></tt>
+               </a>
+            </li><li>
+               
+               <p>Over-indented:</p>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l15">
+                  <tt><i>15</i> 	<span class="kn">from</span> <span class="nn">future_builtins</span> <span class="kn">import</span> <span class="nb">map</span></tt>
+               </a>
+            </li><li>
+               
+               <p>Over-indented:</p>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l17">
+                  <tt><i>17</i> 	<span class="k">pass</span></tt>
+               </a>
+            </li><li>
+               
+               <p>Over-indented:</p>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l26">
+                  <tt><i>26</i> 	<span class="n">saved</span> <span class="o">=</span> <span class="n">_sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[:]</span></tt>
+               </a>
+            </li><li>
+               
+               <p>Over-indented:</p>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l28">
+                  <tt><i>28</i> 		<span class="n">_sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">repl</span></tt>
+               </a>
+            </li><li>
+               
+               <p>Over-indented:</p>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l30">
+                  <tt><i>30</i> 		<span class="k">yield</span> <span class="n">saved</span></tt>
+               </a>
+            </li><li>
+               
+               <p>Over-indented:</p>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l32">
+                  <tt><i>32</i> 		<span class="n">_sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">saved</span></tt>
+               </a>
+            </li><li>
+               
+               <p>Over-indented:</p>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l37">
+                  <tt><i>37</i> 	<span class="n">allow_hosts</span> <span class="o">=</span> <span class="bp">None</span></tt>
+               </a>
+            </li><li>
+               
+               <p>Over-indented:</p>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l41">
+                  <tt><i>41</i> 		<span class="sd">&quot;&quot;&quot; Specialized version of Distribution.fetch_build_egg</span></tt>
+               </a>
+            </li><li>
+               
+               <p>Over-indented:</p>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l52">
+                  <tt><i>52</i> 			<span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">keep</span><span class="p">:</span></tt>
+               </a>
+            </li><li>
+               
+               <p>Over-indented:</p>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l53">
+                  <tt><i>53</i> 				<span class="k">del</span> <span class="n">opts</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>  <span class="c1"># don&#39;t use any other settings</span></tt>
+               </a>
+            </li><li>
+               
+               <p>Over-indented:</p>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l55">
+                  <tt><i>55</i> 			<span class="n">links</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dependency_links</span><span class="p">[:]</span></tt>
+               </a>
+            </li><li>
+               
+               <p>Over-indented:</p>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l57">
+                  <tt><i>57</i> 				<span class="n">links</span> <span class="o">=</span> <span class="n">opts</span><span class="p">[</span><span class="s1">&#39;find_links&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()</span> <span class="o">+</span> <span class="n">links</span></tt>
+               </a>
+            </li><li>
+               
+               <p>Over-indented:</p>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l60">
+                  <tt><i>60</i> 			<span class="n">opts</span><span class="p">[</span><span class="s1">&#39;allow_hosts&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">allow_hosts</span><span class="p">)</span></tt>
+               </a>
+            </li><li>
+               
+               <p>Over-indented:</p>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l62">
+                  <tt><i>62</i> 			<span class="n">opts</span><span class="p">[</span><span class="s1">&#39;index_url&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">index_url</span><span class="p">)</span></tt>
+               </a>
+            </li><li>
+               
+               <p>Over-indented:</p>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l76">
+                  <tt><i>76</i> 	<span class="sd">&quot;&quot;&quot;</span></tt>
+               </a>
+            </li><li>
+               
+               <p>Over-indented:</p>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l93">
+                  <tt><i>93</i> 		<span class="bp">self</span><span class="o">.</span><span class="n">extras</span> <span class="o">=</span> <span class="bp">False</span></tt>
+               </a>
+            </li><li>
+               
+               <p>Over-indented:</p>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l101">
+                  <tt><i>101</i> 		<span class="sd">&quot;&quot;&quot;</span></tt>
+               </a>
+            </li><li>
+               
+               <p>Over-indented:</p>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l111">
+                  <tt><i>111</i> 		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">addopts</span><span class="p">:</span></tt>
+               </a>
+            </li><li>
+               
+               <p>Over-indented:</p>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l112">
+                  <tt><i>112</i> 			<span class="bp">self</span><span class="o">.</span><span class="n">addopts</span> <span class="o">=</span> <span class="n">_shlex</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">addopts</span><span class="p">)</span></tt>
+               </a>
+            </li><li>
+               
+               <p>Over-indented:</p>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l116">
+                  <tt><i>116</i> 		<span class="sd">&quot;&quot;&quot;</span></tt>
+               </a>
+            </li><li>
+               
+               <p>Over-indented:</p>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l127">
+                  <tt><i>127</i> 		<span class="sd">&quot;&quot;&quot;</span></tt>
+               </a>
+            </li><li>
+               
+               <p>Over-indented:</p>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l136">
+                  <tt><i>136</i> 		<span class="sd">&quot;&quot;&quot;</span></tt>
+               </a>
+            </li><li>
+               
+               <p>Over-indented:</p>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l159">
+                  <tt><i>159</i> 		<span class="n">msg</span> <span class="o">=</span> <span class="p">(</span></tt>
+               </a>
+            </li><li>
+               
+               <p>Over-indented:</p>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l167">
+                  <tt><i>167</i> 			<span class="n">_warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></tt>
+               </a>
+            </li><li>
+               
+               <p>Over-indented:</p>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l170">
+                  <tt><i>170</i> 		<span class="sd">&quot;&quot;&quot;</span></tt>
+               </a>
+            </li><li>
+               
+               <p>Over-indented:</p>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l177">
+                  <tt><i>177</i> 			<span class="nb">setattr</span><span class="p">(</span><span class="n">dist</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">))</span></tt>
+               </a>
+            </li><li>
+               
+               <p>Over-indented:</p>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l182">
+                  <tt><i>182</i> 			<span class="nb">setattr</span><span class="p">(</span><span class="n">dist</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="p">,</span> <span class="n">attr</span><span class="p">))</span></tt>
+               </a>
+            </li><li>
+               
+               <p>Over-indented:</p>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l185">
+                  <tt><i>185</i> 			<span class="bp">self</span><span class="o">.</span><span class="n">announce</span><span class="p">(</span><span class="s1">&#39;skipping tests (dry run)&#39;</span><span class="p">)</span></tt>
+               </a>
+            </li><li>
+               
+               <p>Over-indented:</p>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l189">
+                  <tt><i>189</i> 			<span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">project_on_sys_path</span><span class="p">():</span></tt>
+               </a>
+            </li><li>
+               
+               <p>Over-indented:</p>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l190">
+                  <tt><i>190</i> 				<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_tests</span><span class="p">()</span></tt>
+               </a>
+            </li><li>
+               
+               <p>Over-indented:</p>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l194">
+                  <tt><i>194</i> 		<span class="k">return</span> <span class="p">[</span><span class="s1">&#39;pytest&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">addopts</span></tt>
+               </a>
+            </li><li>
+               
+               <p>Over-indented:</p>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l197">
+                  <tt><i>197</i> 		<span class="sd">&quot;&quot;&quot;</span></tt>
+               </a>
+            </li><li>
+               
+               <p>Over-indented:</p>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l201">
+                  <tt><i>201</i> 			<span class="n">result_code</span> <span class="o">=</span> <span class="nb">__import__</span><span class="p">(</span><span class="s1">&#39;pytest&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">main</span><span class="p">()</span></tt>
+               </a>
+            </li><li>
+               
+               <p>Over-indented:</p>
+               
+               <a href="eggs.pytest_runner-4.4-py3.7.egg.ptr.source.html#l203">
+                  <tt><i>203</i> 				<span class="k">raise</span> <span class="ne">SystemExit</span><span class="p">(</span><span class="n">result_code</span><span class="p">)</span></tt>
+               </a>
+            </li>
+            </ul>
+         </li>
+         
+         </ul>
+      </div>
+   </body>
+</html>
