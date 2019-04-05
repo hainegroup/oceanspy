@@ -13,11 +13,12 @@ dependencies:
   - intake-xarray
   - ffmpeg
   - pytest
+  - pytest-cov
+  - pytest-env
+  - codecov
   - pip:
     - geopy
     - xgcm>=0.2.0
     - xesmf
     - xgcm
     - git+https://github.com/xgcm/xmitgcm.git
-    - codecov
-    - pytest-cov
