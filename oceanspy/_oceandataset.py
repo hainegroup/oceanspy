@@ -1010,7 +1010,7 @@ class OceanDataset:
         """
         Access subsampling functions.
         """
-        return _subsampleMethdos(self)  # pragma: no cover
+        return _subsampleMethdos(self)
 
     @property
     def compute(self):
@@ -1020,7 +1020,7 @@ class OceanDataset:
         Set overwrite=True
          to overwrite DataArrays already existing in the oceandataset.
         """
-        return _computeMethdos(self)  # pragma: no cover
+        return _computeMethdos(self)
 
     @property
     def plot(self):
@@ -1028,7 +1028,7 @@ class OceanDataset:
         Access plotting functions.
         """
 
-        return _plotMethdos(self)  # pragma: no cover
+        return _plotMethdos(self)
 
     @property
     def animate(self):
@@ -1036,4 +1036,4 @@ class OceanDataset:
         Access animating functions.
         """
 
-        return _animateMethdos(self)  # pragma: no cover
+        return _animateMethdos(self)

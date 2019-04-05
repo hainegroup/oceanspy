@@ -4,13 +4,15 @@
 import pytest
 import xarray as xr
 import numpy as np
-import matplotlib.pyplot as plt
 
 # From OceanSpy
 from oceanspy import open_oceandataset, OceanDataset
 from oceanspy.plot import (TS_diagram, time_series,
                            horizontal_section,
                            vertical_section)
+
+# Matplotlib (keep it below oceanspy)
+import matplotlib.pyplot as plt
 
 # Directory
 Datadir = './oceanspy/tests/Data/'

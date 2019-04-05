@@ -4,13 +4,15 @@
 import pytest
 import xarray as xr
 import numpy as np
-import matplotlib.pyplot as plt
-from matplotlib.animation import FuncAnimation
 
 # From OceanSpy
 from oceanspy import open_oceandataset
 from oceanspy.animate import (TS_diagram,
                               horizontal_section, vertical_section)
+
+# From matplotlib (keep it below oceanspy!)
+import matplotlib.pyplot as plt
+from matplotlib.animation import FuncAnimation
 
 # Directory
 Datadir = './oceanspy/tests/Data/'
