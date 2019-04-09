@@ -83,7 +83,22 @@ def from_catalog(name, catalog_url=None):
 
     # Check parameters
     if catalog_url is None:  # pragma: no cover
-        pass
+        SciList = ['get_started',
+                   'EGshelfIIseas2km_ERAI_6H',
+                   'EGshelfIIseas2km_ERAI_1D',
+                   'EGshelfIIseas2km_ASR_full',
+                   'EGshelfIIseas2km_ASR_crop',
+                   'Arctic_Control',
+                   'KangerFjord',
+                   'EGshelfSJsec500m_3H_hydro',
+                   'EGshelfSJsec500m_6H_hydro',
+                   'EGshelfSJsec500m_3H_NONhydro',
+                   'EGshelfSJsec500m_6H_NONhydro',
+                   'xmitgcm_snap']
+        if name not in SciList:
+            raise ValueError('[{}] is not available on SciServer.'
+                             ' Here is a list of available oceandatasets: {}.'
+                             ''.format(name, SciList))
     else:
         _check_instance({'catalog_url': catalog_url}, 'str')
 

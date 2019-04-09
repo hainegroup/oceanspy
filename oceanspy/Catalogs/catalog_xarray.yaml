@@ -488,7 +488,7 @@ sources:
         dTempFrz_dS: -5.75e-02
       name: Arctic_Control
       description: |
-        Curvilinear grid test. Setup by Dr. Renske Gelderloos
+        Curvilinear grid test. Setup by Dr. Renske Gelderloos.
       projection: NorthPolarStereo
         
   fld_Arctic_Control:
