@@ -36,7 +36,7 @@ def cutout(od,
            dropAxes=False):
     """
     Cutout the original dataset in space and time
-     preserving the original grid structure.
+    preserving the original grid structure.
 
     Parameters
     ----------
@@ -51,34 +51,32 @@ def cutout(od,
         X axis limits (e.g., longitudes).
         If len(XRange)>2, max and min values are used.
     add_Hbdr: bool, scal
-        If scalar,
-         add (subtract) add_Hbdr to the max (min) values
-         of the horizontal ranges.
+        If scalar, add and subtract `add_Hbdr` to the the horizontal range.
+        of the horizontal ranges.
         If True, automatically estimate add_Hbdr.
         If False, add_Hbdr is set to zero.
     mask_outside: bool
         If True, set all values in areas outside specified (Y,X)ranges to NaNs.
-        (Useless for rectilinear grids).
+        (Useful for curvilinear grids).
     ZRange: 1D array_like, scalar, or None
         Z axis limits.
         If len(ZRange)>2, max and min values are used.
     add_Vbdr: bool, scal
-        If scalar,
-         add (subtract) add_Vbdr to the max (min) values of the vertical range.
+        If scalar, add and subtract `add_Vbdr` to the the vertical range.
         If True, automatically estimate add_Vbdr.
         If False, add_Vbdr is set to zero.
-    timeRange: 1D array_like np.ScalarType, or None
+    timeRange: 1D array_like, numpy.ScalarType, or None
         time axis limits.
         If len(timeRange)>2, max and min values are used.
     timeFreq: str or None
         Time frequency.
-         Available optionts are pandas Offset Aliases (e.g., '6H'):
+        Available optionts are pandas Offset Aliases (e.g., '6H'):
         http://pandas.pydata.org/pandas-docs/stable/timeseries.html#offset-aliases
     sampMethod: {'snapshot', 'mean'}
-        Downsampling method (only if timeFreq is not None)
+        Downsampling method (only if timeFreq is not None).
     dropAxes: 1D array_like, str, or bool
-        List of axes to remove from Grid object
-         if one point only is in the range.
+        List of axes to remove from Grid object.
+        if one point only is in the range.
         If True, set dropAxes=od.grid_coords.
         If False, preserve original grid.
 
@@ -91,9 +89,9 @@ def cutout(od,
     -----
     If any of the horizontal ranges is not None,
     the horizontal dimensions of the cutout will have
-     len(Xp1)>len(X) and len(Yp1)>len(Y)
+    len(Xp1)>len(X) and len(Yp1)>len(Y)
     even if the original oceandataset had
-     len(Xp1)==len(X) or len(Yp1)==len(Y).
+    len(Xp1)==len(X) or len(Yp1)==len(Y).
     """
 
     # Checks
@@ -108,24 +106,19 @@ def cutout(od,
 
     _check_instance({'od': od,
                      'add_Hbdr': add_Hbdr,
-                     'mask_outside': mask_outside},
+                     'mask_outside': mask_outside,
+                     'timeFreq': timeFreq},
                     {'od': 'oceanspy.OceanDataset',
                      'add_Hbdr': '(float, int, bool)',
-                     'mask_outside': 'bool'})
-    if varList is not None:
-        varList = _check_list_of_string(varList, 'varList')
-    if YRange is not None:
-        YRange = _check_range(od, YRange, 'YRange')
-    if XRange is not None:
-        XRange = _check_range(od, XRange, 'XRange')
-    if ZRange is not None:
-        ZRange = _check_range(od, ZRange, 'ZRange')
-    if timeRange is not None:
-        timeRange = _check_range(od, timeRange, 'timeRange')
-    if timeFreq is not None:
-        _check_instance({'timeFreq': timeFreq}, 'str')
-
+                     'mask_outside': 'bool',
+                     'timeFreq': ['type(None)', 'str']})
+    varList = _check_list_of_string(varList, 'varList')
+    YRange = _check_range(od, YRange, 'YRange')
+    XRange = _check_range(od, XRange, 'XRange')
+    ZRange = _check_range(od, ZRange, 'ZRange')
+    timeRange = _check_range(od, timeRange, 'timeRange')
     sampMethod_list = ['snapshot', 'mean']
+
     if sampMethod not in sampMethod_list:
         raise ValueError('`sampMethod` [{}] is not supported.'
                          '\nAvailable options: {}'
@@ -554,27 +547,23 @@ def mooring_array(od, Ymoor, Xmoor,
                   **kwargs):
     """
     Extract a mooring array section following the grid.
-    Trajectories are great circle paths when coordinates are spherical.
+    Trajectories are great circle paths if coordinates are spherical.
 
     Parameters
     ----------
     od: OceanDataset
-        od that will be subsampled
+        od that will be subsampled.
     Ymoor: 1D array_like, scalar
         Y coordinates of moorings.
     Xmoor: 1D array_like, scalar
         X coordinates of moorings.
     **kwargs:
-        Keyword arguments for subsample.cutout
+        Keyword arguments for :py:func:`oceanspy.subsample.cutout`.
 
     Returns
     -------
     od: OceanDataset
-        Subsampled oceandataset
-
-    See Also
-    --------
-    subsample.cutout
+        Subsampled oceandataset.
     """
 
     # Check
@@ -839,13 +828,13 @@ def survey_stations(od, Ysurv, Xsurv,
                     delta=None, xesmf_regridder_kwargs={'method': 'bilinear'},
                     **kwargs):
     """
-    Extract survey stations with regular spacing.
-    Trajectories are great circle paths when coordinates are spherical.
+    Extract survey stations.
+    Trajectories are great circle paths if coordinates are spherical.
 
     Parameters
     ----------
     od: OceanDataset
-        od that will be subsampled
+        od that will be subsampled.
     Ysurv: 1D array_like
         Y coordinates of stations.
     Xsurv: 1D array_like,
@@ -853,24 +842,18 @@ def survey_stations(od, Ysurv, Xsurv,
     delta: scalar, None
         Distance between stations.
         Units are km for spherical coordinate,
-         same units of coordinates for cartesian.
-        If None, only (Ysurv, Xsurv) stations are used.
+        same units of coordinates for cartesian.
+        If None, only (Ysurv, Xsurv) stations are returned.
     xesmf_regridder_kwargs: dict
         Keyword arguments for xesmf.regridder, such as `method`.
         Defaul method: `bilinear`.
-        Available methods:
-         {‘bilinear’, ‘conservative’, ‘patch’, ‘nearest_s2d’, ‘nearest_d2s’}
     **kwargs:
-        Keyword arguments for subsample.cutout
+        Keyword arguments for :py:func:`oceanspy.subsample.cutout`.
 
     Returns
     -------
     od: OceanDataset
-        Subsampled oceandataset
-
-    See Also
-    --------
-    subsample.cutout
+        Subsampled oceandataset.
 
     References
     ----------
@@ -879,15 +862,15 @@ def survey_stations(od, Ysurv, Xsurv,
     Notes
     -----
     By default, kwargs['add_Hbdr'] = True.
-     Try to play with add_Hbdr values if zeros/nans are returned.
-     ospy.survey_stations interpolates using xesmf.regridder.
-     THIS FUNCTION DOES NOT SUPPORT LAZY COMPUTATION!
+    Try to play with add_Hbdr values if zeros/nans are returned.
+    This function interpolates using xesmf.regridder,
+    and does not support lazy computation.
 
     xesmf.regridder currently dosen't allow
-     to set the coordinates system (default is spherical).
+    to set the coordinates system (default is spherical).
     Surveys using cartesian coordinates can be made
-     by changing the xesmf source code
-     as explained here: https://github.com/JiaweiZhuang/xESMF/issues/39
+    by changing the xesmf source code
+    as explained here: https://github.com/JiaweiZhuang/xESMF/issues/39
     """
 
     # Check
@@ -1057,7 +1040,7 @@ def particle_properties(od, times, Ypart, Xpart, Zpart, **kwargs):
 
     """
     Extract Eulerian properties of particles
-     using nearest-neighbor interpolation.
+    using nearest-neighbor interpolation.
 
     Parameters
     ----------
@@ -1066,23 +1049,22 @@ def particle_properties(od, times, Ypart, Xpart, Zpart, **kwargs):
     times: 1D array_like or scalar
         time of particles.
     Ypart: 2D array_like or 1D array_like if times is scalar
-        Y coordinates of particles. Dimensions order: (time, particle)
+        Y coordinates of particles. Dimensions order: (time, particle).
     Xpart: 2D array_like or 1D array_like if times is scalar
-        X coordinates of particles. Dimensions order: (time, particle)
+        X coordinates of particles. Dimensions order: (time, particle).
     Zpart: 2D array_like or 1D array_like if times is scalar
-        Z of particles. Dimensions order: (time, particle)
+        Z of particles. Dimensions order: (time, particle).
     **kwargs:
-        Keyword arguments for subsample.cutout
+        Keyword arguments for :py:func:`oceanspy.subsample.cutout`.
 
     Returns
     -------
     od: OceanDataset
-        Subsampled oceandataset
+        Subsampled oceandataset.
 
     See Also
     --------
-    subsample.cutout
-    OceanDataset.create_tree
+    oceanspy.OceanDataset.create_tree
     """
 
     # Checks

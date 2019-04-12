@@ -45,48 +45,12 @@ KangerFjord:
     original_output: average
     name: KangerFjord
     description: |
-      A realistic numerical model constructed to simulate the oceanic conditions and circulation in a large 
-      southeast Greenland fjord (Kangerdlugssuaq) and the adjacent shelf sea region during winter 2007–2008. 
+      A realistic numerical model constructed to simulate the oceanic conditions
+      and circulation in a large southeast Greenland fjord (Kangerdlugssuaq) and
+      the adjacent shelf sea region during winter 2007–2008. 
       Citation: 
         * Fraser et al., 2018 - JGR.
     projection: Mercator
-    
-    
-# ===========================
-# xmitgcm snapshots
-xmitgcm_snap:
-  description: xmitgcm snapshots
-  args: 
-    data_dir: /home/idies/workspace/OceanCirculation/global_oce_latlon/snapshots
-  metadata:  
-    rename:
-      XC: X 
-      YC: Y 
-      XG: Xp1 
-      YG: Yp1
-    aliases:
-      HFacC: hFacC
-      HFacS: hFacS
-      HFacW: hFacW
-    manipulate_coords:
-      coords2Dfrom1D: True
-    grid_coords: 
-      grid_coords:
-        Y:
-          Y: 
-          Yp1: -0.5
-        X:
-          X: 
-          Xp1: -0.5
-        Z:
-         Z: 
-         Zp1: 0.5
-         Zu: 0.5
-         Zl: -0.5
-    name: xmitgcm_snap
-    description: |
-      curl -L -J -O https://ndownloader.figshare.com/files/6494718 
-    projection: Robinson
     
 # ===========================
 # EGshelfSJsec500m_3H_hydro
@@ -345,4 +309,40 @@ exfEGshelfSJsec500m_6H_NONhydro:
       YC: Y 
       XG: Xp1 
       YG: Yp1
+      
+# ===========================
+# xmitgcm snapshots
+xmitgcm_snap:
+  description: xmitgcm snapshots
+  args: 
+    data_dir: /home/idies/workspace/OceanCirculation/global_oce_latlon/snapshots
+  metadata:  
+    rename:
+      XC: X 
+      YC: Y 
+      XG: Xp1 
+      YG: Yp1
+    aliases:
+      HFacC: hFacC
+      HFacS: hFacS
+      HFacW: hFacW
+    manipulate_coords:
+      coords2Dfrom1D: True
+    grid_coords: 
+      grid_coords:
+        Y:
+          Y: 
+          Yp1: -0.5
+        X:
+          X: 
+          Xp1: -0.5
+        Z:
+         Z: 
+         Zp1: 0.5
+         Zu: 0.5
+         Zl: -0.5
+    name: xmitgcm_snap
+    description: |
+      curl -L -J -O https://ndownloader.figshare.com/files/6494718 
+    projection: Robinson
      

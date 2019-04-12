@@ -29,26 +29,25 @@ try:
 except ImportError:  # pragma: no cover
     pass
 
+# TODO: create list of OceanSpy name and add link under aliases.
+# TODO: create a dictionary with parameters description and add under aliases.
 # TODO: add more xgcm options. E.g., default boundary method.
 # TODO: add attributes to new coordinates (XU, XV, ...)
 # TODO: implement xgcm autogenerate in _set_coords,
 #       set_grid_coords, set_coords when released
-# TODO: _create_grid will be useless with the future release of xgcm.
+# TODO: Use the coords parameter to create xgcm grid instead of
+#       _crate_grid.
 #       We will pass dictionary in xgcm.Grid,
 #       and we can have the option of usining comodo attributes
 #       (currently cleaned up so switched off)
-# TODO: handle attributes as xmitgcm
 
 
 class OceanDataset:
     """
-    OceanDataset combines a xarray.Dataset
-     with other objects used by OceanSpy (e.g., xgcm.Grid).
+    OceanDataset combines a :py:obj:`xarray.Dataset`
+    with other objects used by OceanSpy (e.g., xgcm.Grid).
 
-    Additional objects are attached to the xarray.Dataset as global attributes.
-
-    OceanDataset adds, reads, and decodes
-     global attributes of the dataset object.
+    Additional objects are attached to the :py:obj:`xarray.Dataset` as global attributes.
     """
 
     def __init__(self, dataset):
@@ -124,14 +123,13 @@ class OceanDataset:
     # ===========
     # ATTRIBUTES
     # ===========
-
     # -------------------
     # name
     # -------------------
     @property
     def name(self):
         """
-        Name of the OceanDataset
+        Name of the OceanDataset.
         """
         name = self._read_from_global_attr('name')
 
@@ -140,7 +138,7 @@ class OceanDataset:
     @name.setter
     def name(self, name):
         """
-        Inhibit setter
+        Inhibit setter.
         """
         raise AttributeError(_setter_error_message('name'))
 
@@ -151,9 +149,9 @@ class OceanDataset:
         Parameters
         ----------
         name: str
-            Name of the OceanDataset
+            Name of the OceanDataset.
         overwrite: bool or None
-            If None, raise error if name has been previously set.
+            If None, raises error if name has been previously set.
             If True, overwrite previous name.
             If False, combine with previous name.
         """
@@ -173,7 +171,7 @@ class OceanDataset:
     @property
     def description(self):
         """
-        Description of the OceanDataset
+        Description of the OceanDataset.
         """
         description = self._read_from_global_attr('description')
 
@@ -182,7 +180,7 @@ class OceanDataset:
     @description.setter
     def description(self, description):
         """
-        Inhibit setter
+        Inhibit setter.
         """
         raise AttributeError(_setter_error_message('description'))
 
@@ -195,7 +193,7 @@ class OceanDataset:
         description: str
             Desription of the OceanDataset
         overwrite: bool or None
-            If None, raise error if description has been previously set.
+            If None, raises error if description has been previously set.
             If True, overwrite previous description.
             If False, combine with previous description.
         """
@@ -216,9 +214,9 @@ class OceanDataset:
     def aliases(self):
         """
         A dictionary to connect custom variable names
-         to OceanSpy reference names.
-        Keys are OceanSpy names, values are custom names:
-         {'ospy_name': 'custom_name'}
+        to OceanSpy reference names.
+        Keys are OceanSpy reference names, values are custom names:
+        {'ospy_name': 'custom_name'}
         """
 
         aliases = self._read_from_global_attr('aliases')
@@ -228,8 +226,9 @@ class OceanDataset:
     @property
     def _aliases_flipped(self):
         """
-        Flip aliases: Keys are values names,
-         values are ospy_name names: {'ospy_name': 'custom_name'}
+        Flip aliases:
+        From {'ospy_name': 'custom_name'}
+        to {'custom_name': 'ospy_name'}
         """
         if self.aliases:
             aliases_flipped = {custom: ospy
@@ -242,7 +241,7 @@ class OceanDataset:
     @aliases.setter
     def aliases(self, aliases):
         """
-        Inhibit setter
+        Inhibit setter.
         """
 
         raise AttributeError(_setter_error_message('aliases'))
@@ -250,15 +249,15 @@ class OceanDataset:
     def set_aliases(self, aliases, overwrite=None):
         """
         Set aliases to connect custom variables names
-         to OceanSpy reference names.
+        to OceanSpy reference names.
 
         Parameters
         ----------
         aliases: dict
             Keys are OceanSpy names, values are custom names:
-             {'ospy_name': 'custom_name'}
+            {'ospy_name': 'custom_name'}
         overwrite: bool or None
-            If None, raise error if aliases has been previously set.
+            If None, raises error if aliases has been previously set.
             If True, overwrite previous aliases.
             If False, combine with previous aliases.
         """
@@ -279,7 +278,7 @@ class OceanDataset:
     def _apply_aliases(self):
         """
         Check if there are variables with custom name in _ds,
-         and rename to ospy name
+        and rename to OceanSpy reference name
         """
         if self._aliases_flipped:
             aliases = {custom: ospy
@@ -316,7 +315,7 @@ class OceanDataset:
     @dataset.setter
     def dataset(self, dataset):
         """
-        Inhibit setter
+        Inhibit setter.
         """
         raise AttributeError("Set a new dataset using "
                              "`oceanspy.OceanDataset(dataset)`")
@@ -328,8 +327,8 @@ class OceanDataset:
     def parameters(self):
         """
         A dictionary defining model parameters that are used by OceanSpy.
-        {'parameter_name': parameter value}
-        If a parameter is not available, use default.
+        Default values are used for parameters that have not been set
+        (see :py:const:`oceanspy.DEFAULT_PARAMETERS`).
         """
         from oceanspy import DEFAULT_PARAMETERS
         parameters = self._read_from_global_attr('parameters')
@@ -344,18 +343,21 @@ class OceanDataset:
     @parameters.setter
     def parameters(self, parameters):
         """
-        Inhibit setter
+        Inhibit setter.
         """
         raise AttributeError(_setter_error_message('parameters'))
 
     def set_parameters(self, parameters):
         """
-        Set model parameters used by OceanSpy (see oceanspy.DEFAULT_PARAMETERS)
+        Set model parameters used by OceanSpy.
+        See :py:const:`oceanspy.DEFAULT_PARAMETERS` for a list of parameters.
+        See :py:const:`oceanspy.AVAILABLE_PARAMETERS` for a list of parameters
+        with predefined options.
 
         Parameters
         ----------
         parameters: dict
-            {'parameter_name': parameter_value}
+            {'name': value}
         """
         from oceanspy import (DEFAULT_PARAMETERS,
                               AVAILABLE_PARAMETERS,
@@ -397,7 +399,7 @@ class OceanDataset:
     @property
     def grid_coords(self):
         """
-        Grid coordinates used by xgcm.Grid
+        Grid coordinates used by :py:obj:`xgcm.Grid`.
 
         References
         ----------
@@ -411,31 +413,31 @@ class OceanDataset:
     @grid_coords.setter
     def grid_coords(self, grid_coords):
         """
-        Inhibit setter
+        Inhibit setter.
         """
 
         raise AttributeError(_setter_error_message('grid_coords'))
 
     def set_grid_coords(self, grid_coords, add_midp=False, overwrite=None):
         """
-        Set grid coordinates used by xgcm.Grid.
+        Set grid coordinates used by :py:obj:`xgcm.Grid`.
 
         Parameters
         ----------
         grid_coords: str
-            Grid coordinates used by xgcm.Grid.
-            Keys are axis, and values are dict with
-             key=dim and value=c_grid_axis_shift.
+            Grid coordinates used by :py:obj:`xgcm.Grid`.
+            Keys are axes, and values are dict with
+            key=dim and value=c_grid_axis_shift.
             Available c_grid_axis_shift are {0.5, None, -0.5}.
             E.g., {'Y': {'Y': None, 'Yp1': 0.5}}
-            See oceanspy.OCEANSPY_AXES for a list of axes
+            See :py:const:`oceanspy.OCEANSPY_AXES` for a list of axes
         add_midp: bool
             If true, add inner dimension (mid points)
-             to axis with outer dimension only.
-            The new dimension will be called
-             as the outer dimension + '_midp'
+            to axes with outer dimension only.
+            The new dimension will be named
+            as the outer dimension + '_midp'
         overwrite: bool or None
-            If None, raise error if grid_coords has been previously set.
+            If None, raises error if grid_coords has been previously set.
             If True, overwrite previous grid_coors.
             If False, combine with previous grid_coors.
 
@@ -499,7 +501,7 @@ class OceanDataset:
     @property
     def grid_periodic(self):
         """
-        List of xgcm.Grid axes that are periodic
+        List of :py:obj:`xgcm.Grid` axes that are periodic.
         """
 
         grid_periodic = self._read_from_global_attr('grid_periodic')
@@ -511,22 +513,21 @@ class OceanDataset:
     @grid_periodic.setter
     def grid_periodic(self, grid_periodic):
         """
-        Inhibit setter
+        Inhibit setter.
         """
 
         raise AttributeError(_setter_error_message('grid_periodic'))
 
     def set_grid_periodic(self, grid_periodic):
         """
-        Set grid axes that need to be treated as periodic by xgcm.Grid.
-        Axis that are not set periodic are non-periodic by default.
-        Note that xgcm sets periodic=True by default.
+        Set grid axes that will be treated as periodic by :py:obj:`xgcm.Grid`.
+        Axes that are not set periodic are non-periodic by default.
 
         Parameters
         ----------
         grid_periodic: list
             List of periodic axes.
-            See oceanspy.OCEANSPY_AXES for a list of axes
+            See :py:const:`oceanspy.OCEANSPY_AXES` for a list of axes
         """
 
         # Check parameters
@@ -551,10 +552,10 @@ class OceanDataset:
     @property
     def grid(self):
         """
-        xgcm.Grid: A collection of axis,
-         which is a group of coordinates that all lie
-         along the same physical dimension
-         but describe different positions relative to a grid cell.
+        :py:obj:`xgcm.Grid`: A collection of axes,
+        which is a group of coordinates that all lie
+        along the same physical dimension
+        but describe different positions relative to a grid cell.
 
         References
         ----------
@@ -571,7 +572,7 @@ class OceanDataset:
     @property
     def _grid(self):
         """
-        xgcm.Grid using aliases
+        :py:obj:`xgcm.Grid` with OceanSpy reference names.
         """
 
         aliases = self.aliases
@@ -596,7 +597,7 @@ class OceanDataset:
     @grid.setter
     def grid(self, grid):
         """
-        Inhibit setter
+        Inhibit setter.
         """
         raise AttributeError("Set a new grid using "
                              ".set_grid_coords and .set_periodic")
@@ -604,7 +605,7 @@ class OceanDataset:
     @_grid.setter
     def _grid(self, grid):
         """
-        Inhibit setter
+        Inhibit setter.
         """
         raise AttributeError("Set a new _grid using "
                              ".set_grid_coords and .set_periodic")
@@ -615,7 +616,7 @@ class OceanDataset:
     @property
     def projection(self):
         """
-        Projection of the OceanDataset.
+        Cartopy projection of the OceanDataset.
         """
 
         projection = self._read_from_global_attr('projection')
@@ -635,22 +636,24 @@ class OceanDataset:
     @projection.setter
     def projection(self, projection):
         """
-        Inhibit setter
+        Inhibit setter.
         """
 
         raise AttributeError(_setter_error_message('projection'))
 
     def set_projection(self, projection, **kwargs):
         """
-        Projection of the OceanDataset.
+        Set Cartopy projection of the OceanDataset.
 
         Parameters
         ----------
         projection: str or None
-            cartopy projection of the OceanDataset.
+            Cartopy projection of the OceanDataset.
             Use None to remove projection.
         **kwargs:
+            Keyword arguments for the projection.
             E.g., central_longitude=0.0 for PlateCarree
+
         References
         ----------
         https://scitools.org.uk/cartopy/docs/latest/crs/projections.html
@@ -676,25 +679,26 @@ class OceanDataset:
     # ===========
     # METHODS
     # ===========
-
     def create_tree(self, grid_pos='C'):
         """
         Create a scipy.spatial.cKDTree for quick nearest-neighbor lookup.
 
         Parameters
-        -----------
+        ----------
         grid_pos: str
-            Grid position. Option: {'C', 'G', 'U', 'V'}
+            Grid position. Options: {'C', 'G', 'U', 'V'}
 
         Returns
         -------
         tree: scipy.spatial.cKDTree
-            Return tree that can be used to query a point.
+            Return a xKDTree object that can be used to query a point.
 
         References
         ----------
-        https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.cKDTree.html
-        https://mitgcm.readthedocs.io/en/latest/algorithm/horiz-grid.html
+        | cKDTree:
+          https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.cKDTree.html
+        | Grid:
+          https://mitgcm.readthedocs.io/en/latest/algorithm/horiz-grid.html
         """
 
         # Check parameters
@@ -730,15 +734,15 @@ class OceanDataset:
 
     def merge_into_oceandataset(self, obj, overwrite=False):
         """
-        Merge a dataset or DataArray into the oceandataset
+        Merge a Dataset or DataArray into the OceanDataset.
 
         Parameters
         ----------
         obj: xarray.DataArray or xarray.Dataset
-            xarray object to merge
+            object to merge.
         overwrite: bool or None
             If True, overwrite existing DataArrays with same name.
-            If False, use xarray.merge
+            If False, use xarray.merge.
         """
 
         # Check and make dataset
@@ -775,14 +779,14 @@ class OceanDataset:
 
     def to_netcdf(self, path, **kwargs):
         """
-        Write dataset contents to a netCDF file.
+        Write contents to a netCDF file.
 
         Parameters
         ----------
         path: str
-            Path to which to save this dataset.
+            Path to which to save.
         **kwargs:
-            Keyword arguments for xarray.DataSet.to_netcdf()
+            Keyword arguments for xarray.Dataset.to_netcdf()
 
         References
         ----------
@@ -810,81 +814,9 @@ class OceanDataset:
         else:
             dataset.to_netcdf(path, compute=compute, **kwargs)
 
-    def _store_as_global_attr(self, name, attr, overwrite):
-        """
-        Store an OceanSpy attribute as dataset global attribute.
-
-        Parameters
-        ----------
-        name: str
-            Name of the attribute. Attribute is stored as OceanSpy_+name.
-        attr: str or dict
-            Attribute to store
-        overwrite: bool or None
-            If None, raise error if attr has been previously set.
-            If True, overwrite previous attributes.
-            If False, combine with previous attributes.
-        """
-
-        # Attribute name
-        name = 'OceanSpy_'+name
-
-        if overwrite is None and name in self._ds.attrs:
-            raise ValueError("[{}] has been previously set: "
-                             "`overwrite` must be bool"
-                             "".format(name.replace("OceanSpy_", "")))
-
-        # Copy because attributes are added to _ds
-        self = _copy.copy(self)
-
-        # Store
-        if not overwrite and name in self._ds.attrs:
-            prev_attr = self._ds.attrs[name]
-            if prev_attr[0] == "{" and prev_attr[-1] == "}":
-                attr = {**eval(prev_attr), **attr}
-            else:
-                attr = prev_attr + '_' + attr
-
-        self._ds.attrs[name] = str(attr)
-
-        return self
-
-    def _read_from_global_attr(self, name):
-        """
-        Read an OceanSpy attribute stored as dataset global attribute.
-
-        Parameters
-        ----------
-        name: str
-            Name of the attribute.
-            Attribute will be read from 'OceanSpy_'+name.
-
-        Returns
-        -------
-        attr: str or dict
-            Attribute that has been read
-        """
-
-        # Attribute name
-        name = 'OceanSpy_'+name
-
-        # Check if attributes exists
-        if name not in self._ds.attrs:
-            return None
-
-        # Read attribute
-        attr = self._ds.attrs[name]
-        check_dict = (attr[0] == '{' and attr[-1] == '}')
-        check_list = (attr[0] == '[' and attr[-1] == ']')
-        if check_dict or check_list:
-            attr = eval(attr)
-
-        return attr
-
     # ==================================
     # IMPORT (used by open_oceandataset)
     # ==================================
-
     def shift_averages(self, averageList=None):
         """
         Shift average variables to time_midp.
@@ -915,19 +847,25 @@ class OceanDataset:
     def manipulate_coords(self, fillna=False, coords1Dfrom2D=False,
                           coords2Dfrom1D=False, coordsUVfromG=False):
         """
-        Manipulate coordinates to make them campatible with oceanspy.
+        Manipulate coordinates to make them campatible with OceanSpy.
 
         Parameters
         ----------
         fillna: bool
-            If True, fill NaNs in 2D coordinates.
+            If True, fill NaNs in 2D coordinates
+            (e.g., NaNs are created by MITgcm exch2).
         coords1Dfrom2D: bool
-            If True, compute 1D coordinates from 2D coordinates (means).
-            Use with rectilinear grid only!
+            If True, infer 1D coordinates from 2D coordinates (mean of 2D).
+            Use with rectilinear grid only.
         coords2Dfrom1D: bool
-            If True, compute 2D coordinates from 1D coordinates (brodacast).
+            If True, infer 2D coordinates from 1D coordinates (brodacast 1D).
         coordsUVfromCG: bool
             If True, compute missing coords (U and V points) from G points.
+
+        References
+        ----------
+        Grid:
+        https://mitgcm.readthedocs.io/en/latest/algorithm/horiz-grid.html
         """
 
         # Copy because the dataset will change
@@ -1001,31 +939,104 @@ class OceanDataset:
                                         'YV', 'XV'])
         return self
 
+    # =====
+    # UTILS
+    # =====
+    def _store_as_global_attr(self, name, attr, overwrite):
+        """
+        Store an OceanSpy attribute as dataset global attribute.
+
+        Parameters
+        ----------
+        name: str
+            Name of the attribute. Attribute is stored as OceanSpy_+name.
+        attr: str or dict
+            Attribute to store
+        overwrite: bool or None
+            If None, raises error if attr has been previously set.
+            If True, overwrite previous attributes.
+            If False, combine with previous attributes.
+        """
+
+        # Attribute name
+        name = 'OceanSpy_'+name
+
+        if overwrite is None and name in self._ds.attrs:
+            raise ValueError("[{}] has been previously set: "
+                             "`overwrite` must be bool"
+                             "".format(name.replace("OceanSpy_", "")))
+
+        # Copy because attributes are added to _ds
+        self = _copy.copy(self)
+
+        # Store
+        if not overwrite and name in self._ds.attrs:
+            prev_attr = self._ds.attrs[name]
+            if prev_attr[0] == "{" and prev_attr[-1] == "}":
+                attr = {**eval(prev_attr), **attr}
+            else:
+                attr = prev_attr + '_' + attr
+
+        self._ds.attrs[name] = str(attr)
+
+        return self
+
+    def _read_from_global_attr(self, name):
+        """
+        Read an OceanSpy attribute stored as dataset global attribute.
+
+        Parameters
+        ----------
+        name: str
+            Name of the attribute.
+            Attribute is decoded from 'OceanSpy_'+name.
+
+        Returns
+        -------
+        attr: str or dict
+            Attribute that has been decoded.
+        """
+
+        # Attribute name
+        name = 'OceanSpy_'+name
+
+        # Check if attributes exists
+        if name not in self._ds.attrs:
+            return None
+
+        # Read attribute
+        attr = self._ds.attrs[name]
+        check_dict = (attr[0] == '{' and attr[-1] == '}')
+        check_list = (attr[0] == '[' and attr[-1] == ']')
+        if check_dict or check_list:
+            attr = eval(attr)
+
+        return attr
+
     # ===========
     # SHORTCUTS
     # ===========
-
     @property
     def subsample(self):
         """
-        Access subsampling functions.
+        Access :py:mod:`oceanspy.subsample` functions.
         """
         return _subsampleMethdos(self)
 
     @property
     def compute(self):
         """
-        Access computing functions,
-         and merge the computed dataset into the oceandataset.
+        Access :py:mod:`oceanspy.compute` functions,
+        and merge the computed Dataset into the OceanDataset.
         Set overwrite=True
-         to overwrite DataArrays already existing in the oceandataset.
+        to overwrite DataArrays already existing in the OceanDataset.
         """
         return _computeMethdos(self)
 
     @property
     def plot(self):
         """
-        Access plotting functions.
+        Access :py:mod:`oceanspy.plot` functions.
         """
 
         return _plotMethdos(self)
@@ -1033,7 +1044,7 @@ class OceanDataset:
     @property
     def animate(self):
         """
-        Access animating functions.
+        Access :py:mod:`oceanspy.animate` functions.
         """
 
         return _animateMethdos(self)

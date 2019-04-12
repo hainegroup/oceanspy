@@ -92,9 +92,9 @@ def great_circle_path(lat1, lon1, lat2, lon2,
     References
     ----------
     Converted to python and adapted from:
-     https://ww2.mathworks.cn/matlabcentral/mlc-downloads/downloads/
+    `<https://ww2.mathworks.cn/matlabcentral/mlc-downloads/downloads/
     submissions/8493/versions/2/previews/generate_great_circle_path.m
-    /index.html?access_key=
+    /index.html?access_key=>`_
     """
 
     # Check parameters
@@ -249,10 +249,10 @@ def cartesian_path(x1, y1, x2, y2, delta=None):
 def densjmd95(s, t, p):
     """
     Density of Sea Water using Jackett and McDougall 1995 (JAOT 12)
-     polynomial (modified UNESCO polynomial) [JaMc95]_.
+    polynomial (modified UNESCO polynomial) [JaMc95]_.
     jmd95.py:
-     http://mitgcm.org/
-     download/daily_snapshot/MITgcm/utils/python/MITgcmutils/MITgcmutils/jmd95.py
+    `<http://mitgcm.org/\
+    download/daily_snapshot/MITgcm/utils/python/MITgcmutils/MITgcmutils/jmd95.py>`_
 
     Parameters
     ----------
@@ -262,7 +262,7 @@ def densjmd95(s, t, p):
         potential temperature [degree C (IPTS-68)]
     p: xarray.DatArray, array-like
         pressure [dbar]
-        (p may have dims 1x1, mx1, 1xn or mxn for S(mxn) )
+        (p may have dims 1x1, mx1, 1xn or mxn for S(mxn))
 
     Returns
     -------
@@ -272,10 +272,11 @@ def densjmd95(s, t, p):
     References
     ----------
     .. [JaMc95]
-     Jackett, D.R. and T.J. Mcdougall, 1995:
-     Minimal Adjustment of Hydrographic Profiles to Achieve Static Stability.
-     J. Atmos. Oceanic Technol., 12, 381–389,
-     https://doi.org/10.1175/1520-0426(1995)012<0381:MAOHPT>2.0.CO;2
+        Jackett, D.R. and T.J. Mcdougall, 1995:\
+        Minimal Adjustment of Hydrographic Profiles\
+        to Achieve Static Stability.\
+        J. Atmos. Oceanic Technol., 12, 381–389,\
+        https://doi.org/10.1175/1520-0426(1995)012<0381:MAOHPT>2.0.CO;2
     """
 
     # make sure arguments are floating point
@@ -408,19 +409,20 @@ def densjmd95(s, t, p):
 def densmdjwf(s, t, p):
     """
     Density of Sea Water using McDougall et al. 2003 (JAOT 20)
-     polynomial (Gibbs Potential) [McJa03]_.
-    mdjwf.py: https://github.com/
-     MITgcm/MITgcm/blob/master/utils/python/MITgcmutils/MITgcmutils/mdjwf.py
+    polynomial (Gibbs Potential) [McJa03]_.
+    mdjwf.py:
+    `<https://github.com/\
+    MITgcm/MITgcm/blob/master/utils/python/MITgcmutils/MITgcmutils/mdjwf.py>`_
 
     Parameters
     ----------
     s: xarray.DatArray, array-like
-        salinity    [psu (PSS-78)]
+        salinity [psu (PSS-78)]
     t: xarray.DatArray, array-like
         potential temperature [degree C (IPTS-68)]
     p: xarray.DatArray, array-like
         pressure [dbar]
-        (p may have dims 1x1, mx1, 1xn or mxn for S(mxn) )
+        (p may have dims 1x1, mx1, 1xn or mxn for S(mxn))
 
     Returns
     -------
@@ -430,11 +432,11 @@ def densmdjwf(s, t, p):
     References
     ----------
     .. [McJa03]
-     McDougall, T.J., D.R. Jackett, D.G. Wright, and R. Feistel, 2003:
-     Accurate and Computationally Efficient Algorithms for
-      Potential Temperature and Density of Seawater.
-      J. Atmos. Oceanic Technol., 20, 730–741,
-      https://doi.org/10.1175/1520-0426(2003)20<730:AACEAF>2.0.CO;2
+        McDougall, T.J., D.R. Jackett, D.G. Wright, and R. Feistel, 2003:\
+        Accurate and Computationally Efficient Algorithms for\
+        Potential Temperature and Density of Seawater.\
+        J. Atmos. Oceanic Technol., 20, 730–741,\
+        https://doi.org/10.1175/1520-0426(2003)20<730:AACEAF>2.0.CO;2
     """
 
     # make sure arguments are floating point

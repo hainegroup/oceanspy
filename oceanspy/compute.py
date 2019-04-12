@@ -1578,7 +1578,7 @@ def Okubo_Weiss_parameter(od):
     """
     Compute Okubo-Weiss parameter.
     Vertical component of relative vorticity
-     and shear component of strain are interpolated to C grid points.
+    and shear component of strain are interpolated to C grid points.
 
     .. math::
         OW = S_n^2 + S_s^2 - \\zeta^2 =
@@ -2252,7 +2252,7 @@ def heat_budget(od):
     Notes
     -----
     This function is currently suited for the setup by [AHPM17]_:
-     e.g., z* vertical coordinates, zero explicit diffusive fluxes, KPP.
+    e.g., z* vertical coordinates, zero explicit diffusive fluxes, KPP.
 
     See Also
     --------
@@ -2260,14 +2260,14 @@ def heat_budget(od):
 
     References
     ----------
-    .. [Pie17] https://dspace.mit.edu/bitstream/handle/1721.1/111094/
-    memo_piecuch_2017_evaluating_budgets_in_eccov4r3.pdf?sequence=1
-    .. [AHPM17] Almansi, M., T.W. Haine, R.S. Pickart, M.G. Magaldi,
-     R. Gelderloos, and D. Mastropole, 2017:
-     High-Frequency Variability in the Circulation and Hydrography
-     of the Denmark Strait Overflow from a High-Resolution Numerical Model.
-     J. Phys. Oceanogr., 47, 2999–3013,
-     https://doi.org/10.1175/JPO-D-17-0129.1
+    .. [Pie17] `<https://dspace.mit.edu/bitstream/handle/1721.1/111094/\
+    memo_piecuch_2017_evaluating_budgets_in_eccov4r3.pdf?sequence=1>`_
+    .. [AHPM17] Almansi, M., T.W. Haine, R.S. Pickart, M.G. Magaldi,\
+    R. Gelderloos, and D. Mastropole, 2017:\
+    High-Frequency Variability in the Circulation and Hydrography\
+    of the Denmark Strait Overflow from a High-Resolution Numerical Model.\
+    J. Phys. Oceanogr., 47, 2999–3013,\
+    https://doi.org/10.1175/JPO-D-17-0129.1
     """
 
     # Check parameters
@@ -2425,14 +2425,14 @@ def salt_budget(od):
 
     References
     ----------
-    .. [Pie17] https://dspace.mit.edu/bitstream/handle/1721.1/111094/
-    memo_piecuch_2017_evaluating_budgets_in_eccov4r3.pdf?sequence=1
-    .. [AHPM17] Almansi, M., T.W. Haine, R.S. Pickart, M.G. Magaldi,
-     R. Gelderloos, and D. Mastropole, 2017:
-     High-Frequency Variability in the Circulation and Hydrography
-     of the Denmark Strait Overflow from a High-Resolution Numerical Model.
-     J. Phys. Oceanogr., 47, 2999–3013,
-     https://doi.org/10.1175/JPO-D-17-0129.1
+    .. [Pie17] `<https://dspace.mit.edu/bitstream/handle/1721.1/111094/\
+    memo_piecuch_2017_evaluating_budgets_in_eccov4r3.pdf?sequence=1>`_
+    .. [AHPM17] Almansi, M., T.W. Haine, R.S. Pickart, M.G. Magaldi,\
+    R. Gelderloos, and D. Mastropole, 2017:\
+    High-Frequency Variability in the Circulation and Hydrography\
+    of the Denmark Strait Overflow from a High-Resolution Numerical Model.\
+    J. Phys. Oceanogr., 47, 2999–3013,\
+    https://doi.org/10.1175/JPO-D-17-0129.1
     """
 
     # Check parameters

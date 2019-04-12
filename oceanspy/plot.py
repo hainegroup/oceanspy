@@ -340,7 +340,7 @@ def time_series(od,
     meanAxes: 1D array_like, str, or bool
         List of axes over which to apply mean.
         If True,
-         set meanAxes=od.grid_coords.
+        set meanAxes=od.grid_coords.
         If False, does not apply mean.
     intAxes: 1D array_like, str, or bool
         List of axes over which to integrate.
