@@ -11,6 +11,4 @@ dependencies:
   - sphinx
   - sphinx_rtd_theme
   - nbsphinx
-  - pip:
-    - xgcm
-    - pyyaml
+  - xgcm

@@ -1,10 +1,7 @@
 """
 Open OceanDataset objects.
 """
-
-# There are a few lines that are not tested because
-# are configuration/SciServer specific.
-# We are using xarray and xmitgcm tutorial to test.
+# TODO: add documentation for yaml setup.
 
 # Import oceanspy dependencies
 import xarray as _xr
@@ -29,12 +26,12 @@ except ImportError:  # pragma: no cover
 
 def from_netcdf(path):
     """
-    Load an oceandataset from a netcdf file.
+    Load an OceanDataset from a netcdf file.
 
     Parameters
     ----------
     path: str
-        Path from which to read
+        Path from which to read.
 
     Returns
     -------
@@ -64,15 +61,15 @@ def from_netcdf(path):
 def from_catalog(name, catalog_url=None):
     """
     Import oceadataset using a yaml catalog.
-    Catalogs with suffix xarray.yaml use intake-xarray,
-    while catalogs with suffix xmitgcm.yaml use xmitgcm.open_mdsdataset.
+    Catalogs with suffix xarray.yaml use :py:mod:`intake-xarray`,
+    while catalogs with suffix xmitgcm.yaml use :py:func:`xmitgcm.open_mdsdataset`.
 
     Parameters
     ----------
     name: str
         Name of the oceandataset to open.
     catalog_url: str or None
-        Path from which to read the catalof.
+        Path from which to read the catalog.
         If None, use SciServer's catalogs.
 
     References

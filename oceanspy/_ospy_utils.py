@@ -77,33 +77,36 @@ def _setter_error_message(attribute_name):
 
 
 def _check_list_of_string(obj, objName):
-    obj = numpy.asarray(obj, dtype='str')
-    if obj.ndim == 0:
-        obj = obj.reshape(1)
-    elif obj.ndim > 1:
-        raise TypeError('Invalid `{}`'.format(objName))
+    if obj is not None:
+        obj = numpy.asarray(obj, dtype='str')
+        if obj.ndim == 0:
+            obj = obj.reshape(1)
+        elif obj.ndim > 1:
+            raise TypeError('Invalid `{}`'.format(objName))
     return obj
 
 
 def _check_range(od, obj, objName):
-    prefs = ['Y', 'X', 'Z', 'time']
-    coords = ['YG', 'XG', 'Zp1', 'time']
-    for _, (pref, coord) in enumerate(zip(prefs, coords)):
-        if pref in objName:
-            valchek = od._ds[coord]
-            continue
-    obj = numpy.asarray(obj, dtype=valchek.dtype)
-    if obj.ndim == 0:
-        obj = obj.reshape(1)
-    elif obj.ndim > 1:
-        raise TypeError('Invalid `{}`'.format(objName))
-    maxcheck = valchek.max().values
-    mincheck = valchek.min().values
-    if any(obj < mincheck) or any(obj > maxcheck):
-        warnings.warn("\n{}Range of the oceandataset is: {}"
-                      "\nRequested {} has values outside this range."
-                      "".format(pref, [mincheck, maxcheck], objName),
-                      stacklevel=2)
+    
+    if obj is not None:
+        prefs = ['Y', 'X', 'Z', 'time']
+        coords = ['YG', 'XG', 'Zp1', 'time']
+        for _, (pref, coord) in enumerate(zip(prefs, coords)):
+            if pref in objName:
+                valchek = od._ds[coord]
+                continue
+        obj = numpy.asarray(obj, dtype=valchek.dtype)
+        if obj.ndim == 0:
+            obj = obj.reshape(1)
+        elif obj.ndim > 1:
+            raise TypeError('Invalid `{}`'.format(objName))
+        maxcheck = valchek.max().values
+        mincheck = valchek.min().values
+        if any(obj < mincheck) or any(obj > maxcheck):
+            warnings.warn("\n{}Range of the oceandataset is: {}"
+                          "\nRequested {} has values outside this range."
+                          "".format(pref, [mincheck, maxcheck], objName),
+                          stacklevel=2)
     return obj
 
 
