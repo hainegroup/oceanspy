@@ -10,10 +10,10 @@ from . import utils as _utils
 from ._ospy_utils import (_check_instance, _check_oceanspy_axes,
                           _setter_error_message, _check_list_of_string,
                           _create_grid)
-from . subsample import _subsampleMethdos
-from . compute import _computeMethdos
-from . plot import _plotMethdos
-from . animate import _animateMethdos
+from . subsample import _subsampleMethods
+from . compute import _computeMethods
+from . plot import _plotMethods
+from . animate import _animateMethods
 
 # Recommended dependencies
 try:
@@ -1022,7 +1022,7 @@ class OceanDataset:
         """
         Access :py:mod:`oceanspy.subsample` functions.
         """
-        return _subsampleMethdos(self)
+        return _subsampleMethods(self)
 
     @property
     def compute(self):
@@ -1032,7 +1032,7 @@ class OceanDataset:
         Set overwrite=True
         to overwrite DataArrays already existing in the OceanDataset.
         """
-        return _computeMethdos(self)
+        return _computeMethods(self)
 
     @property
     def plot(self):
@@ -1040,7 +1040,7 @@ class OceanDataset:
         Access :py:mod:`oceanspy.plot` functions.
         """
 
-        return _plotMethdos(self)
+        return _plotMethods(self)
 
     @property
     def animate(self):
@@ -1048,4 +1048,4 @@ class OceanDataset:
         Access :py:mod:`oceanspy.animate` functions.
         """
 
-        return _animateMethdos(self)
+        return _animateMethods(self)

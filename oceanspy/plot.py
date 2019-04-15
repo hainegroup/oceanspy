@@ -50,20 +50,20 @@ def TS_diagram(od,
     Parameters
     ----------
     od: OceanDataset
-        oceandataset to check for missing variables
+        oceandataset used to plot.
     Tlim: array_like with 2 elements
         Temperature limits on the y axis.
-        If None, uses the min and max value.
+        If None, uses min and max values.
     Slim: array_like with 2 elements
         Salinity limits on the x axis.
-        If None, uses the min and max value.
+        If None, uses min and max values.
+    dens: xarray.DataArray
+        DataArray with densities used for isopycnals.
+        Must have coordinates (Temp, S).
+        In None, dens is inferred from Temp and S.
     meanAxes: 1D array_like, str, or None
         List of axes over which to apply weighted mean.
         If None, don't average.
-    dens: xarray.DataArray
-        DataArray corresponding to density used for isopycnals.
-        Must contain coordinates (Temp, S)
-        In None, it will be inferred.
     colorName: str, None
         Name of the variable to use to color (e.g., Temp).
         If None, uses plot insted of scatter (much faster)
@@ -74,27 +74,32 @@ def TS_diagram(od,
     cmap_kwargs: dict
         Keyword arguments for the colormap (same used by xarray)
     contour_kwargs: dict
-        Keyword arguments for matplotlib.pytplot.contour (isopycnals)
+        Keyword arguments for
+        :py:func:`matplotlib.pytplot.contour` (isopycnals)
     clabel_kwargs: dict
-        Keyword arguments for matplotlib.pytplot.clabel (isopycnals)
+        Keyword arguments for
+        :py:func:`matplotlib.pytplot.clabel` (isopycnals)
     cutout_kwargs: dict
-        Keyword arguments for subsample.cutout
+        Keyword arguments for
+        :py:func:`oceanspy.subsample.cutout`
     **kwargs:
-        If colorName is None: Kewyword arguments for matplotlib.pytplot.plot()
-        Otherwise, kewyword arguments for matplotlib.pytplot.scatter()
+        If colorName is None:
+        Kewyword arguments for :py:func:`matplotlib.pytplot.plot`
+        Otherwise,
+        kewyword arguments for :py:func:`matplotlib.pytplot.scatter`
 
     Returns
     -------
-    Axes object
-
-    See also
-    --------
-    subsample.coutout
-    animate.TS_diagram
+    ax: matplotlib.pyplot.axes
+        Axes object.
 
     References
     ----------
     http://xarray.pydata.org/en/stable/plotting.html#introduction
+
+    See Also
+    --------
+    oceanspy.animate.TS_diagram
     """
 
     # Check parameters
@@ -334,31 +339,31 @@ def time_series(od,
     Parameters
     ----------
     od: OceanDataset
-        oceandataset to check for missing variables
+        oceandataset used to plot.
     varName: str, None
         Name of the variable to plot.
     meanAxes: 1D array_like, str, or bool
-        List of axes over which to apply mean.
+        List of axes over which to apply
+        :py:func:`oceanspy.compute.weighted_mean`.
         If True,
-        set meanAxes=od.grid_coords.
-        If False, does not apply mean.
+        set meanAxes= :py:attr:`oceanspy.OceanDataset.grid_coords`.
+        If False, skip weighted mean.
     intAxes: 1D array_like, str, or bool
-        List of axes over which to integrate.
-        Integration is performed after mean.
-        If True, set intAxes=od.grid_coords.
-        If False, does not apply int.
+        List of axes over which to apply
+        :py:func:`oceanspy.compute.integral`.
+        If True,
+        set intAxes= :py:attr:`oceanspy.OceanDataset.grid_coords`.
+        If False, skip integral.
     cutout_kwargs: dict
-        Keyword arguments for subsample.cutout
+        Keyword arguments for
+        :py:func:`oceanspy.subsample.cutout`
     **kwargs:
-        Kewyword arguments for xarray.plot.line
+        Kewyword arguments for :py:func:`xarray.plot.line`
 
     Returns
     -------
-    Axes object
-
-    See also
-    --------
-    subsample.coutout
+    ax: matplotlib.pyplot.axes
+        Axes object.
 
     References
     ----------
@@ -428,51 +433,55 @@ def horizontal_section(od, varName,
                        cutout_kwargs=None,
                        **kwargs):
     """
-    Plot horizontal sections.
+    Plot horizontal section.
 
     Parameters
     ----------
     od: OceanDataset
-        oceandataset to check for missing variables
+        oceandataset used to plot.
     varName: str, None
         Name of the variable to plot.
     plotType: str
-        2D plot type:{'contourf', 'contour', 'imshow', 'pcolormesh'}
+        2D plot type.
+        Options: {'contourf', 'contour', 'imshow', 'pcolormesh'}
     use_coords: bool
         If True, use coordinates for x and y axis (e.g., XC and YC).
         If False, use dimensions for x and y axis (e.g., X and Y)
     contourName: str, None
         Name of the variable to contour on top.
     meanAxes: 1D array_like, str, or bool
-        List of axes over which to apply mean.
-        If True, set meanAxes=od.grid_coords (excluding X, Y).
-        If False, does not apply mean.
+        List of axes over which to apply
+        :py:func:`oceanspy.compute.weighted_mean`.
+        If True,
+        set meanAxes= :py:attr:`oceanspy.OceanDataset.grid_coords`.
+        If False, skip weighted mean.
     intAxes: 1D array_like, str, or bool
-        List of axes over which to integrate.
-        Integration is performed after mean.
-        If True, set intAxes=od.grid_coords (excluding X, Y).
-        If False, does not apply int.
+        List of axes over which to apply
+        :py:func:`oceanspy.compute.integral`.
+        If True,
+        set intAxes= :py:attr:`oceanspy.OceanDataset.grid_coords`.
+        If False, skip integral.
     contour_kwargs: dict
-        Keyword arguments for xarray.plot.contour
+        Keyword arguments for :py:func:`xarray.plot.contour`
     clabel_kwargs: dict
-        Keyword arguments for matplotlib.pyplot.clabel
+        Keyword arguments for :py:func:`matplotlib.pyplot.clabel`
     cutout_kwargs: dict
-        Keyword arguments for subsample.cutout
+        Keyword arguments for
+        :py:func:`oceanspy.subsample.cutout`
     **kwargs:
-        Kewyword arguments for xarray.plot.['plotType']
+        Kewyword arguments for :py:mod:`xarray.plot`.plotType
 
     Returns
     -------
-    Axes or FacetGrid object
-
-    See also
-    --------
-    subsample.coutout
-    animate.horizontal_section
+    matplotlib.pyplot.axes or xarray.plot.FacetGrid
 
     References
     ----------
     http://xarray.pydata.org/en/stable/plotting.html
+
+    See Also
+    --------
+    oceanspy.animate.horizontal_section
     """
 
     # Check parameters
@@ -729,53 +738,57 @@ def vertical_section(od,
     Parameters
     ----------
     od: OceanDataset
-        oceandataset to check for missing variables
+        oceandataset used to plot.
     varName: str, None
         Name of the variable to plot.
     plotType: str
-        2D plot type: {'contourf', 'contour', 'imshow', 'pcolormesh'}
+        2D plot type.
+        Options: {'contourf', 'contour', 'imshow', 'pcolormesh'}
     use_dist: bool
         If True, use distances for x axis.
         If False, use mooring or station.
     subsampMethod: str, None
-        Subsample methods: {'mooring_array', 'survey_station'}
+        Subsample method.
+        Options: {'mooring_array', 'survey_station'}
     contourName: str, None
         Name of the variable to contour on top.
     meanAxes: 1D array_like, str, or bool
-        List of axes over which to apply mean.
-        If True, set meanAxes=od.grid_coords (time only).
-        If False, does not apply mean.
+        List of axes over which to apply
+        :py:func:`oceanspy.compute.weighted_mean`.
+        If True,
+        set meanAxes= :py:attr:`oceanspy.OceanDataset.grid_coords`.
+        If False, skip weighted mean.
     intAxes: 1D array_like, str, or bool
-        List of axes over which to integrate.
-        Integration is performed after mean.
-        If True, set intAxes=od.grid_coords (time only).
-        If False, does not apply int.
+        List of axes over which to apply
+        :py:func:`oceanspy.compute.integral`.
+        If True,
+        set intAxes= :py:attr:`oceanspy.OceanDataset.grid_coords`.
+        If False, skip integral.
     contour_kwargs: dict
-        Keyword arguments for xarray.plot.contour
+        Keyword arguments for :py:func:`xarray.plot.contour`
     clabel_kwargs: dict
-        Keyword arguments for matplotlib.pyplot.clabel
+        Keyword arguments for :py:func:`matplotlib.pyplot.clabel`
     subsamp_kwargs: dict
-        Keyword arguments for subsample.mooring_array
-         or subsample.survey_stations
+        Keyword arguments for
+        :py:func:`oceanspy.subsample.mooring_array`
+        or :py:func:`oceanspy.subsample.survey_stations`
     cutout_kwargs: dict
-        Keyword arguments for subsample.cutout
+        Keyword arguments for
+        :py:func:`oceanspy.subsample.cutout`
     **kwargs:
-        Kewyword arguments for xarray.plot.['plotType']
+        Kewyword arguments for :py:mod:`xarray.plot`.plotType
 
     Returns
     -------
-    Axes or FacetGrid object
-
-    See also
-    --------
-    subsample.coutout
-    subsample.mooring_array
-    subsample.survey_stations
-    animate.vertical_section
+    matplotlib.pyplot.axes or xarray.plot.FacetGrid
 
     References
     ----------
     http://xarray.pydata.org/en/stable/plotting.html
+
+    See Also
+    --------
+    oceanspy.animate.vertical_section
     """
 
     # Check parameters
@@ -1024,10 +1037,9 @@ def _Vsection_regrid(od, da, varName):
     return da, hor_name
 
 
-class _plotMethdos(object):
+class _plotMethods(object):
     """
-    Enables use of oceanspy.plot functions as attributes on a OceanDataset.
-    For example, OceanDataset.plot.TS_diagram
+    Enables use of functions as OceanDataset attributes.
     """
 
     def __init__(self, od):

@@ -1206,11 +1206,9 @@ def particle_properties(od, times, Ypart, Xpart, Zpart, **kwargs):
     return od
 
 
-class _subsampleMethdos(object):
+class _subsampleMethods(object):
     """
-    Enables use of oceanspy.subsample functions
-     as attributes on a OceanDataset.
-    For example, OceanDataset.subsample.cutout
+    Enables use of functions as OceanDataset attributes.
     """
 
     def __init__(self, od):
