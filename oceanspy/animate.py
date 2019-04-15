@@ -2,20 +2,26 @@
 Animate using oceanspy plot functions.
 """
 
-# Required dependencies
+# Instructions for developers:
+# 1. All funcions must return matplotlib.animation.FuncAnimation objects
+# 2. Animate functions are twins of functions under plot
+# 3. Add new functions to _animateMethods
+# 4. Add new functions to docs/api.rst
+
+# Required dependencies (private)
 import xarray as _xr
 import numpy as _np
 import oceanspy as _ospy
 import functools as _functools
 
-# From OceanSpy
+# From OceanSpy (private)
 from xarray.plot.utils import _determine_cmap_params
 from . import compute as _compute
 from . import plot as _plot  # noqa: F401
 from ._ospy_utils import (_check_instance, _rename_aliased,
                           _ax_warning, _check_options)
 
-# Recommended dependencies
+# Recommended dependencies (private)
 try:
     import matplotlib as _matplotlib
     _matplotlib.use('agg')
@@ -59,7 +65,8 @@ def _create_animation(od, time, plot_func, func_kwargs, display,
 
     Returns
     -------
-    Animation object
+    anim: matplotlib.animation.FuncAnimation
+        Animation object
 
     References
     ----------

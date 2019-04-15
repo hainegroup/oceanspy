@@ -21,5 +21,6 @@ dependencies:
   - pytest-cov
   - pytest-env
   - codecov
+  - flake8
   - pip:
     - git+https://github.com/xgcm/xmitgcm.git
