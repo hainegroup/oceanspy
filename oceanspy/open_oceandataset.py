@@ -1,19 +1,22 @@
 """
 Open OceanDataset objects.
 """
-# TODO: add documentation for yaml setup.
 
-# Import oceanspy dependencies
+# Instructions for developers:
+# 1. All functions in this module must return an OceanDataset.
+# 2. Add new functions in docs/api.rst
+
+# Import oceanspy dependencies (private)
 import xarray as _xr
 import warnings as _warnings
 import yaml as _yaml
 
-# Import from oceanspy
+# Import from oceanspy (private)
 from ._oceandataset import OceanDataset as _OceanDataset
 import oceanspy as _ospy
 from ._ospy_utils import _check_instance
 
-# Import extra modules
+# Import extra modules (private)
 try:
     import xmitgcm as _xmitgcm
 except ImportError:  # pragma: no cover

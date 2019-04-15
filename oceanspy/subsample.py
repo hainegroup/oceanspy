@@ -2,7 +2,16 @@
 Subsample OceanDataset objects.
 """
 
-# Required dependencies
+# Instructions for developers:
+# 1. All funcions must return a OceanDataset.
+# 2. All functions must operate on private objects of an od (_ds, _grid),
+#    and use OceanSpy reference names.
+# 3. All functions should use the cutout_kwargs argument at the beginning.
+# 4. Preserve original grid structure if possible.
+# 5. Add new functions to _subsampleMethods
+# 6. Add new functions to docs/api.rst
+
+# Required dependencies (private)
 import xarray as _xr
 import pandas as _pd
 import numpy as _np
@@ -10,14 +19,14 @@ import copy as _copy
 import warnings as _warnings
 import functools as _functools
 
-# From OceanSpy
+# From OceanSpy (private)
 from . import utils as _utils
 from . import compute as _compute
 from ._ospy_utils import (_check_instance, _check_range,
                           _check_list_of_string, _check_native_grid,
                           _check_part_position)
 
-# Recommended dependencies
+# Recommended dependencies (private)
 try:
     from geopy.distance import great_circle as _great_circle
 except ImportError:  # pragma: no cover

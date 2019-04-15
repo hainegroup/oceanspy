@@ -3,14 +3,35 @@
 ============
 Installation
 ============
+.. _from_terminal:
+
+Install from terminal
+---------------------
+The easiest way to install OceanSpy's dependencies is to use conda-forge_.
+First open a terminal, then run the following commands:
+
+.. code-block:: bash
+
+    conda config --remove channels defaults
+    conda config --add channels conda-forge
+    conda install -y dask distributed bottleneck netCDF4 xarray cartopy esmpy ffmpeg intake-xarray tqdm geopy xgcm xesmf oceanspy
+    pip install git+https://github.com/xgcm/xmitgcm.git
+
+Run the following command to install the latest version of OceanSpy:
+
+.. code-block:: bash
+
+    pip install git+https://github.com/malmans2/oceanspy.git
 
 SciServer Access
 ----------------
 SciServer_ optimizes Big Data science by allowing users to bring their analysis close to the data with Jupyter Notebooks deployed in server-side containers.
-Several Apps_ are available on SciServer: use Compute to analyze data with interactive notebook, while use Compute Jobs to asynchronously run notebooks.
+Several Apps_ are available on SciServer: use Compute Interact to analyze data with interactive notebook, while use Compute Jobs to asynchronously run notebooks.
+
+Compute Interact:
 
 1. Go to Apps_ and register for a new account or log in to an existing account
-2. Click on Compute
+2. Click on Compute Interact
 3. Create a new container and select
  
    .. list-table::
@@ -18,51 +39,42 @@ Several Apps_ are available on SciServer: use Compute to analyze data with inter
     :widths: 60 60
 
     * - Compute Image:
-      - Python + R
+      - Oceanography
     * - Data volumes:
       - Ocean Circulation
 
 4. Click on the container
-5. Install OceanSpy and its dependencies
-
-.. note::
-    Users won't need to install OceanSpy and its dependencies on SciServer in the future.  
-
-Install OceanSpy from Terminal
-------------------------------
-The easiest way to install most of OceanSpy's dependencies is to use conda-forge_.
-First open a terminal (Jupyter Notebook: click on ``New`` + ``Terminal``), then run the following commands:
-
-.. code-block:: bash
-
-    conda config --remove channels defaults
-    conda config --add channels conda-forge
-    conda install -y dask distributed bottleneck netCDF4 xarray cartopy esmpy ffmpeg cmocean eofs
-    pip install geopy xgcm xesmf xmitgcm oceanspy
-
-This is the preferred method to install OceanSpy, as it will always install the most recent stable release.
-Run the following command to install the latest version:
+5. A stable realese of OceanSpy and its dependencies are already installed in the Oceanography image. Run the following command to install the latest version of OceanSpy:
 
 .. code-block:: bash
 
     pip install git+https://github.com/malmans2/oceanspy.git
 
-Install from Jupyter Notebook
------------------------------
+Compute Jobs:
 
-This cell installs OceanSpy and its dependencies from a Jupyter Notebook:
+1. Go to Apps_ and register for a new account or log in to an existing account
+2. Click on Compute Jobs
+3. Click on Run Existing Notebook
+4. Select a Compute Domain
+5. Select the ``Oceanography`` image
+6. Select the ``Ocean Circulation`` data volume
+7. Select a User Volume and the Notebook to run
 
-.. code-block:: python
+To install the latest version of OceanSpy in the Compute Job environment, add the following cell on top of the notebook that will be executed:
+
+.. code-block:: ipython
     :class: no-execute
 
-    %%bash
-    conda config --remove channels defaults
-    conda config --add channels conda-forge
-    conda install dask distributed bottleneck netCDF4 xarray cartopy esmpy ffmpeg cmocean eofs
-    pip install geopy xgcm xesmf xmitgcm oceanspy
-
+    import sys
+    !{sys.executable} -m pip install numpy
+    
 .. note::
-    Users using Compute Jobs currently have to install OceanSpy and its dependencies in the first Notebook cell (this won't be necessary in the future).
+    It is possible that the latest version of OceanSpy has different dependencies than the stable release. In that case, also install OceanSpy's dependencies using:
+
+    * From terminal: ``conda install -y``
+    * From notebook: ``!conda install --yes --prefix {sys.prefix}``
+
+    OceanSpy's dependencies that need to be added to the commands above are listed here: :ref:`from_terminal`.
 
 .. _SciServer: http://www.sciserver.org
 .. _Apps: https://apps.sciserver.org

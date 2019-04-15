@@ -1,15 +1,16 @@
 """
 OceanSpy utilities that don't need OceanDataset objects.
 """
-# Required dependencies
+
+# Required dependencies (private)
 import xarray as _xr
 import numpy as _np
 import copy as _copy
 
-# From oceanspy
+# From oceanspy (private)
 from ._ospy_utils import _check_instance
 
-# Recommended dependencies
+# Recommended dependencies (private)
 try:
     from geopy.distance import great_circle as _great_circle
 except ImportError:  # pragma: no cover

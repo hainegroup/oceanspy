@@ -1,9 +1,33 @@
+# Instructions for developers:
+# This modules collect useful functions used by OceanSpy.
+# All functions here must be private (names start with underscore `_`)
+
+# Import modules (can be public here)
 import numpy
 import warnings
 import xgcm
 
 
+# =========
+# FUNCTIONS
+# =========
 def _create_grid(dataset, coords, periodic):
+    """
+    Create xgcm grid by adding comodo attributes to the
+    dimensions of the dataset.
+
+    Parameters
+    ----------
+    dataset: xarray.Dataset
+    coords: dict
+        E.g., {'Y': {Y: None, Yp1: 0.5}}
+    periodic: list
+        List of periodic axes.
+
+    Returns
+    -------
+    grid: xgcm.Grid
+    """
     # Clean up comodo (currently force user to specify axis using set_coords).
     for dim in dataset.dims:
         dataset[dim].attrs.pop('axis', None)
@@ -36,6 +60,16 @@ def _create_grid(dataset, coords, periodic):
 
 
 def _check_instance(objs, classinfos):
+    """
+    Check if the object is an instance or subclass of classinfo class.
+
+    Parameters
+    ----------
+    objs: dict
+        {'obj_name': obj}
+    classinfos: dict
+        E.g.: {'obj_name': ['float', 'int']}
+    """
     for key, value in objs.items():
         if isinstance(classinfos, str):
             classinfo = classinfos
@@ -59,6 +93,14 @@ def _check_instance(objs, classinfos):
 
 
 def _check_oceanspy_axes(axes2check):
+    """
+    Check that axes are OceanSpy axes
+
+    Parameters
+    ----------
+    axes2check: list
+        List of axes
+    """
     from oceanspy import OCEANSPY_AXES
 
     for axis in axes2check:
@@ -66,17 +108,22 @@ def _check_oceanspy_axes(axes2check):
             raise ValueError(_wrong_axes_error_message(axes2check))
 
 
-def _wrong_axes_error_message(axes2check):
-    from oceanspy import OCEANSPY_AXES
-    return ("{} contains non-valid axes."
-            " OceanSpy axes are: {}").format(axes2check, OCEANSPY_AXES)
-
-
-def _setter_error_message(attribute_name):
-    return "Set new `{}` using .set_{}".format(attribute_name, attribute_name)
-
-
 def _check_list_of_string(obj, objName):
+    """
+    Check that object is a list of strings
+
+    Parameters
+    ----------
+    obj: str or list
+        Object to check
+    objName: str
+        Name of the object
+
+    Returns
+    -------
+    obj: list
+        List of strings
+    """
     if obj is not None:
         obj = numpy.asarray(obj, dtype='str')
         if obj.ndim == 0:
@@ -87,6 +134,20 @@ def _check_list_of_string(obj, objName):
 
 
 def _check_range(od, obj, objName):
+    """
+    Check values of a range, and return an object which is
+    compatible with OceanSpy's functions.
+
+    Parameters
+    ----------
+    od: OceanDataset
+    obj: Range object
+    objName: Name of the object
+
+    Returns
+    -------
+    obj: Range object
+    """
     if obj is not None:
         prefs = ['Y', 'X', 'Z', 'time']
         coords = ['YG', 'XG', 'Zp1', 'time']
@@ -109,34 +170,24 @@ def _check_range(od, obj, objName):
     return obj
 
 
-def _check_native_grid(od, func_name):
-    wrong_dims = ['mooring', 'station', 'particle']
-    for wrong_dim in wrong_dims:
-        if wrong_dim in od._ds.dims:
-            raise ValueError('`{}` cannot subsample {} oceandatasets'
-                             ''.format(func_name, wrong_dims))
-
-
-def _check_part_position(od, InputDict):
-    for InputName, InputField in InputDict.items():
-        if 'time' in InputName:
-            InputField = numpy.asarray(InputField, dtype=od._ds['time'].dtype)
-            if InputField.ndim == 0:
-                InputField = InputField.reshape(1)
-            ndim = 1
-        else:
-            InputField = numpy.asarray(InputField)
-            if InputField.ndim < 2 and InputField.size == 1:
-                InputField = InputField.reshape((1, InputField.size))
-            ndim = 2
-        if InputField.ndim > ndim:
-            raise TypeError('Invalid `{}`'.format(InputName))
-        else:
-            InputDict[InputName] = InputField
-    return InputDict
-
-
 def _handle_aliased(od, aliased, varNameList):
+    """
+    Return OceanSpy reference name and corresponding alises.
+
+    Parameters
+    ----------
+    od: OceanDataset
+    aliased: bool
+    varNameList: list
+        List of variables name
+
+    Returns
+    -------
+    varNameListIN: list
+        List of OceanSpy reference names
+    varNameListOUT: list
+        List of aliased names
+    """
     if aliased:
         varNameListIN = _rename_aliased(od, varNameList)
     else:
@@ -145,20 +196,12 @@ def _handle_aliased(od, aliased, varNameList):
     return varNameListIN, varNameListOUT
 
 
-def _check_ijk_components(od, iName=None, jName=None, kName=None):
-    ds = od._ds
-    for _, (Name, dim) in enumerate(zip([iName, jName, kName],
-                                        ['Xp1', 'Yp1', 'Zl'])):
-        if Name is not None and dim not in ds[Name].dims:
-            raise ValueError('[{}] must have dimension [{}]'.format(Name, dim))
-
-
 def _rename_aliased(od, varNameList):
     """
     Check if there are aliases,
-     and return the name of variables in the private dataset.
+    and return the name of variables in the private dataset.
     This is used by smart-naming functions,
-     where user asks for aliased variables.
+    where user asks for aliased variables.
 
     Parameters
     ----------
@@ -201,7 +244,23 @@ def _rename_aliased(od, varNameList):
 
 
 def _check_mean_and_int_axes(od, meanAxes, intAxes, exclude):
+    """
+    Check and return mean and integral axes
+    when they can be used together (e.g., for plots).
 
+    Parameters
+    ----------
+    od: OceanDataset
+    meanAxes: list, bool, or str
+    intAxes: list, bool, or str
+    exclude: list
+        List of axes to exclude
+
+    Returns
+    -------
+    meanAxes: list
+    intAxes: list
+    """
     # Check type
     _check_instance({'meanAxes': meanAxes,
                      'intAxes': intAxes,
@@ -243,6 +302,44 @@ def _check_mean_and_int_axes(od, meanAxes, intAxes, exclude):
     return meanAxes, intAxes
 
 
+# ========
+# MESSAGES
+# ========
+def _check_part_position(od, InputDict):
+    for InputName, InputField in InputDict.items():
+        if 'time' in InputName:
+            InputField = numpy.asarray(InputField, dtype=od._ds['time'].dtype)
+            if InputField.ndim == 0:
+                InputField = InputField.reshape(1)
+            ndim = 1
+        else:
+            InputField = numpy.asarray(InputField)
+            if InputField.ndim < 2 and InputField.size == 1:
+                InputField = InputField.reshape((1, InputField.size))
+            ndim = 2
+        if InputField.ndim > ndim:
+            raise TypeError('Invalid `{}`'.format(InputName))
+        else:
+            InputDict[InputName] = InputField
+    return InputDict
+
+
+def _check_ijk_components(od, iName=None, jName=None, kName=None):
+    ds = od._ds
+    for _, (Name, dim) in enumerate(zip([iName, jName, kName],
+                                        ['Xp1', 'Yp1', 'Zl'])):
+        if Name is not None and dim not in ds[Name].dims:
+            raise ValueError('[{}] must have dimension [{}]'.format(Name, dim))
+
+
+def _check_native_grid(od, func_name):
+    wrong_dims = ['mooring', 'station', 'particle']
+    for wrong_dim in wrong_dims:
+        if wrong_dim in od._ds.dims:
+            raise ValueError('`{}` cannot subsample {} oceandatasets'
+                             ''.format(func_name, wrong_dims))
+
+
 def _check_options(name, selected, options):
     if selected not in options:
         raise ValueError('`{}` [{}] not available.'
@@ -255,3 +352,13 @@ def _ax_warning(kwargs):
         warnings.warn("\n`ax` can not be provided for animations. "
                       "This function will use the current axis", stacklevel=2)
     return kwargs
+
+
+def _wrong_axes_error_message(axes2check):
+    from oceanspy import OCEANSPY_AXES
+    return ("{} contains non-valid axes."
+            " OceanSpy axes are: {}").format(axes2check, OCEANSPY_AXES)
+
+
+def _setter_error_message(attribute_name):
+    return "Set new `{}` using .set_{}".format(attribute_name, attribute_name)

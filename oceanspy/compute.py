@@ -2,7 +2,25 @@
 Create new variables using OceanDataset objects.
 """
 
-# Required dependencies
+# Instructions for developers:
+# 1. All funcions must return a xr.Dataset.
+# 2. All functions must operate on private objects of an od (_ds, _grid),
+#    and use OceanSpy reference names.
+# 3. Check that DataArrays used by functions are available
+#    using _add_missing_variables.
+# 4. Add new functions in _FUNC2VARS:
+#    key is name of the function, value is list of new DataArrays.
+# 5. Add new functions to _computeMethods
+# 6. Add new functions to docs/api.rst
+
+#############################################################
+# TODO: when velocities are mutiplied by hfac,
+#       we should use mass weighted velocities if available
+# TODO: compute transport for survey
+# TODO: compute velocity magnitude
+#############################################################
+
+# Required dependencies (private)
 import xarray as _xr
 import oceanspy as _ospy
 import numpy as _np
@@ -11,15 +29,10 @@ import copy as _copy
 import functools as _functools
 from collections import OrderedDict as _OrderedDict
 
-# From OceanSpy
+# From OceanSpy (private)
 from . import utils as _utils
 from ._ospy_utils import (_check_instance, _check_list_of_string,
                           _handle_aliased, _check_ijk_components)
-
-# TODO: any time velocities are mutiplied by hfac,
-#       we should use mass weighted velocities if available
-# TODO: compute transport for survey
-# TODO: compute velocity magnitude
 
 # Hard coded  list of variables outputed by functions
 _FUNC2VARS = _OrderedDict(potential_density_anomaly=['Sigma0'],

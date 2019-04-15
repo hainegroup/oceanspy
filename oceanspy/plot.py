@@ -1,7 +1,16 @@
 """
 Plot using OceanDataset objects.
 """
-# Required dependencies
+
+# Instructions for developers:
+# 1. All funcions must return plt.Axes or xr.plot.FacetGrid objects,
+# 2. Functions should use the cutout_kwargs argument at the beginning.
+# 3. Make functions compatible with the animate module,
+#    and create a twin function under animate.
+# 4. Add new functions to _plotMethods
+# 5. Add new functions to docs/api.rst
+
+# Required dependencies (private)
 import xarray as _xr
 import oceanspy as _ospy
 import numpy as _np
@@ -9,7 +18,7 @@ import warnings as _warnings
 import functools as _functools
 import pandas as _pd
 
-# From oceanspy
+# From oceanspy (private)
 from . import compute as _compute
 from ._ospy_utils import (_rename_aliased, _check_instance,
                           _check_mean_and_int_axes, _check_options)
@@ -17,7 +26,7 @@ from .compute import (_add_missing_variables)
 from .compute import weighted_mean as _weighted_mean
 from .compute import integral as _integral
 
-# Additional dependencies
+# Additional dependencies (private)
 try:
     import matplotlib as _matplotlib
     _matplotlib.use('agg')

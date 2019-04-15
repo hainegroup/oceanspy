@@ -1,11 +1,41 @@
-# Required dependencies
+# Instructions for developers:
+#
+# This is the main object of OceanSpy.
+# All attributes are stored as global attributes (strings!) of the xr.Dataset.
+# When users request an attribute, it is decoded from the global attributes.
+# Thus, there are custom attribute setters (class setters are inhibited).
+#
+# There are private and public objects.
+# Private objects use OceanSpy's reference aliases (_ds, _grid),
+# while public objects are mirrors of the private objects using custom aliases.
+#
+# All functions in other modules that operate on od,
+# must be added here in the shortcuts section.
+#
+# Add new attributes/methods in docs/api.rst
+
+##############################################################################
+# TODO: create list of OceanSpy name and add link under aliases.
+# TODO: create a dictionary with parameters description and add under aliases.
+# TODO: add more xgcm options. E.g., default boundary method.
+# TODO: add attributes to new coordinates (XU, XV, ...)
+# TODO: implement xgcm autogenerate in _set_coords,
+#       set_grid_coords, set_coords when released
+# TODO: Use the coords parameter to create xgcm grid instead of
+#       _crate_grid.
+#       We will pass dictionary in xgcm.Grid,
+#       and we can have the option of usining comodo attributes
+#       (currently cleaned up so switched off)
+##############################################################################
+
+# Required dependencies (private)
 import xarray as _xr
 import copy as _copy
 import numpy as _np
 import warnings as _warnings
 import sys as _sys
 
-# From OceanSpy
+# From OceanSpy (private)
 from . import utils as _utils
 from ._ospy_utils import (_check_instance, _check_oceanspy_axes,
                           _setter_error_message, _check_list_of_string,
@@ -15,7 +45,7 @@ from . compute import _computeMethods
 from . plot import _plotMethods
 from . animate import _animateMethods
 
-# Recommended dependencies
+# Recommended dependencies (private)
 try:
     import cartopy.crs as _ccrs
 except ImportError:  # pragma: no cover
@@ -28,18 +58,6 @@ try:
     from dask.diagnostics import ProgressBar as _ProgressBar
 except ImportError:  # pragma: no cover
     pass
-
-# TODO: create list of OceanSpy name and add link under aliases.
-# TODO: create a dictionary with parameters description and add under aliases.
-# TODO: add more xgcm options. E.g., default boundary method.
-# TODO: add attributes to new coordinates (XU, XV, ...)
-# TODO: implement xgcm autogenerate in _set_coords,
-#       set_grid_coords, set_coords when released
-# TODO: Use the coords parameter to create xgcm grid instead of
-#       _crate_grid.
-#       We will pass dictionary in xgcm.Grid,
-#       and we can have the option of usining comodo attributes
-#       (currently cleaned up so switched off)
 
 
 class OceanDataset:
@@ -540,7 +558,6 @@ class OceanDataset:
         # Set grid_periodic
         # Use overwrite True by default because
         # xgcm default is all grid_priodic True.
-        # TODO: add True option for grid_periodic
         self = self._store_as_global_attr(name='grid_periodic',
                                           attr=grid_periodic,
                                           overwrite=True)
