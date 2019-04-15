@@ -87,7 +87,6 @@ def _check_list_of_string(obj, objName):
 
 
 def _check_range(od, obj, objName):
-    
     if obj is not None:
         prefs = ['Y', 'X', 'Z', 'time']
         coords = ['YG', 'XG', 'Zp1', 'time']

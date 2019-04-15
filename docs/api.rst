@@ -223,8 +223,10 @@ Computing
    
    compute
    
-Input required
---------------
+Smart-name
+----------
+Computed variables are dynamically named. 
+Names depend on input and operation.
 
 .. autosummary::
    :toctree: generated/
@@ -236,8 +238,9 @@ Input required
    compute.integral
    compute.weighted_mean
    
-OceanDataset only
------------------
+Fixed-name
+----------
+Computed variables have a hard-coded name.
 
 .. autosummary::
    :toctree: generated/
@@ -253,14 +256,13 @@ OceanDataset only
    compute.normal_strain
    compute.Okubo_Weiss_parameter
    compute.Ertel_potential_vorticity
-   compute.mooring_horizontal_volume_transport
+   compute.mooring_volume_transport
    compute.heat_budget
    compute.salt_budget
    compute.geographical_aligned_velocities
    compute.survey_aligned_velocities
    compute.missing_horizontal_spacing
-   
-   
+
    
 Plotting
 ========

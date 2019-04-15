@@ -9,6 +9,7 @@ import numpy as _np
 import warnings as _warnings
 import copy as _copy
 import functools as _functools
+from collections import OrderedDict as _OrderedDict
 
 # From OceanSpy
 from . import utils as _utils
@@ -18,74 +19,75 @@ from ._ospy_utils import (_check_instance, _check_list_of_string,
 # TODO: any time velocities are mutiplied by hfac,
 #       we should use mass weighted velocities if available
 # TODO: compute transport for survey
+# TODO: compute velocity magnitude
 
 # Hard coded  list of variables outputed by functions
-_FUNC2VARS = {'potential_density_anomaly': ['Sigma0'],
-              'Brunt_Vaisala_frequency': ['N2'],
-              'relative_vorticity': ['momVort1',
-                                     'momVort2',
-                                     'momVort3'],
-              'vertical_relative_vorticity': ['momVort3'],
-              'kinetic_energy': ['KE'],
-              'eddy_kinetic_energy': ['EKE'],
-              'horizontal_divergence_velocity': ['hor_div_vel'],
-              'shear_strain': ['s_strain'],
-              'normal_strain': ['n_strain'],
-              'Okubo_Weiss_parameter': ['Okubo_Weiss'],
-              'Ertel_potential_vorticity': ['Ertel_PV'],
-              'mooring_horizontal_volume_transport': ['transport',
-                                                      'Vtransport',
-                                                      'Utransport',
-                                                      'Y_transport',
-                                                      'X_transport',
-                                                      'Y_Utransport',
-                                                      'X_Utransport',
-                                                      'Y_Vtransport',
-                                                      'X_Vtransport',
-                                                      'dir_Utransport',
-                                                      'dir_Vtransport'],
-              'heat_budget': ['tendH',
-                              'adv_hConvH',
-                              'adv_vConvH',
-                              'dif_vConvH',
-                              'kpp_vConvH',
-                              'forcH'],
-              'salt_budget': ['tendS',
-                              'adv_hConvS',
-                              'adv_vConvS',
-                              'dif_vConvS',
-                              'kpp_vConvS',
-                              'forcS'],
-              'geographical_aligned_velocities': ['U_zonal',
-                                                  'V_merid'],
-              'survey_aligned_velocities': ['rot_ang_Vel',
-                                            'tan_Vel',
-                                            'ort_Vel'],
-              'missing_horizontal_spacing': ['dxF',
-                                             'dxV',
-                                             'dyF',
-                                             'dyU']}
+_FUNC2VARS = _OrderedDict(potential_density_anomaly=['Sigma0'],
+                          Brunt_Vaisala_frequency=['N2'],
+                          vertical_relative_vorticity=['momVort3'],
+                          relative_vorticity=['momVort1',
+                                              'momVort2',
+                                              'momVort3'],
+                          kinetic_energy=['KE'],
+                          eddy_kinetic_energy=['EKE'],
+                          horizontal_divergence_velocity=['hor_div_vel'],
+                          shear_strain=['s_strain'],
+                          normal_strain=['n_strain'],
+                          Okubo_Weiss_parameter=['Okubo_Weiss'],
+                          Ertel_potential_vorticity=['Ertel_PV'],
+                          mooring_volume_transport=['transport',
+                                                    'Vtransport',
+                                                    'Utransport',
+                                                    'Y_transport',
+                                                    'X_transport',
+                                                    'Y_Utransport',
+                                                    'X_Utransport',
+                                                    'Y_Vtransport',
+                                                    'X_Vtransport',
+                                                    'dir_Utransport',
+                                                    'dir_Vtransport'],
+                          heat_budget=['tendH',
+                                       'adv_hConvH',
+                                       'adv_vConvH',
+                                       'dif_vConvH',
+                                       'kpp_vConvH',
+                                       'forcH'],
+                          salt_budget=['tendS',
+                                       'adv_hConvS',
+                                       'adv_vConvS',
+                                       'dif_vConvS',
+                                       'kpp_vConvS',
+                                       'forcS'],
+                          geographical_aligned_velocities=['U_zonal',
+                                                           'V_merid'],
+                          survey_aligned_velocities=['rot_ang_Vel',
+                                                     'tan_Vel',
+                                                     'ort_Vel'],
+                          missing_horizontal_spacing=['dxF',
+                                                      'dxV',
+                                                      'dyF',
+                                                      'dyU'])
 
 
 def _add_missing_variables(od, varList, FUNC2VARS=_FUNC2VARS):
     """
     If any variable in varList is missing in the oceandataset,
-     try to compute it.
+    try to compute it.
 
     Parameters
     ----------
     od: OceanDataset
-        oceandataset to check for missing variables
+        oceandataset to check for missing variables.
     varList: 1D array_like, str
         List of variables to check (strings).
     FUNC2VARS: dict
         Dictionary that connect function names to computed variables.
-        Keys are functions, values are list of variables
+        Keys are functions, values are list of variables.
 
     Returns
     -------
     od: OceanDataset
-        oceandataset with variables added
+        oceandataset with new variables.
     """
 
     # Check parameters
@@ -129,9 +131,9 @@ def _add_missing_variables(od, varList, FUNC2VARS=_FUNC2VARS):
     return od
 
 
-# ======================
-# SMART-NAMING VARIABLES
-# ======================
+# ==========
+# SMART-NAME
+# ==========
 def gradient(od, varNameList, axesList=None, aliased=True):
     """
     Compute gradient along specified axes, returning all terms (not summed).
@@ -143,24 +145,29 @@ def gradient(od, varNameList, axesList=None, aliased=True):
     Parameters
     ----------
     od: OceanDataset
-        oceandataset used to compute
+        oceandataset used to compute.
     varNameList: 1D array_like, str
-        List of variables to differenciate
+        List of variables to differenciate.
     axesList: None, list
         List of axes. If None, compute gradient along all axes.
     aliased: bool
-        Set it False when working with ._ds and ._grid.
-        Otherwise, aliased must be True
+        Set it False when working with private ds and grid.
 
     Returns
     -------
     ds: xarray.Dataset
         | d[varName]_d[axis]
-
+    
     References
     ----------
     MITgcm:
-     https://mitgcm.readthedocs.io/en/latest/algorithm/algorithm.html#notation
+    https://mitgcm.readthedocs.io/en/latest/algorithm/algorithm.html#notation
+
+    See Also
+    --------
+    divergence
+    curl
+    laplacian
     """
     # TODO: We are assuming default units,
     #       while we should actually read from metadata.
@@ -325,30 +332,31 @@ def divergence(od, iName=None, jName=None, kName=None, aliased=True):
     Parameters
     ----------
     od: OceanDataset
-        oceandataset used to compute
+        oceandataset used to compute.
     iName: str or None
-        Name of variable corresponding to i-component
+        Name of variable corresponding to i-component.
     jName: str or None
-        Name of variable corresponding to j-component
+        Name of variable corresponding to j-component.
     kName: str or None
-        Name of variable corresponding to k-component
+        Name of variable corresponding to k-component.
     aliased: bool
-        Set it False when working with ._ds and ._grid.
-        Otherwise, aliased must be True
+        Set it False when working with private ds and grid.
 
     Returns
     -------
     ds: xarray.Dataset
         | d[varName]_d[axis]
 
-    See Also
-    --------
-    gradient
-
     References
     ----------
     MITgcm:
-     https://mitgcm.readthedocs.io/en/latest/algorithm/algorithm.html#notation
+    https://mitgcm.readthedocs.io/en/latest/algorithm/algorithm.html#notation
+
+    See Also
+    --------
+    gradient
+    curl
+    laplacian
     """
 
     # Check parameters
@@ -459,16 +467,15 @@ def curl(od, iName=None, jName=None, kName=None, aliased=True):
     Parameters
     ----------
     od: OceanDataset
-        oceandataset used to compute
+        oceandataset used to compute.
     iName: str or None
-        Name of variable corresponding to i-component
+        Name of variable corresponding to i-component.
     jName: str or None
-        Name of variable corresponding to j-component
+        Name of variable corresponding to j-component.
     kName: str or None
-        Name of variable corresponding to k-component
+        Name of variable corresponding to k-component.
     aliased: bool
-        Set it False when working with ._ds and ._grid.
-        Otherwise, aliased must be True
+        Set it False when working with private ds and grid.
 
     Returns
     -------
@@ -477,14 +484,16 @@ def curl(od, iName=None, jName=None, kName=None, aliased=True):
         | d[kName]_dY-d[jName]_dZ
         | d[iName]_dZ-d[kName]_dX
 
-    See Also
-    --------
-    gradient
-
     References
     ----------
     MITgcm:
-     https://mitgcm.readthedocs.io/en/latest/algorithm/algorithm.html#notation
+    https://mitgcm.readthedocs.io/en/latest/algorithm/algorithm.html#notation
+
+    See Also
+    --------
+    gradient
+    divergence
+    laplacian
     """
 
     # Check parameters
@@ -601,29 +610,29 @@ def laplacian(od, varNameList, axesList=None, aliased=True):
     Parameters
     ----------
     od: OceanDataset
-        oceandataset used to compute
+        oceandataset used to compute.
     varNameList: 1D array_like, str
-        Name of variables to differenciate
+        Name of variables to differenciate.
     axesList: None, list
         List of axes. If None, compute gradient along all space axes.
     aliased: bool
-        Set it False when working with ._ds and ._grid.
-        Otherwise, aliased must be True
+        Set it False when working with private ds and grid.
 
     Returns
     -------
     ds: xarray.Dataset
         | dd[varName]_d[axis]_ds[axis]
 
+    References
+    ----------
+    MITgcm:
+    https://mitgcm.readthedocs.io/en/latest/algorithm/algorithm.html#notation
+
     See Also
     --------
     gradient
     divergence
-
-    References
-    ----------
-    MITgcm:
-     https://mitgcm.readthedocs.io/en/latest/algorithm/algorithm.html#notation
+    curl
     """
 
     # Check parameters
@@ -644,6 +653,7 @@ def laplacian(od, varNameList, axesList=None, aliased=True):
     else:
         err_axes = [axis for axis in axesList if axis not in grid_axes]
         if len(err_axes) != 0:
+            
             raise ValueError('These axes are not supported: {}.'
                              '\nThe laplacian operator is'
                              ' currently implemented '
@@ -729,24 +739,27 @@ def weighted_mean(od,
     Parameters
     ----------
     od: OceanDataset
-        oceandataset used to compute
+        oceandataset used to compute.
     varNameList: 1D array_like, str, or None
         If None, compute weighted means of all variables.
     axesList: None, list
         List of axes. If None, compute average along all axes
-         (excluding mooring and station)
+        (excluding mooring and station).
     storeWeights: bool
-        True:  store weight values.
+        True: store weight values.
         False: drop weight values.
     aliased: bool
-        Set it False when working with ._ds and ._grid.
-        Otherwise, aliased must be True
+        Set it False when working with private ds and grid.
 
     Returns
     -------
     ds: xarray.Dataset
         | w_mean_[varName]
         | weight_[varName]
+
+    See Also
+    --------
+    integral
     """
 
     return _integral_and_mean(od,
@@ -759,30 +772,34 @@ def weighted_mean(od,
 
 def integral(od, varNameList=None, axesList=None, aliased=True):
     """
-    Compute integrals along specified axes.
+    Compute integrals along specified axes (simple discretization).
 
     .. math::
-        \\int{\\chi}dx =
+        \\int\\dots\\int{\\chi}dx_1\\dots dx_n =
         \\sum\\limits_{i=1}^n\\left(\\sum\\chi \\Delta x_i\\right)
 
     Parameters
     ----------
     od: OceanDataset
-        oceandataset used to compute
+        oceandataset used to compute.
     varNameList: 1D array_like, str, or None
         If None, compute integral of all variables.
     axesList: None, list
         List of axes. If None, compute integral along all axes
-         (excluding mooring and station)
+        (excluding mooring and station).
     aliased: bool
-        Set it False when working with ._ds and ._grid.
-        Otherwise, aliased must be True
+        Set it False when working with private ds and grid.
 
     Returns
     -------
     ds: xarray.Dataset
         | I([varName])d[axis]
+
+    See Also
+    --------
+    weighted_mean
     """
+
     return _integral_and_mean(od,
                               varNameList=varNameList,
                               axesList=axesList,
@@ -1031,7 +1048,7 @@ def _integral_and_mean(od, operation='integral',
 
 
 # ================
-# FUNCTIONS
+# FIXED-NAME
 # ================
 def potential_density_anomaly(od):
     """
@@ -1046,7 +1063,7 @@ def potential_density_anomaly(od):
     Parameters
     ----------
     od: OceanDataset
-        oceandataset used to compute
+        oceandataset used to compute.
 
     Returns
     -------
@@ -1055,6 +1072,7 @@ def potential_density_anomaly(od):
 
     See Also
     --------
+    Brunt_Vaisala_frequency
     utils.densjmd95
     utils.densmdjwf
     """
@@ -1103,7 +1121,7 @@ def Brunt_Vaisala_frequency(od):
     Parameters
     ----------
     od: OceanDataset
-        oceandataset used to compute
+        oceandataset used to compute.
 
     Returns
     -------
@@ -1162,7 +1180,7 @@ def vertical_relative_vorticity(od):
     Parameters
     ----------
     od: OceanDataset
-        oceandataset used to compute
+        oceandataset used to compute.
 
     Returns
     -------
@@ -1171,6 +1189,7 @@ def vertical_relative_vorticity(od):
 
     See Also
     --------
+    relative_vorticity
     curl
     """
 
@@ -1208,7 +1227,7 @@ def relative_vorticity(od):
     Parameters
     ----------
     od: OceanDataset
-        oceandataset used to compute
+        oceandataset used to compute.
 
     Returns
     -------
@@ -1219,6 +1238,7 @@ def relative_vorticity(od):
 
     See Also
     --------
+    vertical_relative_vorticity
     curl
     """
 
@@ -1226,7 +1246,7 @@ def relative_vorticity(od):
     _check_instance({'od': od}, 'oceanspy.OceanDataset')
 
     # Message
-    print('Computing relative vorticity')
+    print('Computing relative vorticity.')
 
     # Create DataArray
     ds = curl(od, iName='U', jName='V', kName='W', aliased=False)
@@ -1257,7 +1277,7 @@ def kinetic_energy(od):
     Parameters
     ----------
     od: OceanDataset
-        oceandataset used to compute
+        oceandataset used to compute.
 
     Parameters used:
         | eps_nh
@@ -1270,7 +1290,11 @@ def kinetic_energy(od):
     References
     ----------
     MITgcm:
-     https://mitgcm.readthedocs.io/en/latest/algorithm/algorithm.html#kinetic-energy
+    https://mitgcm.readthedocs.io/en/latest/algorithm/algorithm.html#kinetic-energy
+    
+    See Also
+    --------
+    eddy_kinetic_energy
     """
 
     # Check parameters
@@ -1346,7 +1370,7 @@ def eddy_kinetic_energy(od):
     Parameters
     ----------
     od: OceanDataset
-        oceandataset used to compute
+        oceandataset used to compute.
 
     Parameters used:
         | eps_nh
@@ -1359,7 +1383,12 @@ def eddy_kinetic_energy(od):
     References
     ----------
     MITgcm:
-     https://mitgcm.readthedocs.io/en/latest/algorithm/algorithm.html#kinetic-energy
+    https://mitgcm.readthedocs.io/en/latest/algorithm/algorithm.html#kinetic-energy
+    
+    See Also
+    --------
+    kinetic_energy
+    weighted_mean
     """
 
     # Check parameters
@@ -1380,8 +1409,10 @@ def eddy_kinetic_energy(od):
     V = od._ds['V']
 
     # Compute anomalies
-    U = U - U.mean('time')
-    V = V - V.mean('time')
+    Umean = weighted_mean(od, 'U', 'time', False)
+    Vmean = weighted_mean(od, 'V', 'time', False)
+    U = U - Umean['w_mean_U']
+    V = V - Vmean['w_mean_V']
 
     # Extract grid
     grid = od._grid
@@ -1411,7 +1442,8 @@ def eddy_kinetic_energy(od):
         W = od._ds['W']
 
         # Compute anomalies
-        W = W - W.mean('time')
+        Wmean = weighted_mean(od, 'W', 'time', False)
+        W = W - Wmean['w_mean_W']
 
         # Interpolate vertical velocity
         W = grid.interp(W, 'Z', to='center',
@@ -1443,13 +1475,17 @@ def horizontal_divergence_velocity(od):
     Parameters
     ----------
     od: OceanDataset
-        oceandataset used to compute
+        oceandataset used to compute.
 
     Returns
     -------
     ds: xarray.Dataset
         | hor_div_vel: horizontal divergence of the velocity field
-
+    
+    References
+    ----------
+    https://mitgcm.readthedocs.io/en/latest/algorithm/algorithm.html#horizontal-divergence
+    
     See Also
     --------
     divergence
@@ -1484,7 +1520,7 @@ def shear_strain(od):
     Parameters
     ----------
     od: OceanDataset
-        oceandataset used to compute
+        oceandataset used to compute.
 
     Returns
     -------
@@ -1493,7 +1529,8 @@ def shear_strain(od):
 
     See Also
     --------
-    vertical_relative_vorticity
+    normal_strain
+    Okubo_Weiss_parameter
     curl
     """
 
@@ -1542,7 +1579,7 @@ def normal_strain(od):
     Parameters
     ----------
     od: OceanDataset
-        oceandataset used to compute
+        oceandataset used to compute.
 
     Returns
     -------
@@ -1551,7 +1588,8 @@ def normal_strain(od):
 
     See Also
     --------
-    horizontal_divergence_velocity
+    shear_strain
+    Okubo_Weiss_parameter
     divergence
     """
 
@@ -1592,7 +1630,7 @@ def Okubo_Weiss_parameter(od):
     Parameters
     ----------
     od: OceanDataset
-        oceandataset used to compute
+        oceandataset used to compute.
 
     Returns
     -------
@@ -1663,12 +1701,12 @@ def Ertel_potential_vorticity(od, full=True):
     Parameters
     ----------
     od: OceanDataset
-        oceandataset used to compute
+        oceandataset used to compute.
     full: bool
         If False, only use
-         vertical component of the vorticity vectors (fCoriG, momVort3).
+        vertical component of the vorticity vectors (fCoriG, momVort3).
         If True,
-         use both vertical and horizontal components.
+        use both vertical and horizontal components.
 
     Returns
     -------
@@ -1761,21 +1799,21 @@ def Ertel_potential_vorticity(od, full=True):
     return _ospy.OceanDataset(ds).dataset
 
 
-def mooring_horizontal_volume_transport(od):
+def mooring_volume_transport(od):
     """
     Compute horizontal volume flux
-     through a mooring array section (in/outflow).
-     If the array is closed,
-     transport at the first mooring is not computed.
-     Otherwise,
-     transport at both the first and last mooring is not computed.
-     Transport can be computed following two paths,
-     so the dimension `path` is added.
+    through a mooring array section (in/outflow).
+    If the array is closed,
+    transport at the first mooring is not computed.
+    Otherwise,
+    transport at both the first and last mooring is not computed.
+    Transport can be computed following two paths,
+    so the dimension `path` is added.
 
     .. math::
         T(mooring, Z, time, path) =
-         T_x + T_y =
-         u \\Delta y \\Delta z + v \\Delta x \\Delta z
+        T_x + T_y =
+        u \\Delta y \\Delta z + v \\Delta x \\Delta z
 
     Parameters
     ----------
@@ -1785,21 +1823,22 @@ def mooring_horizontal_volume_transport(od):
     Returns
     -------
     ds: xarray.Dataset
-        | transport     : Horizontal volume transport
-        | Vtransport    : Meridional volume transport
-        | Utransport    : Zonal volume transport
-        | Y_transport   : Y coordinate of horizontal volume transport
-        | X_transport   : X coordinate of horizontal volume transport
-        | Y_Utransport  : Y coordinate of zonal volume transport
-        | X_Utransport  : X coordinate of zonal volume transport
-        | Y_Vtransport  : Y coordinate of meridional volume transport
-        | X_Vtransport  : X coordinate of meridional volume transport
+        | transport: Horizontal volume transport
+        | Vtransport: Meridional volume transport
+        | Utransport: Zonal volume transport
+        | Y_transport: Y coordinate of horizontal volume transport
+        | X_transport: X coordinate of horizontal volume transport
+        | Y_Utransport: Y coordinate of zonal volume transport
+        | X_Utransport: X coordinate of zonal volume transport
+        | Y_Vtransport: Y coordinate of meridional volume transport
+        | X_Vtransport: X coordinate of meridional volume transport
         | dir_Utransport: Direction of zonal volume transport
         | dir_Vtransport: Direction of meridional volume transport
 
     See Also
     --------
     subsample.mooring_array
+    geographical_aligned_velocities
     """
 
     # Check parameters
@@ -2043,7 +2082,7 @@ def mooring_horizontal_volume_transport(od):
 def geographical_aligned_velocities(od):
     """
     Compute zonal and meridional velocities
-     from U and V on orthogonal curvilinear grid.
+    from U and V on orthogonal curvilinear grid.
 
     .. math::
         (u_{zonal}, v_{merid}) =
@@ -2124,6 +2163,11 @@ def survey_aligned_velocities(od):
          to survey aligned velocities
         | tan_Vel: Velocity component tangential to survey
         | ort_Vel: Velocity component orthogonal to survey
+
+    
+    See also
+    --------
+    subsample.survey_stations
     """
 
     # Check parameters
@@ -2254,10 +2298,6 @@ def heat_budget(od):
     This function is currently suited for the setup by [AHPM17]_:
     e.g., z* vertical coordinates, zero explicit diffusive fluxes, KPP.
 
-    See Also
-    --------
-    gradient
-
     References
     ----------
     .. [Pie17] `<https://dspace.mit.edu/bitstream/handle/1721.1/111094/\
@@ -2268,6 +2308,11 @@ def heat_budget(od):
     of the Denmark Strait Overflow from a High-Resolution Numerical Model.\
     J. Phys. Oceanogr., 47, 2999–3013,\
     https://doi.org/10.1175/JPO-D-17-0129.1
+
+    See Also
+    --------
+    salt_budget
+    gradient
     """
 
     # Check parameters
@@ -2419,10 +2464,6 @@ def salt_budget(od):
     This function is currently suited for the setup by [AHPM17]_:
      e.g., z* vertical coordinates, zero explicit diffusive fluxes, KPP.
 
-    See Also
-    --------
-    gradient
-
     References
     ----------
     .. [Pie17] `<https://dspace.mit.edu/bitstream/handle/1721.1/111094/\
@@ -2433,6 +2474,11 @@ def salt_budget(od):
     of the Denmark Strait Overflow from a High-Resolution Numerical Model.\
     J. Phys. Oceanogr., 47, 2999–3013,\
     https://doi.org/10.1175/JPO-D-17-0129.1
+
+    See Also
+    --------
+    heat_budget
+    gradient
     """
 
     # Check parameters
@@ -2545,7 +2591,7 @@ def salt_budget(od):
 
 def missing_horizontal_spacing(od):
     """
-    Return horizontal spacing computing missing deltas.
+    Compute missing horizontal spacing.
 
     Parameters
     ----------
@@ -2568,6 +2614,9 @@ def missing_horizontal_spacing(od):
     varList = ['dxC', 'dxG', 'dyC', 'dyG']
     od = _add_missing_variables(od, varList)
 
+    # Message
+    print('Computing missing horizontal spacing.')
+    
     # Unpack
     ds = od._ds
     grid = od._grid
@@ -2705,9 +2754,9 @@ class _computeMethdos(object):
         ds = Ertel_potential_vorticity(self._od, **kwargs)
         return self._od.merge_into_oceandataset(ds, overwrite=overwrite)
 
-    @_functools.wraps(mooring_horizontal_volume_transport)
-    def mooring_horizontal_volume_transport(self, overwrite=False, **kwargs):
-        ds = mooring_horizontal_volume_transport(self._od, **kwargs)
+    @_functools.wraps(mooring_volume_transport)
+    def mooring_volume_transport(self, overwrite=False, **kwargs):
+        ds = mooring_volume_transport(self._od, **kwargs)
         return self._od.merge_into_oceandataset(ds, overwrite=overwrite)
 
     @_functools.wraps(geographical_aligned_velocities)

@@ -18,7 +18,7 @@ from oceanspy.compute import (missing_horizontal_spacing,
                               shear_strain, normal_strain,
                               Okubo_Weiss_parameter,
                               Ertel_potential_vorticity,
-                              mooring_horizontal_volume_transport,
+                              mooring_volume_transport,
                               survey_aligned_velocities,
                               heat_budget, salt_budget)
 
@@ -338,8 +338,8 @@ def test_Ertel_potential_vorticity(od_in, full):
 @pytest.mark.parametrize("closed", [True, False])
 @pytest.mark.parametrize("flippedX", [True, False])
 @pytest.mark.parametrize("flippedY", [True, False])
-def test_mooring_horizontal_volume_transport(od_in, mooring,
-                                             closed, flippedX, flippedY):
+def test_mooring_volume_transport(od_in, mooring,
+                                  closed, flippedX, flippedY):
 
     if mooring is True:
         if not closed:
@@ -385,7 +385,7 @@ def test_mooring_horizontal_volume_transport(od_in, mooring,
                                                     Ymoor=Y)
 
         # Compute transport
-        ds_out = mooring_horizontal_volume_transport(od_moor)
+        ds_out = mooring_volume_transport(od_moor)
         assert 'path' in ds_out.dims
 
         # Max 2 velocities per grid cell
@@ -396,11 +396,11 @@ def test_mooring_horizontal_volume_transport(od_in, mooring,
                         ds_out['transport'].values)
 
         # Test shortcut
-        od_out = od_moor.compute.mooring_horizontal_volume_transport()
+        od_out = od_moor.compute.mooring_volume_transport()
         ds_out_IN_od_out(ds_out, od_out)
     else:
         with pytest.raises(ValueError):
-            mooring_horizontal_volume_transport(od_in)
+            mooring_volume_transport(od_in)
 
 
 @pytest.mark.parametrize("od_in, gridtype", [(od,       'rect'),

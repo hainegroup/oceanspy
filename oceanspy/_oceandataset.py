@@ -47,7 +47,8 @@ class OceanDataset:
     OceanDataset combines a :py:obj:`xarray.Dataset`
     with other objects used by OceanSpy (e.g., xgcm.Grid).
 
-    Additional objects are attached to the :py:obj:`xarray.Dataset` as global attributes.
+    Additional objects are attached to the
+    :py:obj:`xarray.Dataset` as global attributes.
     """
 
     def __init__(self, dataset):
