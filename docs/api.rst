@@ -212,9 +212,7 @@ Functions
    subsample.mooring_array
    subsample.survey_stations
    subsample.particle_properties
-   
-   
-   
+    
 Computing
 =========
 
@@ -278,11 +276,10 @@ Functions
 .. autosummary::
    :toctree: generated/
    
-   plot.vertical_section
-   plot.horizontal_section
-   plot.time_series
    plot.TS_diagram
-   
+   plot.time_series
+   plot.horizontal_section
+   plot.vertical_section
 
 
 Animating
@@ -299,18 +296,10 @@ Functions
 .. autosummary::
    :toctree: generated/
    
-   animate.vertical_section
-   animate.horizontal_section
    animate.TS_diagram
+   animate.horizontal_section
+   animate.vertical_section
 
-   
-   
-   
-   
-   
-   
-   
-   
 Utilities
 =========
 
@@ -331,8 +320,3 @@ Functions
    utils.densjmd95
    utils.densmdjwf
    utils.Coriolis_parameter
-   
-   
-   
-   
-   

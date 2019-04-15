@@ -76,7 +76,7 @@ def great_circle_path(lat1, lon1, lat2, lon2,
     delta_km: scalar, None
         Distance resolution [km]
         If None, only use vertices and return distance
-    R: scalar
+    R: scalar, None
         Earth radius in km
         If None, use geopy default
 

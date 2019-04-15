@@ -37,32 +37,29 @@ except ImportError:  # pragma: no cover
     pass
 
 
-def _create_animation(od, time, plot_func, func_kwargs, display, **kwargs):
+def _create_animation(od, time, plot_func, func_kwargs, display,
+                      **kwargs):
     """
     Create animation using oceanspy plot functions.
 
     Parameters
     ----------
     od: OceanDataset
-        oceandataset to check for missing variables
+        oceandataset used to plot.
     time: DataArray
-        DataArray corresponding to time
+        DataArray corresponding to time.
     plot_func: function
-        Alias referring to the plot function
+        Alias referring to the plot function.
     func_kwargs:
-        Keyword arguments for plot_func
+        Keyword arguments for plot_func.
     display: bool
-        If True, display the animation
+        If True, display the animation.
     **kwargs:
-        Keyword arguments for matplotlib.animation.FuncAnimation
+        Keyword arguments for py:class:`matplotlib.animation.FuncAnimation`
 
     Returns
     -------
     Animation object
-
-    See also
-    --------
-    subsample.coutout
 
     References
     ----------
@@ -110,32 +107,30 @@ def _create_animation(od, time, plot_func, func_kwargs, display, **kwargs):
     return anim
 
 
-def vertical_section(od,
-                     display=True,
-                     FuncAnimation_kwargs=None,
+def vertical_section(od, display=True, FuncAnimation_kwargs=None,
                      **kwargs):
-
     """
     Animate vertical section plots.
 
     Parameters
     ----------
     od: OceanDataset
-        oceandataset to check for missing variables
+        oceandataset used to plot.
     display: bool
-        display the animation in the notebook
+        If True, display the animation.
     FuncAnimation_kwargs: dict
-        Keyword arguments from matplotlib.animation.FuncAnimation
+        Keyword arguments from :py:func:`matplotlib.animation.FuncAnimation`
     **kwargs:
-        Keyword arguments for plot.vertical_section
+        Keyword arguments from :py:func:`oceanspy.plot.vertical_section`
 
     Returns
     -------
-    Animation object
+    anim: matplotlib.animation.FuncAnimation
+        Animation object
 
     See also
     --------
-    plot.vertical_section
+    oceanspy.plot.vertical_section
     """
 
     # Check parameters
@@ -205,9 +200,7 @@ def vertical_section(od,
     return anim
 
 
-def horizontal_section(od,
-                       display=True,
-                       FuncAnimation_kwargs=None,
+def horizontal_section(od, display=True, FuncAnimation_kwargs=None,
                        **kwargs):
     """
     Animate horizontal section plots.
@@ -215,21 +208,22 @@ def horizontal_section(od,
     Parameters
     ----------
     od: OceanDataset
-        oceandataset to check for missing variables
+        oceandataset used to plot.
     display: bool
-        display the animation in the notebook
+        If True, display the animation.
     FuncAnimation_kwargs: dict
-        Keyword arguments from matplotlib.animation.FuncAnimation
+        Keyword arguments from :py:func:`matplotlib.animation.FuncAnimation`
     **kwargs:
-        Keyword arguments for plot.horizontal_section
+        Keyword arguments from :py:func:`oceanspy.plot.horizontal_section`
 
     Returns
     -------
-    Animation object
+    anim: matplotlib.animation.FuncAnimation
+        Animation object
 
     See also
     --------
-    plot.horizontal_section
+    oceanspy.plot.horizontal_section
     """
 
     # Check parameters
@@ -286,31 +280,30 @@ def horizontal_section(od,
     return anim
 
 
-def TS_diagram(od,
-               display=True,
-               FuncAnimation_kwargs=None,
+def TS_diagram(od, display=True, FuncAnimation_kwargs=None,
                **kwargs):
     """
-    Animate temperature-salinity diagram.
+    Animate TS diagrams.
 
     Parameters
     ----------
     od: OceanDataset
-        oceandataset to check for missing variables
+        oceandataset used to plot.
     display: bool
-        display the animation in the notebook
+        If True, display the animation.
     FuncAnimation_kwargs: dict
-        Keyword arguments from matplotlib.animation.FuncAnimation
+        Keyword arguments from :py:func:`matplotlib.animation.FuncAnimation`
     **kwargs:
-        Keyword arguments for plot.TS_diagram
+        Keyword arguments from :py:func:`oceanspy.plot.TS_diagram`
 
     Returns
     -------
-    Animation object
+    anim: matplotlib.animation.FuncAnimation
+        Animation object
 
     See also
     --------
-    plot.TS_diagram
+    oceanspy.plot.TS_diagram
     """
 
     # Check parameters
@@ -413,10 +406,9 @@ def TS_diagram(od,
     return anim
 
 
-class _animateMethdos(object):
+class _animateMethods(object):
     """
-    Enables use of oceanspy.animate functions as attributes on a OceanDataset.
-    For example, OceanDataset.animate.TS_diagram
+    Enables use of functions as OceanDataset attributes.
     """
     def __init__(self, od):
         self._od = od

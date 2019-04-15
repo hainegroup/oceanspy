@@ -157,7 +157,7 @@ def gradient(od, varNameList, axesList=None, aliased=True):
     -------
     ds: xarray.Dataset
         | d[varName]_d[axis]
-    
+
     References
     ----------
     MITgcm:
@@ -653,7 +653,7 @@ def laplacian(od, varNameList, axesList=None, aliased=True):
     else:
         err_axes = [axis for axis in axesList if axis not in grid_axes]
         if len(err_axes) != 0:
-            
+
             raise ValueError('These axes are not supported: {}.'
                              '\nThe laplacian operator is'
                              ' currently implemented '
@@ -1291,7 +1291,7 @@ def kinetic_energy(od):
     ----------
     MITgcm:
     https://mitgcm.readthedocs.io/en/latest/algorithm/algorithm.html#kinetic-energy
-    
+
     See Also
     --------
     eddy_kinetic_energy
@@ -1384,7 +1384,7 @@ def eddy_kinetic_energy(od):
     ----------
     MITgcm:
     https://mitgcm.readthedocs.io/en/latest/algorithm/algorithm.html#kinetic-energy
-    
+
     See Also
     --------
     kinetic_energy
@@ -1481,11 +1481,11 @@ def horizontal_divergence_velocity(od):
     -------
     ds: xarray.Dataset
         | hor_div_vel: horizontal divergence of the velocity field
-    
+
     References
     ----------
     https://mitgcm.readthedocs.io/en/latest/algorithm/algorithm.html#horizontal-divergence
-    
+
     See Also
     --------
     divergence
@@ -2164,8 +2164,7 @@ def survey_aligned_velocities(od):
         | tan_Vel: Velocity component tangential to survey
         | ort_Vel: Velocity component orthogonal to survey
 
-    
-    See also
+    See Also
     --------
     subsample.survey_stations
     """
@@ -2616,7 +2615,7 @@ def missing_horizontal_spacing(od):
 
     # Message
     print('Computing missing horizontal spacing.')
-    
+
     # Unpack
     ds = od._ds
     grid = od._grid
@@ -2660,10 +2659,9 @@ def missing_horizontal_spacing(od):
     return _ospy.OceanDataset(ds).dataset
 
 
-class _computeMethdos(object):
+class _computeMethods(object):
     """
-    Enables use of oceanspy.compute functions as attributes on a OceanDataset.
-    For example, OceanDataset.subsample.gradient
+    Enables use of functions as OceanDataset attributes.
     """
 
     def __init__(self, od):
