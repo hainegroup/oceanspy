@@ -3,7 +3,7 @@
 ============
 Contributing
 ============
-| Report bugs and submit feedbacks at https://github.com/malmans2/oceanspy/issues.
+| Report bugs and submit feedback at https://github.com/malmans2/oceanspy/issues.
 | Don't forget to add yourself to the list of :ref:`people` contributing to OceanSpy! 
 
 .. _using_git:
@@ -113,7 +113,7 @@ It is written in reStructuredText_.
 
    If you want to start from a clean build, run ``make clean`` before ``make html``.
 
-6. You can find the HTML output in ``ocenspy/docs/_build/html``.
+6. You can find the HTML output in ``oceanspy/docs/_build/html``.
 
 7. Use git to ``add``, ``commit``, and ``push`` as explained in :ref:`using_git`.
 

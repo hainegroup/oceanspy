@@ -44,7 +44,7 @@ Compute Interact:
       - Ocean Circulation
 
 4. Click on the container
-5. A stable realese of OceanSpy and its dependencies are already installed in the Oceanography image. Run the following command to install the latest version of OceanSpy:
+5. A stable release of OceanSpy and its dependencies are already installed in the Oceanography image. Run the following command to install the latest version of OceanSpy:
 
 .. code-block:: bash
 
