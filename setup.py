@@ -12,7 +12,7 @@ with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
 requirements = ['dask',
-                'xarray>=0.11.3', 
+                'xarray>=0.11.3',
                 'xgcm>=0.2.0']
 
 setup_requirements = ['pytest-runner', ]
