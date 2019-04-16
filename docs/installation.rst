@@ -15,13 +15,13 @@ First open a terminal, then run the following commands:
     conda config --remove channels defaults
     conda config --add channels conda-forge
     conda install -y dask distributed bottleneck netCDF4 xarray cartopy esmpy ffmpeg intake-xarray tqdm geopy xgcm xesmf oceanspy
-    pip install git+https://github.com/xgcm/xmitgcm.git
+    pip install --no-deps --force-reinstall git+https://github.com/xgcm/xmitgcm.git
 
 Run the following command to install the latest version of OceanSpy:
 
 .. code-block:: bash
 
-    pip install git+https://github.com/malmans2/oceanspy.git
+    pip install --no-deps --force-reinstall git+https://github.com/malmans2/oceanspy.git
 
 SciServer Access
 ----------------
@@ -66,7 +66,7 @@ To install the latest version of OceanSpy in the Compute Job environment, add th
     :class: no-execute
 
     import sys
-    !{sys.executable} -m pip install numpy
+    !{sys.executable} -m pip install --no-deps --force-reinstall git+https://github.com/malmans2/oceanspy.git
     
 .. note::
     It is possible that the latest version of OceanSpy has different dependencies than the stable release. In that case, also install OceanSpy's dependencies using:
