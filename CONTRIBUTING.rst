@@ -161,7 +161,7 @@ Contributing to the Code
 
    .. code-block:: bash 
            
-    flake8 oceanspy
+    pycodestyle oceanspy
 
 
 Deploying
