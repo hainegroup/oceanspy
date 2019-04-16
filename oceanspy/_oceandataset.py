@@ -865,7 +865,7 @@ class OceanDataset:
     def manipulate_coords(self, fillna=False, coords1Dfrom2D=False,
                           coords2Dfrom1D=False, coordsUVfromG=False):
         """
-        Manipulate coordinates to make them campatible with OceanSpy.
+        Manipulate coordinates to make them compatible with OceanSpy.
 
         Parameters
         ----------

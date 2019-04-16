@@ -63,7 +63,7 @@ def from_netcdf(path):
 
 def from_catalog(name, catalog_url=None):
     """
-    Import oceadataset using a yaml catalog.
+    Import oceandataset using a yaml catalog.
     Catalogs with suffix xarray.yaml use :py:mod:`intake-xarray`,
     while catalogs with suffix xmitgcm.yaml use
     :py:func:`xmitgcm.open_mdsdataset`.

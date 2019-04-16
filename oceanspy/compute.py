@@ -1858,7 +1858,7 @@ def mooring_volume_transport(od):
     _check_instance({'od': od}, 'oceanspy.OceanDataset')
 
     if 'mooring' not in od._ds.dims:
-        raise ValueError('oceadatasets must be subsampled'
+        raise ValueError('oceandatasets must be subsampled'
                          ' using `subsample.mooring_array`')
 
     # Add missing variables
@@ -2158,7 +2158,7 @@ def geographical_aligned_velocities(od):
 
 def survey_aligned_velocities(od):
     """
-    Compute horizontal velocities orthogonal and tengential to a survey.
+    Compute horizontal velocities orthogonal and tangential to a survey.
 
     .. math::
         (v_{tan}, v_{ort}) = (u\\cos{\\phi} + v\\sin{\\phi},
@@ -2186,7 +2186,7 @@ def survey_aligned_velocities(od):
     _check_instance({'od': od}, 'oceanspy.OceanDataset')
 
     if 'station' not in od._ds.dims:
-        raise ValueError('oceadatasets must be subsampled using'
+        raise ValueError('oceandatasets must be subsampled using'
                          ' `subsample.survey_stations`')
 
     # Get zonal and meridional velocities
