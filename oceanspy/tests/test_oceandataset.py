@@ -6,6 +6,7 @@ import os
 import numpy as np
 import xarray as xr
 import copy as copy
+import shutil
 
 # Oceanspy modules
 from oceanspy import open_oceandataset, OceanDataset
@@ -386,13 +387,14 @@ def test_merge_into_oceandataset(od, obj, overwrite):
 
 
 @pytest.mark.parametrize("od", [od])
-@pytest.mark.parametrize("path",    [1, './filename.nc'])
 @pytest.mark.parametrize("compute", [True, False])
-def test_to_netcdf(od, path, compute):
-    if not isinstance(path, str):
-        # Raise error if wrong format
-        with pytest.raises(TypeError):
-            od.to_netcdf(path=path, compute=compute)
-    else:
-        od.to_netcdf(path=path, compute=compute)
-        os.remove(path)
+def test_save_load(od, compute):
+    path = 'test_path'
+
+    od.to_netcdf(path=path+'.nc', compute=compute)
+    new_od = open_oceandataset.from_netcdf(path+'.nc')
+    os.remove(path+'.nc')
+
+    od.to_zarr(path=path, compute=compute)
+    new_od = open_oceandataset.from_zarr(path)
+    shutil.rmtree(path, ignore_errors=True)

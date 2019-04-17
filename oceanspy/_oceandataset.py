@@ -39,7 +39,7 @@ import sys as _sys
 from . import utils as _utils
 from ._ospy_utils import (_check_instance, _check_oceanspy_axes,
                           _setter_error_message, _check_list_of_string,
-                          _create_grid)
+                          _create_grid, _rename_coord_attrs)
 from . subsample import _subsampleMethods
 from . compute import _computeMethods
 from . plot import _plotMethods
@@ -804,7 +804,7 @@ class OceanDataset:
         path: str
             Path to which to save.
         **kwargs:
-            Keyword arguments for xarray.Dataset.to_netcdf()
+            Keyword arguments for :py:func:`xarray.Dataset.to_netcdf()`
 
         References
         ----------
@@ -815,14 +815,9 @@ class OceanDataset:
         _check_instance({'path': path}, 'str')
 
         # to_netcdf doesn't like coordinates attribute
-        dataset = self.dataset
-        for var in dataset.variables:
-            attrs = dataset[var].attrs
-            coordinates = attrs.pop('coordinates', None)
-            dataset[var].attrs = attrs
-            if coordinates is not None:
-                dataset[var].attrs['_coordinates'] = coordinates
+        dataset = _rename_coord_attrs(self.dataset)
 
+        # Compute
         compute = kwargs.pop('compute', None)
         print('Writing dataset to [{}].'.format(path))
         if compute is None or compute is False:
@@ -831,6 +826,38 @@ class OceanDataset:
                 delayed_obj.compute()
         else:
             dataset.to_netcdf(path, compute=compute, **kwargs)
+
+    def to_zarr(self, path, **kwargs):
+        """
+        Write contents to a zarr group.
+
+        Parameters
+        ----------
+        path: str
+            Path to which to save.
+        **kwargs:
+            Keyword arguments for :py:func:`xarray.Dataset.to_zarr()`
+
+        References
+        ----------
+        http://xarray.pydata.org/en/stable/generated/xarray.Dataset.to_zarr.html
+        """
+
+        # Check parameters
+        _check_instance({'path': path}, 'str')
+
+        # to_zarr doesn't like coordinates attribute
+        dataset = _rename_coord_attrs(self.dataset)
+
+        # Compute
+        compute = kwargs.pop('compute', None)
+        print('Writing dataset to [{}].'.format(path))
+        if compute is None or compute is False:
+            delayed_obj = dataset.to_zarr(path, compute=False, **kwargs)
+            with _ProgressBar():
+                delayed_obj.compute()
+        else:
+            dataset.to_zarr(path, compute=compute, **kwargs)
 
     # ==================================
     # IMPORT (used by open_oceandataset)

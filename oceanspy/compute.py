@@ -194,6 +194,8 @@ def gradient(od, varNameList, axesList=None, aliased=True):
                      'aliased': 'bool'})
 
     varNameList = _check_list_of_string(varNameList, 'varNameList')
+    if varNameList is None:
+        varNameList = list(od.dataset.data_vars)
 
     if axesList is not None:
         axesList = _check_list_of_string(axesList, 'varNameList')
@@ -655,6 +657,8 @@ def laplacian(od, varNameList, axesList=None, aliased=True):
                      'aliased': 'bool'})
 
     varNameList = _check_list_of_string(varNameList, 'varNameList')
+    if varNameList is None:
+        varNameList = list(od.dataset.data_vars)
 
     if axesList is not None:
         axesList = _check_list_of_string(axesList, 'varNameList')
@@ -833,6 +837,8 @@ def _integral_and_mean(od, operation='integral',
                      'storeWeights': 'bool'})
 
     varNameList = _check_list_of_string(varNameList, 'varNameList')
+    if varNameList is None:
+        varNameList = list(od.dataset.data_vars)
 
     if axesList is not None:
         axesList = _check_list_of_string(axesList, 'varNameList')

@@ -182,6 +182,25 @@ texinfo_documents = [
 ]
 
 
+# This is processed by Jinja2 and inserted before each notebook
+nbsphinx_prolog = r"""
+{% set docname = env.doc2path(env.docname, base='docs') %}
+
+.. only:: html
+
+    .. role:: raw-html(raw)
+        :format: html
+
+    .. nbinfo::
+
+        This page was generated from `{{ docname }}`__.
+
+    __ https://github.com/malmans2/oceanspy/blob/
+        {{ env.config.release }}/{{ docname }}:
+"""
+
+
+
 # Get custom people data into sphinx
 # Borrowed from Pange's website
 import yaml

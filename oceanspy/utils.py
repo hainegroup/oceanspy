@@ -285,7 +285,6 @@ def densjmd95(s, t, p):
         if isinstance(var, _xr.DataArray):
             var = var.astype('float')
         else:
-            print(var)
             var = _np.asfarray(var)
 
     # coefficients nonlinear equation of state in pressure coordinates for

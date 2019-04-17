@@ -12,9 +12,6 @@ OceanDataset
    
    OceanDataset
 
-
-.. _Import:
-
 Import
 ------
 
@@ -62,6 +59,7 @@ Methods
    
     OceanDataset.merge_into_oceandataset
     OceanDataset.to_netcdf
+    OceanDataset.to_zarr
     OceanDataset.create_tree
     
 Shortcuts
@@ -89,6 +87,7 @@ Opening
    :toctree: generated/
    
     open_oceandataset.from_netcdf
+    open_oceandataset.from_zarr
     open_oceandataset.from_catalog
 
 The filename of catalogs must end with either `'xarray.yaml'` or `'xmitgcm.yaml'`.
@@ -98,7 +97,7 @@ Entries containing the requested `'name'` will be merged (e.g., grd_get_started,
 It is possible to select subdomains for each entry using xarray.isel_, and to rename variables using xarray.rename_ (see the metadata arguments of `get_started` entries in `xarray catalog`_). 
 If an entry contains snapshots or averages only, the argument `original_output='snapshot'` or `original_output='average'` can be used (see get_started in `xarray catalog`_).
 
-OceanSpy attributes and Import_ parameters can be provided adding arguments under `metadata`.
+OceanSpy attributes and `Import`_ parameters can be provided adding arguments under `metadata`.
 These attributes/parameters will be processed after merging the entries containing the requested `'name'`, so they must be provided for one entry only (see grd_get_started in `xarray catalog`_).
 
 Datasets available on SciServer:
