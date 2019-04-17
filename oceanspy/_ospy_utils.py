@@ -154,7 +154,7 @@ def _check_range(od, obj, objName):
         for _, (pref, coord) in enumerate(zip(prefs, coords)):
             if pref in objName:
                 valchek = od._ds[coord]
-                continue
+                break
         obj = numpy.asarray(obj, dtype=valchek.dtype)
         if obj.ndim == 0:
             obj = obj.reshape(1)
@@ -300,6 +300,51 @@ def _check_mean_and_int_axes(od, meanAxes, intAxes, exclude):
                              ' {}'.format(exclude))
 
     return meanAxes, intAxes
+
+
+def _rename_coord_attrs(ds):
+    """
+    to_netcdf and to_zarr don't like coordinates attribute
+
+    Parameters
+    ----------
+    ds: xarray.Dataset
+
+    Returns
+    -------
+    ds: xarray.Dataset
+    """
+
+    for var in ds.variables:
+        attrs = ds[var].attrs
+        coordinates = attrs.pop('coordinates', None)
+        ds[var].attrs = attrs
+        if coordinates is not None:
+            ds[var].attrs['_coordinates'] = coordinates
+    return ds
+
+
+def _restore_coord_attrs(ds):
+    """
+    Put back coordinates attribute that
+    to_netcdf and to_zarr didn't like.
+
+    Parameters
+    ----------
+    ds: xarray.Dataset
+
+    Returns
+    -------
+    ds: xarray.Dataset
+    """
+
+    for var in ds.variables:
+        attrs = ds[var].attrs
+        coordinates = attrs.pop('_coordinates', None)
+        ds[var].attrs = attrs
+        if coordinates is not None:
+            ds[var].attrs['coordinates'] = coordinates
+    return ds
 
 
 # ========

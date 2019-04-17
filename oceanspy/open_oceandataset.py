@@ -14,7 +14,7 @@ import yaml as _yaml
 # Import from oceanspy (private)
 from ._oceandataset import OceanDataset as _OceanDataset
 import oceanspy as _ospy
-from ._ospy_utils import _check_instance
+from ._ospy_utils import (_check_instance, _restore_coord_attrs)
 
 # Import extra modules (private)
 try:
@@ -27,7 +27,7 @@ except ImportError:  # pragma: no cover
     pass
 
 
-def from_netcdf(path):
+def from_netcdf(path, **kwargs):
     """
     Load an OceanDataset from a netcdf file.
 
@@ -36,9 +36,16 @@ def from_netcdf(path):
     path: str
         Path from which to read.
 
+    **kwargs:
+        Keyword arguments for :py:func:`xarray.open_dataset`
+
     Returns
     -------
     od: OceanDataset
+
+    References
+    ----------
+    http://xarray.pydata.org/en/stable/generated/xarray.open_dataset.html
     """
 
     # Check parameters
@@ -46,15 +53,46 @@ def from_netcdf(path):
 
     # Open
     print('Opening dataset from [{}].'.format(path))
-    ds = _xr.open_dataset(path)
+    ds = _xr.open_dataset(path, **kwargs)
 
     # Put back coordinates attribute that to_netcdf didn't like
-    for var in ds.variables:
-        attrs = ds[var].attrs
-        coordinates = attrs.pop('_coordinates', None)
-        ds[var].attrs = attrs
-        if coordinates is not None:
-            ds[var].attrs['coordinates'] = coordinates
+    ds = _restore_coord_attrs(ds)
+
+    # Create and return od
+    od = _OceanDataset(ds)
+    return od
+
+
+def from_zarr(path, **kwargs):
+    """
+    Load an OceanDataset from a Zarr store.
+
+    Parameters
+    ----------
+    path: str
+        Path from which to read.
+
+    **kwargs:
+        Keyword arguments for :py:func:`xarray.open_zarr`
+
+    Returns
+    -------
+    od: OceanDataset
+
+    References
+    ----------
+    http://xarray.pydata.org/en/stable/generated/xarray.open_zarr.html
+    """
+
+    # Check parameters
+    _check_instance({'path': path}, 'str')
+
+    # Open
+    print('Opening dataset from [{}].'.format(path))
+    ds = _xr.open_zarr(path, **kwargs)
+
+    # Put back coordinates attribute that to_netcdf didn't like
+    ds = _restore_coord_attrs(ds)
 
     # Create and return od
     od = _OceanDataset(ds)

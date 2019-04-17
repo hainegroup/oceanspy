@@ -69,6 +69,7 @@ docs/_build/
 docs/generated/
 docs/tmp/
 docs/Figs/
+docs/oceanspy_get_started/
 
 # PyBuilder
 target/

@@ -63,18 +63,6 @@ sources:
           * EGshelfIIseas2km_ASR_full: Full domain without variables to close budgets.
           * EGshelfIIseas2km_ASR_crop: Cropped domain with variables to close budgets.
       projection: Mercator
-        
-  kpp_get_started:
-    description: KPP state of get_started
-    driver: netcdf
-    args:
-      urlpath: /home/idies/workspace/OceanCirculation/exp_ASR/kpp_state_glued.nc
-      engine: netcdf4
-    metadata:
-      isel: 
-        Z: slice(None, 55)
-        X: slice(529, 736)
-        Y: slice(582, 736)
             
   fld_get_started:
     description: Full-Fields of get_started
@@ -92,6 +80,7 @@ sources:
         Xp1: slice(529, 737)
         Y: slice(582, 736)
         Yp1: slice(582, 737)
+        time: slice(4)
       rename:
         T: time
       original_output: snapshot
@@ -105,6 +94,8 @@ sources:
       concat_dim: T
       drop_variables: ['diag_levels','iter']
     metadata:
+      isel: 
+        time: slice(4)
       rename: 
         T: time
       original_output: average
