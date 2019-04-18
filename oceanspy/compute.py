@@ -106,8 +106,6 @@ def _add_missing_variables(od, varList, FUNC2VARS=_FUNC2VARS):
     # Check parameters
     _check_instance({'od': od}, ' oceanspy.OceanDataset')
     varList = _check_list_of_string(varList, 'varList')
-    if isinstance(varList, str):
-        varList = [varList]
 
     # Return here if all variables already exist
     varList = [var
@@ -147,7 +145,7 @@ def _add_missing_variables(od, varList, FUNC2VARS=_FUNC2VARS):
 # ==========
 # SMART-NAME
 # ==========
-def gradient(od, varNameList, axesList=None, aliased=True):
+def gradient(od, varNameList=None, axesList=None, aliased=True):
     """
     Compute gradient along specified axes, returning all terms (not summed).
 
@@ -159,8 +157,9 @@ def gradient(od, varNameList, axesList=None, aliased=True):
     ----------
     od: OceanDataset
         oceandataset used to compute.
-    varNameList: 1D array_like, str
+    varNameList: 1D array_like, str, None
         List of variables to differenciate.
+        If None, use all variables.
     axesList: None, list
         List of axes. If None, compute gradient along all axes.
     aliased: bool
@@ -615,7 +614,7 @@ def curl(od, iName=None, jName=None, kName=None, aliased=True):
     return _xr.Dataset(crl, attrs=od.dataset.attrs)
 
 
-def laplacian(od, varNameList, axesList=None, aliased=True):
+def laplacian(od, varNameList=None, axesList=None, aliased=True):
     """
     Compute laplacian along specified axis
 
@@ -628,6 +627,7 @@ def laplacian(od, varNameList, axesList=None, aliased=True):
         oceandataset used to compute.
     varNameList: 1D array_like, str
         Name of variables to differenciate.
+        If None, use all variables.
     axesList: None, list
         List of axes. If None, compute gradient along all space axes.
     aliased: bool
@@ -657,8 +657,6 @@ def laplacian(od, varNameList, axesList=None, aliased=True):
                      'aliased': 'bool'})
 
     varNameList = _check_list_of_string(varNameList, 'varNameList')
-    if varNameList is None:
-        varNameList = list(od.dataset.data_vars)
 
     if axesList is not None:
         axesList = _check_list_of_string(axesList, 'varNameList')
@@ -758,7 +756,8 @@ def weighted_mean(od,
     od: OceanDataset
         oceandataset used to compute.
     varNameList: 1D array_like, str, or None
-        If None, compute weighted means of all variables.
+        Name of variables to average.
+        If None, use all variables.
     axesList: None, list
         List of axes. If None, compute average along all axes
         (excluding mooring and station).
@@ -800,7 +799,8 @@ def integral(od, varNameList=None, axesList=None, aliased=True):
     od: OceanDataset
         oceandataset used to compute.
     varNameList: 1D array_like, str, or None
-        If None, compute integral of all variables.
+        Name of variables to integrate.
+        If None, use all variables.
     axesList: None, list
         List of axes. If None, compute integral along all axes
         (excluding mooring and station).

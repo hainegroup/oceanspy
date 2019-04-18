@@ -347,9 +347,20 @@ def test_int_mean_options(od, varNameList, axesList, storeWeights):
 @pytest.mark.parametrize("od_in", [od4calc])
 def test_shortcuts(od_in):
 
+    # Only use some variables
+    list_calc = ['Temp', 'U', 'V', 'W',
+                 'HFacC', 'HFacW', 'HFacS',
+                 'drC', 'drF',
+                 'dxC', 'dyC',
+                 'dxF', 'dyF',
+                 'dxG', 'dyG',
+                 'dxV', 'dyU',
+                 'rA', 'rAw', 'rAs', 'rAz']
+    od_in = od_in.subsample.cutout(varList=list_calc)
+
     # Gradient
-    ds_out = gradient(od_in, 'Temp')
-    od_out = od_in.compute.gradient(varNameList='Temp')
+    ds_out = gradient(od_in)
+    od_out = od_in.compute.gradient()
     ds_out_IN_od_out(ds_out, od_out)
 
     # Divergence
@@ -368,13 +379,13 @@ def test_shortcuts(od_in):
     ds_out_IN_od_out(ds_out, od_out)
 
     # Weighted mean
-    ds_out = weighted_mean(od_in, 'Temp')
-    od_out = od_in.compute.weighted_mean(varNameList='Temp')
+    ds_out = weighted_mean(od_in)
+    od_out = od_in.compute.weighted_mean()
     ds_out_IN_od_out(ds_out, od_out)
 
     # Integral
-    ds_out = integral(od_in, 'Temp')
-    od_out = od_in.compute.integral(varNameList='Temp')
+    ds_out = integral(od_in)
+    od_out = od_in.compute.integral()
     ds_out_IN_od_out(ds_out, od_out)
 
 
