@@ -15,6 +15,7 @@ import yaml as _yaml
 from ._oceandataset import OceanDataset as _OceanDataset
 import oceanspy as _ospy
 from ._ospy_utils import (_check_instance, _restore_coord_attrs)
+from collections import OrderedDict as _OrderedDict
 
 # Import extra modules (private)
 try:
@@ -272,6 +273,12 @@ def from_catalog(name, catalog_url=None):
     if shift_averages is not None:
         od = od.shift_averages(**shift_averages)
 
+    # Set OceanSpy stuff
+    for var in ['aliases', 'parameters', 'name', 'description', 'projection']:
+        val = metadata.pop(var, None)
+        if val is not None:
+            od = eval('od.set_{}(val)'.format(var))
+
     # Manipulate coordinates
     manipulate_coords = metadata.pop('manipulate_coords', None)
     if manipulate_coords is not None:
@@ -282,11 +289,88 @@ def from_catalog(name, catalog_url=None):
     if grid_coords is not None:
         od = od.set_grid_coords(**grid_coords)
 
-    # Set OceanSpy stuff
-    for var in ['aliases', 'parameters', 'name', 'description', 'projection']:
-        val = metadata.pop(var, None)
-        if val is not None:
-            od = eval('od.set_{}(val)'.format(var))
+    # Set attributes (use xmitgcm)
+    try:
+        from xmitgcm.variables import (vertical_coordinates,
+                                       horizontal_grid_variables,
+                                       vertical_grid_variables,
+                                       volume_grid_variables,
+                                       mask_variables,
+                                       state_variables,
+                                       package_state_variables,
+                                       extra_grid_variables)
+        from xmitgcm.utils import parse_available_diagnostics
+        from xmitgcm import default_diagnostics
+        diagnostics = parse_available_diagnostics(default_diagnostics.__file__)
+        variables = _OrderedDict(list(vertical_coordinates.items())
+                                 + list(horizontal_grid_variables.items())
+                                 + list(vertical_grid_variables.items())
+                                 + list(volume_grid_variables.items())
+                                 + list(mask_variables.items())
+                                 + list(state_variables.items())
+                                 + list(package_state_variables.items())
+                                 + list(extra_grid_variables.items()))
+        variables = _OrderedDict({**diagnostics, **variables})
+
+        # My extra attributes
+        variables['Temp'] = variables.pop('T')
+        variables['HFacC'] = variables.pop('hFacC')
+        variables['HFacW'] = variables.pop('hFacW')
+        variables['HFacS'] = variables.pop('hFacS')
+
+        for var in ['HFacC', 'HFacW', 'HFacS']:
+            variables[var]['attrs']['units'] = " "
+
+        variables['phiHyd'] = variables.pop('PHIHYD')
+        variables['phiHydLow'] = dict(
+            attrs=dict(units=variables['phiHyd']['attrs']['units']))
+
+        variables['AngleCS'] = dict(
+            attrs=dict(standard_name="Cos of grid orientation angle",
+                       long_name="AngleCS",
+                       units=" ", coordinate="YC XC"))
+        variables['AngleSN'] = dict(
+            attrs=dict(standard_name="Sin of grid orientation angle",
+                       long_name="AngleSN",
+                       units=" "))
+        variables['dxF'] = dict(
+            attrs=dict(standard_name="x cell face separation",
+                       long_name="cell x size",
+                       units="m"))
+        variables['dyF'] = dict(
+            attrs=dict(standard_name="y cell face separation",
+                       long_name="cell y size",
+                       units="m"))
+        variables['dxV'] = dict(
+            attrs=dict(standard_name="x v-velocity separation",
+                       long_name="cell x size",
+                       units="m"))
+        variables['dyU'] = dict(
+            attrs=dict(standard_name="y u-velocity separation",
+                       long_name="cell y size",
+                       units="m"))
+        variables['fCori'] = dict(
+            attrs=dict(standard_name="Coriolis f at cell center",
+                       long_name="Coriolis f",
+                       units="s^-1"))
+        variables['fCoriG'] = dict(
+            attrs=dict(standard_name="Coriolis f at cell corner",
+                       long_name="Coriolis f",
+                       units="s^-1"))
+
+        # Extract variables in dataset only
+        variables = _OrderedDict(**{var: variables[var]
+                                    for var in od._ds.variables
+                                    if var in variables})
+
+        # Add attributes
+        for var in variables:
+            attrs = variables[var]['attrs']
+            for attr in attrs:
+                if attr not in od._ds[var].attrs:
+                    od._ds[var].attrs[attr] = attrs[attr]
+    except ImportError:  # pragma: no cover
+        pass
 
     # Print message
     print(od.description)
