@@ -18,7 +18,6 @@
 # TODO: create list of OceanSpy name and add link under aliases.
 # TODO: create a dictionary with parameters description and add under aliases.
 # TODO: add more xgcm options. E.g., default boundary method.
-# TODO: add attributes to new coordinates (XU, XV, ...)
 # TODO: implement xgcm autogenerate in _set_coords,
 #       set_grid_coords, set_coords when released
 # TODO: Use the coords parameter to create xgcm grid instead of
@@ -34,6 +33,7 @@ import copy as _copy
 import numpy as _np
 import warnings as _warnings
 import sys as _sys
+from collections import OrderedDict as _OrderedDict
 
 # From OceanSpy (private)
 from . import utils as _utils
@@ -982,6 +982,62 @@ class OceanDataset:
                                         'YG', 'XG',
                                         'YU', 'XU',
                                         'YV', 'XV'])
+
+        # Attributes (use xmitgcm)
+        try:
+            from xmitgcm import variables
+            if self.parameters['rSphere'] is None:
+                coords = variables.horizontal_coordinates_cartesian
+                add_coords = _OrderedDict(
+                    XU=dict(attrs=dict(standard_name="longitude_at_u_location",
+                                       long_name="longitude",
+                                       units="degrees_east",
+                                       coordinate="YU XU")),
+                    YU=dict(attrs=dict(standard_name="latitude_at_u_location",
+                                       long_name="latitude",
+                                       units="degrees_north",
+                                       coordinate="YU XU")),
+                    XV=dict(attrs=dict(standard_name="longitude_at_v_location",
+                                       long_name="longitude",
+                                       units="degrees_east",
+                                       coordinate="YV XV")),
+                    YV=dict(attrs=dict(standard_name="latitude_at_v_location",
+                                       long_name="latitude",
+                                       units="degrees_north",
+                                       coordinate="YV XV")))
+            else:
+                coords = variables.horizontal_coordinates_spherical
+                add_coords = _OrderedDict(
+                    XU=dict(attrs=dict(standard_name=("plane_x_coordinate"
+                                                      "_at_u_location"),
+                                       long_name="x coordinate",
+                                       units="m",
+                                       coordinate="YU XU")),
+                    YU=dict(attrs=dict(standard_name=("plane_y_coordinate"
+                                                      "_at_u_location"),
+                                       long_name="y coordinate",
+                                       units="m",
+                                       coordinate="YU XU")),
+                    XV=dict(attrs=dict(standard_name=("plane_x_coordinate"
+                                                      "_at_v_location"),
+                                       long_name="x coordinate",
+                                       units="m",
+                                       coordinate="YV XV")),
+                    YV=dict(attrs=dict(standard_name=("plane_y_coordinate"
+                                                      "_at_v_location"),
+                                       long_name="y coordinate",
+                                       units="m",
+                                       coordinate="YV XV")))
+            coords = _OrderedDict(list(coords.items())
+                                  + list(add_coords.items()))
+            for var in coords:
+                attrs = coords[var]['attrs']
+                for attr in attrs:
+                    if attr not in self._ds[var].attrs:
+                        self._ds[var].attrs[attr] = attrs[attr]
+        except ImportErrror:  # pragma: no cover
+            pass
+
         return self
 
     # =====
