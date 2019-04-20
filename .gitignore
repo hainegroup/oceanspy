@@ -2,7 +2,6 @@
 __pycache__/
 *.py[cod]
 *$py.class
-oceanspy/__pycache__/
 
 # C extensions
 *.so
@@ -38,6 +37,7 @@ pip-delete-this-directory.txt
 
 # Unit test / coverage reports
 htmlcov/
+cov_html/
 .tox/
 .coverage
 .coverage.*
@@ -47,6 +47,11 @@ coverage.xml
 *.cover
 .hypothesis/
 .pytest_cache/
+oceanspy/tests/Data/
+oceanspy/tests/.ipynb_checkpoints/
+oceanspy/tests/.nfs*
+oceanspy/tests/__pycache__/
+
 
 # Translations
 *.mo
@@ -67,16 +72,20 @@ instance/
 docs/_build/
 docs/generated/
 docs/tmp/
-docs/*.nc
-docs/.nfs*
-docs/.ipynb_checkpoints/
 docs/Figs/
+docs/oceanspy_get_started/
+docs/.ipynb_checkpoints/
+docs/.nfs*
+docs/__pycache__/
 
 # PyBuilder
-target/
-
-# Jupyter Notebook
-.ipynb_checkpoints
+twp*
+*ipynb_checkpoints*
+*.nfs*
+*.nc
+*.data
+*.meta
+arget/
 
 # pyenv
 .python-version
@@ -108,8 +117,19 @@ ENV/
 # mypy
 .mypy_cache/
 
-# vim tmp
-.*.swp
+# Flake
+flake-report/
 
-# Tests
-oceanspy/tests/__pycache__/
+# Editor
+.editorconfig
+
+# Useless or heavy stuff
+*.zip
+*__cache__*
+*.swp*
+*ipynb_checkpoints*
+*.nfs*
+*.nc
+*.data
+*.meta
+
