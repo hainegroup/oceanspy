@@ -195,8 +195,8 @@ nbsphinx_prolog = r"""
 
         This page was generated from `{{ docname }}`__.
 
-    __ https://github.com/malmans2/oceanspy/blob/
-        {{ env.config.release }}/{{ docname }}:
+    __ https://github.com/malmans2/oceanspy/blob/master
+        /{{ docname }}
 """
 
 
