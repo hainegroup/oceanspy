@@ -147,7 +147,7 @@ def from_catalog(name, catalog_url=None):
 
     # Assign a xarray url if it's None
     if catalog_url is None:  # pragma: no cover
-        url = _ospy.__path__[0] + '/Catalogs/catalog_xarray.yaml'
+        url = _ospy.__path__[0] + '/catalog_xarray.yaml'
     else:
         suffixes = ['xarray.yaml', 'xmitgcm.yaml']
         if not any([suf in catalog_url for suf in suffixes]):
@@ -166,7 +166,7 @@ def from_catalog(name, catalog_url=None):
 
     # Assign a xmitgcm url
     if catalog_url is None and len(entries) == 0:  # pragma: no cover
-        url = _ospy.__path__[0] + '/Catalogs/catalog_xmitgcm.yaml'
+        url = _ospy.__path__[0] + '/catalog_xmitgcm.yaml'
     else:
         pass
 
