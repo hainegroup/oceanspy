@@ -189,8 +189,8 @@ Datasets available on SciServer:
 
 .. _intake-xarray: https://github.com/intake/intake-xarray
 .. _xmitgcm.open_mdsdataset: https://xmitgcm.readthedocs.io/en/latest/usage.html#open-mdsdataset
-.. _`xmitgcm catalog`: https://github.com/malmans2/oceanspy/blob/final_dev/oceanspy/Catalogs/catalog_xmitgcm.yaml
-.. _`xarray catalog`: https://github.com/malmans2/oceanspy/blob/final_dev/oceanspy/Catalogs/catalog_xarray.yaml
+.. _`xmitgcm catalog`: https://github.com/malmans2/oceanspy/blob/final_dev/oceanspy/catalog_xmitgcm.yaml
+.. _`xarray catalog`: https://github.com/malmans2/oceanspy/blob/final_dev/oceanspy/catalog_xarray.yaml
 .. _xarray.isel: http://xarray.pydata.org/en/stable/generated/xarray.Dataset.isel.html
 .. _xarray.rename: http://xarray.pydata.org/en/stable/generated/xarray.Dataset.rename.html
 
