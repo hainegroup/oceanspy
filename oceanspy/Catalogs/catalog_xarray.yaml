@@ -1,0 +1,511 @@
+plugins:
+  source:
+    - module: intake_xarray
+sources:
+  
+  # ===========================
+  # get_started
+  grd_get_started:
+    description: Grid of get_started
+    driver: netcdf
+    args:
+      urlpath: /home/idies/workspace/OceanCirculation/exp_ASR/grid_glued.nc
+      engine: netcdf4
+      drop_variables: ['RC', 'RF', 'RU', 'RL']
+    metadata:
+      manipulate_coords:
+        fillna: True
+        coords1Dfrom2D: True
+      grid_coords: 
+        add_midp: True
+        grid_coords:
+          Y:
+            Y: 
+            Yp1: 0.5
+          X:
+            X: 
+            Xp1: 0.5
+          Z:
+           Z: 
+           Zp1: 0.5
+           Zu: 0.5
+           Zl: -0.5
+          time: 
+            time: -0.5
+      shift_averages: 
+        averageList:
+      isel: 
+        Z: slice(None, 55)
+        Zp1: slice(None, 56)
+        Zu: slice(None, 55)
+        Zl: slice(None, 55)
+        X: slice(529, 736)
+        Xp1: slice(529, 737)
+        Y: slice(582, 736)
+        Yp1: slice(582, 737)
+      parameters:
+        rSphere: 6.371e+03
+        eq_state: jmd95
+        rho0: 1027
+        g: 9.81
+        eps_nh: 0 
+        omega: 7.292123516990375e-05
+        c_p: 3.986e+03
+        tempFrz0: 9.01e-02
+        dTempFrz_dS: -5.75e-02
+      name: EGshelfIIseas2km_ASR_full
+      description: |
+        High-resolution (~2km) numerical simulation covering the east Greenland shelf (EGshelf), 
+        and the Iceland and Irminger Seas (IIseas) forced by the Arctic System Reanalysis (ASR). 
+        Citation: 
+          * Almansi et al., 2017 - JPO.
+        Mates: 
+          * EGshelfIIseas2km_ASR_full: Full domain without variables to close budgets.
+          * EGshelfIIseas2km_ASR_crop: Cropped domain with variables to close budgets.
+      projection: Mercator
+            
+  fld_get_started:
+    description: Full-Fields of get_started
+    driver: netcdf
+    args:
+      urlpath: /home/idies/workspace/OceanCirculation/exp_ASR/result_20070831_20070912/output_glued/*.*_glued.nc
+      engine: netcdf4
+      concat_dim: T
+      drop_variables: ['diag_levels','iter']
+    metadata:
+      isel: 
+        Z: slice(None, 55)
+        Zl: slice(None, 55)
+        X: slice(529, 736)
+        Xp1: slice(529, 737)
+        Y: slice(582, 736)
+        Yp1: slice(582, 737)
+        time: slice(4)
+      rename:
+        T: time
+      original_output: snapshot
+      
+  avg_get_started:
+    description: Cropped-Fields of get_started
+    driver: netcdf
+    args:
+      urlpath: /home/idies/workspace/OceanCirculation/exp_ASR/result_20070831_20070912/output_glued/cropped/*.*_glued.nc
+      engine: netcdf4
+      concat_dim: T
+      drop_variables: ['diag_levels','iter']
+    metadata:
+      isel: 
+        time: slice(4)
+      rename: 
+        T: time
+      original_output: average
+  
+  
+  
+  # ===========================
+  # EGshelfIIseas2km_ERAI_6H
+  grd_EGshelfIIseas2km_ERAI_6H:
+    description: Grid of EGshelfIIseas2km_ERAI_6H
+    driver: netcdf
+    args:
+      urlpath: /home/idies/workspace/OceanCirculation/exp_ERAI/grid_glued.nc
+      engine: netcdf4
+      drop_variables: ['RC', 'RF', 'RU', 'RL']
+    metadata:
+      manipulate_coords:
+        fillna: True
+        coords1Dfrom2D: True
+      grid_coords: 
+        add_midp: True
+        grid_coords:
+          Y:
+            Y: 
+            Yp1: 0.5
+          X:
+            X: 
+            Xp1: 0.5
+          Z:
+           Z: 
+           Zp1: 0.5
+           Zu: 0.5
+           Zl: -0.5
+          time: 
+            time: -0.5
+      parameters:
+        rSphere: 6.371e+03
+        eq_state: jmd95
+        rho0: 1027
+        g: 9.81
+        eps_nh: 0 
+        omega: 7.292123516990375e-05
+        c_p: 3.986e+03
+        tempFrz0: 9.01e-02
+        dTempFrz_dS: -5.75e-02
+      name: EGshelfIIseas2km_ERAI_6H
+      description: |
+        High-resolution (~2km) numerical simulation covering the east Greenland shelf (EGshelf), 
+        and the Iceland and Irminger Seas (IIseas) forced by ERA-Interim. 
+        Citation: 
+          * Almansi et al., 2017 - JPO.
+        Characteristics: 
+          * 6H: 6-hour resolution without sea ice and external forcing variables.
+        Mate: 
+          * EGshelfIIseas2km_ERAI_1D: 1-day resolution with sea ice and external forcing variables.
+      projection: Mercator
+        
+  kpp_EGshelfIIseas2km_ERAI_6H:
+    description: KPP state of EGshelfIIseas2km_ERAI_6H
+    driver: netcdf
+    args:
+      urlpath: /home/idies/workspace/OceanCirculation/exp_ERAI/kpp_state_glued.nc
+      engine: netcdf4
+            
+  fld_EGshelfIIseas2km_ERAI_6H:
+    description: 6H-Fields of EGshelfIIseas2km_ERAI_6H
+    driver: netcdf
+    args:
+      urlpath: /home/idies/workspace/OceanCirculation/exp_ERAI/result_*/output_glued/*.*_glued.nc
+      engine: netcdf4
+      concat_dim: T
+      drop_variables: ['diag_levels','iter']
+    metadata:
+      rename:
+        T: time
+      original_output: snapshot
+      
+  # ===========================  
+  # EGshelfIIseas2km_ERAI_1D
+  grd_EGshelfIIseas2km_ERAI_1D:
+    description: Grid of EGshelfIIseas2km_ERAI_1D
+    driver: netcdf
+    args:
+      urlpath: /home/idies/workspace/OceanCirculation/exp_ERAI/grid_glued.nc
+      engine: netcdf4
+      drop_variables: ['RC', 'RF', 'RU', 'RL']
+    metadata:
+      manipulate_coords:
+        fillna: True
+        coords1Dfrom2D: True
+      grid_coords: 
+        add_midp: True
+        grid_coords:
+          Y:
+            Y: 
+            Yp1: 0.5
+          X:
+            X: 
+            Xp1: 0.5
+          Z:
+           Z: 
+           Zp1: 0.5
+           Zu: 0.5
+           Zl: -0.5
+          time: 
+            time: -0.5
+      parameters:
+        rSphere: 6.371e+03
+        eq_state: jmd95
+        rho0: 1027
+        g: 9.81
+        eps_nh: 0 
+        omega: 7.292123516990375e-05
+        c_p: 3.986e+03
+        tempFrz0: 9.01e-02
+        dTempFrz_dS: -5.75e-02
+      name: EGshelfIIseas2km_ERAI_1D
+      description: |
+        High-resolution (~2km) numerical simulation covering the east Greenland shelf (EGshelf), 
+        and the Iceland and Irminger Seas (IIseas) forced by ERA-Interim. 
+        Citation: 
+          * Almansi et al., 2017 - JPO.
+        Characteristics: 
+          * 1D: 1-day resolution with sea ice and external forcing variables.
+        Mate: 
+          * EGshelfIIseas2km_ERAI_6H: 6-hour resolution without sea ice and external forcing variables.
+      projection: Mercator
+        
+  kpp_EGshelfIIseas2km_ERAI_1D:
+    description: KPP state of EGshelfIIseas2km_ERAI_1D
+    driver: netcdf
+    args:
+      urlpath: /home/idies/workspace/OceanCirculation/exp_ERAI/kpp_state_glued.nc
+      engine: netcdf4
+            
+  fld_EGshelfIIseas2km_ERAI_1D:
+    description: 6H-Fields of EGshelfIIseas2km_ERAI_1D
+    driver: netcdf
+    args:
+      urlpath: /home/idies/workspace/OceanCirculation/exp_ERAI/result_*/output_glued/*.*_glued.nc
+      engine: netcdf4
+      concat_dim: T
+      drop_variables: ['diag_levels','iter']
+    metadata:
+      rename:
+        T: time
+      original_output: snapshot
+      isel: 
+        time: slice(None, None, 4)
+      
+  dailyEGshelfIIseas2km_ERAI_1D:
+    description: Daily-Fields of EGshelfIIseas2km_ERAI_1D
+    driver: netcdf
+    args:
+      urlpath: /home/idies/workspace/OceanCirculation/exp_ERAI/result_*/output_glued/daily/*.*_glued.nc
+      engine: netcdf4
+      concat_dim: T
+      drop_variables: ['diag_levels','iter']
+    metadata:
+      rename:
+        T: time
+      original_output: snapshot 
+      
+  # ===========================
+  # EGshelfIIseas2km_ASR_full
+  grd_EGshelfIIseas2km_ASR_full:
+    description: Grid of EGshelfIIseas2km_ASR_full
+    driver: netcdf
+    args:
+      urlpath: /home/idies/workspace/OceanCirculation/exp_ASR/grid_glued.nc
+      engine: netcdf4
+      drop_variables: ['RC', 'RF', 'RU', 'RL']
+    metadata:
+      manipulate_coords:
+        fillna: True
+        coords1Dfrom2D: True
+      grid_coords: 
+        add_midp: True
+        grid_coords:
+          Y:
+            Y: 
+            Yp1: 0.5
+          X:
+            X: 
+            Xp1: 0.5
+          Z:
+           Z: 
+           Zp1: 0.5
+           Zu: 0.5
+           Zl: -0.5
+          time: 
+            time: -0.5
+      parameters:
+        rSphere: 6.371e+03
+        eq_state: jmd95
+        rho0: 1027
+        g: 9.81
+        eps_nh: 0 
+        omega: 7.292123516990375e-05
+        c_p: 3.986e+03
+        tempFrz0: 9.01e-02
+        dTempFrz_dS: -5.75e-02
+      name: EGshelfIIseas2km_ASR_full
+      description: |
+        High-resolution (~2km) numerical simulation covering the east Greenland shelf (EGshelf), 
+        and the Iceland and Irminger Seas (IIseas) forced by the Arctic System Reanalysis (ASR). 
+        Citation: 
+          * Almansi et al., 2017 - JPO.
+        Characteristics: 
+          * full: Full domain without variables to close budgets.
+        Mate: 
+          * EGshelfIIseas2km_ASR_crop: Cropped domain with variables to close budgets.
+      projection: Mercator
+        
+  kpp_EGshelfIIseas2km_ASR_full:
+    description: KPP state of EGshelfIIseas2km_ASR_full
+    driver: netcdf
+    args:
+      urlpath: /home/idies/workspace/OceanCirculation/exp_ASR/kpp_state_glued.nc
+      engine: netcdf4
+            
+  fld_EGshelfIIseas2km_ASR_full:
+    description: Fields of EGshelfIIseas2km_ASR_full
+    driver: netcdf
+    args:
+      urlpath: /home/idies/workspace/OceanCirculation/exp_ASR/result_*/output_glued/*.*_glued.nc
+      engine: netcdf4
+      concat_dim: T
+      drop_variables: ['diag_levels','iter']
+    metadata:
+      rename:
+        T: time
+      original_output: snapshot
+       
+  # ===========================
+  # EGshelfIIseas2km_ASR_crop
+  grd_EGshelfIIseas2km_ASR_crop:
+    description: Grid of EGshelfIIseas2km_ASR_crop
+    driver: netcdf
+    args:
+      urlpath: /home/idies/workspace/OceanCirculation/exp_ASR/grid_glued.nc
+      engine: netcdf4
+      drop_variables: ['RC', 'RF', 'RU', 'RL']
+    metadata:
+      manipulate_coords:
+        fillna: True
+        coords1Dfrom2D: True
+      grid_coords: 
+        add_midp: True
+        grid_coords:
+          Y:
+            Y: 
+            Yp1: 0.5
+          X:
+            X: 
+            Xp1: 0.5
+          Z:
+           Z: 
+           Zp1: 0.5
+           Zu: 0.5
+           Zl: -0.5
+          time: 
+            time: -0.5
+      shift_averages: 
+        averageList:
+      isel: 
+        Z: slice(None, 55)
+        Zp1: slice(None, 56)
+        Zu: slice(None, 55)
+        Zl: slice(None, 55)
+        X: slice(529, 736)
+        Xp1: slice(529, 737)
+        Y: slice(582, 736)
+        Yp1: slice(582, 737)
+      parameters:
+        rSphere: 6.371e+03
+        eq_state: jmd95
+        rho0: 1027
+        g: 9.81
+        eps_nh: 0 
+        omega: 7.292123516990375e-05
+        c_p: 3.986e+03
+        tempFrz0: 9.01e-02
+        dTempFrz_dS: -5.75e-02
+      name: EGshelfIIseas2km_ASR_full
+      description: |
+        High-resolution (~2km) numerical simulation covering the east Greenland shelf (EGshelf), 
+        and the Iceland and Irminger Seas (IIseas) forced by the Arctic System Reanalysis (ASR). 
+        Citation: 
+          * Almansi et al., 2017 - JPO.
+        Characteristics: 
+          * crop: Cropped domain with variables to close budgets.
+        Mate: 
+          * EGshelfIIseas2km_ASR_full: Full domain without variables to close budgets.
+      projection: Mercator
+        
+  kpp_EGshelfIIseas2km_ASR_crop:
+    description: KPP state of EGshelfIIseas2km_ASR_crop
+    driver: netcdf
+    args:
+      urlpath: /home/idies/workspace/OceanCirculation/exp_ASR/kpp_state_glued.nc
+      engine: netcdf4
+    metadata:
+      isel: 
+        Z: slice(None, 55)
+        X: slice(529, 736)
+        Y: slice(582, 736)
+            
+  fld_EGshelfIIseas2km_ASR_crop:
+    description: Full-Fields of EGshelfIIseas2km_ASR_crop
+    driver: netcdf
+    args:
+      urlpath: /home/idies/workspace/OceanCirculation/exp_ASR/result_*/output_glued/*.*_glued.nc
+      engine: netcdf4
+      concat_dim: T
+      drop_variables: ['diag_levels','iter']
+    metadata:
+      isel: 
+        Z: slice(None, 55)
+        Zl: slice(None, 55)
+        X: slice(529, 736)
+        Xp1: slice(529, 737)
+        Y: slice(582, 736)
+        Yp1: slice(582, 737)
+      rename:
+        T: time
+      original_output: snapshot
+      
+  avg_EGshelfIIseas2km_ASR_crop:
+    description: Cropped-Fields of EGshelfIIseas2km_ASR_crop
+    driver: netcdf
+    args:
+      urlpath: /home/idies/workspace/OceanCirculation/exp_ASR/result_*/output_glued/cropped/*.*_glued.nc
+      engine: netcdf4
+      concat_dim: T
+      drop_variables: ['diag_levels','iter']
+    metadata:
+      rename: 
+        T: time
+      original_output: average
+  
+  # ===========================
+  # Arctic Control
+  grd_Arctic_Control:
+    description: Grid of Arctic Control
+    driver: netcdf
+    args:
+      urlpath: /home/idies/workspace/OceanCirculation/exp_Arctic_Control/GRID/grid_glued_swapped.nc
+      engine: netcdf4
+      drop_variables: ['RC', 'RF', 'RU', 'RL']
+    metadata:
+      manipulate_coords:
+        coordsUVfromG: True
+      grid_coords: 
+        add_midp: True
+        grid_coords:
+          Y:
+            Y: 
+            Yp1: 0.5
+          X:
+            X: 
+            Xp1: 0.5
+          Z:
+           Z: 
+           Zp1: 0.5
+           Zu: 0.5
+           Zl: -0.5
+          time: 
+            time: -0.5
+      shift_averages: 
+        averageList:
+      parameters:
+        rSphere: 6.371e+03
+        eq_state: jmd95
+        rho0: 1027
+        g: 9.81
+        eps_nh: 0 
+        omega: 7.292123516990375e-05
+        c_p: 3.986e+03
+        tempFrz0: 9.01e-02
+        dTempFrz_dS: -5.75e-02
+      name: Arctic_Control
+      description: |
+        Curvilinear grid test. Setup by Dr. Renske Gelderloos.
+      projection: NorthPolarStereo
+        
+  fld_Arctic_Control:
+    description: Average fields of Arctic_Control
+    driver: netcdf
+    args:
+      urlpath: /home/idies/workspace/OceanCirculation/exp_Arctic_Control/days*/DIAGS/*.nc
+      engine: netcdf4
+      concat_dim: T
+      drop_variables: ['diag_levels', 'iter', 'SIGMA0']
+    metadata:
+      rename:
+        T: time
+      original_output: average
+            
+  state_Arctic_Control:
+    description: State variables of Arctic_Control
+    driver: netcdf
+    args:
+      urlpath: /home/idies/workspace/OceanCirculation/exp_Arctic_Control/days*/STATE/*.nc
+      engine: netcdf4
+      concat_dim: T
+    metadata:
+      rename:
+        T: time
+      original_output: snapshot
+
+
+    

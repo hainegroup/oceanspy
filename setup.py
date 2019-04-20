@@ -11,9 +11,9 @@ with open('README.rst') as readme_file:
 with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
-requirements = ['dask', 
-                'xarray', 
-                'xgcm']
+requirements = ['dask',
+                'xarray>=0.11.3',
+                'xgcm>=0.2.0']
 
 setup_requirements = ['pytest-runner', ]
 
@@ -28,10 +28,11 @@ setup(
         'License :: OSI Approved :: MIT License',
         'Natural Language :: English',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
     ],
-    description="OceanSpy: A Python package for easy ocean model data analysis and visualization",
+    description=("OceanSpy: A Python package for"
+                 " easy ocean model data analysis and visualization"),
     install_requires=requirements,
     license="MIT license",
     long_description=readme + '\n\n' + history,
