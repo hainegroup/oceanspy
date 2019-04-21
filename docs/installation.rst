@@ -21,7 +21,7 @@ Run the following command to install the latest version of OceanSpy:
 
 .. code-block:: bash
 
-    pip install --no-deps --force-reinstall git+https://github.com/malmans2/oceanspy.git
+    pip install git+https://github.com/malmans2/oceanspy.git
 
 SciServer Access
 ----------------
@@ -48,7 +48,7 @@ Compute Interact:
 
 .. code-block:: bash
 
-    pip install git+https://github.com/malmans2/oceanspy.git
+    pip install --no-deps --force-reinstall git+https://github.com/malmans2/oceanspy.git
 
 Compute Jobs:
 
