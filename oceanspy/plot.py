@@ -28,8 +28,6 @@ from .compute import integral as _integral
 
 # Additional dependencies (private)
 try:
-    import matplotlib as _matplotlib
-    _matplotlib.use('agg')
     import matplotlib.pyplot as _plt
 except ImportError:  # pragma: no cover
     pass

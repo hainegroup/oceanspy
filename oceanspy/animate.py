@@ -23,8 +23,6 @@ from ._ospy_utils import (_check_instance, _rename_aliased,
 
 # Recommended dependencies (private)
 try:
-    import matplotlib as _matplotlib
-    _matplotlib.use('agg')
     import matplotlib.pyplot as _plt
     from matplotlib.animation import FuncAnimation as _FuncAnimation
 except ImportError:  # pragma: no cover
