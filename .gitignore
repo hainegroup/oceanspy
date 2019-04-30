@@ -77,6 +77,7 @@ docs/oceanspy_get_started/
 docs/.ipynb_checkpoints/
 docs/.nfs*
 docs/__pycache__/
+docs/dask-worker-space/
 
 # PyBuilder
 twp*
