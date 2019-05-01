@@ -2208,7 +2208,7 @@ def survey_aligned_velocities(od):
     except Exception as e:
         # Assume U=U_zonal and V=V_zonal
         _warnings.warn(("\n{}"
-                        "\nAssuming U=U_zonal and V=V_merid"
+                        "\nAssuming U=U_zonal and V=V_merid."
                         "\nIf you are using curvilinear coordinates,"
                         " run `compute.geographical_aligned_velocities`"
                         " before `subsample.survey_stations`").format(e),
