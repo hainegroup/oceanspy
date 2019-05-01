@@ -8,6 +8,7 @@ Welcome to OceanSpy's documentation!
    readme
    installation
    Tutorial
+   Kogur
    contributing
    api
    people
