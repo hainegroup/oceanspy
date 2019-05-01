@@ -78,6 +78,7 @@ docs/.ipynb_checkpoints/
 docs/.nfs*
 docs/__pycache__/
 docs/dask-worker-space/
+docs/*.nc
 
 # PyBuilder
 twp*
