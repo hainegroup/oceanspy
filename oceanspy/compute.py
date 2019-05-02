@@ -1050,8 +1050,10 @@ def _integral_and_mean(od, operation='integral',
             weight = delta
             if not isinstance(weight, int):
                 # Keep dimensions in the right order
-                _, weight = _xr.broadcast(wMean, weight)
-                weight = weight.where(~wMean.isnull())
+                weight = weight.where(wMean.notnull())
+                weight = weight.transpose(*[dim
+                                            for dim in wMean.dims
+                                            if dim in weight.dims])
                 wMean = ((wMean * weight).sum(dims2ave))
                 wMean = wMean / (weight.sum(dims2ave))
 
