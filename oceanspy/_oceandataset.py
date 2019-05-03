@@ -791,7 +791,22 @@ class OceanDataset:
                 _warnings.warn('{} will be overwritten.'
                                ''.format(var2drop), stacklevel=2)
         for var in obj.data_vars:
+            # Store dimension attributes that get lost
+            attrs = {}
+            for dim in obj[var].dims:
+                if dim not in dataset.dims:
+                    pass
+                elif all([i == j
+                          for i, j in zip(obj[dim].attrs.items(),
+                                          dataset[dim].attrs.items())]):
+                    attrs[dim] = dataset[dim].attrs
+
+            # Merge
             dataset[var] = obj[var]
+
+            # Add attributes
+            for dim, attr in attrs.items():
+                dataset[dim].attrs = attr
 
         return OceanDataset(dataset)
 
