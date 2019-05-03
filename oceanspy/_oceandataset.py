@@ -794,9 +794,11 @@ class OceanDataset:
             # Store dimension attributes that get lost
             attrs = {}
             for dim in obj[var].dims:
-                if all([i == j
-                        for i, j in zip(obj[dim].attrs.items(),
-                                        dataset[dim].attrs.items())]):
+                if dim not in dataset.dims:
+                    pass
+                elif all([i == j
+                          for i, j in zip(obj[dim].attrs.items(),
+                                          dataset[dim].attrs.items())]):
                     attrs[dim] = dataset[dim].attrs
 
             # Merge
