@@ -26,7 +26,7 @@ Run the following command to install the latest version of OceanSpy:
 SciServer Access
 ----------------
 SciServer_ optimizes Big Data science by allowing users to bring their analysis close to the data with Jupyter Notebooks deployed in server-side containers.
-Several Apps_ are available on SciServer: use Compute Interact to analyze data with interactive notebook, while use Compute Jobs to asynchronously run notebooks.
+Several Apps_ are available on SciServer: use Compute Interact to analyze data with an interactive notebook; use Compute Jobs to run notebooks asynchronously.
 
 Compute Interact:
 
@@ -60,7 +60,7 @@ Compute Jobs:
 6. Select the ``Ocean Circulation`` data volume
 7. Select a User Volume and the Notebook to run
 
-To install the latest version of OceanSpy in the Compute Job environment, add the following cell on top of the notebook that will be executed:
+To install the latest version of OceanSpy in the Compute Jobs environment, add the following cell on top of the notebook that will be executed:
 
 .. code-block:: ipython
     :class: no-execute
