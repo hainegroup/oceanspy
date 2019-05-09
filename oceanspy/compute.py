@@ -933,7 +933,9 @@ def _integral_and_mean(od, operation='integral',
             for area in areaList:
                 if set(od._ds[area].dims).issubset(Int.dims):
                     delta = delta * od._ds[area]
-                    dims2sum = dims2sum + list(od._ds[area].dims)
+                    dims2sum = dims2sum + [dim
+                                           for dim in od._ds[area].dims
+                                           if dim[0] == 'Y' or dim[0] == 'X']
                     suf = suf + ['dXdY']
                     units = units + ['m^2']
                     continue
