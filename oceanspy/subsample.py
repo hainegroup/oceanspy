@@ -1212,6 +1212,9 @@ def particle_properties(od, times, Ypart, Xpart, Zpart, **kwargs):
     od = od.set_grid_coords({'time': {'time': -0.5}},
                             add_midp=True, overwrite=True)
 
+    # Reset coordinates
+    od._ds = od._ds.reset_coords()
+
     return od
 
 
