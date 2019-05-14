@@ -1198,7 +1198,7 @@ def velocity_magnitude(od):
     Compute velocity magnitude.
 
     .. math::
-        v = \\sqrt{v_x^2 + v_y^2 + v_z^2}
+        vel = \\sqrt{u^2 + v^2 + w^2}
 
     Parameters
     ----------
@@ -1258,7 +1258,7 @@ def horizontal_velocity_magnitude(od):
     Compute magnitude of horizontal velocity.
 
     .. math::
-        v = \\sqrt{v_x^2 + v_y^2}
+        vel_H = \\sqrt{u^2 + v^2}
 
     Parameters
     ----------
