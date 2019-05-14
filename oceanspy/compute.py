@@ -38,6 +38,8 @@ from ._ospy_utils import (_check_instance, _check_list_of_string,
 _FUNC2VARS = _OrderedDict(potential_density_anomaly=['Sigma0'],
                           Brunt_Vaisala_frequency=['N2'],
                           vertical_relative_vorticity=['momVort3'],
+                          velocity_magnitude=['vel'],
+                          horizontal_velocity_magnitude=['hor_vel'],
                           relative_vorticity=['momVort1',
                                               'momVort2',
                                               'momVort3'],
@@ -1187,6 +1189,122 @@ def Brunt_Vaisala_frequency(od):
 
     # Create ds
     ds = _xr.Dataset({'N2': N2}, attrs=od.dataset.attrs)
+
+    return _ospy.OceanDataset(ds).dataset
+
+
+def velocity_magnitude(od):
+    """
+    Compute velocity magnitude.
+
+    .. math::
+        v = \\sqrt{v_x^2 + v_y^2 + v_z^2}
+
+    Parameters
+    ----------
+    od: OceanDataset
+        oceandataset used to compute.
+
+    Returns
+    -------
+    ds: xarray.Dataset
+        | hor_vel: velocity magnitude
+
+    See Also
+    --------
+    horizontal_velocity_magnitude
+    """
+
+    # Check parameters
+    _check_instance({'od': od}, 'oceanspy.OceanDataset')
+
+    # Add missing variables
+    varList = ['U', 'V']
+    od = _add_missing_variables(od, varList)
+
+    # Extract variables
+    U = od._ds['U']
+    V = od._ds['V']
+    W = od._ds['W']
+
+    # Extract grid
+    grid = od._grid
+
+    # Message
+    print('Computing velocity magnitude')
+
+    # Interpolate horizontal velocities
+    U = grid.interp(U, 'X', boundary='fill', fill_value=_np.nan)
+    V = grid.interp(V, 'Y', boundary='fill', fill_value=_np.nan)
+    W = grid.interp(W, 'Z', to='center',
+                    boundary='fill', fill_value=_np.nan)
+
+    # Compute horizontal velocity magnitude
+    vel = _np.sqrt(_np.power(U, 2) + _np.power(V, 2)
+                   + _np.power(W, 2))
+
+    # Create DataArray
+    vel.attrs['units'] = 'm/s'
+    vel.attrs['long_name'] = 'velocity magnitude'
+
+    # Create ds
+    ds = _xr.Dataset({'vel': vel}, attrs=od.dataset.attrs)
+
+    return _ospy.OceanDataset(ds).dataset
+
+
+def horizontal_velocity_magnitude(od):
+    """
+    Compute magnitude of horizontal velocity.
+
+    .. math::
+        v = \\sqrt{v_x^2 + v_y^2}
+
+    Parameters
+    ----------
+    od: OceanDataset
+        oceandataset used to compute.
+
+    Returns
+    -------
+    ds: xarray.Dataset
+        | hor_vel: magnitude of horizontal velocity
+
+    See Also
+    --------
+    velocity_magnitude
+    """
+
+    # Check parameters
+    _check_instance({'od': od}, 'oceanspy.OceanDataset')
+
+    # Add missing variables
+    varList = ['U', 'V']
+    od = _add_missing_variables(od, varList)
+
+    # Extract variables
+    U = od._ds['U']
+    V = od._ds['V']
+
+    # Extract grid
+    grid = od._grid
+
+    # Message
+    print('Computing magnitude of horizontal velocity')
+
+    # Interpolate horizontal velocities
+    U = grid.interp(U, 'X', boundary='fill', fill_value=_np.nan)
+    V = grid.interp(V, 'Y', boundary='fill', fill_value=_np.nan)
+
+    # Compute horizontal velocity magnitude
+    hor_vel = _np.sqrt(_np.power(U, 2) + _np.power(V, 2))
+
+    # Create DataArray
+    hor_vel.attrs['units'] = 'm/s'
+    hor_vel.attrs['long_name'] = 'magnitude of horizontal velocity'
+
+    # Create ds
+    ds = _xr.Dataset({'hor_vel': hor_vel}, attrs=od.dataset.attrs)
 
     return _ospy.OceanDataset(ds).dataset
 
@@ -2728,6 +2846,16 @@ class _computeMethods(object):
     @_functools.wraps(Brunt_Vaisala_frequency)
     def Brunt_Vaisala_frequency(self, overwrite=False, **kwargs):
         ds = Brunt_Vaisala_frequency(self._od, **kwargs)
+        return self._od.merge_into_oceandataset(ds, overwrite=overwrite)
+
+    @_functools.wraps(velocity_magnitude)
+    def velocity_magnitude(self, overwrite=False, **kwargs):
+        ds = velocity_magnitude(self._od, **kwargs)
+        return self._od.merge_into_oceandataset(ds, overwrite=overwrite)
+
+    @_functools.wraps(horizontal_velocity_magnitude)
+    def horizontal_velocity_magnitude(self, overwrite=False, **kwargs):
+        ds = horizontal_velocity_magnitude(self._od, **kwargs)
         return self._od.merge_into_oceandataset(ds, overwrite=overwrite)
 
     @_functools.wraps(vertical_relative_vorticity)
