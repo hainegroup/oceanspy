@@ -127,8 +127,8 @@ def test_velocity_magnitude(od_in):
          + od_in._ds['V'].values[:, :, :-1, :]) / 2
     W = (od_in._ds['W'].values[:, 1:, :, :]
          + od_in._ds['W'].values[:, :-1, :, :]) / 2
-    vel = np.sqrt(U[:,:-1,:,:]**2+V[:,:-1,:,:]**2+W**2)
-    assert_allclose(vel, ds_out['vel'].values[:,:-1,:,:])
+    vel = np.sqrt(U[:, :-1, :, :]**2+V[:, :-1, :, :]**2+W**2)
+    assert_allclose(vel, ds_out['vel'].values[:, :-1, :, :])
 
     # Test shortcut
     od_out = od_in.compute.velocity_magnitude()
