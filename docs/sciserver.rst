@@ -54,8 +54,6 @@ For example, to install the latest version of OceanSpy, use the following cell:
         :class: no-execute
         
         import sys
-        !conda config --set channel_priority strict
-        !conda config --prepend channels conda-forge
         !conda install --yes --prefix {sys.prefix} dask distributed bottleneck netCDF4 xarray cartopy esmpy ffmpeg intake-xarray tqdm geopy xgcm xesmf
         !{sys.executable} -m pip install --no-deps --force-reinstall git+https://github.com/xgcm/xmitgcm.git        
         !{sys.executable} -m pip install --no-deps --force-reinstall git+https://github.com/malmans2/oceanspy.git
