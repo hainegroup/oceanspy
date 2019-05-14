@@ -11,6 +11,7 @@ Open a terminal, then run the following commands:
 
 .. code-block:: bash
     
+    $ conda update conda
     $ conda config --set channel_priority strict
     $ conda config --prepend channels conda-forge
     $ conda install -y dask distributed bottleneck netCDF4 xarray cartopy esmpy ffmpeg intake-xarray tqdm geopy xgcm xesmf xmitgcm Ipython tqdm oceanspy 
