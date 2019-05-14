@@ -29,7 +29,7 @@ Quick Start
 
 .. note::
     The ``Oceanography image`` has not been recently updated, so OceanSpy and its dependencies need to be updated.  
-    Click on New >> Terminal, then use the following commands:
+    Click on ``New`` >> ``Terminal``, then use the following commands:
     
     .. code-block:: bash
 
