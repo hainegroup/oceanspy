@@ -25,28 +25,28 @@ Git_ is the distributed version control system used to develop OceanSpy, while G
 
    .. code-block:: bash
 
-    git config --global user.name "your_username_here"
-    git config --global user.email your_email_here@example.com
+    $ git config --global user.name "your_username_here"
+    $ git config --global user.email your_email_here@example.com
 
 4. Create a local clone:
 
    .. code-block:: bash 
 
-    git clone https://github.com/your_username_here/oceanspy.git
+    $ git clone https://github.com/your_username_here/oceanspy.git
 
 5. Move into your local clone directory, then set up a remote that points to the original:
 
    .. code-block:: bash
     
-    cd oceanspy
-    git remote add upstream https://github.com/malmans2/oceanspy.git
+    $ cd oceanspy
+    $ git remote add upstream https://github.com/malmans2/oceanspy.git
 
 6. Make a new branch from ``upstream/master``:
 
    .. code-block:: bash
         
-    git fetch upstream
-    git checkout -b name_of_your_new_branch
+    $ git fetch upstream
+    $ git checkout -b name_of_your_new_branch
 
 7. Edit and/or add new files:
 
@@ -57,13 +57,13 @@ Git_ is the distributed version control system used to develop OceanSpy, while G
 
    .. code-block:: bash
            
-    git add .
+    $ git add .
 
 9. To save changes, use the following command:
 
    .. code-block:: bash 
                
-    git commit -m "Message describing your edits" 
+    $ git commit -m "Message describing your edits" 
 
    You can repeat 8 and 9 multiple times.
 
@@ -71,7 +71,7 @@ Git_ is the distributed version control system used to develop OceanSpy, while G
 
    .. code-block:: bash
            
-    git push -u origin name_of_your_branch
+    $ git push -u origin name_of_your_branch
 
 11. Finally, go to your OceanSpy fork on GitHub_ *(https://github.com/your_username_here/oceanspy)* and click on ``Compare and Pull``.
 
@@ -89,19 +89,21 @@ It is written in reStructuredText_.
 
    .. code-block:: bash 
            
-    cd oceanspy/docs
+    $ cd oceanspy/docs
 
 3. In order to build the documentation, you need to create a Conda_ environment:
 
    .. code-block:: bash 
            
-    conda env create -f environment.yml
+    $ conda env create -f environment.yml
 
 4. Activate the ``ospy_docs`` environment:
 
    .. code-block:: bash
-
-    conda activate ospy_docs
+    
+    $ conda config --set channel_priority strict
+    $ conda config --prepend channels conda-forge
+    $ conda activate ospy_docs
 
 4. Edit and/or add new files.
 
@@ -109,7 +111,7 @@ It is written in reStructuredText_.
 
    .. code-block:: bash
            
-    make html
+    $ make html
 
    If you want to start from a clean build, run ``make clean`` before ``make html``.
 
@@ -129,21 +131,27 @@ Contributing to the Code
 
    .. code-block:: bash
            
-    cd oceanspy
+    $ cd oceanspy
 
-3. Create a test environment (``conda env create -f ci/environment-pyxx.yml``, substituting ``xx`` with one of the available python versions).
+3. Create a test environment (substituting ``pyxx`` with one of the available python versions):
+
+   .. code-block:: bash
+    
+    $ conda config --set channel_priority strict
+    $ conda config --prepend channels conda-forge
+    $ conda env create -f ci/environment-pyxx.yml
 
 4. Activate the test environment:
 
    .. code-block:: bash
 
-    conda activate test_env
+    $ conda activate ospy_tests
 
 5. Install OceanSpy in development mode:
 
    .. code-block:: bash 
            
-    pip install -e .
+    $ pip install -e .
 
 6. Edit and/or add new files.
 
@@ -153,7 +161,7 @@ Contributing to the Code
 
    .. code-block:: bash 
 
-    py.test oceanspy -v --cov=oceanspy --cov-config .coveragerc --cov-report term-missing
+    $ py.test oceanspy -v --cov=oceanspy --cov-config .coveragerc --cov-report term-missing
 
 9. You can install and use `pytest-html`_ to produce a test report in html format.
 
@@ -161,7 +169,7 @@ Contributing to the Code
 
    .. code-block:: bash 
            
-    pycodestyle oceanspy
+    $ pycodestyle oceanspy
 
 
 Deploying
@@ -173,7 +181,7 @@ A reminder for the maintainers on how to deploy.
 
    .. code-block:: bash
 
-    pip install --upgrade bumpversion
+    $ pip install --upgrade bumpversion
 
 2. Update ``HISTORY.rst``
 
@@ -183,14 +191,14 @@ A reminder for the maintainers on how to deploy.
 
    .. code-block:: bash
 
-    bumpversion patch # possible: major / minor / patch
+    $ bumpversion patch # possible: major / minor / patch
 
 5. Release on PyPI_ by uploading both sdist and wheel:
 
    .. code-block:: bash
 
-    python setup.py sdist upload
-    python setup.py bdist_wheel upload 
+    $ python setup.py sdist upload
+    $ python setup.py bdist_wheel upload 
 
 6. Use git to ``push``
 
@@ -198,9 +206,9 @@ A reminder for the maintainers on how to deploy.
 
    .. code-block:: bash
 
-    git push --tags
+    $ git push --tags
 
-8. Add the release's notes on the `releases' page`_ (copy and past from ``HISTORY.rst``)
+8. Add the release's notes on the `releases' page`_ (copy and paste from ``HISTORY.rst``)
    
 
 .. _Git: https://git-scm.com
