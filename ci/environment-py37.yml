@@ -1,4 +1,4 @@
-name: test_env
+name: ospy_tests
 channels:
   - conda-forge  
 dependencies:

@@ -2,15 +2,31 @@ Welcome to OceanSpy's documentation!
 ======================================
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+   :maxdepth: 1
 
    readme
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Getting Started
+
+   quick
    installation
+   sciserver
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Tutorial & Examples:
+
    Tutorial
    Kogur
-   contributing
+   
+.. toctree::
+   :maxdepth: 1
+   :caption: Help & Reference:
+
    api
+   contributing
    people
    history
 
