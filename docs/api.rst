@@ -247,6 +247,8 @@ Computed variables have a hard-coded name.
    
    compute.potential_density_anomaly
    compute.Brunt_Vaisala_frequency
+   compute.velocity_magnitude
+   compute.horizontal_velocity_magnitude
    compute.vertical_relative_vorticity
    compute.relative_vorticity
    compute.kinetic_energy
