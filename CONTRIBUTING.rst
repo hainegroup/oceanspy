@@ -94,15 +94,15 @@ It is written in reStructuredText_.
 3. In order to build the documentation, you need to create a Conda_ environment:
 
    .. code-block:: bash 
-           
+
+    $ conda config --set channel_priority strict
+    $ conda config --prepend channels conda-forge
     $ conda env create -f environment.yml
 
 4. Activate the ``ospy_docs`` environment:
 
    .. code-block:: bash
-    
-    $ conda config --set channel_priority strict
-    $ conda config --prepend channels conda-forge
+
     $ conda activate ospy_docs
 
 4. Edit and/or add new files.
