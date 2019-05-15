@@ -1,8 +1,8 @@
 .. _readme:
 
-================================================================================
-OceanSpy - A Python package for easy ocean model data analysis and visualization
-================================================================================
+=====================================================================================
+OceanSpy - A Python package to facilitate ocean model data analysis and visualization
+=====================================================================================
 
 .. list-table::
     :stub-columns: 1
@@ -39,15 +39,18 @@ OceanSpy - A Python package for easy ocean model data analysis and visualization
    :alt: License
    :target: https://github.com/malmans2/oceanspy
 
-**OceanSpy** is an open-source and user-friendly Python package that aims to enable scientists and interested amateurs to use oceanographic data sets with out-of-the-box analysis tools. 
-OceanSpy builds on software packages developed by the Pangeo_ community, in particular xarray_, dask_, and xgcm_. 
-It can be used as a stand-alone package if the user has access to oceanographic model output, or it can be run on the Johns Hopkins University SciServer_ system, where a year-long high-resolution regional model solution is publicly available (`here <api.rst#datasets-available-on-sciserver>`_ is the list of datasets currently available on SciServer). 
-SciServer negates the need for the user to own a computing cluster or even download the data. 
+**OceanSpy** is an open-source and user-friendly Python package that enables scientists and 
+interested amateurs to analyze and visualize oceanographic data sets. 
+OceanSpy builds on software packages developed by the Pangeo_ community, in particular xarray_, dask_, and xgcm. 
+The integration of dask facilitates scalability, which is important for the petabyte-scale simulations that are becoming available. 
+OceanSpy can be used as a standalone package for analysis of local circulation model output, 
+or it can be run on a remote data-analysis cluster, such as the Johns Hopkins University SciServer_ system, 
+which hosts several simulations (`here <api.rst#datasets-available-on-sciserver>`_ is the list of simulations publicly available).
 
-OceanSpy aims to fill two needs: 
+OceanSpy enables extraction, processing, and visualization of model data to:
 
-1. Extraction of model data for comparison with oceanographic observations.
-2. Facilitating a complete 4D analysis that complements *in situ* or remote observations, and enable a kinematic and dynamic analysis of diagnostics that cannot be obtained from observations directly.
+1. Compare with oceanographic observations.
+2. Portray the kinematic and dynamic space-time properties of the circulation.
 
 .. _Pangeo: http://pangeo-data.github.io
 .. _xarray: http://xarray.pydata.org
