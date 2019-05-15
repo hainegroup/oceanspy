@@ -154,7 +154,7 @@ def gradient(od, varNameList=None, axesList=None, aliased=True):
     .. math::
         \\nabla \\chi =
         \\frac{\\partial \\chi}{\\partial x}\\mathbf{\\hat{x}}
-        + \\frac{\\partial \\chi}{\partial y}\\mathbf{\\hat{y}}
+        + \\frac{\\partial \\chi}{\\partial y}\\mathbf{\\hat{y}}
         + \\frac{\\partial \\chi}{\\partial z}\\mathbf{\\hat{z}}
 
     Parameters
@@ -1511,7 +1511,7 @@ def eddy_kinetic_energy(od):
     Compute eddy kinetic energy.
 
     .. math::
-        EKE = \\frac{1}{2}\left[
+        EKE = \\frac{1}{2}\\left[
         (u-\\overline{u})^2
         + (v-\\overline{v})^2
         + \\epsilon_{nh} (w-\\overline{w})^2 \\right]
