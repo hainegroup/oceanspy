@@ -19,6 +19,7 @@
 # absolute, like shown here.
 #
 import os
+import datetime
 import sys
 sys.path.insert(0, os.path.abspath('..'))
 
@@ -67,7 +68,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'OceanSpy'
-copyright = u"2018, Mattia Almansi"
+copyright = '2018-%s, OceanSpy developers' % datetime.datetime.now().year
 author = u"Mattia Almansi"
 
 # The version info for the project you're documenting, acts as replacement

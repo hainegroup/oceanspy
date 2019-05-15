@@ -7,6 +7,7 @@ Compute Interact
 
 `Compute Interact`_ allows to analyze data with an interactive notebook. 
 Step-by-step instructions for using the interactive mode are available in the `Quick Start section <quick.rst#quick-start>`_.
+
 The interactive mode runs on a Virtual Machine with 16 cores shared between multiple users. 
 Use it for notebooks that don’t require heavy computations, or to test and design notebooks.
 
