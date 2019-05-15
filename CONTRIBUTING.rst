@@ -48,18 +48,24 @@ Git_ is the distributed version control system used to develop OceanSpy, while G
     $ git fetch upstream
     $ git checkout -b name_of_your_new_branch
 
-7. Edit and/or add new files:
+7. Make sure that your new branch is up-to-date:
+
+   .. code-block:: bash
+
+    $ git merge upstream/master
+
+8. Edit and/or add new files:
 
     * :ref:`documentation`
     * :ref:`code`
 
-8. To stage files ready for a commit, use the following command:
+9. To stage files ready for a commit, use the following command:
 
    .. code-block:: bash
            
     $ git add .
 
-9. To save changes, use the following command:
+10. To save changes, use the following command:
 
    .. code-block:: bash 
                
@@ -67,13 +73,13 @@ Git_ is the distributed version control system used to develop OceanSpy, while G
 
    You can repeat 8 and 9 multiple times.
 
-10. To push the branch online, use the following command:
+11. To push the branch online, use the following command:
 
    .. code-block:: bash
            
     $ git push -u origin name_of_your_branch
 
-11. Finally, go to your OceanSpy fork on GitHub_ *(https://github.com/your_username_here/oceanspy)* and click on ``Compare and Pull``.
+12. Finally, go to your OceanSpy fork on GitHub_ *(https://github.com/your_username_here/oceanspy)* and click on ``Compare and Pull``.
 
 
 .. _documentation:
