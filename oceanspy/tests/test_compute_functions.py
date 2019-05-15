@@ -11,6 +11,8 @@ from oceanspy.compute import gradient, divergence, curl
 from oceanspy.compute import (missing_horizontal_spacing,
                               potential_density_anomaly,
                               Brunt_Vaisala_frequency,
+                              velocity_magnitude,
+                              horizontal_velocity_magnitude,
                               vertical_relative_vorticity,
                               relative_vorticity,
                               kinetic_energy, eddy_kinetic_energy,
@@ -107,6 +109,51 @@ def test_Brunt_Vaisala_frequency(od_in):
 
     # Test shortcut
     od_out = od_in.compute.Brunt_Vaisala_frequency()
+    ds_out_IN_od_out(ds_out, od_out)
+
+
+@pytest.mark.parametrize("od_in", [od, alias_od])
+def test_velocity_magnitude(od_in):
+
+    # Compute vel
+    ds_out = velocity_magnitude(od_in)
+    assert ds_out['vel'].attrs['units'] == 'm/s'
+    assert ds_out['vel'].attrs['long_name'] == 'velocity magnitude'
+
+    # Check values
+    U = (od_in._ds['U'].values[:, :, :, 1:]
+         + od_in._ds['U'].values[:, :, :, :-1]) / 2
+    V = (od_in._ds['V'].values[:, :, 1:, :]
+         + od_in._ds['V'].values[:, :, :-1, :]) / 2
+    W = (od_in._ds['W'].values[:, 1:, :, :]
+         + od_in._ds['W'].values[:, :-1, :, :]) / 2
+    vel = np.sqrt(U[:, :-1, :, :]**2+V[:, :-1, :, :]**2+W**2)
+    assert_allclose(vel, ds_out['vel'].values[:, :-1, :, :])
+
+    # Test shortcut
+    od_out = od_in.compute.velocity_magnitude()
+    ds_out_IN_od_out(ds_out, od_out)
+
+
+@pytest.mark.parametrize("od_in", [od, alias_od])
+def test_horizontal_velocity_magnitude(od_in):
+
+    # Compute hor_vel
+    ds_out = horizontal_velocity_magnitude(od_in)
+    assert ds_out['hor_vel'].attrs['units'] == 'm/s'
+    assert (ds_out['hor_vel'].attrs['long_name']
+            == 'magnitude of horizontal velocity')
+
+    # Check values
+    U = (od_in._ds['U'].values[:, :, :, 1:]
+         + od_in._ds['U'].values[:, :, :, :-1]) / 2
+    V = (od_in._ds['V'].values[:, :, 1:, :]
+         + od_in._ds['V'].values[:, :, :-1, :]) / 2
+    hor_vel = np.sqrt(U**2+V**2)
+    assert_allclose(hor_vel, ds_out['hor_vel'].values)
+
+    # Test shortcut
+    od_out = od_in.compute.horizontal_velocity_magnitude()
     ds_out_IN_od_out(ds_out, od_out)
 
 
