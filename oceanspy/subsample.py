@@ -1206,11 +1206,18 @@ def particle_properties(od, times, Ypart, Xpart, Zpart, **kwargs):
         all_vars = {**all_vars, **add_vars}
 
     # Recreate od
-    od._ds = _xr.Dataset(all_vars)
+    new_ds = _xr.Dataset(all_vars)
+    for var in od._ds.variables:
+        if var in new_ds.variables:
+            new_ds[var].attrs = od._ds[var].attrs
+    od._ds = new_ds
 
     # Add time midp
     od = od.set_grid_coords({'time': {'time': -0.5}},
                             add_midp=True, overwrite=True)
+
+    # Reset coordinates
+    od._ds = od._ds.reset_coords()
 
     return od
 
