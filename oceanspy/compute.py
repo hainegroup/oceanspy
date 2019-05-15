@@ -152,8 +152,10 @@ def gradient(od, varNameList=None, axesList=None, aliased=True):
     Compute gradient along specified axes, returning all terms (not summed).
 
     .. math::
-        \\nabla\\chi = \\sum\\limits_{i=1}^n
-        \\frac{\\partial\\chi}{\\partial x_i}\\hat{\\mathbf{x}}_i
+        \\nabla \\chi =
+        \\frac{\\partial \\chi}{\\partial x}\\mathbf{\\hat{x}}
+        + \\frac{\\partial \\chi}{\\partial y}\\mathbf{\\hat{y}}
+        + \\frac{\\partial \\chi}{\\partial z}\\mathbf{\\hat{z}}
 
     Parameters
     ----------
@@ -340,10 +342,10 @@ def divergence(od, iName=None, jName=None, kName=None, aliased=True):
     Compute divergence of a vector field.
 
     .. math::
-        \\nabla \\cdot \\overline{F} =
-        \\frac{\\partial F_x}{\\partial x}\\hat{\\mathbf{i}} +
-        \\frac{\\partial F_y}{\\partial y}\\hat{\\mathbf{j}} +
-        \\frac{\\partial F_z}{\\partial z}\\hat{\\mathbf{k}}
+        \\nabla \\cdot {\\bf F} =
+        \\frac{\\partial F_x}{\\partial x}
+        + \\frac{\\partial F_y}{\\partial y}
+        + \\frac{\\partial F_z}{\\partial z}
 
     Parameters
     ----------
@@ -472,13 +474,13 @@ def curl(od, iName=None, jName=None, kName=None, aliased=True):
     Compute curl of a vector field.
 
     .. math::
-        \\nabla \\times \\overline{F} =
-        \\left(\\frac{\\partial F_z}{\\partial y}
-        -\\frac{\\partial F_y}{\\partial z}\\right)\\hat{\\mathbf{i}} +
-        \\left(\\frac{\\partial F_x}{\\partial z}
-        -\\frac{\\partial F_z}{\\partial x}\\right)\\hat{\\mathbf{j}} +
-        \\left(\\frac{\\partial F_y}{\\partial x}
-        -\\frac{\\partial F_x}{\\partial y}\\right)\\hat{\\mathbf{k}}
+        \\nabla \\times {\\bf F} =
+        \\left( \\frac{\\partial F_z}{\\partial y}
+        - \\frac{\\partial F_y}{\\partial z} \\right)\\mathbf{\\hat{x}}
+        + \\left( \\frac{\\partial F_x}{\\partial z}
+        - \\frac{\\partial F_z}{\\partial x} \\right)\\mathbf{\\hat{y}}
+        + \\left( \\frac{\\partial F_y}{\\partial x}
+        - \\frac{\\partial F_x}{\\partial y} \\right)\\mathbf{\\hat{z}}
 
     Parameters
     ----------
@@ -621,7 +623,8 @@ def laplacian(od, varNameList=None, axesList=None, aliased=True):
     Compute laplacian along specified axis
 
     .. math::
-        \\nabla^2 \\chi = \\nabla \\cdot \\nabla \\chi
+        \\nabla^2 \\chi =
+        \\nabla \\cdot \\nabla \\chi
 
     Parameters
     ----------
@@ -751,7 +754,7 @@ def weighted_mean(od,
 
     .. math::
         \\overline{\\chi} =
-        \\sum\\limits_{i=1}^n\\frac{\\sum w\\chi\\Delta x_i}{\\sum w}
+        \\frac{\\sum_{i=1}^n w_i\\chi_i}{\\sum_{i=1}^n w_i}
 
     Parameters
     ----------
@@ -793,8 +796,8 @@ def integral(od, varNameList=None, axesList=None, aliased=True):
     Compute integrals along specified axes (simple discretization).
 
     .. math::
-        \\int\\dots\\int{\\chi}dx_1\\dots dx_n =
-        \\sum\\limits_{i=1}^n\\left(\\sum\\chi \\Delta x_i\\right)
+        I =
+        \\int \\cdots \\int \\chi \\; d x_1 \\cdots d x_n
 
     Parameters
     ----------
@@ -1080,7 +1083,9 @@ def potential_density_anomaly(od):
     Compute potential density anomaly.
 
     .. math::
-        \\sigma_\\theta = \\rho_{S, \\theta, 0} -1000 \\text{ kg m}^{-3}
+        \\sigma_\\theta =
+        \\rho \\left(S, \\theta, \\text{pressure} = 0 \\text{ db} \\right)
+        -1000\\text{ kgm}^{-3}
 
     Parameters used:
         | eq_state
@@ -1198,7 +1203,8 @@ def velocity_magnitude(od):
     Compute velocity magnitude.
 
     .. math::
-        vel = \\sqrt{u^2 + v^2 + w^2}
+        ||\\mathbf{u}||=
+        \\left(u^2+v^2+w^2\\right)^{1/2}
 
     Parameters
     ----------
@@ -1258,7 +1264,8 @@ def horizontal_velocity_magnitude(od):
     Compute magnitude of horizontal velocity.
 
     .. math::
-        vel_H = \\sqrt{u^2 + v^2}
+        ||\\mathbf{u}_H||=
+        \\left(u^2+v^2\\right)^{1/2}
 
     Parameters
     ----------
@@ -1357,13 +1364,9 @@ def relative_vorticity(od):
     Compute relative vorticity.
 
     .. math::
-        \\overline{\\omega} = \\nabla \\times \\overline{u} =
-        \\left(\\frac{\\partial w}{\\partial y}
-        -\\frac{\\partial v}{\\partial z}\\right)\\mathbf{i} +
-        \\left(\\frac{\\partial u}{\\partial z}
-        -\\frac{\\partial w}{\\partial x}\\right)\\mathbf{j} +
-        \\left(\\frac{\\partial v}{\\partial x}
-        -\\frac{\\partial u}{\\partial y}\\right)\\mathbf{k}
+        {\\bf \\omega} =
+        \\left( \\zeta_H, \\zeta \\right) =
+        \\nabla \\times {\\bf u}
 
     Parameters
     ----------
@@ -1413,7 +1416,10 @@ def kinetic_energy(od):
     Compute kinetic energy.
 
     .. math::
-        KE = \\frac{1}{2}\\left(u^2 + v^2 + \\epsilon_{nh} w^2\\right)
+         KE =
+         \\frac{1}{2}\\left(
+         u^2 + v^2
+         + \\epsilon_{nh} w^2\\right)
 
     Parameters
     ----------
@@ -1505,8 +1511,10 @@ def eddy_kinetic_energy(od):
     Compute eddy kinetic energy.
 
     .. math::
-        KE = \\frac{1}{2}\\left((u-<u>_{time})^2
-        + (v-<v>_{time})^2 + \\epsilon_{nh} (w-<w>_{time})^2\\right)
+        EKE = \\frac{1}{2}\\left[
+        (u-\\overline{u})^2
+        + (v-\\overline{v})^2
+        + \\epsilon_{nh} (w-\\overline{w})^2 \\right]
 
     Parameters
     ----------
@@ -1610,8 +1618,9 @@ def horizontal_divergence_velocity(od):
     Compute horizontal divergence of the velocity field.
 
     .. math::
-        \\nabla_{H} \\cdot \\overline{u} =
-        \\frac{\\partial u}{\\partial x}+\\frac{\\partial v}{\\partial y}
+        \\nabla_{H} \\cdot {\\bf u} =
+        \\frac{\\partial u}{\\partial x}
+        +\\frac{\\partial v}{\\partial y}
 
     Parameters
     ----------
@@ -1656,7 +1665,8 @@ def shear_strain(od):
     Compute shear component of strain.
 
     .. math::
-        S_s = \\frac{\\partial v}{\\partial x}+\\frac{\\partial u}{\\partial y}
+        S_s = \\frac{\\partial v}{\\partial x}
+        +\\frac{\\partial u}{\\partial y}
 
     Parameters
     ----------
@@ -1715,7 +1725,8 @@ def normal_strain(od):
     Compute normal component of strain.
 
     .. math::
-        S_n = \\frac{\\partial u}{\\partial x}-\\frac{\\partial v}{\\partial y}
+        S_n = \\frac{\\partial u}{\\partial x}
+        -\\frac{\\partial v}{\\partial y}
 
     Parameters
     ----------
@@ -1760,13 +1771,8 @@ def Okubo_Weiss_parameter(od):
     and shear component of strain are interpolated to C grid points.
 
     .. math::
-        OW = S_n^2 + S_s^2 - \\zeta^2 =
-        \\left(\\frac{\\partial u}{\\partial x}
-        -\\frac{\\partial v}{\\partial y}\\right)^2 +
-        \\left(\\frac{\\partial v}{\\partial x}
-        +\\frac{\\partial u}{\\partial y}\\right)^2 -
-        \\left(\\frac{\\partial v}{\\partial x}
-        -\\frac{\\partial u}{\\partial y}\\right)^2
+        OW =
+        S_n^2 + S_s^2 - \\zeta^2
 
     Parameters
     ----------
@@ -1830,9 +1836,11 @@ def Ertel_potential_vorticity(od, full=True):
     Interpolate all terms to C and Z points.
 
     .. math::
-        Q = (f + \\zeta)\\frac{N^2}{g} +
-            \\frac{\\left(\\mathbf{\\zeta_h}
-            +e\\hat{\\mathbf{y}}\\right)\\cdot\\nabla_h\\rho}{\\rho_0}
+        Q =
+        - \\frac{\\omega \\cdot \\nabla \\rho}{\\rho} =
+        (f + \\zeta)\\frac{N^2}{g}
+        + \\frac{\\left(\\zeta_H+e\\hat{\\mathbf{y}}\\right)
+        \\cdot\\nabla_H\\rho}{\\rho_0}
 
     Parameters used:
         | g
