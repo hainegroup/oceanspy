@@ -55,13 +55,12 @@ sources:
         dTempFrz_dS: -5.75e-02
       name: get_started
       description: |
-        High-resolution (~2km) numerical simulation covering the east Greenland shelf (EGshelf), 
-        and the Iceland and Irminger Seas (IIseas) forced by the Arctic System Reanalysis (ASR). 
-        Citation: 
-          * Almansi et al., 2017 - JPO.
-        Mates: 
-          * EGshelfIIseas2km_ASR_full: Full domain without variables to close budgets.
-          * EGshelfIIseas2km_ASR_crop: Cropped domain with variables to close budgets.
+        Small cutout from EGshelfIIseas2km_ASR_crop.
+      citation: |
+        Almansi et al., 2017 - JPO.
+      mates: |
+        EGshelfIIseas2km_ASR_full: Full domain without variables to close budgets.
+        EGshelfIIseas2km_ASR_crop: Cropped domain with variables to close budgets.
       projection: Mercator
             
   fld_get_started:
@@ -96,16 +95,14 @@ sources:
       rename: 
         T: time
       original_output: average
-  
-  
-  
+
   # ===========================
   # EGshelfIIseas2km_ERAI_6H
   grd_EGshelfIIseas2km_ERAI_6H:
     description: Grid of EGshelfIIseas2km_ERAI_6H
     driver: netcdf
     args:
-      urlpath: /home/idies/workspace/OceanCirculation/exp_ERAI/grid_glued.nc
+      urlpath: /home/idies/workspace/OceanCirculation/exp_ERAI/grid.nc
       engine: netcdf4
       drop_variables: ['RC', 'RF', 'RU', 'RL']
     metadata:
@@ -142,22 +139,21 @@ sources:
       description: |
         High-resolution (~2km) numerical simulation covering the east Greenland shelf (EGshelf), 
         and the Iceland and Irminger Seas (IIseas) forced by ERA-Interim. 
-        Citation: 
-          * Almansi et al., 2017 - JPO.
-        Characteristics: 
-          * 6H: 6-hour resolution without sea ice and external forcing variables.
-        Mate: 
-          * EGshelfIIseas2km_ERAI_1D: 1-day resolution with sea ice and external forcing variables.
+      citation: | 
+        Almansi et al., 2017 - JPO.
+      characteristics: | 
+        6H: 6-hour resolution without sea ice and external forcing variables.
+      mates: | 
+        EGshelfIIseas2km_ERAI_1D: 1-day resolution with sea ice and external forcing variables.
       projection: Mercator
             
   fld_EGshelfIIseas2km_ERAI_6H:
     description: 6H-Fields of EGshelfIIseas2km_ERAI_6H
     driver: netcdf
     args:
-      urlpath: /home/idies/workspace/OceanCirculation/exp_ERAI/result_*/output_glued/*.*_glued.nc
+      urlpath: /home/idies/workspace/OceanCirculation/exp_ERAI/6H*.nc
       engine: netcdf4
       concat_dim: T
-      drop_variables: ['diag_levels','iter']
       parallel: True
     metadata:
       rename:
@@ -170,7 +166,7 @@ sources:
     description: Grid of EGshelfIIseas2km_ERAI_1D
     driver: netcdf
     args:
-      urlpath: /home/idies/workspace/OceanCirculation/exp_ERAI/grid_glued.nc
+      urlpath: /home/idies/workspace/OceanCirculation/exp_ERAI/grid.nc
       engine: netcdf4
       drop_variables: ['RC', 'RF', 'RU', 'RL']
     metadata:
@@ -207,22 +203,21 @@ sources:
       description: |
         High-resolution (~2km) numerical simulation covering the east Greenland shelf (EGshelf), 
         and the Iceland and Irminger Seas (IIseas) forced by ERA-Interim. 
-        Citation: 
-          * Almansi et al., 2017 - JPO.
-        Characteristics: 
-          * 1D: 1-day resolution with sea ice and external forcing variables.
-        Mate: 
-          * EGshelfIIseas2km_ERAI_6H: 6-hour resolution without sea ice and external forcing variables.
+      citation: | 
+        Almansi et al., 2017 - JPO.
+      characteristics: | 
+        1D: 1-day resolution with sea ice and external forcing variables.
+      mates: | 
+        EGshelfIIseas2km_ERAI_6H: 6-hour resolution without sea ice and external forcing variables.
       projection: Mercator
 
   fld_EGshelfIIseas2km_ERAI_1D:
     description: 6H-Fields of EGshelfIIseas2km_ERAI_1D
     driver: netcdf
     args:
-      urlpath: /home/idies/workspace/OceanCirculation/exp_ERAI/result_*/output_glued/*.*_glued.nc
+      urlpath: /home/idies/workspace/OceanCirculation/exp_ERAI/6H*.nc
       engine: netcdf4
       concat_dim: T
-      drop_variables: ['diag_levels','iter']
       parallel: True
     metadata:
       rename:
@@ -230,20 +225,19 @@ sources:
       original_output: snapshot
       isel: 
         time: slice(None, None, 4)
-      
+
   dailyEGshelfIIseas2km_ERAI_1D:
     description: Daily-Fields of EGshelfIIseas2km_ERAI_1D
     driver: netcdf
     args:
-      urlpath: /home/idies/workspace/OceanCirculation/exp_ERAI/result_*/output_glued/daily/*.*_glued.nc
+      urlpath: /home/idies/workspace/OceanCirculation/exp_ERAI/1D*.nc
       engine: netcdf4
       concat_dim: T
-      drop_variables: ['diag_levels','iter']
       parallel: True
     metadata:
       rename:
         T: time
-      original_output: snapshot 
+      original_output: snapshot
       
   # ===========================
   # EGshelfIIseas2km_ASR_full
@@ -288,12 +282,12 @@ sources:
       description: |
         High-resolution (~2km) numerical simulation covering the east Greenland shelf (EGshelf), 
         and the Iceland and Irminger Seas (IIseas) forced by the Arctic System Reanalysis (ASR). 
-        Citation: 
-          * Almansi et al., 2017 - JPO.
-        Characteristics: 
-          * full: Full domain without variables to close budgets.
-        Mate: 
-          * EGshelfIIseas2km_ASR_crop: Cropped domain with variables to close budgets.
+      citation: | 
+        Almansi et al., 2017 - JPO.
+      characteristics: |
+        full: Full domain without variables to close budgets.
+      mates: | 
+        EGshelfIIseas2km_ASR_crop: Cropped domain with variables to close budgets.
       projection: Mercator
 
   fld_EGshelfIIseas2km_ASR_full:
@@ -363,12 +357,12 @@ sources:
       description: |
         High-resolution (~2km) numerical simulation covering the east Greenland shelf (EGshelf), 
         and the Iceland and Irminger Seas (IIseas) forced by the Arctic System Reanalysis (ASR). 
-        Citation: 
-          * Almansi et al., 2017 - JPO.
-        Characteristics: 
-          * crop: Cropped domain with variables to close budgets.
-        Mate: 
-          * EGshelfIIseas2km_ASR_full: Full domain without variables to close budgets.
+      citation: | 
+        Almansi et al., 2017 - JPO.
+      characteristics: | 
+        crop: Cropped domain with variables to close budgets.
+      mates: | 
+        EGshelfIIseas2km_ASR_full: Full domain without variables to close budgets.
       projection: Mercator
             
   fld_EGshelfIIseas2km_ASR_crop:

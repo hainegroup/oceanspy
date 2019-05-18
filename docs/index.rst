@@ -1,10 +1,4 @@
-Welcome to OceanSpy's documentation!
-======================================
-
-.. toctree::
-   :maxdepth: 1
-
-   readme
+.. include:: ../README.rst
 
 .. toctree::
    :maxdepth: 1
@@ -13,6 +7,7 @@ Welcome to OceanSpy's documentation!
    quick
    installation
    sciserver
+   datasets
 
 .. toctree::
    :maxdepth: 1
@@ -30,8 +25,3 @@ Welcome to OceanSpy's documentation!
    people
    history
 
-Indices and tables
-==================
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
