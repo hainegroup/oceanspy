@@ -10,6 +10,7 @@ Open OceanDataset objects.
 import xarray as _xr
 import warnings as _warnings
 import yaml as _yaml
+import urllib as _urllib
 
 # Import from oceanspy (private)
 from ._oceandataset import OceanDataset as _OceanDataset
@@ -24,6 +25,7 @@ except ImportError:  # pragma: no cover
     pass
 try:
     import intake as _intake
+    from intake.catalog.exceptions import ValidationError
 except ImportError:  # pragma: no cover
     pass
 
@@ -103,8 +105,8 @@ def from_zarr(path, **kwargs):
 def from_catalog(name, catalog_url=None):
     """
     Import oceandataset using a yaml catalog.
-    Catalogs with suffix xarray.yaml use :py:mod:`intake-xarray`,
-    while catalogs with suffix xmitgcm.yaml use
+    Try to use :py:mod:`intake-xarray`,
+    otherwise use :py:mod:`intake-xarray` and
     :py:func:`xmitgcm.open_mdsdataset`.
 
     Parameters
@@ -121,71 +123,24 @@ def from_catalog(name, catalog_url=None):
     | xmitgcm: https://xmitgcm.readthedocs.io/en/stable/usage.html
     """
 
-    # Check parameters
-    if catalog_url is None:  # pragma: no cover
-        SciList = ['get_started',
-                   'EGshelfIIseas2km_ERAI_6H',
-                   'EGshelfIIseas2km_ERAI_1D',
-                   'EGshelfIIseas2km_ASR_full',
-                   'EGshelfIIseas2km_ASR_crop',
-                   'Arctic_Control',
-                   'KangerFjord',
-                   'EGshelfSJsec500m_3H_hydro',
-                   'EGshelfSJsec500m_6H_hydro',
-                   'EGshelfSJsec500m_3H_NONhydro',
-                   'EGshelfSJsec500m_6H_NONhydro',
-                   'xmitgcm_snap']
-        if name not in SciList:
-            raise ValueError('[{}] is not available on SciServer.'
-                             ' Here is a list of available oceandatasets: {}.'
-                             ''.format(name, SciList))
-    else:
-        _check_instance({'catalog_url': catalog_url}, 'str')
-
     # Message
     print('Opening {}.'.format(name))
-
-    # Assign a xarray url if it's None
-    if catalog_url is None:  # pragma: no cover
-        url = _ospy.__path__[0] + '/catalog_xarray.yaml'
-    else:
-        suffixes = ['xarray.yaml', 'xmitgcm.yaml']
-        if not any([suf in catalog_url for suf in suffixes]):
-            raise ValueError('`catalog_url`'
-                             ' must have one of the following suffixes:'
-                             ' {}'.format(suffixes))
-        else:
-            url = catalog_url
-
-    # Xarray catalog
-    if 'xarray.yaml' in url:
-        cat = _intake.Catalog(url)
-        entries = [entry for entry in cat if name in entry]
-    else:
-        pass
-
-    # Assign a xmitgcm url
-    if catalog_url is None and len(entries) == 0:  # pragma: no cover
-        url = _ospy.__path__[0] + '/catalog_xmitgcm.yaml'
-    else:
-        pass
-
-    # Xmitgcm catalog
-    if 'xmitgcm.yaml' in url:
-        with open(url) as f:
-            cat = _yaml.safe_load(f)
-        entries = [entry for entry in cat if name in entry]
-
-    # Error if not available
-    if len(entries) == 0:
-        raise ValueError('[{}] is not i the catalog.'.format(name))
+    cat, entries, url, intake_switch = _find_entries(name, catalog_url)
 
     # Store all dataset
     datasets = []
     chunks = {}
     metadata = {}
     for entry in entries:
-        if 'xmitgcm.yaml' in url:
+        if intake_switch:
+            # Use intake-xarray
+
+            # Pop metadata
+            mtdt = cat[entry].metadata
+
+            # Create ds
+            ds = cat[entry].to_dask()
+        else:
             # Pop args and metadata
             args = cat[entry].pop('args')
             mtdt = cat[entry].pop('metadata', None)
@@ -203,14 +158,6 @@ def from_catalog(name, catalog_url=None):
                 # TODO: this need to be addressed
                 _warnings.simplefilter("ignore")
                 ds = _xmitgcm.open_mdsdataset(**args)
-        else:
-            # Use intake-xarray
-
-            # Pop metadata
-            mtdt = cat[entry].metadata
-
-            # Create ds
-            ds = cat[entry].to_dask()
 
         # Rename
         rename = mtdt.pop('rename', None)
@@ -373,6 +320,79 @@ def from_catalog(name, catalog_url=None):
         pass
 
     # Print message
-    print(od.description)
+    toprint = od.description
+    for add_str in ['citation', 'characteristics', 'mates']:
+        thisprint = metadata.pop(add_str, None)
+        if thisprint is not None:
+            if add_str == 'mates':
+                add_str = 'see also'
+            if thisprint[-1:] == '\n':
+                thisprint = thisprint[:-1]
+            toprint += '\n{}:\n * {}'.format(add_str.capitalize(),
+                                             thisprint.replace('\n', '\n * '))
+    print(toprint)
 
     return od
+
+
+def _find_entries(name, catalog_url):
+    """
+    Function used by from_catalog to decode xarray or xmitgcm catalogs.
+    It is also used by conf.py in docs to create dataset.rst
+
+    Parameters
+    ----------
+    name: str
+        Name of the oceandataset to open.
+    catalog_url: str or None
+        Path from which to read the catalog.
+        If None, use SciServer's catalogs.
+
+    Returns
+    -------
+    cat, entries, url, intake_switch
+    """
+    # Check parameters
+    if catalog_url is None:  # pragma: no cover
+        from oceanspy import SCISERVER_DATASETS
+        if name not in SCISERVER_DATASETS:
+            raise ValueError('[{}] is not available on SciServer.'
+                             ' Here is a list of available oceandatasets: {}.'
+                             ''.format(name, SCISERVER_DATASETS))
+    else:
+        _check_instance({'catalog_url': catalog_url}, 'str')
+
+    # Read catatog
+    try:
+        if catalog_url is None:
+            url = ('https://raw.githubusercontent.com/malmans2/oceanspy/'
+                   'master/sciserver_catalogs/catalog_xarray.yaml')
+        else:
+            url = catalog_url
+        cat = _intake.Catalog(url)
+        entries = [entry for entry in cat if name in entry]
+        if len(entries) == 0:
+            raise ValidationError('', '')
+        intake_switch = True
+    except ValidationError:
+        if catalog_url is None:
+            url = ('https://raw.githubusercontent.com/malmans2/oceanspy/'
+                   'master/sciserver_catalogs/catalog_xmitgcm.yaml')
+        else:
+            url = catalog_url
+
+        # Is it an url?
+        try:
+            f = _urllib.request.urlopen(url)
+            cat = _yaml.safe_load(f)
+        except ValueError:
+            with open(url) as f:
+                cat = _yaml.safe_load(f)
+        entries = [entry for entry in cat if name in entry]
+        intake_switch = False
+
+    # Error if not available
+    if len(entries) == 0:
+        raise ValueError('[{}] is not in the catalog.'.format(name))
+    else:
+        return cat, entries, url, intake_switch

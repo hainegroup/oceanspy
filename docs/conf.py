@@ -21,10 +21,11 @@
 import os
 import datetime
 import sys
+import yaml
 sys.path.insert(0, os.path.abspath('..'))
-
-
 import oceanspy
+from oceanspy import SCISERVER_DATASETS
+from oceanspy.open_oceandataset import _find_entries
 
 # -- General configuration ---------------------------------------------
 
@@ -35,7 +36,7 @@ import oceanspy
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = ['sphinx.ext.mathjax',
-              'sphinx.ext.autodoc', 
+              'sphinx.ext.autodoc',
               'sphinx.ext.autosummary',
               'sphinx.ext.intersphinx',
               'sphinx.ext.viewcode',
@@ -44,7 +45,7 @@ extensions = ['sphinx.ext.mathjax',
               'numpydoc',
               'nbsphinx',
               'IPython.sphinxext.ipython_directive',
-              'IPython.sphinxext.ipython_console_highlighting',]
+              'IPython.sphinxext.ipython_console_highlighting']
 
 autosummary_generate = True
 numpydoc_class_members_toctree = True
@@ -201,12 +202,76 @@ nbsphinx_prolog = r"""
 """
 
 
-
 # Get custom people data into sphinx
-# Borrowed from Pange's website
-import yaml
+# Borrowed from Pangeo's website
 with open('data/people.yml') as people_data_file:
-    people = yaml.load(people_data_file)
+    people = yaml.load(people_data_file,
+                       Loader=yaml.FullLoader)
 people.sort(key=lambda x: x['last_name'].lower())
 
 html_context = {'people': people}
+
+
+# Create page with
+# Datasets available on SciServer
+citations = {'Almansi et al., 2017 - JPO.':
+             'https://journals.ametsoc.org'
+             '/doi/full/10.1175/JPO-D-17-0129.1',
+             'Magaldi and Haine, 2015 - DSR.':
+             'https://www.sciencedirect.com/'
+             'science/article/pii/S0967063714001915',
+             'Fraser et al., 2018 - JGR.':
+             'https://agupubs.onlinelibrary.wiley.com'
+             '/doi/full/10.1029/2018JC014435'}
+rst = open('datasets.rst', 'w')
+rst.write('.. _datasets:\n\n'
+          '========\n'
+          'Datasets\n'
+          '========\n\n'
+          'List of datasets available on SciServer.\n\n')
+for name in SCISERVER_DATASETS:
+    if name == 'Arctic_Control':
+        continue
+
+    # Section
+    rst.write('.. _'+name+':\n\n')
+    rst.write('{}\n{}\n{}\n\n'.format('-'*len(name), name, '-'*len(name)))
+
+    cat, entries, url, intake_switch = _find_entries(name, None)
+    metadata = {}
+    for entry in entries:
+        if intake_switch:
+            mtdt = cat[entry].metadata
+        else:
+            mtdt = cat[entry].pop('metadata', None)
+        metadata = {**metadata, **mtdt}
+
+    # Description
+    toprint = metadata.pop('description', None)
+    for add_str in ['citation', 'characteristics', 'mates']:
+        thisprint = metadata.pop(add_str, None)
+        if thisprint is not None:
+            if add_str == 'mates':
+                add_str = 'see also'
+            if thisprint[-1:] == '\n':
+                thisprint = thisprint[:-1]
+            toprint += '\n{}:\n\n* {}\n'.format(add_str.capitalize(),
+                                                thisprint.replace('\n',
+                                                                  '\n* '))
+    for n in SCISERVER_DATASETS:
+        toprint = toprint.replace(n, n+'_')
+    for cit in citations:
+        toprint = toprint.replace(cit, '`{}`_'.format(cit))
+    rst.write(toprint + '\n\n')
+
+    # Commands
+    rst.write('Run the following code to open the dataset:\n\n')
+    rst.write('.. code-block:: ipython\n'
+              '    :class: no-execute\n\n'
+              '    import oceanspy as ospy\n'
+              "    od = ospy.open_oceandataset.from_catalog('{}')\n\n"
+              "".format(name))
+
+for k, v in citations.items():
+    rst.write('.. _`{}`: {}\n'.format(k, v))
+rst.close()

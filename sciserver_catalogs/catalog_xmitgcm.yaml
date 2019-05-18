@@ -48,8 +48,8 @@ KangerFjord:
       A realistic numerical model constructed to simulate the oceanic conditions
       and circulation in a large southeast Greenland fjord (Kangerdlugssuaq) and
       the adjacent shelf sea region during winter 2007–2008. 
-      Citation: 
-        * Fraser et al., 2018 - JGR.
+    citation: | 
+      Fraser et al., 2018 - JGR.
     projection: Mercator
     
 # ===========================
@@ -96,15 +96,15 @@ EGshelfSJsec500m_3H_hydro:
     description: |
       Very high-resolution (500m) numerical simulation covering the east Greenland shelf (EGshelf) 
       and the Spill Jet section (SJsec). Hydrostatic solutions.
-      Citation: 
-        * Magaldi and Haine, 2015 - DSR.
-      Characteristics: 
-        * 3H:    3-hour resolution without external forcing variables.
-        * hydro: Hydrostatic solutions.
-      Mates: 
-        * EGshelfSJsec500m_6H_hydro:    6-hour resolution with external forcing variables. Hydrostatic.
-        * EGshelfSJsec500m_6H_NONhydro: 6-hour resolution with external forcing variables. Non-Hydrostatic.
-        * EGshelfSJsec500m_3H_NONhydro: 3-hour resolution without external forcing variables. Non-Hydrostatic.
+    citation: | 
+      Magaldi and Haine, 2015 - DSR.
+    characteristics: |
+      3H:    3-hour resolution without external forcing variables.
+      hydro: Hydrostatic solutions.
+    mates: |
+      EGshelfSJsec500m_6H_hydro:    6-hour resolution with external forcing variables. Hydrostatic.
+      EGshelfSJsec500m_6H_NONhydro: 6-hour resolution with external forcing variables. Non-Hydrostatic.
+      EGshelfSJsec500m_3H_NONhydro: 3-hour resolution without external forcing variables. Non-Hydrostatic.
     projection: Mercator
     
     
@@ -153,15 +153,15 @@ fldEGshelfSJsec500m_6H_hydro:
     description: |
       Very high-resolution (500m) numerical simulation covering the east Greenland shelf (EGshelf) 
       and the Spill Jet section (SJsec). Hydrostatic solutions.
-      Citation: 
-        * Magaldi and Haine, 2015 - DSR.
-      Characteristics: 
-        * 6H:    6-hour resolution with external forcing variables.
-        * hydro: Hydrostatic solutions.
-      Mates: 
-        * EGshelfSJsec500m_3H_hydro:    3-hour resolution without external forcing variables. Hydrostatic.
-        * EGshelfSJsec500m_6H_NONhydro: 6-hour resolution with external forcing variables. Non-Hydrostatic.
-        * EGshelfSJsec500m_3H_NONhydro: 3-hour resolution without external forcing variables. Non-Hydrostatic.
+    citation: | 
+      Magaldi and Haine, 2015 - DSR.
+    characteristics: | 
+      6H:    6-hour resolution with external forcing variables.
+      hydro: Hydrostatic solutions.
+    mates: | 
+      EGshelfSJsec500m_3H_hydro:    3-hour resolution without external forcing variables. Hydrostatic.
+      EGshelfSJsec500m_6H_NONhydro: 6-hour resolution with external forcing variables. Non-Hydrostatic.
+      EGshelfSJsec500m_3H_NONhydro: 3-hour resolution without external forcing variables. Non-Hydrostatic.
     projection: Mercator
     
     
@@ -225,15 +225,15 @@ EGshelfSJsec500m_3H_NONhydro:
     description: |
       Very high-resolution (500m) numerical simulation covering the east Greenland shelf (EGshelf) 
       and the Spill Jet section (SJsec). Non-Hydrostatic solutions.
-      Citation: 
-        * Magaldi and Haine, 2015 - DSR.
-      Characteristics: 
-        * 3H:       3-hour resolution without external forcing variables.
-        * NONhydro: Non-Hydrostatic solutions.
-      Mates: 
-        * EGshelfSJsec500m_6H_NONhydro: 6-hour resolution with external forcing variables. Non-Hydrostatic.
-        * EGshelfSJsec500m_6H_hydro:    6-hour resolution with external forcing variables. Hydrostatic.
-        * EGshelfSJsec500m_3H_hydro:    3-hour resolution without external forcing variables. Hydrostatic.
+    citation: |
+      Magaldi and Haine, 2015 - DSR.
+    characteristics: | 
+      3H:       3-hour resolution without external forcing variables.
+      NONhydro: Non-Hydrostatic solutions.
+    mates: |
+      EGshelfSJsec500m_6H_NONhydro: 6-hour resolution with external forcing variables. Non-Hydrostatic.
+      EGshelfSJsec500m_6H_hydro:    6-hour resolution with external forcing variables. Hydrostatic.
+      EGshelfSJsec500m_3H_hydro:    3-hour resolution without external forcing variables. Hydrostatic.
     projection: Mercator
     
     
@@ -282,15 +282,15 @@ fldEGshelfSJsec500m_6H_NONhydro:
     description: |
       Very high-resolution (500m) numerical simulation covering the east Greenland shelf (EGshelf) 
       and the Spill Jet section (SJsec). Non-Hydrostatic solutions.
-      Citation: 
-        * Magaldi and Haine, 2015 - DSR.
-      Characteristics: 
-        * 6H:       6-hour resolution with external forcing variables.
-        * NONhydro: NONHydrostatic solutions.
-      Mates: 
-        * EGshelfSJsec500m_3H_NONhydro: 3-hour resolution without external forcing variables. Non-Hydrostatic.
-        * EGshelfSJsec500m_6H_hydro:    6-hour resolution with external forcing variables. Hydrostatic.
-        * EGshelfSJsec500m_3H_hydro:    3-hour resolution without external forcing variables. Hydrostatic.
+    citation: | 
+      Magaldi and Haine, 2015 - DSR.
+    characteristics: | 
+      6H:       6-hour resolution with external forcing variables.
+      NONhydro: NONHydrostatic solutions.
+    mates: | 
+      EGshelfSJsec500m_3H_NONhydro: 3-hour resolution without external forcing variables. Non-Hydrostatic.
+      EGshelfSJsec500m_6H_hydro:    6-hour resolution with external forcing variables. Hydrostatic.
+      EGshelfSJsec500m_3H_hydro:    3-hour resolution without external forcing variables. Hydrostatic.
     projection: Mercator
     
     
@@ -310,39 +310,3 @@ exfEGshelfSJsec500m_6H_NONhydro:
       XG: Xp1 
       YG: Yp1
       
-# ===========================
-# xmitgcm snapshots
-xmitgcm_snap:
-  description: xmitgcm snapshots
-  args: 
-    data_dir: /home/idies/workspace/OceanCirculation/global_oce_latlon/snapshots
-  metadata:  
-    rename:
-      XC: X 
-      YC: Y 
-      XG: Xp1 
-      YG: Yp1
-    aliases:
-      HFacC: hFacC
-      HFacS: hFacS
-      HFacW: hFacW
-    manipulate_coords:
-      coords2Dfrom1D: True
-    grid_coords: 
-      grid_coords:
-        Y:
-          Y: 
-          Yp1: -0.5
-        X:
-          X: 
-          Xp1: -0.5
-        Z:
-         Z: 
-         Zp1: 0.5
-         Zu: 0.5
-         Zl: -0.5
-    name: xmitgcm_snap
-    description: |
-      curl -L -J -O https://ndownloader.figshare.com/files/6494718 
-    projection: Robinson
-     

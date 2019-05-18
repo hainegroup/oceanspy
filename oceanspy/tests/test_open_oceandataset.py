@@ -4,7 +4,10 @@ import subprocess
 import numpy as np
 
 # Import oceanspy
-from oceanspy.open_oceandataset import from_netcdf, from_catalog
+from oceanspy.open_oceandataset import (from_netcdf,
+                                        from_catalog,
+                                        _find_entries)
+from oceanspy import SCISERVER_DATASETS
 
 # Directory
 Datadir = './oceanspy/tests/Data/'
@@ -13,19 +16,23 @@ Datadir = './oceanspy/tests/Data/'
 xmitgcm_url = "{}catalog_xmitgcm.yaml".format(Datadir)
 xarray_url = "{}catalog_xarray.yaml".format(Datadir)
 
+# Test SciServer
+@pytest.mark.parametrize("names", [SCISERVER_DATASETS])
+def test_find_entries(names):
+    for name in names:
+        _find_entries(name, None)
 
-# Test
+
 @pytest.mark.parametrize("name, catalog_url",
                          [("xmitgcm_iters", xmitgcm_url),
                           ("xmitgcm_no_iters", xmitgcm_url),
                           ("xarray", xarray_url),
-                          ("error", "error.yaml"),
                           ("error", xarray_url),
                           ("grd_rect", xarray_url),
                           ("grd_curv", xarray_url)])
 def test_opening_and_saving(name, catalog_url):
     if name == 'error':
-        # Check error
+        # Open oceandataset
         with pytest.raises(ValueError):
             from_catalog(name, catalog_url)
     else:

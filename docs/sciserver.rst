@@ -1,12 +1,14 @@
-=========
-SciServer
-=========
+.. _sciserver:
+
+================
+SciServer Access
+================
 
 Compute Interact
 ----------------
 
 `Compute Interact`_ allows to analyze data with an interactive notebook. 
-Step-by-step instructions for using the interactive mode are available in the `Quick Start section <quick.rst#quick-start>`_.
+Step-by-step instructions for using the interactive mode are available in :ref:`quick`.
 
 The interactive mode runs on a Virtual Machine with 16 cores shared between multiple users. 
 Use it for notebooks that don’t require heavy computations, or to test and design notebooks.
@@ -18,7 +20,7 @@ Compute Jobs
 Use the job mode to fully exploit the computational power of SciServer. 
 For larger jobs (8 hour maximum), you have exclusive access to 32 logical CPU cores and 240GiB of memory.
 
-1. Go to `www.sciserver.org <http://www.sciserver.org/>`_
+1. Go to `www.sciserver.org <http://www.sciserver.org/>`_.
 2. Log in or create a new account.
 3. Click on ``Compute``.
 4. Click on ``Run Existing Notebook``.
@@ -45,7 +47,7 @@ For example, to install the latest version of OceanSpy, use the following cell:
     :class: no-execute
 
     import sys
-    !{sys.executable} -m pip install --no-deps --force-reinstall git+https://github.com/malmans2/oceanspy.git
+    !{sys.executable} -m pip install --upgrade git+https://github.com/malmans2/oceanspy.git
 
 .. note::
     The ``Oceanography image`` has not been recently updated, so OceanSpy and its dependencies need to be updated.  
@@ -56,8 +58,8 @@ For example, to install the latest version of OceanSpy, use the following cell:
         
         import sys
         !conda install --yes --prefix {sys.prefix} dask distributed bottleneck netCDF4 xarray cartopy esmpy ffmpeg intake-xarray tqdm geopy xgcm xesmf
-        !{sys.executable} -m pip install --no-deps --force-reinstall git+https://github.com/xgcm/xmitgcm.git        
-        !{sys.executable} -m pip install --no-deps --force-reinstall git+https://github.com/malmans2/oceanspy.git
+        !{sys.executable} -m pip install --upgrade git+https://github.com/xgcm/xmitgcm.git        
+        !{sys.executable} -m pip install --upgrade git+https://github.com/malmans2/oceanspy.git
 
 .. _`Compute Interact`: https://apps.sciserver.org/compute/
 .. _`Compute Jobs`: https://apps.sciserver.org/compute/jobs
