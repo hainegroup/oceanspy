@@ -270,7 +270,10 @@ def from_catalog(name, catalog_url=None):
 
         variables['phiHyd'] = variables.pop('PHIHYD')
         variables['phiHydLow'] = dict(
-            attrs=dict(units=variables['phiHyd']['attrs']['units']))
+            attrs=dict(long_name=('Phi-Hydrostatic at r-lower boundary'
+                                  '(bottom in z-coordinates,'
+                                  'top in p-coordinates)'),
+                       units=variables['phiHyd']['attrs']['units']))
 
         variables['AngleCS'] = dict(
             attrs=dict(standard_name="Cos of grid orientation angle",
@@ -330,7 +333,8 @@ def from_catalog(name, catalog_url=None):
                 thisprint = thisprint[:-1]
             toprint += '\n{}:\n * {}'.format(add_str.capitalize(),
                                              thisprint.replace('\n', '\n * '))
-    print(toprint.replace('\n\n', '\n'))
+    if toprint is not None:
+        print(toprint.replace('\n\n', '\n'))
 
     return od
 

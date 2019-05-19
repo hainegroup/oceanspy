@@ -504,8 +504,15 @@ class OceanDataset:
                     if 'units' in self._ds[_dim].attrs:
                         units = self._ds[_dim].attrs['units']
                         self._ds[_dim+'_midp'].attrs['units'] = units
+                    if 'long_name' in self._ds[_dim].attrs:
+                        long_name = self._ds[_dim].attrs['long_name']
+                        long_name = 'Mid points of {}'.format(long_name)
+                        self._ds[_dim+'_midp'].attrs['long_name'] = long_name
+                    if 'description' in self._ds[_dim].attrs:
+                        desc = self._ds[_dim].attrs['description']
+                        desc = 'Mid points of {}'.format(desc)
+                        self._ds[_dim+'_midp'].attrs['description'] = desc
 
-                    # Update grid_coords
                     grid_coords[axis] = {**self.grid_coords[axis],
                                          dim+'_midp': None}
 
