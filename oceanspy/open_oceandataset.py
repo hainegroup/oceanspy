@@ -354,7 +354,10 @@ def _find_entries(name, catalog_url):
     """
     # Check parameters
     if catalog_url is None:  # pragma: no cover
-        from oceanspy import SCISERVER_DATASETS
+        url = ('https://raw.githubusercontent.com/malmans2/oceanspy/'
+               'master/sciserver_catalogs/datasets_list.yaml')
+        f = _urllib.request.urlopen(url)
+        SCISERVER_DATASETS = _yaml.safe_load(f)['datasets']['sciserver']
         if name not in SCISERVER_DATASETS:
             raise ValueError('[{}] is not available on SciServer.'
                              ' Here is a list of available oceandatasets: {}.'

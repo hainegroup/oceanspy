@@ -2,12 +2,18 @@
 import pytest
 import subprocess
 import numpy as np
+import urllib
 
 # Import oceanspy
 from oceanspy.open_oceandataset import (from_netcdf,
                                         from_catalog,
                                         _find_entries)
-from oceanspy import SCISERVER_DATASETS
+
+# SCISERVER DATASETS
+url = ('https://raw.githubusercontent.com/malmans2/oceanspy/'
+       'master/sciserver_catalogs/datasets_list.yaml')
+f = urllib.request.urlopen(url)
+SCISERVER_DATASETS = yaml.safe_load(f)['datasets']['sciserver']
 
 # Directory
 Datadir = './oceanspy/tests/Data/'
@@ -15,6 +21,7 @@ Datadir = './oceanspy/tests/Data/'
 # Urls catalogs
 xmitgcm_url = "{}catalog_xmitgcm.yaml".format(Datadir)
 xarray_url = "{}catalog_xarray.yaml".format(Datadir)
+
 
 # Test SciServer
 @pytest.mark.parametrize("names", [SCISERVER_DATASETS])

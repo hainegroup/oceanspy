@@ -17,7 +17,7 @@ The integration of dask facilitates scalability, which is important for the peta
 OceanSpy can be used as a standalone package for analysis of local circulation model output, 
 or it can be run on a remote data-analysis cluster, 
 such as the Johns Hopkins University SciServer_ system, 
-which hosts several simulations and is publicly available (see :ref:`sciserver`, and :ref:`datasets`).
+which hosts several simulations and is publicly available (see `SciServer Access`_, and `Datasets`_).
 
 OceanSpy enables extraction, processing, and visualization of model data to 
 (i) compare with oceanographic observations, and 
@@ -28,7 +28,8 @@ OceanSpy enables extraction, processing, and visualization of model data to
 .. _dask: https://dask.org
 .. _xgcm: https://xgcm.readthedocs.io
 .. _SciServer: http://www.sciserver.org
-
+.. _`SciServer Access`: https://oceanspy.readthedocs.io/en/latest/sciserver.html
+.. _Datasets: https://oceanspy.readthedocs.io/en/latest/datasets.html
 
 .. |OceanSpy| image:: https://github.com/malmans2/oceanspy/raw/master/docs/_static/oceanspy_logo_blue.png
    :alt: OceanSpy image

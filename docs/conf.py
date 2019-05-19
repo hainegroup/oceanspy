@@ -22,9 +22,9 @@ import os
 import datetime
 import sys
 import yaml
+import urllib
 sys.path.insert(0, os.path.abspath('..'))
 import oceanspy
-from oceanspy import SCISERVER_DATASETS
 from oceanspy.open_oceandataset import _find_entries
 
 # -- General configuration ---------------------------------------------
@@ -229,6 +229,13 @@ rst.write('.. _datasets:\n\n'
           'Datasets\n'
           '========\n\n'
           'List of datasets available on SciServer.\n\n')
+
+# SCISERVER DATASETS
+url = ('https://raw.githubusercontent.com/malmans2/oceanspy/'
+       'master/sciserver_catalogs/datasets_list.yaml')
+f = urllib.request.urlopen(url)
+SCISERVER_DATASETS = yaml.safe_load(f)['datasets']['sciserver']
+
 for name in SCISERVER_DATASETS:
     if name == 'Arctic_Control':
         continue
