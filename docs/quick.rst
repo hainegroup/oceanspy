@@ -33,11 +33,9 @@ Quick Start
     
     .. code-block:: bash
 
-        $ conda config --set channel_priority strict
-        $ conda config --prepend channels conda-forge
         $ conda install -y dask distributed bottleneck netCDF4 xarray cartopy esmpy ffmpeg intake-xarray tqdm geopy xgcm xesmf
-        $ pip install --no-deps --force-reinstall git+https://github.com/xgcm/xmitgcm.git
-        $ pip install --no-deps --force-reinstall git+https://github.com/malmans2/oceanspy.git
+        $ pip install --upgrade git+https://github.com/xgcm/xmitgcm.git
+        $ pip install --upgrade git+https://github.com/malmans2/oceanspy.git
 
 8. Click on ``New`` >> ``Python 3``.
 9. Copy and paste the following lines in the first notebook cell to import OceanSpy, and open the get started dataset:
@@ -83,14 +81,14 @@ Quick Start
 
     od_cutout = ospy.open_oceandataset.from_netcdf('filename.nc')
 
-15. Opening the netCDF file using OceanSpy will allow you to use OceanSpy's functions whether you are using SciServer or your own computer. For example, the following line plots an animation of mean potential density anomaly.
+15. Opening the netCDF file using OceanSpy will allow you to call OceanSpy's functions whether you are using SciServer or your own computer. For example, the following line plots an animated TS diagram color-coded by potential density anomaly (previously computed).
 
 .. code-block:: ipython
     :class: no-execute
 
-    anim = od_cutout.animate.horizontal_section(varName='Sigma0', plotType='contourf', meanAxes='Z', vmin=26.5, vmax=27.5)
+    anim = od_cutout.animate.TS_diagram(colorName='Sigma0', meanAxes='Z')
 
-The get started dataset is just a small cutout from a high-resolution realistic dataset. For a list of datasets available on SciServer, `see here <api.rst#datasets-available-on-sciserver>`_.  
-Check out `Tutorial <Tutorial.ipynb#Tutorial>`_, Examples, and `API reference <api.rst>`_ to learn more about OceanSpy and its features.
+The :ref:`get_started` is just a small cutout from a high-resolution realistic dataset.
+Click :ref:`datasets` for a list of datasets available on SciServer.
 
-Feel free to open an `issue here <https://github.com/malmans2/oceanspy/issues>`_, or to send an email to `mattia.almansi@jhu.edu <mattia.almansi@jhu.edu>`_ if you have any questions.
+Check out `Tutorial <Tutorial.ipynb#Tutorial>`_, Examples, and :ref:`api` to learn more about OceanSpy and its features, and feel free to open an `issue here <https://github.com/malmans2/oceanspy/issues>`_, or to send an email to `mattia.almansi@jhu.edu <mattia.almansi@jhu.edu>`_ if you have any questions.

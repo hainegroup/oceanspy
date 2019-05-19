@@ -39,3 +39,15 @@ TYPE_PARAMETERS = {'rSphere': (type(None), _np.ScalarType),
                    'c_p': (_np.ScalarType),
                    'tempFrz0': (_np.ScalarType),
                    'dTempFrz_dS': (_np.ScalarType)}
+
+SCISERVER_DATASETS = ['get_started',
+                      'EGshelfIIseas2km_ASR_full',
+                      'EGshelfIIseas2km_ASR_crop',
+                      'EGshelfIIseas2km_ERAI_6H',
+                      'EGshelfIIseas2km_ERAI_1D',
+                      'EGshelfSJsec500m_3H_hydro',
+                      'EGshelfSJsec500m_6H_hydro',
+                      'EGshelfSJsec500m_3H_NONhydro',
+                      'EGshelfSJsec500m_6H_NONhydro',
+                      'Arctic_Control',
+                      'KangerFjord']
