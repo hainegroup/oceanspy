@@ -4,9 +4,7 @@ include HISTORY.rst
 include LICENSE
 include README.rst
 
-include oceanspy/*.yaml
-
-recursive-include tests *
+recursive-include oceanspy/tests *
 recursive-exclude * __pycache__
 recursive-exclude * *.py[co]
 

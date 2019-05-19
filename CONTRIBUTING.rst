@@ -71,7 +71,7 @@ Git_ is the distributed version control system used to develop OceanSpy, while G
                
     $ git commit -m "Message describing your edits" 
 
-   You can repeat 8 and 9 multiple times.
+   You can repeat ``git add`` and ``git commit`` multiple times before pushing the branch online.
 
 11. To push the branch online, use the following command:
 

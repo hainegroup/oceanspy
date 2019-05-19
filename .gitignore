@@ -79,6 +79,7 @@ docs/.nfs*
 docs/__pycache__/
 docs/dask-worker-space/
 docs/*.nc
+docs*/datasets.rst
 
 # PyBuilder
 twp*
