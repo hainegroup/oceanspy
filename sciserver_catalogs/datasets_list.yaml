@@ -1,0 +1,13 @@
+datasets:
+  sciserver:
+    - get_started
+    - EGshelfIIseas2km_ASR_full
+    - EGshelfIIseas2km_ASR_crop
+    - EGshelfIIseas2km_ERAI_6H
+    - EGshelfIIseas2km_ERAI_1D
+    - EGshelfSJsec500m_3H_hydro
+    - EGshelfSJsec500m_6H_hydro
+    - EGshelfSJsec500m_3H_NONhydro
+    - EGshelfSJsec500m_6H_NONhydro
+    - Arctic_Control
+    - KangerFjord

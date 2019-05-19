@@ -81,12 +81,12 @@ Quick Start
 
     od_cutout = ospy.open_oceandataset.from_netcdf('filename.nc')
 
-15. Opening the netCDF file using OceanSpy will allow you to use OceanSpy's functions whether you are using SciServer or your own computer. For example, the following line plots an animation of mean potential density anomaly.
+15. Opening the netCDF file using OceanSpy will allow you to call OceanSpy's functions whether you are using SciServer or your own computer. For example, the following line plots an animated TS diagram color-coded by potential density anomaly (previously computed).
 
 .. code-block:: ipython
     :class: no-execute
 
-    anim = od_cutout.animate.horizontal_section(varName='Sigma0', plotType='contourf', meanAxes='Z', vmin=26.5, vmax=27.5)
+    anim = od_cutout.animate.TS_diagram(colorName='Sigma0', meanAxes='Z')
 
 The :ref:`get_started` is just a small cutout from a high-resolution realistic dataset.
 Click :ref:`datasets` for a list of datasets available on SciServer.
