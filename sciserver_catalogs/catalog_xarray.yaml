@@ -450,6 +450,7 @@ sources:
       urlpath: /home/idies/workspace/OceanCirculation/exp_Arctic_Control/days*/DIAGS/*.nc
       engine: netcdf4
       concat_dim: T
+      parallel: True
       drop_variables: ['diag_levels', 'iter', 'SIGMA0']
     metadata:
       rename:
@@ -463,6 +464,7 @@ sources:
       urlpath: /home/idies/workspace/OceanCirculation/exp_Arctic_Control/days*/STATE/*.nc
       engine: netcdf4
       concat_dim: T
+      parallel: True
     metadata:
       rename:
         T: time

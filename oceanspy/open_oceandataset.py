@@ -330,7 +330,7 @@ def from_catalog(name, catalog_url=None):
                 thisprint = thisprint[:-1]
             toprint += '\n{}:\n * {}'.format(add_str.capitalize(),
                                              thisprint.replace('\n', '\n * '))
-    print(toprint)
+    print(toprint.replace('\n\n', '\n'))
 
     return od
 
