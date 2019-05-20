@@ -11,7 +11,7 @@
 
 .. toctree::
    :maxdepth: 1
-   :caption: Tutorial & Examples:
+   :caption: Tutorial & Use Cases:
 
    Tutorial
    Kogur
