@@ -15,7 +15,7 @@ Open a terminal, then run the following commands:
     $ conda config --set channel_priority strict
     $ conda config --prepend channels conda-forge
     $ conda install -y dask distributed bottleneck netCDF4 xarray cartopy esmpy ffmpeg intake-xarray tqdm geopy xgcm xesmf xmitgcm Ipython tqdm oceanspy 
-    $ pip install --upgrade git+https://github.com/xgcm/xmitgcm.git
+    $ pip install --upgrade xmitgcm
 
 The commands above install the latest stable release of OceanSpy.
 Add the following command to install the latest development version of OceanSpy:
