@@ -18,6 +18,7 @@ authors:
     affiliation: 1
   - name: Ali H. Siddiqui
     affiliation: 1
+    orcid: 0000-0002-8472-8642
 affiliations:
  - name: Department of Earth and Planetary Sciences, The Johns Hopkins University
    index: 1
