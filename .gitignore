@@ -127,12 +127,11 @@ flake-report/
 .editorconfig
 
 # Useless or heavy stuff
-*.zip
-*__cache__*
-*.swp*
-*ipynb_checkpoints*
-*.nfs*
-*.nc
-*.data
-*.meta
-
+**.zip
+**__cache__*
+**.swp*
+**ipynb_checkpoints*
+**.nfs*
+**.nc
+**.meta
+**.data
