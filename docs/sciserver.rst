@@ -58,7 +58,7 @@ For example, to install the latest version of OceanSpy, use the following cell:
         
         import sys
         !conda install --yes --prefix {sys.prefix} dask distributed bottleneck netCDF4 xarray cartopy esmpy ffmpeg intake-xarray tqdm geopy xgcm xesmf
-        !{sys.executable} -m pip install --upgrade git+https://github.com/xgcm/xmitgcm.git        
+        !{sys.executable} -m pip install --upgrade xmitgcm     
         !{sys.executable} -m pip install --upgrade git+https://github.com/malmans2/oceanspy.git
 
 .. _`Compute Interact`: https://apps.sciserver.org/compute/

@@ -23,4 +23,4 @@ dependencies:
   - codecov
   - pycodestyle
   - pip:
-    - git+https://github.com/xgcm/xmitgcm.git
+    - xmitgcm>=0.3.0

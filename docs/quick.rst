@@ -34,7 +34,7 @@ Quick Start
     .. code-block:: bash
 
         $ conda install -y dask distributed bottleneck netCDF4 xarray cartopy esmpy ffmpeg intake-xarray tqdm geopy xgcm xesmf
-        $ pip install --upgrade git+https://github.com/xgcm/xmitgcm.git
+        $ pip install --upgrade xmitgcm
         $ pip install --upgrade git+https://github.com/malmans2/oceanspy.git
 
 8. Click on ``New`` >> ``Python 3``.
