@@ -2,12 +2,10 @@ name: ospy_docs
 channels:
 - conda-forge
 dependencies:
-  - python=3.6
-  - cython
+  - python=3.7
   - xarray
   - intake-xarray
   - ipython
-  - pytest
   - numpydoc
   - sphinx
   - sphinx_rtd_theme
