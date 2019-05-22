@@ -1,3 +1,5 @@
+# This gitignore needs to be cleaned up!
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -79,6 +81,7 @@ docs/.nfs*
 docs/__pycache__/
 docs/dask-worker-space/
 docs/*.nc
+docs/*.mat
 docs*/datasets.rst
 
 # PyBuilder
@@ -88,6 +91,7 @@ twp*
 *.nc
 *.data
 *.meta
+*.mat
 arget/
 
 # pyenv
@@ -135,3 +139,4 @@ flake-report/
 **.nc
 **.meta
 **.data
+**.mat
