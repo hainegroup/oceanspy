@@ -25,8 +25,8 @@ Git_ is the distributed version control system used to develop OceanSpy, while G
 
    .. code-block:: bash
 
-    $ git config --global user.name "your_username_here"
-    $ git config --global user.email your_email_here@example.com
+    $ git config --global user.email "you@example.com"
+    $ git config --global user.name "Your Name"
 
 4. Create a local clone:
 
@@ -79,8 +79,9 @@ Git_ is the distributed version control system used to develop OceanSpy, while G
            
     $ git push -u origin name_of_your_branch
 
-12. Finally, go to your OceanSpy fork on GitHub_ *(https://github.com/your_username_here/oceanspy)* and click on ``Compare and Pull``.
+12. Go to your OceanSpy fork on GitHub_ *(https://github.com/your_username_here/oceanspy)* and click on ``Compare and Pull``.
 
+13. Finally, click on ``Send pull request`` button to finish creating the pull request.
 
 .. _documentation:
 
