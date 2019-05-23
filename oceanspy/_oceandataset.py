@@ -369,7 +369,9 @@ class OceanDataset:
     def set_parameters(self, parameters):
         """
         Set model parameters used by OceanSpy.
-        See :py:const:`oceanspy.DEFAULT_PARAMETERS` for a list of parameters.
+        See :py:const:`oceanspy.DEFAULT_PARAMETERS` for a list of parameters,
+        and :py:const:`oceanspy.PARAMETERS_PARAMETERS_DESCRIPTION`
+        for their description.
         See :py:const:`oceanspy.AVAILABLE_PARAMETERS` for a list of parameters
         with predefined options.
 

@@ -26,6 +26,28 @@ DEFAULT_PARAMETERS = {'rSphere': 6.371E3,  # km or None: cartesian
                       'dTempFrz_dS': -5.75E-02,
                       }
 
+PARAMETERS_DESCRIPTION = {'rSphere':
+                          'Radius of sphere for spherical polar'
+                          'or curvilinear grid (km).'
+                          'Set it None for cartesian grid.',
+                          'eq_state':
+                          'Equation of state.'
+                          'rho0':
+                          'Reference density (Boussinesq)  ( kg/m^3 )',
+                          'g':
+                          'Gravitational acceleration [m/s^2]',
+                          'eps_nh':
+                          'Non-Hydrostatic coefficient.'
+                          'Set 0 for hydrostatic, 1 for non-hydrostatic.'
+                          'omega':
+                          'Angular velocity ( rad/s )',
+                          'c_p':
+                          'Specific heat capacity ( J/kg/K )',
+                          'tempFrz0':
+                          'Freezing temp. of sea water (intercept)',
+                          'dTempFrz_dS':
+                          'Freezing temp. of sea water (intercept)'}
+
 OCEANSPY_AXES = ['X', 'Y', 'Z', 'time', 'mooring', 'station']
 
 AVAILABLE_PARAMETERS = {'eq_state': ['jmd95', 'mdjwf']}
