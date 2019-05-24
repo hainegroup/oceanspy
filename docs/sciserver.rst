@@ -4,9 +4,9 @@
 SciServer Access
 ================
 
-`SciServer (www.sciserver.org)`_ is a data hosting service at the Johns Hopkins University which also provides tools for the users to analyze and tinker around the data with. On this data hosting portal, a container can be made which allows the user to personalize the tools and look at specific data that they are interested in. For the purposes of OceanSpy, certain model data outputs are already stored on Sciserver which can be used as reference for learning OceanSpy (see :ref:`datasets`).
+`SciServer (www.sciserver.org)`_ is a data hosting service at the Johns Hopkins University which also provides tools for users to analyze the data. On this data hosting portal, a container can be made which allows the user to personalize the tools and look at specific data sets that they are interested in. For the purposes of OceanSpy, a number of data sets containing model output are already stored on Sciserver, which can be used to get started with OceanSpy as well as for research (see :ref:`datasets`).
 
-After creating a user account on Sciserver, following are the useful features of Sciserver that one should be aware of.
+After creating a user account on Sciserver, use one of the following useful features of Sciserver (always start with Compute Interact).
 
 Compute Interact
 ----------------
@@ -35,7 +35,7 @@ For larger jobs (8 hour maximum), you have exclusive access to 32 logical CPU co
 9. Click on ``Notebook`` and select the Jupyter Notebook that you want to execute. 
 10. Select a ``Working Directory``, which is the location where the executed notebook and its output will be stored (you can just use the default ``jobs`` directory that will be created in your ``Temporary volume``).
 
-The ``Oceanography image`` will not include any extra-package installed in your interactive containers.
+The ``Oceanography image`` does not include any extra packages installed in your interactive containers.
 To install packages that are not available by default on the ``Oceanography image``, add the following lines in the first cell of your notebook:
 
 .. code-block:: ipython
