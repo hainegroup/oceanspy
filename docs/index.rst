@@ -16,6 +16,7 @@
    Tutorial
    Kogur
    Particles
+   Statistics
    
 .. toctree::
    :maxdepth: 1
