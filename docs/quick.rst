@@ -4,11 +4,11 @@
 Quick Start
 ===========
 
-This is a short introduction for using OceanSpy on the Johns Hopkins University `Sciserver <http://www.sciserver.org/>`_ system.
+This is a short introduction for using OceanSpy on the Johns Hopkins University SciServer_ system.
 
-OceanSpy is preinstalled on `docker containers <https://www.docker.com/resources/what-container>`_ on the Sciserver system. There is no need to download and install it unless OceanSpy is to be run on your local machine or server. Steps to do that are described in the `Installation <https://oceanspy.readthedocs.io/en/latest/installation.html>`_ section.
+OceanSpy and its dependencies are preinstalled on SciServer. There is no need to download and install it unless OceanSpy is to be run on your local machine or server. Steps to do that are described in the :ref:`installation` section.
 
-The following steps explain how to navigate through basics of OceanSpy on Sciserver. Steps 1 to 5 describe how to create a container on Sciserver with a set of example datasets to work on.
+The following steps explain how to navigate through basics of OceanSpy on SciServer. Steps 1 to 5 describe how to create a container on SciServer with a set of example datasets to work on.
 
 1. Go to `www.sciserver.org <http://www.sciserver.org/>`_.
 2. Log in or create a new account.
@@ -31,7 +31,7 @@ The following steps explain how to navigate through basics of OceanSpy on Sciser
 
 5. Click on ``Create``.
 
-Steps 6 to 8 describe how to get started with using the container. Information about which directories to work in and their descriptions are detailed below the container images once they are created on Sciserver.
+Steps 6 to 8 describe how to get started with using the container. Information about which directories to work in and their descriptions are detailed below the container images once they are created on SciServer.
 
 6. Click on the name of the new container.
 7. Click on ``Storage`` >> ``your_username`` >> ``persistent``.
@@ -104,3 +104,5 @@ The :ref:`get_started` is just a small cutout from a high-resolution realistic d
 Click :ref:`datasets` for a list of datasets available on SciServer.
 
 Check out `Tutorial <Tutorial.ipynb#Tutorial>`_, Use Cases, and :ref:`api` to learn more about OceanSpy and its features, and feel free to open an `issue here <https://github.com/malmans2/oceanspy/issues>`_, or to send an email to `mattia.almansi@jhu.edu <mattia.almansi@jhu.edu>`_ if you have any questions.
+
+.. _SciServer: http://www.sciserver.org/
