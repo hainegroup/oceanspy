@@ -4,7 +4,7 @@
 SciServer Access
 ================
 
-`SciServer (www.sciserver.org)`_ is a data hosting service at the Johns Hopkins University which also provides tools for the users to analyze and tinker around the data with. On this data hosting portal, a container can be made which allows the user to personalize the tools and look at specific data that they are interested in. For the purposes of OceanSpy, certain model data outputs are already stored on Sciserver which can be used as reference for learning OceanSpy.
+`SciServer (www.sciserver.org)`_ is a data hosting service at the Johns Hopkins University which also provides tools for the users to analyze and tinker around the data with. On this data hosting portal, a container can be made which allows the user to personalize the tools and look at specific data that they are interested in. For the purposes of OceanSpy, certain model data outputs are already stored on Sciserver which can be used as reference for learning OceanSpy (see :ref:`datasets`).
 
 After creating a user account on Sciserver, following are the useful features of Sciserver that one should be aware of.
 
