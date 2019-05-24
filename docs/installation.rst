@@ -4,11 +4,11 @@
 Installation
 ============
 
-In case OceanSpy  has to be run on a local machine or server, it needs to be downladed and installed first. Use the following 3 steps to install OceanSpy.
+If you would like to use OceanSpy for your own datasets and run it on a local machine or server, you will need to download and install it first. Use the following 3 steps to install OceanSpy.
 
 1. First, download and install Miniconda_ or Anaconda_.
 
-2. Secondly, OceanSpy and its dependencies need to be installed. The easiest way to install OceanSpy's dependencies is to use the conda-forge channel. 
+2. Second, OceanSpy and its dependencies need to be installed. The easiest way to install OceanSpy's dependencies is to use the conda-forge channel. 
 
   Open a terminal, then run the following commands:
 

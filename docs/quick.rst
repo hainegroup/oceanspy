@@ -4,11 +4,11 @@
 Quick Start
 ===========
 
-This is a short introduction for using OceanSpy on the Johns Hopkins University SciServer_ system.
+This is a short introduction for using OceanSpy on the Johns Hopkins University SciServer_ system using sample datasets.
 
-OceanSpy and its dependencies are preinstalled on SciServer. There is no need to download and install it unless OceanSpy is to be run on your local machine or server. Steps to do that are described in the :ref:`installation` section.
+OceanSpy and its dependencies are preinstalled on SciServer. There is no need to download and install it unless you wish to run OceanSpy on your local machine or server. Steps to do that are described in the :ref:`installation` section.
 
-The following steps explain how to navigate through basics of OceanSpy on SciServer. Steps 1 to 5 describe how to create a container on SciServer with a set of example datasets to work on.
+The following steps explain how to navigate through the basics of OceanSpy on SciServer. Steps 1 to 5 describe how to create a container on SciServer with a set of example datasets to work on.
 
 1. Go to `www.sciserver.org <http://www.sciserver.org/>`_.
 2. Log in or create a new account.
@@ -48,7 +48,7 @@ Steps 6 to 8 describe how to get started with using the container. Information a
 
 8. Click on ``New`` >> ``Python 3``.
 
-Steps 9 to 15 highlight a subset of the commonly used OceanSpy commands.
+Steps 9 to 15 demonstrate a subset of the commonly used OceanSpy commands.
 
 9. Copy and paste the following lines in the first notebook cell to import OceanSpy, and open the get started dataset:
 
@@ -58,7 +58,7 @@ Steps 9 to 15 highlight a subset of the commonly used OceanSpy commands.
     import oceanspy as ospy
     od = ospy.open_oceandataset.from_catalog('get_started')
 
-10. Use the following line to extract a cutout:
+10. Use the following line to extract a limited geographic range of the dataset:
 
 .. code-block:: ipython
     :class: no-execute
@@ -79,7 +79,7 @@ Steps 9 to 15 highlight a subset of the commonly used OceanSpy commands.
  
     od_cutout = od_cutout.compute.potential_density_anomaly()
 
-13. Use the following line to store the cutout in netCDF format.
+13. Use the following line to store the cutout in netCDF format:
 
 .. code-block:: ipython
     :class: no-execute
@@ -93,7 +93,7 @@ Steps 9 to 15 highlight a subset of the commonly used OceanSpy commands.
 
     od_cutout = ospy.open_oceandataset.from_netcdf('filename.nc')
 
-15. Opening the netCDF file using OceanSpy will allows the use of OceanSpy's functions whether it be on SciServer or a local machine. For example, the following line plots an animated TS diagram color-coded by potential density anomaly (previously computed).
+15. Opening the netCDF file using OceanSpy will allows the use of OceanSpy's functions whether it be on SciServer or a local machine. For example, the following line plots an animated TS diagram color-coded by potential density anomaly (computed in step 12):
 
 .. code-block:: ipython
     :class: no-execute
