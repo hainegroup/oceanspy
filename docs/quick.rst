@@ -4,6 +4,12 @@
 Quick Start
 ===========
 
+This is a short introduction for using OceanSpy on the Johns Hopkins University `Sciserver <http://www.sciserver.org/>`_ system.
+
+OceanSpy is preinstalled on `docker containers <https://www.docker.com/resources/what-container>`_ on the Sciserver system. There is no need to download and install it unless OceanSpy is to be run on your local machine or server. Steps to do that are described in the `Installation <https://oceanspy.readthedocs.io/en/latest/installation.html>`_ section.
+
+The following steps explain how to navigate through basics of OceanSpy on Sciserver. Steps 1 to 5 describe how to create a container on Sciserver with a set of example datasets to work on.
+
 1. Go to `www.sciserver.org <http://www.sciserver.org/>`_.
 2. Log in or create a new account.
 3. Click on ``Compute``.
@@ -24,6 +30,9 @@ Quick Start
           - Ocean Circulation
 
 5. Click on ``Create``.
+
+Steps 6 to 8 describe how to get started with using the container. Information about which directories to work in and their descriptions are detailed below the container images once they are created on Sciserver.
+
 6. Click on the name of the new container.
 7. Click on ``Storage`` >> ``your_username`` >> ``persistent``.
 
@@ -38,6 +47,9 @@ Quick Start
         $ pip install --upgrade git+https://github.com/malmans2/oceanspy.git
 
 8. Click on ``New`` >> ``Python 3``.
+
+Steps 9 to 15 highlight a subset of the commonly used OceanSpy commands.
+
 9. Copy and paste the following lines in the first notebook cell to import OceanSpy, and open the get started dataset:
 
 .. code-block:: ipython
@@ -74,14 +86,14 @@ Quick Start
 
     od_cutout.to_netcdf('filename.nc')
 
-14. You can either download the netCDF file and continue the post-processing offline, or keep it on SciServer. You can use any software to re-open the netCDF file. To re-open the file using OceanSpy, use the following command:
+14. The netCDF file can be download and used for post-processing offline, or kept on SciServer. Any software of choice can be used to re-open the netCDF file. To re-open the file using OceanSpy, use the following command:
 
 .. code-block:: ipython
     :class: no-execute
 
     od_cutout = ospy.open_oceandataset.from_netcdf('filename.nc')
 
-15. Opening the netCDF file using OceanSpy will allow you to call OceanSpy's functions whether you are using SciServer or your own computer. For example, the following line plots an animated TS diagram color-coded by potential density anomaly (previously computed).
+15. Opening the netCDF file using OceanSpy will allows the use of OceanSpy's functions whether it be on SciServer or a local machine. For example, the following line plots an animated TS diagram color-coded by potential density anomaly (previously computed).
 
 .. code-block:: ipython
     :class: no-execute
