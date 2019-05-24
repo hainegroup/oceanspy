@@ -184,11 +184,11 @@ Deploying
 
 A reminder for the maintainers on how to deploy.
 
-1. Download and install bumpversion
+1. Download and install bump2version
 
    .. code-block:: bash
 
-    $ pip install --upgrade bumpversion
+    $ pip install --upgrade bump2version
 
 2. Update ``HISTORY.rst``
 
@@ -198,7 +198,7 @@ A reminder for the maintainers on how to deploy.
 
    .. code-block:: bash
 
-    $ bumpversion patch # possible: major / minor / patch
+    $ bump2version patch # possible: major / minor / patch
 
 5. Release on PyPI_ by uploading both sdist and wheel:
 
