@@ -4,10 +4,14 @@
 SciServer Access
 ================
 
+`SciServer (www.sciserver.org)`_ is a data hosting service at the Johns Hopkins University which also provides tools for the users to analyze and tinker around the data with. On this data hosting portal, a container can be made which allows the user to personalize the tools and look at specific data that they are interested in. For the purposes of OceanSpy, certain model data outputs are already stored on Sciserver which can be used as reference for learning OceanSpy (see :ref:`datasets`).
+
+After creating a user account on Sciserver, following are the useful features of Sciserver that one should be aware of.
+
 Compute Interact
 ----------------
 
-`Compute Interact`_ allows to analyze data with an interactive notebook. 
+SciServer allows to analyze data with an interactive notebook. 
 Step-by-step instructions for using the interactive mode are available in :ref:`quick`.
 
 The interactive mode runs on a Virtual Machine with 16 cores shared between multiple users. 
@@ -20,7 +24,7 @@ Compute Jobs
 Use the job mode to fully exploit the computational power of SciServer. 
 For larger jobs (8 hour maximum), you have exclusive access to 32 logical CPU cores and 240GiB of memory.
 
-1. Go to `www.sciserver.org <http://www.sciserver.org/>`_.
+1. Go to `SciServer (www.sciserver.org)`_.
 2. Log in or create a new account.
 3. Click on ``Compute``.
 4. Click on ``Run Existing Notebook``.
@@ -61,5 +65,6 @@ For example, to install the latest version of OceanSpy, use the following cell:
         !{sys.executable} -m pip install --upgrade xmitgcm     
         !{sys.executable} -m pip install --upgrade git+https://github.com/malmans2/oceanspy.git
 
+.. _`SciServer (www.sciserver.org)`: http://www.sciserver.org/
 .. _`Compute Interact`: https://apps.sciserver.org/compute/
 .. _`Compute Jobs`: https://apps.sciserver.org/compute/jobs
