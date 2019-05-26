@@ -22,7 +22,7 @@ authors:
 affiliations:
  - name: Department of Earth and Planetary Sciences, The Johns Hopkins University
    index: 1
-date: 20 May 2019
+date: \today 
 bibliography: paper.bib
 ---
 
