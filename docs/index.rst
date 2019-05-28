@@ -8,6 +8,7 @@
    installation
    sciserver
    datasets
+   flowchart
 
 .. toctree::
    :maxdepth: 1
