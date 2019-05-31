@@ -807,8 +807,7 @@ def integral(od, varNameList=None, axesList=None, aliased=True):
         Name of variables to integrate.
         If None, use all variables.
     axesList: None, list
-        List of axes. If None, compute integral along all axes
-        (excluding mooring and station).
+        List of axes. If None, compute integral along all axes.
     aliased: bool
         Set it False when working with private ds and grid.
 
