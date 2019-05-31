@@ -21,6 +21,7 @@ dependencies:
   - pytest-env
   - codecov
   - pycodestyle
+  - ffmpeg
   - pip:
     - ffmpeg
     - xmitgcm>=0.3.0
