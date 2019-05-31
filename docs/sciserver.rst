@@ -53,19 +53,6 @@ For example, to install the latest version of OceanSpy, use the following cell:
     import sys
     !{sys.executable} -m pip install --upgrade git+https://github.com/malmans2/oceanspy.git
 
-.. note::
-    The ``Oceanography image`` has not been recently updated, so OceanSpy and its dependencies need to be updated.  
-    Use the following cell to set up the latest OceanSpy environment:
-            
-    .. code-block:: ipython
-        :class: no-execute
-        
-        import sys
-        !conda install --yes --prefix {sys.prefix} dask distributed bottleneck netCDF4 xarray cartopy esmpy ffmpeg intake-xarray tqdm geopy xgcm xesmf
-        !{sys.executable} -m pip install --upgrade xmitgcm     
-        !{sys.executable} -m pip install --upgrade git+https://github.com/malmans2/oceanspy.git
-
-
 .. _`SciServer (www.sciserver.org)`: http://www.sciserver.org/
 .. _`Compute Interact`: https://apps.sciserver.org/compute/
 .. _`Compute Jobs`: https://apps.sciserver.org/compute/jobs

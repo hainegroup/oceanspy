@@ -35,18 +35,7 @@ Steps 6 to 8 describe how to get started with using the container. Information a
 
 6. Click on the name of the new container.
 7. Click on ``Storage`` >> ``your_username`` >> ``persistent``.
-
-.. note::
-    The ``Oceanography image`` has not been recently updated, so OceanSpy and its dependencies need to be updated.  
-    Click on ``New`` >> ``Terminal``, then use the following commands:
-    
-    .. code-block:: bash
-
-        $ conda install -y dask distributed bottleneck netCDF4 xarray cartopy esmpy ffmpeg intake-xarray tqdm geopy xgcm xesmf
-        $ pip install --upgrade xmitgcm
-        $ pip install --upgrade git+https://github.com/malmans2/oceanspy.git
-
-8. Click on ``New`` >> ``Python 3``.
+8. Click on ``New`` >> ``Oceanography``.
 
 Steps 9 to 15 demonstrate a subset of the commonly used OceanSpy commands.
 

@@ -17,8 +17,8 @@ If you would like to use OceanSpy for your own datasets and run it on a local ma
     $ conda update conda
     $ conda config --set channel_priority strict
     $ conda config --prepend channels conda-forge
-    $ conda install -y dask distributed bottleneck netCDF4 xarray cartopy esmpy ffmpeg intake-xarray tqdm geopy xgcm xesmf xmitgcm Ipython tqdm oceanspy 
-    $ pip install --upgrade xmitgcm
+    $ conda install -y oceanspy dask distributed bottleneck netCDF4 "xarray>=0.11.3" cartopy esmpy ffmpeg intake-xarray tqdm geopy "xgcm>=0.2" xesmf Ipython tqdm
+    $ pip install "xmitgcm>=0.3" ffmpeg
 
   The commands above install the latest stable release of OceanSpy along with its dependencies.
 
