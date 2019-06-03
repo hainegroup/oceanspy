@@ -17,6 +17,43 @@ Step-by-step instructions for using the interactive mode are available in :ref:`
 The interactive mode runs on a Virtual Machine with 16 cores shared between multiple users. 
 Use it for notebooks that don’t require heavy computations, or to test and design notebooks.
 
+**For experts**: To install packages that are not available by default on the ``Oceanography image``, open a new terminal, then use the following commands:
+
+1. Activate the Oceanography environment:
+
+  .. code-block:: bash
+		
+		$ conda activate Oceanography
+
+.. note::
+		
+	If you get a `CommandNotFoundError`, use the following command:
+
+	.. code-block:: bash
+
+		$ conda init bash		
+
+	Then, open a new terminal and start from scratch:
+
+	.. code-block:: bash
+
+		$ conda activate Oceanography	
+
+2. Optional: We suggest to use the following configuration commands:
+
+  .. code-block:: bash
+
+		$ conda config --set channel_priority strict
+		$ conda config --prepend channels conda-forge
+
+3. Use ``conda`` or ``pip`` to install new packages. For example:
+
+  .. code-block:: bash
+
+		$ conda install "name_of_packages_to_install"
+		$ pip install "name_of_packages_to_install"
+
+
 Compute Jobs
 ------------
 
@@ -52,6 +89,7 @@ For example, to install the latest version of OceanSpy, use the following cell:
 
     import sys
     !{sys.executable} -m pip install --upgrade git+https://github.com/malmans2/oceanspy.git
+
 
 .. _`SciServer (www.sciserver.org)`: http://www.sciserver.org/
 .. _`Compute Interact`: https://apps.sciserver.org/compute/
