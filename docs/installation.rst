@@ -41,7 +41,7 @@ If you would like to use OceanSpy for your own datasets and run it on a local ma
 		$ wget https://raw.githubusercontent.com/malmans2/oceanspy/master/sciserver_catalogs/environment.yml
 		$ conda env create -f environment.yml
 
-	Then, activate the Ocenography environment:
+	Then, activate the Oceanography environment:
 
 	.. code-block:: bash
 
