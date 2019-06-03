@@ -17,7 +17,7 @@ Step-by-step instructions for using the interactive mode are available in :ref:`
 The interactive mode runs on a Virtual Machine with 16 cores shared between multiple users. 
 Use it for notebooks that don’t require heavy computations, or to test and design notebooks.
 
-**For experts**: To install packages that are not available by default on the ``Oceanography image``, open a new terminal, then use the following commands:
+**For experts**: To install packages that are not available by default on the ``Oceanography image``, open a new terminal, then follow these step-by-step instructions:
 
 1. Activate the Oceanography environment:
 
@@ -39,7 +39,7 @@ Use it for notebooks that don’t require heavy computations, or to test and des
 
 		$ conda activate Oceanography	
 
-2. Optional: We suggest to use the following configuration commands:
+2. Optional: We suggest to use the following ``conda`` configuration commands:
 
   .. code-block:: bash
 
