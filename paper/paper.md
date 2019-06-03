@@ -81,7 +81,7 @@ Using the 'mooring' and 'survey' functionality of OceanSpy, one easily samples t
 OceanSpy is part of an ongoing effort to democratize large numerical ocean simulation data sets, which is funded through NSF (\#1835640: Collaborative Research: Framework: Data: Toward Exascale Community Ocean Circulation Modeling).
 
 # Acknowledgments
-This work was supported by NSF grants OAC-1835640 and OCE-1633124 and by the Institute for Data Intensive Engineering and Science at John Hopkins University. The authors thank Aleksi Nummelin and Ryan Abernathey for providing constructive comments that helped us improve the code, and Salvatore Palena for designing the OceanSpy logo. 
+This material is based upon work supported by the National Science Foundation under Grant Number OAC-1835640, OCE-1633124, and OCE-1756863 and by the Institute for Data Intensive Engineering and Science at John Hopkins University. The authors thank Aleksi Nummelin and Ryan Abernathey for providing constructive comments that helped us improve the code, and Salvatore Palena for designing the OceanSpy logo. 
 
 # References
 
