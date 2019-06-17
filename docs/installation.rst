@@ -10,7 +10,23 @@ If you would like to use OceanSpy for your own datasets and run it on a local ma
 
 2. Second, OceanSpy and its dependencies need to be installed. The easiest way to install OceanSpy's dependencies is to use the conda-forge channel. 
 
-  Open a terminal, then run the following commands:
+  For optimal performance, OceanSpy requires the latest version of the following python dependencies to be installed : 
+
+  - Dask.distributed_
+  - bottleneck_
+  - netCDF4_
+  - xarray_
+  - Cartopy_
+  - ESMPy_
+  - FFmpeg_
+  - intake_xarray_
+  - GeoPy_
+  - xgcm_
+  - xESMF_
+  - IPython_
+  - tqdm_
+
+  To install OceanSpy and the above mentioned dependencies, open a terminal, then run the following commands:
 
   .. code-block:: bash
     
@@ -47,6 +63,19 @@ If you would like to use OceanSpy for your own datasets and run it on a local ma
 
 		$ conda activate Oceanography
 
-.. _Anaconda: https://www.anaconda.com/
-.. _Miniconda: https://docs.conda.io/en/latest/miniconda.html
+.. _Anaconda: https: //www.anaconda.com/
+.. _Miniconda: https: //docs.conda.io/en/latest/miniconda.html
+.. _Dask.distributed : http://distributed.dask.org/en/latest/
+.. _bottleneck : https://github.com/kwgoodman/bottleneck
+.. _netCDF4 : https://unidata.github.io/netcdf4-python/netCDF4/index.html
+.. _xarray : http://xarray.pydata.org/en/stable/
+.. _Cartopy : https://scitools.org.uk/cartopy/docs/latest/
+.. _ESMPy : https://www.earthsystemcog.org/projects/esmpy/
+.. _FFmpeg : https://ffmpeg.org/
+.. _intake_xarray : https://github.com/intake/intake-xarray
+.. _GeoPy : https://github.com/geopy/geopy
+.. _xgcm : https://github.com/xgcm/xgcm
+.. _xESMF : https://xesmf.readthedocs.io/en/latest/
+.. _IPython : https://ipython.org/
+.. _tqdm : https://tqdm.github.io/
 .. _`Create an environment`: https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#creating-an-environment-from-an-environment-yml-file
