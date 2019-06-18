@@ -6,7 +6,7 @@ OceanSpy - A Python package to facilitate ocean model data analysis and visualiz
 
 |OceanSpy|
 
-|docs| |travis| |codecov| |version| |supported-versions| |license|
+|docs| |travis| |codecov| |version| |license|
 
 What is OceanSpy?
 -----------------
@@ -50,10 +50,6 @@ OceanSpy can be used as a standalone package for analysis of local circulation m
 
 .. |version| image:: https://img.shields.io/pypi/v/oceanspy.svg?style=flat
     :alt: PyPI
-    :target: https://pypi.python.org/pypi/oceanspy
-
-.. |supported-versions| image:: https://img.shields.io/pypi/pyversions/oceanspy.svg?style=flat
-    :alt: Python Version
     :target: https://pypi.python.org/pypi/oceanspy
     
 .. |license| image:: https://img.shields.io/github/license/mashape/apistatus.svg
