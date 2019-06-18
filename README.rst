@@ -8,20 +8,21 @@ OceanSpy - A Python package to facilitate ocean model data analysis and visualiz
 
 |docs| |travis| |codecov| |version| |supported-versions| |license|
 
-**OceanSpy** is an open-source and user-friendly Python package that enables scientists and 
-interested amateurs to analyze and visualize oceanographic data sets. 
-OceanSpy builds on software packages developed by the Pangeo_ community, 
-in particular xarray_, dask_, and xgcm_. 
+What is OceanSpy?
+-----------------
+**OceanSpy** is an open-source and user-friendly Python package that enables scientists and interested amateurs to analyze and visualize oceanographic data sets. 
+OceanSpy builds on software packages developed by the Pangeo_ community, in particular xarray_, dask_, and xgcm_. 
 The integration of dask facilitates scalability, which is important for the petabyte-scale simulations that are becoming available. 
 
-OceanSpy can be used as a standalone package for analysis of local circulation model output, 
-or it can be run on a remote data-analysis cluster, 
-such as the Johns Hopkins University SciServer_ system, 
-which hosts several simulations and is publicly available (see `SciServer Access`_, and `Datasets`_).
+Why OceanSpy?
+-------------
+Simulations of ocean currents using numerical circulation models are becoming increasingly realistic.
+At the same time, these models generate increasingly large volumes of model output data, making the analysis of model data harder.
+Using OceanSpy, model data can be easily analyzed in the way observational oceanographers analyze field measurements.
 
-OceanSpy enables extraction, processing, and visualization of model data to 
-(i) compare with oceanographic observations, and 
-(ii) portray the kinematic and dynamic space-time properties of the circulation.
+How to use OceanSpy?
+--------------------
+OceanSpy can be used as a standalone package for analysis of local circulation model output, or it can be run on a remote data-analysis cluster, such as the Johns Hopkins University SciServer_ system, which hosts several simulations and is publicly available (see `SciServer Access`_, and `Datasets`_).
 
 .. _Pangeo: http://pangeo-data.github.io
 .. _xarray: http://xarray.pydata.org
