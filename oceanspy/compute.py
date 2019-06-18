@@ -176,7 +176,7 @@ def gradient(od, varNameList=None, axesList=None, aliased=True):
 
     References
     ----------
-    MITgcm:
+    Numerical Method:
     https://mitgcm.readthedocs.io/en/latest/algorithm/algorithm.html#notation
 
     See Also
@@ -367,7 +367,7 @@ def divergence(od, iName=None, jName=None, kName=None, aliased=True):
 
     References
     ----------
-    MITgcm:
+    Numerical Method:
     https://mitgcm.readthedocs.io/en/latest/algorithm/algorithm.html#notation
 
     See Also
@@ -504,7 +504,7 @@ def curl(od, iName=None, jName=None, kName=None, aliased=True):
 
     References
     ----------
-    MITgcm:
+    Numerical Method:
     https://mitgcm.readthedocs.io/en/latest/algorithm/algorithm.html#notation
 
     See Also
@@ -645,7 +645,7 @@ def laplacian(od, varNameList=None, axesList=None, aliased=True):
 
     References
     ----------
-    MITgcm:
+    Numerical Method:
     https://mitgcm.readthedocs.io/en/latest/algorithm/algorithm.html#notation
 
     See Also
@@ -1435,7 +1435,7 @@ def kinetic_energy(od):
 
     References
     ----------
-    MITgcm:
+    Numerical Method:
     https://mitgcm.readthedocs.io/en/latest/algorithm/algorithm.html#kinetic-energy
 
     See Also
@@ -1530,7 +1530,7 @@ def eddy_kinetic_energy(od):
 
     References
     ----------
-    MITgcm:
+    Numerical Method:
     https://mitgcm.readthedocs.io/en/latest/algorithm/algorithm.html#kinetic-energy
 
     See Also
@@ -1633,6 +1633,7 @@ def horizontal_divergence_velocity(od):
 
     References
     ----------
+    Numerical Method:
     https://mitgcm.readthedocs.io/en/latest/algorithm/algorithm.html#horizontal-divergence
 
     See Also
