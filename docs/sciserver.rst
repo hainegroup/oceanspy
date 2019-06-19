@@ -61,9 +61,13 @@ Compute Jobs
 Use the job mode to fully exploit the computational power of SciServer. 
 For larger jobs (8 hour maximum), you have exclusive access to 32 logical CPU cores and 240GiB of memory.
 
+.. note::
+
+	If you're looking to work with the data interactively, then its better to use Compute Interact. However, if you're looking to run multiple notebooks simultaneously and want to exploit all CPU cores and memory available on Sciserver, Compute Jobs is the way to go.
+
 1. Go to `SciServer (www.sciserver.org)`_.
 2. Log in or create a new account.
-3. Click on ``Compute``.
+3. Click on ``Compute Jobs``.
 4. Click on ``Run Existing Notebook``.
 5. Select a ``Compute Domain`` between ``Large Jobs Domain``, or ``Small Jobs Domain``.
 6. Click on ``Compute Image`` and select ``Oceanography``.

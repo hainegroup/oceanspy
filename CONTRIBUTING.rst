@@ -87,6 +87,9 @@ Git_ is the distributed version control system used to develop OceanSpy, while G
 
 Contributing to the Documentation
 ---------------------------------
+
+Documentation link: |docs|
+
 The documentation is built with Sphinx_ and hosted by `Read the Docs`_.
 It is written in reStructuredText_.
 
@@ -131,6 +134,8 @@ It is written in reStructuredText_.
 
 Contributing to the Code
 ------------------------
+
+Continuous Integration and Test Coverage links: |travis| |codecov|
 
 1. First, you need a local clone of ``oceanspy`` and a branch (follow the instructions in :ref:`using_git`).
 
@@ -182,6 +187,8 @@ Contributing to the Code
 Deploying
 ---------
 
+Python Package Index (PyPI) link: |version|
+
 A reminder for the maintainers on how to deploy.
 
 1. Download and install bump2version
@@ -230,3 +237,22 @@ A reminder for the maintainers on how to deploy.
 .. _pytest: https://docs.pytest.org/en/latest
 .. _`pytest-html`: https://pypi.org/project/pytest-html
 .. _`PEP 8`: https://www.python.org/dev/peps/pep-0008
+
+
+.. |docs| image:: http://readthedocs.org/projects/oceanspy/badge/?version=latest
+    :alt: Documentation
+    :target: http://oceanspy.readthedocs.io/en/latest/?badge=latest
+
+.. |travis| image:: https://travis-ci.org/malmans2/oceanspy.svg?branch=master
+    :alt: Travis
+    :target: https://travis-ci.org/malmans2/oceanspy
+    
+.. |codecov| image:: https://codecov.io/github/malmans2/oceanspy/coverage.svg?branch=master
+    :alt: Coverage
+    :target: https://codecov.io/github/malmans2/oceanspy?branch=master
+
+.. |version| image:: https://img.shields.io/pypi/v/oceanspy.svg?style=flat
+    :alt: PyPI
+    :target: https://pypi.python.org/pypi/oceanspy
+
+
