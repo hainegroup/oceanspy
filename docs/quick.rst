@@ -94,7 +94,7 @@ Click :ref:`datasets` for a list of datasets available on SciServer.
 
 Check out `Tutorial <Tutorial.ipynb#Tutorial>`_, Use Cases, and :ref:`api` to learn more about OceanSpy and its features, and feel free to open an `issue here <https://github.com/malmans2/oceanspy/issues>`_, or to send an email to `mattia.almansi@jhu.edu <mattia.almansi@jhu.edu>`_ if you have any questions.
 
-The flowchart below shows how OceanSpy is designed to be used by the oceanographic community.
+The schematic below shows how OceanSpy is designed to be used by the oceanographic community.
 
 .. image:: ./_static/flowchart.jpg
    :alt: Flowchart
