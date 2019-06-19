@@ -10,7 +10,7 @@ OceanSpy - A Python package to facilitate ocean model data analysis and visualiz
 
 What is OceanSpy?
 -----------------
-**OceanSpy** is an open-source and user-friendly Python package that enables scientists and interested amateurs to analyze and visualize oceanographic data sets. 
+**OceanSpy** is an open-source and user-friendly Python package that enables scientists and interested amateurs to analyze and visualize ocean model datasets. 
 OceanSpy builds on software packages developed by the Pangeo_ community, in particular xarray_, dask_, and xgcm_. 
 The integration of dask facilitates scalability, which is important for the petabyte-scale simulations that are becoming available. 
 
