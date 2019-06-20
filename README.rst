@@ -24,6 +24,13 @@ How to use OceanSpy?
 --------------------
 OceanSpy can be used as a standalone package for analysis of local circulation model output, or it can be run on a remote data-analysis cluster, such as the Johns Hopkins University SciServer_ system, which hosts several simulations and is publicly available (see `SciServer Access`_, and `Datasets`_).
 
+.. note::
+
+   OceanSpy has been developed and tested using MITgcm output. However, it is designed to work with any (structured grid) ocean general circulation model. OceanSpy's architecture allows to easily implement model-specific features, such as different grids, numerical schemes for vector calculus, budget closures, and equations of state. We actively seek input and contributions from users of other ocean models (`feedback submission`_).
+
+
+
+
 .. _Pangeo: http://pangeo-data.github.io
 .. _xarray: http://xarray.pydata.org
 .. _dask: https://dask.org
@@ -31,6 +38,7 @@ OceanSpy can be used as a standalone package for analysis of local circulation m
 .. _SciServer: http://www.sciserver.org
 .. _`SciServer Access`: https://oceanspy.readthedocs.io/en/latest/sciserver.html
 .. _Datasets: https://oceanspy.readthedocs.io/en/latest/datasets.html
+.. _`feedback submission`: https://github.com/malmans2/oceanspy/issues
 
 .. |OceanSpy| image:: https://github.com/malmans2/oceanspy/raw/master/docs/_static/oceanspy_logo_blue.png
    :alt: OceanSpy image
