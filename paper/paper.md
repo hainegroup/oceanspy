@@ -71,6 +71,9 @@ OceanSpy can compute new diagnostics that are not part of the model output. Thes
 ## Easy visualization
 OceanSpy interfaces with matplotlib and xarray plotting functions and customizes them for oceanography. The most common visualizations, such as a temperature/salinity (T/S) diagrams, maps of the sea-surface temperature, or hydrographic transects along 'survey' sections, can be made with a single command. A minor change to the syntax creates an animation.
 
+## Model compatibility
+OceanSpy has been developed and tested using output of the Massachusets Institute of Technology General Circulation Model [MITgcm; @Marshall97]. However, it is designed to work with any (structured grid) ocean general circulation model. OceanSpy’s architecture allows to easily implement model-specific features, such as different grids, numerical schemes for vector calculus, budget closures, and equations of state.
+
 ## An oceanographic example: The Kögur section
 Consider a specific application of OceanSpy. The Kögur section is a frequently-occupied hydrographic transect between Iceland and Greenland. It has also been instrumented by moorings for at least a year (Figure \ref{fig:Kogur}a). A typical task concerns comparing simulation data to these observations, for example to quantify the simulation realism and to understand how the sparse measurements represent (and distort) the 4D fields.
 Using the 'mooring' and 'survey' functionality of OceanSpy, one easily samples the model output on the Kögur section, computes and visualizes the velocity field orthogonal to the section (Figure \ref{fig:Kogur}b), computes a time series of the volume flux of dense water ($\sigma_\theta \ge 27.8$ kgm$^{-3}$, which selects water that subsequently overflows through the Denmark Strait downstream of the Kögur section, Figure \ref{fig:Kogur}c), and explores the T/S properties of, for instance, the velocity orthogonal to the section (Figure \ref{fig:Kogur}d).
