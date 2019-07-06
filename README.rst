@@ -50,7 +50,7 @@ OceanSpy can be used as a standalone package for analysis of local circulation m
 
 .. |conda forge| image:: https://anaconda.org/conda-forge/oceanspy/badges/version.svg
    :alt: conda-forge
-   :target: https://anaconda.org/conda-forge/xgcm
+   :target: https://anaconda.org/conda-forge/oceanspy
 
 .. |docs| image:: http://readthedocs.org/projects/oceanspy/badge/?version=latest
     :alt: Documentation
