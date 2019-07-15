@@ -1,0 +1,13 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "time_midp",
+        "Y",
+        "X"
+    ],
+    "coordinates": "YC XC",
+    "description": "total salt flux (match salt-content variations), >0 increases salt",
+    "long_name": "total salt flux (match salt-content variations), >0 increases salt",
+    "original_output": "average",
+    "standard_name": "SFLUX",
+    "units": "g/m^2/s"
+}

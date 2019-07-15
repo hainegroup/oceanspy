@@ -1,0 +1,8 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "time_midp"
+    ],
+    "calendar": "proleptic_gregorian",
+    "long_name": "Mid points of model_time",
+    "units": "hours since 2007-09-01 03:00:00"
+}

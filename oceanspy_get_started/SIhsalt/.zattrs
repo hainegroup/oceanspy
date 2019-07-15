@@ -1,0 +1,13 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "time",
+        "Y",
+        "X"
+    ],
+    "coordinates": "YC XC",
+    "description": "SEAICE effective salinity",
+    "long_name": "SEAICE effective salinity",
+    "original_output": "snapshot",
+    "standard_name": "SIhsalt",
+    "units": "g/m^2"
+}

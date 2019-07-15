@@ -1,0 +1,12 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "Yp1",
+        "X"
+    ],
+    "coordinate": "YG XC",
+    "coordinates": "XV YV",
+    "description": "y cell center separation",
+    "long_name": "cell y size",
+    "standard_name": "cell_y_size_at_v_location",
+    "units": "m"
+}

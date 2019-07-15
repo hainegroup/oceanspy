@@ -1,0 +1,11 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "Yp1",
+        "X"
+    ],
+    "coordinate": "YV XV",
+    "description": "X coordinate of V point",
+    "long_name": "x coordinate",
+    "standard_name": "plane_x_coordinate_at_v_location",
+    "units": "degree_east"
+}

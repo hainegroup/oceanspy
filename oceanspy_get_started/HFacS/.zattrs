@@ -1,0 +1,12 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "Z",
+        "Yp1",
+        "X"
+    ],
+    "coordinates": "XV YV",
+    "description": "vertical fraction of open cell at South face",
+    "long_name": "vertical fraction of open cell",
+    "standard_name": "cell_vertical_fraction_at_v_location",
+    "units": " "
+}

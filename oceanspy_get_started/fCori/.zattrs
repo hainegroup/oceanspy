@@ -1,0 +1,11 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "Y",
+        "X"
+    ],
+    "coordinates": "YC XC",
+    "description": "Coriolis f at cell center",
+    "long_name": "Coriolis f",
+    "standard_name": "Coriolis f at cell center",
+    "units": "s^-1"
+}

@@ -1,0 +1,13 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "time",
+        "Z",
+        "Y",
+        "X"
+    ],
+    "coordinates": "YC XC",
+    "long_name": "salinity",
+    "original_output": "snapshot",
+    "standard_name": "sea_water_salinity",
+    "units": "psu"
+}

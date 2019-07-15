@@ -1,0 +1,13 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "time_midp",
+        "Y",
+        "X"
+    ],
+    "coordinates": "YC XC",
+    "description": "total heat flux (match heat-content variations), >0 increases theta",
+    "long_name": "total heat flux (match heat-content variations), >0 increases theta",
+    "original_output": "average",
+    "standard_name": "TFLUX",
+    "units": "W/m^2"
+}

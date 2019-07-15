@@ -1,0 +1,11 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "Yp1",
+        "Xp1"
+    ],
+    "coordinates": "YG XG",
+    "description": "x v-velocity separation",
+    "long_name": "cell x size",
+    "standard_name": "x v-velocity separation",
+    "units": "m"
+}

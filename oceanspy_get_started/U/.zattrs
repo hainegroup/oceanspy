@@ -1,0 +1,14 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "time",
+        "Z",
+        "Y",
+        "Xp1"
+    ],
+    "coordinates": "YU XU",
+    "long_name": "Zonal Component of Velocity",
+    "mate": "V",
+    "original_output": "snapshot",
+    "standard_name": "sea_water_x_velocity",
+    "units": "m/s"
+}

@@ -1,0 +1,9 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "Z"
+    ],
+    "long_name": "vertical coordinate of cell center",
+    "positive": "up",
+    "standard_name": "depth",
+    "units": "meters"
+}

@@ -1,0 +1,13 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "time",
+        "Y",
+        "X"
+    ],
+    "coordinates": "YC XC",
+    "description": "net upward freshwater flux, > 0 increases salinity",
+    "long_name": "net upward freshwater flux, > 0 increases salinity",
+    "original_output": "snapshot",
+    "standard_name": "EXFempmr",
+    "units": "m/s"
+}

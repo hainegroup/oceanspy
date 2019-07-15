@@ -1,0 +1,13 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "time",
+        "Z",
+        "Y",
+        "X"
+    ],
+    "coordinates": "YC XC",
+    "long_name": "Hydrostatic Pressure Pot.(p/rho) Anomaly",
+    "original_output": "snapshot",
+    "standard_name": "PHIHYD",
+    "units": "m^2/s^2"
+}

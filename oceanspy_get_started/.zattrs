@@ -1,0 +1,7 @@
+{
+    "OceanSpy_description": "Small cutout from EGshelfIIseas2km_ASR_crop.",
+    "OceanSpy_grid_coords": "{'Y': {'Y': None, 'Yp1': 0.5}, 'X': {'X': None, 'Xp1': 0.5}, 'Z': {'Z': None, 'Zp1': 0.5, 'Zu': 0.5, 'Zl': -0.5}, 'time': {'time': -0.5, 'time_midp': None}}",
+    "OceanSpy_name": "get_started",
+    "OceanSpy_parameters": "{'rSphere': 6371.0, 'eq_state': 'jmd95', 'rho0': 1027, 'g': 9.81, 'eps_nh': 0, 'omega': 7.292123516990375e-05, 'c_p': 3986.0, 'tempFrz0': 0.0901, 'dTempFrz_dS': -0.0575}",
+    "OceanSpy_projection": "Mercator(**{})"
+}

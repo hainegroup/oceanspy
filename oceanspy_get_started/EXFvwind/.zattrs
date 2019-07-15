@@ -1,0 +1,13 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "time",
+        "Y",
+        "X"
+    ],
+    "coordinates": "YC XC",
+    "description": "meridional 10-m wind speed, >0 increases uVel",
+    "long_name": "meridional 10-m wind speed, >0 increases uVel",
+    "original_output": "snapshot",
+    "standard_name": "EXFvwind",
+    "units": "m/s"
+}

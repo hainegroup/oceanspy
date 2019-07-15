@@ -1,0 +1,13 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "time",
+        "Y",
+        "X"
+    ],
+    "coordinates": "YC XC",
+    "description": "Salt plume depth based on density criterion (>0)",
+    "long_name": "Salt plume depth based on density criterion (>0)",
+    "original_output": "snapshot",
+    "standard_name": "oceSPDep",
+    "units": "m"
+}

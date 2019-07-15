@@ -1,0 +1,13 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "time",
+        "Y",
+        "X"
+    ],
+    "coordinates": "YC XC",
+    "description": "KPP boundary layer depth, bulk Ri criterion",
+    "long_name": "KPP boundary layer depth, bulk Ri criterion",
+    "original_output": "snapshot",
+    "standard_name": "KPP_boundary_layer",
+    "units": "m"
+}

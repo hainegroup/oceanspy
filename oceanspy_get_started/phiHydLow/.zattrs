@@ -1,0 +1,11 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "time",
+        "Y",
+        "X"
+    ],
+    "coordinates": "YC XC",
+    "long_name": "Phi-Hydrostatic at r-lower boundary(bottom in z-coordinates,top in p-coordinates)",
+    "original_output": "snapshot",
+    "units": "m^2/s^2"
+}

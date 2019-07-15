@@ -1,0 +1,11 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "Y",
+        "X"
+    ],
+    "coordinates": "YC XC",
+    "description": "y cell face separation",
+    "long_name": "cell y size",
+    "standard_name": "y cell face separation",
+    "units": "m"
+}

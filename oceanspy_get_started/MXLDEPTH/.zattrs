@@ -1,0 +1,13 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "time",
+        "Y",
+        "X"
+    ],
+    "coordinates": "YC XC",
+    "description": "Mixed-Layer Depth (>0)",
+    "long_name": "Mixed-Layer Depth (>0)",
+    "original_output": "snapshot",
+    "standard_name": "MXLDEPTH",
+    "units": "m"
+}

@@ -1,0 +1,11 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "Yp1",
+        "Xp1"
+    ],
+    "_coordinates": "YG XG",
+    "description": "Y coordinate of cell corner (Vorticity point)",
+    "long_name": "latitude",
+    "standard_name": "latitude_at_f_location",
+    "units": "degree_north"
+}

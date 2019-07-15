@@ -1,0 +1,13 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "time",
+        "Y",
+        "X"
+    ],
+    "coordinates": "YC XC",
+    "description": "SEAICE effective ice thickness",
+    "long_name": "SEAICE effective ice thickness",
+    "original_output": "snapshot",
+    "standard_name": "SIheff",
+    "units": "m"
+}

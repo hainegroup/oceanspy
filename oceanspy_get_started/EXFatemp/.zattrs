@@ -1,0 +1,13 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "time",
+        "Y",
+        "X"
+    ],
+    "coordinates": "YC XC",
+    "description": "surface (2-m) air temperature",
+    "long_name": "surface (2-m) air temperature",
+    "original_output": "snapshot",
+    "standard_name": "EXFatemp",
+    "units": "degK"
+}

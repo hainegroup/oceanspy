@@ -1,0 +1,9 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "Zp1"
+    ],
+    "description": "r cell center separation",
+    "long_name": "cell z size",
+    "standard_name": "cell_z_size_at_w_location",
+    "units": "m"
+}

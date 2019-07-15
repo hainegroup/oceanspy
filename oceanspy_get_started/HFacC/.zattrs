@@ -1,0 +1,12 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "Z",
+        "Y",
+        "X"
+    ],
+    "coordinates": "YC XC",
+    "description": "vertical fraction of open cell at cell center",
+    "long_name": "vertical fraction of open cell",
+    "standard_name": "cell_vertical_fraction",
+    "units": " "
+}

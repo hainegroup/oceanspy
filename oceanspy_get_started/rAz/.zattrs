@@ -1,0 +1,12 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "Yp1",
+        "Xp1"
+    ],
+    "coordinate": "YG XG",
+    "coordinates": "YG XG",
+    "description": "r-face area at cell corner",
+    "long_name": "cell area",
+    "standard_name": "cell_area_at_f_location",
+    "units": "m"
+}

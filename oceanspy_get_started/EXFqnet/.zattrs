@@ -1,0 +1,13 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "time",
+        "Y",
+        "X"
+    ],
+    "coordinates": "YC XC",
+    "description": "Net upward heat flux (turb+rad), >0 decreases theta",
+    "long_name": "Net upward heat flux (turb+rad), >0 decreases theta",
+    "original_output": "snapshot",
+    "standard_name": "EXFqnet",
+    "units": "W/m^2"
+}

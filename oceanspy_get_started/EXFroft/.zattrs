@@ -1,0 +1,13 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "time",
+        "Y",
+        "X"
+    ],
+    "coordinates": "YC XC",
+    "description": "river runoff temperature",
+    "long_name": "river runoff temperature",
+    "original_output": "snapshot",
+    "standard_name": "EXFroft",
+    "units": "deg C"
+}

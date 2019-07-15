@@ -1,0 +1,12 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "Yp1",
+        "X"
+    ],
+    "_coordinates": "YG XC",
+    "coordinates": "XV YV",
+    "description": "r-face area at V point",
+    "long_name": "cell area",
+    "standard_name": "cell_area_at_v_location",
+    "units": "m2"
+}

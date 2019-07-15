@@ -1,0 +1,14 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "time",
+        "Y",
+        "Xp1"
+    ],
+    "coordinates": "YU XU",
+    "description": "SEAICE zonal ice velocity, >0 from West to East",
+    "long_name": "SEAICE zonal ice velocity, >0 from West to East",
+    "mate": "SIvice",
+    "original_output": "snapshot",
+    "standard_name": "SIuice",
+    "units": "m/s"
+}

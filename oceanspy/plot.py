@@ -271,7 +271,10 @@ def TS_diagram(od,
     # Plot isopycnals
     t = dens['Temp']
     s = dens['S']
-    default_contour_kwargs = {'colors': 'gray'}
+    col_keys = ['colors','cmap']
+    default_contour_kwargs = {key : contour_kwargs.pop(key, None) for key in col_keys}
+    if all(default_contour_kwargs[key] is None for key in col_keys):
+    	default_contour_kwargs['colors'] = 'gray'
     contour_kwargs = {**default_contour_kwargs, **contour_kwargs}
     CS = ax.contour(s.values, t.values, dens.values, **contour_kwargs)
     ax.clabel(CS, **clabel_kwargs)
@@ -686,12 +689,16 @@ def horizontal_section(od, varName,
         ax = args.pop('ax', None)
         transform = args.pop('transform', None)
         subplot_kws = args.pop('subplot_kws', None)
+        col_keys = ['colors', 'cmap']
+        default_contour_kwargs = {key : contour_kwargs.pop(key, None) for key in col_keys}
+        if all(default_contour_kwargs[key] is None for key in col_keys):
+            default_contour_kwargs['colors'] = 'gray'
+        contour_kwargs = {**default_contour_kwargs, **contour_kwargs}
         args = {'x': X_name_cont,
                 'y': Y_name_cont,
                 'ax': ax,
                 'transform': transform,
                 'subplot_kws': subplot_kws,
-                'colors': 'gray',
                 'add_labels': False,
                 **contour_kwargs}
         if ax is not None:
@@ -945,10 +952,14 @@ def vertical_section(od,
     # Contour
     if contourName is not None:
         ax = args.pop('ax', None)
+        col_keys = ['colors','cmap']
+        default_contour_kwargs = {key : contour_kwargs.pop(key, None) for key in col_keys}
+        if all(default_contour_kwargs[key] is None for key in col_keys):
+            default_contour_kwargs['colors'] = 'gray'
+        contour_kwargs = {**default_contour_kwargs, **contour_kwargs}
         args = {'x': hor_name_cont,
                 'y': ver_name_cont,
                 'ax': ax,
-                'colors': 'gray',
                 'add_labels': False, **contour_kwargs}
         if ax is not None:
             cont = da_contour.plot.contour(**args)

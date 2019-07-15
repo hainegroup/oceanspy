@@ -1,0 +1,13 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "time",
+        "Y",
+        "X"
+    ],
+    "coordinates": "YC XC",
+    "description": "Latent heat flux into ocean, >0 increases theta",
+    "long_name": "Latent heat flux into ocean, >0 increases theta",
+    "original_output": "snapshot",
+    "standard_name": "EXFhl",
+    "units": "W/m^2"
+}

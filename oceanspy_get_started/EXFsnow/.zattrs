@@ -1,0 +1,13 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "time",
+        "Y",
+        "X"
+    ],
+    "coordinates": "YC XC",
+    "description": "snow precipitation, > 0 decreases salinity",
+    "long_name": "snow precipitation, > 0 decreases salinity",
+    "original_output": "snapshot",
+    "standard_name": "EXFsnow",
+    "units": "m/s"
+}

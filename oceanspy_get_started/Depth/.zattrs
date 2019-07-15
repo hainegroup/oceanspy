@@ -1,0 +1,12 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "Y",
+        "X"
+    ],
+    "coordinate": "XC YC",
+    "coordinates": "YC XC",
+    "description": "fluid thickness in r coordinates (at rest)",
+    "long_name": "ocean depth",
+    "standard_name": "ocean_depth",
+    "units": "m"
+}

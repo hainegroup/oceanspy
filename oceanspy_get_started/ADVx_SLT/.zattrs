@@ -1,0 +1,15 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "time_midp",
+        "Z",
+        "Y",
+        "Xp1"
+    ],
+    "coordinates": "YU XU",
+    "description": "Zonal      Advective Flux of Salinity",
+    "long_name": "Zonal      Advective Flux of Salinity",
+    "mate": "ADVy_SLT",
+    "original_output": "average",
+    "standard_name": "ADVx_SLT",
+    "units": "psu.m^3/s"
+}

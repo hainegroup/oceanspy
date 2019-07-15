@@ -1,0 +1,13 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "time",
+        "Y",
+        "X"
+    ],
+    "coordinates": "YC XC",
+    "description": "net surface Fresh-Water flux into the ocean (+=down), >0 decreases salinity",
+    "long_name": "net surface Fresh-Water flux into the ocean (+=down), >0 decreases salinity",
+    "original_output": "snapshot",
+    "standard_name": "oceFWflx",
+    "units": "kg/m^2/s"
+}

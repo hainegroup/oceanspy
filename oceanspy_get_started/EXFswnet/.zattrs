@@ -1,0 +1,13 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "time",
+        "Y",
+        "X"
+    ],
+    "coordinates": "YC XC",
+    "description": "Net upward shortwave radiation, >0 decreases theta",
+    "long_name": "Net upward shortwave radiation, >0 decreases theta",
+    "original_output": "snapshot",
+    "standard_name": "EXFswnet",
+    "units": "W/m^2"
+}

@@ -1,0 +1,13 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "time",
+        "Y",
+        "X"
+    ],
+    "coordinates": "YC XC",
+    "description": "evaporation, > 0 increases salinity",
+    "long_name": "evaporation, > 0 increases salinity",
+    "original_output": "snapshot",
+    "standard_name": "EXFevap",
+    "units": "m/s"
+}

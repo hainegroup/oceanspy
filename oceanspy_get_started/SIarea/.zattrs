@@ -1,0 +1,13 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "time",
+        "Y",
+        "X"
+    ],
+    "coordinates": "YC XC",
+    "description": "SEAICE fractional ice-covered area [0 to 1]",
+    "long_name": "SEAICE fractional ice-covered area [0 to 1]",
+    "original_output": "snapshot",
+    "standard_name": "SIarea",
+    "units": "m^2/m^2"
+}

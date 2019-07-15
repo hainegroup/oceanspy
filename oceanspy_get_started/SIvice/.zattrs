@@ -1,0 +1,14 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "time",
+        "Yp1",
+        "X"
+    ],
+    "coordinates": "XV YV",
+    "description": "SEAICE merid. ice velocity, >0 from South to North",
+    "long_name": "SEAICE merid. ice velocity, >0 from South to North",
+    "mate": "SIuice",
+    "original_output": "snapshot",
+    "standard_name": "SIvice",
+    "units": "m/s"
+}

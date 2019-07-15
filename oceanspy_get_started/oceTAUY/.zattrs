@@ -1,0 +1,14 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "time",
+        "Yp1",
+        "X"
+    ],
+    "coordinates": "XV YV",
+    "description": "meridional surf. wind stress, >0 increases vVel",
+    "long_name": "meridional surf. wind stress, >0 increases vVel",
+    "mate": "oceTAUX",
+    "original_output": "snapshot",
+    "standard_name": "oceTAUY",
+    "units": "N/m^2"
+}

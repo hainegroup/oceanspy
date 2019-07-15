@@ -1,0 +1,12 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "time",
+        "Y",
+        "X"
+    ],
+    "coordinates": "YC XC",
+    "long_name": "free-surface_r-anomaly",
+    "original_output": "snapshot",
+    "standard_name": "sea_surface_height_above_geoid",
+    "units": "m"
+}

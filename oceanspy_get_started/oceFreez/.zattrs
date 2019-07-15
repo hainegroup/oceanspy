@@ -1,0 +1,13 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "time",
+        "Y",
+        "X"
+    ],
+    "coordinates": "YC XC",
+    "description": "heating from freezing of sea-water (allowFreezing=T)",
+    "long_name": "heating from freezing of sea-water (allowFreezing=T)",
+    "original_output": "snapshot",
+    "standard_name": "oceFreez",
+    "units": "W/m^2"
+}

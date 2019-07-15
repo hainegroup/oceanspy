@@ -1,0 +1,14 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "time",
+        "Y",
+        "Xp1"
+    ],
+    "coordinates": "YU XU",
+    "description": "zonal surface wind stress, >0 increases uVel",
+    "long_name": "zonal surface wind stress, >0 increases uVel",
+    "mate": "oceTAUY",
+    "original_output": "snapshot",
+    "standard_name": "oceTAUX",
+    "units": "N/m^2"
+}
