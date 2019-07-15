@@ -271,10 +271,10 @@ def TS_diagram(od,
     # Plot isopycnals
     t = dens['Temp']
     s = dens['S']
-    col_keys = ['colors','cmap']
-    default_contour_kwargs = {key : contour_kwargs.pop(key, None) for key in col_keys}
+    col_keys = ['colors', 'cmap']
+    default_contour_kwargs = {key: contour_kwargs.pop(key, None) for key in col_keys}
     if all(default_contour_kwargs[key] is None for key in col_keys):
-    	default_contour_kwargs['colors'] = 'gray'
+        default_contour_kwargs['colors'] = 'gray'
     contour_kwargs = {**default_contour_kwargs, **contour_kwargs}
     CS = ax.contour(s.values, t.values, dens.values, **contour_kwargs)
     ax.clabel(CS, **clabel_kwargs)
@@ -690,7 +690,7 @@ def horizontal_section(od, varName,
         transform = args.pop('transform', None)
         subplot_kws = args.pop('subplot_kws', None)
         col_keys = ['colors', 'cmap']
-        default_contour_kwargs = {key : contour_kwargs.pop(key, None) for key in col_keys}
+        default_contour_kwargs = {key: contour_kwargs.pop(key, None) for key in col_keys}
         if all(default_contour_kwargs[key] is None for key in col_keys):
             default_contour_kwargs['colors'] = 'gray'
         contour_kwargs = {**default_contour_kwargs, **contour_kwargs}
@@ -952,8 +952,8 @@ def vertical_section(od,
     # Contour
     if contourName is not None:
         ax = args.pop('ax', None)
-        col_keys = ['colors','cmap']
-        default_contour_kwargs = {key : contour_kwargs.pop(key, None) for key in col_keys}
+        col_keys = ['colors', 'cmap']
+        default_contour_kwargs = {key: contour_kwargs.pop(key, None) for key in col_keys}
         if all(default_contour_kwargs[key] is None for key in col_keys):
             default_contour_kwargs['colors'] = 'gray'
         contour_kwargs = {**default_contour_kwargs, **contour_kwargs}
