@@ -84,6 +84,7 @@ def _create_animation(od, time, plot_func, func_kwargs, display,
     # Handle kwargs
     if func_kwargs is None:
         func_kwargs = {}
+    func_kwargs = dict(func_kwargs)
 
     # Animate function
     def animate(i):
@@ -149,6 +150,7 @@ def vertical_section(od, display=True, FuncAnimation_kwargs=None,
     # Handle kwargs
     if FuncAnimation_kwargs is None:
         FuncAnimation_kwargs = {}
+    FuncAnimation_kwargs = dict(FuncAnimation_kwargs)
 
     # Name of the plot_functions
     plot_func = eval('_plot.vertical_section')
@@ -242,6 +244,7 @@ def horizontal_section(od, display=True, FuncAnimation_kwargs=None,
     # Handle kwargs
     if FuncAnimation_kwargs is None:
         FuncAnimation_kwargs = {}
+    FuncAnimation_kwargs = dict(FuncAnimation_kwargs)
 
     # Name of the plot_functions
     plot_func = eval('_plot.horizontal_section')
@@ -322,6 +325,7 @@ def TS_diagram(od, display=True, FuncAnimation_kwargs=None,
     # Handle kwargs
     if FuncAnimation_kwargs is None:
         FuncAnimation_kwargs = {}
+    FuncAnimation_kwargs = dict(FuncAnimation_kwargs)
 
     # Name of the plot_functions
     plot_func = eval('_plot.TS_diagram')
@@ -394,6 +398,7 @@ def TS_diagram(od, display=True, FuncAnimation_kwargs=None,
         cmap_kwargs = kwargs.pop('cmap_kwargs', None)
         if cmap_kwargs is None:
             cmap_kwargs = {}
+        cmap_kwargs = dict(cmap_kwargs)
         cmap_kwargs['plot_data'] = color.values
         kwargs['cmap_kwargs'] = _determine_cmap_params(**cmap_kwargs)
     kwargs['colorName'] = colorName

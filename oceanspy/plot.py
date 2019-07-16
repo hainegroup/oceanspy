@@ -147,12 +147,16 @@ def TS_diagram(od,
     # Change None in empty dict
     if cmap_kwargs is None:
         cmap_kwargs = {}
+    cmap_kwargs = dict(cmap_kwargs)
     if contour_kwargs is None:
         contour_kwargs = {}
+    contour_kwargs = dict(contour_kwargs)
     if clabel_kwargs is None:
         clabel_kwargs = {}
+    clabel_kwargs = dict(clabel_kwargs)
     if cutout_kwargs is None:
         cutout_kwargs = {}
+    cutout_kwargs = dict(cutout_kwargs)
 
     # Cutout first
     if len(cutout_kwargs) != 0:
@@ -397,6 +401,7 @@ def time_series(od,
     # Handle kwargs
     if cutout_kwargs is None:
         cutout_kwargs = {}
+    cutout_kwargs = dict(cutout_kwargs)
 
     # Cutout first
     if len(cutout_kwargs) != 0:
@@ -527,10 +532,13 @@ def horizontal_section(od, varName,
     # Handle kwargs
     if contour_kwargs is None:
         contour_kwargs = {}
+    contour_kwargs = dict(contour_kwargs)
     if clabel_kwargs is None:
         clabel_kwargs = {}
+    clabel_kwargs = dict(clabel_kwargs)
     if cutout_kwargs is None:
         cutout_kwargs = {}
+    cutout_kwargs = dict(cutout_kwargs)
 
     # Cutout first
     if len(cutout_kwargs) != 0:
@@ -840,10 +848,13 @@ def vertical_section(od,
     # Handle kwargs
     if contour_kwargs is None:
         contour_kwargs = {}
+    contour_kwargs = dict(contour_kwargs)
     if clabel_kwargs is None:
         clabel_kwargs = {}
+    clabel_kwargs = dict(clabel_kwargs)
     if cutout_kwargs is None:
         cutout_kwargs = {}
+    cutout_kwargs = dict(cutout_kwargs)
 
     # For animation purposes.
     if len(cutout_kwargs) != 0:
