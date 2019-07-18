@@ -5,7 +5,7 @@ History
 =======
 
 v0.1.0 (2019-07-06)
------------------
+-------------------
 
 Initial release published in the `Journal of Open Source Software`_.
 

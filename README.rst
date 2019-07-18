@@ -6,7 +6,11 @@ OceanSpy - A Python package to facilitate ocean model data analysis and visualiz
 
 |OceanSpy|
 
-|version| |conda forge| |docs| |travis| |codecov| |license| |doi|
+|version| |conda forge| |docs| |travis| |codecov| |license| |doi| |JOSS|
+
+For publications, please cite the following paper:  
+
+Almansi, M., R. Gelderloos, T. W. N. Haine, A. Saberi, and A. H. Siddiqui (2019). OceanSpy: A Python package to facilitate ocean model data analysis and visualization. *Journal of Open Source Software*, 4(39), 1506, doi: https://doi.org/10.21105/joss.01506 .
 
 What is OceanSpy?
 -----------------
@@ -71,3 +75,7 @@ OceanSpy can be used as a standalone package for analysis of local circulation m
 .. |doi| image:: https://zenodo.org/badge/DOI/10.5281/zenodo.3270646.svg
    :alt: doi
    :target: https://doi.org/10.5281/zenodo.3270646
+   
+.. |JOSS| image:: http://joss.theoj.org/papers/10.21105/joss.01506/status.svg
+   :alt: JOSS
+   :target: https://doi.org/10.21105/joss.01506
