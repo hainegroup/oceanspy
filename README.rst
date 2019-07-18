@@ -8,8 +8,9 @@ OceanSpy - A Python package to facilitate ocean model data analysis and visualiz
 
 |version| |conda forge| |docs| |travis| |codecov| |license| |doi| |JOSS|
 
-| For publications, please cite the following paper:  
-| Almansi, M., R. Gelderloos, T. W. N. Haine, A. Saberi, and A. H. Siddiqui (2019). OceanSpy: A Python package to facilitate ocean model data analysis and visualization. *Journal of Open Source Software*, 4(39), 1506, doi: https://doi.org/10.21105/joss.01506 .
+For publications, please cite the following paper:  
+
+Almansi, M., R. Gelderloos, T. W. N. Haine, A. Saberi, and A. H. Siddiqui (2019). OceanSpy: A Python package to facilitate ocean model data analysis and visualization. *Journal of Open Source Software*, 4(39), 1506, doi: https://doi.org/10.21105/joss.01506 .
 
 What is OceanSpy?
 -----------------
