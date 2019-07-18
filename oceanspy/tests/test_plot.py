@@ -107,7 +107,9 @@ def test_TS_diagram_set(od_in, Tlim, Slim, ax,
 @pytest.mark.parametrize("colorName", [None, 'Temp', 'Depth', 'Eta', 'U', 'W'])
 def test_TS_diagram_field(od_in, meanAxes, colorName):
     plt.close()
-    ax = TS_diagram(od_in, colorName=colorName, meanAxes=meanAxes)
+    contour_kwargs = {'levels': 10, 'cmap': 'viridis'}
+    ax = TS_diagram(od_in, colorName=colorName, meanAxes=meanAxes,
+                    contour_kwargs=contour_kwargs)
     assert isinstance(ax, plt.Axes)
 
 
@@ -195,7 +197,7 @@ def test_hor_sec(od_in, varName, contourName):
     plt.close()
     cutout_kwargs = {'timeRange': [od_in.dataset['time'][0].values,
                                    od_in.dataset['time'][-1].values]}
-    contour_kwargs = {'levels': 10}
+    contour_kwargs = {'levels': 10, 'cmap': 'viridis'}
     clabel_kwargs = {'fontsize': 10}
     if varName == 'Temp':
         od_in = od_in.set_projection('NorthPolarStereo')
@@ -234,7 +236,7 @@ def test_ver_sec_error(od_in):
 def test_ver_sec_subsamp(od_in, subsampMethod):
     cutout_kwargs = {'timeRange': [od_in.dataset['time'][0].values,
                                    od_in.dataset['time'][-1].values]}
-
+    contour_kwargs = {'levels': 10, 'cmap': 'viridis'}
     plt.close()
     fig, ax = plt.subplots(1, 1)
     if subsampMethod in ['error', None]:
@@ -264,7 +266,8 @@ def test_ver_sec_subsamp(od_in, subsampMethod):
                               meanAxes=True, cutout_kwargs=cutout_kwargs,
                               subsampMethod=subsampMethod,
                               subsamp_kwargs=subsamp_kwargs,
-                              use_dist=use_dist)
+                              use_dist=use_dist,
+                              contour_kwargs=contour_kwargs)
         assert isinstance(ax, plt.Axes)
 
 
