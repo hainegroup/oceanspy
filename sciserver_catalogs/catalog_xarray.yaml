@@ -71,7 +71,6 @@ sources:
       urlpath: /home/idies/workspace/OceanCirculation/exp_ASR/full_2007-09-01.nc
       xarray_kwargs:
         engine: netcdf4
-        concat_dim: T
     metadata:
       isel: 
         Z: slice(None, 55)
@@ -91,7 +90,6 @@ sources:
       urlpath: /home/idies/workspace/OceanCirculation/exp_ASR/crop_2007-09-01.nc
       xarray_kwargs:
         engine: netcdf4
-        concat_dim: T
     metadata:
       isel: 
         time: slice(4)
