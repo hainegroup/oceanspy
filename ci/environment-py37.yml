@@ -22,6 +22,6 @@ dependencies:
   - codecov
   - pycodestyle
   - ffmpeg
+  - xmitgcm>=0.3.0  
   - pip:
     - ffmpeg
-    - xmitgcm>=0.3.0
