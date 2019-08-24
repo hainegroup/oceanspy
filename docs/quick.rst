@@ -4,7 +4,10 @@
 Quick Start
 ===========
 
-This is a short introduction for using OceanSpy on the Johns Hopkins University SciServer_ system using sample datasets.
+Click on the following badge to run the notebook immediately: |binder|
+
+The badge above opens the tutorial notebook in an executable environment without any dataset.
+Follow the instructions below to learn how to use OceanSpy with the :ref:`datasets` on the Johns Hopkins University SciServer_ system.
 
 OceanSpy and its dependencies are preinstalled on SciServer. There is no need to download and install it unless you wish to run OceanSpy on your local machine or server. Steps to do that are described in the :ref:`installation` section.
 
@@ -100,3 +103,6 @@ The schematic below shows how OceanSpy is designed to be used by the oceanograph
    :alt: Flowchart
 
 .. _SciServer: http://www.sciserver.org/
+.. |binder| image:: https://mybinder.org/badge_logo.svg
+   :alt: binder
+   :target: https://mybinder.org/v2/gh/malmans2/oceanspy/master?filepath=binder%2FTutorial.ipynb
