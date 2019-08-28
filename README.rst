@@ -12,6 +12,8 @@ For publications, please cite the following paper:
 
 Almansi, M., R. Gelderloos, T. W. N. Haine, A. Saberi, and A. H. Siddiqui (2019). OceanSpy: A Python package to facilitate ocean model data analysis and visualization. *Journal of Open Source Software*, 4(39), 1506, doi: https://doi.org/10.21105/joss.01506 .
 
+This material is based upon work supported by the National Science Foundation under Grant Numbers 1835640, 124330, 118123, and 1756863. Any opinions, findings, and conclusions or recommendations expressed in this material are those of the authors and do not necessarily reflect the views of the National Science Foundation.
+
 What is OceanSpy?
 -----------------
 **OceanSpy** is an open-source and user-friendly Python package that enables scientists and interested amateurs to analyze and visualize ocean model datasets. 
