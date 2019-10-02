@@ -109,6 +109,12 @@ def _add_missing_variables(od, varList, FUNC2VARS=_FUNC2VARS):
     _check_instance({'od': od}, ' oceanspy.OceanDataset')
     varList = _check_list_of_string(varList, 'varList')
 
+    # Don't use aliased names
+    if od.aliases:
+        varList = [od._aliases_flipped[var]
+                   if var in od._aliases_flipped else var
+                   for var in varList]
+
     # Return here if all variables already exist
     varList = [var
                for var in varList
