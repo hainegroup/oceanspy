@@ -70,7 +70,7 @@ EGshelfSJsec500m_3H_hydro:
       XG: Xp1 
       YG: Yp1
     aliases:
-      T: Temp
+      Temp: T
       HFacC: hFacC
       HFacS: hFacS
       HFacW: hFacW
@@ -127,7 +127,7 @@ fldEGshelfSJsec500m_6H_hydro:
       XG: Xp1 
       YG: Yp1
     aliases:
-      T: Temp
+      Temp: T
       HFacC: hFacC
       HFacS: hFacS
       HFacW: hFacW
@@ -199,7 +199,7 @@ EGshelfSJsec500m_3H_NONhydro:
       XG: Xp1 
       YG: Yp1
     aliases:
-      T: Temp
+      Temp: T
       HFacC: hFacC
       HFacS: hFacS
       HFacW: hFacW
@@ -256,7 +256,7 @@ fldEGshelfSJsec500m_6H_NONhydro:
       XG: Xp1 
       YG: Yp1
     aliases:
-      T: Temp
+      Temp: T
       HFacC: hFacC
       HFacS: hFacS
       HFacW: hFacW
