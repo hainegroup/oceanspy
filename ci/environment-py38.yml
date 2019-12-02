@@ -1,0 +1,27 @@
+name: ospy_tests
+channels:
+  - conda-forge  
+dependencies:
+  - python=3.8
+  - dask
+  - distributed
+  - bottleneck
+  - netCDF4
+  - xarray>=0.11.3
+  - cartopy
+  - esmpy
+  - intake-xarray
+  - geopy
+  - xesmf
+  - esmf
+  - xgcm>=0.2.0
+  - Ipython
+  - tqdm
+  - pytest
+  - pytest-cov
+  - pytest-env
+  - codecov
+  - pycodestyle
+  - ffmpeg
+  - xmitgcm>=0.3.0  
+  - ffmpeg
