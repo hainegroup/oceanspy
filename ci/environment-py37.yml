@@ -13,6 +13,7 @@ dependencies:
   - intake-xarray
   - geopy
   - xesmf
+  - esmf
   - xgcm>=0.2.0
   - Ipython
   - tqdm
@@ -23,5 +24,4 @@ dependencies:
   - pycodestyle
   - ffmpeg
   - xmitgcm>=0.3.0  
-  - pip:
-    - ffmpeg
+  - ffmpeg
