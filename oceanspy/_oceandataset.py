@@ -606,12 +606,13 @@ class OceanDataset:
         coords = self.grid_coords
 
         if aliases and coords:
+
             # Flip aliases
             aliases = {custom: ospy for ospy, custom in aliases.items()}
 
             # Rename coords
             for axis in coords:
-                for dim in coords[axis]:
+                for dim in coords[axis].copy():
                     if dim in aliases:
                         coords[axis][aliases[dim]] = coords[axis].pop(dim)
 
