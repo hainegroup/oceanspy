@@ -358,7 +358,10 @@ def _find_entries(name, catalog_url):
     """
     # Check parameters
     if catalog_url is None:  # pragma: no cover
-        url = ('https://raw.githubusercontent.com/malmans2/oceanspy/'
+    # original
+        # url = ('https://raw.githubusercontent.com/malmans2/oceanspy/'
+        #        'master/sciserver_catalogs/datasets_list.yaml')
+        url = ('https://raw.githubusercontent.com/Mikejmnez/oceanspy/'
                'master/sciserver_catalogs/datasets_list.yaml')
         f = _urllib.request.urlopen(url)
         SCISERVER_DATASETS = _yaml.safe_load(f)['datasets']['sciserver']

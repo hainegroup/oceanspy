@@ -526,6 +526,13 @@ sources:
         c_p: 3.986e+03
         tempFrz0: 9.01e-02
         dTempFrz_dS: -5.75e-02
+        temp_offset: 20
+        temp_scale: 0.001
+        temp_fill: -30000
+        sal_offset: 20
+        sal_scale: 0.001
+        sal_fill: -30000
+        ssh_fill: 1.2676e30
       name: California_Coast
       description: |
         High-resolution grid of the (1/25 deg) numerical simulation covering the California Coast using the HyCOM model. The original grid has 41 (isopycnal) layers but these files were interpolated to 101 vertical levels.

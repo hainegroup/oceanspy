@@ -104,17 +104,17 @@ class OceanDataset:
         main_info.append("   .dataset: %s" %
                          self.dataset.__repr__()
                          [self.dataset.__repr__().find('<'):
-                          self.dataset.__repr__().find('>')+1])
+                          self.dataset.__repr__().find('>') + 1])
         if self.grid is not None:
             main_info.append("   .grid: %s" %
                              self.grid.__repr__()
                              [self.grid.__repr__().find('<'):
-                              self.grid.__repr__().find('>')+1])
+                              self.grid.__repr__().find('>') + 1])
         if self.projection is not None:
             main_info.append("   .projection: %s" %
                              self.projection.__repr__()
                              [self.projection.__repr__().find('<'):
-                              self.projection.__repr__().find('>')+1])
+                              self.projection.__repr__().find('>') + 1])
 
         more_info = ['\n\nMore attributes:']
         if self.name:
