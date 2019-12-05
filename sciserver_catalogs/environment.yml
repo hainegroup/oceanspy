@@ -36,7 +36,7 @@ dependencies:
   - jupyterlab
   - nodejs 
   - ffmpeg
-  - oceanspy
-  - pip:
-    - ffmpeg
-    - xmitgcm>=0.3.0
+  - oceanspy=
+  - xhistogram
+  - ffmpeg
+  - xmitgcm>=0.3.0
