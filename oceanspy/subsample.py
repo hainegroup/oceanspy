@@ -168,8 +168,8 @@ def cutout(od,
     # Horizontal CUTOUT
     # ---------------------------
     if add_Hbdr is True:
-        add_Hbdr = _np.mean([_np.fabs(od._ds['XG'].max()-od._ds['XG'].min()),
-                             _np.fabs(od._ds['YG'].max()-od._ds['YG'].min())])
+        add_Hbdr = _np.mean([_np.fabs(od._ds['XG'].max() - od._ds['XG'].min()),
+                             _np.fabs(od._ds['YG'].max() - od._ds['YG'].min())])
         add_Hbdr = add_Hbdr / _np.mean([len(od._ds['X']), len(od._ds['Y'])])
     elif add_Hbdr is False:
         add_Hbdr = 0
@@ -185,26 +185,26 @@ def cutout(od,
 
         if YRange is not None:
             # Use arrays
-            YRange = _np.asarray([_np.min(YRange)-add_Hbdr,
-                                  _np.max(YRange)+add_Hbdr])
+            YRange = _np.asarray([_np.min(YRange) - add_Hbdr,
+                                  _np.max(YRange) + add_Hbdr])
             YRange = YRange.astype(ds['YG'].dtype)
 
             # Get the closest
             for i, Y in enumerate(YRange):
-                diff = _np.fabs(ds['YG']-Y)
+                diff = _np.fabs(ds['YG'] - Y)
                 YRange[i] = ds['YG'].where(diff == diff.min()).min().values
             maskH = maskH.where(_np.logical_and(ds['YG'] >= YRange[0],
                                                 ds['YG'] <= YRange[-1]), 0)
 
         if XRange is not None:
             # Use arrays
-            XRange = _np.asarray([_np.min(XRange)-add_Hbdr,
-                                  _np.max(XRange)+add_Hbdr])
+            XRange = _np.asarray([_np.min(XRange) - add_Hbdr,
+                                  _np.max(XRange) + add_Hbdr])
             XRange = XRange.astype(ds['XG'].dtype)
 
             # Get the closest
             for i, X in enumerate(XRange):
-                diff = _np.fabs(ds['XG']-X)
+                diff = _np.fabs(ds['XG'] - X)
                 XRange[i] = ds['XG'].where(diff == diff.min()).min().values
             maskH = maskH.where(_np.logical_and(ds['XG'] >= XRange[0],
                                                 ds['XG'] <= XRange[-1]), 0)
@@ -232,48 +232,48 @@ def cutout(od,
         if iY[0] == iY[1]:
             if 'Y' not in dropAxes:
                 if iY[0] > 0:
-                    iY[0] = iY[0]-1
+                    iY[0] = iY[0] - 1
                 else:
-                    iY[1] = iY[1]+1
+                    iY[1] = iY[1] + 1
         else:
             dropAxes.pop('Y', None)
 
         if iX[0] == iX[1]:
             if 'X' not in dropAxes:
                 if iX[0] > 0:
-                    iX[0] = iX[0]-1
+                    iX[0] = iX[0] - 1
                 else:
-                    iX[1] = iX[1]+1
+                    iX[1] = iX[1] + 1
         else:
             dropAxes.pop('X', None)
 
         # Cutout
-        ds = ds.isel(Yp1=slice(iY[0], iY[1]+1),
-                     Xp1=slice(iX[0], iX[1]+1))
+        ds = ds.isel(Yp1=slice(iY[0], iY[1] + 1),
+                     Xp1=slice(iX[0], iX[1] + 1))
 
         Xcoords = od._grid.axes['X'].coords
         if 'X' in dropAxes:
             if iX[0] == len(ds['X']):
-                iX[0] = iX[0]-1
-                iX[1] = iX[1]-1
-            ds = ds.isel(X=slice(iX[0], iX[1]+1))
+                iX[0] = iX[0] - 1
+                iX[1] = iX[1] - 1
+            ds = ds.isel(X=slice(iX[0], iX[1] + 1))
         elif (('outer' in Xcoords and Xcoords['outer'] == 'Xp1') or
               ('left' in Xcoords and Xcoords['left'] == 'Xp1')):
             ds = ds.isel(X=slice(iX[0], iX[1]))
         elif 'right' in Xcoords and Xcoords['right'] == 'Xp1':
-            ds = ds.isel(X=slice(iX[0]+1, iX[1]+1))
+            ds = ds.isel(X=slice(iX[0] + 1, iX[1] + 1))
 
         Ycoords = od._grid.axes['Y'].coords
         if 'Y' in dropAxes:
             if iY[0] == len(ds['Y']):
-                iY[0] = iY[0]-1
-                iY[1] = iY[1]-1
-            ds = ds.isel(Y=slice(iY[0], iY[1]+1))
+                iY[0] = iY[0] - 1
+                iY[1] = iY[1] - 1
+            ds = ds.isel(Y=slice(iY[0], iY[1] + 1))
         elif (('outer' in Ycoords and Ycoords['outer'] == 'Yp1') or
               ('left' in Ycoords and Ycoords['left'] == 'Yp1')):
             ds = ds.isel(Y=slice(iY[0], iY[1]))
         elif 'right' in Ycoords and Ycoords['right'] == 'Yp1':
-            ds = ds.isel(Y=slice(iY[0]+1, iY[1]+1))
+            ds = ds.isel(Y=slice(iY[0] + 1, iY[1] + 1))
 
         # Cut axis can't be periodic
         if (len(ds['Yp1']) < lenY or 'Y' in dropAxes) and 'Y' in periodic:
@@ -295,7 +295,7 @@ def cutout(od,
 
         # Get the closest
         for i, Z in enumerate(ZRange):
-            diff = _np.fabs(ds['Zp1']-Z)
+            diff = _np.fabs(ds['Zp1'] - Z)
             ZRange[i] = ds['Zp1'].where(diff == diff.min()).min().values
         maskV = maskV.where(_np.logical_and(ds['Zp1'] >= ZRange[0],
                                             ds['Zp1'] <= ZRange[-1]), 0)
@@ -311,19 +311,19 @@ def cutout(od,
         if iZ[0] == iZ[1]:
             if 'Z' not in dropAxes:
                 if iZ[0] > 0:
-                    iZ[0] = iZ[0]-1
+                    iZ[0] = iZ[0] - 1
                 else:
-                    iZ[1] = iZ[1]+1
+                    iZ[1] = iZ[1] + 1
         else:
             dropAxes.pop('Z', None)
 
         # Cutout
-        ds = ds.isel(Zp1=slice(iZ[0], iZ[1]+1))
+        ds = ds.isel(Zp1=slice(iZ[0], iZ[1] + 1))
         if 'Z' in dropAxes:
             if iZ[0] == len(ds['Z']):
-                iZ[0] = iZ[0]-1
-                iZ[1] = iZ[1]-1
-            ds = ds.isel(Z=slice(iZ[0], iZ[1]+1))
+                iZ[0] = iZ[0] - 1
+                iZ[1] = iZ[1] - 1
+            ds = ds.isel(Z=slice(iZ[0], iZ[1] + 1))
         else:
             ds = ds.isel(Z=slice(iZ[0], iZ[1]))
 
@@ -356,7 +356,7 @@ def cutout(od,
                 diff = _np.fabs(ds['time'].astype('float64') -
                                 time.astype('float64'))
             else:
-                diff = _np.fabs(ds['time']-time)
+                diff = _np.fabs(ds['time'] - time)
             timeRange[i] = ds['time'].where(diff == diff.min()).min().values
         maskT = maskT.where(_np.logical_and(ds['time'] >= timeRange[0],
                                             ds['time'] <= timeRange[-1]), 0)
@@ -372,20 +372,20 @@ def cutout(od,
         if iT[0] == iT[1]:
             if 'time' not in dropAxes:
                 if iT[0] > 0:
-                    iT[0] = iT[0]-1
+                    iT[0] = iT[0] - 1
                 else:
-                    iT[1] = iT[1]+1
+                    iT[1] = iT[1] + 1
         else:
             dropAxes.pop('time', None)
 
         # Cutout
-        ds = ds.isel(time=slice(iT[0], iT[1]+1))
+        ds = ds.isel(time=slice(iT[0], iT[1] + 1))
         if 'time_midp' in ds.dims:
             if 'time' in dropAxes:
                 if iT[0] == len(ds['time_midp']):
-                    iT[0] = iT[0]-1
-                    iT[1] = iT[1]-1
-                ds = ds.isel(time_midp=slice(iT[0], iT[1]+1))
+                    iT[0] = iT[0] - 1
+                    iT[1] = iT[1] - 1
+                ds = ds.isel(time_midp=slice(iT[0], iT[1] + 1))
             else:
                 ds = ds.isel(time_midp=slice(iT[0], iT[1]))
 
@@ -446,7 +446,7 @@ def cutout(od,
         # Infer original frequency
         inFreq = _pd.infer_freq(ds.time.values)
         if timeFreq[0].isdigit() and not inFreq[0].isdigit():
-            inFreq = '1'+inFreq
+            inFreq = '1' + inFreq
 
         # Same frequency: Skip
         if timeFreq == inFreq:
@@ -481,7 +481,7 @@ def cutout(od,
                 inds_diff = _np.diff(inds)
                 if all(inds_diff == inds_diff[0]):
                     ds = ds.isel(time=slice(inds[0],
-                                            inds[-1]+1,
+                                            inds[-1] + 1,
                                             inds_diff[0]))
                 else:
                     attrs = ds.attrs
@@ -649,8 +649,8 @@ def mooring_array(od, Ymoor, Xmoor,
         k = _np.argwhere(diff_iY + diff_iX != 1)[0][0]
         lat0 = near_Y[k]
         lon0 = near_X[k]
-        lat1 = near_Y[k+1]
-        lon1 = near_X[k+1]
+        lat1 = near_Y[k + 1]
+        lon1 = near_X[k + 1]
 
         # Find grid point in the middle
         if R is not None:
@@ -658,7 +658,7 @@ def mooring_array(od, Ymoor, Xmoor,
             dist = _great_circle((lat0, lon0), (lat1, lon1), radius=R).km
 
             # Divide dist by 2.1 to make sure that returns 3 points
-            dist = dist/2.1
+            dist = dist / 2.1
             this_Y, this_X, this_dists = _utils.great_circle_path(lat0,
                                                                   lon0,
                                                                   lat1,
@@ -669,8 +669,8 @@ def mooring_array(od, Ymoor, Xmoor,
             x, y, z = _utils.spherical2cartesian(this_Y[1], this_X[1], R)
         else:
             # CARTESIAN: take the average
-            x = (lon0 + lon1)/2
-            y = (lat0 + lat1)/2
+            x = (lon0 + lon1) / 2
+            y = (lat0 + lat1) / 2
             z = 0
 
         # Indexes of 3 nearest grid point
@@ -683,9 +683,9 @@ def mooring_array(od, Ymoor, Xmoor,
         to_rem = []
         for i, (this_iY, this_iX) in enumerate(zip(new_iY, new_iX)):
             check1 = (this_iY == iY[k] and this_iX == iX[k])
-            check2 = (this_iY == iY[k+1] and this_iX == iX[k+1])
+            check2 = (this_iY == iY[k + 1] and this_iX == iX[k + 1])
             if check1 or check2:
-                to_rem = to_rem+[i]
+                to_rem = to_rem + [i]
         new_iY = _np.asarray([i
                               for j, i in enumerate(new_iY)
                               if j not in to_rem])[0]
@@ -698,10 +698,10 @@ def mooring_array(od, Ymoor, Xmoor,
         new_lon = XC.isel(Y=new_iY, X=new_iX).values
 
         # Insert
-        near_Y = _np.insert(near_Y, k+1, new_lat)
-        near_X = _np.insert(near_X, k+1, new_lon)
-        iY = _np.insert(iY, k+1, new_iY)
-        iX = _np.insert(iX, k+1, new_iX)
+        near_Y = _np.insert(near_Y, k + 1, new_lat)
+        near_X = _np.insert(near_X, k + 1, new_lon)
+        iY = _np.insert(iY, k + 1, new_iY)
+        iX = _np.insert(iX, k + 1, new_iX)
 
         # Steps
         diff_iY = _np.fabs(_np.diff(iY))
@@ -736,10 +736,10 @@ def mooring_array(od, Ymoor, Xmoor,
     ix = _xr.DataArray(_np.reshape(iX, (len(mooring), len(x))),
                        coords={'mooring': mooring, 'x': x},
                        dims=('mooring', 'x'))
-    iyp1 = _xr.DataArray(_np.stack((iY, iY+1), 1),
+    iyp1 = _xr.DataArray(_np.stack((iY, iY + 1), 1),
                          coords={'mooring': mooring, 'yp1': yp1},
                          dims=('mooring', 'yp1'))
-    ixp1 = _xr.DataArray(_np.stack((iX, iX+1), 1),
+    ixp1 = _xr.DataArray(_np.stack((iX, iX + 1), 1),
                          coords={'mooring': mooring, 'xp1': xp1},
                          dims=('mooring', 'xp1'))
 
@@ -766,7 +766,7 @@ def mooring_array(od, Ymoor, Xmoor,
                               ['Y', 'Xp1'],
                               ['Yp1', 'X']]:
                 if set(this_dims).issubset(ds[var].dims):
-                    da = ds[var].isel({dim: eval('i'+dim.lower(), {},
+                    da = ds[var].isel({dim: eval('i' + dim.lower(), {},
                                                  {'iy': iy,
                                                   'ix': ix,
                                                   'iyp1': iyp1,
@@ -786,7 +786,7 @@ def mooring_array(od, Ymoor, Xmoor,
     # Add distance
     dists = _np.zeros(near_Y.shape)
     for i in range(1, len(dists)):
-        coord1 = (near_Y[i-1], near_X[i-1])
+        coord1 = (near_Y[i - 1], near_X[i - 1])
         coord2 = (near_Y[i], near_X[i])
 
         if R is not None:
@@ -794,8 +794,8 @@ def mooring_array(od, Ymoor, Xmoor,
             dists[i] = _great_circle(coord1, coord2, radius=R).km
         else:
             # CARTESIAN
-            dists[i] = _np.sqrt((coord2[0]-coord1[0])**2
-                                + (coord2[1]-coord1[1])**2)
+            dists[i] = _np.sqrt((coord2[0] - coord1[0])**2
+                                + (coord2[1] - coord1[1])**2)
 
     dists = _np.cumsum(dists)
     distance = _xr.DataArray(dists,
@@ -929,14 +929,14 @@ def survey_stations(od, Ysurv, Xsurv,
             X_surv = this_X
             dists_surv = this_dists
         else:
-            this_Y = _np.delete(this_Y,  0, axis=None)
-            this_X = _np.delete(this_X,  0, axis=None)
+            this_Y = _np.delete(this_Y, 0, axis=None)
+            this_X = _np.delete(this_X, 0, axis=None)
             this_dists = _np.delete(this_dists, 0, axis=None)
             if len(this_dists) == 0:
                 continue
             this_dists = this_dists + dists_surv[-1]
-            Y_surv = _np.concatenate((Y_surv,  this_Y))
-            X_surv = _np.concatenate((X_surv,  this_X))
+            Y_surv = _np.concatenate((Y_surv, this_Y))
+            X_surv = _np.concatenate((X_surv, this_X))
             dists_surv = _np.concatenate((dists_surv, this_dists))
 
     # Cutout
@@ -1046,7 +1046,6 @@ def survey_stations(od, Ysurv, Xsurv,
 
 
 def particle_properties(od, times, Ypart, Xpart, Zpart, **kwargs):
-
     """
     Extract Eulerian properties of particles
     using nearest-neighbor interpolation.
@@ -1149,7 +1148,7 @@ def particle_properties(od, times, Ypart, Xpart, Zpart, **kwargs):
                              coords={dim: ds[dim].values},
                              dims={dim})
         itmp = itmp.sel({dim: tmp}, method='nearest')
-        i_ds['i'+dim] = itmp
+        i_ds['i' + dim] = itmp
 
     # Convert 2 cartesian
     if R is not None:
@@ -1166,8 +1165,8 @@ def particle_properties(od, times, Ypart, Xpart, Zpart, **kwargs):
         # Don't create tree if no variables
         var_grid_pos = [var
                         for var in ds.data_vars
-                        if set(['X'+grid_pos,
-                                'Y'+grid_pos]).issubset(ds[var].coords)]
+                        if set(['X' + grid_pos,
+                                'Y' + grid_pos]).issubset(ds[var].coords)]
         if not var_grid_pos:
             continue
         this_ds = _xr.Dataset({var: od._ds[var] for var in var_grid_pos})
@@ -1195,11 +1194,11 @@ def particle_properties(od, times, Ypart, Xpart, Zpart, **kwargs):
                            dims=('time', 'particle'))
 
         # Transform indexes in DataArray and add to dictionary
-        i_ds['i'+Yname] = iY
-        i_ds['i'+Xname] = iX
+        i_ds['i' + Yname] = iY
+        i_ds['i' + Xname] = iX
 
         # Subsample (looping is faster)
-        add_vars = {var: this_ds[var].isel({dim: i_ds['i'+dim]
+        add_vars = {var: this_ds[var].isel({dim: i_ds['i' + dim]
                                             for dim in this_ds[var].dims})
                     for var in this_ds.data_vars}
         add_vars = {k: v.drop([Xname, Yname]) for k, v in add_vars.items()}
