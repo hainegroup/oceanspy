@@ -139,7 +139,7 @@ def cutout(od,
         if len(axes_warn) != 0:
             _warnings.warn("\n{} are not axes of the oceandataset"
                            "".format(axes_warn), stacklevel=2)
-            dropAxes = list(set(dropAxes)-set(axes_warn))
+            dropAxes = list(set(dropAxes) - set(axes_warn))
         dropAxes = {d: od.grid_coords[d] for d in dropAxes}
     elif dropAxes is True:
         dropAxes = od.grid_coords
