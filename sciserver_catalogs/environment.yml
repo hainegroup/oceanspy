@@ -37,6 +37,6 @@ dependencies:
   - nodejs 
   - ffmpeg
   - oceanspy
-  - pip:
-    - ffmpeg
-    - xmitgcm>=0.3.0
+  - xhistogram
+  - ffmpeg
+  - xmitgcm>=0.3.0
