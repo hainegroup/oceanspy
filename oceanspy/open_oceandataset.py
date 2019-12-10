@@ -341,7 +341,7 @@ def from_catalog(name, catalog_url=None):
 
 def _find_entries(name, catalog_url):
     """
-    Function used by from_catalog to decode xarray or xmitgcm catalogs.
+    Function used by from_catalog to decode xarray, zarr or xmitgcm catalogs.
     It is also used by conf.py in docs to create dataset.rst
 
     Parameters

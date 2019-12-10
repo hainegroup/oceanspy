@@ -362,7 +362,7 @@ sources:
         c_p: 3.986e+03
         tempFrz0: 9.01e-02
         dTempFrz_dS: -5.75e-02
-      name: EGshelfIIseas2km_ASR_full
+      name: EGshelfIIseas2km_ASR_crop
       description: |
         High-resolution (~2km) numerical simulation covering the east Greenland shelf (EGshelf), 
         and the Iceland and Irminger Seas (IIseas) forced by the Arctic System Reanalysis (ASR). 
