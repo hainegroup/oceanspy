@@ -389,7 +389,7 @@ def _find_entries(name, catalog_url):
             url = ('https://raw.githubusercontent.com/Mikejmnez/oceanspy/'
                    'llc4320/sciserver_catalogs/catalog_xmitgcm.yaml')
         else:
-            url = catalog_url
+            url = catalog_url # provided by user
 
         # Is it an url?
         try:
