@@ -1,8 +1,8 @@
-# ===========================
-plugins:
-  source:
-    - module: intake_xarray
-sources:
+# # ===========================
+# plugins:
+#   source:
+#     - module: intake_xarray
+# sources:
   
   # ===========================
   # KangerFjord
