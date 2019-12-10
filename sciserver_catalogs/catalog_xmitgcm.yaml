@@ -1,9 +1,9 @@
 # ===========================
 plugins:
   source:
-    - module: intake_xmitgcm
+    - module: intake_xarray
 sources:
-
+  
   # ===========================
   # KangerFjord
   KangerFjord:
