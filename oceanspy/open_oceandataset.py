@@ -362,7 +362,7 @@ def _find_entries(name, catalog_url):
         # url = ('https://raw.githubusercontent.com/malmans2/oceanspy/'
         #        'master/sciserver_catalogs/datasets_list.yaml')
         url = ('https://raw.githubusercontent.com/Mikejmnez/oceanspy/'
-               'master/sciserver_catalogs/datasets_list.yaml')
+               'llc4320/sciserver_catalogs/datasets_list.yaml')
         f = _urllib.request.urlopen(url)
         SCISERVER_DATASETS = _yaml.safe_load(f)['datasets']['sciserver']
         if name not in SCISERVER_DATASETS:
@@ -376,7 +376,7 @@ def _find_entries(name, catalog_url):
     try:
         if catalog_url is None:
             url = ('https://raw.githubusercontent.com/Mikejmnez/oceanspy/'
-                   'master/sciserver_catalogs/catalog_xarray.yaml')
+                   'llc4320/sciserver_catalogs/catalog_xarray.yaml')
         else:
             url = catalog_url
         cat = _intake.Catalog(url)
@@ -387,7 +387,7 @@ def _find_entries(name, catalog_url):
     except ValidationError:
         if catalog_url is None:
             url = ('https://raw.githubusercontent.com/Mikejmnez/oceanspy/'
-                   'master/sciserver_catalogs/catalog_xmitgcm.yaml')
+                   'llc4320/sciserver_catalogs/catalog_xmitgcm.yaml')
         else:
             url = catalog_url
 
