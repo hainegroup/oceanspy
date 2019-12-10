@@ -701,3 +701,52 @@ sources:
       projection:
 
 
+# ======================================================================
+#  POP Core
+  POP_Core:
+    description: Pop ocean (only) simulation forced with COREv2
+    driver: netcdf
+    args:
+      urlpath: '/sciserver/filedb07-01/ocean/POP/CORE/'
+      xarray_kwargs:
+        engine: netcdf4
+        drop_variables: ['']
+    metadata:
+      manipulate_coords:
+        fillna: True
+        coords1Dfrom2D: False
+      grid_coords: 
+        add_midp: True
+        grid_coords:
+          Y:
+            Y: 
+            Yp1: 0.5
+          X:
+            X: 
+            Xp1: 0.5
+          time: 
+            time: -0.5
+          Z:
+           Z: 
+           Zp1: 0.5
+           Zu: 0.5
+           Zl: -0.5
+      shift_averages: 
+        averageList:
+      parameters:
+        rSphere: 6.371e+03
+        eq_state: jmd95
+        rho0: 1027
+        g: 9.81
+        eps_nh: 0 
+        omega: 7.292123516990375e-05
+        c_p: 3.986e+03
+        tempFrz0: 9.01e-02
+        dTempFrz_dS: -5.75e-02
+      name: POP_CORE
+      description: |
+        Fields from the Ocean-only POPv2 ocean simulation for a subregion of the Subpolar NorthAtlantic.
+      citation: |
+        Justin et al 2014.
+      projection: Mercator
+
