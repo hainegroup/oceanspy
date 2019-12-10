@@ -8,6 +8,7 @@ sources:
   grd_get_started:
     description: Grid of get_started
     driver: netcdf
+    model: MITGCM
     args:
       urlpath: /home/idies/workspace/OceanCirculation/exp_ASR/grid.nc
       xarray_kwargs:
@@ -67,6 +68,7 @@ sources:
   fld_get_started:
     description: Full-Fields of get_started
     driver: netcdf
+    model: MITGCM
     args:
       urlpath: /home/idies/workspace/OceanCirculation/exp_ASR/full_2007-09-01.nc
       xarray_kwargs:
@@ -86,6 +88,7 @@ sources:
   avg_get_started:
     description: Cropped-Fields of get_started
     driver: netcdf
+    model: MITGCM
     args:
       urlpath: /home/idies/workspace/OceanCirculation/exp_ASR/crop_2007-09-01.nc
       xarray_kwargs:
@@ -102,6 +105,7 @@ sources:
   grd_EGshelfIIseas2km_ERAI_6H:
     description: Grid of EGshelfIIseas2km_ERAI_6H
     driver: netcdf
+    model: MITGCM
     args:
       urlpath: /home/idies/workspace/OceanCirculation/exp_ERAI/grid.nc
       xarray_kwargs:
@@ -152,6 +156,7 @@ sources:
   fld_EGshelfIIseas2km_ERAI_6H:
     description: 6H-Fields of EGshelfIIseas2km_ERAI_6H
     driver: netcdf
+    model: MITGCM
     args:
       urlpath: /home/idies/workspace/OceanCirculation/exp_ERAI/6H*.nc
       xarray_kwargs:
@@ -168,6 +173,7 @@ sources:
   grd_EGshelfIIseas2km_ERAI_1D:
     description: Grid of EGshelfIIseas2km_ERAI_1D
     driver: netcdf
+    model: MITGCM
     args:
       urlpath: /home/idies/workspace/OceanCirculation/exp_ERAI/grid.nc
       xarray_kwargs:
@@ -218,6 +224,7 @@ sources:
   fld_EGshelfIIseas2km_ERAI_1D:
     description: 6H-Fields of EGshelfIIseas2km_ERAI_1D
     driver: netcdf
+    model: MITGCM
     args:
       urlpath: /home/idies/workspace/OceanCirculation/exp_ERAI/6H*.nc
       xarray_kwargs:
@@ -234,6 +241,7 @@ sources:
   dailyEGshelfIIseas2km_ERAI_1D:
     description: Daily-Fields of EGshelfIIseas2km_ERAI_1D
     driver: netcdf
+    model: MITGCM
     args:
       urlpath: /home/idies/workspace/OceanCirculation/exp_ERAI/1D*.nc
       xarray_kwargs:
@@ -250,6 +258,7 @@ sources:
   grd_EGshelfIIseas2km_ASR_full:
     description: Grid of EGshelfIIseas2km_ASR_full
     driver: netcdf
+    model: MITGCM
     args:
       urlpath: /home/idies/workspace/OceanCirculation/exp_ASR/grid.nc
       xarray_kwargs:
@@ -300,6 +309,7 @@ sources:
   fld_EGshelfIIseas2km_ASR_full:
     description: Fields of EGshelfIIseas2km_ASR_full
     driver: netcdf
+    model: MITGCM
     args:
       urlpath: /home/idies/workspace/OceanCirculation/exp_ASR/full*.nc
       xarray_kwargs:
@@ -316,6 +326,7 @@ sources:
   grd_EGshelfIIseas2km_ASR_crop:
     description: Grid of EGshelfIIseas2km_ASR_crop
     driver: netcdf
+    model: MITGCM
     args:
       urlpath: /home/idies/workspace/OceanCirculation/exp_ASR/grid.nc
       xarray_kwargs:
@@ -377,6 +388,7 @@ sources:
   fld_EGshelfIIseas2km_ASR_crop:
     description: Full-Fields of EGshelfIIseas2km_ASR_crop
     driver: netcdf
+    model: MITGCM
     args:
       urlpath: /home/idies/workspace/OceanCirculation/exp_ASR/full*.nc
       xarray_kwargs:
@@ -398,6 +410,7 @@ sources:
   avg_EGshelfIIseas2km_ASR_crop:
     description: Cropped-Fields of EGshelfIIseas2km_ASR_crop
     driver: netcdf
+    model: MITGCM
     args:
       urlpath: /home/idies/workspace/OceanCirculation/exp_ASR/crop*.nc
       xarray_kwargs:
@@ -414,6 +427,7 @@ sources:
   grd_Arctic_Control:
     description: Grid of Arctic Control
     driver: netcdf
+    model: MITGCM
     args:
       urlpath: /home/idies/workspace/OceanCirculation/exp_Arctic_Control/GRID/grid_glued_swapped.nc
       xarray_kwargs:
@@ -458,6 +472,7 @@ sources:
   fld_Arctic_Control:
     description: Average fields of Arctic_Control
     driver: netcdf
+    model: MITGCM
     args:
       urlpath: /home/idies/workspace/OceanCirculation/exp_Arctic_Control/days*/DIAGS/*.nc
       xarray_kwargs:
@@ -473,6 +488,7 @@ sources:
   state_Arctic_Control:
     description: State variables of Arctic_Control
     driver: netcdf
+    model: MITGCM
     args:
       urlpath: /home/idies/workspace/OceanCirculation/exp_Arctic_Control/days*/STATE/*.nc
       xarray_kwargs:
@@ -490,6 +506,7 @@ sources:
   SST_LLC4320:
     description: SST for LLC4320
     driver: zarr
+    model: MITGCM
     args:
       urlpath: '/sciserver/filedb02-01/ocean/LLC4320/SST'
       xarray_kwargs:
@@ -533,6 +550,7 @@ sources:
   SSS_LLC4320:
     description: SSS for LLC4320
     driver: zarr
+    model: MITGCM
     args:
       urlpath: '/sciserver/filedb03-01/ocean/LLC4320/SSS'
       xarray_kwargs:
@@ -575,6 +593,7 @@ sources:
   Eta_LLC4320:
     description: Eta for LLC4320
     driver: zarr
+    model: MITGCM
     args:
       urlpath: '/sciserver/filedb04-01/ocean/LLC4320/Eta'
       xarray_kwargs:
@@ -618,6 +637,7 @@ sources:
   U_LLC4320:
     description: U for LLC4320
     driver: zarr
+    model: MITGCM
     args:
       urlpath: '/sciserver/filedb05-01/ocean/LLC4320/U'
       xarray_kwargs:
@@ -661,6 +681,7 @@ sources:
   V_LLC4320:
     description: V for LLC4320
     driver: zarr
+    model: MITGCM
     args:
       urlpath: '/sciserver/filedb06-01/ocean/LLC4320/V'
       xarray_kwargs:
@@ -706,6 +727,7 @@ sources:
   POP_Core:
     description: Pop ocean (only) simulation forced with COREv2
     driver: netcdf
+    model: POP
     args:
       urlpath: '/sciserver/filedb07-01/ocean/POP/CORE/*.nc'
       xarray_kwargs:
@@ -755,6 +777,7 @@ sources:
   POP_Hybrid:
     description: Pop coupled simulation
     driver: netcdf
+    model: POP
     args:
       urlpath: '/sciserver/filedb07-01/ocean/POP/Hybrid/*.nc'
       xarray_kwargs:
@@ -858,6 +881,7 @@ sources:
   fld_California_Coast:
     description: 3H-Fields of California_Coast
     driver: netcdf
+    model: HyCOM
     args:
       urlpath: /sciserver/oceanography/HyCOM/swot+smode/GLBy0.04*.nc
       xarray_kwargs:
