@@ -784,7 +784,7 @@ sources:
         averageList:
       parameters:
         rSphere: 6.371e+03
-        eq_state: jmd95
+        eq_state: mdjwf
         rho0: 1027
         g: 9.81
         eps_nh: 0 
