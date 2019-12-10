@@ -1,4 +1,7 @@
-
+plugins:
+  source:
+    - module: intake_zarr
+sources:
   # ===========================
   # SST-vel_LLC4320
   grd_SST_LLC4320:
