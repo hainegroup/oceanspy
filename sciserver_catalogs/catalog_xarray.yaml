@@ -803,6 +803,7 @@ sources:
   grd_California_Coast:
     description: Grid of California_Coast
     driver: netcdf
+    model: HyCOM
     args:
       urlpath: /sciserver/oceanography/HyCOM/swot+smode/grid.nc
       xarray_kwargs:
