@@ -707,7 +707,7 @@ sources:
     description: Pop ocean (only) simulation forced with COREv2
     driver: netcdf
     args:
-      urlpath: '/sciserver/filedb07-01/ocean/POP/CORE/'
+      urlpath: '/sciserver/filedb07-01/ocean/POP/CORE/*.nc'
       xarray_kwargs:
         engine: netcdf4
         drop_variables: ['']
@@ -743,7 +743,7 @@ sources:
         c_p: 3.986e+03
         tempFrz0: 9.01e-02
         dTempFrz_dS: -5.75e-02
-      name: POP_CORE
+      name: POP_Core
       description: |
         Fields from the Ocean-only POPv2 ocean simulation for a subregion of the Subpolar NorthAtlantic.
       citation: |
