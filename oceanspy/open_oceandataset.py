@@ -372,10 +372,10 @@ def _find_entries(name, catalog_url):
     else:
         _check_instance({'catalog_url': catalog_url}, 'str')
 
-    # Read catatog
+    # Read catalog
     try:
         if catalog_url is None:
-            url = ('https://raw.githubusercontent.com/malmans2/oceanspy/'
+            url = ('https://raw.githubusercontent.com/Mikejmnez/oceanspy/'
                    'master/sciserver_catalogs/catalog_xarray.yaml')
         else:
             url = catalog_url
@@ -386,7 +386,7 @@ def _find_entries(name, catalog_url):
         intake_switch = True
     except ValidationError:
         if catalog_url is None:
-            url = ('https://raw.githubusercontent.com/malmans2/oceanspy/'
+            url = ('https://raw.githubusercontent.com/Mikejmnez/oceanspy/'
                    'master/sciserver_catalogs/catalog_xmitgcm.yaml')
         else:
             url = catalog_url
