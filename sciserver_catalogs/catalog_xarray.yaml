@@ -745,7 +745,7 @@ sources:
         dTempFrz_dS: -5.75e-02
       name: POP_Core
       description: |
-        Fields from the Ocean-only POPv2 ocean simulation for a subregion of the Subpolar NorthAtlantic.
+        Fields from the Ocean-only POPv2 ocean simulation for a subregion of the Subpolar North Atlantic, centered around Nordic Seas.
       citation: |
         Justin et al 2014.
       projection: Mercator
@@ -794,7 +794,7 @@ sources:
         dTempFrz_dS: -5.75e-02
       name: POP_Hybrid
       description: |
-        Fields from the POPv2 coupled ocean simulation for a subregion of the Subpolar NorthAtlantic.
+        Fields from the POPv2 coupled ocean simulation for a subregion of the Subpolar North Atlantic, centered around Nordic Seas.
       citation: |
         Justin et al 2014.
       projection: Mercator
