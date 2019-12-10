@@ -485,13 +485,13 @@ sources:
       original_output: snapshot
 
 
-
+  # ====================================================================
   # LLC4320
   SST_LLC4320:
     description: SST for LLC4320
     driver: zarr
     args:
-      urlpath: 
+      urlpath: '/sciserver/filedb02-01/ocean/LLC4320/SST'
       xarray_kwargs:
         engine: zarr
         drop_variables: ['']
@@ -527,8 +527,53 @@ sources:
         SST field for the LLC4320, a general, curvilinear ocean simulations on the cube-sphere.
       citation: |
         Paper.
-      mates: |
-        EGshelfIIseas2km_ASR_full: Full domain without variables to close budgets.
-        EGshelfIIseas2km_ASR_crop: Cropped domain with variables to close budgets.
       projection:
+
+
+  SSS_LLC4320:
+    description: SSS for LLC4320
+    driver: zarr
+    args:
+      urlpath: '/sciserver/filedb03-01/ocean/LLC4320/SSS'
+      xarray_kwargs:
+        engine: zarr
+        drop_variables: ['']
+    metadata:
+      manipulate_coords:
+        fillna: True
+        coords1Dfrom2D: False
+      grid_coords: 
+        add_midp: True
+        grid_coords:
+          Y:
+            Y: 
+            Yp1: 0.5
+          X:
+            X: 
+            Xp1: 0.5
+          time: 
+            time: -0.5
+      shift_averages: 
+        averageList:
+      parameters:
+        rSphere: 6.371e+03
+        eq_state: jmd95
+        rho0: 1027
+        g: 9.81
+        eps_nh: 0 
+        omega: 7.292123516990375e-05
+        c_p: 3.986e+03
+        tempFrz0: 9.01e-02
+        dTempFrz_dS: -5.75e-02
+      name: LLC4320
+      description: |
+        SSS field for the LLC4320, a general, curvilinear ocean simulations on the cube-sphere.
+      citation: |
+        Paper.
+      projection:
+
+
+
+
+
 
