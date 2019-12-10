@@ -42,7 +42,7 @@ sources:
         c_p: 3.986e+03
       name: SST_LLC4320
       description: |
-        Sea surface temperature for the high-resolution (1/48 deg) global numerical simulation LLC4320.
+        Sea surface temperature for the high-resolution (1/48 deg) global numerical simulation LLC4320. Domain is divided into 13 faces, with faces as an extra dimension
       citation: | 
         Add citation
       characteristics: | 
