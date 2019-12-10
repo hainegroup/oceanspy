@@ -528,44 +528,6 @@ def static_pressure(Z):
     return P
 
 
-def denspop(t,s,p):
-    '''
-    Returns the equation of state used in POP model of the form
-
-    PD(Temp,S,p) = P_{1}(Temp,S,p)/P_{2}(Temp,S,p)
-
-    where P_{1} is a 12 term polynomial and P_{2} is a 13 term polynomial.
-    
-    Density equation is valid in the range 0 < S < 40 psu, -2<Temp<33 at the
-    surface, diminishing to 30 < S < 40 psu, -2< Temp < 12 at 555 bars.
-
-    Input:
-        Temp: Potential temperature (output). 
-        Salt: Salinity (output). 
-        P: Barometric pressure at t points. 
-        thermo (bool): Thermobaric correction (True by default). 
-
-    '''
-    T=np.copy(t); S=np.copy(s); P=np.copy(p)
-    A0=[9.99843699e2,7.35212840e0,-5.45928211e-2,3.98476704e-4]
-    A1=[2.96938239e0,-7.23268813e-3,2.12382341e-3]
-    A2=[1.04004591e-2,1.03970529e-7]
-    A3=[5.18761880e-6,-3.24041825e-8,-1.23869360e-11]
-    A=A0+A1+A2+A3 # complete list of 12 - elements
-    B0=[1.0,7.28606739e-3,-4.60835542e-5,3.68390573e-7,1.80809186e-10]
-    B1=[2.14691708e-3,-9.27062484e-6, -1.78343643e-10]
-    B2=[ 4.76534122e-6,1.63410736e-9]
-    B3=[5.30848875e-6,-3.03175128e-16,-1.27934137e-17]
-    B=B0+B1+B2+B3
-
-    P1=A[0]+(A[1]*T)+A[2]*(T**2)+A[3]*(T**3)+A[4]*S+A[5]*S*T + A[6]*(S**2)+A[7]*P + A[8]*P*(T**2)+A[9]*P*S + A[10]*(P**2)+A[11]*(P**2)*(T**2)
-
-    P2=B[0]+B[1]*T+B[2]*(T**2)+B[3]*(T**3)+B[4]*(T**4)+B[5]*S + B[6]*(S*T)+ B[7]*S*(T**3)+B[8]*(S**(1.5)) +B[9]*(S**(1.5))*(T**2) + B[10]*P + B[11]*(P**2)*(T**3) + B[12]*(P**3)*T
-
-    sigma=(P1/P2)
-    return sigma
-
-
 
 def Coriolis_parameter(Y, omega=7.2921E-5):
     """
