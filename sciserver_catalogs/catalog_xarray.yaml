@@ -484,3 +484,43 @@ sources:
         T: time
       original_output: snapshot
 
+
+  sst_llc4320:
+    description: Sea surface temperature of LLC4320 simulation
+    driver: zarr
+    args:
+      urlpath: /sciserver/filedb02-01/ocean/LLC4320/SST
+      xarray_kwargs:
+        engine: zarr
+        concat_dim: T
+        parallel: True
+      grid_coords: 
+        add_midp: True
+        grid_coords:
+          Y:
+            Y: 
+            Yp1: 0.5
+          X:
+            X: 
+            Xp1: 0.5
+      parameters:
+        rSphere: 6.371e+03
+        eq_state: jmd95
+        rho0: 1027
+        g: 9.81
+        eps_nh: 0 
+        omega: 7.292123516990375e-05
+        c_p: 3.986e+03
+        tempFrz0: 9.01e-02
+        dTempFrz_dS: -5.75e-02
+      name: LLC4320
+      description: |
+        SST field for the LLC4320, a general, curvilinear ocean simulations on the cube-sphere.
+      projection: general (non regulat lat lon grid)
+    metadata:
+      rename:
+        T: time
+      original_output: snapshot
+
+
+
