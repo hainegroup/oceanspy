@@ -1,0 +1,63 @@
+
+  # ===========================
+  # LLC4320
+  grd_LLC4320:
+    description: Grid of California_Coast
+    driver: netcdf
+    args:
+      urlpath: /sciserver/oceanography/HyCOM/swot+smode/grid.nc
+      xarray_kwargs:
+        engine: netcdf4
+        drop_variables: [''] # need to figure out which variables I am droping
+    metadata:
+      manipulate_coords:
+        fillna: True
+        coords1Dfrom2D: True
+      grid_coords:
+        add_midp: True
+        grid_coords:
+          Y:
+            Y: 
+            Yp1: 0.5
+          X:
+            X: 
+            Xp1: 0.5
+          Z:
+           Z: 
+           Zp1: 0.5
+           Zu: 0.5
+           Zl: -0.5
+          time: 
+            time: -0.5
+      parameters: # need to double check this parameters. Add scale factors
+        rSphere: 6.371e+03
+        eq_state: jmd95
+        rho0: 1027
+        g: 9.81
+        eps_nh: 0 
+        omega: 7.292123516990375e-05
+        c_p: 3.986e+03
+      name: LLC4320
+      description: |
+        High-resolution grid of the (1/48 deg) global numerical simulation.
+      citation: | 
+        Add citation
+      characteristics: | 
+        Add citation
+      mates: | 
+      projection: Mercator
+            
+  fld_LLC4320:
+    description: Flow fields
+    driver: netcdf
+    args:
+      urlpath: /sciserver/oceanography/HyCOM/swot+smode/GLBy0.04*.nc
+      xarray_kwargs:
+        engine: netcdf4
+        concat_dim: T
+        parallel: True
+    metadata:
+      rename:
+        T: time
+      original_output: snapshot
+
