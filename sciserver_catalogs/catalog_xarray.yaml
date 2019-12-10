@@ -756,7 +756,7 @@ sources:
     description: Pop coupled simulation
     driver: netcdf
     args:
-      urlpath: '/sciserver/filedb07-01/ocean/POP/Hybrid/'
+      urlpath: '/sciserver/filedb07-01/ocean/POP/Hybrid/*.nc'
       xarray_kwargs:
         engine: netcdf4
         drop_variables: ['']
