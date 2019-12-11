@@ -166,6 +166,10 @@ def from_catalog(name, catalog_url=None):
         # Fix Z dimensions (Zmd, ...)
         default_Zs = ['Zp1', 'Zu', 'Zl', 'Z']
         # Make sure they're sorted with decreasing letter number
+
+# Makes sure default_Zs are defined in the dataset dimensions
+# Does nothing to horizontal dimensions
+
         default_Zs = sorted(default_Zs, key=len, reverse=True)
         for Zdim in default_Zs:  # pragma: no cover
             for dim, size in ds.sizes.items():
