@@ -311,6 +311,26 @@ def from_catalog(name, catalog_url=None):
                        long_name="Coriolis f",
                        units="s^-1"))
 
+        #  LLC4320 Surface Variables 
+        variables['SSS'] = dict(
+            attrs=dict(standard_name=('surface sea_water_salinity'),
+                       units=variables['S']['attrs']['units']))
+        variables['SST'] = dict(
+            attrs=dict(standard_name=('surface sea_water_temperature'),
+                       units=variables['Temp']['attrs']['units']))
+        variables['SSU'] = dict(
+            attrs=dict(standard_name=('surface sea_water_x_velocity'),
+                       units=variables['U']['attrs']['units']))
+        variables['SSV'] = dict(
+            attrs=dict(standard_name=('surface sea_water_y_velocity'),
+                       units=variables['V']['attrs']['units']))
+        variables['XC'] = dict(
+            attrs=dict(standard_name=('longitude'),
+                       units='degrees_east'))
+        variables['YC'] = dict(
+            attrs=dict(standard_name=('latitude'),
+                       units='degrees_north'))
+
         # Extract variables in dataset only
         variables = _OrderedDict(**{var: variables[var]
                                     for var in od._ds.variables
