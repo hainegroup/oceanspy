@@ -557,6 +557,7 @@ sources:
       citation: |
         Paper.
       projection:
+      original_output: snapshot
 
 
   SSS_LLC4320:
@@ -613,6 +614,8 @@ sources:
       citation: |
         Paper.
       projection:
+      original_output: snapshot
+
 
   Eta_LLC4320:
     description: Eta for LLC4320
@@ -667,6 +670,9 @@ sources:
       citation: |
         Paper.
       projection:
+      original_output: snapshot
+
+
 
   U_LLC4320:
     description: U for LLC4320
@@ -721,6 +727,7 @@ sources:
       citation: |
         Paper.
       projection:
+      original_output: snapshot
 
 
   V_LLC4320:
@@ -776,6 +783,7 @@ sources:
       citation: |
         Paper.
       projection:
+      original_output: snapshot
 
 
 # ======================================================================
