@@ -551,6 +551,7 @@ sources:
         c_p: 3.986e+03
         tempFrz0: 9.01e-02
         dTempFrz_dS: -5.75e-02
+        grid_type: 'llc'
       name: LLC4320
       description: |
         SST field for the LLC4320, a general, curvilinear ocean simulations on the cube-sphere.
@@ -608,6 +609,7 @@ sources:
         c_p: 3.986e+03
         tempFrz0: 9.01e-02
         dTempFrz_dS: -5.75e-02
+        grid_type: 'llc'
       name: LLC4320
       description: |
         SSS field for the LLC4320, a general, curvilinear ocean simulations on the cube-sphere.
@@ -664,6 +666,7 @@ sources:
         c_p: 3.986e+03
         tempFrz0: 9.01e-02
         dTempFrz_dS: -5.75e-02
+        grid_type: 'llc'
       name: LLC4320
       description: |
         Sea surface height (Eta) field for the LLC4320, a general, curvilinear ocean simulations on the cube-sphere.
@@ -721,6 +724,7 @@ sources:
         c_p: 3.986e+03
         tempFrz0: 9.01e-02
         dTempFrz_dS: -5.75e-02
+        grid_type: 'llc'
       name: LLC4320
       description: |
         U (3D + time dependent) field for the LLC4320, a general, curvilinear ocean simulations on the cube-sphere.
@@ -777,6 +781,7 @@ sources:
         c_p: 3.986e+03
         tempFrz0: 9.01e-02
         dTempFrz_dS: -5.75e-02
+        grid_type: 'llc'
       name: LLC4320
       description: |
         V (3D + time dependent) field for the LLC4320, a general, curvilinear ocean simulations on the cube-sphere.
