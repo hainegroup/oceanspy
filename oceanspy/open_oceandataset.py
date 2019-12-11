@@ -129,7 +129,6 @@ def from_catalog(name, catalog_url=None):
 
     # Store all dataset
     datasets = []
-    chunks = {}
     metadata = {}
     for entry in entries:
         if intake_switch:
