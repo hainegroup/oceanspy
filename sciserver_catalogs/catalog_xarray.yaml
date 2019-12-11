@@ -523,7 +523,7 @@ sources:
         k_p1: Zp1
         k_u: Zu
       manipulate_coords:
-        fillna: True
+        fillna: False
         coords1Dfrom2D: False
       grid_coords: 
         add_midp: True
@@ -581,7 +581,7 @@ sources:
         k_p1: Zp1
         k_u: Zu
       manipulate_coords:
-        fillna: True
+        fillna: False
         coords1Dfrom2D: False
       grid_coords: 
         add_midp: True
@@ -636,7 +636,7 @@ sources:
         k_p1: Zp1
         k_u: Zu
       manipulate_coords:
-        fillna: True
+        fillna: False
         coords1Dfrom2D: False
       grid_coords: 
         add_midp: True
@@ -694,7 +694,7 @@ sources:
         k_p1: Zp1
         k_u: Zu
       manipulate_coords:
-        fillna: True
+        fillna: False
         coords1Dfrom2D: False
       grid_coords: 
         add_midp: True
@@ -751,7 +751,7 @@ sources:
         k_p1: Zp1
         k_u: Zu
       manipulate_coords:
-        fillna: True
+        fillna: False
         coords1Dfrom2D: False
       grid_coords: 
         add_midp: True
