@@ -522,6 +522,8 @@ sources:
         j_g: Yg
         k: Z
         k_l: Zl
+        k_p1: Zp1
+        k_u: Zu
       manipulate_coords:
         fillna: True
         coords1Dfrom2D: False
@@ -578,6 +580,8 @@ sources:
         j_g: Yg
         k: Z
         k_l: Zl
+        k_p1: Zp1
+        k_u: Zu
       manipulate_coords:
         fillna: True
         coords1Dfrom2D: False
@@ -623,7 +627,15 @@ sources:
     metadata:
       rename:
         i: X
+        i_p1: Xp1
+        i_g: Xg
         j: Y
+        j_p1: Yp1
+        j_g: Yg
+        k: Z
+        k_l: Zl
+        k_p1: Zp1
+        k_u: Zu
       manipulate_coords:
         fillna: True
         coords1Dfrom2D: False
@@ -671,7 +683,15 @@ sources:
     metadata:
       rename:
         i: X
+        i_p1: Xp1
+        i_g: Xg
         j: Y
+        j_p1: Yp1
+        j_g: Yg
+        k: Z
+        k_l: Zl
+        k_p1: Zp1
+        k_u: Zu
       manipulate_coords:
         fillna: True
         coords1Dfrom2D: False
@@ -720,7 +740,15 @@ sources:
     metadata:
       rename:
         i: X
+        i_p1: Xp1
+        i_g: Xg
         j: Y
+        j_p1: Yp1
+        j_g: Yg
+        k: Z
+        k_l: Zl
+        k_p1: Zp1
+        k_u: Zu
       manipulate_coords:
         fillna: True
         coords1Dfrom2D: False
