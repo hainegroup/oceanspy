@@ -12,6 +12,10 @@ datasets:
     - Arctic_Control
     - KangerFjord
     - California_Coast
-    - LLC4320
+    - SST_LLC4320
+    - SSS_LLC4320
+    - Eta_LLC4320
+    - U_LLC4320
+    - V_LLC4320
     - POP_Core
     - POP_Hybrid
