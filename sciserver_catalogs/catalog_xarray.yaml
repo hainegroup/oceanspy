@@ -515,7 +515,13 @@ sources:
     metadata:
       rename:
         i: X
+        i_p1: Xp1
+        i_g: Xg
         j: Y
+        j_p1: Yp1
+        j_g: Yg
+        k: Z
+        k_l: Zl
       manipulate_coords:
         fillna: True
         coords1Dfrom2D: False
@@ -528,6 +534,11 @@ sources:
           X:
             X: 
             Xp1: 0.5
+          Z:
+            Z: 
+            Zp1: 0.5
+            Zu: 0.5
+            Zl: -0.5
           time: 
             time: -0.5
       parameters:
@@ -560,7 +571,13 @@ sources:
     metadata:
       rename:
         i: X
+        i_p1: Xp1
+        i_g: Xg
         j: Y
+        j_p1: Yp1
+        j_g: Yg
+        k: Z
+        k_l: Zl
       manipulate_coords:
         fillna: True
         coords1Dfrom2D: False
@@ -573,6 +590,11 @@ sources:
           X:
             X: 
             Xp1: 0.5
+          Z:
+            Z: 
+            Zp1: 0.5
+            Zu: 0.5
+            Zl: -0.5
           time: 
             time: -0.5
       parameters:
@@ -614,6 +636,11 @@ sources:
           X:
             X: 
             Xp1: 0.5
+          Z:
+            Z: 
+            Zp1: 0.5
+            Zu: 0.5
+            Zl: -0.5
           time: 
             time: -0.5
       # shift_averages: 
@@ -657,6 +684,11 @@ sources:
           X:
             X: 
             Xp1: 0.5
+          Z:
+            Z: 
+            Zp1: 0.5
+            Zu: 0.5
+            Zl: -0.5
           time: 
             time: -0.5
       # shift_averages: 
@@ -701,6 +733,11 @@ sources:
           X:
             X: 
             Xp1: 0.5
+          Z:
+            Z: 
+            Zp1: 0.5
+            Zu: 0.5
+            Zl: -0.5
           time: 
             time: -0.5
       # shift_averages: 
@@ -751,10 +788,10 @@ sources:
           time: 
             time: -0.5
           Z:
-           Z: 
-           Zp1: 0.5
-           Zu: 0.5
-           Zl: -0.5
+            Z: 
+            Zp1: 0.5
+            Zu: 0.5
+            Zl: -0.5
       shift_averages: 
         averageList:
       parameters:
@@ -801,10 +838,10 @@ sources:
           time: 
             time: -0.5
           Z:
-           Z: 
-           Zp1: 0.5
-           Zu: 0.5
-           Zl: -0.5
+            Z: 
+            Zp1: 0.5
+            Zu: 0.5
+            Zl: -0.5
       shift_averages: 
         averageList:
       parameters:
@@ -848,10 +885,10 @@ sources:
             X: 
             Xp1: 0.5
           Z:
-           Z: 
-           Zp1: 0.5
-           Zu: 0.5
-           Zl: -0.5
+            Z: 
+            Zp1: 0.5
+            Zu: 0.5
+            Zl: -0.5
           time: 
             time: -0.5
       parameters: # need to double check this parameters. Add scale factors
