@@ -508,10 +508,10 @@ sources:
     driver: zarr
     model: MITGCM
     args:
-      urlpath: '/sciserver/filedb02-01/ocean/LLC4320/SST'
-      xarray_kwargs:
-        engine: zarr
-        drop_variables: ['']
+      url: '/sciserver/filedb02-01/ocean/LLC4320/SST'
+      # xarray_kwargs:
+        # engine: zarr
+        # drop_variables: ['']
     metadata:
       manipulate_coords:
         fillna: True
