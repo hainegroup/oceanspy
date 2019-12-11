@@ -508,7 +508,7 @@ sources:
     driver: zarr
     model: MITGCM
     args:
-      url: '/sciserver/filedb02-01/ocean/LLC4320/SST'
+      urlpath: '/sciserver/filedb02-01/ocean/LLC4320/SST'
       # xarray_kwargs:
         # engine: zarr
         # drop_variables: ['']
