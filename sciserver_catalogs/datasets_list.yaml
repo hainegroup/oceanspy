@@ -12,8 +12,8 @@ datasets:
     - Arctic_Control
     - KangerFjord
     - California_Coast
-    - LLC4320
-    - SST_LLC4320
+    - LLC4320 # This allows to access the whole dataset 
+    - SST_LLC4320 # individual variable of dataset (might change later)
     - SSS_LLC4320
     - Eta_LLC4320
     - U_LLC4320
