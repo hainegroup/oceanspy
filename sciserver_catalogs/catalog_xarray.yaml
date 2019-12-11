@@ -513,6 +513,9 @@ sources:
         # engine: zarr
         # drop_variables: ['']
     metadata:
+      rename:
+        i: X
+        j: Y
       manipulate_coords:
         fillna: True
         coords1Dfrom2D: False
@@ -555,6 +558,9 @@ sources:
       #   engine: zarr
       #   drop_variables: ['']
     metadata:
+      rename:
+        i: X
+        j: Y
       manipulate_coords:
         fillna: True
         coords1Dfrom2D: False
@@ -593,6 +599,9 @@ sources:
     args:
       urlpath: '/sciserver/filedb04-01/ocean/LLC4320/Eta'
     metadata:
+      rename:
+        i: X
+        j: Y
       manipulate_coords:
         fillna: True
         coords1Dfrom2D: False
@@ -633,6 +642,9 @@ sources:
     args:
       urlpath: '/sciserver/filedb05-01/ocean/LLC4320/U'
     metadata:
+      rename:
+        i: X
+        j: Y
       manipulate_coords:
         fillna: True
         coords1Dfrom2D: False
@@ -674,6 +686,9 @@ sources:
     args:
       urlpath: '/sciserver/filedb06-01/ocean/LLC4320/V'
     metadata:
+      rename:
+        i: X
+        j: Y
       manipulate_coords:
         fillna: True
         coords1Dfrom2D: False
@@ -720,6 +735,7 @@ sources:
         engine: netcdf4
         drop_variables: ['']
     metadata:
+      rename:
       manipulate_coords:
         fillna: True
         coords1Dfrom2D: False
