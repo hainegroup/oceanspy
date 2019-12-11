@@ -527,8 +527,6 @@ sources:
             Xp1: 0.5
           time: 
             time: -0.5
-      shift_averages: 
-        averageList:
       parameters:
         rSphere: 6.371e+03
         eq_state: jmd95
@@ -571,8 +569,6 @@ sources:
             Xp1: 0.5
           time: 
             time: -0.5
-      shift_averages: 
-        averageList:
       parameters:
         rSphere: 6.371e+03
         eq_state: jmd95
@@ -596,9 +592,6 @@ sources:
     model: MITGCM
     args:
       urlpath: '/sciserver/filedb04-01/ocean/LLC4320/Eta'
-      # xarray_kwargs:
-      #   engine: zarr
-      #   drop_variables: ['']
     metadata:
       manipulate_coords:
         fillna: True
@@ -614,8 +607,8 @@ sources:
             Xp1: 0.5
           time: 
             time: -0.5
-      shift_averages: 
-        averageList:
+      # shift_averages: 
+      #   averageList:
       parameters:
         rSphere: 6.371e+03
         eq_state: jmd95
@@ -639,9 +632,6 @@ sources:
     model: MITGCM
     args:
       urlpath: '/sciserver/filedb05-01/ocean/LLC4320/U'
-      # xarray_kwargs:
-      #   engine: zarr
-      #   drop_variables: ['']
     metadata:
       manipulate_coords:
         fillna: True
@@ -657,8 +647,8 @@ sources:
             Xp1: 0.5
           time: 
             time: -0.5
-      shift_averages: 
-        averageList:
+      # shift_averages: 
+      #   averageList:
       parameters:
         rSphere: 6.371e+03
         eq_state: jmd95
@@ -683,9 +673,6 @@ sources:
     model: MITGCM
     args:
       urlpath: '/sciserver/filedb06-01/ocean/LLC4320/V'
-      # xarray_kwargs:
-      #   engine: zarr
-      #   drop_variables: ['']
     metadata:
       manipulate_coords:
         fillna: True
@@ -701,8 +688,8 @@ sources:
             Xp1: 0.5
           time: 
             time: -0.5
-      shift_averages: 
-        averageList:
+      # shift_averages: 
+      #   averageList:
       parameters:
         rSphere: 6.371e+03
         eq_state: jmd95
