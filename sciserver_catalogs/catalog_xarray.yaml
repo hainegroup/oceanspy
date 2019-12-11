@@ -553,9 +553,9 @@ sources:
     model: MITGCM
     args:
       urlpath: '/sciserver/filedb03-01/ocean/LLC4320/SSS'
-      xarray_kwargs:
-        engine: zarr
-        drop_variables: ['']
+      # xarray_kwargs:
+      #   engine: zarr
+      #   drop_variables: ['']
     metadata:
       manipulate_coords:
         fillna: True
@@ -596,9 +596,9 @@ sources:
     model: MITGCM
     args:
       urlpath: '/sciserver/filedb04-01/ocean/LLC4320/Eta'
-      xarray_kwargs:
-        engine: zarr
-        drop_variables: ['']
+      # xarray_kwargs:
+      #   engine: zarr
+      #   drop_variables: ['']
     metadata:
       manipulate_coords:
         fillna: True
@@ -633,16 +633,15 @@ sources:
         Paper.
       projection:
 
-
   U_LLC4320:
     description: U for LLC4320
     driver: zarr
     model: MITGCM
     args:
       urlpath: '/sciserver/filedb05-01/ocean/LLC4320/U'
-      xarray_kwargs:
-        engine: zarr
-        drop_variables: ['']
+      # xarray_kwargs:
+      #   engine: zarr
+      #   drop_variables: ['']
     metadata:
       manipulate_coords:
         fillna: True
@@ -684,9 +683,9 @@ sources:
     model: MITGCM
     args:
       urlpath: '/sciserver/filedb06-01/ocean/LLC4320/V'
-      xarray_kwargs:
-        engine: zarr
-        drop_variables: ['']
+      # xarray_kwargs:
+      #   engine: zarr
+      #   drop_variables: ['']
     metadata:
       manipulate_coords:
         fillna: True
