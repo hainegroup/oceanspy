@@ -736,10 +736,10 @@ sources:
         i_g: Xg
         j: Y
         j_g: Yg
-        k: Z
-        k_l: Zl
-        k_p1: Zp1
-        k_u: Zu
+        # k: Z
+        # k_l: Zl
+        # k_p1: Zp1
+        # k_u: Zu
       grid_coords: 
         add_midp: True
         grid_coords:
@@ -749,11 +749,11 @@ sources:
           X:
             X: 
             Xp1: 0.5
-          Z:
-            Z: 
-            Zp1: 0.5
-            Zu: 0.5
-            Zl: -0.5
+          # Z:
+          #   Z: 
+          #   Zp1: 0.5
+          #   Zu: 0.5
+          #   Zl: -0.5
           time: 
             time: -0.5
       # shift_averages: 
