@@ -509,9 +509,7 @@ sources:
     model: MITGCM
     args:
       urlpath: '/sciserver/filedb02-01/ocean/LLC4320/SST'
-      # xarray_kwargs:
-        # engine: zarr
-        # drop_variables: ['']
+      drop_variables: ['']
     metadata:
       rename:
         i: X
@@ -564,9 +562,7 @@ sources:
     model: MITGCM
     args:
       urlpath: '/sciserver/filedb03-01/ocean/LLC4320/SSS'
-      # kwargs:
-        # engine: zarr
-      drop_variables: ['XC']
+      drop_variables: ['XC','YC','iter']
     metadata:
       rename:
         i: X
@@ -619,6 +615,7 @@ sources:
   #   model: MITGCM
   #   args:
   #     urlpath: '/sciserver/filedb04-01/ocean/LLC4320/Eta'
+  #     drop_variables: ['']
   #   metadata:
   #     rename:
   #       i: X
@@ -666,14 +663,13 @@ sources:
   #     projection:
   #     original_output: snapshot
 
-
-
   # U_LLC4320:
   #   description: U for LLC4320
   #   driver: zarr
   #   model: MITGCM
   #   args:
   #     urlpath: '/sciserver/filedb05-01/ocean/LLC4320/U'
+  #     drop_variables: ['']
   #   metadata:
   #     rename:
   #       i: X
@@ -783,6 +779,7 @@ sources:
   #   model: MITGCM
   #   args:
   #     urlpath: '/sciserver/filedb06-01/ocean/LLC4320/V'
+  #     drop_variables: ['']
   #   metadata:
   #     rename:
   #       i: X
