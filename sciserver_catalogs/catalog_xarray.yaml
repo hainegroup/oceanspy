@@ -560,12 +560,12 @@ sources:
 
   SSS_LLC4320:
     description: SSS for LLC4320
-    driver: zarr
+    driver: xarray
     model: MITGCM
     args:
       urlpath: '/sciserver/filedb03-01/ocean/LLC4320/SSS'
       xarray_kwargs:
-      #   engine: zarr
+        engine: zarr
         drop_variables: ['XC']
     metadata:
       rename:
