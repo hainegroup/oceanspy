@@ -613,116 +613,116 @@ sources:
       original_output: snapshot
 
 
-  Eta_LLC4320:
-    description: Eta for LLC4320
-    driver: zarr
-    model: MITGCM
-    args:
-      urlpath: '/sciserver/filedb04-01/ocean/LLC4320/Eta'
-    metadata:
-      rename:
-        i: X
-        i_g: Xg
-        j: Y
-        j_g: Yg
-        k: Z
-        k_l: Zl
-        k_p1: Zp1
-        k_u: Zu
-      grid_coords: 
-        add_midp: True
-        grid_coords:
-          Y:
-            Y: 
-            Yp1: 0.5
-          X:
-            X: 
-            Xp1: 0.5
-          Z:
-            Z: 
-            Zp1: 0.5
-            Zu: 0.5
-            Zl: -0.5
-          time: 
-            time: -0.5
-      # shift_averages: 
-      #   averageList:
-      parameters:
-        rSphere: 6.371e+03
-        eq_state: jmd95
-        rho0: 1027
-        g: 9.81
-        eps_nh: 0 
-        omega: 7.292123516990375e-05
-        c_p: 3.986e+03
-        tempFrz0: 9.01e-02
-        dTempFrz_dS: -5.75e-02
-        grid_type: 'llc'
-      name: Eta_LLC4320
-      description: |
-        Sea surface height (Eta) field for the LLC4320, a general, curvilinear ocean simulations on the cube-sphere.
-      citation: |
-        Paper.
-      projection:
-      original_output: snapshot
+  # Eta_LLC4320:
+  #   description: Eta for LLC4320
+  #   driver: zarr
+  #   model: MITGCM
+  #   args:
+  #     urlpath: '/sciserver/filedb04-01/ocean/LLC4320/Eta'
+  #   metadata:
+  #     rename:
+  #       i: X
+  #       i_g: Xg
+  #       j: Y
+  #       j_g: Yg
+  #       k: Z
+  #       k_l: Zl
+  #       k_p1: Zp1
+  #       k_u: Zu
+  #     grid_coords: 
+  #       add_midp: True
+  #       grid_coords:
+  #         Y:
+  #           Y: 
+  #           Yp1: 0.5
+  #         X:
+  #           X: 
+  #           Xp1: 0.5
+  #         Z:
+  #           Z: 
+  #           Zp1: 0.5
+  #           Zu: 0.5
+  #           Zl: -0.5
+  #         time: 
+  #           time: -0.5
+  #     # shift_averages: 
+  #     #   averageList:
+  #     parameters:
+  #       rSphere: 6.371e+03
+  #       eq_state: jmd95
+  #       rho0: 1027
+  #       g: 9.81
+  #       eps_nh: 0 
+  #       omega: 7.292123516990375e-05
+  #       c_p: 3.986e+03
+  #       tempFrz0: 9.01e-02
+  #       dTempFrz_dS: -5.75e-02
+  #       grid_type: 'llc'
+  #     name: Eta_LLC4320
+  #     description: |
+  #       Sea surface height (Eta) field for the LLC4320, a general, curvilinear ocean simulations on the cube-sphere.
+  #     citation: |
+  #       Paper.
+  #     projection:
+  #     original_output: snapshot
 
 
 
-  U_LLC4320:
-    description: U for LLC4320
-    driver: zarr
-    model: MITGCM
-    args:
-      urlpath: '/sciserver/filedb05-01/ocean/LLC4320/U'
-    metadata:
-      rename:
-        i: X
-        i_g: Xg
-        j: Y
-        j_g: Yg
-        k: Z
-        k_l: Zl
-        k_p1: Zp1
-        k_u: Zu
-      # manipulate_coords:
-      #   fillna: False
-      #   coords1Dfrom2D: False
-      grid_coords: 
-        add_midp: True
-        grid_coords:
-          Y:
-            Y: 
-            Yp1: 0.5
-          X:
-            X: 
-            Xp1: 0.5
-          Z:
-            Z: 
-            Zp1: 0.5
-            Zu: 0.5
-            Zl: -0.5
-          time: 
-            time: -0.5
-      # shift_averages: 
-      #   averageList:
-      parameters:
-        rSphere: 6.371e+03
-        eq_state: jmd95
-        rho0: 1027
-        g: 9.81
-        eps_nh: 0 
-        omega: 7.292123516990375e-05
-        c_p: 3.986e+03
-        tempFrz0: 9.01e-02
-        dTempFrz_dS: -5.75e-02
-        grid_type: 'llc'
-      name: U_LLC4320
-      description: |
-        U (3D + time dependent) field for the LLC4320, a general, curvilinear ocean simulations on the cube-sphere.
-      citation: |
-        Paper.
-      projection:
-      original_output: snapshot
+  # U_LLC4320:
+  #   description: U for LLC4320
+  #   driver: zarr
+  #   model: MITGCM
+  #   args:
+  #     urlpath: '/sciserver/filedb05-01/ocean/LLC4320/U'
+  #   metadata:
+  #     rename:
+  #       i: X
+  #       i_g: Xg
+  #       j: Y
+  #       j_g: Yg
+  #       k: Z
+  #       k_l: Zl
+  #       k_p1: Zp1
+  #       k_u: Zu
+  #     # manipulate_coords:
+  #     #   fillna: False
+  #     #   coords1Dfrom2D: False
+  #     grid_coords: 
+  #       add_midp: True
+  #       grid_coords:
+  #         Y:
+  #           Y: 
+  #           Yp1: 0.5
+  #         X:
+  #           X: 
+  #           Xp1: 0.5
+  #         Z:
+  #           Z: 
+  #           Zp1: 0.5
+  #           Zu: 0.5
+  #           Zl: -0.5
+  #         time: 
+  #           time: -0.5
+  #     # shift_averages: 
+  #     #   averageList:
+  #     parameters:
+  #       rSphere: 6.371e+03
+  #       eq_state: jmd95
+  #       rho0: 1027
+  #       g: 9.81
+  #       eps_nh: 0 
+  #       omega: 7.292123516990375e-05
+  #       c_p: 3.986e+03
+  #       tempFrz0: 9.01e-02
+  #       dTempFrz_dS: -5.75e-02
+  #       grid_type: 'llc'
+  #     name: U_LLC4320
+  #     description: |
+  #       U (3D + time dependent) field for the LLC4320, a general, curvilinear ocean simulations on the cube-sphere.
+  #     citation: |
+  #       Paper.
+  #     projection:
+  #     original_output: snapshot
 
   grid_LLC4320:
     description: horizontal grid for LLC4320
@@ -777,58 +777,58 @@ sources:
       projection:
       original_output: snapshot
 
-  V_LLC4320:
-    description: V for LLC4320
-    driver: zarr
-    model: MITGCM
-    args:
-      urlpath: '/sciserver/filedb06-01/ocean/LLC4320/V'
-    metadata:
-      rename:
-        i: X
-        i_g: Xg
-        j: Y
-        j_g: Yg
-        k: Z
-        k_l: Zl
-        k_p1: Zp1
-        k_u: Zu
-      grid_coords: 
-        add_midp: True
-        grid_coords:
-          Y:
-            Y: 
-            Yp1: 0.5
-          X:
-            X: 
-            Xp1: 0.5
-          Z:
-            Z: 
-            Zp1: 0.5
-            Zu: 0.5
-            Zl: -0.5
-          time: 
-            time: -0.5
-      # shift_averages: 
-      #   averageList:
-      parameters:
-        rSphere: 6.371e+03
-        eq_state: jmd95
-        rho0: 1027
-        g: 9.81
-        eps_nh: 0 
-        omega: 7.292123516990375e-05
-        c_p: 3.986e+03
-        tempFrz0: 9.01e-02
-        dTempFrz_dS: -5.75e-02
-        grid_type: 'llc'
-      name: V_LLC4320
-      description: |
-        V (3D + time dependent) field for the LLC4320, a general, curvilinear ocean simulations on the cube-sphere.
-      citation: |
-        Paper.
-      projection:
-      original_output: snapshot
+  # V_LLC4320:
+  #   description: V for LLC4320
+  #   driver: zarr
+  #   model: MITGCM
+  #   args:
+  #     urlpath: '/sciserver/filedb06-01/ocean/LLC4320/V'
+  #   metadata:
+  #     rename:
+  #       i: X
+  #       i_g: Xg
+  #       j: Y
+  #       j_g: Yg
+  #       k: Z
+  #       k_l: Zl
+  #       k_p1: Zp1
+  #       k_u: Zu
+  #     grid_coords: 
+  #       add_midp: True
+  #       grid_coords:
+  #         Y:
+  #           Y: 
+  #           Yp1: 0.5
+  #         X:
+  #           X: 
+  #           Xp1: 0.5
+  #         Z:
+  #           Z: 
+  #           Zp1: 0.5
+  #           Zu: 0.5
+  #           Zl: -0.5
+  #         time: 
+  #           time: -0.5
+  #     # shift_averages: 
+  #     #   averageList:
+  #     parameters:
+  #       rSphere: 6.371e+03
+  #       eq_state: jmd95
+  #       rho0: 1027
+  #       g: 9.81
+  #       eps_nh: 0 
+  #       omega: 7.292123516990375e-05
+  #       c_p: 3.986e+03
+  #       tempFrz0: 9.01e-02
+  #       dTempFrz_dS: -5.75e-02
+  #       grid_type: 'llc'
+  #     name: V_LLC4320
+  #     description: |
+  #       V (3D + time dependent) field for the LLC4320, a general, curvilinear ocean simulations on the cube-sphere.
+  #     citation: |
+  #       Paper.
+  #     projection:
+  #     original_output: snapshot
 
 
 # ======================================================================
