@@ -18,5 +18,6 @@ datasets:
     - Eta_LLC4320
     - U_LLC4320
     - V_LLC4320
+    - grid_LLC4320
     - POP_Core
     - POP_Hybrid
