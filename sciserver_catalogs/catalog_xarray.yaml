@@ -564,9 +564,9 @@ sources:
     model: MITGCM
     args:
       urlpath: '/sciserver/filedb03-01/ocean/LLC4320/SSS'
-      # xarray_kwargs:
+      xarray_kwargs:
       #   engine: zarr
-      #   drop_variables: ['']
+        drop_variables: ['XC']
     metadata:
       rename:
         i: X
