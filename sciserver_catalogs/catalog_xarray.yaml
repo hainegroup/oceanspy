@@ -930,19 +930,31 @@ sources:
       projection: Mercator
 
   # California Coast
-  grd_California_Coast:
+  California_Coast:
     description: Grid of California_Coast
     driver: netcdf
     model: HyCOM
     args:
-      urlpath: /sciserver/oceanography/HyCOM/swot+smode/grid.nc
+      urlpath: /sciserver/oceanography/HyCOM/swot+smode/GLBy0.04_*.nc
       xarray_kwargs:
         engine: netcdf4
-        drop_variables: [''] # need to figure out which variables I am droping
+        drop_variables: ['bottom_salinity','bottom_temp','bottom_u','bottom_v']
+        engine: netcdf4
+        concat_dim: time
+        combine: by_coords
+        parallel: True
+        decode_cf: False
     metadata:
+      rename:
+        water_temp: temp
+        water_u: u
+        water_v: v
+        lon: X
+        lat: Y
+        depth: Z
       manipulate_coords:
-        fillna: True
-        coords1Dfrom2D: True
+        fillna: False
+        coords1Dfrom2D: False
       grid_coords:
         add_midp: True
         grid_coords:
@@ -964,7 +976,7 @@ sources:
         eq_state: 
         rho0: 1027
         g: 9.81
-        eps_nh: 0 
+        eps_nh: 0
         omega: 7.292123516990375e-05
         c_p: 3.986e+03
         temp_offset: 20
@@ -984,21 +996,7 @@ sources:
       mates: | 
         Sample files
       projection: Mercator
-            
-  fld_California_Coast:
-    description: 3H-Fields of California_Coast
-    driver: netcdf
-    model: HyCOM
-    args:
-      urlpath: /sciserver/oceanography/HyCOM/swot+smode/GLBy0.04*.nc
-      xarray_kwargs:
-        engine: netcdf4
-        concat_dim: T
-        parallel: True
-    metadata:
-      rename:
-        T: time
-      original_output: snapshot
+      original_output: snapshot.
 
 
 
