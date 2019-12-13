@@ -946,9 +946,9 @@ sources:
         decode_cf: False
     metadata:
       rename:
-        water_temp: temp
-        water_u: u
-        water_v: v
+        water_temp: Temp
+        water_u: U
+        water_v: V
         lon: X
         lat: Y
         depth: Z
