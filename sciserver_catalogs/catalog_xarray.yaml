@@ -989,10 +989,6 @@ sources:
       name: California_Coast
       description: |
         High-resolution grid of the (1/25 deg) numerical simulation covering the California Coast using the HyCOM model. The original grid has 41 (isopycnal) layers but these files were interpolated to 101 vertical levels.
-      citation: | 
-        Sample files
-      characteristics: | 
-        Sample files
       mates: | 
         Sample files
       projection: Mercator
