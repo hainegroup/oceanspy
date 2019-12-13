@@ -931,7 +931,7 @@ sources:
 
   # California Coast
   California_Coast:
-    description: Grid of California_Coast
+    description: Simulation off the Northern California Coast with HyCOM ocean mdoel
     driver: netcdf
     model: HyCOM
     args:
@@ -939,7 +939,6 @@ sources:
       xarray_kwargs:
         engine: netcdf4
         drop_variables: ['bottom_salinity','bottom_temp','bottom_u','bottom_v']
-        engine: netcdf4
         concat_dim: time
         combine: by_coords
         parallel: True
