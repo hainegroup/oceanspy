@@ -886,7 +886,7 @@ sources:
     driver: netcdf
     model: POP
     args:
-      urlpath: '/sciserver/filedb07-01/ocean/POP/Hybrid/*.nc'
+      urlpath: '/sciserver/filedb07-01/ocean/POP/HYBRID/*.nc'
       xarray_kwargs:
         engine: netcdf4
         drop_variables: ['']
