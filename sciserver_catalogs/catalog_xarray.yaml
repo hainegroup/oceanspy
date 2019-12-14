@@ -892,6 +892,7 @@ sources:
       xarray_kwargs:
         engine: netcdf4
         drop_variables: ['']
+        group: Flow_Vars
     metadata:
       manipulate_coords:
         fillna: True
