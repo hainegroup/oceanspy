@@ -839,6 +839,8 @@ sources:
       xarray_kwargs:
         engine: netcdf4
         drop_variables: ['']
+        decode_times: False
+        group: Flow_Vars
     metadata:
       rename:
       manipulate_coords:
