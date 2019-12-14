@@ -972,8 +972,8 @@ sources:
             time: -0.5
       parameters: # need to double check this parameters. Add scale factors
         rSphere: 6.371e+03
-        eq_state:jmd95
-        rho0: 1027
+        # eq_state: jmd95
+        # rho0: 1027
         g: 9.81
         eps_nh: 0
         omega: 7.292123516990375e-05
