@@ -52,7 +52,14 @@ TYPE_PARAMETERS = {'rSphere': (type(None), _np.ScalarType),
                    'omega': (_np.ScalarType),
                    'c_p': (_np.ScalarType),
                    'tempFrz0': (_np.ScalarType),
-                   'dTempFrz_dS': (_np.ScalarType)}
+                   'dTempFrz_dS': (_np.ScalarType),
+                   'temp_offset': (_np.ScalarType),
+                   'temp_scale': (_np.ScalarType),
+                   'temp_fill': (_np.ScalarType),
+                   'sal_offset': (_np.ScalarType),
+                   'sal_scale': (_np.ScalarType),
+                   'sal_fill': (_np.ScalarType),
+                   'ssh_fill': (_np.ScalarType)}
 
 SCISERVER_DATASETS = ['get_started',
                       'EGshelfIIseas2km_ASR_full',
