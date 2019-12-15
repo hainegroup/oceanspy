@@ -834,7 +834,7 @@ sources:
     args:
       urlpath: '/sciserver/filedb07-01/ocean/POP/CORE/CESM_POPv2_CORE_0033.nc'
       engine: netcdf4
-      drop_variables: ['time']
+      drop_variables: ['time','Jstart','Jend','Istart','Iend']
       decode_times: False
     metadata: 
         manipulate_coords: 
