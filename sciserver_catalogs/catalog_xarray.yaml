@@ -884,6 +884,7 @@ sources:
         drop_variables: ['']
         decode_times: False
         group: Flow_Vars
+        concat_dim: Nt
     metadata:
       rename:
       parameters:
@@ -915,6 +916,7 @@ sources:
         engine: netcdf4
         drop_variables: ['']
         group: Flow_Vars
+        concat_dim: Nt
     metadata:
       manipulate_coords:
         fillna: True
