@@ -827,7 +827,7 @@ sources:
   #     projection:
   #     original_output: snapshot
 
-  grd_POP:
+  grd_CORE_POP:
     description: POP (version 2) model grid
     driver: netcdf
     model: POPv2
@@ -872,7 +872,7 @@ sources:
 
 # ======================================================================
 #  POP Core-forced
-  POP_Core:
+  fld_Core_POP:
     description: Pop ocean (only) simulation forced with COREv2
     driver: netcdf
     model: POP
@@ -903,10 +903,9 @@ sources:
         Justin et al 2014.
       projection: Mercator
 
-
 #  POP coupled simulation
-  POP_Hybrid:
-    description: Pop coupled simulation
+  fld_HYBRID_POP:
+    description: Flow fields for the coupled atmos-ocean simulation for the CESM model (POPv2).
     driver: netcdf
     model: POP
     args:
