@@ -835,7 +835,7 @@ sources:
       urlpath: '/sciserver/filedb07-01/ocean/POP/CORE/CESM_POPv2_CORE_0033.nc'
       xarray_kwargs:
         engine: netcdf4
-        drop_variables: ['time','Jstart','Jend','Istart','Iend']
+        drop_variables: ['time','Jstart','Jend','Istart','Iend','cp_air','cp_sw','fwflux_factor','grav','T0_Kelvin','heat_to_PW','hflux_factor','latent_heat_fusion','latent_heat_vapor','mass_to_Sv','momentum_factor','ocn_ref_salinity','omega','ppt_to_salt','radius','rho_air','rho_fw','rho_sw','salinity_factor','salt_to_Svppt','salt_to_mmday','salt_to_ppt','sea_ice_salinity','sflux_factor','sound','stefan_boltzmann','vonkar']
         decode_times: False
     metadata:
       grid_coords: 
