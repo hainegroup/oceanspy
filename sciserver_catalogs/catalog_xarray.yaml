@@ -723,10 +723,10 @@ sources:
   grd_LLC4320:
     description: horizontal grid for LLC4320
     driver: zarr
-    model: MITGCM
     args:
       urlpath: '/sciserver/filedb05-01/ocean/LLC4320/grid'
     metadata:
+      model: MITGCM
       rename:
         i: X
         i_g: Xg
@@ -838,6 +838,7 @@ sources:
         drop_variables: ['time','Jstart','Jend','Istart','Iend','cp_air','cp_sw','fwflux_factor','grav','T0_Kelvin','heat_to_PW','hflux_factor','latent_heat_fusion','latent_heat_vapor','mass_to_Sv','momentum_factor','ocn_ref_salinity','omega','ppt_to_salt','radius','rho_air','rho_fw','rho_sw','salinity_factor','salt_to_Svppt','salt_to_mmday','salt_to_ppt','sea_ice_salinity','sflux_factor','sound','stefan_boltzmann','vonkar']
         decode_times: False
     metadata:
+      model: POP
       grid_coords: 
         add_midp: True
         grid_coords:
@@ -876,7 +877,6 @@ sources:
   fld_CORE_POP:
     description: Pop ocean (only) simulation forced with COREv2
     driver: netcdf
-    model: POP
     args:
       urlpath: '/sciserver/filedb07-01/ocean/POP/CORE/*.nc'
       xarray_kwargs:
@@ -888,6 +888,7 @@ sources:
         parallel: True
         combine: nested
     metadata:
+      model: POP
       rename:
         Nt: time
       parameters:
@@ -911,7 +912,6 @@ sources:
   grd_HYBRID_POP:
     description: POP (version 2) model grid
     driver: netcdf
-    model: POPv2
     args:
       urlpath: '/sciserver/filedb07-01/ocean/POP/HYBRID/CESM_POPv2_HYBRID_0086.nc'
       xarray_kwargs:
@@ -919,6 +919,7 @@ sources:
         drop_variables: ['time','Jstart','Jend','Istart','Iend','cp_air','cp_sw','fwflux_factor','grav','T0_Kelvin','heat_to_PW','hflux_factor','latent_heat_fusion','latent_heat_vapor','mass_to_Sv','momentum_factor','ocn_ref_salinity','omega','ppt_to_salt','radius','rho_air','rho_fw','rho_sw','salinity_factor','salt_to_Svppt','salt_to_mmday','salt_to_ppt','sea_ice_salinity','sflux_factor','sound','stefan_boltzmann','vonkar']
         decode_times: False
     metadata:
+      model: POP
       grid_coords: 
         add_midp: True
         grid_coords:
@@ -957,7 +958,6 @@ sources:
   fld_HYBRID_POP:
     description: Flow fields for the coupled atmos-ocean simulation for the CESM model (POPv2).
     driver: netcdf
-    model: POP
     args:
       urlpath: '/sciserver/filedb07-01/ocean/POP/HYBRID/*.nc'
       xarray_kwargs:
@@ -968,6 +968,7 @@ sources:
         parallel: True
         combine: nested
     metadata:
+      model: POP
       rename:
         Nt: time
       manipulate_coords:
