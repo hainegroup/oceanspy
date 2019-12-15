@@ -886,6 +886,7 @@ sources:
         group: Flow_Vars
         concat_dim: Nt
         parallel: True
+        combine: by_coords
     metadata:
       rename:
       parameters:
