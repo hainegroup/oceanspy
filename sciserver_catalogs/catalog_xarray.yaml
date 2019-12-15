@@ -827,25 +827,17 @@ sources:
   #     projection:
   #     original_output: snapshot
 
-
-# ======================================================================
-#  POP Core-forced
-  POP_Core:
-    description: Pop ocean (only) simulation forced with COREv2
+  POP_grid:
+    description: POP (version 2) model grid.
     driver: netcdf
-    model: POP
+    model: POPv2
     args:
-      urlpath: '/sciserver/filedb07-01/ocean/POP/CORE/*.nc'
-      xarray_kwargs:
-        engine: netcdf4
-        drop_variables: ['']
-        decode_times: False
-        group: Flow_Vars
-    metadata:
-      rename:
-      manipulate_coords:
-        fillna: True
-        coords1Dfrom2D: False
+      urlpath: '/sciserver/filedb07-01/ocean/POP/CORE/CESM_POPv2_CORE_0033.nc'
+      engine: netcdf4
+      drop_variables: ['']
+      decode_times: False
+    metadata: 
+        manipulate_coords: 
       grid_coords: 
         add_midp: True
         grid_coords:
@@ -862,8 +854,38 @@ sources:
             Zp1: 0.5
             Zu: 0.5
             Zl: -0.5
-      shift_averages: 
-        averageList:
+      parameters:
+        rSphere: 6.371e+03
+        eq_state: mdjwf
+        rho0: 1027
+        g: 9.81
+        eps_nh: 0 
+        omega: 7.292123516990375e-05
+        c_p: 3.986e+03
+        tempFrz0: 9.01e-02
+        dTempFrz_dS: -5.75e-02
+      name: POP_Grid
+      description: |
+        Grid for the POPv2 synoptic scale ocean model
+      citation: |
+        Justin et al (2014), A new synoptic scale resolving global climate simulatoin using the Community Earth System Model. J. Adv. Model. Earth Syst., 6, 1065-1094. https:doi.org/10.1002/2014MS000363
+      original_output: Monthly means.
+
+# ======================================================================
+#  POP Core-forced
+  POP_Core:
+    description: Pop ocean (only) simulation forced with COREv2
+    driver: netcdf
+    model: POP
+    args:
+      urlpath: '/sciserver/filedb07-01/ocean/POP/CORE/*.nc'
+      xarray_kwargs:
+        engine: netcdf4
+        drop_variables: ['']
+        decode_times: False
+        group: Flow_Vars
+    metadata:
+      rename:
       parameters:
         rSphere: 6.371e+03
         eq_state: mdjwf
