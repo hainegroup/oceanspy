@@ -381,7 +381,6 @@ def _find_entries(name, catalog_url):
     """
     # Check parameters
     if catalog_url is None:  # pragma: no cover
-    # original
         # url = ('https://raw.githubusercontent.com/malmans2/oceanspy/'
         #        'master/sciserver_catalogs/datasets_list.yaml')
         url = ('https://raw.githubusercontent.com/Mikejmnez/oceanspy/'
@@ -412,7 +411,7 @@ def _find_entries(name, catalog_url):
             url = ('https://raw.githubusercontent.com/Mikejmnez/oceanspy/'
                    'llc4320/sciserver_catalogs/catalog_xmitgcm.yaml')
         else:
-            url = catalog_url # provided by user
+            url = catalog_url  # provided by user
 
         # Is it an url?
         try:
