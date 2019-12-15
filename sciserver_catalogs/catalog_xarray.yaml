@@ -828,7 +828,7 @@ sources:
   #     original_output: snapshot
 
   grd_POP:
-    description: POP (version 2) model grid.
+    description: POP (version 2) model grid
     driver: netcdf
     model: POPv2
     args:
@@ -836,8 +836,8 @@ sources:
       engine: netcdf4
       drop_variables: ['time','Jstart','Jend','Istart','Iend']
       decode_times: False
-    metadata: 
-        manipulate_coords: 
+    metadata:
+      manipulate_coords: 
       grid_coords: 
         add_midp: True
         grid_coords:
