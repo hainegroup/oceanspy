@@ -720,7 +720,7 @@ sources:
   #     projection:
   #     original_output: snapshot
 
-  grid_LLC4320:
+  grd_LLC4320:
     description: horizontal grid for LLC4320
     driver: zarr
     model: MITGCM
@@ -827,7 +827,7 @@ sources:
   #     projection:
   #     original_output: snapshot
 
-  POP_grid:
+  grd_POP:
     description: POP (version 2) model grid.
     driver: netcdf
     model: POPv2
