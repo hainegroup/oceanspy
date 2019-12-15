@@ -21,3 +21,5 @@ datasets:
     - grid_LLC4320
     - POP_Core
     - POP_Hybrid
+    - POP_grid
+    - POP
