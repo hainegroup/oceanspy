@@ -864,7 +864,7 @@ sources:
         c_p: 3.986e+03
         tempFrz0: 9.01e-02
         dTempFrz_dS: -5.75e-02
-      name: POP_Grid
+      name: POP_grid
       description: |
         Grid for the POPv2 synoptic scale ocean model
       citation: |
