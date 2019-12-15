@@ -833,9 +833,10 @@ sources:
     model: POPv2
     args:
       urlpath: '/sciserver/filedb07-01/ocean/POP/CORE/CESM_POPv2_CORE_0033.nc'
-      engine: netcdf4
-      drop_variables: ['time','Jstart','Jend','Istart','Iend']
-      decode_times: False
+      xarray_kwargs:
+        engine: netcdf4
+        drop_variables: ['time','Jstart','Jend','Istart','Iend']
+        decode_times: False
     metadata:
       grid_coords: 
         add_midp: True
@@ -884,6 +885,7 @@ sources:
         decode_times: False
         group: Flow_Vars
         concat_dim: Nt
+        parallel: True
     metadata:
       rename:
       parameters:
@@ -910,9 +912,10 @@ sources:
     model: POPv2
     args:
       urlpath: '/sciserver/filedb07-01/ocean/POP/HYBRID/CESM_POPv2_HYBRID_0086.nc'
-      engine: netcdf4
-      drop_variables: ['time','Jstart','Jend','Istart','Iend']
-      decode_times: False
+      xarray_kwargs:
+        engine: netcdf4
+        drop_variables: ['time','Jstart','Jend','Istart','Iend']
+        decode_times: False
     metadata:
       grid_coords: 
         add_midp: True
@@ -960,6 +963,7 @@ sources:
         drop_variables: ['']
         group: Flow_Vars
         concat_dim: Nt
+        parallel: True
     metadata:
       manipulate_coords:
         fillna: True
