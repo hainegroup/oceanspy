@@ -837,7 +837,6 @@ sources:
       drop_variables: ['time','Jstart','Jend','Istart','Iend']
       decode_times: False
     metadata:
-      manipulate_coords: 
       grid_coords: 
         add_midp: True
         grid_coords:
