@@ -872,7 +872,7 @@ sources:
 
 # ======================================================================
 #  POP Core-forced
-  fld_Core_POP:
+  fld_CORE_POP:
     description: Pop ocean (only) simulation forced with COREv2
     driver: netcdf
     model: POP
@@ -902,7 +902,7 @@ sources:
       citation: |
         Justin et al 2014.
       projection: Mercator
-      
+
 
   grd_HYBRID_POP:
     description: POP (version 2) model grid
