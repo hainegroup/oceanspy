@@ -19,7 +19,7 @@ datasets:
     - U_LLC4320
     - V_LLC4320
     - grid_LLC4320
-    - POP_Core
-    - POP_Hybrid
     - POP_grid
     - POP
+    - CORE # Core-forced POP simulation
+    - HYBRID # Atmos-ocean coupled POP simulation
