@@ -6,6 +6,7 @@
 import numpy
 import warnings
 import xgcm
+import xarray as _xr
 
 
 # =========
@@ -352,10 +353,10 @@ def _restore_coord_attrs(ds):
 
 def _add_pop_dims_to_dataset(ds):
     ds_new = ds.copy()
-    ds_new['nlon_u'] = xr.Variable(('nlon_u'), np.arange(len(ds.nlon)) + 1, {'axis': 'X', 'c_grid_axis_shift': 0.5})
-    ds_new['nlat_u'] = xr.Variable(('nlat_u'), np.arange(len(ds.nlat)) + 1, {'axis': 'Y', 'c_grid_axis_shift': 0.5})
-    ds_new['nlon_t'] = xr.Variable(('nlon_t'), np.arange(len(ds.nlon)) + 0.5, {'axis': 'X'})
-    ds_new['nlat_t'] = xr.Variable(('nlat_t'), np.arange(len(ds.nlat)) + 0.5, {'axis': 'Y'})
+    ds_new['nlon_u'] = _xr.Variable(('nlon_u'), np.arange(len(ds.nlon)) + 1, {'axis': 'X', 'c_grid_axis_shift': 0.5})
+    ds_new['nlat_u'] = _xr.Variable(('nlat_u'), np.arange(len(ds.nlat)) + 1, {'axis': 'Y', 'c_grid_axis_shift': 0.5})
+    ds_new['nlon_t'] = _xr.Variable(('nlon_t'), np.arange(len(ds.nlon)) + 0.5, {'axis': 'X'})
+    ds_new['nlat_t'] = _xr.Variable(('nlat_t'), np.arange(len(ds.nlat)) + 0.5, {'axis': 'Y'})
 
     # add metadata to z grid
     ds_new=ds_new.set_coords({'z_t','z_w','z_w_top','z_w_bot'})
@@ -458,7 +459,7 @@ def _relabel_pop_dims(ds):
                 dims = ('time',) + new_spatial_dims
             else:
                 dims = new_spatial_dims
-            ds_new[vname] = xr.Variable(dims, da.data, da.attrs, da.encoding, fastpath=True)
+            ds_new[vname] = _xr.Variable(dims, da.data, da.attrs, da.encoding, fastpath=True)
     return ds_new
 
 
