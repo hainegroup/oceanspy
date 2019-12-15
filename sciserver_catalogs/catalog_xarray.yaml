@@ -889,6 +889,7 @@ sources:
         combine: nested
     metadata:
       rename:
+        Nt: time
       parameters:
         rSphere: 6.371e+03
         eq_state: mdjwf
@@ -967,6 +968,8 @@ sources:
         parallel: True
         combine: nested
     metadata:
+      rename:
+        Nt: time
       manipulate_coords:
         fillna: True
         coords1Dfrom2D: False
