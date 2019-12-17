@@ -1,6 +1,7 @@
 datasets:
   sciserver:
     - get_started
+    - IGP
     - EGshelfIIseas2km_ASR_full
     - EGshelfIIseas2km_ASR_crop
     - EGshelfIIseas2km_ERAI_6H
