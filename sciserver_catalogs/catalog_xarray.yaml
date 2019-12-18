@@ -163,6 +163,7 @@ sources:
         engine: netcdf4
         concat_dim: T
         parallel: True
+        combine: nested
     metadata:
       rename:
         T: time
@@ -231,6 +232,7 @@ sources:
         engine: netcdf4
         concat_dim: T
         parallel: True
+        combine: nested
     metadata:
       rename:
         T: time
@@ -318,6 +320,7 @@ sources:
         engine: netcdf4
         concat_dim: T
         parallel: True
+        combine: nested
     metadata:
       rename:
         T: time
@@ -397,6 +400,7 @@ sources:
         engine: netcdf4
         concat_dim: T
         parallel: True
+        combine: nested
     metadata:
       isel: 
         Z: slice(None, 55)
@@ -419,6 +423,7 @@ sources:
         engine: netcdf4
         concat_dim: T
         parallel: True
+        combine: nested
     metadata:
       rename: 
         T: time
@@ -431,7 +436,8 @@ sources:
     driver: netcdf
     model: MITGCM
     args:
-      urlpath: /home/idies/workspace/OceanCirculation/exp_Arctic_Control/GRID/grid_glued_swapped.nc
+      urlpath: /sciserver/oceanography/exp_Arctic_Control/GRID/grid_glued_swapped.nc
+      # urlpath: /home/idies/workspace/OceanCirculation/exp_Arctic_Control/GRID/grid_glued_swapped.nc
       xarray_kwargs:
         engine: netcdf4
         drop_variables: ['RC', 'RF', 'RU', 'RL']
@@ -476,11 +482,13 @@ sources:
     driver: netcdf
     model: MITGCM
     args:
-      urlpath: /home/idies/workspace/OceanCirculation/exp_Arctic_Control/days*/DIAGS/*.nc
+      urlpath: /sciserver/oceanography/exp_Arctic_Control/days*/DIAGS/*.nc
+      # urlpath: /home/idies/workspace/OceanCirculation/exp_Arctic_Control/days*/DIAGS/*.nc
       xarray_kwargs:
         engine: netcdf4
         concat_dim: T
         parallel: True
+        combine: nested
         drop_variables: ['diag_levels', 'iter', 'SIGMA0']
     metadata:
       rename:
@@ -492,11 +500,13 @@ sources:
     driver: netcdf
     model: MITGCM
     args:
-      urlpath: /home/idies/workspace/OceanCirculation/exp_Arctic_Control/days*/STATE/*.nc
+      urlpath: /sciserver/oceanography/exp_Arctic_Control/days*/STATE/*.nc
+      # urlpath: /home/idies/workspace/OceanCirculation/exp_Arctic_Control/days*/STATE/*.nc
       xarray_kwargs:
         engine: netcdf4
         concat_dim: T
         parallel: True
+        combine: nested
     metadata:
       rename:
         T: time
