@@ -15,7 +15,7 @@ import urllib as _urllib
 # Import from oceanspy (private)
 from ._oceandataset import OceanDataset as _OceanDataset
 import oceanspy as _ospy
-from ._ospy_utils import (_check_instance, _restore_coord_attrs)
+from ._ospy_utils import (_check_instance, _restore_coord_attrs,_relabel_pop_dims)
 from collections import OrderedDict as _OrderedDict
 
 # Import extra modules (private)
