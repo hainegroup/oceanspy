@@ -159,7 +159,7 @@ sources:
     driver: netcdf
     model: MITGCM
     args:
-      urlpath: urlpath: /sciserver/oceanography/exp_ERAI/6H*.nc
+      urlpath: /sciserver/oceanography/exp_ERAI/6H*.nc
       # urlpath: /home/idies/workspace/OceanCirculation/exp_ERAI/6H*.nc
       xarray_kwargs:
         engine: netcdf4
