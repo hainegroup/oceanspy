@@ -903,10 +903,10 @@ sources:
         dTempFrz_dS: -5.75e-02
       name: POP_Core
       description: |
-        Fields from the Ocean-only POPv2 ocean simulation for a subregion of the Subpolar North Atlantic, centered around Nordic Seas.
+        Fields from the ocean only, CORE-forced POPv2 ocean simulation for a subregion of the Subpolar North Atlantic, centered around Nordic Seas.
       citation: |
-        Justin et al 2014.
-      projection: Mercator
+        Justin et al (2014), A new synoptic scale resolving global climate simulatoin using the Community Earth System Model. J. Adv. Model. Earth Syst., 6, 1065-1094. https:doi.org/10.1002/2014MS000363
+      original_output: Monthly means.
 
 
   grd_HYBRID_POP:
