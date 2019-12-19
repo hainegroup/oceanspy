@@ -1074,7 +1074,8 @@ class OceanDataset:
                                        coordinate="YV XV")))
             elif self.parameters['grid_type'] == 'pop':
                 pass
-
+            else:
+                raise ValueError('grid type not recognized by OceanSpy')
             coords = _OrderedDict(list(coords.items())
                                   + list(add_coords.items()))
             for var in coords:
