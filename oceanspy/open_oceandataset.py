@@ -224,7 +224,7 @@ def from_catalog(name, catalog_url=None):
         od = od.shift_averages(**shift_averages)
 
     # Set OceanSpy stuff
-    for var in ['aliases', 'parameters', 'name', 'description', 'projection']:
+    for var in ['aliases', 'parameters', 'name', 'description', 'projection','grid_type']:
         val = metadata.pop(var, None)
         if val is not None:
             od = eval('od.set_{}(val)'.format(var))
