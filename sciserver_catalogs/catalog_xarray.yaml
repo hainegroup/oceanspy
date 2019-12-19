@@ -542,6 +542,7 @@ sources:
     args:
       urlpath: '/sciserver/filedb03-01/ocean/LLC4320/SSS'
       drop_variables: ['XC','YC','iter']
+    metadata:
       name: SSS_LLC4320
       description: |
         SSS field for the LLC4320, a general, curvilinear ocean simulations on the cube-sphere.
