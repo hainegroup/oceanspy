@@ -687,8 +687,6 @@ sources:
         coordsUVfromG: True
       grid_coords: 
         add_midp: True
-      grid_periodic:
-        X: True
         grid_coords:
           Y:
             Y: 
@@ -703,6 +701,9 @@ sources:
             Zl: -0.5
           time: 
             time: -0.5
+        grid_periodic:
+          X: True
+        face_connections: # topology
       # shift_averages: 
       #   averageList:
       parameters:
