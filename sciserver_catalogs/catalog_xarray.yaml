@@ -531,6 +531,8 @@ sources:
         i_g: Xp1
         j: Y
         j_g: Yp1
+      parameters:
+        grid_type: llc
       name: SST_LLC4320
       description: |
         SST field for the LLC4320, a general, curvilinear ocean simulations on the cube-sphere.
@@ -546,13 +548,15 @@ sources:
     model: MITGCM
     args:
       urlpath: '/sciserver/filedb03-01/ocean/LLC4320/SSS'
-      drop_variables: ['XC','YC','iter']
+      drop_variables: ['XC','YC','iter','k','k_l','k_u','Z','Zl','Zu']
     metadata:
       rename:
         i: X
         i_g: Xp1
         j: Y
         j_g: Yp1
+      parameters:
+        grid_type: llc
       name: SSS_LLC4320
       description: |
         SSS field for the LLC4320, a general, curvilinear ocean simulations on the cube-sphere.
