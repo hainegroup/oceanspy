@@ -1055,6 +1055,23 @@ class OceanDataset:
                                        coordinate="YV XV")))
             elif self.parameters['grid_type'] == 'llc':
                 coords = variables.horizontal_coordinates_llc
+                add_coords = _OrderedDict(
+                    XU=dict(attrs=dict(standard_name="longitude_at_u_location",
+                                       long_name="longitude",
+                                       units="degrees_east",
+                                       coordinate="YU XU")),
+                    YU=dict(attrs=dict(standard_name="latitude_at_u_location",
+                                       long_name="latitude",
+                                       units="degrees_north",
+                                       coordinate="YU XU")),
+                    XV=dict(attrs=dict(standard_name="longitude_at_v_location",
+                                       long_name="longitude",
+                                       units="degrees_east",
+                                       coordinate="YV XV")),
+                    YV=dict(attrs=dict(standard_name="latitude_at_v_location",
+                                       long_name="latitude",
+                                       units="degrees_north",
+                                       coordinate="YV XV")))
             elif self.parameters['grid_type'] == 'pop':
                 pass
 
