@@ -463,6 +463,7 @@ sources:
       shift_averages: 
         averageList:
       parameters:
+        grid_type: 'spherical'
         rSphere: 6.371e+03
         eq_state: jmd95
         rho0: 1027
