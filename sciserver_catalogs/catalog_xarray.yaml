@@ -706,8 +706,8 @@ sources:
         face_connections: # topology
           face:
             0:
-              X: ((12,'Y',False),(3,'X',False))
-              Y: (None,(1,'Y',False))
+              X: [(12,'Y',False),(3,'X',False)]
+              Y: [None,(1,'Y',False)]
             1:
               X: ((11,'Y',False),(4,'X',False))
               Y: ((0,'Y',False),(2,'Y',False))
