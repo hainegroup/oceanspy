@@ -463,7 +463,6 @@ sources:
       shift_averages: 
         averageList:
       parameters:
-        grid_type: 'spherical'
         rSphere: 6.371e+03
         eq_state: jmd95
         rho0: 1027
@@ -473,6 +472,7 @@ sources:
         c_p: 3.986e+03
         tempFrz0: 9.01e-02
         dTempFrz_dS: -5.75e-02
+      grid_type: 'spherical'
       name: Arctic_Control
       description: |
         Curvilinear grid test. Setup by Dr. Renske Gelderloos.
