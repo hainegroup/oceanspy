@@ -42,10 +42,13 @@ PARAMETERS_DESCRIPTION = {'rSphere':
 
 OCEANSPY_AXES = ['X', 'Y', 'Z', 'time', 'mooring', 'station']
 
-AVAILABLE_PARAMETERS = {'eq_state': ['jmd95', 'mdjwf']}
+AVAILABLE_PARAMETERS = {'eq_state': ['jmd95', 'mdjwf'],
+                        'grid_type': ['llc', 'spherical', 'rectilinear',
+                                      'pop']}
 
 TYPE_PARAMETERS = {'rSphere': (type(None), _np.ScalarType),
                    'eq_state': (str),
+                   'grid_type': (str),
                    'rho0': (_np.ScalarType),
                    'g': (_np.ScalarType),
                    'eps_nh': (_np.ScalarType),
