@@ -9,7 +9,6 @@ import numpy as _np  # noqa: F401
 
 DEFAULT_PARAMETERS = {'rSphere': 6.371E3,
                       'eq_state': 'jmd95',
-                      'grid_type': 'rectilinear',
                       'rho0': 1027,
                       'g': 9.81,
                       'eps_nh': 0,
@@ -23,8 +22,6 @@ PARAMETERS_DESCRIPTION = {'rSphere':
                           'Radius of sphere for spherical polar'
                           'or curvilinear grid (km).'
                           'Set it None for cartesian grid.',
-                          'grid_type':
-                          'Type of grid the model uses.',
                           'eq_state':
                           'Equation of state.',
                           'rho0':
@@ -45,13 +42,11 @@ PARAMETERS_DESCRIPTION = {'rSphere':
 
 OCEANSPY_AXES = ['X', 'Y', 'Z', 'time', 'mooring', 'station']
 
-AVAILABLE_PARAMETERS = {'eq_state': ['jmd95', 'mdjwf'],
-                        'grid_type': ['llc', 'spherical', 'rectilinear',
-                                      'pop']}
+AVAILABLE_PARAMETERS = {'eq_state': ['jmd95', 'mdjwf']},
+
 
 TYPE_PARAMETERS = {'rSphere': (type(None), _np.ScalarType),
                    'eq_state': (str),
-                   'grid_type': (str),
                    'rho0': (_np.ScalarType),
                    'g': (_np.ScalarType),
                    'eps_nh': (_np.ScalarType),
