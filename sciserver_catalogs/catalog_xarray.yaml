@@ -683,6 +683,8 @@ sources:
         i_g: Xp1
         j: Y
         j_g: Yp1
+      manipulate_coords:
+        coordsUVfromG: True
       grid_coords: 
         add_midp: True
         grid_coords:
@@ -712,7 +714,7 @@ sources:
         tempFrz0: 9.01e-02
         dTempFrz_dS: -5.75e-02
         grid_type: llc
-      name: grid_LLC4320
+      name: LLC4320
       description: |
         horizontal grid for LLC4320, a general, curvilinear ocean simulations on the cube-sphere.
       citation: |
