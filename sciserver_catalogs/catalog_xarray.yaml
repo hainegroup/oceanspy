@@ -683,8 +683,8 @@ sources:
         i_g: Xp1
         j: Y
         j_g: Yp1
-      manipulate_coords:
-        coordsUVfromG: True
+      # manipulate_coords:
+      #   coordsUVfromG: True
       grid_coords: 
         add_midp: True
         grid_coords:
