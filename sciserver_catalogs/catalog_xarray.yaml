@@ -528,9 +528,9 @@ sources:
     metadata:
       rename:
         i: X
-        # i_g: Xg
+        i_g: Xp1
         j: Y
-        # j_g: Yg
+        j_g: Yp1
         # k: Z
         # k_l: Zl
         # k_p1: Zp1
@@ -580,13 +580,13 @@ sources:
     metadata:
       rename:
         i: X
-        i_g: Xg
+        i_g: Xp1
         j: Y
-        j_g: Yg
-        k: Z
-        k_l: Zl
-        k_p1: Zp1
-        k_u: Zu
+        j_g: Yp1
+        # k: Z
+        # k_l: Zl
+        # k_p1: Zp1
+        # k_u: Zu
       grid_coords: 
         add_midp: True
         grid_coords:
@@ -742,9 +742,9 @@ sources:
       model: MITGCM
       rename:
         i: X
-        i_g: Xg
+        i_g: Xp1
         j: Y
-        j_g: Yg
+        j_g: Yp1
         # k: Z
         # k_l: Zl
         # k_p1: Zp1
