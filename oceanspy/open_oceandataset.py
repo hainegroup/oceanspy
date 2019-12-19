@@ -324,12 +324,12 @@ def from_catalog(name, catalog_url=None):
         variables['SSV'] = dict(
             attrs=dict(standard_name=('surface sea_water_y_velocity'),
                        units=variables['V']['attrs']['units']))
-        variables['XC'] = dict(
-            attrs=dict(standard_name=('longitude'),
-                       units='degrees_east'))
-        variables['YC'] = dict(
-            attrs=dict(standard_name=('latitude'),
-                       units='degrees_north'))
+        # variables['XC'] = dict(
+        #     attrs=dict(standard_name=('longitude'),
+        #                units='degrees_east'))
+        # variables['YC'] = dict(
+        #     attrs=dict(standard_name=('latitude'),
+        #                units='degrees_north'))
 
         # Extract variables in dataset only
         variables = _OrderedDict(**{var: variables[var]
