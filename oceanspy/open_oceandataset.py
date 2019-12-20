@@ -234,6 +234,10 @@ def from_catalog(name, catalog_url=None):
     if manipulate_coords is not None:
         od = od.manipulate_coords(**manipulate_coords)
 
+    grid_periodic = metadata.pop('grid_periodic', None)
+    if grid_periodic is not None:
+        od = od.set_grid_periodic(**grid_periodic)
+
     # Set grid coordinates
     grid_coords = metadata.pop('grid_coords', None)
     if grid_coords is not None:
