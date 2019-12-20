@@ -134,6 +134,9 @@ class OceanDataset:
         if self.grid_periodic:
             more_info.append("   .grid_periodic: %s" %
                              type(self.grid_periodic))
+        if self.face_connections:
+            more_info.append("   .face_connections: %s" %
+                             type(self.face_connections))
 
         info = '\n'.join(main_info)
         info = info + '\n'.join(more_info)
