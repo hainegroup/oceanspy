@@ -701,7 +701,8 @@ sources:
             Zl: -0.5
           time: 
             time: -0.5
-      grid_periodic: ['X']
+      grid_periodic: 
+        grid_periodic: ['X']
       face_connections: # topology
         face:
           0:
