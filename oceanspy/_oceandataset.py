@@ -596,7 +596,8 @@ class OceanDataset:
 
     def set_face_connections(self, face_connections):
         '''
-        Set face conections that define the grid topology by :py:obj:`xgcm.Grid`
+        Set face conections that define the grid topology that gets read by
+        :py:obj:`xgcm.Grid`
         Parameters
         ----------
         face_connections: dict
