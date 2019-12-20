@@ -607,10 +607,10 @@ class OceanDataset:
         _check_instance({'face_connections': face_connections}, 'dict')
 
         print(face_connections.keys())
-        # for k in range(12):
-        #     for axis in ['X', 'Y']:
-        #         print([k, axis])
-        #         face_connections['face'][k][axis]=eval(face_connections['face'][k][axis])
+        for k in range(13):
+            for axis in ['X', 'Y']:
+                print([k, axis])
+                face_connections['face'][k][axis]=eval(face_connections['face'][k][axis])
 
         self = self._store_as_global_attr(name='face_connections',
                                           attr=face_connections,
