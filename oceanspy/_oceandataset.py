@@ -573,6 +573,47 @@ class OceanDataset:
 
         return self
 
+    # -----------------
+    #  face_connections
+    # -----------------
+    @property
+    def face_connections(self):
+        '''
+        Defines the topology of the grid used by :py:obj:`xgcm.Grid`.
+
+        References
+        ----------
+
+        '''
+        return self._read_from_global_attr('face_connections')
+
+    @face_connections.setter
+    def face_connections(self, face_connections):
+        '''
+        Inhibit setter.
+        '''
+        raise AttributeError(_setter_error_message('face_connections'))
+
+    def set_face_connections(self, face_connections):
+        '''
+        Set face conections that define the grid topology by :py:obj:`xgcm.Grid`
+        Parameters
+        ----------
+        face_connections: dict
+            Dictionary the connections of each face along each direction.
+        '''
+        # check parameters
+        _check_instance({'face_connections': face_connections}, 'dict')
+
+        for k in range(12):
+            for axis in ['X', 'Y']:
+                face_connections['face'][k][axis]=eval(face_connections['face'][k][axis])
+
+        self = self._store_as_global_attr(name='face_connections',
+                                          attr=face_connections,
+                                          overwrite=False)
+        return self
+
     # -------------------
     # grid
     # -------------------
