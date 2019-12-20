@@ -55,7 +55,10 @@ def _create_grid(dataset, coords, periodic, face_connections):
                       " and are not added"
                       " to the grid object.".format(warn_dims), stacklevel=2)
     # Create grid
-    grid = xgcm.Grid(dataset, periodic=periodic, face_connections = face_connections)
+    if face_connections is None:
+        grid = xgcm.Grid(dataset, periodic=periodic)
+    else:
+        grid = xgcm.Grid(dataset, periodic=periodic, face_connections = face_connections)
     if len(grid.axes) == 0:
         grid = None
 
