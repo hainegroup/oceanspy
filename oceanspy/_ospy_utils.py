@@ -12,7 +12,7 @@ import xarray as _xr
 # =========
 # FUNCTIONS
 # =========
-def _create_grid(dataset, coords, periodic, face_connections=None):
+def _create_grid(dataset, coords, periodic, face_connections):
     """
     Create xgcm grid by adding comodo attributes to the
     dimensions of the dataset.
@@ -39,23 +39,21 @@ def _create_grid(dataset, coords, periodic, face_connections=None):
     # Add comodo attributes.
     # TODO: it is possible to pass grid dict in xgcm.
     #       Should we implement it?
-# ---------- from here
-    # warn_dims = []
-    # if coords:
-    #     for axis in coords:
-    #         for dim in coords[axis]:
-    #             if dim not in dataset.dims:
-    #                 warn_dims = warn_dims+[dim]
-    #             else:
-    #                 shift = coords[axis][dim]
-    #                 dataset[dim].attrs['axis'] = axis
-    #                 if shift:
-    #                     dataset[dim].attrs['c_grid_axis_shift'] = str(shift)
-    # if len(warn_dims) != 0:
-    #     warnings.warn("{} are not dimensions"
-    #                   " and are not added"
-    #                   " to the grid object.".format(warn_dims), stacklevel=2)
-# -------------- to here
+    warn_dims = []
+    if coords:
+        for axis in coords:
+            for dim in coords[axis]:
+                if dim not in dataset.dims:
+                    warn_dims = warn_dims+[dim]
+                else:
+                    shift = coords[axis][dim]
+                    dataset[dim].attrs['axis'] = axis
+                    if shift:
+                        dataset[dim].attrs['c_grid_axis_shift'] = str(shift)
+    if len(warn_dims) != 0:
+        warnings.warn("{} are not dimensions"
+                      " and are not added"
+                      " to the grid object.".format(warn_dims), stacklevel=2)
     # Create grid
     if face_connections is None:
         grid = xgcm.Grid(dataset, periodic=periodic)

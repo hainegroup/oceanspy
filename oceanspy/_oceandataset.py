@@ -588,7 +588,10 @@ class OceanDataset:
         ----------
 
         '''
-        return self._read_from_global_attr('face_connections')
+        face_connections = self._read_from_global_attr('face_connections')
+        if not face_connections:
+            face_connections = []
+        return face_connections
 
     @face_connections.setter
     def face_connections(self, face_connections):
@@ -641,7 +644,7 @@ class OceanDataset:
         coords = self.grid_coords
         periodic = self.grid_periodic
         face_connections = self.face_connections
-        grid = _create_grid(dataset, coords, periodic,face_connections)
+        grid = _create_grid(dataset, coords, periodic, face_connections)
 
         return grid
 
