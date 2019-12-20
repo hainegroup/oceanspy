@@ -591,7 +591,7 @@ class OceanDataset:
         face_connections = self._read_from_global_attr('face_connections')
         # if not face_connections:
         #     face_connections = []
-        # return face_connections
+        return face_connections
 
     @face_connections.setter
     def face_connections(self, face_connections):
