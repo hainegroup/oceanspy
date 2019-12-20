@@ -43,7 +43,7 @@ PARAMETERS_DESCRIPTION = {'rSphere':
                           'dTempFrz_dS':
                           'Freezing temp. of sea water (intercept)'}
 
-OCEANSPY_AXES = ['X', 'Y', 'Z', 'time', 'mooring', 'station']
+OCEANSPY_AXES = ['X', 'Y', 'Z', 'face', 'time', 'mooring', 'station']
 
 AVAILABLE_PARAMETERS = {'eq_state': ['jmd95', 'mdjwf'],
                         'grid_type': ['llc', 'spherical', 'rectilinear',
