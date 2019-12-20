@@ -740,7 +740,7 @@ sources:
             11: 
               X: ((10, 'X', False), (12, 'X', False))
               Y: ((8, 'Y', False), (1, 'X', False))
-            13: 
+            12: 
               X: ((11, 'X', False), None)
               Y: ((9, 'Y', False), (0, 'X', False))
       # shift_averages: 
