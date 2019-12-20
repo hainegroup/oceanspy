@@ -701,8 +701,6 @@ sources:
             Zl: -0.5
           time: 
             time: -0.5
-      grid_periodic: 
-        grid_periodic: False
       face_connections: # topology
         face_connections:
           face:
