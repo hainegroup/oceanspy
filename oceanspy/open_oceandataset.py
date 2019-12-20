@@ -238,15 +238,15 @@ def from_catalog(name, catalog_url=None):
     if grid_periodic is not None:
         od = od.set_grid_periodic(**grid_periodic)
 
-    #  Set grid topology if present (e.g. llc4320)
-    face_connections = metadata.pop('face_connections', None)
-    if face_connections is not None:
-        od = od.set_face_connections(**face_connections)
-
     # Set grid coordinates
     grid_coords = metadata.pop('grid_coords', None)
     if grid_coords is not None:
         od = od.set_grid_coords(**grid_coords)
+
+    #  Set grid topology if present (e.g. llc4320)
+    face_connections = metadata.pop('face_connections', None)
+    if face_connections is not None:
+        od = od.set_face_connections(**face_connections)
 
     # Set attributes (use xmitgcm)
     try:
