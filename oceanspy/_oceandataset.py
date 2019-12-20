@@ -609,10 +609,8 @@ class OceanDataset:
         # check parameters
         _check_instance({'face_connections': face_connections}, 'dict')
 
-        print(face_connections.keys())
         for k in range(13):
             for axis in ['X', 'Y']:
-                print([k, axis])
                 face_connections['face'][k][axis]=eval(face_connections['face'][k][axis])
 
         self = self._store_as_global_attr(name='face_connections',
@@ -639,7 +637,8 @@ class OceanDataset:
         dataset = self.dataset.copy()
         coords = self.grid_coords
         periodic = self.grid_periodic
-        grid = _create_grid(dataset, coords, periodic)
+        face_connections = self.face_connections
+        grid = _create_grid(dataset, coords, periodic,face_connections)
 
         return grid
 
@@ -664,7 +663,8 @@ class OceanDataset:
 
         dataset = self._ds.copy()
         periodic = self.grid_periodic
-        grid = _create_grid(dataset, coords, periodic)
+        face_connections = self.face_connections
+        grid = _create_grid(dataset, coords, periodic, face_connections)
 
         return grid
 
