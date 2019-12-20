@@ -713,7 +713,7 @@ sources:
               X: tuple(((11,'Y',False),(4,'X',False)))
               Y: tuple(((0,'Y',False),(2,'Y',False)))
             2:
-              X: tuple(((10,'Y',False),(10, 'Y', False), (5, 'X', False)))
+              X: tuple(((10,'Y',False),(5, 'X', False)))
               Y: tuple(((1, 'Y', False), (6, 'X', False)))
             3:
               X: tuple(((0, 'X', False), (9, 'Y', False)))
