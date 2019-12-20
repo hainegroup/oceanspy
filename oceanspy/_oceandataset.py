@@ -614,10 +614,7 @@ class OceanDataset:
 
         for k in range(13):
             for axis in ['X', 'Y']:
-                if type(face_connections['face'][k][axis])==tuple:
-                    print('')
-                else:
-                    face_connections['face'][k][axis]=eval(face_connections['face'][k][axis])
+                face_connections['face'][k][axis]=eval(face_connections['face'][k][axis])
 
         self = self._store_as_global_attr(name='face_connections',
                                           attr=face_connections,
