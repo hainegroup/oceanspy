@@ -528,9 +528,9 @@ sources:
     metadata:
       rename:
         i: X
-        i_g: Xp1
+      #   i_g: Xp1
         j: Y
-        j_g: Yp1
+      #   j_g: Yp1
       parameters:
         grid_type: llc
       name: SST_LLC4320
@@ -552,9 +552,9 @@ sources:
     metadata:
       rename:
         i: X
-        i_g: Xp1
+      #   i_g: Xp1
         j: Y
-        j_g: Yp1
+      #   j_g: Yp1
       parameters:
         grid_type: llc
       name: SSS_LLC4320
