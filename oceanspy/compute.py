@@ -134,7 +134,7 @@ def _add_missing_variables(od, varList, FUNC2VARS=_FUNC2VARS):
     funcList = list(set([VAR2FUNC[var] for var in varList if var in VAR2FUNC]))
     allds = []
     for func in funcList:
-        allds = allds+[eval('{}(od)'.format(func))]
+        allds = allds + [eval('{}(od)'.format(func))]
     ds = _xr.merge(allds)
     ds = ds.drop([var for var in ds.variables if var not in varList])
 
@@ -246,7 +246,7 @@ def gradient(od, varNameList=None, axesList=None, aliased=True):
                     # Add missing variables
                     varList = ['dxC', 'dxF', 'dxG', 'dxV']
                     od = _add_missing_variables(od, varList)
-                    pointList = pointList+['V']
+                    pointList = pointList + ['V']
                 else:
                     # Add missing variables
                     varList = ['dyC', 'dyF', 'dyG', 'dyU']
