@@ -743,6 +743,76 @@ def horizontal_section(od, varName,
         return p
 
 
+def llc_horizontal(od,
+                   varName,
+                   plotType='contourf',
+                   faces='all',
+                   regrid=False,
+                   contour_kwargs=None,
+                   clabel_kwargs=None,
+                   cmap_land_mask='Greys_r',
+                   cutout_kwargs=None,
+                   **kwargs):
+    '''
+    Plot horizontal fields defined on llc-grid. This only works with fields
+    defined on 13 faces  (e.g. llc4320). Two options exist: One is to create
+    maps without regridding the fields. Another option is to use a regridding
+
+    Parameters
+    ----------
+    od: OceanDataset
+        oceandataset used to plot. Dimensions must match that used in
+        llc-grids.
+    varName: str, None
+        Name of the variable to plot.
+    plotType: str
+        2D plot type.
+        Options: {'contourf', 'contour', 'imshow', 'pcolormesh'}
+    faces: list
+        Number of faces to be drawn.
+        Options: ['all',0,1,2,...12].
+    regrid: str
+        Whether the data will be regridded or not when making the plot.
+        If True, regridder is used to create a 1/12 degree global resolution
+        map with all faces (e.g. faces='all').
+        Options: 'True', 'False'
+    contour_kwargs: dict
+        Keyword arguments for :py:func:`xarray.plot.contour`
+    clabel_kwargs: dict
+        Keyword arguments for :py:func:`matplotlib.pyplot.clabel`
+    cutout_kwargs: dict
+        Keyword arguments for
+        :py:func:`oceanspy.subsample.cutout`
+    **kwargs:
+        Kewyword arguments for :py:mod:`xarray.plot`.plotType
+    '''
+
+    # Check parameters
+    _check_instance({'od': od,
+                     'varName': varName,
+                     'plotType': plotType,
+                     'faces': faces,
+                     'regrid': regrid,
+                     'contour_kwargs': contour_kwargs,
+                     'clabel_kwargs': clabel_kwargs,
+                     'cutout_kwargs': cutout_kwargs},
+                    {'od': 'oceanspy.OceanDataset',
+                     'varName': 'str',
+                     'plotType': 'str',
+                     'faces': 'str',
+                     'regrid': 'str',
+                     'contour_kwargs': ['type(None)', 'dict'],
+                     'clabel_kwargs': ['type(None)', 'dict'],
+                     'cutout_kwargs': ['type(None)', 'dict']})
+
+    # Check plot
+    _check_options(name='plotType',
+                   selected=plotType,
+                   options=['contourf', 'contour', 'imshow', 'pcolormesh'])
+
+    pass
+
+
 def vertical_section(od,
                      varName,
                      plotType='pcolormesh',
