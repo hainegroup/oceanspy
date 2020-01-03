@@ -850,12 +850,12 @@ def llc_horizontal(od,
     if len(cutout_kwargs) != 0:
         od = od.subsample.cutout(**cutout_kwargs)
 
-    # Check variables and add
-    listName = [varName]
-    if contourName is not None:
-        listName = listName + [contourName]
-    _listName = _rename_aliased(od, listName)
-    od = _add_missing_variables(od, _listName)
+    # # Check variables and add
+    # listName = [varName]
+    # if contourName is not None:
+    #     listName = listName + [contourName]
+    # _listName = _rename_aliased(od, listName)
+    # od = _add_missing_variables(od, _listName)
 
     # Check mean and int axes
     meanAxes, intAxes = _check_mean_and_int_axes(od=od,
