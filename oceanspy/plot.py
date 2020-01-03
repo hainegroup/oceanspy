@@ -814,7 +814,7 @@ def llc_horizontal(od,
                      'varName': 'str',
                      'plotType': 'str',
                      'faces': 'str',
-                     'regrid': ['type(None)', 'str'],
+                     'regrid': 'bool',
                      'contour_kwargs': ['type(None)', 'dict'],
                      'clabel_kwargs': ['type(None)', 'dict'],
                      'cutout_kwargs': ['type(None)', 'dict']})
