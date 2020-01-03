@@ -907,13 +907,13 @@ def llc_horizontal(od,
             if face in empty:
                 ax.axis('off')
             else:
-                da_face = da.isel(face=FACE)
+                da_fac = da.isel(face=FACE, time=0)
                 yincrease = False
                 if FACE == 6:
                     xincrease = False
-                    da_face = da.transpose(transpose_coords=False)[::-1, :]
+                    da_fac = da_fac.transpose(transpose_coords=False)[::-1, :]
                 elif FACE in transpose:
-                    da_face = da.transpose(transpose_coords=False)[:, ::-1]
+                    da_fac = da_fac.transpose(transpose_coords=False)[:, ::-1]
                     yincrease = False
                 da_face.plot(ax=ax, xincrease=xincrease, yincrease=yincrease,
                              **kwargs)
