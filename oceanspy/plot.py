@@ -901,7 +901,7 @@ def llc_horizontal(od,
                            wspace=0.01, hspace=0.01)
         xincrease = True
         yincrease = True
-        fig, axes = plt.subplots(nrows=4, ncols=4, gridspec_kw=gridspec_kw)
+        fig, axes = _plt.subplots(nrows=4, ncols=4, gridspec_kw=gridspec_kw)
         for FACE, (j, i) in face_to_axis.items():
             ax = axes[j, i]
             if face in empty:
