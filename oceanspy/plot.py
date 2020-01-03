@@ -904,7 +904,7 @@ def llc_horizontal(od,
         fig, axes = _plt.subplots(nrows=4, ncols=4, gridspec_kw=gridspec_kw)
         for FACE, (j, i) in face_to_axis.items():
             ax = axes[j, i]
-            if face in empty:
+            if FACE in empty:
                 ax.axis('off')
             else:
                 da_fac = da.isel(face=FACE, time=0)
