@@ -677,7 +677,7 @@ def horizontal_section(od, varName,
             subplot_kws = {'projection': od.projection}
         kwargs['subplot_kws'] = subplot_kws
 
-    else:
+    else: # Here if face is another dimension (for now, separate function)
         raise ValueError('There are too many dimensions: {}.'
                          'A maximum of 3 dimensions (including time)'
                          ' are supported.'
@@ -748,6 +748,8 @@ def llc_horizontal(od,
                    plotType='contourf',
                    faces='all',
                    regrid=False,
+                   meanAxes=False,
+                   intAxes=False,
                    contour_kwargs=None,
                    clabel_kwargs=None,
                    cmap_land_mask='Greys_r',
@@ -776,6 +778,18 @@ def llc_horizontal(od,
         If True, regridder is used to create a 1/12 degree global resolution
         map with all faces (e.g. faces='all').
         Options: 'True', 'False'
+    meanAxes: 1D array_like, str, or bool
+        List of axes over which to apply
+        :py:func:`oceanspy.compute.weighted_mean`.
+        If True,
+        set meanAxes= :py:attr:`oceanspy.OceanDataset.grid_coords`.
+        If False, skip weighted mean.
+    intAxes: 1D array_like, str, or bool
+        List of axes over which to apply
+        :py:func:`oceanspy.compute.integral`.
+        If True,
+        set intAxes= :py:attr:`oceanspy.OceanDataset.grid_coords`.
+        If False, skip integral.
     contour_kwargs: dict
         Keyword arguments for :py:func:`xarray.plot.contour`
     clabel_kwargs: dict
@@ -810,7 +824,108 @@ def llc_horizontal(od,
                    selected=plotType,
                    options=['contourf', 'contour', 'imshow', 'pcolormesh'])
 
-    pass
+    # Check oceandataset
+    wrong_dims = ['mooring', 'station', 'particle']
+    if any([dim in od._ds.dims for dim in wrong_dims]):
+        raise ValueError('`plot.llc_horizontal` does not support'
+                         ' `od` with the following dimensions: '
+                         '{}'.format(wrong_dims))
+
+    if 'faces' not in od._ds.dims:
+        raise ValueError('`plot.llc_horizontal` only supports'
+                         '`od` in which `faces` is a dimension.')
+
+    # Handle kwargs
+    if contour_kwargs is None:
+        contour_kwargs = {}
+    contour_kwargs = dict(contour_kwargs)
+    if clabel_kwargs is None:
+        clabel_kwargs = {}
+    clabel_kwargs = dict(clabel_kwargs)
+    if cutout_kwargs is None:
+        cutout_kwargs = {}
+    cutout_kwargs = dict(cutout_kwargs)
+
+    # Cutout first
+    if len(cutout_kwargs) != 0:
+        od = od.subsample.cutout(**cutout_kwargs)
+
+    # Check variables and add
+    listName = [varName]
+    if contourName is not None:
+        listName = listName + [contourName]
+    _listName = _rename_aliased(od, listName)
+    od = _add_missing_variables(od, _listName)
+
+    # Check mean and int axes
+    meanAxes, intAxes = _check_mean_and_int_axes(od=od,
+                                                 meanAxes=meanAxes,
+                                                 intAxes=intAxes,
+                                                 exclude=['X', 'Y'])
+
+    # Apply mean and sum
+    da, varName = _compute_mean_and_int(od, varName, meanAxes, intAxes)
+
+    # SQUEEZE! Otherwise animation don't show up
+    # because xarray makes a faceted plot
+    da = da.squeeze()
+
+    # Get dimension names
+    X_name = [dim for dim in od.grid_coords['X'] if dim in da.dims][0]
+    Y_name = [dim for dim in od.grid_coords['Y'] if dim in da.dims][0]
+
+    # Get dimensions
+    dims = list(da.dims)
+    dims.remove(X_name)
+    dims.remove(Y_name)
+    dims.remove('face')  # do I really want to erase this? prob not
+
+    # Pop from kwargs
+    ax = kwargs.pop('ax', None)
+    col = kwargs.pop('col', None)
+    col_wrap = kwargs.pop('col_wrap', None)
+    subplot_kws = kwargs.pop('subplot_kws', None)
+    transform = kwargs.pop('transform', None)
+
+    #  add here parameters to make 4x4 plot of faces
+    if regrid == 0:
+        face_to_axis = {0: (3, 0), 1: (2, 0), 2: (1, 0),
+                        3: (3, 1), 4: (2, 1), 5: (1, 1),
+                        6: (0, 3), 7: (1, 2), 8: (2, 2),
+                        9: (3, 2), 10: (1, 3), 11: (2, 3),
+                        12: (3, 3), 13: (0, 0), 14: (0, 1),
+                        15: (0, 2)}
+        transpose = [k for k in range(7, 13)]
+        empty = [k for k in range(13, 16)]
+        gridspec_kw = dict(left=0, bottom=0, right=1, top=1,
+                           wspace=0.01, hspace=0.01)
+        xincrease = True
+        yincrease = True
+        fig, axes = plt.subplots(nrows=4, ncols=4, gridspec_kw=gridspec_kw)
+        for FACE, (j, i) in face_to_axis.items():
+            ax = axes[j, i]
+            if face in empty:
+                ax.axis('off')
+            else:
+                da_face = da.isel(face=FACE)
+                yincrease = False
+                if FACE == 6:
+                    xincrease = False
+                    da_face = da.transpose(transpose_coords=False)[::-1, :]
+                elif FACE in transpose:
+                    da_face = da.transpose(transpose_coords=False)[:, ::-1]
+                    yincrease = False
+                da_face.plot(ax=ax, xincrease=xincrease, yincrease=yincrease,
+                             **kwargs)
+                if axis_off:
+                    ax.axis('off')
+
+    if regrid == 1:
+        # Plot
+        args = {'x': X_name, 'y': Y_name, **kwargs}
+        plotfunc = eval('_xr.plot.' + plotType)
+        p = plotfunc(da, **args)
+    return fig
 
 
 def vertical_section(od,
