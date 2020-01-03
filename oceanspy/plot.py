@@ -831,9 +831,9 @@ def llc_horizontal(od,
                          ' `od` with the following dimensions: '
                          '{}'.format(wrong_dims))
 
-    if 'faces' not in od._ds.dims:
+    if 'face' not in od._ds.dims:
         raise ValueError('`plot.llc_horizontal` only supports'
-                         '`od` in which `faces` is a dimension.')
+                         '`od` in which `face` is a dimension.')
 
     # Handle kwargs
     if contour_kwargs is None:
