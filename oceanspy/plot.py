@@ -898,7 +898,7 @@ def llc_horizontal(od,
         transpose = [k for k in range(7, 13)]
         empty = [k for k in range(13, 16)]
         gridspec_kw = dict(left=0, bottom=0, right=1, top=1,
-                           wspace=0.01, hspace=0.01)
+                           wspace=0.001, hspace=0.001)
         xincrease = True
         yincrease = True
         fig, axes = _plt.subplots(nrows=4, ncols=4, gridspec_kw=gridspec_kw)
@@ -908,16 +908,15 @@ def llc_horizontal(od,
                 ax.axis('off')
             else:
                 da_fac = da.isel(face=FACE, time=0)
-                # yincrease = False
-                # if FACE == 6:
-                #     xincrease = False
-                #     da_fac = da_fac.transpose(transpose_coords=False)[::-1, :]
-                # elif FACE in transpose:
-                #     da_fac = da_fac.transpose(transpose_coords=False)[:, ::-1]
-                #     yincrease = False
+                yincrease = False
+                if FACE == 6:
+                    xincrease = False
+                    da_fac = da_fac.transpose(transpose_coords=False)
+                elif FACE in transpose:
+                    da_fac = da_fac.transpose(transpose_coords=False)
+                    yincrease = False
                 da_fac.plot(ax=ax, xincrease=xincrease,
                             yincrease=yincrease, add_colorbar=False, **kwargs)
-                # if axis_off:
                 ax.axis('off')
                 ax.set_title('')
 
