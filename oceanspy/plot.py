@@ -915,8 +915,8 @@ def llc_horizontal(od,
                 elif FACE in transpose:
                     da_fac = da_fac.transpose(transpose_coords=False)[:, ::-1]
                     yincrease = False
-                da_face.plot(ax=ax, xincrease=xincrease, yincrease=yincrease,
-                             **kwargs)
+                da_fac.plot(ax=ax, xincrease=xincrease, yincrease=yincrease,
+                            **kwargs)
                 if axis_off:
                     ax.axis('off')
 
