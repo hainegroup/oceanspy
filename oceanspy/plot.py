@@ -917,8 +917,8 @@ def llc_horizontal(od,
                     yincrease = False
                 da_fac.plot(ax=ax, xincrease=xincrease, yincrease=yincrease,
                             **kwargs)
-                if axis_off:
-                    ax.axis('off')
+                # if axis_off:
+                ax.axis('off')
 
     if regrid == 1:
         # Plot
