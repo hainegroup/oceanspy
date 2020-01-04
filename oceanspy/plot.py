@@ -889,12 +889,12 @@ def llc_horizontal(od,
 
     #  add here parameters to make 4x4 plot of faces
     if regrid == 0:
-        face_to_axis = {0: (3, 0), 1: (2, 0), 2: (1, 0),
-                        3: (3, 1), 4: (2, 1), 5: (1, 1),
-                        6: (0, 3), 7: (1, 2), 8: (2, 2),
-                        9: (3, 2), 10: (1, 3), 11: (2, 3),
-                        12: (3, 3), 13: (0, 0), 14: (0, 1),
-                        15: (0, 2)}
+        face_to_axis = {0: (3, 2), 1: (2, 2), 2: (1, 2),
+                        3: (3, 3), 4: (2, 3), 5: (1, 3),
+                        6: (0, 2), 7: (1, 0), 8: (2, 0),
+                        9: (3, 0), 10: (1, 1), 11: (2, 1),
+                        12: (3, 1), 13: (0, 1), 14: (0, 3),
+                        15: (0, 0)}
         transpose = [k for k in range(7, 13)]
         empty = [k for k in range(13, 16)]
         gridspec_kw = dict(left=0, bottom=0, right=1, top=1,
@@ -908,13 +908,13 @@ def llc_horizontal(od,
                 ax.axis('off')
             else:
                 da_fac = da.isel(face=FACE, time=0)
-                yincrease = False
                 if FACE == 6:
                     xincrease = False
-                    da_fac = da_fac.transpose(transpose_coords=False)
+                    da_fac = da_fac.transpose(transpose_coords=False)[::-1, :]
                 elif FACE in transpose:
                     da_fac = da_fac.transpose(transpose_coords=False)
                     yincrease = False
+                    xincrease = True
                 da_fac.plot(ax=ax, xincrease=xincrease,
                             yincrease=yincrease, add_colorbar=False, **kwargs)
                 ax.axis('off')
