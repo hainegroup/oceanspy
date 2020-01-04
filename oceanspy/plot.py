@@ -898,7 +898,7 @@ def llc_horizontal(od,
         transpose = [k for k in range(7, 13)]
         empty = [k for k in range(13, 16)]
         gridspec_kw = dict(left=0, bottom=0, right=1, top=1,
-                           wspace=0.001, hspace=0.001)
+                           wspace=0.0001, hspace=0.0001)
         xincrease = True
         yincrease = True
         fig, axes = _plt.subplots(nrows=4, ncols=4, gridspec_kw=gridspec_kw)
