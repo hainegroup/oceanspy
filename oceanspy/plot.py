@@ -919,7 +919,7 @@ def llc_horizontal(od,
                             yincrease=yincrease, add_colorbar=False, **kwargs)
                 # if axis_off:
                 ax.axis('off')
-                ax.title('')
+                ax.set_title('')
 
     if regrid == 1:
         # Plot
