@@ -907,7 +907,7 @@ def llc_horizontal(od,
             if FACE in empty:
                 ax.axis('off')
             else:
-                da_fac = da.isel(face=FACE, time=0)
+                da_fac = da.isel(face=FACE, time=0)[::3,::3]
                 if FACE == 6:
                     xincrease = False
                     yincrease = True
