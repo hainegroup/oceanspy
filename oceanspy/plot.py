@@ -907,17 +907,21 @@ def llc_horizontal(od,
             if FACE in empty:
                 ax.axis('off')
             else:
-                da_fac = da.isel(face=FACE, time=0)[::3, ::3]
+                da_fac = da.isel(face=FACE, time=0)
                 if FACE == 6:
                     xincrease = False
-                    da_fac = da_fac.transpose(transpose_coords=False)[::-1, :]
+                    yincrease = True
+                    Xdim = Y_name
+                    Ydim = X_name
                 elif FACE in transpose:
-                    da_fac = da_fac.transpose(transpose_coords=False)
+                    Xdim = Y_name
+                    Ydim = X_name
                     yincrease = False
                     xincrease = True
-                args = {'x': X_name, 'y': Y_name, **kwargs}
-                da_fac.plot(ax=ax, xincrease=xincrease,
-                            yincrease=yincrease, add_colorbar=False, **args)
+                args = {'ax': ax, 'x': X_name, 'y': Y_name,
+                        'add_colorbar': False, 'xincrease': xincrease,
+                        'yincrease': yincrease, **kwargs}
+                da_fac.plot(ax=ax, **args)
                 ax.axis('off')
                 ax.set_title('')
 
@@ -926,7 +930,7 @@ def llc_horizontal(od,
         args = {'x': X_name, 'y': Y_name, **kwargs}
         plotfunc = eval('_xr.plot.' + plotType)
         p = plotfunc(da, **args)
-    return fig
+    return fig, axes
 
 
 def vertical_section(od,
