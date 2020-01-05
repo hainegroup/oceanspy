@@ -921,7 +921,7 @@ def llc_horizontal(od,
                 args = {'ax': ax, 'x': X_name, 'y': Y_name,
                         'add_colorbar': False, 'xincrease': xincrease,
                         'yincrease': yincrease, **kwargs}
-                da_fac.plot(ax=ax, **args)
+                da_fac.plot(**args)
                 ax.axis('off')
                 ax.set_title('')
 
