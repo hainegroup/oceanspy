@@ -914,9 +914,9 @@ def llc_horizontal(od,
                     Ydim = X_name
                     yincrease = False
                     xincrease = True
-                args = {'ax': ax, 'x': X_name, 'y': Y_name,
-                        'add_colorbar': False, 'xincrease': xincrease,
-                        'yincrease': yincrease, **kwargs}
+                args = {'ax': ax, 'x': Xdim, 'y': Ydim, 'add_colorbar': False,
+                        'xincrease': xincrease, 'yincrease': yincrease,
+                        **kwargs}
                 plotfunc = eval('_xr.plot.' + plotType)
                 plotfunc(da_face, **args)
                 ax.axis('off')
