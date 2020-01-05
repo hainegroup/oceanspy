@@ -745,7 +745,7 @@ def horizontal_section(od, varName,
 
 def llc_horizontal(od,
                    varName,
-                   plotType='contourf',
+                   plotType='pcolormesh',
                    faces='all',
                    regrid=False,
                    meanAxes=False,
