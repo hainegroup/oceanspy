@@ -1280,6 +1280,10 @@ class _plotMethods(object):
     def horizontal_section(self, **kwargs):
         return horizontal_section(self._od, **kwargs)
 
+    @_functools.wraps(llc_horizontal)
+    def llc_horizontal(self, **kwargs):
+        return llc_horizontal(self._od, **kwargs)
+
     @_functools.wraps(vertical_section)
     def vertical_section(self, **kwargs):
         return vertical_section(self._od, **kwargs)
