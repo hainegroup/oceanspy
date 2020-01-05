@@ -897,6 +897,8 @@ def llc_horizontal(od,
                            wspace=0.0001, hspace=0.0001)
         xincrease = True
         yincrease = True
+        Xdim = X_name
+        Ydim = Y_name
         fig, axes = _plt.subplots(nrows=4, ncols=4, gridspec_kw=gridspec_kw)
         for FACE, (j, i) in face_to_axis.items():
             ax = axes[j, i]
