@@ -907,7 +907,7 @@ def llc_horizontal(od,
             if FACE in empty:
                 ax.axis('off')
             else:
-                da_fac = da.isel(face=FACE, time=0)[::3,::3]
+                da_face = da.isel(face=FACE, time=0)[::2, ::2]
                 if FACE == 6:
                     xincrease = False
                     yincrease = True
@@ -921,7 +921,8 @@ def llc_horizontal(od,
                 args = {'ax': ax, 'x': X_name, 'y': Y_name,
                         'add_colorbar': False, 'xincrease': xincrease,
                         'yincrease': yincrease, **kwargs}
-                da_fac.plot(**args)
+                plotfunc = eval('_xr.plot.' + plotType)
+                plotfunc(da_face, **args)
                 ax.axis('off')
                 ax.set_title('')
 
