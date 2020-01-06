@@ -266,7 +266,6 @@ def gradient(od, varNameList=None, axesList=None, aliased=True):
                     else:
                         pointList = pointList + ['U']
                 ddenNames = ['d'+axis.lower()+point for point in pointList]
-                print(ddenNames)
                 for ddenName in ddenNames:
                     if set(od._ds[ddenName].dims).issubset(dnum.dims):
                         dden = od._ds[ddenName]
