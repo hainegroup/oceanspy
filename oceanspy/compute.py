@@ -242,6 +242,9 @@ def gradient(od, varNameList=None, axesList=None, aliased=True):
             if axis in ['X', 'Y']:
                 # Select denominator
                 pointList = ['C', 'F', 'G']
+                if 'face' in od._ds.dims:  # complex grid topology
+                    pointList = ['C', 'G']
+
                 if axis == 'X':
                     # Add missing variables
                     varList = ['dxC', 'dxF', 'dxG', 'dxV']
