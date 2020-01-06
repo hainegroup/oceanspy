@@ -2792,9 +2792,9 @@ def missing_horizontal_spacing(od):
         if 'face' in ds.dims:
             #  For some reason, grid.interp does not work, need to approach
             #  it as a vector, which means calculating the same thing twice
-            delF = grid.interp_2d_vector({'X': ds[pref + suf],
-                                          'Y': ds[pref + suf]},
-                                         boundary='extend')
+            delF = grid.interp_2d_vector({'X': ds['dxC'],
+                                          'Y': ds['dyC']},
+                                         boundary='extend')  # or fill?
             deltas[var] = delF[axis]  # this will repeat, only one matters
         else:
             deltas[var] = grid.interp(ds[pref + suf], axis, boundary='extend')
@@ -2808,8 +2808,8 @@ def missing_horizontal_spacing(od):
             add_vel = 'cell face'
         deltas[var].attrs['description'] = ('{} {} separation'
                                             ''.format(axis.lower(), add_vel))
-        if 'units' in ds[pref+suf].attrs:
-            deltas[var].attrs['units'] = ds[pref+suf].attrs['units']
+        if 'units' in ds[pref + suf].attrs:
+            deltas[var].attrs['units'] = ds[pref + suf].attrs['units']
 
     # Create dataset
     ds = _xr.Dataset(deltas)
