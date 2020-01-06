@@ -2792,8 +2792,8 @@ def missing_horizontal_spacing(od):
         if 'face' in ds.dims:
             #  For some reason, grid.interp does not work, need to approach
             #  it as a vector, which means calculating the same thing twice
-            delF = grid.interp_2d_vector({'X': ds[pre + suf],
-                                          'Y': ds[pre + suf]},
+            delF = grid.interp_2d_vector({'X': ds[pref + suf],
+                                          'Y': ds[pref + suf]},
                                          boundary='extend')
             deltas[var] = delF[axis]  # this will repeat, only one matters
         else:
