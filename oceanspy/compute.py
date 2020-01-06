@@ -243,22 +243,27 @@ def gradient(od, varNameList=None, axesList=None, aliased=True):
                 # Select denominator
                 pointList = ['C', 'F', 'G']
                 if 'face' in od._ds.dims:  # complex grid topology
-                    pointList = ['C', 'G']
+                    pointList = ['C', 'G']  # only scalar fields
 
                 if axis == 'X':
                     # Add missing variables
                     varList = ['dxC', 'dxF', 'dxG', 'dxV']
                     if 'face' in od._ds.dims:  # complex grid topology
-                        varList = ['dxC', 'dxG']
+                        varList = ['dxC', 'dxG']  # only scalar fields
                     od = _add_missing_variables(od, varList)
                     pointList = pointList + ['V']
+                    if 'face' in od._ds.dims:  # complex grid topology
+                        pointList = pointList + ['G']  # only scalars
                 else:
                     # Add missing variables
                     varList = ['dyC', 'dyF', 'dyG', 'dyU']
                     if 'face' in od._ds.dims:  # complex grid topology
-                        varList = ['dyC', 'dyG']
+                        varList = ['dyC', 'dyG']  # only scalar variables
                     od = _add_missing_variables(od, varList)
                     pointList = pointList + ['U']
+                    if 'face' in od._ds.dims:  # complex grid topology
+                        pointList = pointList + ['G']  # only scalar vars
+
                 ddenNames = ['d'+axis.lower()+point for point in pointList]
                 for ddenName in ddenNames:
                     if set(od._ds[ddenName].dims).issubset(dnum.dims):
