@@ -613,7 +613,7 @@ class OceanDataset:
         _check_instance({'face_connections': face_connections}, 'dict')
 
         for k in face_connections['face'].keys():
-            for axis in ['X', 'Y']:
+            for axis in face_connections['face'][k].keys():
                 if type(face_connections['face'][k][axis]) == tuple:
                     face_connections['face'][k][axis] = face_connections['face'][k][axis]
                 else:
