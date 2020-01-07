@@ -163,6 +163,7 @@ def cutout(od,
     # Unpack
     ds = od._ds
     periodic = od.grid_periodic
+    face_connections = od.face_connections
 
     # ---------------------------
     # Horizontal CUTOUT
@@ -248,8 +249,14 @@ def cutout(od,
             dropAxes.pop('X', None)
 
         # Cutout
-        ds = ds.isel(Yp1=slice(iY[0], iY[1] + 1),
-                     Xp1=slice(iX[0], iX[1] + 1))
+        if 'face' in ds.dims:
+            faces = dmaskH['face'].values
+            ds = ds.isel(Yp1=slice(iY[0], iY[1] + 1),
+                         Xp1=slice(iX[0], iX[1] + 1),
+                         face=faces)
+        else:
+            ds = ds.isel(Yp1=slice(iY[0], iY[1] + 1),
+                         Xp1=slice(iX[0], iX[1] + 1))
 
         Xcoords = od._grid.axes['X'].coords
         if 'X' in dropAxes:
@@ -536,6 +543,21 @@ def cutout(od,
 
     # Cut axis can't be periodic
     od = od.set_grid_periodic(periodic)
+
+    # new grid topology
+    if face_connections is not None:
+        # set new face_connections given faces
+        _face_connections={'face':{}} # new grid topology
+        axes=['X','Y']
+        for face in faces:
+            for dim in axes: # X or Y 
+            for pos in range(2):
+                for mface in faces:
+                    if face_connections['face'][face][dim][pos][0]==mface:
+                        _face_connections['face'][face]={dim:(face_connections['face'][face][dim][pos],None)}
+                    elif face_connections['face'][face][dim][pos][1]==mface:
+                        _face_connections['face'][face]={dim:(None,face_connections['face'][face][dim][pos])}
+        od = od.set_face_connections(**face_connections)
 
     # Drop variables
     if varList is not None:
