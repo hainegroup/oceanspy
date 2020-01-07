@@ -557,7 +557,8 @@ def cutout(od,
                             _face_con['face'][fc] = {dim: (face_connections['face'][fc][dim][pos],None)}
                         elif face_connections['face'][fc][dim][pos][1]==mface:
                             _face_con['face'][fc] = {dim:(None,face_connections['face'][fc][dim][pos])}
-        od = od.set_face_connections(**{'face_connections':_face_con})
+
+        od = od.set_face_connections(**{'face_connections': _face_con})
 
     # Drop variables
     if varList is not None:

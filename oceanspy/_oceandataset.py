@@ -612,8 +612,7 @@ class OceanDataset:
         # check parameters
         _check_instance({'face_connections': face_connections}, 'dict')
 
-        Nf = len(face_connections['face'].keys())
-        for k in range(Nf):
+        for k in face_connections['face'].keys():
             for axis in ['X', 'Y']:
                 if type(face_connections['face'][k][axis]) == tuple:
                     face_connections['face'][k][axis] = face_connections['face'][k][axis]
