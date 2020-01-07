@@ -553,9 +553,9 @@ def cutout(od,
             for dim in axes:  # X or Y
                 for pos in range(2):
                     for mface in faces:
-                        if face_con['face'][fc][dim][pos][0] == mface:
+                        if face_connections['face'][fc][dim][pos][0]==mface:
                             _face_con['face'][fc] = {dim: (face_connections['face'][fc][dim][pos],None)}
-                        elif face_con['face'][fc][dim][pos][1] == mface:
+                        elif face_connections['face'][fc][dim][pos][1]==mface:
                             _face_con['face'][fc] = {dim:(None,face_connections['face'][fc][dim][pos])}
         od = od.set_face_connections(**face_connections)
 
