@@ -615,10 +615,10 @@ class OceanDataset:
         Nf = len(face_connections['face'].keys())
         for k in range(Nf):
             for axis in ['X', 'Y']:
-                if type(face_connections['face'][k]['X'])==tuple:
-                    print('')
+                if type(face_connections['face'][k][axis]) == tuple:
+                    face_connections['face'][k][axis] = face_connections['face'][k][axis]
                 else:
-                    face_connections['face'][k][axis]=eval(face_connections['face'][k][axis])
+                    face_connections['face'][k][axis] = eval(face_connections['face'][k][axis])
 
         self = self._store_as_global_attr(name='face_connections',
                                           attr=face_connections,
