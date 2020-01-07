@@ -589,8 +589,6 @@ class OceanDataset:
 
         '''
         face_connections = self._read_from_global_attr('face_connections')
-        # if not face_connections:
-        #     face_connections = []
         return face_connections
 
     @face_connections.setter
@@ -621,7 +619,7 @@ class OceanDataset:
 
         self = self._store_as_global_attr(name='face_connections',
                                           attr=face_connections,
-                                          overwrite=False)
+                                          overwrite=True)
         return self
 
     # -------------------
