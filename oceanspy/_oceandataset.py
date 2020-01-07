@@ -615,7 +615,7 @@ class OceanDataset:
         Nf = len(face_connections['face'].keys())
         for k in range(Nf):
             for axis in ['X', 'Y']:
-                if type(face_connections['face_connections']['face'][k]['X'])==tuple:
+                if type(face_connections['face'][k]['X'])==tuple:
                     continue
                 else:
                     face_connections['face'][k][axis]=eval(face_connections['face'][k][axis])
