@@ -25,6 +25,7 @@ from . import compute as _compute
 from ._ospy_utils import (_check_instance, _check_range,
                           _check_list_of_string, _check_native_grid,
                           _check_part_position)
+from ._oceandataset import OceanDataset as _OceanDataset
 
 # Recommended dependencies (private)
 try:
@@ -163,7 +164,7 @@ def cutout(od,
     # Unpack
     ds = od._ds
     periodic = od.grid_periodic
-    face_connections = od.face_connections
+    fcon = od.face_connections
 
     # ---------------------------
     # Horizontal CUTOUT
@@ -547,19 +548,42 @@ def cutout(od,
     # Cut axis can't be periodic
     od = od.set_grid_periodic(periodic)
 
+    # Update face connections (grid topology)
     # new grid topology
-    if face_connections is not None:
+    if fcon is not None:
+
+        ds['cface'] = _xr.Variable(('cface'), _np.arange(ds.dims['face']))
+        ds = ds.reset_index('face')
+        ds = ds.set_index(face='cface')
+        ds.attrs.pop('OceanSpy_face_connections')
+        ds = ds.rename({'face_': 'oface'})
+        ds.face.attrs['standard_name'] = 'cutout face index'
+        ds.oface.attrs['standard_name'] = 'original (native) face index'
         # set new face_connections given faces
         _face_con = {'face': {}}  # new grid topology
         axes = ['X', 'Y']
-        for fc in faces:
-            for dim in axes:  # X or Y
-                for pos in range(2):
-                    for mface in faces:
-                        if face_connections['face'][fc][dim][pos][0]==mface:
-                            _face_con['face'][fc] = {dim: (face_connections['face'][fc][dim][pos],None)}
-                        elif face_connections['face'][fc][dim][pos][1]==mface:
-                            _face_con['face'][fc] = {dim:(None,face_connections['face'][fc][dim][pos])}
+        for fc in ds.face.values:
+            of = ds.oface.values[fc]
+            for dim in axes:
+                for mface in ds.oface.values:
+                    if fcon['face'][of][dim][0] is None:
+                        pos = 1
+                    elif fcon['face'][of][dim][1] is None:
+                        pos = 0
+                    if fcon['face'][of][dim][0][0] == mface:
+                        pos = 0
+                        ii= _np.where(ds.oface.values == mface)[0][0]
+                        connection = list(fcon['face'][of][dim][pos])
+                        connection[0] = ds['face'].values[ii]
+                        con = tuple(connection)
+                        _face_con['face'][fc] = {dim: (con, None)}
+                    elif fcon['face'][of][dim][1][0] == mface:
+                        pos = 1
+                        ii= _np.where(ds.oface.values == mface)[0][0]
+                        connection = list(fcon['face'][of][dim][pos])
+                        connection[0] = ds['face'].values[ii]
+                        con = tuple(connection)
+                        _face_con['face'][fc] = {dim: (None, con)}
 
         od = od.set_face_connections(**{'face_connections': _face_con})
 
