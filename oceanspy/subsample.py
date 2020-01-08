@@ -25,7 +25,6 @@ from . import compute as _compute
 from ._ospy_utils import (_check_instance, _check_range,
                           _check_list_of_string, _check_native_grid,
                           _check_part_position)
-from ._oceandataset import OceanDataset as _OceanDataset
 
 # Recommended dependencies (private)
 try:
