@@ -549,14 +549,16 @@ def cutout(od,
     # Update face connections (grid topology)
     # new grid topology
     if fcon is not None:
-
+        # need to remove all grid topology
+        ds.attrs.pop('OceanSpy_face_connections')
         ds['cface'] = _xr.Variable(('cface'), _np.arange(ds.dims['face']))
         ds = ds.reset_index('face')
         ds = ds.set_index(face='cface')
-        ds.attrs.pop('OceanSpy_face_connections')
         ds = ds.rename({'face_': 'oface'})
         ds.face.attrs['standard_name'] = 'cutout face index'
         ds.oface.attrs['standard_name'] = 'original (native) face index'
+        # update again ocean dataset
+        od._ds = ds
         # set new face_connections given faces
         _face_con = {'face': {}}  # new grid topology
         axes = ['X', 'Y']
@@ -582,7 +584,7 @@ def cutout(od,
                         connection[0] = ds['face'].values[ii]
                         con = tuple(connection)
                         _face_con['face'][fc] = {dim: (None, con)}
-
+        od._ds.attrs['OceanSpy_face_connections'] = _face_con
         od = od.set_face_connections(**{'face_connections': _face_con})
 
     # Drop variables
