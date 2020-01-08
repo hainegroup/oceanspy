@@ -425,13 +425,12 @@ def cutout(od,
                                                           ds['XG'] <= maxX)),
                           1, 0).persist()
 
-        if set(['Xp1', 'Y']).issubset(ds[var].dims):
+        if 'face' in ds.dims:
             maskU = _xr.where(_np.logical_and(_np.logical_and(ds['YU']>=minY,
                                                               ds['YU']<=maxY),
                                               _np.logical_and(ds['XU']>=minX,
                                                               ds['XU']<=maxX)),
                               1, 0).persist()
-        elif set(['X', 'Yp1']).issubset(ds[var].dims):
             maskV = _xr.where(_np.logical_and(_np.logical_and(ds['YV']>=minY,
                                                               ds['YV']<=maxY),
                                               _np.logical_and(ds['XV']>=minX,
