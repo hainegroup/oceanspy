@@ -425,7 +425,7 @@ def cutout(od,
                                                           ds['XG'] <= maxX)),
                           1, 0).persist()
 
-        if 'face' in ds.dims:
+        if 'face' not in ds.dims:
             maskU = _xr.where(_np.logical_and(_np.logical_and(ds['YU']>=minY,
                                                               ds['YU']<=maxY),
                                               _np.logical_and(ds['XU']>=minX,
