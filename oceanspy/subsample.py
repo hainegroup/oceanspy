@@ -560,30 +560,37 @@ def cutout(od,
         # update again ocean dataset
         od._ds = ds
         # set new face_connections given faces
-        _face_con = {'face': {}}  # new grid topology
-        axes = ['X', 'Y']
-        for fc in ds.face.values:
-            of = ds.oface.values[fc]
-            for dim in axes:
-                for mface in ds.oface.values:
-                    if fcon['face'][of][dim][0] is None:
-                        pos = 1
-                    elif fcon['face'][of][dim][1] is None:
-                        pos = 0
-                    if fcon['face'][of][dim][0][0] == mface:
-                        pos = 0
-                        ii= _np.where(ds.oface.values == mface)[0][0]
-                        connection = list(fcon['face'][of][dim][pos])
-                        connection[0] = ds['face'].values[ii]
-                        con = tuple(connection)
-                        _face_con['face'][fc] = {dim: (con, None)}
-                    elif fcon['face'][of][dim][1][0] == mface:
-                        pos = 1
-                        ii= _np.where(ds.oface.values == mface)[0][0]
-                        connection = list(fcon['face'][of][dim][pos])
-                        connection[0] = ds['face'].values[ii]
-                        con = tuple(connection)
-                        _face_con['face'][fc] = {dim: (None, con)}
+
+        def face_con_map(_ofaces, _faces, _fcon):
+            ntuple1, ntuple2 = None, None
+            _ncon = {}
+            for fc in _faces:
+                of = _ofaces[fc]
+                _ncon[fc] = {'X': {}, 'Y': {}}
+                for dim in ['X', 'Y']:
+                    tuple1, tuple2 = _fcon['face'][of][dim]
+                    if tuple1 is None:
+                        tuple1 = (None, None)
+                    elif tuple2 is None:
+                        tuple2 = (None, None)
+                    _mfaces = [k for k in ofaces if k != of]
+                    for mf in _mfaces:
+                        if mf == tuple1[0]:
+                            ii = _np.where(_ofaces == mf)[0][0]
+                            ntuple1 = (_faces[ii], tuple1[1], tuple1[2])
+                            _ncon[fc][dim] = (ntuple1, ntuple2)
+                        elif mf == tuple2[0]:
+                            ii = _np.where(_ofaces == mf)[0][0]
+                            ntuple2 = (_faces[ii], tuple2[1], tuple2[2])
+                            _ncon[fc][dim] = (ntuple1, ntuple2)
+                    ntuple1, ntuple2 = None, None
+                    if len(_ncon[fc][dim]) == 0:
+                        _ncon[fc].pop(dim)
+            _new_con = {'face': {}}
+            _new_con['face'] = _ncon
+            return _new_con
+
+        _face_con = face_con_map(ds.oface.values, ds.face.values, fcon)
         od._ds.attrs['OceanSpy_face_connections'] = _face_con
         od = od.set_face_connections(**{'face_connections': _face_con})
         od._ds.attrs['OceanSpy_description'] = 'Cutout of LLC4320 simulation'
