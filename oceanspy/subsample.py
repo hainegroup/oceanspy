@@ -573,7 +573,7 @@ def cutout(od,
                         tuple1 = (None, None)
                     elif tuple2 is None:
                         tuple2 = (None, None)
-                    _mfaces = [k for k in ofaces if k != of]
+                    _mfaces = [k for k in _ofaces if k != of]
                     for mf in _mfaces:
                         if mf == tuple1[0]:
                             ii = _np.where(_ofaces == mf)[0][0]
