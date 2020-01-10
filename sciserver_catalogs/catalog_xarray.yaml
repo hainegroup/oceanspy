@@ -826,6 +826,12 @@ sources:
         decode_times: False
     metadata:
       model: POP
+      rename:
+        nlat: Y
+        # i_g: Xp1
+        nlon: X
+        # j_g: Yp1
+        nz: Z
       grid_coords: 
         add_midp: True
         grid: B
