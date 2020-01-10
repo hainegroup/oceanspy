@@ -358,17 +358,17 @@ def _restore_coord_attrs(ds):
 
 def _add_pop_dims_to_dataset(ds):
     ds_new = ds.copy()
-    ds_new['nlon_u'] = _xr.Variable(('nlon_u'), np.arange(len(ds.nlon)) + 1, {'axis': 'X', 'c_grid_axis_shift': 0.5})
-    ds_new['nlat_u'] = _xr.Variable(('nlat_u'), np.arange(len(ds.nlat)) + 1, {'axis': 'Y', 'c_grid_axis_shift': 0.5})
-    ds_new['nlon_t'] = _xr.Variable(('nlon_t'), np.arange(len(ds.nlon)) + 0.5, {'axis': 'X'})
-    ds_new['nlat_t'] = _xr.Variable(('nlat_t'), np.arange(len(ds.nlat)) + 0.5, {'axis': 'Y'})
+    ds_new['XU'] = _xr.Variable(('XU'), np.arange(len(ds.nlon)) + 1, {'axis': 'X', 'c_grid_axis_shift': 0.5})
+    ds_new['YU'] = _xr.Variable(('YU'), np.arange(len(ds.nlat)) + 1, {'axis': 'Y', 'c_grid_axis_shift': 0.5})
+    ds_new['XT'] = _xr.Variable(('XT'), np.arange(len(ds.nlon)) + 0.5, {'axis': 'X'})
+    ds_new['XT'] = _xr.Variable(('XT'), np.arange(len(ds.nlat)) + 0.5, {'axis': 'Y'})
 
     # add metadata to z grid
     ds_new=ds_new.set_coords({'z_t','z_w','z_w_top','z_w_bot'})
-    ds_new['z_t'].attrs.update({'axis': 'Z'})
-    ds_new['z_w'].attrs.update({'axis': 'Z', 'c_grid_axis_shift': -0.5})
-    ds_new['z_w_top'].attrs.update({'axis': 'Z', 'c_grid_axis_shift': -0.5})
-    ds_new['z_w_bot'].attrs.update({'axis': 'Z', 'c_grid_axis_shift': 0.5})
+    ds_new['Z_t'].attrs.update({'axis': 'Z'})
+    ds_new['Z_w'].attrs.update({'axis': 'Z', 'c_grid_axis_shift': -0.5})
+    ds_new['Z_w_top'].attrs.update({'axis': 'Z', 'c_grid_axis_shift': -0.5})
+    ds_new['Z_w_bot'].attrs.update({'axis': 'Z', 'c_grid_axis_shift': 0.5})
 
     return ds_new
 
@@ -380,8 +380,8 @@ def _dims_from_grid_loc(grid_loc):
     y_loc_key = int(grid_loc[2])
     z_loc_key = int(grid_loc[3])
 
-    x_loc = {1: 'nlon_t', 2: 'nlon_u'}[x_loc_key]
-    y_loc = {1: 'nlat_t', 2: 'nlat_u'}[y_loc_key]
+    x_loc = {1: 'XT', 2: 'XU'}[x_loc_key]
+    y_loc = {1: 'XT', 2: 'XU'}[y_loc_key]
     z_loc = {0: 'surface', 1: 'z_t', 2: 'z_w', 3: 'z_w_bot', 4: 'z_t_150m'}[z_loc_key]
 
     if ndim == 2: # meant to represent spatial coordinates (not time)
