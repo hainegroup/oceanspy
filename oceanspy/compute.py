@@ -32,7 +32,8 @@ from collections import OrderedDict as _OrderedDict
 # From OceanSpy (private)
 from . import utils as _utils
 from ._ospy_utils import (_check_instance, _check_list_of_string,
-                          _handle_aliased, _check_ijk_components)
+                          _handle_aliased, _check_ijk_components,
+                          _rename_aliased)
 
 # Hard coded  list of variables outputed by functions
 _FUNC2VARS = _OrderedDict(potential_density_anomaly=['Sigma0'],
@@ -110,6 +111,7 @@ def _add_missing_variables(od, varList, FUNC2VARS=_FUNC2VARS):
     varList = _check_list_of_string(varList, 'varList')
 
     # Return here if all variables already exist
+    varList = _rename_aliased(od, varList)
     varList = [var
                for var in varList
                if var not in od._ds.variables]

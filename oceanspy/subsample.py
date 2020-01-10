@@ -24,7 +24,7 @@ from . import utils as _utils
 from . import compute as _compute
 from ._ospy_utils import (_check_instance, _check_range,
                           _check_list_of_string, _check_native_grid,
-                          _check_part_position)
+                          _check_part_position, _rename_aliased)
 
 # Recommended dependencies (private)
 try:
@@ -540,6 +540,7 @@ def cutout(od,
     if varList is not None:
         # Make sure it's a list
         varList = list(varList)
+        varList = _rename_aliased(od, varList)
 
         # Compute missing variables
         od = _compute._add_missing_variables(od, varList)
