@@ -886,7 +886,6 @@ sources:
     metadata:
       model: POP
       rename:
-        Nt: time
         Nz: Z 
         nlat: Y 
         nlon: X
