@@ -832,6 +832,11 @@ sources:
         nlon: X
         # j_g: Yp1
         Nz: Z
+        Nw: Zw
+        Nw_top: Zw_top
+        Nz_top: Z_top
+        Nz_150: Z_150
+        Nz_bot: Z_bot
       grid_coords: 
         add_midp: True
         grid: B
