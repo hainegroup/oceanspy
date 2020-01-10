@@ -828,6 +828,7 @@ sources:
       model: POP
       grid_coords: 
         add_midp: True
+        grid: B
         grid_coords:
           Y:
             Y: 
