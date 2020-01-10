@@ -832,7 +832,6 @@ sources:
         nlon: X
         # j_g: Yp1
         Nz: Z
-        Nt: time
       grid_coords: 
         add_midp: True
         grid: B
@@ -886,6 +885,7 @@ sources:
     metadata:
       model: POP
       rename:
+        Nt: time
         Nz: Z 
         nlat: Y 
         nlon: X
