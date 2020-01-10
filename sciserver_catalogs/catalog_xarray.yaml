@@ -889,6 +889,7 @@ sources:
       rename:
         Nt: time
         Nz: Z 
+        Nw: Zw
         nlat: Y 
         nlon: X
       parameters:
