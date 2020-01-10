@@ -831,7 +831,8 @@ sources:
         # i_g: Xp1
         nlon: X
         # j_g: Yp1
-        nz: Z
+        Nz: Z
+        Nt: time
       grid_coords: 
         add_midp: True
         grid: B
@@ -845,7 +846,7 @@ sources:
           time: 
             time: -0.5
           Z:
-            Z: 
+            Z:
             Zp1: 0.5
             Zu: 0.5
             Zl: -0.5
@@ -886,6 +887,9 @@ sources:
       model: POP
       rename:
         Nt: time
+        Nz: Z 
+        nlat: Y 
+        nlon: X
       parameters:
         rSphere: 6.371e+03
         eq_state: mdjwf
@@ -915,6 +919,11 @@ sources:
         decode_times: False
     metadata:
       model: POP
+      rename:
+        Nt: time
+        nlat: Y
+        nlon: X
+        Nz: Z
       grid_coords: 
         add_midp: True
         grid_coords:
@@ -946,7 +955,7 @@ sources:
       description: |
         Grid for the POPv2 synoptic scale ocean model
       citation: |
-        Justin et al (2014), A new synoptic scale resolving global climate simulatoin using the Community Earth System Model. J. Adv. Model. Earth Syst., 6, 1065-1094. https:doi.org/10.1002/2014MS000363
+        Justin et al (2014), A new synoptic scale resolving global climate simulation using the Community Earth System Model. J. Adv. Model. Earth Syst., 6, 1065-1094. https:doi.org/10.1002/2014MS000363
       original_output: Monthly means.
 
 
@@ -967,9 +976,12 @@ sources:
       model: POP
       rename:
         Nt: time
-      manipulate_coords:
-        fillna: True
-        coords1Dfrom2D: False
+        Nz: Z
+        nlat: Y
+        nlon: X
+      # manipulate_coords:
+      #   fillna: False
+      #   coords1Dfrom2D: False
       grid_coords: 
         add_midp: True
         grid_coords:
