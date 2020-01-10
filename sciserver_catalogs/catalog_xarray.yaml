@@ -886,11 +886,21 @@ sources:
         combine: nested
     metadata:
       model: POP
+      aliases:
+        SSH: Eta
+        SSH2: Eta2
+        UVEL: U
+        VVEL: V
+        UVEL2: U2
+        VVEL2: V2
+        WVEL: W
+        S: SALT
+        Temp: TEMP
       rename:
         Nt: time
         Nz: Z 
         Nw: Zw
-        nlat: Y 
+        nlat: Y
         nlon: X
       parameters:
         rSphere: 6.371e+03
