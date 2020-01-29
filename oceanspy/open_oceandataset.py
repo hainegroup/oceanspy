@@ -15,7 +15,7 @@ import urllib as _urllib
 # Import from oceanspy (private)
 from ._oceandataset import OceanDataset as _OceanDataset
 import oceanspy as _ospy
-from ._ospy_utils import (_check_instance, _restore_coord_attrs)
+from ._ospy_utils import _check_instance, _restore_coord_attrs
 from collections import OrderedDict as _OrderedDict
 
 # Import extra modules (private)
@@ -52,10 +52,10 @@ def from_netcdf(path, **kwargs):
     """
 
     # Check parameters
-    _check_instance({'path': path}, 'str')
+    _check_instance({"path": path}, "str")
 
     # Open
-    print('Opening dataset from [{}].'.format(path))
+    print("Opening dataset from [{}].".format(path))
     ds = _xr.open_dataset(path, **kwargs)
 
     # Put back coordinates attribute that to_netcdf didn't like
@@ -88,10 +88,10 @@ def from_zarr(path, **kwargs):
     """
 
     # Check parameters
-    _check_instance({'path': path}, 'str')
+    _check_instance({"path": path}, "str")
 
     # Open
-    print('Opening dataset from [{}].'.format(path))
+    print("Opening dataset from [{}].".format(path))
     ds = _xr.open_zarr(path, **kwargs)
 
     # Put back coordinates attribute that to_netcdf didn't like
@@ -124,7 +124,7 @@ def from_catalog(name, catalog_url=None):
     """
 
     # Message
-    print('Opening {}.'.format(name))
+    print("Opening {}.".format(name))
     cat, entries, url, intake_switch = _find_entries(name, catalog_url)
 
     # Store all dataset
@@ -142,15 +142,15 @@ def from_catalog(name, catalog_url=None):
             ds = cat[entry].to_dask()
         else:
             # Pop args and metadata
-            args = cat[entry].pop('args')
-            mtdt = cat[entry].pop('metadata', None)
+            args = cat[entry].pop("args")
+            mtdt = cat[entry].pop("metadata", None)
 
             # If iter is a string, need to be evaluated (likely range)
-            iters = args.pop('iters', None)
-            if isinstance(iters, str) and 'range' in iters:
+            iters = args.pop("iters", None)
+            if isinstance(iters, str) and "range" in iters:
                 iters = eval(iters)
             if iters is not None:
-                args['iters'] = iters
+                args["iters"] = iters
 
             # Create ds
             with _warnings.catch_warnings():
@@ -160,11 +160,11 @@ def from_catalog(name, catalog_url=None):
                 ds = _xmitgcm.open_mdsdataset(**args)
 
         # Rename
-        rename = mtdt.pop('rename', None)
+        rename = mtdt.pop("rename", None)
         ds = ds.rename(rename)
 
         # Fix Z dimensions (Zmd, ...)
-        default_Zs = ['Zp1', 'Zu', 'Zl', 'Z']
+        default_Zs = ["Zp1", "Zu", "Zl", "Z"]
         # Make sure they're sorted with decreasing letter number
         default_Zs = sorted(default_Zs, key=len, reverse=True)
         for Zdim in default_Zs:  # pragma: no cover
@@ -176,19 +176,19 @@ def from_catalog(name, catalog_url=None):
                         ds = ds.squeeze(dim)
                     else:
                         if Zdim in ds.dims:
-                            ds = ds.rename({Zdim: 'tmp'})
-                            ds = ds.rename({'tmp': Zdim, dim: Zdim})
+                            ds = ds.rename({Zdim: "tmp"})
+                            ds = ds.rename({"tmp": Zdim, dim: Zdim})
                         else:
                             ds = ds.rename({dim: Zdim})
 
         # Original output
-        or_out = mtdt.pop('original_output', None)
+        or_out = mtdt.pop("original_output", None)
         if or_out is not None:
             for var in ds.data_vars:
-                ds[var].attrs['original_output'] = or_out
+                ds[var].attrs["original_output"] = or_out
 
         # Select
-        isel = mtdt.pop('isel', None)
+        isel = mtdt.pop("isel", None)
         if isel is not None:
             isel = {key: eval(value) for key, value in isel.items()}
             ds = ds.isel(isel)
@@ -216,106 +216,141 @@ def from_catalog(name, catalog_url=None):
     od = _OceanDataset(ds)
 
     # Shift averages
-    shift_averages = metadata.pop('shift_averages', None)
+    shift_averages = metadata.pop("shift_averages", None)
     if shift_averages is not None:
         od = od.shift_averages(**shift_averages)
 
     # Set OceanSpy stuff
-    for var in ['aliases', 'parameters', 'name', 'description', 'projection']:
+    for var in ["aliases", "parameters", "name", "description", "projection"]:
         val = metadata.pop(var, None)
         if val is not None:
-            od = eval('od.set_{}(val)'.format(var))
+            od = eval("od.set_{}(val)".format(var))
 
     # Manipulate coordinates
-    manipulate_coords = metadata.pop('manipulate_coords', None)
+    manipulate_coords = metadata.pop("manipulate_coords", None)
     if manipulate_coords is not None:
         od = od.manipulate_coords(**manipulate_coords)
 
     # Set grid coordinates
-    grid_coords = metadata.pop('grid_coords', None)
+    grid_coords = metadata.pop("grid_coords", None)
     if grid_coords is not None:
         od = od.set_grid_coords(**grid_coords)
 
     # Set attributes (use xmitgcm)
     try:
-        from xmitgcm.variables import (vertical_coordinates,
-                                       horizontal_grid_variables,
-                                       vertical_grid_variables,
-                                       volume_grid_variables,
-                                       mask_variables,
-                                       state_variables,
-                                       package_state_variables,
-                                       extra_grid_variables)
+        from xmitgcm.variables import (
+            vertical_coordinates,
+            horizontal_grid_variables,
+            vertical_grid_variables,
+            volume_grid_variables,
+            mask_variables,
+            state_variables,
+            package_state_variables,
+            extra_grid_variables,
+        )
         from xmitgcm.utils import parse_available_diagnostics
         from xmitgcm import default_diagnostics
+
         diagnostics = parse_available_diagnostics(default_diagnostics.__file__)
-        variables = _OrderedDict(list(vertical_coordinates.items())
-                                 + list(horizontal_grid_variables.items())
-                                 + list(vertical_grid_variables.items())
-                                 + list(volume_grid_variables.items())
-                                 + list(mask_variables.items())
-                                 + list(state_variables.items())
-                                 + list(package_state_variables.items())
-                                 + list(extra_grid_variables.items()))
+        variables = _OrderedDict(
+            list(vertical_coordinates.items())
+            + list(horizontal_grid_variables.items())
+            + list(vertical_grid_variables.items())
+            + list(volume_grid_variables.items())
+            + list(mask_variables.items())
+            + list(state_variables.items())
+            + list(package_state_variables.items())
+            + list(extra_grid_variables.items())
+        )
         variables = _OrderedDict({**diagnostics, **variables})
 
         # My extra attributes
-        variables['Temp'] = variables.pop('T')
-        variables['HFacC'] = variables.pop('hFacC')
-        variables['HFacW'] = variables.pop('hFacW')
-        variables['HFacS'] = variables.pop('hFacS')
+        variables["Temp"] = variables.pop("T")
+        variables["HFacC"] = variables.pop("hFacC")
+        variables["HFacW"] = variables.pop("hFacW")
+        variables["HFacS"] = variables.pop("hFacS")
 
-        for var in ['HFacC', 'HFacW', 'HFacS']:
-            variables[var]['attrs']['units'] = " "
+        for var in ["HFacC", "HFacW", "HFacS"]:
+            variables[var]["attrs"]["units"] = " "
 
-        variables['phiHyd'] = variables.pop('PHIHYD')
-        variables['phiHydLow'] = dict(
-            attrs=dict(long_name=('Phi-Hydrostatic at r-lower boundary'
-                                  '(bottom in z-coordinates,'
-                                  'top in p-coordinates)'),
-                       units=variables['phiHyd']['attrs']['units']))
+        variables["phiHyd"] = variables.pop("PHIHYD")
+        variables["phiHydLow"] = dict(
+            attrs=dict(
+                long_name=(
+                    "Phi-Hydrostatic at r-lower boundary"
+                    "(bottom in z-coordinates,"
+                    "top in p-coordinates)"
+                ),
+                units=variables["phiHyd"]["attrs"]["units"],
+            )
+        )
 
-        variables['AngleCS'] = dict(
-            attrs=dict(standard_name="Cos of grid orientation angle",
-                       long_name="AngleCS",
-                       units=" ", coordinate="YC XC"))
-        variables['AngleSN'] = dict(
-            attrs=dict(standard_name="Sin of grid orientation angle",
-                       long_name="AngleSN",
-                       units=" "))
-        variables['dxF'] = dict(
-            attrs=dict(standard_name="x cell face separation",
-                       long_name="cell x size",
-                       units="m"))
-        variables['dyF'] = dict(
-            attrs=dict(standard_name="y cell face separation",
-                       long_name="cell y size",
-                       units="m"))
-        variables['dxV'] = dict(
-            attrs=dict(standard_name="x v-velocity separation",
-                       long_name="cell x size",
-                       units="m"))
-        variables['dyU'] = dict(
-            attrs=dict(standard_name="y u-velocity separation",
-                       long_name="cell y size",
-                       units="m"))
-        variables['fCori'] = dict(
-            attrs=dict(standard_name="Coriolis f at cell center",
-                       long_name="Coriolis f",
-                       units="s^-1"))
-        variables['fCoriG'] = dict(
-            attrs=dict(standard_name="Coriolis f at cell corner",
-                       long_name="Coriolis f",
-                       units="s^-1"))
+        variables["AngleCS"] = dict(
+            attrs=dict(
+                standard_name="Cos of grid orientation angle",
+                long_name="AngleCS",
+                units=" ",
+                coordinate="YC XC",
+            )
+        )
+        variables["AngleSN"] = dict(
+            attrs=dict(
+                standard_name="Sin of grid orientation angle",
+                long_name="AngleSN",
+                units=" ",
+            )
+        )
+        variables["dxF"] = dict(
+            attrs=dict(
+                standard_name="x cell face separation",
+                long_name="cell x size",
+                units="m",
+            )
+        )
+        variables["dyF"] = dict(
+            attrs=dict(
+                standard_name="y cell face separation",
+                long_name="cell y size",
+                units="m",
+            )
+        )
+        variables["dxV"] = dict(
+            attrs=dict(
+                standard_name="x v-velocity separation",
+                long_name="cell x size",
+                units="m",
+            )
+        )
+        variables["dyU"] = dict(
+            attrs=dict(
+                standard_name="y u-velocity separation",
+                long_name="cell y size",
+                units="m",
+            )
+        )
+        variables["fCori"] = dict(
+            attrs=dict(
+                standard_name="Coriolis f at cell center",
+                long_name="Coriolis f",
+                units="s^-1",
+            )
+        )
+        variables["fCoriG"] = dict(
+            attrs=dict(
+                standard_name="Coriolis f at cell corner",
+                long_name="Coriolis f",
+                units="s^-1",
+            )
+        )
 
         # Extract variables in dataset only
-        variables = _OrderedDict(**{var: variables[var]
-                                    for var in od._ds.variables
-                                    if var in variables})
+        variables = _OrderedDict(
+            **{var: variables[var] for var in od._ds.variables if var in variables}
+        )
 
         # Add attributes
         for var in variables:
-            attrs = variables[var]['attrs']
+            attrs = variables[var]["attrs"]
             for attr in attrs:
                 if attr not in od._ds[var].attrs:
                     od._ds[var].attrs[attr] = attrs[attr]
@@ -324,17 +359,18 @@ def from_catalog(name, catalog_url=None):
 
     # Print message
     toprint = od.description
-    for add_str in ['citation', 'characteristics', 'mates']:
+    for add_str in ["citation", "characteristics", "mates"]:
         thisprint = metadata.pop(add_str, None)
         if thisprint is not None:
-            if add_str == 'mates':
-                add_str = 'see also'
-            if thisprint[-1:] == '\n':
+            if add_str == "mates":
+                add_str = "see also"
+            if thisprint[-1:] == "\n":
                 thisprint = thisprint[:-1]
-            toprint += '\n{}:\n * {}'.format(add_str.capitalize(),
-                                             thisprint.replace('\n', '\n * '))
+            toprint += "\n{}:\n * {}".format(
+                add_str.capitalize(), thisprint.replace("\n", "\n * ")
+            )
     if toprint is not None:
-        print(toprint.replace('\n\n', '\n'))
+        print(toprint.replace("\n\n", "\n"))
 
     return od
 
@@ -358,33 +394,41 @@ def _find_entries(name, catalog_url):
     """
     # Check parameters
     if catalog_url is None:  # pragma: no cover
-        url = ('https://raw.githubusercontent.com/malmans2/oceanspy/'
-               'master/sciserver_catalogs/datasets_list.yaml')
+        url = (
+            "https://raw.githubusercontent.com/malmans2/oceanspy/"
+            "master/sciserver_catalogs/datasets_list.yaml"
+        )
         f = _urllib.request.urlopen(url)
-        SCISERVER_DATASETS = _yaml.safe_load(f)['datasets']['sciserver']
+        SCISERVER_DATASETS = _yaml.safe_load(f)["datasets"]["sciserver"]
         if name not in SCISERVER_DATASETS:
-            raise ValueError('[{}] is not available on SciServer.'
-                             ' Here is a list of available oceandatasets: {}.'
-                             ''.format(name, SCISERVER_DATASETS))
+            raise ValueError(
+                "[{}] is not available on SciServer."
+                " Here is a list of available oceandatasets: {}."
+                "".format(name, SCISERVER_DATASETS)
+            )
     else:
-        _check_instance({'catalog_url': catalog_url}, 'str')
+        _check_instance({"catalog_url": catalog_url}, "str")
 
     # Read catatog
     try:
         if catalog_url is None:
-            url = ('https://raw.githubusercontent.com/malmans2/oceanspy/'
-                   'master/sciserver_catalogs/catalog_xarray.yaml')
+            url = (
+                "https://raw.githubusercontent.com/malmans2/oceanspy/"
+                "master/sciserver_catalogs/catalog_xarray.yaml"
+            )
         else:
             url = catalog_url
         cat = _intake.Catalog(url)
         entries = [entry for entry in cat if name in entry]
         if len(entries) == 0:
-            raise ValidationError('', '')
+            raise ValidationError("", "")
         intake_switch = True
     except ValidationError:
         if catalog_url is None:
-            url = ('https://raw.githubusercontent.com/malmans2/oceanspy/'
-                   'master/sciserver_catalogs/catalog_xmitgcm.yaml')
+            url = (
+                "https://raw.githubusercontent.com/malmans2/oceanspy/"
+                "master/sciserver_catalogs/catalog_xmitgcm.yaml"
+            )
         else:
             url = catalog_url
 
@@ -400,6 +444,6 @@ def _find_entries(name, catalog_url):
 
     # Error if not available
     if len(entries) == 0:
-        raise ValueError('[{}] is not in the catalog.'.format(name))
+        raise ValueError("[{}] is not in the catalog.".format(name))
     else:
         return cat, entries, url, intake_switch
