@@ -6,7 +6,8 @@ scanner:
 
 flake8:  # Same as scanner.linter value. Other option is flake8
     max-line-length: 88  # Default is 79 in PEP 8
-    ignore: E203
+    ignore:
+      - E203
 
 no_blank_comment: True  # If True, no comment is made on PR without any errors.
 descending_issues_order: False  # If True, PEP 8 issues in message will be displayed in descending order of line numbers in the file
