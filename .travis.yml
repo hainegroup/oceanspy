@@ -35,7 +35,8 @@ install:
 script:
   - py.test oceanspy -v --cov=oceanspy --cov-config .coveragerc --cov-report term-missing
   - if [[ $TASK == "black" ]]; then
-      black --check oceanspy;
+      black --check .;
+      black-nb --check .;
     fi;
 
 after_success:

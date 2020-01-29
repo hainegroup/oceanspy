@@ -26,3 +26,6 @@ dependencies:
   - xmitgcm>=0.3.0
   - ffmpeg
   - black
+  - pip
+  pip:
+    - black-nb
