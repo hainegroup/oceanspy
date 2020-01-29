@@ -10,7 +10,7 @@ matrix:
   - python: 3.6
     env:
       - CONDA_ENV=py36
-      - TASK=lint
+      - TASK=black
   - python: 3.7
     env: CONDA_ENV=py37
   - python: 3.8
@@ -34,8 +34,9 @@ install:
 
 script:
   - py.test oceanspy -v --cov=oceanspy --cov-config .coveragerc --cov-report term-missing
-  - if [[ $TASK == "docs" ]]; then
-      black --check oceanspy
+  - if [[ $TASK == "black" ]]; then
+      black --check oceanspy;
+    fi;
 
 after_success:
   - codecov
