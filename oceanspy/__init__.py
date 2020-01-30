@@ -3,16 +3,16 @@ __email__ = "mattia.almansi@jhu.edu"
 __version__ = "0.1.0"
 
 from ._oceandataset import OceanDataset  # noqa: F401
-from . import (
+from . import (  # noqa: F401
     open_oceandataset,
     subsample,
-    compute,  # noqa: F401
+    compute,
     plot,
     animate,
     utils,
     _ospy_utils,
-)  # noqa: F401
-import numpy as _np  # noqa: F401
+)
+import numpy as _np
 
 DEFAULT_PARAMETERS = {
     "rSphere": 6.371e3,

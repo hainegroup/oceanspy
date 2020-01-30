@@ -1115,7 +1115,7 @@ class OceanDataset:
                 for attr in attrs:
                     if attr not in self._ds[var].attrs:
                         self._ds[var].attrs[attr] = attrs[attr]
-        except ImportErrror:  # pragma: no cover
+        except ImportError:  # pragma: no cover
             pass
 
         return self

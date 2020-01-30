@@ -392,9 +392,9 @@ def test_save_load(od, compute):
     path = "test_path"
 
     od.to_netcdf(path=path + ".nc", compute=compute)
-    new_od = open_oceandataset.from_netcdf(path + ".nc")
+    open_oceandataset.from_netcdf(path + ".nc")
     os.remove(path + ".nc")
 
     od.to_zarr(path=path, compute=compute)
-    new_od = open_oceandataset.from_zarr(path)
+    open_oceandataset.from_zarr(path)
     shutil.rmtree(path, ignore_errors=True)
