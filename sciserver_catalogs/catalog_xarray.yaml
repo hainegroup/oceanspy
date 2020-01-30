@@ -523,7 +523,7 @@ sources:
     driver: zarr
     model: MITGCM
     args:
-      urlpath: '/sciserver/filedb02-01/ocean/LLC4320/SST'
+      urlpath: '/sciserver/filedb02-01/ocean/poseidon/SST'
       drop_variables: ['']
     metadata:
       rename:
@@ -545,7 +545,7 @@ sources:
     driver: zarr
     model: MITGCM
     args:
-      urlpath: '/sciserver/filedb03-01/ocean/LLC4320/SSS'
+      urlpath: '/sciserver/filedb03-01/ocean/poseidon/SSS'
       drop_variables: ['XC','YC','iter','k','k_l','k_u','Z','Zl','Zu']
     metadata:
       rename:
@@ -567,7 +567,7 @@ sources:
   #   driver: zarr
   #   model: MITGCM
   #   args:
-  #     urlpath: '/sciserver/filedb04-01/ocean/LLC4320/Eta'
+  #     urlpath: '/sciserver/filedb04-01/ocean/poseidon/Eta'
   #     drop_variables: ['']
   #   metadata:
   #     rename:
@@ -615,7 +615,7 @@ sources:
   #   driver: zarr
   #   model: MITGCM
   #   args:
-  #     urlpath: '/sciserver/filedb05-01/ocean/LLC4320/U'
+  #     urlpath: '/sciserver/filedb05-01/ocean/poseidon/U'
   #     drop_variables: ['']
   #   metadata:
   #     rename:
@@ -671,7 +671,7 @@ sources:
     description: horizontal grid for LLC4320
     driver: zarr
     args:
-      urlpath: '/sciserver/filedb05-01/ocean/LLC4320/grid'
+      urlpath: '/sciserver/filedb05-01/ocean/poseidon/LLC4320/grid'
     metadata:
       model: MITGCM
       rename:
@@ -765,7 +765,7 @@ sources:
   #   driver: zarr
   #   model: MITGCM
   #   args:
-  #     urlpath: '/sciserver/filedb06-01/ocean/LLC4320/V'
+  #     urlpath: '/sciserver/filedb06-01/ocean/poseidon/V'
   #     drop_variables: ['']
   #   metadata:
   #     rename:
@@ -819,7 +819,7 @@ sources:
     driver: netcdf
     model: POPv2
     args:
-      urlpath: '/sciserver/filedb07-01/ocean/POP/CORE/CESM_POPv2_CORE_0033.nc'
+      urlpath: '/sciserver/filedb07-01/ocean/poseidon/POP/CORE/CESM_POPv2_CORE_0033.nc'
       xarray_kwargs:
         engine: netcdf4
         drop_variables: ['time','Jstart','Jend','Istart','Iend','cp_air','cp_sw','fwflux_factor','grav','T0_Kelvin','heat_to_PW','hflux_factor','latent_heat_fusion','latent_heat_vapor','mass_to_Sv','momentum_factor','ocn_ref_salinity','omega','ppt_to_salt','radius','rho_air','rho_fw','rho_sw','salinity_factor','salt_to_Svppt','salt_to_mmday','salt_to_ppt','sea_ice_salinity','sflux_factor','sound','stefan_boltzmann','vonkar']
@@ -875,7 +875,7 @@ sources:
     description: Pop ocean (only) simulation forced with COREv2
     driver: netcdf
     args:
-      urlpath: '/sciserver/filedb07-01/ocean/POP/CORE/*.nc'
+      urlpath: '/sciserver/filedb07-01/ocean/poseidon/POP/CORE/*.nc'
       xarray_kwargs:
         engine: netcdf4
         drop_variables: ['']
@@ -894,8 +894,9 @@ sources:
         UVEL2: U2
         VVEL2: V2
         WVEL: W
-        S: SALT
-        Temp: TEMP
+        SALT: S
+        TEMP: Temp
+        SHF: 
       rename:
         Nt: time
         Nz: Z 
@@ -924,7 +925,7 @@ sources:
     description: POP (version 2) model grid
     driver: netcdf
     args:
-      urlpath: '/sciserver/filedb07-01/ocean/POP/HYBRID/CESM_POPv2_HYBRID_0086.nc'
+      urlpath: '/sciserver/filedb07-01/ocean/poseidon/POP/HYBRID/CESM_POPv2_HYBRID_0086.nc'
       xarray_kwargs:
         engine: netcdf4
         drop_variables: ['time','Jstart','Jend','Istart','Iend','cp_air','cp_sw','fwflux_factor','grav','T0_Kelvin','heat_to_PW','hflux_factor','latent_heat_fusion','latent_heat_vapor','mass_to_Sv','momentum_factor','ocn_ref_salinity','omega','ppt_to_salt','radius','rho_air','rho_fw','rho_sw','salinity_factor','salt_to_Svppt','salt_to_mmday','salt_to_ppt','sea_ice_salinity','sflux_factor','sound','stefan_boltzmann','vonkar']
@@ -976,7 +977,7 @@ sources:
     description: Flow fields for the coupled atmos-ocean simulation for the CESM model (POPv2).
     driver: netcdf
     args:
-      urlpath: '/sciserver/filedb07-01/ocean/POP/HYBRID/*.nc'
+      urlpath: '/sciserver/filedb07-01/ocean/poseidon/POP/HYBRID/*.nc'
       xarray_kwargs:
         engine: netcdf4
         drop_variables: ['']
