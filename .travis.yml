@@ -15,6 +15,9 @@ matrix:
     env:
       - CONDA_ENV=py36
       - TASK=black
+  - python: 3.7
+    env:
+      - TASK=docs
   - python: 3.6
     env: CONDA_ENV=py36
   - python: 3.7
@@ -34,12 +37,21 @@ before_install:
   - conda info -a
 
 install:
-  - conda env create --file ci/environment-$CONDA_ENV.yml
-  - source activate ospy_tests
+  - if [[ $TASK == "docs" ]]; then
+      conda env create --file docs/environment.yml;
+      source activate ospy_docs;
+    else
+      conda env create --file ci/environment-$CONDA_ENV.yml;
+      source activate ospy_tests;
+    fi
   - pip install -e .
 
 script:
-  - if [[ $TASK == "black" ]]; then
+  - if [[ $TASK == "docs" ]]; then
+      cd docs;
+      make clean;
+      make html;
+    elif [[ $TASK == "black" ]]; then
       black --check .;
       black-nb --check .;
     elif [[ $TASK == "flake8" ]]; then
