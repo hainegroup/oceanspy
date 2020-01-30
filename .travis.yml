@@ -9,12 +9,10 @@ matrix:
   include:
   - python: 3.6
     env:
-      - NAME=flake8
       - CONDA_ENV=py36
       - TASK=flake8
   - python: 3.6
     env:
-      - NAME=black
       - CONDA_ENV=py36
       - TASK=black
   - python: 3.6
@@ -45,10 +43,10 @@ script:
       black --check .;
       black-nb --check .;
     elif [[ $TASK == "flake8" ]]; then
-      flake8
+      flake8;
     else
-      py.test oceanspy -v --cov=oceanspy --cov-config .coveragerc --cov-report term-missing
-    fi;
+      py.test oceanspy -v --cov=oceanspy --cov-config .coveragerc --cov-report term-missing;
+    fi
 
 after_success:
   - codecov
