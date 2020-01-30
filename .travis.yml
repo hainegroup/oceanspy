@@ -19,7 +19,9 @@ matrix:
     env:
       - TASK=docs
   - python: 3.6
-    env: CONDA_ENV=py36
+    env:
+      - CONDA_ENV=py36
+      - TASK=codecov
   - python: 3.7
     env: CONDA_ENV=py37
   - python: 3.8
@@ -61,4 +63,6 @@ script:
     fi
 
 after_success:
-  - codecov
+  - if [[ $TASK == "codecov" ]]; then
+      codecov;
+    fi
