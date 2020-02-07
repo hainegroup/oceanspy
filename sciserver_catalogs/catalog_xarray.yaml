@@ -526,6 +526,7 @@ sources:
       urlpath: '/sciserver/filedb02-01/ocean/poseidon/LLC4320/2D/SS0'
       drop_variables: ['']
       consolidated: False
+      group: None
     metadata:
       rename:
         i: X
