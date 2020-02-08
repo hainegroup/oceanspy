@@ -21,7 +21,12 @@ dependencies:
   - pytest-cov
   - pytest-env
   - codecov
-  - pycodestyle
+  - flake8
   - ffmpeg
   - xmitgcm>=0.3.0
   - ffmpeg
+  - black
+  - pip
+  - pip:
+    - black-nb
+    - pre-commit

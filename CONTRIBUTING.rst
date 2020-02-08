@@ -177,11 +177,22 @@ Continuous Integration and Test Coverage links: |travis| |codecov|
 
 9. You can install and use `pytest-html`_ to produce a test report in html format.
 
-10. Make sure that the code follows the `PEP 8`_ style guide using the following command:
+10. Make sure that the code follows the `PEP 8`_ style guide and the `black`_ format using the following commands:
 
    .. code-block:: bash 
            
-    $ pycodestyle oceanspy
+    $ black .
+    $ black-nb .
+    $ flake8
+
+   .. note::
+
+    Run the following command to automatically run `black` and `flake8` each time `git commit` is used:
+
+      .. code-block:: bash 
+
+       $ pre-commit install
+           
 
 
 Deploying
@@ -225,6 +236,7 @@ A reminder for the maintainers on how to deploy.
 8. Add the release's notes on the `releases' page`_ (copy and paste from ``HISTORY.rst``)
    
 
+.. _black: "https://black.readthedocs.io"
 .. _Git: https://git-scm.com
 .. _GitHub: https://github.com
 .. _OceanSpy: https://github.com/malmans2/oceanspy

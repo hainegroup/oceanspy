@@ -8,7 +8,20 @@ matrix:
   fast_finish: true
   include:
   - python: 3.6
-    env: CONDA_ENV=py36
+    env:
+      - CONDA_ENV=py36
+      - TASK=flake8
+  - python: 3.6
+    env:
+      - CONDA_ENV=py36
+      - TASK=black
+  - python: 3.7
+    env:
+      - TASK=docs
+  - python: 3.6
+    env:
+      - CONDA_ENV=py36
+      - TASK=codecov
   - python: 3.7
     env: CONDA_ENV=py37
   - python: 3.8
@@ -26,12 +39,30 @@ before_install:
   - conda info -a
 
 install:
-  - conda env create --file ci/environment-$CONDA_ENV.yml
-  - source activate ospy_tests
+  - if [[ $TASK == "docs" ]]; then
+      conda env create --file docs/environment.yml;
+      source activate ospy_docs;
+    else
+      conda env create --file ci/environment-$CONDA_ENV.yml;
+      source activate ospy_tests;
+    fi
   - pip install -e .
 
 script:
-  - py.test oceanspy -v --cov=oceanspy --cov-config .coveragerc --cov-report term-missing
+  - if [[ $TASK == "docs" ]]; then
+      cd docs;
+      make clean;
+      make html;
+    elif [[ $TASK == "black" ]]; then
+      black --check .;
+      black-nb --check .;
+    elif [[ $TASK == "flake8" ]]; then
+      flake8;
+    else
+      py.test oceanspy -v --cov=oceanspy --cov-config .coveragerc --cov-report term-missing;
+    fi
 
 after_success:
-  - codecov
+  - if [[ $TASK == "codecov" ]]; then
+      codecov;
+    fi
