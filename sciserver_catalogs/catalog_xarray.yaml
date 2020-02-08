@@ -684,7 +684,7 @@ sources:
       # manipulate_coords:
       #   coordsUVfromG: True
       grid_coords: 
-        add_midp: True
+        # add_midp: True
         grid_coords:
           Y:
             Y: 
@@ -692,13 +692,13 @@ sources:
           X:
             X: 
             Xp1: 0.5
-          Z:
-            Z: 
-            Zp1: 0.5
-            Zu: 0.5
-            Zl: -0.5
-          time: 
-            time: -0.5
+          # Z:
+          #   Z: 
+          #   Zp1: 0.5
+          #   Zu: 0.5
+          #   Zl: -0.5
+          # time: 
+          #   time: -0.5
       face_connections: # topology
         face_connections:
           face:
