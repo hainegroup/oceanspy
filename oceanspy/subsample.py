@@ -543,7 +543,9 @@ def cutout(
                 # Mean
                 # Separate time and timeless
                 attrs = ds.attrs
-                ds_dims = ds.drop_vars([var for var in ds.variables if var not in ds.dims])
+                ds_dims = ds.drop_vars(
+                    [var for var in ds.variables if var not in ds.dims]
+                )
                 ds_time = ds.drop_vars(
                     [var for var in ds.variables if "time" not in ds[var].dims]
                 )

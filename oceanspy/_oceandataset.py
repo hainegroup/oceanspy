@@ -995,7 +995,9 @@ class OceanDataset:
                 for dim in ["Y", "X"]:
                     coord = self._ds[dim + "G"].rolling(**{dim2roll: 2})
                     coord = coord.mean().dropna(dim2roll)
-                    coord = coord.drop_vars(coord.coords).rename({dim2roll: dim2roll[0]})
+                    coord = coord.drop_vars(coord.coords).rename(
+                        {dim2roll: dim2roll[0]}
+                    )
                     self._ds[dim + point_pos] = coord
                     if "units" in self._ds[dim + "G"].attrs:
                         units = self._ds[dim + "G"].attrs["units"]
