@@ -390,12 +390,12 @@ def cutout(
                 diff = _np.fabs(ds["time"].astype("float64") - time.astype("float64"))
             else:
                 diff = _np.fabs(ds["time"] - time)
-            timeRange[i] = ds["time"].where(diff == diff.min()).min().values
+            timeRange[i] = ds["time"].where(diff == diff.min(), drop=True).min().values
         maskT = maskT.where(
             _np.logical_and(ds["time"] >= timeRange[0], ds["time"] <= timeRange[-1]), 0
         )
 
-        # Find vertical indexes
+        # Find time indexes
         maskT["time"].values = _np.arange(len(maskT["time"]))
         dmaskT = maskT.where(maskT, drop=True)
         dtime = dmaskT["time"].values
