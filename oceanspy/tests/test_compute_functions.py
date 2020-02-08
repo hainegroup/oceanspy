@@ -165,9 +165,9 @@ def test_vertical_relative_vorticity(od_in):
     vortName = aliases.pop("momVort3", None)
     ds = od.dataset
     if vortName is None:
-        ds = ds.drop("momVort3")
+        ds = ds.drop_vars("momVort3")
     else:
-        ds = ds.drop(vortName)
+        ds = ds.drop_vars(vortName)
     od_in = ospy.OceanDataset(ds).set_aliases(aliases)
 
     # Compute momVort3
@@ -198,9 +198,9 @@ def test_relative_vorticity(od_in):
     vortName = aliases.pop("momVort3", None)
     ds = od.dataset
     if vortName is None:
-        ds = ds.drop("momVort3")
+        ds = ds.drop_vars("momVort3")
     else:
-        ds = ds.drop(vortName)
+        ds = ds.drop_vars(vortName)
     od_in = ospy.OceanDataset(ds).set_aliases(aliases)
 
     # Compute momVort1, momVort2, momVort3

@@ -516,7 +516,7 @@ def cutout(
                     "".format(vars2drop),
                     stacklevel=2,
                 )
-                ds = ds.drop(vars2drop)
+                ds = ds.drop_vars(vars2drop)
 
             # Snapshot
             if sampMethod == "snapshot":
@@ -543,11 +543,11 @@ def cutout(
                 # Mean
                 # Separate time and timeless
                 attrs = ds.attrs
-                ds_dims = ds.drop([var for var in ds.variables if var not in ds.dims])
-                ds_time = ds.drop(
+                ds_dims = ds.drop_vars([var for var in ds.variables if var not in ds.dims])
+                ds_time = ds.drop_vars(
                     [var for var in ds.variables if "time" not in ds[var].dims]
                 )
-                ds_timeless = ds.drop(
+                ds_timeless = ds.drop_vars(
                     [var for var in ds.variables if "time" in ds[var].dims]
                 )
 
@@ -594,7 +594,7 @@ def cutout(
         od = _compute._add_missing_variables(od, varList)
 
         # Drop useless
-        od._ds = od._ds.drop([v for v in od._ds.data_vars if v not in varList])
+        od._ds = od._ds.drop_vars([v for v in od._ds.data_vars if v not in varList])
 
     return od
 
@@ -838,7 +838,7 @@ def mooring_array(od, Ymoor, Xmoor, **kwargs):
                             for dim in this_dims
                         }
                     )
-                    da = da.drop(this_dims).rename(
+                    da = da.drop_vars(this_dims).rename(
                         {dim.lower(): dim for dim in this_dims}
                     )
 
@@ -1206,7 +1206,7 @@ def particle_properties(od, times, Ypart, Xpart, Zpart, **kwargs):
             "\nDropped variables: {}.".format(vars2drop),
             stacklevel=2,
         )
-        ds = ds.drop(vars2drop)
+        ds = ds.drop_vars(vars2drop)
 
     # New dimensions
     time = _xr.DataArray(times, dims=("time"), attrs=ds["time"].attrs)
@@ -1287,7 +1287,7 @@ def particle_properties(od, times, Ypart, Xpart, Zpart, **kwargs):
             var: this_ds[var].isel({dim: i_ds["i" + dim] for dim in this_ds[var].dims})
             for var in this_ds.data_vars
         }
-        add_vars = {k: v.drop([Xname, Yname]) for k, v in add_vars.items()}
+        add_vars = {k: v.drop_vars([Xname, Yname]) for k, v in add_vars.items()}
         all_vars = {**all_vars, **add_vars}
 
     # Recreate od

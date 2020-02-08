@@ -1099,7 +1099,7 @@ def _Vsection_regrid(od, da, varName):
             for toRem in ["X", "Y", "Xp1", "Yp1"]:
                 toRem = _rename_aliased(od, varNameList=toRem)
                 if toRem in da.coords:
-                    da = da.drop(toRem)
+                    da = da.drop_vars(toRem)
     else:
         # Station
         hor_name = [dim for dim in od.grid_coords["station"] if dim in da.dims]

@@ -7,7 +7,7 @@ dependencies:
   - distributed
   - bottleneck
   - netCDF4
-  - xarray>=0.11.3
+  - xarray>=0.14.1
   - cartopy
   - esmpy
   - intake-xarray
