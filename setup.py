@@ -11,7 +11,7 @@ with open("README.rst") as readme_file:
 with open("HISTORY.rst") as history_file:
     history = history_file.read()
 
-requirements = ["dask", "xarray>=0.11.3", "xgcm>=0.2.0"]
+requirements = ["dask", "xarray>=0.14.1", "xgcm>=0.2.0"]
 
 setup_requirements = ["pytest-runner"]
 

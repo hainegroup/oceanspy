@@ -140,7 +140,7 @@ def _add_missing_variables(od, varList, FUNC2VARS=_FUNC2VARS):
     for func in funcList:
         allds = allds + [eval("{}(od)".format(func))]
     ds = _xr.merge(allds)
-    ds = ds.drop([var for var in ds.variables if var not in varList])
+    ds = ds.drop_vars([var for var in ds.variables if var not in varList])
 
     # Merge to od
     od = od.merge_into_oceandataset(ds)

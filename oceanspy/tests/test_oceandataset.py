@@ -29,8 +29,8 @@ alias_od = OceanDataset(ds).set_aliases(aliases)
 
 # Grid only wihtout time_midp
 ds = clean_od.dataset
-ds = ds.drop(ds.data_vars)
-ds = ds.drop(["Y", "time_midp"])
+ds = ds.drop_vars(ds.data_vars)
+ds = ds.drop_vars(["Y", "time_midp"])
 aliases = {dim: dim + "_alias" for dim in ds.dims}
 ds_aliases = ds.rename(aliases)
 nomidp_od = OceanDataset(ds)

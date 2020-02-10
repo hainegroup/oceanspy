@@ -256,7 +256,7 @@ def cartesian_path(x1, y1, x2, y2, delta=None):
     if delta is None:
         coefs = _np.linspace(0, 1, 2)
     else:
-        coefs = _np.linspace(0, 1, round(dist_tot / delta))
+        coefs = _np.linspace(0, 1, int(round(dist_tot / delta)))
     xs = x1 + coefs * (x2 - x1)
     ys = y1 + coefs * (y2 - y1)
     dists = coefs * dist_tot
