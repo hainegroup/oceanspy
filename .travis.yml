@@ -15,7 +15,7 @@ matrix:
     env:
       - CONDA_ENV=py36
       - TASK=black
-  - python: 3.7
+  - python: 3.8
     env:
       - TASK=docs
   - python: 3.6
