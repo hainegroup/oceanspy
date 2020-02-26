@@ -1,14 +1,17 @@
 name: ospy_docs
 channels:
-- default
 - conda-forge
 dependencies:
-  - python=3.7
-  - xarray
-  - intake-xarray
-  - ipython
-  - numpydoc
-  - sphinx
-  - sphinx_rtd_theme
-  - nbsphinx
-  - xgcm
+  - python=3.8
+  - pandoc
+  - pip
+  - pip:
+    - xarray
+    - intake
+    - intake-xarray
+    - ipython
+    - numpydoc
+    - sphinx
+    - sphinx_rtd_theme
+    - nbsphinx
+    - xgcm
