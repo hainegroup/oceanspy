@@ -5,6 +5,7 @@ dependencies:
   - pip
   - pip:
     - xarray
+    - intake
     - intake-xarray
     - ipython
     - numpydoc
