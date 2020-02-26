@@ -130,7 +130,7 @@ def _add_missing_variables(od, varList, FUNC2VARS=_FUNC2VARS):
             "\nIf you think that OceanSpy"
             " should be able to compute them,"
             " please open an issue on GitHub:"
-            "\n https://github.com/malmans2/oceanspy/issues"
+            "\n https://github.com/hainegroup/oceanspy/issues"
             "".format(var_error)
         )
 

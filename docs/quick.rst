@@ -95,7 +95,7 @@ Steps 9 to 15 demonstrate a subset of the commonly used OceanSpy commands.
 The :ref:`get_started` is just a small cutout from a high-resolution realistic dataset.
 Click :ref:`datasets` for a list of datasets available on SciServer.
 
-Check out `Tutorial <Tutorial.ipynb#Tutorial>`_, Use Cases, and :ref:`api` to learn more about OceanSpy and its features, and feel free to open an `issue here <https://github.com/malmans2/oceanspy/issues>`_, or to send an email to `mattia.almansi@jhu.edu <mattia.almansi@jhu.edu>`_ if you have any questions.
+Check out `Tutorial <Tutorial.ipynb#Tutorial>`_, Use Cases, and :ref:`api` to learn more about OceanSpy and its features, and feel free to open an `issue here <https://github.com/hainegroup/oceanspy/issues>`_, or to send an email to `mattia.almansi@jhu.edu <mattia.almansi@jhu.edu>`_ if you have any questions.
 
 The schematic below shows how OceanSpy is designed to be used by the oceanographic community.
 
@@ -105,4 +105,4 @@ The schematic below shows how OceanSpy is designed to be used by the oceanograph
 .. _SciServer: http://www.sciserver.org/
 .. |binder| image:: https://mybinder.org/badge_logo.svg
    :alt: binder
-   :target: https://mybinder.org/v2/gh/malmans2/oceanspy/master?filepath=binder%2FTutorial.ipynb
+   :target: https://mybinder.org/v2/gh/hainegroup/oceanspy/master?filepath=binder%2FTutorial.ipynb

@@ -92,7 +92,7 @@ For example, to install the latest version of OceanSpy, use the following cell:
     :class: no-execute
 
     import sys
-    !{sys.executable} -m pip install --upgrade git+https://github.com/malmans2/oceanspy.git
+    !{sys.executable} -m pip install --upgrade git+https://github.com/hainegroup/oceanspy.git
 
 
 .. _`SciServer (www.sciserver.org)`: http://www.sciserver.org/
