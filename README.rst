@@ -62,9 +62,9 @@ OceanSpy can be used as a standalone package for analysis of local circulation m
     :alt: Documentation
     :target: http://oceanspy.readthedocs.io/en/latest/?badge=latest
 
-.. |travis| image:: https://travis-ci.org/malmans2/oceanspy.svg?branch=master
+.. |travis| image:: https://travis-ci.com/hainegroup/oceanspy.svg?branch=master
     :alt: Travis
-    :target: https://travis-ci.org/malmans2/oceanspy
+    :target: https://travis-ci.com/hainegroup/oceanspy
     
 .. |codecov| image:: https://codecov.io/github/hainegroup/oceanspy/coverage.svg?branch=master
     :alt: Coverage
