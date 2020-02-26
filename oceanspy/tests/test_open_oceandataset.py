@@ -10,7 +10,7 @@ from oceanspy.open_oceandataset import from_netcdf, from_catalog, _find_entries
 
 # SCISERVER DATASETS
 url = (
-    "https://raw.githubusercontent.com/malmans2/oceanspy/"
+    "https://raw.githubusercontent.com/hainegroup/oceanspy/"
     "master/sciserver_catalogs/datasets_list.yaml"
 )
 f = urllib.request.urlopen(url)
