@@ -692,11 +692,11 @@ sources:
           X:
             X: 
             Xp1: 0.5
-          Z:
-            Z: 
-            Zp1: 0.5
-            Zu: 0.5
-            Zl: -0.5
+          # Z:
+          #   Z: 
+          #   Zp1: 0.5
+          #   Zu: 0.5
+          #   Zl: -0.5
           time: 
             time: -0.5
       face_connections: # topology
