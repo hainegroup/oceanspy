@@ -439,13 +439,13 @@ def cutout(od,
 
         for var in ds.data_vars:
             if set(['X', 'Y']).issubset(ds[var].dims):
-                ds[var] = ds[var].where(maskC, drop=True)
+                ds[var] = ds[var].where(maskC)
             elif set(['Xp1', 'Yp1']).issubset(ds[var].dims):
-                ds[var] = ds[var].where(maskG, drop=True)
+                ds[var] = ds[var].where(maskG)
             elif set(['Xp1', 'Y']).issubset(ds[var].dims):
-                ds[var] = ds[var].where(maskU, drop=True)
+                ds[var] = ds[var].where(maskU)
             elif set(['X', 'Yp1']).issubset(ds[var].dims):
-                ds[var] = ds[var].where(maskV, drop=True)
+                ds[var] = ds[var].where(maskV)
 
     # ---------------------------
     # TIME RESAMPLING
