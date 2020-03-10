@@ -382,11 +382,14 @@ def _dims_from_grid_loc(grid_loc):
 
     x_loc = {1: 'XT', 2: 'XU'}[x_loc_key]
     y_loc = {1: 'XT', 2: 'XU'}[y_loc_key]
-    z_loc = {0: 'surface', 1: 'z_t', 2: 'z_w', 3: 'z_w_bot', 4: 'z_t_150m'}[z_loc_key]
+    z_loc = {0: 'surface', 1: 'z_t', 2: 'z_w'}[z_loc_key]
 
-    if ndim == 2: # meant to represent spatial coordinates (not time)
-        return y_loc, x_loc
-    else: # ndim >= 3
+    if ndim == 3:
+        if z_loc == 'surface':
+            return y_loc, x_loc
+        else:
+            return z_loc, y_loc, x_loc
+    elif ndim == 2 :
         return z_loc, y_loc, x_loc
 
 
@@ -403,8 +406,9 @@ def _label_coord_grid_locs(ds):
             2120: nlat_u, nlon_t
             2110: nlat_t, nlon_t
         3D variables
-            3221: z_t,nlat_u,nlon_u
-            3
+            3121: z_t,nlat_u,nlon_u
+            3111: z_t,nlat_t, nlon_t
+            3211: z_w,nlat_t,nlon_t
     '''
     grid_locs = {'ANGLE': '2220', 'ANGLET': '2110',
                  'DXT': '2110', 'DXU': '2220',
@@ -416,31 +420,31 @@ def _label_coord_grid_locs(ds):
                  'REGION_MASK': '2110',
                  'TAREA': '2110', 'TLAT': '2110', 'TLONG': '2110',
                  'UAREA': '2220', 'ULAT': '2220', 'ULONG': '2220',
-                 'ADVU': '4221', 'ADVV': '4221',
-                 'DIA_IMPVF_SALT': '4112', 'DIA_IMPVF_TEMP': '4112',
-                 'EVAP_F': '2110', 'GRADX': '4221', 'GRADY': '4221',
+                 'ADVU': '3221', 'ADVV': '3221',
+                 'DIA_IMPVF_SALT': '3112', 'DIA_IMPVF_TEMP': '3112',
+                 'EVAP_F': '2110', 'GRADX': '3221', 'GRADY': '3221',
                  'HBLT': '2110', 'HMXL': '2110',
-                 'HDIFB_SALT': '4112', 'HDIFB_TEMP': '4112',
-                 'HDIFE_SALT': '4211', 'HDIFE_TEMP': '4211',
-                 'HDIFN_SALT': '4121', 'HDIFN_TEMP': '4121',
-                 'HDIFFU': '4221', 'HDIFFV': '4221',
-                 'KPP_SRC_SALT': '4111', 'KPP_SRC_TEMP': '4111',
+                 'HDIFB_SALT': '3112', 'HDIFB_TEMP': '3112',
+                 'HDIFE_SALT': '3211', 'HDIFE_TEMP': '3211',
+                 'HDIFN_SALT': '3121', 'HDIFN_TEMP': '3121',
+                 'HDIFFU': '3221', 'HDIFFV': '3221',
+                 'KPP_SRC_SALT': '3111', 'KPP_SRC_TEMP': '3111',
                  'LWDN_F': '2110', 'LWUP_F': '2110',
                  'MELTH_F': '2110', 'MELT_F': '2110',
-                 'PD': '4111', 'PREC_F': '2110', 'QFLUX': '2110',
-                 'QSW_3D': '4111', 'ROFF_F': '2110', 'SALT': '4111',
+                 'PD': '3111', 'PREC_F': '2110', 'QFLUX': '2110',
+                 'QSW_3D': '3111', 'ROFF_F': '2110', 'SALT': '3111',
                  'SALT_F': '2110', 'SENH_F': '2110', 'SFWF': '2110',
                  'SFWF_WRST': '2110', 'SHF': '2110', 'SHF_QSW': '2110',
                  'SNOW_F': '2110', 'SSH': '2110', 'SSH2': '2110',
                  'SU': '2220', 'SV': '2220', 'TAUX': '2220', 'TAUY': '2220',
-                 'TBLT': '2110', 'TEMP': '4111', 'TEND_TEMP': '4111',
-                 'TEND_SALT': '4111', 'TMXL': '2110',
-                 'UES': '4211', 'UET': '4211', 'UV': '4221',
-                 'UVEL': '4221', 'UVEL2': '4221',
-                 'VVEL': '4221', 'VVEL2': '4221',
-                 'VDIFFU': '4221', 'VDIFFV': '4221',
-                 'VNS': '4121', 'VNT': '4121',
-                 'WTS': '4112', 'WTT': '4112', 'WVEL': '4222',
+                 'TBLT': '2110', 'TEMP': '3111', 'TEND_TEMP': '3111',
+                 'TEND_SALT': '3111', 'TMXL': '2110',
+                 'UES': '3211', 'UET': '3211', 'UV': '3221',
+                 'UVEL': '3221', 'UVEL2': '3221',
+                 'VVEL': '3221', 'VVEL2': '3221',
+                 'VDIFFU': '3221', 'VDIFFV': '3221',
+                 'VNS': '3121', 'VNT': '3121',
+                 'WTS': '3112', 'WTT': '3112', 'WVEL': '3222',
                  'XBLT': '2110', 'XMXL': '2110'}
     ds_new = ds.copy()
     for var in ds_new.variables:
@@ -460,8 +464,8 @@ def _relabel_pop_dims(ds):
             da = ds_new[vname]
             dims_orig = da.dims
             new_spatial_dims = _dims_from_grid_loc(da.attrs['grid_loc'])
-            if dims_orig[0] == 'time':
-                dims = ('time',) + new_spatial_dims
+            if dims_orig[0] == 'Nt':
+                dims = ('Nt',) + new_spatial_dims
             else:
                 dims = new_spatial_dims
             ds_new[vname] = _xr.Variable(dims, da.data, da.attrs, da.encoding, fastpath=True)
