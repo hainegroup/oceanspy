@@ -367,11 +367,6 @@ def _add_pop_dims_to_dataset(ds):
     ds_new['k_t'] = xr.Variable(('k_t'), np.arange(len(ds.Nz)) + 0.5, {'axis': 'Z'})
     ds_new['k_w'] = xr.Variable(('k_w'), np.arange(len(ds.Nw)), {'axis': 'Z', 'c_grid_axis_shift': -0.5})
 
-
-    # ds_new = ds_new.set_coords({'z_t', 'z_w'})
-    # ds_new['Z_t'].attrs.update({'axis': 'Z'})
-    # ds_new['Z_w'].attrs.update({'axis': 'Z', 'c_grid_axis_shift': -0.5})
-
     return ds_new
 
 
