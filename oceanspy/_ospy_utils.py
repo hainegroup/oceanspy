@@ -358,17 +358,19 @@ def _restore_coord_attrs(ds):
 
 def _add_pop_dims_to_dataset(ds):
     ds_new = ds.copy()
-    ds_new['XU'] = _xr.Variable(('XU'), np.arange(len(ds.nlon)) + 1, {'axis': 'X', 'c_grid_axis_shift': 0.5})
-    ds_new['YU'] = _xr.Variable(('YU'), np.arange(len(ds.nlat)) + 1, {'axis': 'Y', 'c_grid_axis_shift': 0.5})
-    ds_new['XT'] = _xr.Variable(('XT'), np.arange(len(ds.nlon)) + 0.5, {'axis': 'X'})
-    ds_new['XT'] = _xr.Variable(('XT'), np.arange(len(ds.nlat)) + 0.5, {'axis': 'Y'})
+    ds_new['nlon_u'] = _xr.Variable(('nlon_u'), np.arange(len(ds.nlon)) + 1, {'axis': 'X', 'c_grid_axis_shift': 0.5})
+    ds_new['nlat_u'] = _xr.Variable(('nlat_u'), np.arange(len(ds.nlat)) + 1, {'axis': 'Y', 'c_grid_axis_shift': 0.5})
+    ds_new['nlon_t'] = _xr.Variable(('nlon_t'), np.arange(len(ds.nlon)) + 0.5, {'axis': 'X'})
+    ds_new['nlat_t'] = _xr.Variable(('nlat_t'), np.arange(len(ds.nlat)) + 0.5, {'axis': 'Y'})
 
     # add metadata to z grid
-    ds_new=ds_new.set_coords({'z_t','z_w','z_w_top','z_w_bot'})
-    ds_new['Z_t'].attrs.update({'axis': 'Z'})
-    ds_new['Z_w'].attrs.update({'axis': 'Z', 'c_grid_axis_shift': -0.5})
-    ds_new['Z_w_top'].attrs.update({'axis': 'Z', 'c_grid_axis_shift': -0.5})
-    ds_new['Z_w_bot'].attrs.update({'axis': 'Z', 'c_grid_axis_shift': 0.5})
+    ds_new['k_t'] = xr.Variable(('k_t'), np.arange(len(ds.Nz)) + 0.5, {'axis': 'Z'})
+    ds_new['k_w'] = xr.Variable(('k_w'), np.arange(len(ds.Nw)), {'axis': 'Z', 'c_grid_axis_shift': -0.5})
+
+
+    # ds_new = ds_new.set_coords({'z_t', 'z_w'})
+    # ds_new['Z_t'].attrs.update({'axis': 'Z'})
+    # ds_new['Z_w'].attrs.update({'axis': 'Z', 'c_grid_axis_shift': -0.5})
 
     return ds_new
 
@@ -389,7 +391,7 @@ def _dims_from_grid_loc(grid_loc):
             return y_loc, x_loc
         else:
             return z_loc, y_loc, x_loc
-    elif ndim == 2 :
+    elif ndim == 2:
         return z_loc, y_loc, x_loc
 
 
