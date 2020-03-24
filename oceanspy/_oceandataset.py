@@ -1011,7 +1011,7 @@ class OceanDataset:
                                                           ['Yp1', 'Xp1'])):
                 for dim in ['Y', 'X']:
                     coord = self._ds[dim + 'G'].rolling(**{dim2roll: 2})
-                    coord = coord.mean().dropna(dim2roll)
+                    coord = coord.mean().dropna(dim2roll, how = 'all')
                     coord = coord.drop(coord.coords).rename({dim2roll:
                                                              dim2roll[0]})
                     self._ds[dim+point_pos] = coord
