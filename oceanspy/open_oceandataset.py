@@ -417,8 +417,8 @@ def _find_entries(name, catalog_url):
             )
         else:
             url = catalog_url
-        cat = _intake.Catalog(url)
-        entries = [entry for entry in cat if name in entry]
+        cat = _intake.open_catalog(url)
+        entries = [entry for entry in list(cat) if name in entry]
         if len(entries) == 0:
             raise ValidationError("", "")
         intake_switch = True
@@ -438,7 +438,7 @@ def _find_entries(name, catalog_url):
         except ValueError:
             with open(url) as f:
                 cat = _yaml.safe_load(f)
-        entries = [entry for entry in cat if name in entry]
+        entries = [entry for entry in list(cat) if name in entry]
         intake_switch = False
 
     # Error if not available
