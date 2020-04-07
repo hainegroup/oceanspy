@@ -835,6 +835,13 @@ sources:
         k: Z
         k_l: Z_l
         k_p1: Z_p1
+        UVEL : U
+        VVEL : V
+        THETA: T
+        SSH : ETA
+        oceTAUX : TAUX
+        oceTAUY : TAUY
+        oceQnet: Qnet
       # manipulate_coords:
       #   coordsUVfromG: True
       grid_coords: 

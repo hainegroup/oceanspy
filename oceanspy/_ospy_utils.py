@@ -44,7 +44,7 @@ def _create_grid(dataset, coords, periodic, face_connections):
         for axis in coords:
             for dim in coords[axis]:
                 if dim not in dataset.dims:
-                    warn_dims = warn_dims+[dim]
+                    warn_dims = warn_dims + [dim]
                 else:
                     shift = coords[axis][dim]
                     dataset[dim].attrs['axis'] = axis
@@ -58,7 +58,8 @@ def _create_grid(dataset, coords, periodic, face_connections):
     if face_connections is None:
         grid = xgcm.Grid(dataset, periodic=periodic)
     else:
-        grid = xgcm.Grid(dataset, periodic=periodic, face_connections = face_connections)
+        grid = xgcm.Grid(dataset, periodic=periodic,
+                         face_connections=face_connections)
     if len(grid.axes) == 0:
         grid = None
 
@@ -356,16 +357,29 @@ def _restore_coord_attrs(ds):
 # POP Model Output
 # ========
 
+
 def _add_pop_dims_to_dataset(ds):
     ds_new = ds.copy()
-    ds_new['nlon_u'] = _xr.Variable(('nlon_u'), np.arange(len(ds.nlon)) + 1, {'axis': 'X', 'c_grid_axis_shift': 0.5})
-    ds_new['nlat_u'] = _xr.Variable(('nlat_u'), np.arange(len(ds.nlat)) + 1, {'axis': 'Y', 'c_grid_axis_shift': 0.5})
-    ds_new['nlon_t'] = _xr.Variable(('nlon_t'), np.arange(len(ds.nlon)) + 0.5, {'axis': 'X'})
-    ds_new['nlat_t'] = _xr.Variable(('nlat_t'), np.arange(len(ds.nlat)) + 0.5, {'axis': 'Y'})
+    ds_new['nlon_u'] = _xr.Variable(('nlon_u'),
+                                    numpy.arange(len(ds.nlon)) + 1,
+                                    {'axis': 'X', 'c_grid_axis_shift': 0.5})
+    ds_new['nlat_u'] = _xr.Variable(('nlat_u'),
+                                    numpy.arange(len(ds.nlat)) + 1,
+                                    {'axis': 'Y', 'c_grid_axis_shift': 0.5})
+    ds_new['nlon_t'] = _xr.Variable(('nlon_t'),
+                                    numpy.arange(len(ds.nlon)) + 0.5,
+                                    {'axis': 'X'})
+    ds_new['nlat_t'] = _xr.Variable(('nlat_t'),
+                                    numpy.arange(len(ds.nlat)) + 0.5,
+                                    {'axis': 'Y'})
 
     # add metadata to z grid
-    ds_new['k_t'] = xr.Variable(('k_t'), np.arange(len(ds.Nz)) + 0.5, {'axis': 'Z'})
-    ds_new['k_w'] = xr.Variable(('k_w'), np.arange(len(ds.Nw)), {'axis': 'Z', 'c_grid_axis_shift': -0.5})
+    ds_new['k_t'] = _xr.Variable(('k_t'),
+                                 numpy.arange(len(ds.Nz)) + 0.5,
+                                 {'axis': 'Z'})
+    ds_new['k_w'] = _xr.Variable(('k_w'),
+                                 numpy.arange(len(ds.Nw)),
+                                 {'axis': 'Z', 'c_grid_axis_shift': -0.5})
 
     return ds_new
 
@@ -465,7 +479,9 @@ def _relabel_pop_dims(ds):
                 dims = ('Nt',) + new_spatial_dims
             else:
                 dims = new_spatial_dims
-            ds_new[vname] = _xr.Variable(dims, da.data, da.attrs, da.encoding, fastpath=True)
+            ds_new[vname] = _xr.Variable(dims, da.data,
+                                         da.attrs, da.encoding,
+                                         fastpath=True)
     return ds_new
 
 
@@ -475,7 +491,8 @@ def _relabel_pop_dims(ds):
 def _check_part_position(od, InputDict):
     for InputName, InputField in InputDict.items():
         if 'time' in InputName:
-            InputField = numpy.asarray(InputField, dtype=od._ds['time'].dtype)
+            InputField = numpy.asarray(InputField,
+                                       dtype=od._ds['time'].dtype)
             if InputField.ndim == 0:
                 InputField = InputField.reshape(1)
             ndim = 1
