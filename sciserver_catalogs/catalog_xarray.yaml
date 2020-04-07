@@ -837,7 +837,8 @@ sources:
         k_p1: Z_p1
         UVEL : U
         VVEL : V
-        THETA: T
+        THETA : T
+        SALT : S
         SSH : ETA
         oceTAUX : TAUX
         oceTAUY : TAUY
