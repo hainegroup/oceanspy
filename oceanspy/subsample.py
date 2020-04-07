@@ -246,8 +246,9 @@ def cutout(
             raise ValueError("Zero grid points in the horizontal range")
 
         # Find horizontal indexes
-        maskH["Yp1"].values = _np.arange(len(maskH["Yp1"]))
-        maskH["Xp1"].values = _np.arange(len(maskH["Xp1"]))
+        maskH = maskH.assign_coords(
+            Yp1=_np.arange(len(maskH["Yp1"])), Xp1=_np.arange(len(maskH["Xp1"]))
+        )
         dmaskH = maskH.where(maskH, drop=True)
         dYp1 = dmaskH["Yp1"].values
         dXp1 = dmaskH["Xp1"].values
@@ -334,7 +335,7 @@ def cutout(
         )
 
         # Find vertical indexes
-        maskV["Zp1"].values = _np.arange(len(maskV["Zp1"]))
+        maskV = maskV.assign_coords(Zp1=_np.arange(len(maskV["Zp1"])))
         dmaskV = maskV.where(maskV, drop=True)
         dZp1 = dmaskV["Zp1"].values
         iZ = [_np.min(dZp1), _np.max(dZp1)]
@@ -396,7 +397,7 @@ def cutout(
         )
 
         # Find time indexes
-        maskT["time"].values = _np.arange(len(maskT["time"]))
+        maskT = maskT.assign_coords(time=_np.arange(len(maskT["time"])))
         dmaskT = maskT.where(maskT, drop=True)
         dtime = dmaskT["time"].values
         iT = [min(dtime), max(dtime)]

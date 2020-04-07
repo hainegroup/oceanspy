@@ -99,8 +99,8 @@ sources:
 
   # ===========================
   # IGP
-  grd_IGP:
-    description: Grid of IGP
+  grd_IGPwinter:
+    description: Grid of IGPwinter
     driver: netcdf
     args:
       urlpath: /home/idies/workspace/OceanCirculation/IGP/grid.nc
@@ -150,8 +150,8 @@ sources:
         Renfrew et al., 2019 - BAMS.
       projection: Mercator
 
-  fld_IGP:
-    description: Fields of IGP
+  fld_IGPwinter:
+    description: Fields of IGPwinter
     driver: netcdf
     args:
       urlpath: /home/idies/workspace/OceanCirculation/IGP/day*.nc
