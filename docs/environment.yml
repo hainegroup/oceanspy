@@ -9,7 +9,7 @@ dependencies:
     - intake-xarray
     - ipython
     - numpydoc
-    - sphinx>=3.0
+    - 'sphinx>=3.0'
     - sphinx_rtd_theme
     - nbsphinx
     - xgcm
