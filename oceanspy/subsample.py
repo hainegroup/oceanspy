@@ -1061,6 +1061,8 @@ def survey_stations(
 
     # Interpolate
     regridder = _xe.Regridder(ds_in, ds, **xesmf_regridder_kwargs)
+    regridder._grid_in = None  # See https://github.com/JiaweiZhuang/xESMF/issues/71
+    regridder._grid_out = None  # See https://github.com/JiaweiZhuang/xESMF/issues/71
     interp_vars = [
         var for var in ds_in.variables if var not in ["lon", "lat", "X", "Y"]
     ]
