@@ -2,7 +2,7 @@ name: ospy_docs
 dependencies:
   - python=3.8
   - pandoc
-  - sphinx>=3.0
+  - sphinx
   - pip
   - pip:
     - xarray
