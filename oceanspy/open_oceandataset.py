@@ -407,7 +407,7 @@ def _find_entries(name, catalog_url):
 
     # Read catalog
     try:
-        if catalog_url is None:
+        if catalog_url is None:  # url will have to change to hainegroup
             url = (
                 "https://raw.githubusercontent.com/Mikejmnez/oceanspy/"
                 "llc4320/sciserver_catalogs/catalog_xarray.yaml"
@@ -420,7 +420,7 @@ def _find_entries(name, catalog_url):
             raise ValidationError('', '')
         intake_switch = True
     except ValidationError:
-        if catalog_url is None:
+        if catalog_url is None:  # url wil have to change to hainegroup
             url = (
                 "https://raw.githubusercontent.com/Mikejmnez/oceanspy/"
                 "llc4320/sciserver_catalogs/catalog_xmitgcm.yaml"
