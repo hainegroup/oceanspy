@@ -926,6 +926,274 @@ sources:
       original_output: snapshot
 
 
+  UVEL_LLC90:
+    description: Zonal velocity for LLC90 ECCO data for 2017
+    driver: netcdf4
+    args:
+      urlpath: '/scratch/ceph/haine/asiddi24/ECCO/ECCO_v4_r4/ecco.jpl.nasa.gov/drive/files/Version4/Release4/nctiles_monthly/UVEL*/2017/*.nc'
+    metadata:
+      model: MITGCM
+      parameters:
+        rSphere: 6.371e+03
+        eq_state: jmd95
+        rho0: 1027
+        g: 9.81
+        eps_nh: 0 
+        omega: 7.292123516990375e-05
+        c_p: 3.986e+03
+        tempFrz0: 9.01e-02
+        dTempFrz_dS: -5.75e-02
+        grid_type: llc
+      name: LLC4320
+      description: |
+        horizontal UVEL for LLC90 ECCO data from the MITGCM, a general, curvilinear ocean simulation on the cube-sphere.
+      citation: |
+        Paper.
+      projection:
+      original_output: snapshot
+
+
+  VVEL_LLC90:
+    description: Meridional velocity for LLC90 ECCO data for 2017
+    driver: netcdf4
+    args:
+      urlpath: '/scratch/ceph/haine/asiddi24/ECCO/ECCO_v4_r4/ecco.jpl.nasa.gov/drive/files/Version4/Release4/nctiles_monthly/VVEL*/2017/*.nc'
+    metadata:
+      model: MITGCM
+      parameters:
+        rSphere: 6.371e+03
+        eq_state: jmd95
+        rho0: 1027
+        g: 9.81
+        eps_nh: 0 
+        omega: 7.292123516990375e-05
+        c_p: 3.986e+03
+        tempFrz0: 9.01e-02
+        dTempFrz_dS: -5.75e-02
+        grid_type: llc
+      name: LLC4320
+      description: |
+        horizontal VVEL for LLC90 ECCO data from the MITGCM, a general, curvilinear ocean simulation on the cube-sphere.
+      citation: |
+        Paper.
+      projection:
+      original_output: snapshot
+
+
+  ETA_LLC90:
+    description: Sea surface height (ETA) for LLC90 ECCO data for 2017
+    driver: netcdf4
+    args:
+      urlpath: '/scratch/ceph/haine/asiddi24/ECCO/ECCO_v4_r4/ecco.jpl.nasa.gov/drive/files/Version4/Release4/nctiles_monthly/SSH/2017/*.nc'
+    metadata:
+      model: MITGCM
+      parameters:
+        rSphere: 6.371e+03
+        eq_state: jmd95
+        rho0: 1027
+        g: 9.81
+        eps_nh: 0 
+        omega: 7.292123516990375e-05
+        c_p: 3.986e+03
+        tempFrz0: 9.01e-02
+        dTempFrz_dS: -5.75e-02
+        grid_type: llc
+      name: LLC4320
+      description: |
+        Sea surface height for LLC90 ECCO data from the MITGCM, a general, curvilinear ocean simulation on the cube-sphere.
+      citation: |
+        Paper.
+      projection:
+      original_output: snapshot
+
+
+  oceQnet_LLC90:
+    description: Net sea surface heat flux (Qnet) for LLC90 ECCO data for 2017
+    driver: netcdf4
+    args:
+      urlpath: '/scratch/ceph/haine/asiddi24/ECCO/ECCO_v4_r4/ecco.jpl.nasa.gov/drive/files/Version4/Release4/nctiles_monthly/oceQnet/2017/*.nc'
+    metadata:
+      model: MITGCM
+      parameters:
+        rSphere: 6.371e+03
+        eq_state: jmd95
+        rho0: 1027
+        g: 9.81
+        eps_nh: 0 
+        omega: 7.292123516990375e-05
+        c_p: 3.986e+03
+        tempFrz0: 9.01e-02
+        dTempFrz_dS: -5.75e-02
+        grid_type: llc
+      name: LLC4320
+      description: |
+        Surface heat flux (oceQnet) for LLC90 ECCO data from the MITGCM, a general, curvilinear ocean simulation on the cube-sphere.
+      citation: |
+        Paper.
+      projection:
+      original_output: snapshot
+
+  oceTAUX_LLC90:
+    description: Zonal surface wind stresses (oceTAU) for LLC90 ECCO data for 2017
+    driver: netcdf4
+    args:
+      urlpath: '/scratch/ceph/haine/asiddi24/ECCO/ECCO_v4_r4/ecco.jpl.nasa.gov/drive/files/Version4/Release4/nctiles_monthly/oceTAUX/2017/*.nc'
+    metadata:
+      model: MITGCM
+      parameters:
+        rSphere: 6.371e+03
+        eq_state: jmd95
+        rho0: 1027
+        g: 9.81
+        eps_nh: 0 
+        omega: 7.292123516990375e-05
+        c_p: 3.986e+03
+        tempFrz0: 9.01e-02
+        dTempFrz_dS: -5.75e-02
+        grid_type: llc
+      name: LLC4320
+      description: |
+        Zonal surface wind stress (oceTAUX) for LLC90 ECCO data from the MITGCM, a general, curvilinear ocean simulation on the cube-sphere.
+      citation: |
+        Paper.
+      projection:
+      original_output: snapshot
+
+
+  oceTAUY_LLC90:
+    description: Meridional surface wind stresses (oceTAU) for LLC90 ECCO data for 2017
+    driver: netcdf4
+    args:
+      urlpath: '/scratch/ceph/haine/asiddi24/ECCO/ECCO_v4_r4/ecco.jpl.nasa.gov/drive/files/Version4/Release4/nctiles_monthly/oceTAUY/2017/*.nc'
+    metadata:
+      model: MITGCM
+      parameters:
+        rSphere: 6.371e+03
+        eq_state: jmd95
+        rho0: 1027
+        g: 9.81
+        eps_nh: 0 
+        omega: 7.292123516990375e-05
+        c_p: 3.986e+03
+        tempFrz0: 9.01e-02
+        dTempFrz_dS: -5.75e-02
+        grid_type: llc
+      name: LLC4320
+      description: |
+        Meridional surface wind stress (oceTAUY) for LLC90 ECCO data from the MITGCM, a general, curvilinear ocean simulation on the cube-sphere.
+      citation: |
+        Paper.
+      projection:
+      original_output: snapshot
+
+
+  THETA_LLC90:
+    description: Potential temperature (Theta) for LLC90 ECCO data for 2017
+    driver: netcdf4
+    args:
+      urlpath: '/scratch/ceph/haine/asiddi24/ECCO/ECCO_v4_r4/ecco.jpl.nasa.gov/drive/files/Version4/Release4/nctiles_monthly/THETA/2017/*.nc'
+    metadata:
+      model: MITGCM
+      parameters:
+        rSphere: 6.371e+03
+        eq_state: jmd95
+        rho0: 1027
+        g: 9.81
+        eps_nh: 0 
+        omega: 7.292123516990375e-05
+        c_p: 3.986e+03
+        tempFrz0: 9.01e-02
+        dTempFrz_dS: -5.75e-02
+        grid_type: llc
+      name: LLC4320
+      description: |
+        Potential temperature (Theta) for LLC90 ECCO data from the MITGCM, a general, curvilinear ocean simulation on the cube-sphere.
+      citation: |
+        Paper.
+      projection:
+      original_output: snapshot
+
+
+  SALT_LLC90:
+    description: Salinity (Salt) for LLC90 ECCO data for 2017
+    driver: netcdf4
+    args:
+      urlpath: '/scratch/ceph/haine/asiddi24/ECCO/ECCO_v4_r4/ecco.jpl.nasa.gov/drive/files/Version4/Release4/nctiles_monthly/SALT/2017/*.nc'
+    metadata:
+      model: MITGCM
+      parameters:
+        rSphere: 6.371e+03
+        eq_state: jmd95
+        rho0: 1027
+        g: 9.81
+        eps_nh: 0 
+        omega: 7.292123516990375e-05
+        c_p: 3.986e+03
+        tempFrz0: 9.01e-02
+        dTempFrz_dS: -5.75e-02
+        grid_type: llc
+      name: LLC4320
+      description: |
+        Salinity (Salt) for LLC90 ECCO data from the MITGCM, a general, curvilinear ocean simulation on the cube-sphere.
+      citation: |
+        Paper.
+      projection:
+      original_output: snapshot
+
+
+  TFLUX_LLC90:
+    description: Surface temperature flux (TFLUX) for LLC90 ECCO data for 2017
+    driver: netcdf4
+    args:
+      urlpath: '/scratch/ceph/haine/asiddi24/ECCO/ECCO_v4_r4/ecco.jpl.nasa.gov/drive/files/Version4/Release4/nctiles_monthly/TFLUX/2017/*.nc'
+    metadata:
+      model: MITGCM
+      parameters:
+        rSphere: 6.371e+03
+        eq_state: jmd95
+        rho0: 1027
+        g: 9.81
+        eps_nh: 0 
+        omega: 7.292123516990375e-05
+        c_p: 3.986e+03
+        tempFrz0: 9.01e-02
+        dTempFrz_dS: -5.75e-02
+        grid_type: llc
+      name: LLC4320
+      description: |
+        Surface temperature flux (Tflux) for LLC90 ECCO data from the MITGCM, a general, curvilinear ocean simulation on the cube-sphere.
+      citation: |
+        Paper.
+      projection:
+      original_output: snapshot
+
+  SFLUX_LLC90:
+    description: Surface salinity flux (TFLUX) for LLC90 ECCO data for 2017
+    driver: netcdf4
+    args:
+      urlpath: '/scratch/ceph/haine/asiddi24/ECCO/ECCO_v4_r4/ecco.jpl.nasa.gov/drive/files/Version4/Release4/nctiles_monthly/SFLUX/2017/*.nc'
+    metadata:
+      model: MITGCM
+      parameters:
+        rSphere: 6.371e+03
+        eq_state: jmd95
+        rho0: 1027
+        g: 9.81
+        eps_nh: 0 
+        omega: 7.292123516990375e-05
+        c_p: 3.986e+03
+        tempFrz0: 9.01e-02
+        dTempFrz_dS: -5.75e-02
+        grid_type: llc
+      name: LLC4320
+      description: |
+        Surface salinity flux (Tflux) for LLC90 ECCO data from the MITGCM, a general, curvilinear ocean simulation on the cube-sphere.
+      citation: |
+        Paper.
+      projection:
+      original_output: snapshot
+
+
   grd_CORE_POP:
     description: POP (version 2) model grid
     driver: netcdf
