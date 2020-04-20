@@ -822,7 +822,7 @@ sources:
 
   grd_LLC90:
     description: horizontal grid for LLC90 ECCO data
-    driver: netcdf4
+    driver: netcdf
     args:
       urlpath: '/scratch/ceph/haine/asiddi24/ECCO/ECCO_v4_r4/ecco.jpl.nasa.gov/drive/files/Version4/Release4/nctiles_grid/'
     metadata:
@@ -911,7 +911,7 @@ sources:
         eq_state: jmd95
         rho0: 1027
         g: 9.81
-        eps_nh: 0 
+        eps_nh: 0
         omega: 7.292123516990375e-05
         c_p: 3.986e+03
         tempFrz0: 9.01e-02
@@ -928,7 +928,7 @@ sources:
 
   UVEL_LLC90:
     description: Zonal velocity for LLC90 ECCO data for 2017
-    driver: netcdf4
+    driver: netcdf
     args:
       urlpath: '/scratch/ceph/haine/asiddi24/ECCO/ECCO_v4_r4/ecco.jpl.nasa.gov/drive/files/Version4/Release4/nctiles_monthly/UVEL*/2017/*.nc'
     metadata:
@@ -955,7 +955,7 @@ sources:
 
   VVEL_LLC90:
     description: Meridional velocity for LLC90 ECCO data for 2017
-    driver: netcdf4
+    driver: netcdf
     args:
       urlpath: '/scratch/ceph/haine/asiddi24/ECCO/ECCO_v4_r4/ecco.jpl.nasa.gov/drive/files/Version4/Release4/nctiles_monthly/VVEL*/2017/*.nc'
     metadata:
@@ -982,7 +982,7 @@ sources:
 
   ETA_LLC90:
     description: Sea surface height (ETA) for LLC90 ECCO data for 2017
-    driver: netcdf4
+    driver: netcdf
     args:
       urlpath: '/scratch/ceph/haine/asiddi24/ECCO/ECCO_v4_r4/ecco.jpl.nasa.gov/drive/files/Version4/Release4/nctiles_monthly/SSH/2017/*.nc'
     metadata:
@@ -1009,7 +1009,7 @@ sources:
 
   oceQnet_LLC90:
     description: Net sea surface heat flux (Qnet) for LLC90 ECCO data for 2017
-    driver: netcdf4
+    driver: netcdf
     args:
       urlpath: '/scratch/ceph/haine/asiddi24/ECCO/ECCO_v4_r4/ecco.jpl.nasa.gov/drive/files/Version4/Release4/nctiles_monthly/oceQnet/2017/*.nc'
     metadata:
@@ -1035,7 +1035,7 @@ sources:
 
   oceTAUX_LLC90:
     description: Zonal surface wind stresses (oceTAU) for LLC90 ECCO data for 2017
-    driver: netcdf4
+    driver: netcdf
     args:
       urlpath: '/scratch/ceph/haine/asiddi24/ECCO/ECCO_v4_r4/ecco.jpl.nasa.gov/drive/files/Version4/Release4/nctiles_monthly/oceTAUX/2017/*.nc'
     metadata:
@@ -1062,7 +1062,7 @@ sources:
 
   oceTAUY_LLC90:
     description: Meridional surface wind stresses (oceTAU) for LLC90 ECCO data for 2017
-    driver: netcdf4
+    driver: netcdf
     args:
       urlpath: '/scratch/ceph/haine/asiddi24/ECCO/ECCO_v4_r4/ecco.jpl.nasa.gov/drive/files/Version4/Release4/nctiles_monthly/oceTAUY/2017/*.nc'
     metadata:
@@ -1089,7 +1089,7 @@ sources:
 
   THETA_LLC90:
     description: Potential temperature (Theta) for LLC90 ECCO data for 2017
-    driver: netcdf4
+    driver: netcdf
     args:
       urlpath: '/scratch/ceph/haine/asiddi24/ECCO/ECCO_v4_r4/ecco.jpl.nasa.gov/drive/files/Version4/Release4/nctiles_monthly/THETA/2017/*.nc'
     metadata:
@@ -1116,7 +1116,7 @@ sources:
 
   SALT_LLC90:
     description: Salinity (Salt) for LLC90 ECCO data for 2017
-    driver: netcdf4
+    driver: netcdf
     args:
       urlpath: '/scratch/ceph/haine/asiddi24/ECCO/ECCO_v4_r4/ecco.jpl.nasa.gov/drive/files/Version4/Release4/nctiles_monthly/SALT/2017/*.nc'
     metadata:
@@ -1143,7 +1143,7 @@ sources:
 
   TFLUX_LLC90:
     description: Surface temperature flux (TFLUX) for LLC90 ECCO data for 2017
-    driver: netcdf4
+    driver: netcdf
     args:
       urlpath: '/scratch/ceph/haine/asiddi24/ECCO/ECCO_v4_r4/ecco.jpl.nasa.gov/drive/files/Version4/Release4/nctiles_monthly/TFLUX/2017/*.nc'
     metadata:
@@ -1169,7 +1169,7 @@ sources:
 
   SFLUX_LLC90:
     description: Surface salinity flux (TFLUX) for LLC90 ECCO data for 2017
-    driver: netcdf4
+    driver: netcdf
     args:
       urlpath: '/scratch/ceph/haine/asiddi24/ECCO/ECCO_v4_r4/ecco.jpl.nasa.gov/drive/files/Version4/Release4/nctiles_monthly/SFLUX/2017/*.nc'
     metadata:
