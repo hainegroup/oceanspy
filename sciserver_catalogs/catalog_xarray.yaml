@@ -2,7 +2,7 @@ plugins:
   source:
     - module: intake_xarray
 sources:
-  
+
   # ===========================
   # get_started
   grd_get_started:
