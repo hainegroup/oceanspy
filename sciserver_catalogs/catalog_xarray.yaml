@@ -824,7 +824,7 @@ sources:
     description: horizontal grid for LLC90 ECCO data
     driver: netcdf
     args:
-      urlpath: '/scratch/ceph/haine/asiddi24/ECCO/ECCO_v4_r4/ecco.jpl.nasa.gov/drive/files/Version4/Release4/nctiles_grid/'
+      urlpath: '/scratch/ceph/haine/asiddi24/ECCO/ECCO_v4_r4/ecco.jpl.nasa.gov/drive/files/Version4/Release4/nctiles_grid/ECCO-GRID.nc'
     metadata:
       model: MITGCM
       rename:
