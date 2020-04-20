@@ -933,7 +933,9 @@ sources:
         k_l: Z_l
         k_p1: Z_p1
         tile: face
-        UVEL: U
+      aliases:
+        face: tile
+        U: UVEL
       model: MITGCM
       parameters:
         rSphere: 6.371e+03
@@ -970,7 +972,9 @@ sources:
         k_l: Z_l
         k_p1: Z_p1
         tile: face
-        VVEL: V
+      aliases:
+        face: tile
+        V: VVEL
       model: MITGCM
       parameters:
         rSphere: 6.371e+03
@@ -1007,7 +1011,9 @@ sources:
         k_l: Z_l
         k_p1: Z_p1
         tile: face
-        SSH: ETA
+      aliases:
+        face: tile
+        ETA: SSH
       model: MITGCM
       parameters:
         rSphere: 6.371e+03
@@ -1044,7 +1050,9 @@ sources:
         k_l: Z_l
         k_p1: Z_p1
         tile: face
-        oceQnet: Qnet
+      aliases:
+        face: tile
+        Qnet: oceQnet
       model: MITGCM
       parameters:
         rSphere: 6.371e+03
@@ -1080,7 +1088,9 @@ sources:
         k_l: Z_l
         k_p1: Z_p1
         tile: face
-        oceTAUX: TAUX
+      aliases:
+        TAUX: oceTAUX
+        face: tile
       model: MITGCM
       parameters:
         rSphere: 6.371e+03
@@ -1117,7 +1127,9 @@ sources:
         k_l: Z_l
         k_p1: Z_p1
         tile: face
-        oceTAUY: TAUY
+      aliases:
+        face: tile
+        TAUY: oceTAUY
       model: MITGCM
       parameters:
         rSphere: 6.371e+03
@@ -1154,7 +1166,9 @@ sources:
         k_l: Z_l
         k_p1: Z_p1
         tile: face
-        THETA: T
+      aliases:
+        face: tile
+        T: THETA
       model: MITGCM
       parameters:
         rSphere: 6.371e+03
@@ -1191,7 +1205,8 @@ sources:
         k_l: Z_l
         k_p1: Z_p1
         tile: face
-        SALT: S
+      aliases:
+        S: SALT
       model: MITGCM
       parameters:
         rSphere: 6.371e+03
@@ -1228,6 +1243,8 @@ sources:
         k_l: Z_l
         k_p1: Z_p1
         tile: face
+      aliases:
+        face: tile
       model: MITGCM
       parameters:
         rSphere: 6.371e+03
@@ -1263,6 +1280,8 @@ sources:
         k_l: Z_l
         k_p1: Z_p1
         tile: face
+      aliases:
+        face: tile
       model: MITGCM
       parameters:
         rSphere: 6.371e+03
