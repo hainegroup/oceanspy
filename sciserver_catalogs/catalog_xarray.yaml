@@ -821,10 +821,10 @@ sources:
   #     original_output: snapshot
 
   grd_LLC90:
-    description: horizontal grid for LLC90
-    driver: zarr
+    description: horizontal grid for LLC90 ECCO data
+    driver: netcdf4
     args:
-      urlpath: '/scratch/ceph/haine/mjimen17/LLC4320/'
+      urlpath: '/scratch/ceph/haine/asiddi24/ECCO/ECCO_v4_r4/ecco.jpl.nasa.gov/drive/files/Version4/Release4/nctiles_grid/'
     metadata:
       model: MITGCM
       rename:
@@ -919,7 +919,7 @@ sources:
         grid_type: llc
       name: LLC4320
       description: |
-        horizontal grid for LLC90, a general, curvilinear ocean simulations on the cube-sphere.
+        horizontal grid for LLC90 ECCO data from the MITGCM, a general, curvilinear ocean simulation on the cube-sphere.
       citation: |
         Paper.
       projection:
