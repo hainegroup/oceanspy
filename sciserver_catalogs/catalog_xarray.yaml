@@ -843,6 +843,7 @@ sources:
         oceTAUX : TAUX
         oceTAUY : TAUY
         oceQnet: Qnet
+        tile: face
       # manipulate_coords:
       #   coordsUVfromG: True
       grid_coords: 
