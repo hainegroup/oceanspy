@@ -410,7 +410,7 @@ def _find_entries(name, catalog_url):
                    'llc4320/sciserver_catalogs/catalog_xarray.yaml')
         else:
             url = catalog_url
-        cat = _intake.Catalog(url)
+        cat = _intake.open_catalog(url)
         entries = [entry for entry in cat if name in entry]
         if len(entries) == 0:
             raise ValidationError('', '')
