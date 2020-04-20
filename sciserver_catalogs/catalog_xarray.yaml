@@ -932,6 +932,16 @@ sources:
     args:
       urlpath: '/scratch/ceph/haine/asiddi24/ECCO/ECCO_v4_r4/ecco.jpl.nasa.gov/drive/files/Version4/Release4/nctiles_monthly/UVEL*/2017/*.nc'
     metadata:
+      rename:
+        i: X
+        i_g: Xp1
+        j: Y
+        j_g: Yp1
+        k: Z
+        k_l: Z_l
+        k_p1: Z_p1
+        tile: face
+        UVEL: U
       model: MITGCM
       parameters:
         rSphere: 6.371e+03
@@ -959,6 +969,16 @@ sources:
     args:
       urlpath: '/scratch/ceph/haine/asiddi24/ECCO/ECCO_v4_r4/ecco.jpl.nasa.gov/drive/files/Version4/Release4/nctiles_monthly/VVEL*/2017/*.nc'
     metadata:
+      rename:
+        i: X
+        i_g: Xp1
+        j: Y
+        j_g: Yp1
+        k: Z
+        k_l: Z_l
+        k_p1: Z_p1
+        tile: face
+        VVEL: V
       model: MITGCM
       parameters:
         rSphere: 6.371e+03
@@ -986,6 +1006,16 @@ sources:
     args:
       urlpath: '/scratch/ceph/haine/asiddi24/ECCO/ECCO_v4_r4/ecco.jpl.nasa.gov/drive/files/Version4/Release4/nctiles_monthly/SSH/2017/*.nc'
     metadata:
+      rename:
+        i: X
+        i_g: Xp1
+        j: Y
+        j_g: Yp1
+        k: Z
+        k_l: Z_l
+        k_p1: Z_p1
+        tile: face
+        SSH: ETA
       model: MITGCM
       parameters:
         rSphere: 6.371e+03
@@ -1013,6 +1043,16 @@ sources:
     args:
       urlpath: '/scratch/ceph/haine/asiddi24/ECCO/ECCO_v4_r4/ecco.jpl.nasa.gov/drive/files/Version4/Release4/nctiles_monthly/oceQnet/2017/*.nc'
     metadata:
+      rename:
+        i: X
+        i_g: Xp1
+        j: Y
+        j_g: Yp1
+        k: Z
+        k_l: Z_l
+        k_p1: Z_p1
+        tile: face
+        oceQnet: Qnet
       model: MITGCM
       parameters:
         rSphere: 6.371e+03
@@ -1039,6 +1079,16 @@ sources:
     args:
       urlpath: '/scratch/ceph/haine/asiddi24/ECCO/ECCO_v4_r4/ecco.jpl.nasa.gov/drive/files/Version4/Release4/nctiles_monthly/oceTAUX/2017/*.nc'
     metadata:
+      rename:
+        i: X
+        i_g: Xp1
+        j: Y
+        j_g: Yp1
+        k: Z
+        k_l: Z_l
+        k_p1: Z_p1
+        tile: face
+        oceTAUX: TAUX
       model: MITGCM
       parameters:
         rSphere: 6.371e+03
@@ -1066,6 +1116,16 @@ sources:
     args:
       urlpath: '/scratch/ceph/haine/asiddi24/ECCO/ECCO_v4_r4/ecco.jpl.nasa.gov/drive/files/Version4/Release4/nctiles_monthly/oceTAUY/2017/*.nc'
     metadata:
+      rename:
+        i: X
+        i_g: Xp1
+        j: Y
+        j_g: Yp1
+        k: Z
+        k_l: Z_l
+        k_p1: Z_p1
+        tile: face
+        oceTAUY: TAUY
       model: MITGCM
       parameters:
         rSphere: 6.371e+03
@@ -1093,6 +1153,16 @@ sources:
     args:
       urlpath: '/scratch/ceph/haine/asiddi24/ECCO/ECCO_v4_r4/ecco.jpl.nasa.gov/drive/files/Version4/Release4/nctiles_monthly/THETA/2017/*.nc'
     metadata:
+      rename:
+        i: X
+        i_g: Xp1
+        j: Y
+        j_g: Yp1
+        k: Z
+        k_l: Z_l
+        k_p1: Z_p1
+        tile: face
+        THETA: T
       model: MITGCM
       parameters:
         rSphere: 6.371e+03
@@ -1120,6 +1190,16 @@ sources:
     args:
       urlpath: '/scratch/ceph/haine/asiddi24/ECCO/ECCO_v4_r4/ecco.jpl.nasa.gov/drive/files/Version4/Release4/nctiles_monthly/SALT/2017/*.nc'
     metadata:
+      rename:
+        i: X
+        i_g: Xp1
+        j: Y
+        j_g: Yp1
+        k: Z
+        k_l: Z_l
+        k_p1: Z_p1
+        tile: face
+        SALT: S
       model: MITGCM
       parameters:
         rSphere: 6.371e+03
@@ -1147,6 +1227,15 @@ sources:
     args:
       urlpath: '/scratch/ceph/haine/asiddi24/ECCO/ECCO_v4_r4/ecco.jpl.nasa.gov/drive/files/Version4/Release4/nctiles_monthly/TFLUX/2017/*.nc'
     metadata:
+      rename:
+        i: X
+        i_g: Xp1
+        j: Y
+        j_g: Yp1
+        k: Z
+        k_l: Z_l
+        k_p1: Z_p1
+        tile: face
       model: MITGCM
       parameters:
         rSphere: 6.371e+03
@@ -1173,6 +1262,15 @@ sources:
     args:
       urlpath: '/scratch/ceph/haine/asiddi24/ECCO/ECCO_v4_r4/ecco.jpl.nasa.gov/drive/files/Version4/Release4/nctiles_monthly/SFLUX/2017/*.nc'
     metadata:
+      rename:
+        i: X
+        i_g: Xp1
+        j: Y
+        j_g: Yp1
+        k: Z
+        k_l: Z_l
+        k_p1: Z_p1
+        tile: face
       model: MITGCM
       parameters:
         rSphere: 6.371e+03
