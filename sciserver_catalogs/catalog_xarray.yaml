@@ -933,7 +933,7 @@ sources:
         concat_dim: time
         parallel: True
         combine: nested
-        drop_dims: ['time_bnds']
+        drop_variables: ['time_bnds']
     metadata:
       rename:
         Z: Zed
@@ -975,7 +975,7 @@ sources:
         concat_dim: time
         parallel: True
         combine: nested
-        drop_dims: ['time_bnds']
+        drop_variables: ['time_bnds']
     metadata:
       rename:
         Z: Zed
@@ -1017,12 +1017,12 @@ sources:
         concat_dim: time
         parallel: True
         combine: nested
+        drop_variables: ['time_bnds']
     metadata:
       rename:
         i: X
         j: Y
         tile: face
-        face: tile
         ETA: SSH
       aliases:
         face: tile
@@ -1057,6 +1057,7 @@ sources:
         concat_dim: time
         parallel: True
         combine: nested
+        drop_variables: ['time_bnds']
     metadata:
       rename:
         i: X
@@ -1095,6 +1096,7 @@ sources:
         concat_dim: time
         parallel: True
         combine: nested
+        drop_variables: ['time_bnds']
     metadata:
       rename:
         i_g: Xp1
@@ -1134,6 +1136,7 @@ sources:
         concat_dim: time
         parallel: True
         combine: nested
+        drop_variables: ['time_bnds']
     metadata:
       rename:
         i: X
@@ -1173,6 +1176,7 @@ sources:
         concat_dim: time
         parallel: True
         combine: nested
+        drop_variables: ['time_bnds']
     metadata:
       rename:
         Z: Zed
@@ -1214,6 +1218,7 @@ sources:
         concat_dim: time
         parallel: True
         combine: nested
+        drop_variables: ['time_bnds']
     metadata:
       rename:
         Z: Zed
@@ -1255,6 +1260,7 @@ sources:
         concat_dim: time
         parallel: True
         combine: nested
+        drop_variables: ['time_bnds']
     metadata:
       rename:
         i: X
@@ -1292,6 +1298,7 @@ sources:
         concat_dim: time
         parallel: True
         combine: nested
+        drop_variables: ['time_bnds']
     metadata:
       rename:
         i: X
