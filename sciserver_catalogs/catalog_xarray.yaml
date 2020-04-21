@@ -1023,7 +1023,7 @@ sources:
         i: X
         j: Y
         tile: face
-        ETA: SSH
+        SSH: ETA
       aliases:
         face: tile
       model: MITGCM
