@@ -940,7 +940,7 @@ sources:
         j: Y
         k: Z
         tile: face
-        UVEL: U
+        # UVEL: U
       aliases:
         face: tile
         # U: UVEL
@@ -984,7 +984,7 @@ sources:
         tile: face
       aliases:
         face: tile
-        V: VVEL
+        # V: VVEL
       model: MITGCM
       parameters:
         rSphere: 6.371e+03
