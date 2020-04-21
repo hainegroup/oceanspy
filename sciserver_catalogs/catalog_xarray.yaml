@@ -837,9 +837,9 @@ sources:
         j: Y
         j_g: Yp1
         k: Z
-        k_l: Z_l
-        k_p1: Z_p1
-        k_u : Z_u
+        k_l: Zl
+        k_p1: Zp1
+        k_u : Zu
         tile: face
       # manipulate_coords:
       #   coordsUVfromG: True
