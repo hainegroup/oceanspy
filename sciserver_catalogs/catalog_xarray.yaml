@@ -933,7 +933,7 @@ sources:
         concat_dim: time
         parallel: True
         combine: nested
-        drop_dims: ['nv']
+        drop_dims: ['time_bnds']
     metadata:
       rename:
         Z: Zed
@@ -975,7 +975,7 @@ sources:
         concat_dim: time
         parallel: True
         combine: nested
-        drop_dims: ['nv']
+        drop_dims: ['time_bnds']
     metadata:
       rename:
         Z: Zed
