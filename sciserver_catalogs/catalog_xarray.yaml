@@ -831,6 +831,7 @@ sources:
         Z: Zed
         Zp1: Zed_p1
         Zl: Zed_l
+        Zu: Zed_u
         i: X
         i_g: Xp1
         j: Y
@@ -838,6 +839,7 @@ sources:
         k: Z
         k_l: Z_l
         k_p1: Z_p1
+        ku : Z_u
         tile: face
       # manipulate_coords:
       #   coordsUVfromG: True
@@ -931,6 +933,7 @@ sources:
         Z: Zed
         Zp1: Zed_p1
         Zl: Zed_l
+        Zu: Zed_u
         i: X
         i_g: Xp1
         j: Y
@@ -938,6 +941,7 @@ sources:
         k: Z
         k_l: Z_l
         k_p1: Z_p1
+        ku : Z_u
         tile: face
       aliases:
         face: tile
@@ -973,6 +977,7 @@ sources:
         Z: Zed
         Zp1: Zed_p1
         Zl: Zed_l
+        Zu: Zed_u
         i: X
         i_g: Xp1
         j: Y
@@ -980,10 +985,12 @@ sources:
         k: Z
         k_l: Z_l
         k_p1: Z_p1
+        ku : Z_u
         tile: face
-      aliases:
-        face: tile
-        V: VVEL
+        VVEL: V
+      # aliases:
+      #   face: tile
+      #   V: VVEL
       model: MITGCM
       parameters:
         rSphere: 6.371e+03
@@ -1012,16 +1019,8 @@ sources:
       urlpath: '/scratch/ceph/haine/asiddi24/ECCO/ECCO_v4_r4/ecco.jpl.nasa.gov/drive/files/Version4/Release4/nctiles_monthly/SSH/2017/*.nc'
     metadata:
       rename:
-        Z: Zed
-        Zp1: Zed_p1
-        Zl: Zed_l
         i: X
-        i_g: Xp1
         j: Y
-        j_g: Yp1
-        k: Z
-        k_l: Z_l
-        k_p1: Z_p1
         tile: face
       aliases:
         face: tile
@@ -1054,16 +1053,10 @@ sources:
       urlpath: '/scratch/ceph/haine/asiddi24/ECCO/ECCO_v4_r4/ecco.jpl.nasa.gov/drive/files/Version4/Release4/nctiles_monthly/oceQnet/2017/*.nc'
     metadata:
       rename:
-        Z: Zed
-        Zp1: Zed_p1
-        Zl: Zed_l
         i: X
         i_g: Xp1
         j: Y
         j_g: Yp1
-        k: Z
-        k_l: Z_l
-        k_p1: Z_p1
         tile: face
       aliases:
         face: tile
@@ -1095,16 +1088,10 @@ sources:
       urlpath: '/scratch/ceph/haine/asiddi24/ECCO/ECCO_v4_r4/ecco.jpl.nasa.gov/drive/files/Version4/Release4/nctiles_monthly/oceTAUX/2017/*.nc'
     metadata:
       rename:
-        Z: Zed
-        Zp1: Zed_p1
-        Zl: Zed_l
         i: X
         i_g: Xp1
         j: Y
         j_g: Yp1
-        k: Z
-        k_l: Z_l
-        k_p1: Z_p1
         tile: face
       aliases:
         TAUX: oceTAUX
@@ -1137,16 +1124,10 @@ sources:
       urlpath: '/scratch/ceph/haine/asiddi24/ECCO/ECCO_v4_r4/ecco.jpl.nasa.gov/drive/files/Version4/Release4/nctiles_monthly/oceTAUY/2017/*.nc'
     metadata:
       rename:
-        Z: Zed
-        Zp1: Zed_p1
-        Zl: Zed_l
         i: X
         i_g: Xp1
         j: Y
         j_g: Yp1
-        k: Z
-        k_l: Z_l
-        k_p1: Z_p1
         tile: face
       aliases:
         face: tile
@@ -1182,6 +1163,7 @@ sources:
         Z: Zed
         Zp1: Zed_p1
         Zl: Zed_l
+        Zu: Zed_u
         i: X
         i_g: Xp1
         j: Y
@@ -1189,6 +1171,7 @@ sources:
         k: Z
         k_l: Z_l
         k_p1: Z_p1
+        k_u: Z_u
         tile: face
       aliases:
         face: tile
@@ -1224,6 +1207,7 @@ sources:
         Z: Zed
         Zp1: Zed_p1
         Zl: Zed_l
+        Zu: Zed_u
         i: X
         i_g: Xp1
         j: Y
@@ -1231,6 +1215,7 @@ sources:
         k: Z
         k_l: Z_l
         k_p1: Z_p1
+        k_u: Z_u
         tile: face
       aliases:
         S: SALT
@@ -1262,16 +1247,10 @@ sources:
       urlpath: '/scratch/ceph/haine/asiddi24/ECCO/ECCO_v4_r4/ecco.jpl.nasa.gov/drive/files/Version4/Release4/nctiles_monthly/TFLUX/2017/*.nc'
     metadata:
       rename:
-        Z: Zed
-        Zp1: Zed_p1
-        Zl: Zed_l
         i: X
         i_g: Xp1
         j: Y
         j_g: Yp1
-        k: Z
-        k_l: Z_l
-        k_p1: Z_p1
         tile: face
       aliases:
         face: tile
@@ -1302,16 +1281,10 @@ sources:
       urlpath: '/scratch/ceph/haine/asiddi24/ECCO/ECCO_v4_r4/ecco.jpl.nasa.gov/drive/files/Version4/Release4/nctiles_monthly/SFLUX/2017/*.nc'
     metadata:
       rename:
-        Z: Zed
-        Zp1: Zed_p1
-        Zl: Zed_l
         i: X
         i_g: Xp1
         j: Y
         j_g: Yp1
-        k: Z
-        k_l: Z_l
-        k_p1: Z_p1
         tile: face
       aliases:
         face: tile
