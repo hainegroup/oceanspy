@@ -940,9 +940,10 @@ sources:
         j: Y
         k: Z
         tile: face
+        UVEL: U
       aliases:
         face: tile
-        U: UVEL
+        # U: UVEL
       model: MITGCM
       parameters:
         rSphere: 6.371e+03
