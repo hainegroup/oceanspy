@@ -933,6 +933,7 @@ sources:
         concat_dim: time
         parallel: True
         combine: nested
+        drop_variables: ['nv']
     metadata:
       rename:
         Z: Zed
@@ -943,7 +944,6 @@ sources:
         UVEL: U
       aliases:
         face: tile
-        # U: UVEL
       model: MITGCM
       parameters:
         rSphere: 6.371e+03
@@ -975,6 +975,7 @@ sources:
         concat_dim: time
         parallel: True
         combine: nested
+        drop_variables: ['nv']
     metadata:
       rename:
         Z: Zed
@@ -982,9 +983,9 @@ sources:
         j_g: Yp1
         k: Z
         tile: face
+        VVEL: V
       aliases:
         face: tile
-        V: VVEL
       model: MITGCM
       parameters:
         rSphere: 6.371e+03
@@ -1011,6 +1012,11 @@ sources:
     driver: netcdf
     args:
       urlpath: '/scratch/ceph/haine/asiddi24/ECCO/ECCO_v4_r4/ecco.jpl.nasa.gov/drive/files/Version4/Release4/nctiles_monthly/SSH/2017/*.nc'
+      xarray_kwargs:
+        engine: netcdf4
+        concat_dim: time
+        parallel: True
+        combine: nested
     metadata:
       rename:
         i: X
@@ -1018,6 +1024,8 @@ sources:
         tile: face
         face: tile
         ETA: SSH
+      aliases:
+        face: tile
       model: MITGCM
       parameters:
         rSphere: 6.371e+03
@@ -1044,16 +1052,19 @@ sources:
     driver: netcdf
     args:
       urlpath: '/scratch/ceph/haine/asiddi24/ECCO/ECCO_v4_r4/ecco.jpl.nasa.gov/drive/files/Version4/Release4/nctiles_monthly/oceQnet/2017/*.nc'
+      xarray_kwargs:
+        engine: netcdf4
+        concat_dim: time
+        parallel: True
+        combine: nested
     metadata:
       rename:
         i: X
-        i_g: Xp1
         j: Y
-        j_g: Yp1
         tile: face
+        oceQnet: Qnet
       aliases:
         face: tile
-        Qnet: oceQnet
       model: MITGCM
       parameters:
         rSphere: 6.371e+03
@@ -1079,15 +1090,18 @@ sources:
     driver: netcdf
     args:
       urlpath: '/scratch/ceph/haine/asiddi24/ECCO/ECCO_v4_r4/ecco.jpl.nasa.gov/drive/files/Version4/Release4/nctiles_monthly/oceTAUX/2017/*.nc'
+      xarray_kwargs:
+        engine: netcdf4
+        concat_dim: time
+        parallel: True
+        combine: nested
     metadata:
       rename:
-        i: X
         i_g: Xp1
         j: Y
-        j_g: Yp1
         tile: face
+        oceTAUX: TAUX
       aliases:
-        TAUX: oceTAUX
         face: tile
       model: MITGCM
       parameters:
@@ -1115,16 +1129,19 @@ sources:
     driver: netcdf
     args:
       urlpath: '/scratch/ceph/haine/asiddi24/ECCO/ECCO_v4_r4/ecco.jpl.nasa.gov/drive/files/Version4/Release4/nctiles_monthly/oceTAUY/2017/*.nc'
+      xarray_kwargs:
+        engine: netcdf4
+        concat_dim: time
+        parallel: True
+        combine: nested
     metadata:
       rename:
         i: X
-        i_g: Xp1
-        j: Y
         j_g: Yp1
         tile: face
+        oceTAUY: TAUY
       aliases:
         face: tile
-        TAUY: oceTAUY
       model: MITGCM
       parameters:
         rSphere: 6.371e+03
@@ -1151,24 +1168,21 @@ sources:
     driver: netcdf
     args:
       urlpath: '/scratch/ceph/haine/asiddi24/ECCO/ECCO_v4_r4/ecco.jpl.nasa.gov/drive/files/Version4/Release4/nctiles_monthly/THETA/2017/*.nc'
+      xarray_kwargs:
+        engine: netcdf4
+        concat_dim: time
+        parallel: True
+        combine: nested
     metadata:
       rename:
         Z: Zed
-        Zp1: Zed_p1
-        Zl: Zed_l
-        Zu: Zed_u
         i: X
-        i_g: Xp1
         j: Y
-        j_g: Yp1
         k: Z
-        k_l: Z_l
-        k_p1: Z_p1
-        k_u: Z_u
         tile: face
+        THETA: T
       aliases:
         face: tile
-        T: THETA
       model: MITGCM
       parameters:
         rSphere: 6.371e+03
@@ -1195,23 +1209,21 @@ sources:
     driver: netcdf
     args:
       urlpath: '/scratch/ceph/haine/asiddi24/ECCO/ECCO_v4_r4/ecco.jpl.nasa.gov/drive/files/Version4/Release4/nctiles_monthly/SALT/2017/*.nc'
+      xarray_kwargs:
+        engine: netcdf4
+        concat_dim: time
+        parallel: True
+        combine: nested
     metadata:
       rename:
         Z: Zed
-        Zp1: Zed_p1
-        Zl: Zed_l
-        Zu: Zed_u
         i: X
-        i_g: Xp1
         j: Y
-        j_g: Yp1
         k: Z
-        k_l: Z_l
-        k_p1: Z_p1
-        k_u: Z_u
         tile: face
+        SALT: S
       aliases:
-        S: SALT
+        face: files
       model: MITGCM
       parameters:
         rSphere: 6.371e+03
@@ -1238,12 +1250,15 @@ sources:
     driver: netcdf
     args:
       urlpath: '/scratch/ceph/haine/asiddi24/ECCO/ECCO_v4_r4/ecco.jpl.nasa.gov/drive/files/Version4/Release4/nctiles_monthly/TFLUX/2017/*.nc'
+      xarray_kwargs:
+        engine: netcdf4
+        concat_dim: time
+        parallel: True
+        combine: nested
     metadata:
       rename:
         i: X
-        i_g: Xp1
         j: Y
-        j_g: Yp1
         tile: face
       aliases:
         face: tile
@@ -1272,12 +1287,15 @@ sources:
     driver: netcdf
     args:
       urlpath: '/scratch/ceph/haine/asiddi24/ECCO/ECCO_v4_r4/ecco.jpl.nasa.gov/drive/files/Version4/Release4/nctiles_monthly/SFLUX/2017/*.nc'
+      xarray_kwargs:
+        engine: netcdf4
+        concat_dim: time
+        parallel: True
+        combine: nested
     metadata:
       rename:
         i: X
-        i_g: Xp1
         j: Y
-        j_g: Yp1
         tile: face
       aliases:
         face: tile
