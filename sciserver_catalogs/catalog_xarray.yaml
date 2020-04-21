@@ -828,6 +828,9 @@ sources:
     metadata:
       model: MITGCM
       rename:
+        Z: Zed
+        Zp1: Zed_p1
+        Zl: Zed_l
         i: X
         i_g: Xp1
         j: Y
@@ -836,10 +839,6 @@ sources:
         k_l: Z_l
         k_p1: Z_p1
         tile: face
-      rename_vars:
-        Z: Zed
-        Zp1: Zed_p1
-        Zl: Zed_l
       # manipulate_coords:
       #   coordsUVfromG: True
       grid_coords: 
@@ -929,6 +928,9 @@ sources:
       urlpath: '/scratch/ceph/haine/asiddi24/ECCO/ECCO_v4_r4/ecco.jpl.nasa.gov/drive/files/Version4/Release4/nctiles_monthly/UVEL*/2017/*.nc'
     metadata:
       rename:
+        Z: Zed
+        Zp1: Zed_p1
+        Zl: Zed_l
         i: X
         i_g: Xp1
         j: Y
@@ -937,10 +939,6 @@ sources:
         k_l: Z_l
         k_p1: Z_p1
         tile: face
-      rename_vars:
-        Z: Zed
-        Zp1: Zed_p1
-        Zl: Zed_l
       aliases:
         face: tile
         U: UVEL
@@ -972,6 +970,9 @@ sources:
       urlpath: '/scratch/ceph/haine/asiddi24/ECCO/ECCO_v4_r4/ecco.jpl.nasa.gov/drive/files/Version4/Release4/nctiles_monthly/VVEL*/2017/*.nc'
     metadata:
       rename:
+        Z: Zed
+        Zp1: Zed_p1
+        Zl: Zed_l
         i: X
         i_g: Xp1
         j: Y
@@ -980,10 +981,6 @@ sources:
         k_l: Z_l
         k_p1: Z_p1
         tile: face
-      rename_vars:
-        Z: Zed
-        Zp1: Zed_p1
-        Zl: Zed_l
       aliases:
         face: tile
         V: VVEL
@@ -1015,6 +1012,9 @@ sources:
       urlpath: '/scratch/ceph/haine/asiddi24/ECCO/ECCO_v4_r4/ecco.jpl.nasa.gov/drive/files/Version4/Release4/nctiles_monthly/SSH/2017/*.nc'
     metadata:
       rename:
+        Z: Zed
+        Zp1: Zed_p1
+        Zl: Zed_l
         i: X
         i_g: Xp1
         j: Y
@@ -1023,10 +1023,6 @@ sources:
         k_l: Z_l
         k_p1: Z_p1
         tile: face
-      rename_vars:
-        Z: Zed
-        Zp1: Zed_p1
-        Zl: Zed_l
       aliases:
         face: tile
         ETA: SSH
@@ -1058,6 +1054,9 @@ sources:
       urlpath: '/scratch/ceph/haine/asiddi24/ECCO/ECCO_v4_r4/ecco.jpl.nasa.gov/drive/files/Version4/Release4/nctiles_monthly/oceQnet/2017/*.nc'
     metadata:
       rename:
+        Z: Zed
+        Zp1: Zed_p1
+        Zl: Zed_l
         i: X
         i_g: Xp1
         j: Y
@@ -1066,10 +1065,6 @@ sources:
         k_l: Z_l
         k_p1: Z_p1
         tile: face
-      rename_vars:
-        Z: Zed
-        Zp1: Zed_p1
-        Zl: Zed_l
       aliases:
         face: tile
         Qnet: oceQnet
@@ -1100,6 +1095,9 @@ sources:
       urlpath: '/scratch/ceph/haine/asiddi24/ECCO/ECCO_v4_r4/ecco.jpl.nasa.gov/drive/files/Version4/Release4/nctiles_monthly/oceTAUX/2017/*.nc'
     metadata:
       rename:
+        Z: Zed
+        Zp1: Zed_p1
+        Zl: Zed_l
         i: X
         i_g: Xp1
         j: Y
@@ -1108,10 +1106,6 @@ sources:
         k_l: Z_l
         k_p1: Z_p1
         tile: face
-      rename_vars:
-        Z: Zed
-        Zp1: Zed_p1
-        Zl: Zed_l
       aliases:
         TAUX: oceTAUX
         face: tile
@@ -1143,6 +1137,9 @@ sources:
       urlpath: '/scratch/ceph/haine/asiddi24/ECCO/ECCO_v4_r4/ecco.jpl.nasa.gov/drive/files/Version4/Release4/nctiles_monthly/oceTAUY/2017/*.nc'
     metadata:
       rename:
+        Z: Zed
+        Zp1: Zed_p1
+        Zl: Zed_l
         i: X
         i_g: Xp1
         j: Y
@@ -1151,10 +1148,6 @@ sources:
         k_l: Z_l
         k_p1: Z_p1
         tile: face
-      rename_vars:
-        Z: Zed
-        Zp1: Zed_p1
-        Zl: Zed_l
       aliases:
         face: tile
         TAUY: oceTAUY
@@ -1186,6 +1179,9 @@ sources:
       urlpath: '/scratch/ceph/haine/asiddi24/ECCO/ECCO_v4_r4/ecco.jpl.nasa.gov/drive/files/Version4/Release4/nctiles_monthly/THETA/2017/*.nc'
     metadata:
       rename:
+        Z: Zed
+        Zp1: Zed_p1
+        Zl: Zed_l
         i: X
         i_g: Xp1
         j: Y
@@ -1194,10 +1190,6 @@ sources:
         k_l: Z_l
         k_p1: Z_p1
         tile: face
-      rename_vars:
-        Z: Zed
-        Zp1: Zed_p1
-        Zl: Zed_l
       aliases:
         face: tile
         T: THETA
@@ -1229,6 +1221,9 @@ sources:
       urlpath: '/scratch/ceph/haine/asiddi24/ECCO/ECCO_v4_r4/ecco.jpl.nasa.gov/drive/files/Version4/Release4/nctiles_monthly/SALT/2017/*.nc'
     metadata:
       rename:
+        Z: Zed
+        Zp1: Zed_p1
+        Zl: Zed_l
         i: X
         i_g: Xp1
         j: Y
@@ -1237,10 +1232,6 @@ sources:
         k_l: Z_l
         k_p1: Z_p1
         tile: face
-      rename_vars:
-        Z: Zed
-        Zp1: Zed_p1
-        Zl: Zed_l
       aliases:
         S: SALT
       model: MITGCM
@@ -1271,6 +1262,9 @@ sources:
       urlpath: '/scratch/ceph/haine/asiddi24/ECCO/ECCO_v4_r4/ecco.jpl.nasa.gov/drive/files/Version4/Release4/nctiles_monthly/TFLUX/2017/*.nc'
     metadata:
       rename:
+        Z: Zed
+        Zp1: Zed_p1
+        Zl: Zed_l
         i: X
         i_g: Xp1
         j: Y
@@ -1279,10 +1273,6 @@ sources:
         k_l: Z_l
         k_p1: Z_p1
         tile: face
-      rename_vars:
-        Z: Zed
-        Zp1: Zed_p1
-        Zl: Zed_l
       aliases:
         face: tile
       model: MITGCM
@@ -1312,6 +1302,9 @@ sources:
       urlpath: '/scratch/ceph/haine/asiddi24/ECCO/ECCO_v4_r4/ecco.jpl.nasa.gov/drive/files/Version4/Release4/nctiles_monthly/SFLUX/2017/*.nc'
     metadata:
       rename:
+        Z: Zed
+        Zp1: Zed_p1
+        Zl: Zed_l
         i: X
         i_g: Xp1
         j: Y
@@ -1320,10 +1313,6 @@ sources:
         k_l: Z_l
         k_p1: Z_p1
         tile: face
-      rename_vars:
-        Z: Zed
-        Zp1: Zed_p1
-        Zl: Zed_l
       aliases:
         face: tile
       model: MITGCM
