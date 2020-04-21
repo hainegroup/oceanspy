@@ -836,6 +836,10 @@ sources:
         k_l: Z_l
         k_p1: Z_p1
         tile: face
+      rename_vars:
+        Z: Zed
+        Zp1: Zed_p1
+        Zl: Zed_l
       # manipulate_coords:
       #   coordsUVfromG: True
       grid_coords: 
@@ -933,6 +937,10 @@ sources:
         k_l: Z_l
         k_p1: Z_p1
         tile: face
+      rename_vars:
+        Z: Zed
+        Zp1: Zed_p1
+        Zl: Zed_l
       aliases:
         face: tile
         U: UVEL
@@ -972,6 +980,10 @@ sources:
         k_l: Z_l
         k_p1: Z_p1
         tile: face
+      rename_vars:
+        Z: Zed
+        Zp1: Zed_p1
+        Zl: Zed_l
       aliases:
         face: tile
         V: VVEL
@@ -1011,6 +1023,10 @@ sources:
         k_l: Z_l
         k_p1: Z_p1
         tile: face
+      rename_vars:
+        Z: Zed
+        Zp1: Zed_p1
+        Zl: Zed_l
       aliases:
         face: tile
         ETA: SSH
@@ -1050,6 +1066,10 @@ sources:
         k_l: Z_l
         k_p1: Z_p1
         tile: face
+      rename_vars:
+        Z: Zed
+        Zp1: Zed_p1
+        Zl: Zed_l
       aliases:
         face: tile
         Qnet: oceQnet
@@ -1088,6 +1108,10 @@ sources:
         k_l: Z_l
         k_p1: Z_p1
         tile: face
+      rename_vars:
+        Z: Zed
+        Zp1: Zed_p1
+        Zl: Zed_l
       aliases:
         TAUX: oceTAUX
         face: tile
@@ -1127,6 +1151,10 @@ sources:
         k_l: Z_l
         k_p1: Z_p1
         tile: face
+      rename_vars:
+        Z: Zed
+        Zp1: Zed_p1
+        Zl: Zed_l
       aliases:
         face: tile
         TAUY: oceTAUY
@@ -1166,6 +1194,10 @@ sources:
         k_l: Z_l
         k_p1: Z_p1
         tile: face
+      rename_vars:
+        Z: Zed
+        Zp1: Zed_p1
+        Zl: Zed_l
       aliases:
         face: tile
         T: THETA
@@ -1205,6 +1237,10 @@ sources:
         k_l: Z_l
         k_p1: Z_p1
         tile: face
+      rename_vars:
+        Z: Zed
+        Zp1: Zed_p1
+        Zl: Zed_l
       aliases:
         S: SALT
       model: MITGCM
@@ -1243,6 +1279,10 @@ sources:
         k_l: Z_l
         k_p1: Z_p1
         tile: face
+      rename_vars:
+        Z: Zed
+        Zp1: Zed_p1
+        Zl: Zed_l
       aliases:
         face: tile
       model: MITGCM
@@ -1280,6 +1320,10 @@ sources:
         k_l: Z_l
         k_p1: Z_p1
         tile: face
+      rename_vars:
+        Z: Zed
+        Zp1: Zed_p1
+        Zl: Zed_l
       aliases:
         face: tile
       model: MITGCM
