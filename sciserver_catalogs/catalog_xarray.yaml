@@ -523,7 +523,7 @@ sources:
     driver: zarr
     model: MITGCM
     args:
-      urlpath: '/sciserver/filedb02-01/ocean/poseidon/LLC4320/2D/SS0'
+      urlpath: '/sciserver/filedb02-01/ocean/poseidon/LLC4320/SST'
       drop_variables: ['']
       consolidated: True
       group: None
@@ -547,7 +547,7 @@ sources:
     driver: zarr
     model: MITGCM
     args:
-      urlpath: '/sciserver/filedb03-01/ocean/poseidon/SSS'
+      urlpath: '/sciserver/filedb03-01/ocean/poseidon/LLC4320/SSS'
       drop_variables: ['XC','YC','iter','k','k_l','k_u','Z','Zl','Zu']
     metadata:
       rename:
