@@ -694,9 +694,9 @@ sources:
             Xp1: 0.5
           # Z:
           #  Z: 
-          #  Z_p1: 0.5
+          #  Zp1: 0.5
           #  # k_u: 0.5
-          #  Z_l: -0.5
+          #  Zl: -0.5
           time: 
             time: -0.5
       face_connections: # topology
@@ -1255,9 +1255,9 @@ sources:
             Xp1: 0.5
           Z:
            Z: 
-           Z_p1: 0.5
+           Zp1: 0.5
            # k_u: 0.5
-           Z_l: -0.5
+           Zl: -0.5
           time: 
             time: -0.5
       face_connections: # topology
