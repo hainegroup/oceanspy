@@ -472,9 +472,9 @@ class OceanDataset:
 
         # Check parameters
         _check_instance({'grid_coords': grid_coords,
-                         'add_midp':    add_midp},
+                         'add_midp': add_midp},
                         {'grid_coords': 'dict',
-                         'add_midp':    'bool'})
+                         'add_midp': 'bool'})
 
         # Check axes
         _check_oceanspy_axes(list(grid_coords.keys()))
@@ -495,31 +495,31 @@ class OceanDataset:
                     dim = list(self.grid_coords[axis].keys())[0]
                     if self._aliases_flipped and dim in self._aliases_flipped:
                         _dim = self._aliases_flipped[dim]
-                        self = self.set_aliases({_dim+'_midp':
+                        self = self.set_aliases({_dim + '_midp':
                                                  dim+'_midp'}, overwrite=False)
                     else:
                         _dim = dim
 
                     # Midpoints are averages of outpoints
                     midp = (self._ds[_dim].values[:-1] +
-                            self._ds[_dim].diff(_dim)/2).rename({_dim:
+                            self._ds[_dim].diff(_dim) / 2).rename({_dim:
                                                                  _dim+'_midp'})
                     self._ds[_dim+'_midp'] = _xr.DataArray(midp,
                                                            dims=(_dim+'_midp'))
                     if 'units' in self._ds[_dim].attrs:
                         units = self._ds[_dim].attrs['units']
-                        self._ds[_dim+'_midp'].attrs['units'] = units
+                        self._ds[_dim + '_midp'].attrs['units'] = units
                     if 'long_name' in self._ds[_dim].attrs:
                         long_name = self._ds[_dim].attrs['long_name']
                         long_name = 'Mid-points of {}'.format(long_name)
-                        self._ds[_dim+'_midp'].attrs['long_name'] = long_name
+                        self._ds[_dim + '_midp'].attrs['long_name'] = long_name
                     if 'description' in self._ds[_dim].attrs:
                         desc = self._ds[_dim].attrs['description']
                         desc = 'Mid-points of {}'.format(desc)
-                        self._ds[_dim+'_midp'].attrs['description'] = desc
+                        self._ds[_dim + '_midp'].attrs['description'] = desc
 
                     grid_coords[axis] = {**self.grid_coords[axis],
-                                         dim+'_midp': None}
+                                         dim + '_midp': None}
 
             self = self._store_as_global_attr(name='grid_coords',
                                               attr=grid_coords,
@@ -790,8 +790,8 @@ class OceanDataset:
                              "".format(grid_pos_list))
 
         # Convert if it's not cartesian
-        Y = self._ds['Y'+grid_pos]
-        X = self._ds['X'+grid_pos]
+        Y = self._ds['Y' + grid_pos]
+        X = self._ds['X' + grid_pos]
         R = self.parameters['rSphere']
         if R:
             x, y, z = _utils.spherical2cartesian(Y=Y, X=X, R=R)
@@ -1011,13 +1011,13 @@ class OceanDataset:
                                                           ['Yp1', 'Xp1'])):
                 for dim in ['Y', 'X']:
                     coord = self._ds[dim + 'G'].rolling(**{dim2roll: 2})
-                    coord = coord.mean().dropna(dim2roll, how = 'all')
+                    coord = coord.mean().dropna(dim2roll, how='all')
                     coord = coord.drop(coord.coords).rename({dim2roll:
                                                              dim2roll[0]})
-                    self._ds[dim+point_pos] = coord
-                    if 'units' in self._ds[dim+'G'].attrs:
-                        units = self._ds[dim+'G'].attrs['units']
-                        self._ds[dim+point_pos].attrs['units'] = units
+                    self._ds[dim + point_pos] = coord
+                    if 'units' in self._ds[dim + 'G'].attrs:
+                        units = self._ds[dim + 'G'].attrs['units']
+                        self._ds[dim + point_pos].attrs['units'] = units
 
         # For cartesian grid we can use 1D coordinates
         if coords1Dfrom2D:
@@ -1127,8 +1127,8 @@ class OceanDataset:
                 pass
             else:
                 raise ValueError('grid type not recognized by OceanSpy')
-            coords = _OrderedDict(list(coords.items())
-                                  + list(add_coords.items()))
+            coords = _OrderedDict(list(coords.items()) +
+                                  list(add_coords.items()))
             for var in coords:
                 attrs = coords[var]['attrs']
                 for attr in attrs:
@@ -1159,7 +1159,7 @@ class OceanDataset:
         """
 
         # Attribute name
-        name = 'OceanSpy_'+name
+        name = 'OceanSpy_' + name
 
         if overwrite is None and name in self._ds.attrs:
             raise ValueError("[{}] has been previously set: "
@@ -1198,7 +1198,7 @@ class OceanDataset:
         """
 
         # Attribute name
-        name = 'OceanSpy_'+name
+        name = 'OceanSpy_' + name
 
         # Check if attributes exists
         if name not in self._ds.attrs:
