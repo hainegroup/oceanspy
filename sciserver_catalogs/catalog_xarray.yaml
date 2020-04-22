@@ -524,7 +524,6 @@ sources:
     model: MITGCM
     args:
       urlpath: '/sciserver/filedb02-01/ocean/poseidon/LLC4320/SST'
-      drop_variables: ['']
     metadata:
       rename:
         i: X
