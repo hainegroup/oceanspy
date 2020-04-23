@@ -546,6 +546,8 @@ sources:
     args:
       urlpath: '/sciserver/filedb*/ocean/poseidon/LLC4320/2D/*'
       parallel: True
+      concat_dim: 'time'
+      combine: 'nested'
       # drop_variables: ['XC','YC','iter','k','k_l','k_u','Z','Zl','Zu']
     metadata:
       rename:
