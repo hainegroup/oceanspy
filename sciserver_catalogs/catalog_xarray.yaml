@@ -545,7 +545,8 @@ sources:
     model: MITGCM
     args:
       urlpath: '/sciserver/filedb*/ocean/poseidon/LLC4320/2D/*'
-      drop_variables: ['XC','YC','iter','k','k_l','k_u','Z','Zl','Zu']
+      parallel: True
+      # drop_variables: ['XC','YC','iter','k','k_l','k_u','Z','Zl','Zu']
     metadata:
       rename:
         i: X
