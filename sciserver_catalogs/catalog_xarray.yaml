@@ -517,26 +517,26 @@ sources:
 
 
   # ====================================================================
-  # LLC4320
-  SST_LLC4320:
-    description: SST for LLC4320
-    driver: zarr
-    model: MITGCM
-    args:
-      urlpath: '/sciserver/filedb02-01/ocean/poseidon/LLC4320/SST'
-    metadata:
-      rename:
-        i: X
-        j: Y
-      parameters:
-        grid_type: llc
-      name: SST_LLC4320
-      description: |
-        SST field for the LLC4320, a general, curvilinear ocean simulations on the cube-sphere.
-      citation: |
-        Paper.
-      projection:
-      original_output: snapshot
+  # # LLC4320
+  # SST_LLC4320:
+  #   description: SST for LLC4320
+  #   driver: zarr
+  #   model: MITGCM
+  #   args:
+  #     urlpath: '/sciserver/filedb02-01/ocean/poseidon/LLC4320/SST'
+  #   metadata:
+  #     rename:
+  #       i: X
+  #       j: Y
+  #     parameters:
+  #       grid_type: llc
+  #     name: SST_LLC4320
+  #     description: |
+  #       SST field for the LLC4320, a general, curvilinear ocean simulations on the cube-sphere.
+  #     citation: |
+  #       Paper.
+  #     projection:
+  #     original_output: snapshot
 
 
   SSS_LLC4320:
@@ -544,7 +544,7 @@ sources:
     driver: zarr
     model: MITGCM
     args:
-      urlpath: '/sciserver/filedb03-01/ocean/poseidon/LLC4320/SSS'
+      urlpath: '/sciserver/filedb*/ocean/poseidon/LLC4320/2D/*'
       drop_variables: ['XC','YC','iter','k','k_l','k_u','Z','Zl','Zu']
     metadata:
       rename:
@@ -671,6 +671,7 @@ sources:
     driver: zarr
     args:
       urlpath: '/sciserver/filedb05-01/ocean/poseidon/LLC4320/grid'
+      parallel: True
     metadata:
       model: MITGCM
       rename:
@@ -1242,19 +1243,17 @@ sources:
         k_p1: Zp1
         k_u : Zu
         tile: face
-      # manipulate_coords:
-      #   coordsUVfromG: True
-      grid_coords: 
+      grid_coords:
         add_midp: True
         grid_coords:
           Y:
-            Y: 
+            Y:
             Yp1: 0.5
           X:
-            X: 
+            X:
             Xp1: 0.5
           Z:
-           Z: 
+           Z:
            Zp1: 0.5
            Zu: 0.5
            Zl: -0.5
