@@ -675,7 +675,6 @@ sources:
     driver: zarr
     args:
       urlpath: '/sciserver/filedb05-01/ocean/poseidon/LLC4320/grid'
-      parallel: True
     metadata:
       model: MITGCM
       rename:
