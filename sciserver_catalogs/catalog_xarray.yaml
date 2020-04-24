@@ -544,12 +544,12 @@ sources:
     driver: zarr
     model: MITGCM
     args:
-      urlpath: '/sciserver/filedb*/ocean/poseidon/LLC4320/2D/*'
+      urlpath: '/sciserver/filedb*/ocean/poseidon/LLC4320/2D/SS*'
+      chunks: {'i':4320, 'j':4320, 'time':1, 'face':1}
       xarray_kwargs:
         concat_dim: time
         parallel: True
         combine: nested
-        chunks: {'i':4320, 'j':4320, 'time':1, 'face':1}
       # drop_variables: ['XC','YC','iter','k','k_l','k_u','Z','Zl','Zu']
     metadata:
       rename:
