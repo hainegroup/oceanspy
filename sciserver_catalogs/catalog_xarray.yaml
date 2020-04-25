@@ -540,7 +540,7 @@ sources:
 
 
   SSS_LLC4320:
-    description: SSS for LLC4320
+    description: Surface fields for LLC4320
     driver: zarr
     model: MITGCM
     args:
@@ -558,10 +558,9 @@ sources:
         i_g: Xp1
         j_g: Yp1
       parameters:
-        grid_type: llc
       name: SSS_LLC4320
       description: |
-        SSS field for the LLC4320, a general, curvilinear ocean simulations on the cube-sphere.
+        Surface fields for the LLC4320, a general, curvilinear ocean simulations on the cube-sphere.
       citation: |
         Paper.
       projection:
@@ -685,11 +684,6 @@ sources:
         i_g: Xp1
         j: Y
         j_g: Yp1
-        # k: Z
-        # k_l: Z_l
-        # k_p1: Z_p1
-      # manipulate_coords:
-      #   coordsUVfromG: True
       grid_coords: 
         add_midp: True
         grid_coords:
@@ -699,11 +693,6 @@ sources:
           X:
             X: 
             Xp1: 0.5
-          # Z:
-          #  Z: 
-          #  Zp1: 0.5
-          #  # k_u: 0.5
-          #  Zl: -0.5
           time: 
             time: -0.5
       face_connections: # topology
