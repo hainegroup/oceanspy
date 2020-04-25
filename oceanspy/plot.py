@@ -677,7 +677,7 @@ def horizontal_section(od, varName,
             subplot_kws = {'projection': od.projection}
         kwargs['subplot_kws'] = subplot_kws
 
-    else: # Here if face is another dimension (for now, separate function)
+    else:
         raise ValueError('There are too many dimensions: {}.'
                          'A maximum of 3 dimensions (including time)'
                          ' are supported.'
