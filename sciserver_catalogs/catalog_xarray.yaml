@@ -555,6 +555,8 @@ sources:
       rename:
         i: X
         j: Y
+        i_g: Xp1
+        j_g: Yp1
       parameters:
         grid_type: llc
       name: SSS_LLC4320
