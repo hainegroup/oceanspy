@@ -1062,6 +1062,30 @@ class OceanDataset:
         try:
             from xmitgcm import variables
             if self.parameters['rSphere'] is None:
+                coords = variables.horizontal_coordinates_cartesian
+                add_coords = _OrderedDict(
+                    XU=dict(attrs=dict(standard_name=("plane_x_coordinate"
+                                                      "_at_u_location"),
+                                       long_name="x coordinate",
+                                       units="m",
+                                       coordinate="YU XU")),
+                    YU=dict(attrs=dict(standard_name=("plane_y_coordinate"
+                                                      "_at_u_location"),
+                                       long_name="y coordinate",
+                                       units="m",
+                                       coordinate="YU XU")),
+                    XV=dict(attrs=dict(standard_name=("plane_x_coordinate"
+                                                      "_at_v_location"),
+                                       long_name="x coordinate",
+                                       units="m",
+                                       coordinate="YV XV")),
+                    YV=dict(attrs=dict(standard_name=("plane_y_coordinate"
+                                                      "_at_v_location"),
+                                       long_name="y coordinate",
+                                       units="m",
+                                       coordinate="YV XV")))
+
+            else:
                 coords = variables.horizontal_coordinates_spherical
 
                 add_coords = _OrderedDict(
