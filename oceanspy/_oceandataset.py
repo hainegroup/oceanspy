@@ -1089,6 +1089,16 @@ class OceanDataset:
                 coords = variables.horizontal_coordinates_spherical
 
                 add_coords = _OrderedDict(
+
+                    XC=dict(attrs=dict(standard_name="longitude_at_T_location",
+                                       long_name="longitude",
+                                       units="degrees_east",
+                                       coordinate="YC XC")),
+                    YC=dict(attrs=dict(standard_name="latitude_at_T_location",
+                                       long_name="latitude",
+                                       units="degrees_north",
+                                       coordinate="YC XC")),
+
                     XU=dict(attrs=dict(standard_name="longitude_at_u_location",
                                        long_name="longitude",
                                        units="degrees_east",
