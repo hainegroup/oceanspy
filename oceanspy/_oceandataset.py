@@ -37,13 +37,18 @@ from collections import OrderedDict as _OrderedDict
 
 # From OceanSpy (private)
 from . import utils as _utils
-from ._ospy_utils import (_check_instance, _check_oceanspy_axes,
-                          _setter_error_message, _check_list_of_string,
-                          _create_grid, _rename_coord_attrs)
-from . subsample import _subsampleMethods
-from . compute import _computeMethods
-from . plot import _plotMethods
-from . animate import _animateMethods
+from ._ospy_utils import (
+    _check_instance,
+    _check_oceanspy_axes,
+    _setter_error_message,
+    _check_list_of_string,
+    _create_grid,
+    _rename_coord_attrs,
+)
+from .subsample import _subsampleMethods
+from .compute import _computeMethods
+from .plot import _plotMethods
+from .animate import _animateMethods
 
 # Recommended dependencies (private)
 try:
@@ -82,7 +87,7 @@ class OceanDataset:
         """
 
         # Check parameters
-        _check_instance({'dataset': dataset}, 'xarray.Dataset')
+        _check_instance({"dataset": dataset}, "xarray.Dataset")
 
         # Initialize dataset
         self._ds = dataset.copy()
@@ -99,47 +104,50 @@ class OceanDataset:
 
     def __repr__(self):
 
-        main_info = ['<oceanspy.OceanDataset>']
-        main_info.append('\nMain attributes:')
-        main_info.append("   .dataset: %s" %
-                         self.dataset.__repr__()
-                         [self.dataset.__repr__().find('<'):
-                          self.dataset.__repr__().find('>') + 1])
+        main_info = ["<oceanspy.OceanDataset>"]
+        main_info.append("\nMain attributes:")
+        main_info.append(
+            "   .dataset: %s"
+            % self.dataset.__repr__()[
+                self.dataset.__repr__().find("<") : self.dataset.__repr__().find(">")
+                + 1
+            ]
+        )
         if self.grid is not None:
-            main_info.append("   .grid: %s" %
-                             self.grid.__repr__()
-                             [self.grid.__repr__().find('<'):
-                              self.grid.__repr__().find('>') + 1])
+            main_info.append(
+                "   .grid: %s"
+                % self.grid.__repr__()[
+                    self.grid.__repr__().find("<") : self.grid.__repr__().find(">") + 1
+                ]
+            )
         if self.projection is not None:
-            main_info.append("   .projection: %s" %
-                             self.projection.__repr__()
-                             [self.projection.__repr__().find('<'):
-                              self.projection.__repr__().find('>') + 1])
+            main_info.append(
+                "   .projection: %s"
+                % self.projection.__repr__()[
+                    self.projection.__repr__()
+                    .find("<") : self.projection.__repr__()
+                    .find(">")
+                    + 1
+                ]
+            )
 
-        more_info = ['\n\nMore attributes:']
+        more_info = ["\n\nMore attributes:"]
         if self.name:
-            more_info.append("   .name: %s" %
-                             self.name)
+            more_info.append("   .name: %s" % self.name)
         if self.description:
-            more_info.append("   .description: %s" %
-                             self.description)
-        more_info.append("   .parameters: %s" %
-                         type(self.parameters))
+            more_info.append("   .description: %s" % self.description)
+        more_info.append("   .parameters: %s" % type(self.parameters))
         if self.aliases:
-            more_info.append("   .aliases: %s" %
-                             type(self.aliases))
+            more_info.append("   .aliases: %s" % type(self.aliases))
         if self.grid_coords:
-            more_info.append("   .grid_coords: %s" %
-                             type(self.grid_coords))
+            more_info.append("   .grid_coords: %s" % type(self.grid_coords))
         if self.grid_periodic:
-            more_info.append("   .grid_periodic: %s" %
-                             type(self.grid_periodic))
+            more_info.append("   .grid_periodic: %s" % type(self.grid_periodic))
         if self.face_connections:
-            more_info.append("   .face_connections: %s" %
-                             type(self.face_connections))
+            more_info.append("   .face_connections: %s" % type(self.face_connections))
 
-        info = '\n'.join(main_info)
-        info = info + '\n'.join(more_info)
+        info = "\n".join(main_info)
+        info = info + "\n".join(more_info)
         return info
 
     # ===========
@@ -153,7 +161,7 @@ class OceanDataset:
         """
         Name of the OceanDataset.
         """
-        name = self._read_from_global_attr('name')
+        name = self._read_from_global_attr("name")
 
         return name
 
@@ -162,7 +170,7 @@ class OceanDataset:
         """
         Inhibit setter.
         """
-        raise AttributeError(_setter_error_message('name'))
+        raise AttributeError(_setter_error_message("name"))
 
     def set_name(self, name, overwrite=None):
         """
@@ -178,12 +186,10 @@ class OceanDataset:
             If False, combine with previous name.
         """
         # Check parameters
-        _check_instance({'name': name}, 'str')
+        _check_instance({"name": name}, "str")
 
         # Set name
-        self = self._store_as_global_attr(name='name',
-                                          attr=name,
-                                          overwrite=overwrite)
+        self = self._store_as_global_attr(name="name", attr=name, overwrite=overwrite)
 
         return self
 
@@ -195,7 +201,7 @@ class OceanDataset:
         """
         Description of the OceanDataset.
         """
-        description = self._read_from_global_attr('description')
+        description = self._read_from_global_attr("description")
 
         return description
 
@@ -204,7 +210,7 @@ class OceanDataset:
         """
         Inhibit setter.
         """
-        raise AttributeError(_setter_error_message('description'))
+        raise AttributeError(_setter_error_message("description"))
 
     def set_description(self, description, overwrite=None):
         """
@@ -220,12 +226,12 @@ class OceanDataset:
             If False, combine with previous description.
         """
         # Check parameters
-        _check_instance({'description': description}, 'str')
+        _check_instance({"description": description}, "str")
 
         # Set description
-        self = self._store_as_global_attr(name='description',
-                                          attr=description,
-                                          overwrite=overwrite)
+        self = self._store_as_global_attr(
+            name="description", attr=description, overwrite=overwrite
+        )
 
         return self
 
@@ -241,7 +247,7 @@ class OceanDataset:
         {'ospy_name': 'custom_name'}
         """
 
-        aliases = self._read_from_global_attr('aliases')
+        aliases = self._read_from_global_attr("aliases")
 
         return aliases
 
@@ -253,8 +259,7 @@ class OceanDataset:
         to {'custom_name': 'ospy_name'}
         """
         if self.aliases:
-            aliases_flipped = {custom: ospy
-                               for ospy, custom in self.aliases.items()}
+            aliases_flipped = {custom: ospy for ospy, custom in self.aliases.items()}
         else:
             return self.aliases
 
@@ -266,7 +271,7 @@ class OceanDataset:
         Inhibit setter.
         """
 
-        raise AttributeError(_setter_error_message('aliases'))
+        raise AttributeError(_setter_error_message("aliases"))
 
     def set_aliases(self, aliases, overwrite=None):
         """
@@ -285,12 +290,12 @@ class OceanDataset:
         """
 
         # Check parameters
-        _check_instance({'aliases': aliases}, 'dict')
+        _check_instance({"aliases": aliases}, "dict")
 
         # Set aliases
-        self = self._store_as_global_attr(name='aliases',
-                                          attr=aliases,
-                                          overwrite=overwrite)
+        self = self._store_as_global_attr(
+            name="aliases", attr=aliases, overwrite=overwrite
+        )
 
         # Apply aliases
         self = self._apply_aliases()
@@ -303,10 +308,11 @@ class OceanDataset:
         and rename to OceanSpy reference name
         """
         if self._aliases_flipped:
-            aliases = {custom: ospy
-                       for custom, ospy in self._aliases_flipped.items()
-                       if custom in self._ds.variables
-                       or custom in self._ds.dims}
+            aliases = {
+                custom: ospy
+                for custom, ospy in self._aliases_flipped.items()
+                if custom in self._ds.variables or custom in self._ds.dims
+            }
             self._ds = self._ds.rename(aliases)
 
         return self
@@ -327,9 +333,11 @@ class OceanDataset:
         # Show _ds with renamed variables.
         dataset = self._ds.copy()
         if self.aliases:
-            aliases = {ospy: custom for ospy, custom in self.aliases.items()
-                       if ospy in self._ds
-                       or ospy in self._ds.dims}
+            aliases = {
+                ospy: custom
+                for ospy, custom in self.aliases.items()
+                if ospy in self._ds or ospy in self._ds.dims
+            }
             dataset = dataset.rename(aliases)
 
         return dataset
@@ -339,8 +347,9 @@ class OceanDataset:
         """
         Inhibit setter.
         """
-        raise AttributeError("Set a new dataset using "
-                             "`oceanspy.OceanDataset(dataset)`")
+        raise AttributeError(
+            "Set a new dataset using " "`oceanspy.OceanDataset(dataset)`"
+        )
 
     # -------------------
     # parameters
@@ -353,7 +362,8 @@ class OceanDataset:
         (see :py:const:`oceanspy.DEFAULT_PARAMETERS`).
         """
         from oceanspy import DEFAULT_PARAMETERS
-        parameters = self._read_from_global_attr('parameters')
+
+        parameters = self._read_from_global_attr("parameters")
 
         if parameters is None:
             parameters = DEFAULT_PARAMETERS
@@ -367,7 +377,7 @@ class OceanDataset:
         """
         Inhibit setter.
         """
-        raise AttributeError(_setter_error_message('parameters'))
+        raise AttributeError(_setter_error_message("parameters"))
 
     def set_parameters(self, parameters):
         """
@@ -383,12 +393,10 @@ class OceanDataset:
         parameters: dict
             {'name': value}
         """
-        from oceanspy import (DEFAULT_PARAMETERS,
-                              AVAILABLE_PARAMETERS,
-                              TYPE_PARAMETERS)
+        from oceanspy import DEFAULT_PARAMETERS, AVAILABLE_PARAMETERS, TYPE_PARAMETERS
 
         # Check parameters
-        _check_instance({'parameters': parameters}, 'dict')
+        _check_instance({"parameters": parameters}, "dict")
 
         # Check parameters
         warn_params = []
@@ -397,23 +405,26 @@ class OceanDataset:
                 warn_params = warn_params + [key]
             else:
                 if not isinstance(value, TYPE_PARAMETERS[key]):
-                    raise TypeError("Invalid [{}]. "
-                                    "Check oceanspy.TYPE_PARAMETERS"
-                                    "".format(key))
-                check1 = (key in AVAILABLE_PARAMETERS.keys())
+                    raise TypeError(
+                        "Invalid [{}]. " "Check oceanspy.TYPE_PARAMETERS" "".format(key)
+                    )
+                check1 = key in AVAILABLE_PARAMETERS.keys()
                 if check1 and (value not in AVAILABLE_PARAMETERS[key]):
-                    raise ValueError("Requested [{}] not available. "
-                                     "Check oceanspy.AVAILABLE_PARAMETERS"
-                                     "".format(key))
+                    raise ValueError(
+                        "Requested [{}] not available. "
+                        "Check oceanspy.AVAILABLE_PARAMETERS"
+                        "".format(key)
+                    )
 
         if len(warn_params) != 0:
-            _warnings.warn("{} are not OceanSpy parameters"
-                           "".format(warn_params), stacklevel=2)
+            _warnings.warn(
+                "{} are not OceanSpy parameters" "".format(warn_params), stacklevel=2
+            )
 
         # Set parameters
-        self = self._store_as_global_attr(name='parameters',
-                                          attr=parameters,
-                                          overwrite=True)
+        self = self._store_as_global_attr(
+            name="parameters", attr=parameters, overwrite=True
+        )
 
         return self
 
@@ -430,7 +441,7 @@ class OceanDataset:
         https://xgcm.readthedocs.io/en/stable/grids.html#Grid-Metadata
         """
 
-        grid_coords = self._read_from_global_attr('grid_coords')
+        grid_coords = self._read_from_global_attr("grid_coords")
 
         return grid_coords
 
@@ -440,7 +451,7 @@ class OceanDataset:
         Inhibit setter.
         """
 
-        raise AttributeError(_setter_error_message('grid_coords'))
+        raise AttributeError(_setter_error_message("grid_coords"))
 
     def set_grid_coords(self, grid_coords, add_midp=False, overwrite=None):
         """
@@ -471,59 +482,60 @@ class OceanDataset:
         """
 
         # Check parameters
-        _check_instance({'grid_coords': grid_coords,
-                         'add_midp': add_midp},
-                        {'grid_coords': 'dict',
-                         'add_midp': 'bool'})
+        _check_instance(
+            {"grid_coords": grid_coords, "add_midp": add_midp},
+            {"grid_coords": "dict", "add_midp": "bool"},
+        )
 
         # Check axes
         _check_oceanspy_axes(list(grid_coords.keys()))
 
         # Set grid_coords
-        self = self._store_as_global_attr(name='grid_coords',
-                                          attr=grid_coords,
-                                          overwrite=overwrite)
+        self = self._store_as_global_attr(
+            name="grid_coords", attr=grid_coords, overwrite=overwrite
+        )
 
         if add_midp:
             grid_coords = {}
             for axis in self.grid_coords:
-                check1 = (len(self.grid_coords[axis]) == 1)
-                check2 = (list(self.grid_coords[axis].values())[0] is not None)
+                check1 = len(self.grid_coords[axis]) == 1
+                check2 = list(self.grid_coords[axis].values())[0] is not None
                 if check1 and check2:
 
                     # Deal with aliases
                     dim = list(self.grid_coords[axis].keys())[0]
                     if self._aliases_flipped and dim in self._aliases_flipped:
                         _dim = self._aliases_flipped[dim]
-                        self = self.set_aliases({_dim + '_midp':
-                                                 dim+'_midp'}, overwrite=False)
+                        self = self.set_aliases(
+                            {_dim + "_midp": dim + "_midp"}, overwrite=False
+                        )
                     else:
                         _dim = dim
 
                     # Midpoints are averages of outpoints
-                    midp = (self._ds[_dim].values[:-1] +
-                            self._ds[_dim].diff(_dim) / 2).rename({_dim:
-                                                                 _dim+'_midp'})
-                    self._ds[_dim+'_midp'] = _xr.DataArray(midp,
-                                                           dims=(_dim+'_midp'))
-                    if 'units' in self._ds[_dim].attrs:
-                        units = self._ds[_dim].attrs['units']
-                        self._ds[_dim + '_midp'].attrs['units'] = units
-                    if 'long_name' in self._ds[_dim].attrs:
-                        long_name = self._ds[_dim].attrs['long_name']
-                        long_name = 'Mid-points of {}'.format(long_name)
-                        self._ds[_dim + '_midp'].attrs['long_name'] = long_name
-                    if 'description' in self._ds[_dim].attrs:
-                        desc = self._ds[_dim].attrs['description']
-                        desc = 'Mid-points of {}'.format(desc)
-                        self._ds[_dim + '_midp'].attrs['description'] = desc
+                    midp = (
+                        self._ds[_dim].values[:-1] + self._ds[_dim].diff(_dim) / 2
+                    ).rename({_dim: _dim + "_midp"})
+                    self._ds[_dim + "_midp"] = _xr.DataArray(
+                        midp, dims=(_dim + "_midp")
+                    )
+                    if "units" in self._ds[_dim].attrs:
+                        units = self._ds[_dim].attrs["units"]
+                        self._ds[_dim + "_midp"].attrs["units"] = units
+                    if "long_name" in self._ds[_dim].attrs:
+                        long_name = self._ds[_dim].attrs["long_name"]
+                        long_name = "Mid-points of {}".format(long_name)
+                        self._ds[_dim + "_midp"].attrs["long_name"] = long_name
+                    if "description" in self._ds[_dim].attrs:
+                        desc = self._ds[_dim].attrs["description"]
+                        desc = "Mid-points of {}".format(desc)
+                        self._ds[_dim + "_midp"].attrs["description"] = desc
 
-                    grid_coords[axis] = {**self.grid_coords[axis],
-                                         dim + '_midp': None}
+                    grid_coords[axis] = {**self.grid_coords[axis], dim + "_midp": None}
 
-            self = self._store_as_global_attr(name='grid_coords',
-                                              attr=grid_coords,
-                                              overwrite=False)
+            self = self._store_as_global_attr(
+                name="grid_coords", attr=grid_coords, overwrite=False
+            )
         return self
 
     # -------------------
@@ -535,7 +547,7 @@ class OceanDataset:
         List of :py:obj:`xgcm.Grid` axes that are periodic.
         """
 
-        grid_periodic = self._read_from_global_attr('grid_periodic')
+        grid_periodic = self._read_from_global_attr("grid_periodic")
         if not grid_periodic:
             grid_periodic = []
 
@@ -547,7 +559,7 @@ class OceanDataset:
         Inhibit setter.
         """
 
-        raise AttributeError(_setter_error_message('grid_periodic'))
+        raise AttributeError(_setter_error_message("grid_periodic"))
 
     def set_grid_periodic(self, grid_periodic):
         """
@@ -562,7 +574,7 @@ class OceanDataset:
         """
 
         # Check parameters
-        _check_instance({'grid_periodic': grid_periodic}, 'list')
+        _check_instance({"grid_periodic": grid_periodic}, "list")
 
         # Check axes
         _check_oceanspy_axes(grid_periodic)
@@ -570,9 +582,9 @@ class OceanDataset:
         # Set grid_periodic
         # Use overwrite True by default because
         # xgcm default is all grid_priodic True.
-        self = self._store_as_global_attr(name='grid_periodic',
-                                          attr=grid_periodic,
-                                          overwrite=True)
+        self = self._store_as_global_attr(
+            name="grid_periodic", attr=grid_periodic, overwrite=True
+        )
 
         return self
 
@@ -581,45 +593,49 @@ class OceanDataset:
     # -----------------
     @property
     def face_connections(self):
-        '''
+        """
         Defines the topology of the grid used by :py:obj:`xgcm.Grid`.
 
         References
         ----------
 
-        '''
-        face_connections = self._read_from_global_attr('face_connections')
+        """
+        face_connections = self._read_from_global_attr("face_connections")
         return face_connections
 
     @face_connections.setter
     def face_connections(self, face_connections):
-        '''
+        """
         Inhibit setter.
-        '''
-        raise AttributeError(_setter_error_message('face_connections'))
+        """
+        raise AttributeError(_setter_error_message("face_connections"))
 
     def set_face_connections(self, face_connections):
-        '''
+        """
         Set face conections that define the grid topology that gets read by
         :py:obj:`xgcm.Grid`
         Parameters
         ----------
         face_connections: dict
             Dictionary the connections of each face along each direction.
-        '''
+        """
         # check parameters
-        _check_instance({'face_connections': face_connections}, 'dict')
+        _check_instance({"face_connections": face_connections}, "dict")
 
-        for k in face_connections['face'].keys():
-            for axis in face_connections['face'][k].keys():
-                if type(face_connections['face'][k][axis]) == tuple:
-                    face_connections['face'][k][axis] = face_connections['face'][k][axis]
+        for k in face_connections["face"].keys():
+            for axis in face_connections["face"][k].keys():
+                if type(face_connections["face"][k][axis]) == tuple:
+                    face_connections["face"][k][axis] = face_connections["face"][k][
+                        axis
+                    ]
                 else:
-                    face_connections['face'][k][axis] = eval(face_connections['face'][k][axis])
+                    face_connections["face"][k][axis] = eval(
+                        face_connections["face"][k][axis]
+                    )
 
-        self = self._store_as_global_attr(name='face_connections',
-                                          attr=face_connections,
-                                          overwrite=True)
+        self = self._store_as_global_attr(
+            name="face_connections", attr=face_connections, overwrite=True
+        )
         return self
 
     # -------------------
@@ -677,16 +693,18 @@ class OceanDataset:
         """
         Inhibit setter.
         """
-        raise AttributeError("Set a new grid using "
-                             ".set_grid_coords and .set_periodic")
+        raise AttributeError(
+            "Set a new grid using " ".set_grid_coords and .set_periodic"
+        )
 
     @_grid.setter
     def _grid(self, grid):
         """
         Inhibit setter.
         """
-        raise AttributeError("Set a new _grid using "
-                             ".set_grid_coords and .set_periodic")
+        raise AttributeError(
+            "Set a new _grid using " ".set_grid_coords and .set_periodic"
+        )
 
     # -------------------
     # projection
@@ -697,17 +715,19 @@ class OceanDataset:
         Cartopy projection of the OceanDataset.
         """
 
-        projection = self._read_from_global_attr('projection')
+        projection = self._read_from_global_attr("projection")
         if projection:
-            if projection == 'None':
+            if projection == "None":
                 projection = eval(projection)
             else:
-                if 'cartopy' not in _sys.modules:  # pragma: no cover
-                    _warnings.warn("cartopy is not available,"
-                                   " so projection is None", stacklevel=2)
+                if "cartopy" not in _sys.modules:  # pragma: no cover
+                    _warnings.warn(
+                        "cartopy is not available," " so projection is None",
+                        stacklevel=2,
+                    )
                     projection = None
                 else:
-                    projection = eval('_ccrs.{}'.format(projection))
+                    projection = eval("_ccrs.{}".format(projection))
 
         return projection
 
@@ -717,7 +737,7 @@ class OceanDataset:
         Inhibit setter.
         """
 
-        raise AttributeError(_setter_error_message('projection'))
+        raise AttributeError(_setter_error_message("projection"))
 
     def set_projection(self, projection, **kwargs):
         """
@@ -740,24 +760,24 @@ class OceanDataset:
         # Check parameters
         if projection is not None:
             # Check
-            _check_instance({'projection': projection}, 'str')
+            _check_instance({"projection": projection}, "str")
             if not hasattr(_ccrs, projection):
-                raise ValueError("{} is not a cartopy projection"
-                                 "".format(projection))
-            projection = '{}(**{})'.format(projection, kwargs)
+                raise ValueError("{} is not a cartopy projection" "".format(projection))
+            projection = "{}(**{})".format(projection, kwargs)
         else:
             projection = str(projection)
 
         # Set projection
-        self = self._store_as_global_attr(name='projection', attr=projection,
-                                          overwrite=True)
+        self = self._store_as_global_attr(
+            name="projection", attr=projection, overwrite=True
+        )
 
         return self
 
     # ===========
     # METHODS
     # ===========
-    def create_tree(self, grid_pos='C'):
+    def create_tree(self, grid_pos="C"):
         """
         Create a scipy.spatial.cKDTree for quick nearest-neighbor lookup.
 
@@ -780,19 +800,21 @@ class OceanDataset:
         """
 
         # Check parameters
-        _check_instance({'grid_pos': grid_pos}, 'str')
+        _check_instance({"grid_pos": grid_pos}, "str")
 
-        grid_pos_list = ['C', 'G', 'U', 'V']
+        grid_pos_list = ["C", "G", "U", "V"]
         if grid_pos not in grid_pos_list:
-            raise ValueError("`grid_pos` must be one of {}:"
-                             "\nhttps://mitgcm.readthedocs.io"
-                             "/en/latest/algorithm/horiz-grid.html"
-                             "".format(grid_pos_list))
+            raise ValueError(
+                "`grid_pos` must be one of {}:"
+                "\nhttps://mitgcm.readthedocs.io"
+                "/en/latest/algorithm/horiz-grid.html"
+                "".format(grid_pos_list)
+            )
 
         # Convert if it's not cartesian
-        Y = self._ds['Y' + grid_pos]
-        X = self._ds['X' + grid_pos]
-        R = self.parameters['rSphere']
+        Y = self._ds["Y" + grid_pos]
+        X = self._ds["X" + grid_pos]
+        R = self.parameters["rSphere"]
         if R:
             x, y, z = _utils.spherical2cartesian(Y=Y, X=X, R=R)
         else:
@@ -825,15 +847,16 @@ class OceanDataset:
 
         # Check and make dataset
         if not isinstance(obj, (_xr.DataArray, _xr.Dataset)):
-            raise TypeError('`obj` must be xarray.DataArray or xarray.Dataset')
-        _check_instance({'overwrite': overwrite}, 'bool')
+            raise TypeError("`obj` must be xarray.DataArray or xarray.Dataset")
+        _check_instance({"overwrite": overwrite}, "bool")
 
         # Check name
         obj = obj.drop(obj.coords)
         if isinstance(obj, _xr.DataArray):
             if obj.name is None:
-                raise ValueError("xarray.DataArray doesn't have a name."
-                                 "Set it using da.rename()")
+                raise ValueError(
+                    "xarray.DataArray doesn't have a name." "Set it using da.rename()"
+                )
             else:
                 obj = obj.to_dataset()
 
@@ -843,22 +866,31 @@ class OceanDataset:
         if overwrite is False:
             obj = obj.drop(var2drop)
             if len(var2drop) != 0:
-                _warnings.warn('{} will not be merged.'
-                               '\nSet `overwrite=True` if you wish otherwise.'
-                               ''.format(var2drop), stacklevel=2)
+                _warnings.warn(
+                    "{} will not be merged."
+                    "\nSet `overwrite=True` if you wish otherwise."
+                    "".format(var2drop),
+                    stacklevel=2,
+                )
         else:
             if len(var2drop) != 0:
-                _warnings.warn('{} will be overwritten.'
-                               ''.format(var2drop), stacklevel=2)
+                _warnings.warn(
+                    "{} will be overwritten." "".format(var2drop), stacklevel=2
+                )
         for var in obj.data_vars:
             # Store dimension attributes that get lost
             attrs = {}
             for dim in obj[var].dims:
                 if dim not in dataset.dims:
                     pass
-                elif all([i == j
-                          for i, j in zip(obj[dim].attrs.items(),
-                                          dataset[dim].attrs.items())]):
+                elif all(
+                    [
+                        i == j
+                        for i, j in zip(
+                            obj[dim].attrs.items(), dataset[dim].attrs.items()
+                        )
+                    ]
+                ):
                     attrs[dim] = dataset[dim].attrs
 
             # Merge
@@ -887,14 +919,14 @@ class OceanDataset:
         """
 
         # Check parameters
-        _check_instance({'path': path}, 'str')
+        _check_instance({"path": path}, "str")
 
         # to_netcdf doesn't like coordinates attribute
         dataset = _rename_coord_attrs(self.dataset)
 
         # Compute
-        compute = kwargs.pop('compute', None)
-        print('Writing dataset to [{}].'.format(path))
+        compute = kwargs.pop("compute", None)
+        print("Writing dataset to [{}].".format(path))
         if compute is None or compute is False:
             delayed_obj = dataset.to_netcdf(path, compute=False, **kwargs)
             with _ProgressBar():
@@ -919,14 +951,14 @@ class OceanDataset:
         """
 
         # Check parameters
-        _check_instance({'path': path}, 'str')
+        _check_instance({"path": path}, "str")
 
         # to_zarr doesn't like coordinates attribute
         dataset = _rename_coord_attrs(self.dataset)
 
         # Compute
-        compute = kwargs.pop('compute', None)
-        print('Writing dataset to [{}].'.format(path))
+        compute = kwargs.pop("compute", None)
+        print("Writing dataset to [{}].".format(path))
         if compute is None or compute is False:
             delayed_obj = dataset.to_zarr(path, compute=False, **kwargs)
             with _ProgressBar():
@@ -951,21 +983,26 @@ class OceanDataset:
         """
 
         if averageList is not None:
-            averageList = _check_list_of_string(averageList, 'averageList')
+            averageList = _check_list_of_string(averageList, "averageList")
         else:
             averageList = []
 
         for var in self._ds.data_vars:
-            original_output = self._ds[var].attrs.pop('original_output', None)
-            if original_output == 'average' or var in averageList:
-                ds_tmp = self._ds[var].drop('time').isel(time=slice(1, None))
-                self._ds[var] = ds_tmp.rename({'time': 'time_midp'})
+            original_output = self._ds[var].attrs.pop("original_output", None)
+            if original_output == "average" or var in averageList:
+                ds_tmp = self._ds[var].drop("time").isel(time=slice(1, None))
+                self._ds[var] = ds_tmp.rename({"time": "time_midp"})
             if original_output is not None:
-                self._ds[var].attrs['original_output'] = original_output
+                self._ds[var].attrs["original_output"] = original_output
         return self
 
-    def manipulate_coords(self, fillna=False, coords1Dfrom2D=False,
-                          coords2Dfrom1D=False, coordsUVfromG=False):
+    def manipulate_coords(
+        self,
+        fillna=False,
+        coords1Dfrom2D=False,
+        coords2Dfrom1D=False,
+        coordsUVfromG=False,
+    ):
         """
         Manipulate coordinates to make them compatible with OceanSpy.
 
@@ -996,8 +1033,8 @@ class OceanDataset:
 
         # Fill nans (e.g., because of exch2)
         if fillna:
-            coords = ['YC', 'XC', 'YG', 'XG', 'YU', 'XU', 'YV', 'XV']
-            dims = ['X', 'Y', 'Xp1', 'Yp1', 'Xp1', 'Y', 'X', 'Yp1']
+            coords = ["YC", "XC", "YG", "XG", "YU", "XU", "YV", "XV"]
+            dims = ["X", "Y", "Xp1", "Yp1", "Xp1", "Y", "X", "Yp1"]
 
             for i, (coord, dim) in enumerate(zip(coords, dims)):
                 if coord in self._ds.variables:
@@ -1007,119 +1044,146 @@ class OceanDataset:
         # Get U and V by rolling G
         if coordsUVfromG:
 
-            for i, (point_pos, dim2roll) in enumerate(zip(['U', 'V'],
-                                                          ['Yp1', 'Xp1'])):
-                for dim in ['Y', 'X']:
-                    coord = self._ds[dim + 'G'].rolling(**{dim2roll: 2})
-                    coord = coord.mean().dropna(dim2roll, how='all')
-                    coord = coord.drop(coord.coords).rename({dim2roll:
-                                                             dim2roll[0]})
+            for i, (point_pos, dim2roll) in enumerate(zip(["U", "V"], ["Yp1", "Xp1"])):
+                for dim in ["Y", "X"]:
+                    coord = self._ds[dim + "G"].rolling(**{dim2roll: 2})
+                    coord = coord.mean().dropna(dim2roll, how="all")
+                    coord = coord.drop(coord.coords).rename({dim2roll: dim2roll[0]})
                     self._ds[dim + point_pos] = coord
-                    if 'units' in self._ds[dim + 'G'].attrs:
-                        units = self._ds[dim + 'G'].attrs['units']
-                        self._ds[dim + point_pos].attrs['units'] = units
+                    if "units" in self._ds[dim + "G"].attrs:
+                        units = self._ds[dim + "G"].attrs["units"]
+                        self._ds[dim + point_pos].attrs["units"] = units
 
         # For cartesian grid we can use 1D coordinates
         if coords1Dfrom2D:
             # Take mean
-            self._ds['Y'] = self._ds['YC'].mean('X',
-                                                keep_attrs=True).persist()
-            self._ds['X'] = self._ds['XC'].mean('Y',
-                                                keep_attrs=True).persist()
-            self._ds['Yp1'] = self._ds['YG'].mean('Xp1',
-                                                  keep_attrs=True).persist()
-            self._ds['Xp1'] = self._ds['XG'].mean('Yp1',
-                                                  keep_attrs=True).persist()
+            self._ds["Y"] = self._ds["YC"].mean("X", keep_attrs=True).persist()
+            self._ds["X"] = self._ds["XC"].mean("Y", keep_attrs=True).persist()
+            self._ds["Yp1"] = self._ds["YG"].mean("Xp1", keep_attrs=True).persist()
+            self._ds["Xp1"] = self._ds["XG"].mean("Yp1", keep_attrs=True).persist()
 
         # Get 2D coordinates broadcasting 1D
         if coords2Dfrom1D:
             # Broadcast
-            self._ds['YC'], self._ds['XC'] = _xr.broadcast(self._ds['Y'],
-                                                           self._ds['X'])
-            self._ds['YG'], self._ds['XG'] = _xr.broadcast(self._ds['Yp1'],
-                                                           self._ds['Xp1'])
-            self._ds['YU'], self._ds['XU'] = _xr.broadcast(self._ds['Y'],
-                                                           self._ds['Xp1'])
-            self._ds['YV'], self._ds['XV'] = _xr.broadcast(self._ds['Yp1'],
-                                                           self._ds['X'])
+            self._ds["YC"], self._ds["XC"] = _xr.broadcast(self._ds["Y"], self._ds["X"])
+            self._ds["YG"], self._ds["XG"] = _xr.broadcast(
+                self._ds["Yp1"], self._ds["Xp1"]
+            )
+            self._ds["YU"], self._ds["XU"] = _xr.broadcast(
+                self._ds["Y"], self._ds["Xp1"]
+            )
+            self._ds["YV"], self._ds["XV"] = _xr.broadcast(
+                self._ds["Yp1"], self._ds["X"]
+            )
 
             # Add units
-            dims2 = ['YC', 'XC', 'YG', 'XG',
-                     'YU', 'XU', 'YV', 'XV']
-            dims1 = ['Y', 'X', 'Yp1', 'Xp1',
-                     'Y', 'Xp1', 'Yp1', 'X']
+            dims2 = ["YC", "XC", "YG", "XG", "YU", "XU", "YV", "XV"]
+            dims1 = ["Y", "X", "Yp1", "Xp1", "Y", "Xp1", "Yp1", "X"]
             for i, (D2, D1) in enumerate(zip(dims2, dims1)):
-                if 'units' in self._ds[D1].attrs:
-                    self._ds[D2].attrs['units'] = self._ds[D1].attrs['units']
+                if "units" in self._ds[D1].attrs:
+                    self._ds[D2].attrs["units"] = self._ds[D1].attrs["units"]
 
         # Set 2D coordinates
-        self._ds = self._ds.set_coords(['YC', 'XC',
-                                        'YG', 'XG',
-                                        'YU', 'XU',
-                                        'YV', 'XV'])
+        self._ds = self._ds.set_coords(["YC", "XC", "YG", "XG", "YU", "XU", "YV", "XV"])
 
         # Attributes (use xmitgcm)
         try:
             from xmitgcm import variables
-            if self.parameters['rSphere'] is None:
+
+            if self.parameters["rSphere"] is None:
                 coords = variables.horizontal_coordinates_cartesian
                 add_coords = _OrderedDict(
-                    XU=dict(attrs=dict(standard_name=("plane_x_coordinate"
-                                                      "_at_u_location"),
-                                       long_name="x coordinate",
-                                       units="m",
-                                       coordinate="YU XU")),
-                    YU=dict(attrs=dict(standard_name=("plane_y_coordinate"
-                                                      "_at_u_location"),
-                                       long_name="y coordinate",
-                                       units="m",
-                                       coordinate="YU XU")),
-                    XV=dict(attrs=dict(standard_name=("plane_x_coordinate"
-                                                      "_at_v_location"),
-                                       long_name="x coordinate",
-                                       units="m",
-                                       coordinate="YV XV")),
-                    YV=dict(attrs=dict(standard_name=("plane_y_coordinate"
-                                                      "_at_v_location"),
-                                       long_name="y coordinate",
-                                       units="m",
-                                       coordinate="YV XV")))
+                    XU=dict(
+                        attrs=dict(
+                            standard_name=("plane_x_coordinate" "_at_u_location"),
+                            long_name="x coordinate",
+                            units="m",
+                            coordinate="YU XU",
+                        )
+                    ),
+                    YU=dict(
+                        attrs=dict(
+                            standard_name=("plane_y_coordinate" "_at_u_location"),
+                            long_name="y coordinate",
+                            units="m",
+                            coordinate="YU XU",
+                        )
+                    ),
+                    XV=dict(
+                        attrs=dict(
+                            standard_name=("plane_x_coordinate" "_at_v_location"),
+                            long_name="x coordinate",
+                            units="m",
+                            coordinate="YV XV",
+                        )
+                    ),
+                    YV=dict(
+                        attrs=dict(
+                            standard_name=("plane_y_coordinate" "_at_v_location"),
+                            long_name="y coordinate",
+                            units="m",
+                            coordinate="YV XV",
+                        )
+                    ),
+                )
 
             else:
                 coords = variables.horizontal_coordinates_spherical
 
                 add_coords = _OrderedDict(
+                    XC=dict(
+                        attrs=dict(
+                            standard_name="longitude_at_T_location",
+                            long_name="longitude",
+                            units="degrees_east",
+                            coordinate="YC XC",
+                        )
+                    ),
+                    YC=dict(
+                        attrs=dict(
+                            standard_name="latitude_at_T_location",
+                            long_name="latitude",
+                            units="degrees_north",
+                            coordinate="YC XC",
+                        )
+                    ),
+                    XU=dict(
+                        attrs=dict(
+                            standard_name="longitude_at_u_location",
+                            long_name="longitude",
+                            units="degrees_east",
+                            coordinate="YU XU",
+                        )
+                    ),
+                    YU=dict(
+                        attrs=dict(
+                            standard_name="latitude_at_u_location",
+                            long_name="latitude",
+                            units="degrees_north",
+                            coordinate="YU XU",
+                        )
+                    ),
+                    XV=dict(
+                        attrs=dict(
+                            standard_name="longitude_at_v_location",
+                            long_name="longitude",
+                            units="degrees_east",
+                            coordinate="YV XV",
+                        )
+                    ),
+                    YV=dict(
+                        attrs=dict(
+                            standard_name="latitude_at_v_location",
+                            long_name="latitude",
+                            units="degrees_north",
+                            coordinate="YV XV",
+                        )
+                    ),
+                )
 
-                    XC=dict(attrs=dict(standard_name="longitude_at_T_location",
-                                       long_name="longitude",
-                                       units="degrees_east",
-                                       coordinate="YC XC")),
-                    YC=dict(attrs=dict(standard_name="latitude_at_T_location",
-                                       long_name="latitude",
-                                       units="degrees_north",
-                                       coordinate="YC XC")),
-
-                    XU=dict(attrs=dict(standard_name="longitude_at_u_location",
-                                       long_name="longitude",
-                                       units="degrees_east",
-                                       coordinate="YU XU")),
-                    YU=dict(attrs=dict(standard_name="latitude_at_u_location",
-                                       long_name="latitude",
-                                       units="degrees_north",
-                                       coordinate="YU XU")),
-                    XV=dict(attrs=dict(standard_name="longitude_at_v_location",
-                                       long_name="longitude",
-                                       units="degrees_east",
-                                       coordinate="YV XV")),
-                    YV=dict(attrs=dict(standard_name="latitude_at_v_location",
-                                       long_name="latitude",
-                                       units="degrees_north",
-                                       coordinate="YV XV")))
-
-            coords = _OrderedDict(list(coords.items()) +
-                                  list(add_coords.items()))
+            coords = _OrderedDict(list(coords.items()) + list(add_coords.items()))
             for var in coords:
-                attrs = coords[var]['attrs']
+                attrs = coords[var]["attrs"]
                 for attr in attrs:
                     if attr not in self._ds[var].attrs:
                         self._ds[var].attrs[attr] = attrs[attr]
@@ -1148,12 +1212,14 @@ class OceanDataset:
         """
 
         # Attribute name
-        name = 'OceanSpy_' + name
+        name = "OceanSpy_" + name
 
         if overwrite is None and name in self._ds.attrs:
-            raise ValueError("[{}] has been previously set: "
-                             "`overwrite` must be bool"
-                             "".format(name.replace("OceanSpy_", "")))
+            raise ValueError(
+                "[{}] has been previously set: "
+                "`overwrite` must be bool"
+                "".format(name.replace("OceanSpy_", ""))
+            )
 
         # Copy because attributes are added to _ds
         self = _copy.copy(self)
@@ -1164,7 +1230,7 @@ class OceanDataset:
             if prev_attr[0] == "{" and prev_attr[-1] == "}":
                 attr = {**eval(prev_attr), **attr}
             else:
-                attr = prev_attr + '_' + attr
+                attr = prev_attr + "_" + attr
 
         self._ds.attrs[name] = str(attr)
 
@@ -1187,7 +1253,7 @@ class OceanDataset:
         """
 
         # Attribute name
-        name = 'OceanSpy_' + name
+        name = "OceanSpy_" + name
 
         # Check if attributes exists
         if name not in self._ds.attrs:
@@ -1195,8 +1261,8 @@ class OceanDataset:
 
         # Read attribute
         attr = self._ds.attrs[name]
-        check_dict = (attr[0] == '{' and attr[-1] == '}')
-        check_list = (attr[0] == '[' and attr[-1] == ']')
+        check_dict = attr[0] == "{" and attr[-1] == "}"
+        check_list = attr[0] == "[" and attr[-1] == "]"
         if check_dict or check_list:
             attr = eval(attr)
 
