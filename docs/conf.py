@@ -23,7 +23,8 @@ import datetime
 import sys
 import yaml
 import urllib
-sys.path.insert(0, os.path.abspath('..'))
+
+sys.path.insert(0, os.path.abspath(".."))
 import oceanspy
 from oceanspy.open_oceandataset import _find_entries
 
@@ -35,17 +36,19 @@ from oceanspy.open_oceandataset import _find_entries
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.mathjax',
-              'sphinx.ext.autodoc',
-              'sphinx.ext.autosummary',
-              'sphinx.ext.intersphinx',
-              'sphinx.ext.viewcode',
-              'sphinx.ext.extlinks',
-              'sphinx.ext.intersphinx',
-              'numpydoc',
-              'nbsphinx',
-              'IPython.sphinxext.ipython_directive',
-              'IPython.sphinxext.ipython_console_highlighting']
+extensions = [
+    "sphinx.ext.mathjax",
+    "sphinx.ext.autodoc",
+    "sphinx.ext.autosummary",
+    "sphinx.ext.intersphinx",
+    "sphinx.ext.viewcode",
+    "sphinx.ext.extlinks",
+    "sphinx.ext.intersphinx",
+    "numpydoc",
+    "nbsphinx",
+    "IPython.sphinxext.ipython_directive",
+    "IPython.sphinxext.ipython_console_highlighting",
+]
 
 autosummary_generate = True
 numpydoc_class_members_toctree = True
@@ -53,23 +56,23 @@ numpydoc_show_class_members = False
 
 # never execute notebooks: avoids lots of expensive imports on rtd
 # https://nbsphinx.readthedocs.io/en/0.2.14/never-execute.html
-nbsphinx_execute = 'never'
+nbsphinx_execute = "never"
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['_templates']
+templates_path = ["_templates"]
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
 #
 # source_suffix = ['.rst', '.md']
-source_suffix = '.rst'
+source_suffix = ".rst"
 
 # The master toctree document.
-master_doc = 'index'
+master_doc = "index"
 
 # General information about the project.
-project = u'OceanSpy'
-copyright = '2018-%s, OceanSpy developers' % datetime.datetime.now().year
+project = u"OceanSpy"
+copyright = "2018-%s, OceanSpy developers" % datetime.datetime.now().year
 author = u"Mattia Almansi"
 
 # The version info for the project you're documenting, acts as replacement
@@ -91,10 +94,10 @@ language = None
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This patterns also effect to html_static_path and html_extra_path
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', '**.ipynb_checkpoints']
+exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "**.ipynb_checkpoints"]
 
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = 'sphinx'
+pygments_style = "sphinx"
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = False
@@ -105,18 +108,18 @@ todo_include_todos = False
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'sphinx_rtd_theme'
+html_theme = "sphinx_rtd_theme"
 
 # Theme options are theme-specific and customize the look and feel of a
 # theme further.  For a list of options available for each theme, see the
 # documentation.
 #
-html_theme_options = {'logo_only': True}
+html_theme_options = {"logo_only": True}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+html_static_path = ["_static"]
 
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
@@ -125,7 +128,7 @@ html_logo = "_static/oceanspy_logo_white.png"
 # -- Options for HTMLHelp output ---------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'oceanspydoc'
+htmlhelp_basename = "oceanspydoc"
 
 
 # -- Options for LaTeX output ------------------------------------------
@@ -134,15 +137,12 @@ latex_elements = {
     # The paper size ('letterpaper' or 'a4paper').
     #
     # 'papersize': 'letterpaper',
-
     # The font size ('10pt', '11pt' or '12pt').
     #
     # 'pointsize': '10pt',
-
     # Additional stuff for the LaTeX preamble.
     #
     # 'preamble': '',
-
     # Latex figure (float) alignment
     #
     # 'figure_align': 'htbp',
@@ -152,9 +152,13 @@ latex_elements = {
 # (source start file, target name, title, author, documentclass
 # [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'oceanspy.tex',
-     u'OceanSpy Documentation',
-     u'Mattia Almansi', 'manual'),
+    (
+        master_doc,
+        "oceanspy.tex",
+        u"OceanSpy Documentation",
+        u"Mattia Almansi",
+        "manual",
+    ),
 ]
 
 
@@ -162,11 +166,7 @@ latex_documents = [
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [
-    (master_doc, 'oceanspy',
-     u'OceanSpy Documentation',
-     [author], 1)
-]
+man_pages = [(master_doc, "oceanspy", u"OceanSpy Documentation", [author], 1)]
 
 
 # -- Options for Texinfo output ----------------------------------------
@@ -175,12 +175,15 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'oceanspy',
-     u'OceanSpy Documentation',
-     author,
-     'oceanspy',
-     'One line description of project.',
-     'Miscellaneous'),
+    (
+        master_doc,
+        "oceanspy",
+        u"OceanSpy Documentation",
+        author,
+        "oceanspy",
+        "One line description of project.",
+        "Miscellaneous",
+    ),
 ]
 
 
@@ -204,45 +207,47 @@ nbsphinx_prolog = r"""
 
 # Get custom people data into sphinx
 # Borrowed from Pangeo's website
-with open('data/people.yml') as people_data_file:
-    people = yaml.load(people_data_file,
-                       Loader=yaml.FullLoader)
-people.sort(key=lambda x: x['last_name'].lower())
+with open("data/people.yml") as people_data_file:
+    people = yaml.load(people_data_file, Loader=yaml.FullLoader)
+people.sort(key=lambda x: x["last_name"].lower())
 
-html_context = {'people': people}
+html_context = {"people": people}
 
 
 # Create page with
 # Datasets available on SciServer
-citations = {'Almansi et al., 2017 - JPO.':
-             'https://journals.ametsoc.org'
-             '/doi/full/10.1175/JPO-D-17-0129.1',
-             'Magaldi and Haine, 2015 - DSR.':
-             'https://www.sciencedirect.com/'
-             'science/article/pii/S0967063714001915',
-             'Fraser et al., 2018 - JGR.':
-             'https://agupubs.onlinelibrary.wiley.com'
-             '/doi/full/10.1029/2018JC014435'}
-rst = open('datasets.rst', 'w')
-rst.write('.. _datasets:\n\n'
-          '========\n'
-          'Datasets\n'
-          '========\n\n'
-          'List of datasets available on SciServer.\n\n')
+citations = {
+    "Almansi et al., 2017 - JPO.": "https://journals.ametsoc.org"
+    "/doi/full/10.1175/JPO-D-17-0129.1",
+    "Magaldi and Haine, 2015 - DSR.": "https://www.sciencedirect.com/"
+    "science/article/pii/S0967063714001915",
+    "Fraser et al., 2018 - JGR.": "https://agupubs.onlinelibrary.wiley.com"
+    "/doi/full/10.1029/2018JC014435",
+}
+rst = open("datasets.rst", "w")
+rst.write(
+    ".. _datasets:\n\n"
+    "========\n"
+    "Datasets\n"
+    "========\n\n"
+    "List of datasets available on SciServer.\n\n"
+)
 
 # SCISERVER DATASETS
-url = ('https://raw.githubusercontent.com/malmans2/oceanspy/'
-       'master/sciserver_catalogs/datasets_list.yaml')
+url = (
+    "https://raw.githubusercontent.com/malmans2/oceanspy/"
+    "master/sciserver_catalogs/datasets_list.yaml"
+)
 f = urllib.request.urlopen(url)
-SCISERVER_DATASETS = yaml.safe_load(f)['datasets']['sciserver']
+SCISERVER_DATASETS = yaml.safe_load(f)["datasets"]["sciserver"]
 
 for name in SCISERVER_DATASETS:
-    if name == 'Arctic_Control':
+    if name == "Arctic_Control":
         continue
 
     # Section
-    rst.write('.. _'+name+':\n\n')
-    rst.write('{}\n{}\n{}\n\n'.format('-'*len(name), name, '-'*len(name)))
+    rst.write(".. _" + name + ":\n\n")
+    rst.write("{}\n{}\n{}\n\n".format("-" * len(name), name, "-" * len(name)))
 
     cat, entries, url, intake_switch = _find_entries(name, None)
     metadata = {}
@@ -250,35 +255,37 @@ for name in SCISERVER_DATASETS:
         if intake_switch:
             mtdt = cat[entry].metadata
         else:
-            mtdt = cat[entry].pop('metadata', None)
+            mtdt = cat[entry].pop("metadata", None)
         metadata = {**metadata, **mtdt}
 
     # Description
-    toprint = metadata.pop('description', None)
-    for add_str in ['citation', 'characteristics', 'mates']:
+    toprint = metadata.pop("description", None)
+    for add_str in ["citation", "characteristics", "mates"]:
         thisprint = metadata.pop(add_str, None)
         if thisprint is not None:
-            if add_str == 'mates':
-                add_str = 'see also'
-            if thisprint[-1:] == '\n':
+            if add_str == "mates":
+                add_str = "see also"
+            if thisprint[-1:] == "\n":
                 thisprint = thisprint[:-1]
-            toprint += '\n{}:\n\n* {}\n'.format(add_str.capitalize(),
-                                                thisprint.replace('\n',
-                                                                  '\n* '))
+            toprint += "\n{}:\n\n* {}\n".format(
+                add_str.capitalize(), thisprint.replace("\n", "\n* ")
+            )
     for n in SCISERVER_DATASETS:
-        toprint = toprint.replace(n, n+'_')
+        toprint = toprint.replace(n, n + "_")
     for cit in citations:
-        toprint = toprint.replace(cit, '`{}`_'.format(cit))
-    rst.write(toprint + '\n\n')
+        toprint = toprint.replace(cit, "`{}`_".format(cit))
+    rst.write(toprint + "\n\n")
 
     # Commands
-    rst.write('Run the following code to open the dataset:\n\n')
-    rst.write('.. code-block:: ipython\n'
-              '    :class: no-execute\n\n'
-              '    import oceanspy as ospy\n'
-              "    od = ospy.open_oceandataset.from_catalog('{}')\n\n"
-              "".format(name))
+    rst.write("Run the following code to open the dataset:\n\n")
+    rst.write(
+        ".. code-block:: ipython\n"
+        "    :class: no-execute\n\n"
+        "    import oceanspy as ospy\n"
+        "    od = ospy.open_oceandataset.from_catalog('{}')\n\n"
+        "".format(name)
+    )
 
 for k, v in citations.items():
-    rst.write('.. _`{}`: {}\n'.format(k, v))
+    rst.write(".. _`{}`: {}\n".format(k, v))
 rst.close()

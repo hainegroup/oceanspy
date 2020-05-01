@@ -2,8 +2,7 @@
 import pytest
 
 # From OceanSpy
-from oceanspy.utils import (spherical2cartesian,
-                            great_circle_path, cartesian_path)
+from oceanspy.utils import spherical2cartesian, great_circle_path, cartesian_path
 
 
 def test_RNone():
