@@ -1228,7 +1228,7 @@ sources:
         Z: Zed
         Zp1: Zed_p1
         Zl: Zed_l
-        Zu: Zed_u
+        # Zu: Zed_u
         i: X
         i_g: Xp1
         j: Y
@@ -1236,7 +1236,7 @@ sources:
         k: Z
         k_l: Zl
         k_p1: Zp1
-        k_u : Zu
+        # k_u : Zu
         tile: face
       grid_coords:
         add_midp: True
