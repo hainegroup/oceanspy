@@ -1,5 +1,5 @@
 __author__ = """Mattia Almansi"""
-__email__ = "mattia.almansi@jhu.edu"
+__email__ = "mattia.almansi@noc.ac.uk"
 __version__ = "0.1.0"
 
 from ._oceandataset import OceanDataset  # noqa: F401
@@ -11,7 +11,7 @@ from . import (
     animate,
     utils,
     _ospy_utils,
-)  # noqa: F401
+)
 import numpy as _np  # noqa: F401
 
 DEFAULT_PARAMETERS = {
@@ -55,13 +55,6 @@ TYPE_PARAMETERS = {
     "c_p": (_np.ScalarType),
     "tempFrz0": (_np.ScalarType),
     "dTempFrz_dS": (_np.ScalarType),
-    "temp_offset": (_np.ScalarType),
-    "temp_scale": (_np.ScalarType),
-    "temp_fill": (_np.ScalarType),
-    "sal_offset": (_np.ScalarType),
-    "sal_scale": (_np.ScalarType),
-    "sal_fill": (_np.ScalarType),
-    "ssh_fill": (_np.ScalarType),
 }
 
 SCISERVER_DATASETS = [
@@ -76,4 +69,6 @@ SCISERVER_DATASETS = [
     "EGshelfSJsec500m_6H_NONhydro",
     "Arctic_Control",
     "KangerFjord",
+    "LLC4320",
+    "ECCO"
 ]
