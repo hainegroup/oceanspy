@@ -3,7 +3,7 @@
 ============
 Contributing
 ============
-| Report bugs and submit feedback at https://github.com/malmans2/oceanspy/issues.
+| Report bugs and submit feedback at https://github.com/hainegroup/oceanspy/issues.
 | Don't forget to add yourself to the list of :ref:`people` contributing to OceanSpy! 
 
 .. _using_git:
@@ -39,7 +39,7 @@ Git_ is the distributed version control system used to develop OceanSpy, while G
    .. code-block:: bash
     
     $ cd oceanspy
-    $ git remote add upstream https://github.com/malmans2/oceanspy.git
+    $ git remote add upstream https://github.com/hainegroup/oceanspy.git
 
 6. Make a new branch from ``upstream/master``:
 
@@ -177,11 +177,22 @@ Continuous Integration and Test Coverage links: |travis| |codecov|
 
 9. You can install and use `pytest-html`_ to produce a test report in html format.
 
-10. Make sure that the code follows the `PEP 8`_ style guide using the following command:
+10. Make sure that the code follows the `PEP 8`_ style guide and the `black`_ format using the following commands:
 
    .. code-block:: bash 
            
-    $ pycodestyle oceanspy
+    $ black .
+    $ black-nb .
+    $ flake8
+
+   .. note::
+
+    Run the following command to automatically run `black` and `flake8` each time `git commit` is used:
+
+      .. code-block:: bash 
+
+       $ pre-commit install
+           
 
 
 Deploying
@@ -225,15 +236,16 @@ A reminder for the maintainers on how to deploy.
 8. Add the release's notes on the `releases' page`_ (copy and paste from ``HISTORY.rst``)
    
 
+.. _black: "https://black.readthedocs.io"
 .. _Git: https://git-scm.com
 .. _GitHub: https://github.com
-.. _OceanSpy: https://github.com/malmans2/oceanspy
+.. _OceanSpy: https://github.com/hainegroup/oceanspy
 .. _Sphinx: http://www.sphinx-doc.org/en/master
 .. _`Read the Docs`: https://readthedocs.org
 .. _reStructuredText: http://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html
 .. _Conda: https://conda.io/docs
 .. _PyPI: https://pypi.org/project/oceanspy
-.. _`releases' page`: https://github.com/malmans2/oceanspy/releases
+.. _`releases' page`: https://github.com/hainegroup/oceanspy/releases
 .. _pytest: https://docs.pytest.org/en/latest
 .. _`pytest-html`: https://pypi.org/project/pytest-html
 .. _`PEP 8`: https://www.python.org/dev/peps/pep-0008
@@ -243,13 +255,13 @@ A reminder for the maintainers on how to deploy.
     :alt: Documentation
     :target: http://oceanspy.readthedocs.io/en/latest/?badge=latest
 
-.. |travis| image:: https://travis-ci.org/malmans2/oceanspy.svg?branch=master
+.. |travis| image:: https://travis-ci.com/hainegroup/oceanspy.svg?branch=master
     :alt: Travis
-    :target: https://travis-ci.org/malmans2/oceanspy
+    :target: https://travis-ci.com/hainegroup/oceanspy
     
-.. |codecov| image:: https://codecov.io/github/malmans2/oceanspy/coverage.svg?branch=master
+.. |codecov| image:: https://codecov.io/github/hainegroup/oceanspy/coverage.svg?branch=master
     :alt: Coverage
-    :target: https://codecov.io/github/malmans2/oceanspy?branch=master
+    :target: https://codecov.io/github/hainegroup/oceanspy?branch=master
 
 .. |version| image:: https://img.shields.io/pypi/v/oceanspy.svg?style=flat
     :alt: PyPI

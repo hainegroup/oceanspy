@@ -1,42 +1,33 @@
 name: Oceanography
 channels:
   - conda-forge
-  - pyviz
 dependencies:
   - python=3.7
   - dask
   - distributed
   - bottleneck
   - netCDF4
-  - xarray>=0.11.3
+  - xarray
   - cartopy
   - esmpy
   - intake-xarray
   - geopy
   - xesmf
-  - xgcm>=0.2.0
+  - esmf
+  - xgcm
   - Ipython
   - tqdm
   - pytest
-  - pytest-cov
-  - pytest-env
-  - codecov
-  - pycodestyle
-  - ipython
-  - numpydoc
-  - sphinx
-  - sphinx_rtd_theme
-  - nbsphinx
-  - cmocean
+  - ffmpeg
+  - xmitgcm
   - eofs
+  - cmocean
   - gsw
   - pycwt
   - seaborn
-  - pyviz
-  - jupyterlab
-  - nodejs 
-  - ffmpeg
-  - oceanspy
+  - xhistogram
+  - nc-time-axis
+  - pip
   - pip:
-    - ffmpeg
-    - xmitgcm>=0.3.0
+    - numbagg
+    - git+https://github.com/hainegroup/oceanspy.git 

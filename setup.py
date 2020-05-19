@@ -21,6 +21,7 @@ test_requirements = [
     "pytest",
 ]
 
+
 setup(
     author="Mattia Almansi",
     author_email="mattia.almansi@noc.ac.uk",

@@ -36,6 +36,7 @@ from ._ospy_utils import (
     _check_list_of_string,
     _handle_aliased,
     _check_ijk_components,
+    _rename_aliased,
 )
 
 # Hard coded  list of variables outputed by functions
@@ -114,6 +115,7 @@ def _add_missing_variables(od, varList, FUNC2VARS=_FUNC2VARS):
     varList = _check_list_of_string(varList, "varList")
 
     # Return here if all variables already exist
+    varList = _rename_aliased(od, varList)
     varList = [var for var in varList if var not in od._ds.variables]
     if len(varList) == 0:
         return od
@@ -128,7 +130,7 @@ def _add_missing_variables(od, varList, FUNC2VARS=_FUNC2VARS):
             "\nIf you think that OceanSpy"
             " should be able to compute them,"
             " please open an issue on GitHub:"
-            "\n https://github.com/malmans2/oceanspy/issues"
+            "\n https://github.com/hainegroup/oceanspy/issues"
             "".format(var_error)
         )
 
@@ -138,7 +140,7 @@ def _add_missing_variables(od, varList, FUNC2VARS=_FUNC2VARS):
     for func in funcList:
         allds = allds + [eval("{}(od)".format(func))]
     ds = _xr.merge(allds)
-    ds = ds.drop([var for var in ds.variables if var not in varList])
+    ds = ds.drop_vars([var for var in ds.variables if var not in varList])
 
     # Merge to od
     od = od.merge_into_oceandataset(ds)
@@ -246,7 +248,6 @@ def gradient(od, varNameList=None, axesList=None, aliased=True):
             if axis in ["X", "Y"]:
                 # Select denominator
                 pointList = ["C", "F", "G"]
-
                 if axis == "X":
                     # Add missing variables
                     varList = ["dxC", "dxF", "dxG", "dxV"]

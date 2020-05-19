@@ -28,6 +28,7 @@ from ._ospy_utils import (
     _check_list_of_string,
     _check_native_grid,
     _check_part_position,
+    _rename_aliased,
 )
 
 # Recommended dependencies (private)
@@ -246,8 +247,10 @@ def cutout(
             raise ValueError("Zero grid points in the horizontal range")
 
         # Find horizontal indexes
-        maskH["Yp1"].values = _np.arange(len(maskH["Yp1"]))
-        maskH["Xp1"].values = _np.arange(len(maskH["Xp1"]))
+        maskH = maskH.assign_coords(
+            Yp1=_np.arange(len(maskH["Yp1"])),
+            Xp1=_np.arange(len(maskH["Xp1"]))
+        )
         dmaskH = maskH.where(maskH, drop=True)
         dYp1 = dmaskH["Yp1"].values
         dXp1 = dmaskH["Xp1"].values
@@ -283,10 +286,14 @@ def cutout(
         if "face" in ds.dims:
             faces = dmaskH["face"].values
             ds = ds.isel(
-                Yp1=slice(iY[0], iY[1] + 1), Xp1=slice(iX[0], iX[1] + 1), face=faces
+                Yp1=slice(iY[0], iY[1] + 1),
+                Xp1=slice(iX[0], iX[1] + 1),
+                face=faces
             )
         else:
-            ds = ds.isel(Yp1=slice(iY[0], iY[1] + 1), Xp1=slice(iX[0], iX[1] + 1))
+            ds = ds.isel(
+                Yp1=slice(iY[0], iY[1] + 1),
+                Xp1=slice(iX[0], iX[1] + 1))
 
         Xcoords = od._grid.axes["X"].coords
         if "X" in dropAxes:
@@ -340,7 +347,7 @@ def cutout(
         )
 
         # Find vertical indexes
-        maskV["Zp1"].values = _np.arange(len(maskV["Zp1"]))
+        maskV = maskV.assign_coords(Zp1=_np.arange(len(maskV["Zp1"])))
         dmaskV = maskV.where(maskV, drop=True)
         dZp1 = dmaskV["Zp1"].values
         iZ = [_np.min(dZp1), _np.max(dZp1)]
@@ -396,13 +403,13 @@ def cutout(
                 diff = _np.fabs(ds["time"].astype("float64") - time.astype("float64"))
             else:
                 diff = _np.fabs(ds["time"] - time)
-            timeRange[i] = ds["time"].where(diff == diff.min()).min().values
+            timeRange[i] = ds["time"].where(diff == diff.min(), drop=True).min().values
         maskT = maskT.where(
             _np.logical_and(ds["time"] >= timeRange[0], ds["time"] <= timeRange[-1]), 0
         )
 
-        # Find vertical indexes
-        maskT["time"].values = _np.arange(len(maskT["time"]))
+        # Find time indexes
+        maskT = maskT.assign_coords(time=_np.arange(len(maskT["time"])))
         dmaskT = maskT.where(maskT, drop=True)
         dtime = dmaskT["time"].values
         iT = [min(dtime), max(dtime)]
@@ -525,7 +532,7 @@ def cutout(
                     "".format(vars2drop),
                     stacklevel=2,
                 )
-                ds = ds.drop(vars2drop)
+                ds = ds.drop_vars(vars2drop)
 
             # Snapshot
             if sampMethod == "snapshot":
@@ -552,11 +559,13 @@ def cutout(
                 # Mean
                 # Separate time and timeless
                 attrs = ds.attrs
-                ds_dims = ds.drop([var for var in ds.variables if var not in ds.dims])
-                ds_time = ds.drop(
+                ds_dims = ds.drop_vars(
+                    [var for var in ds.variables if var not in ds.dims]
+                )
+                ds_time = ds.drop_vars(
                     [var for var in ds.variables if "time" not in ds[var].dims]
                 )
-                ds_timeless = ds.drop(
+                ds_timeless = ds.drop_vars(
                     [var for var in ds.variables if "time" in ds[var].dims]
                 )
 
@@ -646,12 +655,13 @@ def cutout(
     if varList is not None:
         # Make sure it's a list
         varList = list(varList)
+        varList = _rename_aliased(od, varList)
 
         # Compute missing variables
         od = _compute._add_missing_variables(od, varList)
 
         # Drop useless
-        od._ds = od._ds.drop([v for v in od._ds.data_vars if v not in varList])
+        od._ds = od._ds.drop_vars([v for v in od._ds.data_vars if v not in varList])
 
     return od
 
@@ -895,7 +905,7 @@ def mooring_array(od, Ymoor, Xmoor, **kwargs):
                             for dim in this_dims
                         }
                     )
-                    da = da.drop(this_dims).rename(
+                    da = da.drop_vars(this_dims).rename(
                         {dim.lower(): dim for dim in this_dims}
                     )
 
@@ -1115,6 +1125,8 @@ def survey_stations(
 
     # Interpolate
     regridder = _xe.Regridder(ds_in, ds, **xesmf_regridder_kwargs)
+    regridder._grid_in = None  # See https://github.com/JiaweiZhuang/xESMF/issues/71
+    regridder._grid_out = None  # See https://github.com/JiaweiZhuang/xESMF/issues/71
     interp_vars = [
         var for var in ds_in.variables if var not in ["lon", "lat", "X", "Y"]
     ]
@@ -1262,7 +1274,7 @@ def particle_properties(od, times, Ypart, Xpart, Zpart, **kwargs):
             "\nDropped variables: {}.".format(vars2drop),
             stacklevel=2,
         )
-        ds = ds.drop(vars2drop)
+        ds = ds.drop_vars(vars2drop)
 
     # New dimensions
     time = _xr.DataArray(times, dims=("time"), attrs=ds["time"].attrs)
@@ -1343,7 +1355,7 @@ def particle_properties(od, times, Ypart, Xpart, Zpart, **kwargs):
             var: this_ds[var].isel({dim: i_ds["i" + dim] for dim in this_ds[var].dims})
             for var in this_ds.data_vars
         }
-        add_vars = {k: v.drop([Xname, Yname]) for k, v in add_vars.items()}
+        add_vars = {k: v.drop_vars([Xname, Yname]) for k, v in add_vars.items()}
         all_vars = {**all_vars, **add_vars}
 
     # Recreate od

@@ -3,16 +3,16 @@ __email__ = "mattia.almansi@noc.ac.uk"
 __version__ = "0.1.0"
 
 from ._oceandataset import OceanDataset  # noqa: F401
-from . import (
+from . import (  # noqa: F401
     open_oceandataset,
     subsample,
-    compute,  # noqa: F401
+    compute,
     plot,
     animate,
     utils,
     _ospy_utils,
 )
-import numpy as _np  # noqa: F401
+import numpy as _np
 
 DEFAULT_PARAMETERS = {
     "rSphere": 6.371e3,
@@ -43,6 +43,7 @@ PARAMETERS_DESCRIPTION = {
 
 OCEANSPY_AXES = ["X", "Y", "Z", "face", "time", "mooring", "station"]
 
+
 AVAILABLE_PARAMETERS = {"eq_state": ["jmd95", "mdjwf"]}
 
 TYPE_PARAMETERS = {
@@ -70,5 +71,5 @@ SCISERVER_DATASETS = [
     "Arctic_Control",
     "KangerFjord",
     "LLC4320",
-    "ECCO"
+    "ECCO",
 ]
