@@ -917,11 +917,6 @@ def llc_horizontal(
 
     # Pop from kwargs
     ax = kwargs.pop("ax", None)
-    col = kwargs.pop("col", None)
-    col_wrap = kwargs.pop("col_wrap", None)
-    subplot_kws = kwargs.pop("subplot_kws", None)
-    transform = kwargs.pop("transform", None)
-
     #  add here parameters to make 4x4 plot of faces
     if regrid == 0:
         face_to_axis = {
@@ -986,7 +981,7 @@ def llc_horizontal(
         # Plot
         args = {"x": X_name, "y": Y_name, **kwargs}
         plotfunc = eval("_xr.plot." + plotType)
-        p = plotfunc(da, **args)
+        plotfunc(da, **args)
     return fig, axes
 
 
