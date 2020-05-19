@@ -429,8 +429,10 @@ def _find_entries(name, catalog_url):
     # Check parameters
     if catalog_url is None:  # pragma: no cover
         url = (
-            "https://raw.githubusercontent.com/hainegroup/oceanspy/"
-            "master/sciserver_catalogs/datasets_list.yaml"
+            # "https://raw.githubusercontent.com/hainegroup/oceanspy/"
+            # "master/sciserver_catalogs/datasets_list.yaml"
+            "https://raw.githubusercontent.com/Mikejmnez/oceanspy/"
+            "llc4320/sciserver_catalogs/datasets_list.yaml"
         )
         f = _urllib.request.urlopen(url)
         SCISERVER_DATASETS = _yaml.safe_load(f)["datasets"]["sciserver"]
@@ -447,8 +449,10 @@ def _find_entries(name, catalog_url):
     try:
         if catalog_url is None:
             url = (
-                "https://raw.githubusercontent.com/hainegroup/oceanspy/"
-                "master/sciserver_catalogs/catalog_xarray.yaml"
+                # "https://raw.githubusercontent.com/hainegroup/oceanspy/"
+                # "master/sciserver_catalogs/catalog_xarray.yaml"
+                "https://raw.githubusercontent.com/Mikejmnez/oceanspy/"
+                "llc4320/sciserver_catalogs/catalog_xarray.yaml"
             )
         else:
             url = catalog_url
@@ -460,8 +464,10 @@ def _find_entries(name, catalog_url):
     except ValidationError:
         if catalog_url is None:
             url = (
-                "https://raw.githubusercontent.com/hainegroup/oceanspy/"
-                "master/sciserver_catalogs/catalog_xmitgcm.yaml"
+                # "https://raw.githubusercontent.com/hainegroup/oceanspy/"
+                # "master/sciserver_catalogs/catalog_xmitgcm.yaml"
+                "https://raw.githubusercontent.com/Mikejmnez/oceanspy/"
+                "llc4320/sciserver_catalogs/catalog_xmitgcm.yaml"
             )
         else:
             url = catalog_url  # provided by user
