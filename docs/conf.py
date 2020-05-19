@@ -152,17 +152,7 @@ latex_elements = {
 # (source start file, target name, title, author, documentclass
 # [howto, manual, or own class]).
 latex_documents = [
-<<<<<<< HEAD
-    (
-        master_doc,
-        "oceanspy.tex",
-        u"OceanSpy Documentation",
-        u"Mattia Almansi",
-        "manual",
-    ),
-=======
     (master_doc, "oceanspy.tex", u"OceanSpy Documentation", u"Mattia Almansi", "manual")
->>>>>>> upstream/master
 ]
 
 
@@ -187,11 +177,7 @@ texinfo_documents = [
         "oceanspy",
         "One line description of project.",
         "Miscellaneous",
-<<<<<<< HEAD
-    ),
-=======
     )
->>>>>>> upstream/master
 ]
 
 
@@ -243,11 +229,7 @@ rst.write(
 
 # SCISERVER DATASETS
 url = (
-<<<<<<< HEAD
-    "https://raw.githubusercontent.com/malmans2/oceanspy/"
-=======
     "https://raw.githubusercontent.com/hainegroup/oceanspy/"
->>>>>>> upstream/master
     "master/sciserver_catalogs/datasets_list.yaml"
 )
 f = urllib.request.urlopen(url)
