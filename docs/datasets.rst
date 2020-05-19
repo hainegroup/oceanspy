@@ -31,6 +31,27 @@ Run the following code to open the dataset:
     import oceanspy as ospy
     od = ospy.open_oceandataset.from_catalog('get_started')
 
+.. _IGP:
+
+---
+IGP
+---
+
+High-resolution numerical simulation carried out in parallel to the observational
+component of the Iceland Greenland Seas Project (IGP_).
+Citation:
+
+* Renfrew et al., 2019 - BAMS.
+
+
+Run the following code to open the dataset:
+
+.. code-block:: ipython
+    :class: no-execute
+
+    import oceanspy as ospy
+    od = ospy.open_oceandataset.from_catalog('IGP')
+
 .. _EGshelfIIseas2km_ASR_full:
 
 -------------------------

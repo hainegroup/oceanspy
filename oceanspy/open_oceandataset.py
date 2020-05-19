@@ -14,8 +14,7 @@ import urllib as _urllib
 
 # Import from oceanspy (private)
 from ._oceandataset import OceanDataset as _OceanDataset
-import oceanspy as _ospy
-from ._ospy_utils import _check_instance, _restore_coord_attrs, _relabel_pop_dims
+from ._ospy_utils import _check_instance, _restore_coord_attrs
 from collections import OrderedDict as _OrderedDict
 
 # Import extra modules (private)
@@ -429,11 +428,9 @@ def _find_entries(name, catalog_url):
     """
     # Check parameters
     if catalog_url is None:  # pragma: no cover
-        # url = ('https://raw.githubusercontent.com/malmans2/oceanspy/'
-        #        'master/sciserver_catalogs/datasets_list.yaml')
         url = (
-            "https://raw.githubusercontent.com/Mikejmnez/oceanspy/"
-            "llc4320/sciserver_catalogs/datasets_list.yaml"
+            "https://raw.githubusercontent.com/hainegroup/oceanspy/"
+            "master/sciserver_catalogs/datasets_list.yaml"
         )
         f = _urllib.request.urlopen(url)
         SCISERVER_DATASETS = _yaml.safe_load(f)["datasets"]["sciserver"]
@@ -448,23 +445,23 @@ def _find_entries(name, catalog_url):
 
     # Read catalog
     try:
-        if catalog_url is None:  # url will have to change to hainegroup
+        if catalog_url is None:
             url = (
-                "https://raw.githubusercontent.com/Mikejmnez/oceanspy/"
-                "llc4320/sciserver_catalogs/catalog_xarray.yaml"
+                "https://raw.githubusercontent.com/hainegroup/oceanspy/"
+                "master/sciserver_catalogs/catalog_xarray.yaml"
             )
         else:
             url = catalog_url
         cat = _intake.open_catalog(url)
-        entries = [entry for entry in cat if name in entry]
+        entries = [entry for entry in list(cat) if name in entry]
         if len(entries) == 0:
             raise ValidationError("", "")
         intake_switch = True
     except ValidationError:
-        if catalog_url is None:  # url wil have to change to hainegroup
+        if catalog_url is None:
             url = (
-                "https://raw.githubusercontent.com/Mikejmnez/oceanspy/"
-                "llc4320/sciserver_catalogs/catalog_xmitgcm.yaml"
+                "https://raw.githubusercontent.com/hainegroup/oceanspy/"
+                "master/sciserver_catalogs/catalog_xmitgcm.yaml"
             )
         else:
             url = catalog_url  # provided by user
@@ -476,7 +473,7 @@ def _find_entries(name, catalog_url):
         except ValueError:
             with open(url) as f:
                 cat = _yaml.safe_load(f)
-        entries = [entry for entry in cat if name in entry]
+        entries = [entry for entry in list(cat) if name in entry]
         intake_switch = False
 
     # Error if not available

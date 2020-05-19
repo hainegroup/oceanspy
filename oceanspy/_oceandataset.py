@@ -672,12 +672,13 @@ class OceanDataset:
         coords = self.grid_coords
 
         if aliases and coords:
+
             # Flip aliases
             aliases = {custom: ospy for ospy, custom in aliases.items()}
 
             # Rename coords
             for axis in coords:
-                for dim in coords[axis]:
+                for dim in coords[axis].copy():
                     if dim in aliases:
                         coords[axis][aliases[dim]] = coords[axis].pop(dim)
 
@@ -851,7 +852,7 @@ class OceanDataset:
         _check_instance({"overwrite": overwrite}, "bool")
 
         # Check name
-        obj = obj.drop(obj.coords)
+        obj = obj.drop_vars(obj.coords)
         if isinstance(obj, _xr.DataArray):
             if obj.name is None:
                 raise ValueError(
@@ -864,7 +865,7 @@ class OceanDataset:
         dataset = self.dataset
         var2drop = [var for var in obj.variables if var in dataset]
         if overwrite is False:
-            obj = obj.drop(var2drop)
+            obj = obj.drop_vars(var2drop)
             if len(var2drop) != 0:
                 _warnings.warn(
                     "{} will not be merged."
@@ -990,7 +991,7 @@ class OceanDataset:
         for var in self._ds.data_vars:
             original_output = self._ds[var].attrs.pop("original_output", None)
             if original_output == "average" or var in averageList:
-                ds_tmp = self._ds[var].drop("time").isel(time=slice(1, None))
+                ds_tmp = self._ds[var].drop_vars("time").isel(time=slice(1, None))
                 self._ds[var] = ds_tmp.rename({"time": "time_midp"})
             if original_output is not None:
                 self._ds[var].attrs["original_output"] = original_output
@@ -1047,8 +1048,10 @@ class OceanDataset:
             for i, (point_pos, dim2roll) in enumerate(zip(["U", "V"], ["Yp1", "Xp1"])):
                 for dim in ["Y", "X"]:
                     coord = self._ds[dim + "G"].rolling(**{dim2roll: 2})
-                    coord = coord.mean().dropna(dim2roll, how="all")
-                    coord = coord.drop(coord.coords).rename({dim2roll: dim2roll[0]})
+                    coord = coord.mean().dropna(dim2roll)
+                    coord = coord.drop_vars(coord.coords).rename(
+                        {dim2roll: dim2roll[0]}
+                    )
                     self._ds[dim + point_pos] = coord
                     if "units" in self._ds[dim + "G"].attrs:
                         units = self._ds[dim + "G"].attrs["units"]
@@ -1095,7 +1098,8 @@ class OceanDataset:
                 add_coords = _OrderedDict(
                     XU=dict(
                         attrs=dict(
-                            standard_name=("plane_x_coordinate" "_at_u_location"),
+                            standard_name=("plane_x_coordinate"
+                                           "_at_u_location"),
                             long_name="x coordinate",
                             units="m",
                             coordinate="YU XU",
@@ -1103,7 +1107,8 @@ class OceanDataset:
                     ),
                     YU=dict(
                         attrs=dict(
-                            standard_name=("plane_y_coordinate" "_at_u_location"),
+                            standard_name=("plane_y_coordinate"
+                                           "_at_u_location"),
                             long_name="y coordinate",
                             units="m",
                             coordinate="YU XU",
@@ -1111,7 +1116,8 @@ class OceanDataset:
                     ),
                     XV=dict(
                         attrs=dict(
-                            standard_name=("plane_x_coordinate" "_at_v_location"),
+                            standard_name=("plane_x_coordinate"
+                                           "_at_v_location"),
                             long_name="x coordinate",
                             units="m",
                             coordinate="YV XV",
@@ -1119,14 +1125,14 @@ class OceanDataset:
                     ),
                     YV=dict(
                         attrs=dict(
-                            standard_name=("plane_y_coordinate" "_at_v_location"),
+                            standard_name=("plane_y_coordinate"
+                                           "_at_v_location"),
                             long_name="y coordinate",
                             units="m",
                             coordinate="YV XV",
                         )
                     ),
                 )
-
             else:
                 coords = variables.horizontal_coordinates_spherical
 

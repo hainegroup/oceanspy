@@ -14,8 +14,10 @@ def pytest_configure():
         "cd {}".format(Datadir),
         "rm -fr Data",
         "wget -v -O Data.tar.gz -L "
-        "https://jh.box.com/"
-        "shared/static/lezaefccn11zmbrvtvollmzgkbw9r8ie.gz",
+        "https://livejohnshopkins-my.sharepoint.com/"
+        ":u:/g/personal/malmans2_jh_edu/"
+        "ERLGPTpYMyRWmGW0YqVyFaQBiHxDuDzSMQPC4_UfH5e5Qg"
+        "?download=1",
         "tar xvzf Data.tar.gz",
         "rm -f Data.tar.gz",
     ]

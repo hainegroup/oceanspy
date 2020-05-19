@@ -7,12 +7,13 @@ dependencies:
   - distributed
   - bottleneck
   - netCDF4
-  - xarray>=0.11.3
+  - xarray>=0.14.1
   - cartopy
   - esmpy
   - intake-xarray
   - geopy
   - xesmf
+  - esmf
   - xgcm>=0.2.0
   - Ipython
   - tqdm
@@ -20,8 +21,12 @@ dependencies:
   - pytest-cov
   - pytest-env
   - codecov
-  - pycodestyle
+  - flake8
   - ffmpeg
-  - xmitgcm>=0.3.0  
+  - xmitgcm>=0.3.0
+  - ffmpeg
+  - black
+  - pip
   - pip:
-    - ffmpeg
+    - black-nb
+    - pre-commit

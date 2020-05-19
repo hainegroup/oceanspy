@@ -414,7 +414,8 @@ def _dims_from_grid_loc(grid_loc):
 
 
 def _label_coord_grid_locs(ds):
-    """ Assign grid loc to label coordinates for each variables. grid_loc consists of 4 numbers grid_loc=abcd, where
+    """ Assign grid loc to label coordinates for each variables. grid_loc
+    consists of 4 numbers grid_loc=abcd, where
         a: ndim
         b: x_loc
         c: y_loc

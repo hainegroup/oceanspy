@@ -240,7 +240,7 @@ def test_time_resampling(od, timeFreq, sampMethod):
         with pytest.warns(RuntimeWarning):
             # Test time only
             new_ds = new_od.dataset
-            new_ds = new_ds.drop("time_midp")
+            new_ds = new_ds.drop_vars("time_midp")
             new_od = OceanDataset(new_ds)
             new_od.subsample.cutout(timeFreq="2D", sampMethod=sampMethod)
 

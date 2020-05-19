@@ -101,6 +101,138 @@ sources:
       original_output: average
 
   # ===========================
+  # IGP
+  grd_IGPwinter:
+    description: Grid of IGPwinter
+    driver: netcdf
+    args:
+      urlpath: /home/idies/workspace/OceanCirculation/IGP/grid.nc
+      xarray_kwargs:
+        engine: netcdf4
+        drop_variables: ['RC', 'RF', 'RU', 'RL']
+    metadata:
+      manipulate_coords:
+        coordsUVfromG: True
+      grid_coords: 
+        add_midp: True
+        grid_coords:
+          Y:
+            Y: 
+            Yp1: 0.5
+          X:
+            X: 
+            Xp1: 0.5
+          Z:
+           Z: 
+           Zp1: 0.5
+           Zu: 0.5
+           Zl: -0.5
+          time: 
+            time: -0.5
+      shift_averages: 
+        averageList: ['UVELMASS', 'VVELMASS', 'WVELMASS',
+                      'ADVr_TH', 'ADVx_TH', 'ADVy_TH', 'DFrI_TH',
+                      'ADVr_SLT', 'ADVx_SLT', 'ADVy_SLT', 'DFrI_SLT',
+                      'KPPg_TH', 'KPPg_SLT', 'oceSPtnd',
+                      'oceQsw_AVG', 'TFLUX', 'SFLUX', 'oceFWflx_AVG']
+      parameters:
+        rSphere: 6.371e+03
+        eq_state: mdjwf
+        rho0: 1027
+        g: 9.8156
+        eps_nh: 0 
+        omega: 7.292123516990375e-05
+        c_p: 3.986e+03
+        tempFrz0: 9.01e-02
+        dTempFrz_dS: -5.75e-02
+      name: IGP
+      description: |
+        High-resolution numerical simulation carried out in parallel to the observational
+        component of the Iceland Greenland Seas Project (IGP).
+      citation: | 
+        Renfrew et al., 2019 - BAMS.
+      projection: Mercator
+
+  fld_IGPwinter:
+    description: Fields of IGPwinter
+    driver: netcdf
+    args:
+      urlpath: /home/idies/workspace/OceanCirculation/IGP/day*.nc
+      xarray_kwargs:
+        engine: netcdf4
+        concat_dim: T
+        parallel: True
+    metadata:
+      rename:
+        T: time  
+
+  # ===========================
+  # IGPyearlong
+  grd_IGPyearlong:
+    description: Grid of IGPyearlong
+    driver: netcdf
+    args:
+      urlpath: /home/idies/workspace/ocean_circulation/data01_01/IGP/grid.nc
+      xarray_kwargs:
+        engine: netcdf4
+        drop_variables: ['RC', 'RF', 'RU', 'RL']
+    metadata:
+      manipulate_coords:
+        coordsUVfromG: True
+      grid_coords: 
+        add_midp: True
+        grid_coords:
+          Y:
+            Y: 
+            Yp1: 0.5
+          X:
+            X: 
+            Xp1: 0.5
+          Z:
+           Z: 
+           Zp1: 0.5
+           Zu: 0.5
+           Zl: -0.5
+          time: 
+            time: -0.5
+      shift_averages: 
+        averageList: ['UVELMASS', 'VVELMASS', 'WVELMASS',
+                      'ADVr_TH', 'ADVx_TH', 'ADVy_TH', 'DFrI_TH',
+                      'ADVr_SLT', 'ADVx_SLT', 'ADVy_SLT', 'DFrI_SLT',
+                      'KPPg_TH', 'KPPg_SLT', 'oceSPtnd',
+                      'oceQsw_AVG', 'TFLUX', 'SFLUX', 'oceFWflx_AVG']
+      parameters:
+        rSphere: 6.371e+03
+        eq_state: mdjwf
+        rho0: 1027
+        g: 9.8156
+        eps_nh: 0 
+        omega: 7.292123516990375e-05
+        c_p: 3.986e+03
+        tempFrz0: 9.01e-02
+        dTempFrz_dS: -5.75e-02
+      name: IGPyearlong
+      description: |
+        High-resolution numerical simulation carried out in parallel to the observational
+        component of the Iceland Greenland Seas Project (IGP). Year-long simulation.
+      citation: | 
+        Renfrew et al., 2019 - BAMS.
+      projection: Mercator
+
+  fld_IGPyearlong:
+    description: Fields of IGPyearlong
+    driver: netcdf
+    args:
+      urlpath: /home/idies/workspace/ocean_circulation/data*_*/IGP/day_*.nc
+      xarray_kwargs:
+        engine: netcdf4
+        concat_dim: T
+        parallel: True
+    metadata:
+      rename:
+        T: time
+
+  # ===========================
   # EGshelfIIseas2km_ERAI_6H
   grd_EGshelfIIseas2km_ERAI_6H:
     description: Grid of EGshelfIIseas2km_ERAI_6H
@@ -516,55 +648,55 @@ sources:
       original_output: snapshot
 
 
-  # ====================================================================
-  # # LLC4320
-  # SST_LLC4320:
-  #   description: SST for LLC4320
-  #   driver: zarr
-  #   model: MITGCM
-  #   args:
-  #     urlpath: '/sciserver/filedb02-01/ocean/poseidon/LLC4320/SST'
-  #   metadata:
-  #     rename:
-  #       i: X
-  #       j: Y
-  #     parameters:
-  #       grid_type: llc
-  #     name: SST_LLC4320
-  #     description: |
-  #       SST field for the LLC4320, a general, curvilinear ocean simulations on the cube-sphere.
-  #     citation: |
-  #       Paper.
-  #     projection:
-  #     original_output: snapshot
-
-
-  SSS_LLC4320:
-    description: Surface fields for LLC4320
+  ====================================================================
+  # LLC4320
+  SST_LLC4320:
+    description: SST for LLC4320
     driver: zarr
     model: MITGCM
     args:
-      urlpath: '/sciserver/filedb*/ocean/poseidon/LLC4320/2D/SS*'
-      chunks: {'i':4320, 'j':4320, 'time':1, 'face':1}
-      xarray_kwargs:
-        concat_dim: time
-        parallel: True
-        combine: nested
-      # drop_variables: ['XC','YC','iter','k','k_l','k_u','Z','Zl','Zu']
+      urlpath: '/sciserver/filedb02-01/ocean/poseidon/LLC4320/SSDATA/SST'
     metadata:
       rename:
         i: X
         j: Y
-        i_g: Xp1
-        j_g: Yp1
       parameters:
-      name: SSS_LLC4320
+        grid_type: llc
+      name: SST_LLC4320
       description: |
-        Surface fields for the LLC4320, a general, curvilinear ocean simulations on the cube-sphere.
+        SST field for the LLC4320, a general, curvilinear ocean simulations on the cube-sphere.
       citation: |
         Paper.
       projection:
       original_output: snapshot
+
+
+  # SSS_LLC4320:
+  #   description: Surface fields for LLC4320
+  #   driver: zarr
+  #   model: MITGCM
+  #   args:
+  #     urlpath: '/sciserver/filedb*/ocean/poseidon/LLC4320/2D/SS*'
+  #     chunks: {'i':4320, 'j':4320, 'time':1, 'face':1}
+  #     xarray_kwargs:
+  #       concat_dim: time
+  #       parallel: True
+  #       combine: nested
+  #     # drop_variables: ['XC','YC','iter','k','k_l','k_u','Z','Zl','Zu']
+  #   metadata:
+  #     rename:
+  #       i: X
+  #       j: Y
+  #       i_g: Xp1
+  #       j_g: Yp1
+  #     parameters:
+  #     name: SSS_LLC4320
+  #     description: |
+  #       Surface fields for the LLC4320, a general, curvilinear ocean simulations on the cube-sphere.
+  #     citation: |
+  #       Paper.
+  #     projection:
+  #     original_output: snapshot
 
 
   # Eta_LLC4320:

@@ -256,7 +256,7 @@ def cartesian_path(x1, y1, x2, y2, delta=None):
     if delta is None:
         coefs = _np.linspace(0, 1, 2)
     else:
-        coefs = _np.linspace(0, 1, round(dist_tot / delta))
+        coefs = _np.linspace(0, 1, int(round(dist_tot / delta)))
     xs = x1 + coefs * (x2 - x1)
     ys = y1 + coefs * (y2 - y1)
     dists = coefs * dist_tot
@@ -546,7 +546,7 @@ def static_pressure(Z):
     """
     # Coefficients to determine static pressure
     c = [0.059808, -0.025, 0.100766, 2.28405e-7]
-    P = c[0] * np.exp((c[1] * Z) - 1) + c[2] * Z + c[3] * (Z ** 2)
+    P = c[0] * _np.exp((c[1] * Z) - 1) + c[2] * Z + c[3] * (Z ** 2)
     P = 10 * P  # decibars
     return P
 

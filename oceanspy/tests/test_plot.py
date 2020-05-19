@@ -336,7 +336,7 @@ def test_ver_sec_subsamp(od_in, subsampMethod):
 def test_ver_sec(od_in, varName, contourName):
     plt.close()
     if "mooring_dist" in od_in.dataset.variables:
-        ds = od_in.dataset.drop("mooring_dist")
+        ds = od_in.dataset.drop_vars("mooring_dist")
         od_in = OceanDataset(ds)
         contour_kwargs = {"levels": 10}
         clabel_kwargs = {"fontsize": 10}

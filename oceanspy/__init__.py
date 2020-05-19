@@ -12,7 +12,7 @@ from . import (  # noqa: F401
     utils,
     _ospy_utils,
 )
-import numpy as _np  # noqa: F401
+import numpy as _np
 
 DEFAULT_PARAMETERS = {
     "rSphere": 6.371e3,
@@ -42,6 +42,7 @@ PARAMETERS_DESCRIPTION = {
 }
 
 OCEANSPY_AXES = ["X", "Y", "Z", "face", "time", "mooring", "station"]
+
 
 AVAILABLE_PARAMETERS = {"eq_state": ["jmd95", "mdjwf"]}
 

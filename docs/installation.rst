@@ -53,7 +53,7 @@ Step-by-step instructions
 
   .. code-block:: bash
 
-    $ pip install --upgrade git+https://github.com/malmans2/oceanspy.git
+    $ pip install --upgrade git+https://github.com/hainegroup/oceanspy.git
 
 
 .. note::
@@ -65,7 +65,7 @@ Step-by-step instructions
 		$ conda update conda
 		$ conda config --set channel_priority strict
 		$ conda config --prepend channels conda-forge
-		$ wget https://raw.githubusercontent.com/malmans2/oceanspy/master/sciserver_catalogs/environment.yml
+		$ wget https://raw.githubusercontent.com/hainegroup/oceanspy/master/sciserver_catalogs/environment.yml
 		$ conda env create -f environment.yml
 
 	Then, activate the Oceanography environment:
