@@ -648,55 +648,55 @@ sources:
       original_output: snapshot
 
 
-  # ====================================================================
-  # # LLC4320
-  # SST_LLC4320:
-  #   description: SST for LLC4320
-  #   driver: zarr
-  #   model: MITGCM
-  #   args:
-  #     urlpath: '/sciserver/filedb02-01/ocean/poseidon/LLC4320/SST'
-  #   metadata:
-  #     rename:
-  #       i: X
-  #       j: Y
-  #     parameters:
-  #       grid_type: llc
-  #     name: SST_LLC4320
-  #     description: |
-  #       SST field for the LLC4320, a general, curvilinear ocean simulations on the cube-sphere.
-  #     citation: |
-  #       Paper.
-  #     projection:
-  #     original_output: snapshot
-
-
-  SSS_LLC4320:
-    description: Surface fields for LLC4320
+  ====================================================================
+  # LLC4320
+  SST_LLC4320:
+    description: SST for LLC4320
     driver: zarr
     model: MITGCM
     args:
-      urlpath: '/sciserver/filedb*/ocean/poseidon/LLC4320/2D/SS*'
-      chunks: {'i':4320, 'j':4320, 'time':1, 'face':1}
-      xarray_kwargs:
-        concat_dim: time
-        parallel: True
-        combine: nested
-      # drop_variables: ['XC','YC','iter','k','k_l','k_u','Z','Zl','Zu']
+      urlpath: '/sciserver/filedb02-01/ocean/poseidon/LLC4320/SSDATA/SST'
     metadata:
       rename:
         i: X
         j: Y
-        i_g: Xp1
-        j_g: Yp1
       parameters:
-      name: SSS_LLC4320
+        grid_type: llc
+      name: SST_LLC4320
       description: |
-        Surface fields for the LLC4320, a general, curvilinear ocean simulations on the cube-sphere.
+        SST field for the LLC4320, a general, curvilinear ocean simulations on the cube-sphere.
       citation: |
         Paper.
       projection:
       original_output: snapshot
+
+
+  # SSS_LLC4320:
+  #   description: Surface fields for LLC4320
+  #   driver: zarr
+  #   model: MITGCM
+  #   args:
+  #     urlpath: '/sciserver/filedb*/ocean/poseidon/LLC4320/2D/SS*'
+  #     chunks: {'i':4320, 'j':4320, 'time':1, 'face':1}
+  #     xarray_kwargs:
+  #       concat_dim: time
+  #       parallel: True
+  #       combine: nested
+  #     # drop_variables: ['XC','YC','iter','k','k_l','k_u','Z','Zl','Zu']
+  #   metadata:
+  #     rename:
+  #       i: X
+  #       j: Y
+  #       i_g: Xp1
+  #       j_g: Yp1
+  #     parameters:
+  #     name: SSS_LLC4320
+  #     description: |
+  #       Surface fields for the LLC4320, a general, curvilinear ocean simulations on the cube-sphere.
+  #     citation: |
+  #       Paper.
+  #     projection:
+  #     original_output: snapshot
 
 
   # Eta_LLC4320:
