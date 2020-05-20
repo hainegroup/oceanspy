@@ -23,7 +23,7 @@ import functools as _functools
 from . import utils as _utils
 from . import compute as _compute
 # from ._oceandataset import OceanDataset as _OceanDataset
-from .llc_rearrange import _llc_trans
+from .llc_rearrange import LLCtransformation as _llc_trans
 from ._ospy_utils import (
     _check_instance,
     _check_range,
