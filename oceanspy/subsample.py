@@ -22,7 +22,7 @@ import functools as _functools
 # From OceanSpy (private)
 from . import utils as _utils
 from . import compute as _compute
-from ._oceandataset import OceanDataset as _OceanDataset
+# from ._oceandataset import OceanDataset as _OceanDataset
 from .LLCrearrange import _LLCtrans
 from ._ospy_utils import (
     _check_instance,
@@ -277,7 +277,7 @@ def cutout(
                 elif transformation == 'arctic_centered':
                     _transformation = _LLCtrans.arctic_centered
                 dsnew = _transformation(arg)
-                od = _OceanDataset(dsnew)
+                od = od._ds = ds
                 cutout(od, varlist=varList, YRange=list(YRange),
                        XRange=list(XRange), add_Hbdr=add_Hbdr,
                        mask_outside=mask_outside, ZRange=ZRange,
