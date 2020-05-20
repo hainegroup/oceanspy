@@ -22,7 +22,7 @@ import functools as _functools
 # From OceanSpy (private)
 from . import utils as _utils
 from . import compute as _compute
-# from ._oceandataset import OceanDataset as _OceanDataset
+from ._oceandataset import OceanDataset as _OceanDataset
 from .llc_rearrange import LLCtransformation as _llc_trans
 from ._ospy_utils import (
     _check_instance,
@@ -277,8 +277,14 @@ def cutout(
                 elif transformation == 'arctic_centered':
                     _transformation = _llc_trans.arctic_centered
                 dsnew = _transformation(arg)
-                od = od._ds = ds
-                cutout(od, varlist=varList, YRange=list(YRange),
+                grid_coords = od.grid_coords
+                newod = OceanDataset(dsnew)
+                if len(grid_coords['time']) > 1:
+                    grid_coords['time'].pop('time_midp', None)
+                    grid_coords = {'add_midp': True,
+                                   'grid_coords': grid_coords}
+                    new_od = new_od.set_grid_coords(**grid_coords)
+                cutout(new_od, varlist=varList, YRange=list(YRange),
                        XRange=list(XRange), add_Hbdr=add_Hbdr,
                        mask_outside=mask_outside, ZRange=ZRange,
                        add_Vbdr=add_Vbdr, timeRange=timeRange,
