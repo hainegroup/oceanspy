@@ -264,30 +264,27 @@ def cutout(
         )
         dmaskH = maskH.where(maskH, drop=True)
 
-        if 'face' in ds.dims:
+        if transformation is not False and 'face' in ds.dims:
             faces = dmask.dims.values
-            if transformation is False:
-                continue
-            elif transformation not in ['arctic_crown', 'arctic_centered']:
-                raise ValueError("transformation not supported")
-            else:
+            _transf_list = ['arctic_crown', 'arctic_centered']
+            if transformation in _trans_list:
+                arg = {'ds': ds,
+                       'varList': varList,
+                       'centered': centered,
+                       'faces': faces}
                 if transformation == 'arctic_crown':
-                    dsnew = _LLCtrans.arctic_crown(ds,
-                                                   varlist=varlist,
-                                                   centered=centered,
-                                                   faces=faces)
+                    _transformation = _LLCtrans.arctic_crown
                 elif transformation == 'arctic_centered':
-                    dsnew = _LLCtrans.arctic_centered(ds,
-                                                      varlist=varlist,
-                                                      centered=centered)
-                else:
-                    raise ValueError("centering not supported")
+                    _transformation = _LLCtrans.arctic_centered
+                dsnew = _transformation(arg)
                 od = _OceanDataset(dsnew)
                 cutout(od, varlist=varList, YRange=list(YRange),
                        XRange=list(XRange), add_Hbdr=add_Hbdr,
                        mask_outside=mask_outside, ZRange=ZRange,
                        add_Vbdr=add_Vbdr, timeRange=timeRange,
                        timeFreq=timeFreq, sampMethod=sampMethod, dropAxes=True)
+            elif transformation not in _transf_list:
+                raise ValueError("transformation not supported")
 
         dYp1 = dmaskH["Yp1"].values
         dXp1 = dmaskH["Xp1"].values
