@@ -22,6 +22,8 @@ import functools as _functools
 # From OceanSpy (private)
 from . import utils as _utils
 from . import compute as _compute
+from ._oceandataset import OceanDataset as _OceanDataset
+from .LLCrearrange import _LLCtrans
 from ._ospy_utils import (
     _check_instance,
     _check_range,
@@ -55,6 +57,7 @@ def cutout(
     timeFreq=None,
     sampMethod="snapshot",
     dropAxes=False,
+    transformation=False,
 ):
     """
     Cutout the original dataset in space and time
@@ -101,6 +104,12 @@ def cutout(
         if one point only is in the range.
         If True, set dropAxes=od.grid_coords.
         If False, preserve original grid.
+    transformation: str, or bool
+        Lists the transformation of the llcgrid into a new one in which face
+        is no longer a dimension. Default is `False`. If `True`, need to
+        define how data will be centered
+    centered: str, or bool
+        default is `False`, otherwise options are `Atlantic` or `Pacific`, referring to which ocean appears.
 
     Returns
     -------
@@ -224,7 +233,8 @@ def cutout(
                 diff = _np.fabs(ds["YG"] - Y)
                 YRange[i] = ds["YG"].where(diff == diff.min()).min().values
             maskH = maskH.where(
-                _np.logical_and(ds["YG"] >= YRange[0], ds["YG"] <= YRange[-1]), 0
+                _np.logical_and(ds["YG"] >= YRange[0],
+                                ds["YG"] <= YRange[-1]), 0
             )
 
         if XRange is not None:
@@ -239,7 +249,8 @@ def cutout(
                 diff = _np.fabs(ds["XG"] - X)
                 XRange[i] = ds["XG"].where(diff == diff.min()).min().values
             maskH = maskH.where(
-                _np.logical_and(ds["XG"] >= XRange[0], ds["XG"] <= XRange[-1]), 0
+                _np.logical_and(ds["XG"] >= XRange[0],
+                                ds["XG"] <= XRange[-1]), 0
             )
 
         # Can't be all zeros
@@ -252,6 +263,32 @@ def cutout(
             Xp1=_np.arange(len(maskH["Xp1"]))
         )
         dmaskH = maskH.where(maskH, drop=True)
+
+        if 'face' in ds.dims:
+            faces = dmask.dims.values
+            if transformation is False:
+                continue
+            elif transformation not in ['arctic_crown', 'arctic_centered']:
+                raise ValueError("transformation not supported")
+            else:
+                if transformation == 'arctic_crown':
+                    dsnew = _LLCtrans.arctic_crown(ds,
+                                                   varlist=varlist,
+                                                   centered=centered,
+                                                   faces=faces)
+                elif transformation == 'arctic_centered':
+                    dsnew = _LLCtrans.arctic_centered(ds,
+                                                      varlist=varlist,
+                                                      centered=centered)
+                else:
+                    raise ValueError("centering not supported")
+                od = _OceanDataset(dsnew)
+                cutout(od, varlist=varList, YRange=list(YRange),
+                       XRange=list(XRange), add_Hbdr=add_Hbdr,
+                       mask_outside=mask_outside, ZRange=ZRange,
+                       add_Vbdr=add_Vbdr, timeRange=timeRange,
+                       timeFreq=timeFreq, sampMethod=sampMethod, dropAxes=True)
+
         dYp1 = dmaskH["Yp1"].values
         dXp1 = dmaskH["Xp1"].values
         iY = [_np.min(dYp1), _np.max(dYp1)]
