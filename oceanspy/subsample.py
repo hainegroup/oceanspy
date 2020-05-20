@@ -23,7 +23,7 @@ import functools as _functools
 from . import utils as _utils
 from . import compute as _compute
 # from ._oceandataset import OceanDataset as _OceanDataset
-from .LLCrearrange import _LLCtrans
+from .llc_rearrange import _llc_trans
 from ._ospy_utils import (
     _check_instance,
     _check_range,
@@ -273,9 +273,9 @@ def cutout(
                        'centered': centered,
                        'faces': faces}
                 if transformation == 'arctic_crown':
-                    _transformation = _LLCtrans.arctic_crown
+                    _transformation = _llc_trans.arctic_crown
                 elif transformation == 'arctic_centered':
-                    _transformation = _LLCtrans.arctic_centered
+                    _transformation = _llc_trans.arctic_centered
                 dsnew = _transformation(arg)
                 od = od._ds = ds
                 cutout(od, varlist=varList, YRange=list(YRange),

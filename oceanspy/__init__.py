@@ -11,7 +11,7 @@ from . import (  # noqa: F401
     animate,
     utils,
     _ospy_utils,
-    LLC_rearrange,
+    llc_rearrange,
 )
 import numpy as _np
 
