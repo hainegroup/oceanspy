@@ -3,7 +3,6 @@ __email__ = "mattia.almansi@noc.ac.uk"
 __version__ = "0.1.0"
 
 from ._oceandataset import OceanDataset  # noqa: F401
-from .llc_rearrange import LLCtransformation  # noqa: F401
 from . import (  # noqa: F401
     open_oceandataset,
     subsample,
@@ -12,6 +11,7 @@ from . import (  # noqa: F401
     animate,
     utils,
     _ospy_utils,
+    llc_rearrange,
 )
 import numpy as _np
 
