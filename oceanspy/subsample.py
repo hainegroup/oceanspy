@@ -266,7 +266,7 @@ def cutout(
         dmaskH = maskH.where(maskH, drop=True)
 
         if transformation is not False and 'face' in ds.dims:
-            faces = dmask.dims.values
+            faces = dmaskH.dims.values
             _transf_list = ['arctic_crown', 'arctic_centered']
             if transformation in _trans_list:
                 arg = {'ds': ds,
