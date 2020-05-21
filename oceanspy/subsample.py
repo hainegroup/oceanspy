@@ -199,6 +199,18 @@ def cutout(
     periodic = od.grid_periodic
     fcon = od.face_connections
 
+    # Drop variables
+    if varList is not None:
+        # Make sure it's a list
+        varList = list(varList)
+        varList = _rename_aliased(od, varList)
+
+        # Compute missing variables
+        od = _compute._add_missing_variables(od, varList)
+        # Drop useless
+        nvarlist = [v for v in od._ds.data_vars if v not in varList]
+        od._ds = od._ds.drop_vars(nvarlist)
+
     # ---------------------------
     # Time CUTOUT
     # ---------------------------
@@ -208,9 +220,8 @@ def cutout(
     if timeRange is not None:
 
         # Use arrays
-        timeRange = _np.asarray([_np.min(timeRange), _np.max(timeRange)]).astype(
-            ds["time"].dtype
-        )
+        timeRange = _np.asarray([_np.min(timeRange),
+                                 _np.max(timeRange)]).astype(ds["time"].dtype)
 
         # Get the closest
         for i, time in enumerate(timeRange):
@@ -342,12 +353,12 @@ def cutout(
                 od = od.set_grid_coords(**grid_coords, overwrite=True)
                 od._ds.attrs["OceanSpy_description"] = "Cutout of LLC4320"
                 "simulation, with simple topology (face not a dimension)"
-                print(od._ds.dims)
-                cutout(od, varList=varList, YRange=list(YRange),
-                       XRange=list(XRange), add_Hbdr=add_Hbdr,
-                       mask_outside=mask_outside, ZRange=ZRange,
-                       add_Vbdr=add_Vbdr, timeRange=timeRange,
-                       timeFreq=timeFreq, sampMethod=sampMethod)
+                print([YRange, list(YRange)])
+                cutout(od, varList=varList, YRange=YRange,
+                       XRange=XRange, add_Hbdr=False,
+                       mask_outside=mask_outside, ZRange=None,
+                       add_Vbdr=False, timeRange=timeRange,
+                       timeFreq=None, sampMethod=sampMethod)
 
             elif transformation not in _transf_list:
                 raise ValueError("transformation not supported")
@@ -698,18 +709,6 @@ def cutout(
         od._ds.attrs["OceanSpy_face_connections"] = _face_con
         od = od.set_face_connections(**{"face_connections": _face_con})
         od._ds.attrs["OceanSpy_description"] = "Cutout of LLC4320 simulation"
-
-    # Drop variables
-    if varList is not None:
-        # Make sure it's a list
-        varList = list(varList)
-        varList = _rename_aliased(od, varList)
-
-        # Compute missing variables
-        od = _compute._add_missing_variables(od, varList)
-
-        # Drop useless
-        od._ds = od._ds.drop_vars([v for v in od._ds.data_vars if v not in varList])
 
     return od
 
