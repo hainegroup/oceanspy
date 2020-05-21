@@ -228,11 +228,14 @@ class LLCtransformation:
         elif isinstance(varlist, str):
             if varlist == 'all':
                 varlist = ds.data_vars
-                varName = 'Depth'
+                varName = 'XG'
             else:
                 varName = varlist
                 varlist = [varlist]
-        else:
+        elif len(varlist) > 0:
+            varlist = list(varlist)
+            varName = 'XG'
+        elif len(varlist) == 0:
             raise ValueError("Empty list of variables")
 
         arc_faces, Nx_ac_nrot, Ny_ac_nrot, Nx_ac_rot, Ny_ac_rot, ARCT = arct_connect(ds, varName, faces)
