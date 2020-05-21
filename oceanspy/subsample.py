@@ -343,7 +343,7 @@ def cutout(
                     _transformation = _llc_trans.arctic_centered
                 dsnew = _transformation(**arg)
                 grid_coords = od.grid_coords
-                od._ds = dsnew  # update dataset
+                od._ds = dsnew
                 manipulate_coords = {'coordsUVfromG': True}
                 od = od.manipulate_coords(**manipulate_coords)
                 if len(grid_coords['time']) > 1:
@@ -353,7 +353,7 @@ def cutout(
                 od = od.set_grid_coords(**grid_coords, overwrite=True)
                 od._ds.attrs["OceanSpy_description"] = "Cutout of LLC4320"
                 "simulation, with simple topology (face not a dimension)"
-                print([YRange, list(YRange)])
+                print(od._ds)
                 cutout(od, varList=varList, YRange=YRange,
                        XRange=XRange, add_Hbdr=False,
                        mask_outside=mask_outside, ZRange=None,
@@ -533,6 +533,7 @@ def cutout(
         if 'face' in ds.dims:
             raise ValueError('retains face?')
         else:
+            print('calculating maskU')
             maskU = _xr.where(
                 _np.logical_and(
                     _np.logical_and(ds["YU"] >= minY, ds["YU"] <= maxY),
