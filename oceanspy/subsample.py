@@ -109,7 +109,8 @@ def cutout(
         is no longer a dimension. Default is `False`. If `True`, need to
         define how data will be centered
     centered: str, or bool
-        default is `False`, otherwise options are `Atlantic` or `Pacific`, referring to which ocean appears.
+        default is `Atlantic`, and other options is `Pacific`. This refers
+        to which ocean appears centered on the data.
 
     Returns
     -------
