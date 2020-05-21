@@ -276,18 +276,21 @@ def cutout(
                 elif transformation == 'arctic_centered':
                     _transformation = _llc_trans.arctic_centered
                 dsnew = _transformation(arg)
+                od._ds = dsnew  # update dataset
                 grid_coords = od.grid_coords
-                newod = OceanDataset(dsnew)
                 if len(grid_coords['time']) > 1:
                     grid_coords['time'].pop('time_midp', None)
                     grid_coords = {'add_midp': True,
                                    'grid_coords': grid_coords}
-                    new_od = new_od.set_grid_coords(**grid_coords)
+                od = od.set_grid_coords(**grid_coords, overwrite=True)
+                od._ds.attrs["OceanSpy_description"] = "Cutout of LLC4320"
+                "simulation, with simple topology (face not a dimension)"
                 cutout(new_od, varlist=varList, YRange=list(YRange),
                        XRange=list(XRange), add_Hbdr=add_Hbdr,
                        mask_outside=mask_outside, ZRange=ZRange,
                        add_Vbdr=add_Vbdr, timeRange=timeRange,
                        timeFreq=timeFreq, sampMethod=sampMethod, dropAxes=True)
+
             elif transformation not in _transf_list:
                 raise ValueError("transformation not supported")
 
