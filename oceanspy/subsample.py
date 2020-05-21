@@ -200,6 +200,58 @@ def cutout(
     fcon = od.face_connections
 
     # ---------------------------
+    # Time CUTOUT
+    # ---------------------------
+    # Initialize vertical mask
+    maskT = _xr.ones_like(ds["time"]).astype("int")
+
+    if timeRange is not None:
+
+        # Use arrays
+        timeRange = _np.asarray([_np.min(timeRange), _np.max(timeRange)]).astype(
+            ds["time"].dtype
+        )
+
+        # Get the closest
+        for i, time in enumerate(timeRange):
+            if _np.issubdtype(ds["time"].dtype, _np.datetime64):
+                diff = _np.fabs(ds["time"].astype("float64") - time.astype("float64"))
+            else:
+                diff = _np.fabs(ds["time"] - time)
+            timeRange[i] = ds["time"].where(diff == diff.min(), drop=True).min().values
+        maskT = maskT.where(
+            _np.logical_and(ds["time"] >= timeRange[0], ds["time"] <= timeRange[-1]), 0
+        )
+
+        # Find time indexes
+        maskT = maskT.assign_coords(time=_np.arange(len(maskT["time"])))
+        dmaskT = maskT.where(maskT, drop=True)
+        dtime = dmaskT["time"].values
+        iT = [min(dtime), max(dtime)]
+        maskT["time"] = ds["time"]
+
+        # Indexis
+        if iT[0] == iT[1]:
+            if "time" not in dropAxes:
+                if iT[0] > 0:
+                    iT[0] = iT[0] - 1
+                else:
+                    iT[1] = iT[1] + 1
+        else:
+            dropAxes.pop("time", None)
+
+        # Cutout
+        ds = ds.isel(time=slice(iT[0], iT[1] + 1))
+        if "time_midp" in ds.dims:
+            if "time" in dropAxes:
+                if iT[0] == len(ds["time_midp"]):
+                    iT[0] = iT[0] - 1
+                    iT[1] = iT[1] - 1
+                ds = ds.isel(time_midp=slice(iT[0], iT[1] + 1))
+            else:
+                ds = ds.isel(time_midp=slice(iT[0], iT[1]))
+
+    # ---------------------------
     # Horizontal CUTOUT
     # ---------------------------
     if add_Hbdr is True:
@@ -430,58 +482,6 @@ def cutout(
                 ds = ds.isel(Zu=slice(iZ[0], iZ[1]))
             if "Zl" in ds.dims and len(ds["Zl"]) > 1:
                 ds = ds.isel(Zl=slice(iZ[0], iZ[1]))
-
-    # ---------------------------
-    # Time CUTOUT
-    # ---------------------------
-    # Initialize vertical mask
-    maskT = _xr.ones_like(ds["time"]).astype("int")
-
-    if timeRange is not None:
-
-        # Use arrays
-        timeRange = _np.asarray([_np.min(timeRange), _np.max(timeRange)]).astype(
-            ds["time"].dtype
-        )
-
-        # Get the closest
-        for i, time in enumerate(timeRange):
-            if _np.issubdtype(ds["time"].dtype, _np.datetime64):
-                diff = _np.fabs(ds["time"].astype("float64") - time.astype("float64"))
-            else:
-                diff = _np.fabs(ds["time"] - time)
-            timeRange[i] = ds["time"].where(diff == diff.min(), drop=True).min().values
-        maskT = maskT.where(
-            _np.logical_and(ds["time"] >= timeRange[0], ds["time"] <= timeRange[-1]), 0
-        )
-
-        # Find time indexes
-        maskT = maskT.assign_coords(time=_np.arange(len(maskT["time"])))
-        dmaskT = maskT.where(maskT, drop=True)
-        dtime = dmaskT["time"].values
-        iT = [min(dtime), max(dtime)]
-        maskT["time"] = ds["time"]
-
-        # Indexis
-        if iT[0] == iT[1]:
-            if "time" not in dropAxes:
-                if iT[0] > 0:
-                    iT[0] = iT[0] - 1
-                else:
-                    iT[1] = iT[1] + 1
-        else:
-            dropAxes.pop("time", None)
-
-        # Cutout
-        ds = ds.isel(time=slice(iT[0], iT[1] + 1))
-        if "time_midp" in ds.dims:
-            if "time" in dropAxes:
-                if iT[0] == len(ds["time_midp"]):
-                    iT[0] = iT[0] - 1
-                    iT[1] = iT[1] - 1
-                ds = ds.isel(time_midp=slice(iT[0], iT[1] + 1))
-            else:
-                ds = ds.isel(time_midp=slice(iT[0], iT[1]))
 
     # ---------------------------
     # Horizontal MASK
