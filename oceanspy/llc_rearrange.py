@@ -366,8 +366,8 @@ def make_array(ds, tNx, tNy, X0=0):
             'Y': (('Y',), _np.arange(tNy), {'axis': 'Y'}),
             'Yp1': (('Yp1',), _np.arange(tNy), {'axis': 'Y'})
             }
-
-    coords = [k for k in ds.coords if k not in ['X', 'Xp1', 'Y', 'Yp1']]
+    old_coords = ['X', 'Xp1', 'Y', 'Yp1', 'face']
+    coords = [k for k in ds.coords if k not in old_coords]
     for crd in coords:
         array = ds.coords[crd].values
         attrs = ds.coords[crd].attrs
