@@ -416,7 +416,7 @@ def drop_size(ds):
         attrs = ds.coords[crd].attrs
         coords = {**coords, **{crd: ((crd,), array, attrs )}}
 
-    DS_final = xr.Dataset(coords)
+    DS_final = _xr.Dataset(coords)
     for dim in DS_final.dims:
         DS_final[dim].attrs = ds[dim].attrs
     for varName in ds.data_vars:
