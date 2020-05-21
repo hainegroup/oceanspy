@@ -530,7 +530,7 @@ def cutout(
             0,
         ).persist()
 
-        if 'face' is in ds.dims:
+        if 'face' in ds.dims:
             raise ValueError('retains face?')
         else:
             maskU = _xr.where(
