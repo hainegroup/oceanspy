@@ -270,7 +270,7 @@ def cutout(
             _transf_list = ['arctic_crown', 'arctic_centered']
             if transformation in _transf_list:
                 arg = {'ds': ds,
-                       'varList': varList,
+                       'varlist': varList,
                        'centered': centered,
                        'faces': faces,
                        'drop': True}

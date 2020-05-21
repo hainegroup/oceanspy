@@ -209,7 +209,7 @@ class LLCtransformation:
         varlist,
         centered,
         faces='all',
-        drop=False
+        drop=False,
     ):
         """ Transforms the dataset in which faces appears as a dimension into
         one with faces, with grids and variables sharing a common grid
