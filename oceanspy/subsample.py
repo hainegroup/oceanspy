@@ -346,7 +346,7 @@ def cutout(
                        XRange=list(XRange), add_Hbdr=add_Hbdr,
                        mask_outside=mask_outside, ZRange=ZRange,
                        add_Vbdr=add_Vbdr, timeRange=timeRange,
-                       timeFreq=timeFreq, sampMethod=sampMethod, dropAxes=True)
+                       timeFreq=timeFreq, sampMethod=sampMethod)
 
             elif transformation not in _transf_list:
                 raise ValueError("transformation not supported")
