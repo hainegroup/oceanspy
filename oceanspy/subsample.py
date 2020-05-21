@@ -530,7 +530,9 @@ def cutout(
             0,
         ).persist()
 
-        if "face" not in ds.dims:
+        if 'face' is in ds.dims:
+            raise ValueError('retains face?')
+        else:
             maskU = _xr.where(
                 _np.logical_and(
                     _np.logical_and(ds["YU"] >= minY, ds["YU"] <= maxY),
