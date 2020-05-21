@@ -194,11 +194,6 @@ def cutout(
     # Copy
     od = _copy.copy(od)
 
-    # Unpack
-    ds = od._ds
-    periodic = od.grid_periodic
-    fcon = od.face_connections
-
     # Drop variables
     if varList is not None:
         # Make sure it's a list
@@ -210,6 +205,11 @@ def cutout(
         # Drop useless
         nvarlist = [v for v in od._ds.data_vars if v not in varList]
         od._ds = od._ds.drop_vars(nvarlist)
+
+    # Unpack
+    ds = od._ds
+    periodic = od.grid_periodic
+    fcon = od.face_connections
 
     # ---------------------------
     # Time CUTOUT
