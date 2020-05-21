@@ -57,6 +57,7 @@ def cutout(
     sampMethod="snapshot",
     dropAxes=False,
     transformation=False,
+    centered='Atlantic'
 ):
     """
     Cutout the original dataset in space and time
