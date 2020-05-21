@@ -361,13 +361,19 @@ def make_chunks(Nx, Ny):
 
 def make_array(ds, tNx, tNy, X0=0):
 
-    coords = {}
-    for crd in ds.coords:
+    crds = {'X': (('X',), _np.arange(X0, X0 + tNx), {'axis': 'X'}),
+            'Xp1': (('Xp1',), _np.arange(X0, X0 + tNx), {'axis': 'X'}),
+            'Y': (('Y',), _np.arange(tNy), {'axis': 'Y'}),
+            'Yp1': (('Yp1',), _np.arange(tNy), {'axis': 'Y'})
+            }
+
+    coords = [k for k in ds.coords if k not in ['X', 'Xp1', 'Y', 'Yp1']]
+    for crd in coords:
         array = ds.coords[crd].values
         attrs = ds.coords[crd].attrs
-        coords = {**coords, **{crd: ((crd,), array, attrs)}}
+        crds = {**crds, **{crd: ((crd,), array, attrs)}}
 
-    dsnew = _xr.Dataset(coords=coords)
+    dsnew = _xr.Dataset(coords=crds)
     for dim in dsnew.dims:
         dsnew[dim].attrs = ds[dim].attrs
     return dsnew
