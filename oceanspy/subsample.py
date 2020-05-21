@@ -270,14 +270,17 @@ def cutout(
                 arg = {'ds': ds,
                        'varList': varList,
                        'centered': centered,
-                       'faces': faces}
+                       'faces': faces, 
+                       'drop': True}
                 if transformation == 'arctic_crown':
                     _transformation = _llc_trans.arctic_crown
                 elif transformation == 'arctic_centered':
                     _transformation = _llc_trans.arctic_centered
                 dsnew = _transformation(arg)
-                od._ds = dsnew  # update dataset
                 grid_coords = od.grid_coords
+                od._ds = dsnew  # update dataset
+                manipulate_coords = {'coordsUVfromG': True}
+                od = od.manipulate_coords(**manipulate_coords)
                 if len(grid_coords['time']) > 1:
                     grid_coords['time'].pop('time_midp', None)
                     grid_coords = {'add_midp': True,
