@@ -815,6 +815,10 @@ sources:
         i_g: Xp1
         j: Y
         j_g: Yp1
+        Z: Zed
+        k: Z
+        k_p1: Zp1
+        Zp1: Zedp1
       grid_coords: 
         add_midp: True
         grid_coords:
