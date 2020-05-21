@@ -13,6 +13,7 @@ class LLCtransformation:
         transformation,
         centered='Atlantic',
         faces='all',
+        drop=False,
     ):
         self._ds = ds  # xarray.DataSet
         self._varlist = varlist  # variables names to be transformed
@@ -27,6 +28,7 @@ class LLCtransformation:
         varlist,
         centered='Arctic',
         faces='all',
+        drop=False,
     ):
         """ Transforms the dataset by removing faces as a dimension, into a
         new dataset centered at the arctic, while preserving the grid.
@@ -196,6 +198,8 @@ class LLCtransformation:
                             dsnew[varName].isel(**arg)[:] = data.values
                         else:
                             dsnew[varName].isel(**arg).transpose(*dtr)[:] = data.values
+        if drop is True:
+            dsnew = drop_size(dsnew)
         return dsnew
 
     @classmethod
@@ -205,6 +209,7 @@ class LLCtransformation:
         varlist,
         centered,
         faces='all',
+        drop=False
     ):
         """ Transforms the dataset in which faces appears as a dimension into
         one with faces, with grids and variables sharing a common grid
@@ -333,6 +338,8 @@ class LLCtransformation:
             DS = NR_dsnew.combine_first(R_dsnew)
 
         DS = DS.reset_coords()
+        if drop is True:
+            DS = drop_size(DS)
 
         return DS
 
@@ -392,6 +399,38 @@ def init_vars(ds, DSNEW, varlist):
         DSNEW[varName] = ds_new
         DSNEW[varName].attrs = ds[varName].attrs
     return DSNEW
+
+
+def drop_size(ds):
+    coords = {}
+    for crd in ds.coords:
+        if crd in ['X', 'Y']:
+            array = ds.coords[crd].values[0:-1]
+        else:
+            array = ds.coords[crd].values
+        attrs = ds.coords[crd].attrs
+        coords = {**coords, **{crd: ((crd,), array, attrs )}}
+
+    DS_final = xr.Dataset(coords)
+    for dim in DS_final.dims:
+        DS_final[dim].attrs = ds[dim].attrs
+    for varName in ds.data_vars:
+        dims = Dims([dim for dim in ds[varName].dims][::-1])
+        if len(dims) == 1:
+            DS_final[varName] = ds[varName]
+        else:
+            if len(dims.X) + len(dims.Y) == 2:
+                arg = {dims.X: slice(0, -1), dims.Y: slice(0, -1)}
+            elif len(dims.X) + len(dims.Y) == 6:
+                arg = {}
+            elif len(dims.X) + len(dims.Y) == 4:
+                if len(dims.X) == 1:
+                    arg = {dims.X: slice(0, -1)}
+                elif len(dims.Y) == 1:
+                    arg = {dims.Y: slice(0, -1)}
+            DS_final[varName] = ds[varName].isel(**arg)
+        DS_final[varName].attrs = ds[varName].attrs
+    return DS_final
 
 
 def pos_chunks(faces, arc_faces, chunksY, chunksX):
