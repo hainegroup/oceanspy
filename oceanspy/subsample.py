@@ -278,7 +278,7 @@ def cutout(
                     _transformation = _llc_trans.arctic_crown
                 elif transformation == 'arctic_centered':
                     _transformation = _llc_trans.arctic_centered
-                dsnew = _transformation(arg)
+                dsnew = _transformation(**arg)
                 grid_coords = od.grid_coords
                 od._ds = dsnew  # update dataset
                 manipulate_coords = {'coordsUVfromG': True}
