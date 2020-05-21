@@ -342,7 +342,7 @@ def cutout(
                 od = od.set_grid_coords(**grid_coords, overwrite=True)
                 od._ds.attrs["OceanSpy_description"] = "Cutout of LLC4320"
                 "simulation, with simple topology (face not a dimension)"
-                cutout(new_od, varlist=varList, YRange=list(YRange),
+                cutout(od, varlist=varList, YRange=list(YRange),
                        XRange=list(XRange), add_Hbdr=add_Hbdr,
                        mask_outside=mask_outside, ZRange=ZRange,
                        add_Vbdr=add_Vbdr, timeRange=timeRange,
