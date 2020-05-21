@@ -353,12 +353,12 @@ def cutout(
                 od = od.set_grid_coords(**grid_coords, overwrite=True)
                 od._ds.attrs["OceanSpy_description"] = "Cutout of LLC4320"
                 "simulation, with simple topology (face not a dimension)"
-                print(od._ds)
-                cutout(od, varList=varList, YRange=YRange,
-                       XRange=XRange, add_Hbdr=False,
-                       mask_outside=mask_outside, ZRange=None,
-                       add_Vbdr=False, timeRange=timeRange,
-                       timeFreq=None, sampMethod=sampMethod)
+                cut_od = cutout(od, varList=varList, YRange=YRange,
+                                XRange=XRange, add_Hbdr=False,
+                                mask_outside=mask_outside, ZRange=None,
+                                add_Vbdr=False, timeRange=timeRange,
+                                timeFreq=None, sampMethod=sampMethod)
+                return cutout
 
             elif transformation not in _transf_list:
                 raise ValueError("transformation not supported")
