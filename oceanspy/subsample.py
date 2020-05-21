@@ -358,8 +358,7 @@ def cutout(
                                 mask_outside=mask_outside, ZRange=None,
                                 add_Vbdr=False, timeRange=timeRange,
                                 timeFreq=None, sampMethod=sampMethod)
-                return cutout
-
+                return cut_od
             elif transformation not in _transf_list:
                 raise ValueError("transformation not supported")
 
@@ -529,11 +528,7 @@ def cutout(
             1,
             0,
         ).persist()
-
-        if 'face' in ds.dims:
-            raise ValueError('retains face?')
-        else:
-            print('calculating maskU')
+        if 'face' not in ds.dims:
             maskU = _xr.where(
                 _np.logical_and(
                     _np.logical_and(ds["YU"] >= minY, ds["YU"] <= maxY),
