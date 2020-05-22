@@ -648,8 +648,7 @@ sources:
       original_output: snapshot
 
 
-  ====================================================================
-  # LLC4320
+  LLC4320
   SST_LLC4320:
     description: SST for LLC4320
     driver: zarr
@@ -816,6 +815,10 @@ sources:
         i_g: Xp1
         j: Y
         j_g: Yp1
+        Z: Zed
+        k: Z
+        k_p1: Zp1
+        Zp1: Zedp1
       grid_coords: 
         add_midp: True
         grid_coords:
@@ -1360,7 +1363,7 @@ sources:
         Z: Zed
         Zp1: Zed_p1
         Zl: Zed_l
-        Zu: Zed_u
+        # Zu: Zed_u
         i: X
         i_g: Xp1
         j: Y
@@ -1368,7 +1371,7 @@ sources:
         k: Z
         k_l: Zl
         k_p1: Zp1
-        k_u : Zu
+        # k_u : Zu
         tile: face
       grid_coords:
         add_midp: True
@@ -1382,7 +1385,7 @@ sources:
           Z:
            Z:
            Zp1: 0.5
-           Zu: 0.5
+           # Zu: 0.5
            Zl: -0.5
           time: 
             time: -0.5
