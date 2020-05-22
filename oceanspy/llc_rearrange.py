@@ -383,7 +383,9 @@ def init_vars(ds, DSNEW, varlist):
     """ initializes dataarray within dataset"""
     for varName in varlist:
         dims = Dims([dim for dim in ds[varName].dims if dim != 'face'][::-1])
-        if len(dims) == 2:
+        if len(dims) == 1:
+            ncoords = {dims.X: DSNEW.coords[dims.X]}
+        elif len(dims) == 2:
             ncoords = {dims.X: DSNEW.coords[dims.X],
                        dims.Y: DSNEW.coords[dims.Y]}
         elif len(dims) == 3:
