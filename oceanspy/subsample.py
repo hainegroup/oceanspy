@@ -57,7 +57,7 @@ def cutout(
     sampMethod="snapshot",
     dropAxes=False,
     transformation=False,
-    centered='Atlantic'
+    centered="Atlantic",
 ):
     """
     Cutout the original dataset in space and time
@@ -220,8 +220,9 @@ def cutout(
     if timeRange is not None:
 
         # Use arrays
-        timeRange = _np.asarray([_np.min(timeRange),
-                                 _np.max(timeRange)]).astype(ds["time"].dtype)
+        timeRange = _np.asarray([_np.min(timeRange), _np.max(timeRange)]).astype(
+            ds["time"].dtype
+        )
 
         # Get the closest
         for i, time in enumerate(timeRange):
@@ -297,8 +298,7 @@ def cutout(
                 diff = _np.fabs(ds["YG"] - Y)
                 YRange[i] = ds["YG"].where(diff == diff.min()).min().values
             maskH = maskH.where(
-                _np.logical_and(ds["YG"] >= YRange[0],
-                                ds["YG"] <= YRange[-1]), 0
+                _np.logical_and(ds["YG"] >= YRange[0], ds["YG"] <= YRange[-1]), 0
             )
 
         if XRange is not None:
@@ -313,8 +313,7 @@ def cutout(
                 diff = _np.fabs(ds["XG"] - X)
                 XRange[i] = ds["XG"].where(diff == diff.min()).min().values
             maskH = maskH.where(
-                _np.logical_and(ds["XG"] >= XRange[0],
-                                ds["XG"] <= XRange[-1]), 0
+                _np.logical_and(ds["XG"] >= XRange[0], ds["XG"] <= XRange[-1]), 0
             )
 
         # Can't be all zeros
@@ -323,41 +322,49 @@ def cutout(
 
         # Find horizontal indexes
         maskH = maskH.assign_coords(
-            Yp1=_np.arange(len(maskH["Yp1"])),
-            Xp1=_np.arange(len(maskH["Xp1"]))
+            Yp1=_np.arange(len(maskH["Yp1"])), Xp1=_np.arange(len(maskH["Xp1"]))
         )
         dmaskH = maskH.where(maskH, drop=True)
 
-        if transformation is not False and 'face' in ds.dims:
-            faces = dmaskH['face'].values
-            _transf_list = ['arctic_crown', 'arctic_centered']
+        if transformation is not False and "face" in ds.dims:
+            faces = dmaskH["face"].values
+            _transf_list = ["arctic_crown", "arctic_centered"]
             if transformation in _transf_list:
-                arg = {'ds': ds,
-                       'varlist': varList,
-                       'centered': centered,
-                       'faces': faces,
-                       'drop': True}
-                if transformation == 'arctic_crown':
+                arg = {
+                    "ds": ds,
+                    "varlist": varList,
+                    "centered": centered,
+                    "faces": faces,
+                    "drop": True,
+                }
+                if transformation == "arctic_crown":
                     _transformation = _llc_trans.arctic_crown
-                elif transformation == 'arctic_centered':
+                elif transformation == "arctic_centered":
                     _transformation = _llc_trans.arctic_centered
                 dsnew = _transformation(**arg)
                 grid_coords = od.grid_coords
                 od._ds = dsnew
-                manipulate_coords = {'coordsUVfromG': True}
+                manipulate_coords = {"coordsUVfromG": True}
                 od = od.manipulate_coords(**manipulate_coords)
-                if len(grid_coords['time']) > 1:
-                    grid_coords['time'].pop('time_midp', None)
-                    grid_coords = {'add_midp': True,
-                                   'grid_coords': grid_coords}
+                if len(grid_coords["time"]) > 1:
+                    grid_coords["time"].pop("time_midp", None)
+                    grid_coords = {"add_midp": True, "grid_coords": grid_coords}
                 od = od.set_grid_coords(**grid_coords, overwrite=True)
                 od._ds.attrs["OceanSpy_description"] = "Cutout of LLC4320"
                 "simulation, with simple topology (face not a dimension)"
-                cut_od = cutout(od, varList=varList, YRange=YRange,
-                                XRange=XRange, add_Hbdr=False,
-                                mask_outside=mask_outside, ZRange=None,
-                                add_Vbdr=False, timeRange=timeRange,
-                                timeFreq=None, sampMethod=sampMethod)
+                cut_od = cutout(
+                    od,
+                    varList=varList,
+                    YRange=YRange,
+                    XRange=XRange,
+                    add_Hbdr=False,
+                    mask_outside=mask_outside,
+                    ZRange=None,
+                    add_Vbdr=False,
+                    timeRange=timeRange,
+                    timeFreq=None,
+                    sampMethod=sampMethod,
+                )
                 return cut_od
             elif transformation not in _transf_list:
                 raise ValueError("transformation not supported")
@@ -396,14 +403,10 @@ def cutout(
         if "face" in ds.dims:
             faces = dmaskH["face"].values
             ds = ds.isel(
-                Yp1=slice(iY[0], iY[1] + 1),
-                Xp1=slice(iX[0], iX[1] + 1),
-                face=faces
+                Yp1=slice(iY[0], iY[1] + 1), Xp1=slice(iX[0], iX[1] + 1), face=faces
             )
         else:
-            ds = ds.isel(
-                Yp1=slice(iY[0], iY[1] + 1),
-                Xp1=slice(iX[0], iX[1] + 1))
+            ds = ds.isel(Yp1=slice(iY[0], iY[1] + 1), Xp1=slice(iX[0], iX[1] + 1))
 
         Xcoords = od._grid.axes["X"].coords
         if "X" in dropAxes:
@@ -528,7 +531,7 @@ def cutout(
             1,
             0,
         ).persist()
-        if 'face' not in ds.dims:
+        if "face" not in ds.dims:
             maskU = _xr.where(
                 _np.logical_and(
                     _np.logical_and(ds["YU"] >= minY, ds["YU"] <= maxY),

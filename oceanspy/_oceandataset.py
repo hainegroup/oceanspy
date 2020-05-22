@@ -1048,7 +1048,7 @@ class OceanDataset:
             for i, (point_pos, dim2roll) in enumerate(zip(["U", "V"], ["Yp1", "Xp1"])):
                 for dim in ["Y", "X"]:
                     coord = self._ds[dim + "G"].rolling(**{dim2roll: 2})
-                    coord = coord.mean().dropna(dim2roll, 'all')
+                    coord = coord.mean().dropna(dim2roll, "all")
                     coord = coord.drop_vars(coord.coords).rename(
                         {dim2roll: dim2roll[0]}
                     )
@@ -1098,8 +1098,7 @@ class OceanDataset:
                 add_coords = _OrderedDict(
                     XU=dict(
                         attrs=dict(
-                            standard_name=("plane_x_coordinate"
-                                           "_at_u_location"),
+                            standard_name=("plane_x_coordinate" "_at_u_location"),
                             long_name="x coordinate",
                             units="m",
                             coordinate="YU XU",
@@ -1107,8 +1106,7 @@ class OceanDataset:
                     ),
                     YU=dict(
                         attrs=dict(
-                            standard_name=("plane_y_coordinate"
-                                           "_at_u_location"),
+                            standard_name=("plane_y_coordinate" "_at_u_location"),
                             long_name="y coordinate",
                             units="m",
                             coordinate="YU XU",
@@ -1116,8 +1114,7 @@ class OceanDataset:
                     ),
                     XV=dict(
                         attrs=dict(
-                            standard_name=("plane_x_coordinate"
-                                           "_at_v_location"),
+                            standard_name=("plane_x_coordinate" "_at_v_location"),
                             long_name="x coordinate",
                             units="m",
                             coordinate="YV XV",
@@ -1125,8 +1122,7 @@ class OceanDataset:
                     ),
                     YV=dict(
                         attrs=dict(
-                            standard_name=("plane_y_coordinate"
-                                           "_at_v_location"),
+                            standard_name=("plane_y_coordinate" "_at_v_location"),
                             long_name="y coordinate",
                             units="m",
                             coordinate="YV XV",
