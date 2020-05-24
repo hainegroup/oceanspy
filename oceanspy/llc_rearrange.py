@@ -27,6 +27,13 @@ class LLCtransformation:
 
         if isinstance(faces, str):
             faces = _np.array([2, 5, 6, 7, 10])
+        if isinstance(faces, list) or isinstance(faces, _np.ndarray):
+            face = [fac for fac in faces if fac not in [2, 5, 6, 7, 10]]
+            if len(face) > 0:
+                raise Warning("Range of latitudes is beyond the scope of"
+                              "this rearrangement of faces."
+                              )
+            faces = _np.array([2, 5, 6, 7, 10])
 
         if isinstance(varlist, str):
             if varlist == "all":
@@ -43,9 +50,6 @@ class LLCtransformation:
         if centered == "Atlantic":
             ix = [1, 2, 1, 1, 0]
             jy = [0, 1, 1, 2, 1]
-            # shifts at u- and v-points
-            xs = [[-1, -1], [-1, -1], [-1, -1], [-1, -1], [0, -1]]
-            ys = [[0, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1]]
             nrot = _np.array([2])
             Arot = _np.array([5, 6, 7])
             Brot = _np.array([10])
@@ -53,8 +57,6 @@ class LLCtransformation:
         elif centered == "Pacific":
             ix = [1, 0, 1, 1, 2]
             jy = [2, 1, 1, 0, 1]
-            xs = [[-1, -1], [0, -1], [-1, -1], [-1, -1], [-1, -1]]
-            ys = [[-1, -1], [-1, -1], [-1, -1], [0, -1], [-1, -1]]
             nrot = _np.array([10])
             Arot = _np.array([])
             Brot = _np.array([2])
@@ -62,14 +64,13 @@ class LLCtransformation:
         elif centered == "Arctic":
             ix = [0, 1, 1, 2, 1]
             jy = [1, 0, 1, 1, 2]
-            xs = [[0, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1]]
-            ys = [[-1, -1], [0, -1], [-1, -1], [-1, -1], [-1, -1]]
             nrot = _np.array([6, 5, 7])
             Arot = _np.array([10])
             Brot = _np.array([])
             Crot = _np.array([2])
         else:
-            print("raise error: Centering not supported")
+            raise ValueError("Centering not supported")
+
         psX = []
         psY = []
         for i in range(len(ix)):
@@ -91,27 +92,11 @@ class LLCtransformation:
             else:
                 for k in range(len(faces)):
                     fac = 1
-                    if dims.X == "Xp1":  # xshift
-                        xslice = slice(psX[k][0] + xs[k][0], psX[k][1] + xs[k][1])
-                    else:
-                        xslice = slice(psX[k][0], psX[k][1])
-                    if dims.Y == "Yp1":  # yshift
-                        yslice = slice(psY[k][0] + ys[k][0], psY[k][1] + ys[k][1])
-                    else:
-                        yslice = slice(psY[k][0], psY[k][1])
+                    xslice = slice(psX[k][0], psX[k][1])
+                    yslice = slice(psY[k][0], psY[k][1])
                     arg = {dims.X: xslice, dims.Y: yslice}
                     data = ds[varName].isel(face=faces[k])
                     if faces[k] in nrot:
-                        if len(dims.Y) == 3 and faces[k] == 5:
-                            narg = {dims.Y: slice(0, -1)}
-                            data = data.isel(narg)
-                        if len(dims.Y) == 3 and faces[k] == 2:
-                            narg = {dims.Y: slice(0, -1)}
-                            data = data.isel(narg)
-                        if len(dims.X) + len(dims.Y) == 6:
-                            if centered == "Arctic" and faces[k] == 2:
-                                narg = {dims.Y: slice(0, -1)}
-                                data = data.isel(narg)
                         dsnew[varName].isel(**arg)[:] = data.values
                     else:
                         dtr = list(dims)[::-1]
@@ -127,26 +112,7 @@ class LLCtransformation:
                                             fac = -1
                                 _DIMS = [dim for dim in ds[vName].dims if dim != "face"]
                                 _dims = Dims(_DIMS[::-1])
-                                if len(_dims.Y) == 3 and faces[k] == 2:
-                                    narg = {_dims.Y: slice(0, -1)}
-                                    data = data.isel(narg)
-                                elif len(dims.X) == 3 and faces[k] == 5:
-                                    narg = {_dims.Y: slice(0, -1)}
-                                    data = data.isel(narg)
-                                elif len(dims.Y) == 3 and faces[k] == 7:
-                                    narg = {_dims.X: slice(0, -1)}
-                                    data = data.isel(narg)
                                 sort_arg = {"variables": _dims.X, "ascending": False}
-                            if len(dims.X) + len(dims.Y) == 6:
-                                if centered == "Pacific" and faces[k] == 5:
-                                    narg = {dims.Y: slice(0, -1)}
-                                    data = data.isel(narg)
-                                if centered == "Pacific" and faces[k] == 7:
-                                    narg = {dims.X: slice(0, -1)}
-                                    data = data.isel(narg)
-                                if centered == "Arctic" and faces[k] == 2:
-                                    narg = {dims.Y: slice(0, -1)}
-                                    data = data.isel(narg)
                         elif faces[k] in Arot:
                             sort_arg = {"variables": dims.Y, "ascending": False}
                             if len(dims.X) + len(dims.Y) == 4:
@@ -159,10 +125,6 @@ class LLCtransformation:
                                 _DIMS = [dim for dim in ds[vName].dims if dim != "face"]
                                 _dims = Dims(_DIMS[::-1])
                                 sort_arg = {"variables": _dims.Y, "ascending": False}
-                            if len(dims.X) + len(dims.Y) == 6:
-                                if centered == "Atlantic" and faces[k] == 2:
-                                    narg = {dims.Y: slice(1, -1)}
-                                    data = data.isel(narg)
                         elif faces[k] in Brot:
                             sort_arg = {
                                 "variables": [dims.X, dims.Y],
@@ -171,20 +133,13 @@ class LLCtransformation:
                             if len(dims.X) + len(dims.Y) == 4:
                                 if vName not in metrics:
                                     fac = -1
-                                if len(dims.X) == 3 and faces[k] == 10:
-                                    narg = {dims.X: slice(0, -1)}
-                                    data = data.isel(narg)
-                            if len(dims.X) + len(dims.Y) == 6:
-                                if centered == "Atlantic" and faces[k] == 10:
-                                    narg = {dims.X: slice(0, -1)}
-                                    data = data.isel(narg)
                         data = fac * data.sortby(**sort_arg)
                         if faces[k] in Brot:
                             dsnew[varName].isel(**arg)[:] = data.values
                         else:
                             dsnew[varName].isel(**arg).transpose(*dtr)[:] = data.values
         if drop is True:
-            dsnew = drop_size(dsnew, "arctic_centered")
+            dsnew = drop_size(dsnew)
         return dsnew
 
     @classmethod
@@ -197,6 +152,11 @@ class LLCtransformation:
         """
         Nx = len(ds["X"])
         Ny = len(ds["Y"])
+
+        if centered not in ['Atlantic', 'Pacific']:
+            raise ValueError("Centering option not recognized. Options are"
+                             "Atlantic or Pacific"
+                             )
 
         if isinstance(faces, str):
             faces = _np.arange(13)
@@ -339,7 +299,7 @@ class LLCtransformation:
 
         DS = DS.reset_coords()
         if drop is True:
-            DS = drop_size(DS, "arctic_crown")
+            DS = drop_size(DS)
 
         return DS
 
@@ -402,23 +362,16 @@ def init_vars(ds, DSNEW, varlist):
     return DSNEW
 
 
-def drop_size(ds, transformation="arctic_crown"):
+def drop_size(ds):
     """ Drops a row and/or column from interior (scalar) points, creating
     len(X)<len(Xp1) of staggered grids
     """
     coords = {}
-    if transformation == "arctic_crown":
-        for crd in ds.coords:
-            if crd in ["X", "Y"]:
-                array = ds.coords[crd].values[0:-1]
-            else:
-                array = ds.coords[crd].values
-    elif transformation == "arctic_centered":
-        for crd in ds.coords:
-            if crd in ["X", "Y"]:
-                array = ds.coords[crd].values[0:-2]
-            else:
-                array = ds.coords[crd].values[0:-1]
+    for crd in ds.coords:
+        if crd in ["X", "Y"]:
+            array = ds.coords[crd].values[0:-1]
+        else:
+            array = ds.coords[crd].values
 
     attrs = ds.coords[crd].attrs
     coords = {**coords, **{crd: ((crd,), array, attrs)}}
@@ -432,26 +385,14 @@ def drop_size(ds, transformation="arctic_crown"):
             DS_final[varName] = ds[varName]
         else:
             if len(dims.X) + len(dims.Y) == 2:
-                if transformation == "arctic_crown":
-                    arg = {dims.X: slice(0, -1), dims.Y: slice(0, -1)}
-                elif transformation == "arctic_centered":
-                    arg = {dims.X: slice(0, -2), dims.Y: slice(0, -2)}
+                arg = {dims.X: slice(0, -1), dims.Y: slice(0, -1)}
             elif len(dims.X) + len(dims.Y) == 6:
-                if transformation == "arctic_crown":
-                    arg = {}
-                elif transformation == "arctic_centered":
-                    arg = {dims.X: slice(0, -1), dims.Y: slice(0, -1)}
+                arg = {}
             elif len(dims.X) + len(dims.Y) == 4:
                 if len(dims.X) == 1:
-                    if transformation == "arctic_crown":
-                        arg = {dims.X: slice(0, -1)}
-                    elif transformation == "arctic_centered":
-                        arg = {dims.X: slice(0, -2), dims.Y: slice(0, -1)}
+                    arg = {dims.X: slice(0, -1)}
                 elif len(dims.Y) == 1:
-                    if transformation == "arctic_crown":
-                        arg = {dims.Y: slice(0, -1)}
-                    elif transformation == "arctic_centered":
-                        arg = {dims.X: slice(0, -1), dims.Y: slice(0, -2)}
+                    arg = {dims.Y: slice(0, -1)}
             DS_final[varName] = ds[varName].isel(**arg)
         DS_final[varName].attrs = ds[varName].attrs
     return DS_final
@@ -555,7 +496,7 @@ def pos_chunks(faces, arc_faces, chunksY, chunksX):
                     elif k == rotB[2]:
                         yk = 2
         else:
-            print("face index not in LLC grid")
+            raise ValueError("face index not in LLC grid")
         POSY.append(chunksY[yk])
         POSX.append(chunksX[xk])
     # This to create a new list with positions for Arctic cap slices
@@ -566,9 +507,7 @@ def pos_chunks(faces, arc_faces, chunksY, chunksX):
     aface_rot = [k for k in arc_faces if k in rotA + rotB]
 
     if len(aface_rot) == 0:
-        if len(aface_nrot) == 0:
-            print("no arctic faces")
-        else:
+        if len(aface_nrot) > 0:
             pos_r = chunksY[-1][-1]
             pos_l = chunksY[-1][0]
             if len(aface_nrot) == 1:
@@ -613,10 +552,9 @@ def chunk_sizes(faces, Nx, Ny, rotated=False):
                 tNy = Ny[0]
             elif len(B_list) == 2:
                 if min(B_list) == B_ref[0] and max(B_list) == B_ref[-1]:
-                    print(
-                        "error, these faces do not connect. Not possible to"
-                        "create a single dataset that minimizes nans"
-                    )
+                    raise ValueError("These faces do not connect. Not"
+                                     "possible to create a single dataset"
+                                     "that minimizes nans.")
                 else:
                     tNy = len(B_list) * Ny[0]
             else:
@@ -624,7 +562,7 @@ def chunk_sizes(faces, Nx, Ny, rotated=False):
         else:
             tNx = 0
             tNy = 0
-            print("error, no data survives the cutout. Change the values")
+            raise ValueError("No data survives the cutout.")
     else:
         if len(B_list) == 0:
             tNx = Nx[0]
@@ -632,10 +570,9 @@ def chunk_sizes(faces, Nx, Ny, rotated=False):
                 tNy = Ny[0]
             elif len(A_list) == 2:
                 if min(A_list) == A_ref[0] and max(A_list) == A_ref[-1]:
-                    print(
-                        "error, these faces do not connect. Not possible to"
-                        "create a single datase that minimizes nans"
-                    )
+                    raise ValueError("These faces do not connect. Not"
+                                     "possible to create a single datase"
+                                     "that minimizes nans")
                     tNy = 0
                 else:
                     tNy = len(A_list) * Ny[0]
@@ -659,10 +596,10 @@ def chunk_sizes(faces, Nx, Ny, rotated=False):
                         tNy = Ny[0]
                     else:
                         tNy = 0
-                        print("Error, faces do not connect within facet")
+                        raise ValueError("faces do not connect within facet")
                 elif len(A_list) == 2:
                     if min(A_list) == A_ref[0] and max(A_list) == A_ref[-1]:
-                        print("Error, faces do not connect within facet")
+                        raise ValueError("faces do not connect within facet")
                         tNy = 0
                     else:
                         iA = [
@@ -678,16 +615,17 @@ def chunk_sizes(faces, Nx, Ny, rotated=False):
                         if iA == iB:
                             tNy = len(A_list) * Ny[0]
                         else:
-                            print("error, not all faces connect equally")
+                            raise ValueError("Not all faces connect equally,"
+                                             "ragged arrays not supported"
+                                             )
                             tNy = 0
                 else:
                     tNy = len(A_list) * Ny[0]
             else:
                 tNy = 0
-                print(
-                    "Number of faces in facet A is not equal to the number"
-                    "of faces in facet B."
-                )
+                raise ValueError("Number of faces in facet A is not equal to"
+                                 "the number of faces in facet B. Ragged"
+                                 "arrays are not supported")
     return tNy, tNx
 
 
