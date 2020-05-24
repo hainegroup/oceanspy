@@ -77,6 +77,8 @@ class LLCtransformation:
             psX.append(chunksX[ix[i]])
             psY.append(chunksY[jy[i]])
 
+        ds = mates(ds).reset_coords()
+
         dsnew = make_array(ds, 3 * Nx, 3 * Ny)
         metrics = ["dxC", "dyC", "dxG", "dyG"]
 
@@ -160,6 +162,8 @@ class LLCtransformation:
 
         if isinstance(faces, str):
             faces = _np.arange(13)
+
+        ds = mates(ds).reset_coords()
 
         nrot_faces, Nx_nrot, Ny_nrot, rot_faces, Nx_rot, Ny_rot = face_connect(
             ds, faces
@@ -829,6 +833,19 @@ def arct_connect(ds, varName, all_faces):
                 ARCT.append(arct)
 
     return arc_faces, Nx_ac_nrot, Ny_ac_nrot, Nx_ac_rot, Ny_ac_rot, ARCT
+
+
+def mates(ds):
+    vars_mates = ['ADVx_SLT', 'ADVy_SLT', 'ADVx_TH', 'ADVy_TH', 'DFxE_TH',
+                  'DFyE_TH', 'DFxE_SLT', 'DFyE_SLT', 'maskW', 'maskS',
+                  'TAUX', 'TAUY', 'U', 'V', 'UVELMASS', 'VVELMASS',
+                  'dxC', 'dyC', 'dxG', 'dyG', 'hFacW', 'hFacS', 'rAw', 'rAs']
+    for k in range(int(len(vars_mates) / 2)):
+        nk = 2 * k
+        if vars_mates[nk] in ds.variables:
+            ds[vars_mates[nk]].attrs['mates'] = vars_mates[nk + 1]
+            ds[vars_mates[nk + 1]].attrs['mates'] = vars_mates[nk]
+    return ds
 
 
 class Dims:
