@@ -394,8 +394,8 @@ sources:
     driver: netcdf
     model: MITGCM
     args:
-      urlpath: /sciserver/oceanography/exp_ASR/grid.nc
-      # urlpath: /home/idies/workspace/OceanCirculation/exp_ASR/grid.nc
+      # urlpath: /sciserver/oceanography/exp_ASR/grid.nc
+      urlpath: /home/idies/workspace/OceanCirculation/exp_ASR/grid.nc
       xarray_kwargs:
         engine: netcdf4
         drop_variables: ['RC', 'RF', 'RU', 'RL']
