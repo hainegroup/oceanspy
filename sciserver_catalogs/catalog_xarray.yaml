@@ -446,8 +446,8 @@ sources:
     driver: netcdf
     model: MITGCM
     args:
-      urlpath: /sciserver/oceanography/exp_ASR/full*.nc
-      # urlpath: /home/idies/workspace/OceanCirculation/exp_ASR/full*.nc
+      # urlpath: /sciserver/oceanography/exp_ASR/full*.nc
+      urlpath: /home/idies/workspace/OceanCirculation/exp_ASR/full*.nc
       xarray_kwargs:
         engine: netcdf4
         concat_dim: T
