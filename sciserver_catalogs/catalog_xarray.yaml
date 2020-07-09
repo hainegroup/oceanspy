@@ -394,7 +394,6 @@ sources:
     driver: netcdf
     model: MITGCM
     args:
-      # urlpath: /sciserver/oceanography/exp_ASR/grid.nc
       urlpath: /home/idies/workspace/OceanCirculation/exp_ASR/grid.nc
       xarray_kwargs:
         engine: netcdf4
@@ -446,7 +445,6 @@ sources:
     driver: netcdf
     model: MITGCM
     args:
-      # urlpath: /sciserver/oceanography/exp_ASR/full*.nc
       urlpath: /home/idies/workspace/OceanCirculation/exp_ASR/full*.nc
       xarray_kwargs:
         engine: netcdf4
@@ -568,8 +566,8 @@ sources:
     driver: netcdf
     model: MITGCM
     args:
-      urlpath: /sciserver/oceanography/exp_Arctic_Control/GRID/grid_glued_swapped.nc
-      # urlpath: /home/idies/workspace/OceanCirculation/exp_Arctic_Control/GRID/grid_glued_swapped.nc
+      # urlpath: /sciserver/oceanography/exp_Arctic_Control/GRID/grid_glued_swapped.nc
+      urlpath: /home/idies/workspace/OceanCirculation/exp_Arctic_Control/GRID/grid_glued_swapped.nc
       xarray_kwargs:
         engine: netcdf4
         drop_variables: ['RC', 'RF', 'RU', 'RL']
@@ -616,8 +614,8 @@ sources:
     driver: netcdf
     model: MITGCM
     args:
-      urlpath: /sciserver/oceanography/exp_Arctic_Control/days*/DIAGS/*.nc
-      # urlpath: /home/idies/workspace/OceanCirculation/exp_Arctic_Control/days*/DIAGS/*.nc
+      # urlpath: /sciserver/oceanography/exp_Arctic_Control/days*/DIAGS/*.nc
+      urlpath: /home/idies/workspace/OceanCirculation/exp_Arctic_Control/days*/DIAGS/*.nc
       xarray_kwargs:
         engine: netcdf4
         concat_dim: T
@@ -635,8 +633,8 @@ sources:
     driver: netcdf
     model: MITGCM
     args:
-      urlpath: /sciserver/oceanography/exp_Arctic_Control/days*/STATE/*.nc
-      # urlpath: /home/idies/workspace/OceanCirculation/exp_Arctic_Control/days*/STATE/*.nc
+      # urlpath: /sciserver/oceanography/exp_Arctic_Control/days*/STATE/*.nc
+      urlpath: /home/idies/workspace/OceanCirculation/exp_Arctic_Control/days*/STATE/*.nc
       xarray_kwargs:
         engine: netcdf4
         concat_dim: T
