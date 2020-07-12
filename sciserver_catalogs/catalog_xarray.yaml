@@ -58,7 +58,7 @@ sources:
       description: |
         Small cutout from EGshelfIIseas2km_ASR_crop.
       citation: |
-        Almansi et al., 2017 - JPO.
+        Almansi et al., 2020 - GRL.
       mates: |
         EGshelfIIseas2km_ASR_full: Full domain without variables to close budgets.
         EGshelfIIseas2km_ASR_crop: Cropped domain with variables to close budgets.
@@ -422,7 +422,7 @@ sources:
         High-resolution (~2km) numerical simulation covering the east Greenland shelf (EGshelf), 
         and the Iceland and Irminger Seas (IIseas) forced by the Arctic System Reanalysis (ASR). 
       citation: | 
-        Almansi et al., 2017 - JPO.
+        Almansi et al., 2020 - GRL.
       characteristics: |
         full: Full domain without variables to close budgets.
       mates: | 
@@ -499,7 +499,7 @@ sources:
         High-resolution (~2km) numerical simulation covering the east Greenland shelf (EGshelf), 
         and the Iceland and Irminger Seas (IIseas) forced by the Arctic System Reanalysis (ASR). 
       citation: | 
-        Almansi et al., 2017 - JPO.
+        Almansi et al., 2020 - GRL.
       characteristics: | 
         crop: Cropped domain with variables to close budgets.
       mates: | 
