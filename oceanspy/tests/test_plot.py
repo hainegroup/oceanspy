@@ -209,24 +209,24 @@ def test_hor_sec_warn(od_in):
 
     with pytest.warns(UserWarning):
         plt.close()
-        fig, ax = plt.subplots(1, 1)
+        # fig, ax = plt.subplots(1, 1)
         ax = horizontal_section(
             od_in,
             varName="Eta",
             contourName="Depth",
-            ax=ax,
+            # ax=ax,
             subplot_kws={"projection": None},
         )
         assert isinstance(ax, xr.plot.FacetGrid)
 
     with pytest.warns(UserWarning):
         plt.close()
-        fig, ax = plt.subplots(1, 1)
+        # fig, ax = plt.subplots(1, 1)
         ax = horizontal_section(
             od_in,
             varName="Eta",
             contourName="V",
-            ax=ax,
+            # ax=ax,
             meanAxes=["Z"],
             subplot_kws={"projection": od.projection},
         )
