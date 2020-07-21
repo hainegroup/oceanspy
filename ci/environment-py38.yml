@@ -23,10 +23,9 @@ dependencies:
   - codecov
   - flake8
   - ffmpeg
-  - xmitgcm>=0.3.0
-  - ffmpeg
   - black
   - pip
   - pip:
+    - git+https://github.com/MITgcm/xmitgcm.git
     - black-nb
     - pre-commit
