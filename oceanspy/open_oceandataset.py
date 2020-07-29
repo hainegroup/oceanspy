@@ -163,7 +163,8 @@ def from_catalog(name, catalog_url=None):
 
         # swaps dimension k (index space) to Z (depth) - LLC data
         swap_dims = mtdt.pop("swap_dims", None)
-        ds = ds.swap_dims(swap_dims)
+        if swap_dims is not None:
+            ds = ds.swap_dims(swap_dims)
 
         # Fix Z dimensions (Zmd, ...)
         default_Zs = ["Zp1", "Zu", "Zl", "Z"]
