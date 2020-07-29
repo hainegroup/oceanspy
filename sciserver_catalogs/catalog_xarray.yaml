@@ -807,16 +807,14 @@ sources:
     args:
       urlpath: '/sciserver/filedb05-01/ocean/poseidon/LLC4320/grid'
     metadata:
-      model: MITGCM
+      swap_dims:
+        k: Z
+        k_p1: Zp1
       rename:
         i: X
         i_g: Xp1
         j: Y
         j_g: Yp1
-        Z: Zed
-        k: Z
-        k_p1: Zp1
-        Zp1: Zedp1
       grid_coords: 
         add_midp: True
         grid_coords:
@@ -959,11 +957,11 @@ sources:
         combine: nested
         drop_variables: ['time_bnds']
     metadata:
+      swap_dims:
+        k: Z
       rename:
-        Z: Zed
         i_g: Xp1
         j: Y
-        k: Z
         tile: face
         UVEL: U
       model: MITGCM
@@ -999,11 +997,11 @@ sources:
         combine: nested
         drop_variables: ['time_bnds']
     metadata:
+      swap_dims:
+        k: Z
       rename:
-        Z: Zed
         i: X
         j_g: Yp1
-        k: Z
         tile: face
         VVEL: V
       model: MITGCM
@@ -1190,11 +1188,11 @@ sources:
         combine: nested
         drop_variables: ['time_bnds']
     metadata:
+      swap_dims:
+        k: Z
       rename:
-        Z: Zed
         i: X
         j: Y
-        k: Z
         tile: face
         THETA: T
       model: MITGCM
@@ -1230,11 +1228,11 @@ sources:
         combine: nested
         drop_variables: ['time_bnds']
     metadata:
+      swap_dims:
+        k: Z
       rename:
-        Z: Zed
         i: X
         j: Y
-        k: Z
         tile: face
         SALT: S
       model: MITGCM
@@ -1337,18 +1335,16 @@ sources:
       urlpath: '/scratch/ceph/haine/asiddi24/ECCO/ECCO_v4_r4/ecco.jpl.nasa.gov/drive/files/Version4/Release4/nctiles_grid/ECCO-GRID.nc'
     metadata:
       model: MITGCM
+      swap_dims:
+        k: Z
+        k_p1: Zp1
+        k_l: Zl
       rename:
-        Z: Zed
-        Zp1: Zed_p1
-        Zl: Zed_l
         # Zu: Zed_u
         i: X
         i_g: Xp1
         j: Y
         j_g: Yp1
-        k: Z
-        k_l: Zl
-        k_p1: Zp1
         # k_u : Zu
         tile: face
       grid_coords:
