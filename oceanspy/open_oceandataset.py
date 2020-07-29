@@ -161,6 +161,10 @@ def from_catalog(name, catalog_url=None):
         rename = mtdt.pop("rename", None)
         ds = ds.rename(rename)
 
+        # swaps dimension k (index space) to Z (depth) - LLC data
+        swap_dims = mtdt.pop("swap_dims", None)
+        ds = ds.swap_dims(swap_dims)
+
         # Fix Z dimensions (Zmd, ...)
         default_Zs = ["Zp1", "Zu", "Zl", "Z"]
         # Make sure they're sorted with decreasing letter number
