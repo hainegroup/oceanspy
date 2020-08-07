@@ -24,6 +24,8 @@ dependencies:
   - flake8
   - ffmpeg
   - black
+  - aiohttp
+  - pandas<1.1.0
   - pip
   - pip:
     - git+https://github.com/MITgcm/xmitgcm.git
