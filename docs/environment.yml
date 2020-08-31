@@ -3,6 +3,7 @@ dependencies:
   - python=3.8
   - pandoc
   - sphinx
+  - docrep<0.3
   - pip
   - pip:
     - xarray
