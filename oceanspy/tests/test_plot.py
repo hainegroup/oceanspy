@@ -210,10 +210,7 @@ def test_hor_sec_warn(od_in):
     with pytest.warns(UserWarning):
         plt.close()
         ax = horizontal_section(
-            od_in,
-            varName="Eta",
-            contourName="Depth",
-            subplot_kws={"projection": None},
+            od_in, varName="Eta", contourName="Depth", subplot_kws={"projection": None},
         )
         assert isinstance(ax, xr.plot.FacetGrid)
 

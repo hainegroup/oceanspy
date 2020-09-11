@@ -676,7 +676,8 @@ def horizontal_section(
         # TODO: For some reason, faceting and cartopy are not
         #       working very nice with our configurations
         #       Drop it for now, but we need to explore it more
-        if od.projection is not None:
+        sbp_kws_proj = kwargs["subplot_kws"].pop("projection", None)
+        if od.projection is not None or sbp_kws_proj is not None:
             _warnings.warn(
                 "\nSwitch projection off."
                 " This function currently"
@@ -685,6 +686,8 @@ def horizontal_section(
             )
             od = od.set_projection(None)
             transform = None
+            sbp_kws_proj = None
+        kwargs["subplot_kws"]["projection"] = sbp_kws_proj
 
         # Add col
         if col is None:
