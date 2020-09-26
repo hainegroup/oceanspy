@@ -709,7 +709,7 @@ def cutout(
         _face_con = face_con_map(ds.oface.values, ds.face.values, fcon)
         od._ds.attrs["OceanSpy_face_connections"] = _face_con
         od = od.set_face_connections(**{"face_connections": _face_con})
-        od._ds.attrs["OceanSpy_description"] = "Cutout of LLC4320 simulation"
+        od._ds.attrs["OceanSpy_description"] = "Cutout of simulation"
 
     return od
 
