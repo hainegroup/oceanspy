@@ -345,7 +345,7 @@ def cutout(
     # Initialize horizontal mask
     if XRange is not None or YRange is not None:
 
-        mask, dmaskH = get_maskH(ds, add_Hbdr, add_Vbdr, XRange, YRange)
+        maskH, dmaskH = get_maskH(ds, add_Hbdr, add_Vbdr, XRange, YRange)
 
     if transformation is not False and "face" in ds.dims:
         if XRange is None and YRange is None:
