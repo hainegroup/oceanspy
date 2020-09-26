@@ -198,6 +198,9 @@ def cutout(
     if varList is not None:
         # Make sure it's a list
         varList = list(varList)
+        # list for coord variables
+        co_list = [var for var in od._ds.coords if var not in od._ds.dims]
+        varList = varList + co_list
         varList = _rename_aliased(od, varList)
 
         # Compute missing variables
@@ -205,6 +208,8 @@ def cutout(
         # Drop useless
         nvarlist = [v for v in od._ds.data_vars if v not in varList]
         od._ds = od._ds.drop_vars(nvarlist)
+    else:  # this way, if applicable, llc_transf gets applied to all vars
+        varList = [var for var in od._ds.reset_coords().data_vars]
 
     # Unpack
     ds = od._ds
@@ -321,14 +326,12 @@ def cutout(
                 ds = ds.isel(Zl=slice(iZ[0], iZ[1]))
 
     # ---------------------------
-    # Horizontal CUTOUT
+    # Horizontal CUTOUT (part I, split into two to avoid repeated code)
     # ---------------------------
     if add_Hbdr is True:
         add_Hbdr = _np.mean(
-            [
-                _np.fabs(od._ds["XG"].max() - od._ds["XG"].min()),
-                _np.fabs(od._ds["YG"].max() - od._ds["YG"].min()),
-            ]
+            [_np.fabs(od._ds["XG"].max() - od._ds["XG"].min()),
+             _np.fabs(od._ds["YG"].max() - od._ds["YG"].min())]
         )
         add_Hbdr = add_Hbdr / _np.mean([len(od._ds["X"]), len(od._ds["Y"])])
     elif add_Hbdr is False:
@@ -341,91 +344,50 @@ def cutout(
 
     # Initialize horizontal mask
     if XRange is not None or YRange is not None:
-        maskH = _xr.ones_like(ds["XG"])
 
-        if YRange is not None:
-            # Use arrays
-            YRange = _np.asarray(
-                [_np.min(YRange) - add_Hbdr, _np.max(YRange) + add_Hbdr]
-            )
-            YRange = YRange.astype(ds["YG"].dtype)
+        mask, dmaskH = get_maskH(ds, add_Hbdr, add_Vbdr, XRange, YRange)
 
-            # Get the closest
-            for i, Y in enumerate(YRange):
-                diff = _np.fabs(ds["YG"] - Y)
-                YRange[i] = ds["YG"].where(diff == diff.min()).min().values
-            maskH = maskH.where(
-                _np.logical_and(ds["YG"] >= YRange[0], ds["YG"] <= YRange[-1]), 0
-            )
+    if transformation is not False and "face" in ds.dims:
+        if XRange is None and YRange is None:
+            faces = 'all'
+        else:
+            faces = dmaskH["face"].values  # gets faces that survives cutout
+        _transf_list = ["arctic_crown", "arctic_centered"]
+        if transformation in _transf_list:
+            arg = {
+                "ds": ds,
+                "varlist": varList,  # vars and grid coords to transform
+                "centered": centered,
+                "faces": faces,
+                "drop": True,  # required to calculate U-V grid points
+            }
+            if transformation == "arctic_crown":
+                _transformation = _llc_trans.arctic_crown
+            elif transformation == "arctic_centered":
+                _transformation = _llc_trans.arctic_centered
+            dsnew = _transformation(**arg)
+            grid_coords = od.grid_coords
+            od._ds = dsnew
+            manipulate_coords = {"coordsUVfromG": True}
+            od = od.manipulate_coords(**manipulate_coords)
+            if len(grid_coords["time"]) > 1:
+                grid_coords["time"].pop("time_midp", None)
+                grid_coords = {"add_midp": True, "grid_coords": grid_coords}
+            od = od.set_grid_coords(**grid_coords, overwrite=True)
+            od._ds.attrs["OceanSpy_description"] = "Cutout of"
+            "simulation, with simple topology (face not a dimension)"
+            # Unpack the new dataset without face as dimension
+            ds = od._ds
+            maskH, dmaskH = get_maskH(ds, add_Hbdr, add_Vbdr, XRange, YRange)
+            fcon = None  # so it does not calculate new topology
+        elif transformation not in _transf_list:
+            raise ValueError("transformation not supported")
 
-        if XRange is not None:
-            # Use arrays
-            XRange = _np.asarray(
-                [_np.min(XRange) - add_Hbdr, _np.max(XRange) + add_Hbdr]
-            )
-            XRange = XRange.astype(ds["XG"].dtype)
+    # ---------------------------
+    # Horizontal CUTOUT part II (continuation of original code)
+    # ---------------------------
 
-            # Get the closest
-            for i, X in enumerate(XRange):
-                diff = _np.fabs(ds["XG"] - X)
-                XRange[i] = ds["XG"].where(diff == diff.min()).min().values
-            maskH = maskH.where(
-                _np.logical_and(ds["XG"] >= XRange[0], ds["XG"] <= XRange[-1]), 0
-            )
-
-        # Can't be all zeros
-        if maskH.sum() == 0:
-            raise ValueError("Zero grid points in the horizontal range")
-
-        # Find horizontal indexes
-        maskH = maskH.assign_coords(
-            Yp1=_np.arange(len(maskH["Yp1"])), Xp1=_np.arange(len(maskH["Xp1"]))
-        )
-        dmaskH = maskH.where(maskH, drop=True)
-
-        if transformation is not False and "face" in ds.dims:
-            faces = dmaskH["face"].values
-            _transf_list = ["arctic_crown", "arctic_centered"]
-            if transformation in _transf_list:
-                arg = {
-                    "ds": ds,
-                    "varlist": varList,
-                    "centered": centered,
-                    "faces": faces,
-                    "drop": True,
-                }
-                if transformation == "arctic_crown":
-                    _transformation = _llc_trans.arctic_crown
-                elif transformation == "arctic_centered":
-                    _transformation = _llc_trans.arctic_centered
-                dsnew = _transformation(**arg)
-                grid_coords = od.grid_coords
-                od._ds = dsnew
-                manipulate_coords = {"coordsUVfromG": True}
-                od = od.manipulate_coords(**manipulate_coords)
-                if len(grid_coords["time"]) > 1:
-                    grid_coords["time"].pop("time_midp", None)
-                    grid_coords = {"add_midp": True, "grid_coords": grid_coords}
-                od = od.set_grid_coords(**grid_coords, overwrite=True)
-                od._ds.attrs["OceanSpy_description"] = "Cutout of"
-                "simulation, with simple topology (face not a dimension)"
-                cut_od = cutout(
-                    od,
-                    varList=varList,
-                    YRange=YRange,
-                    XRange=XRange,
-                    add_Hbdr=False,
-                    mask_outside=mask_outside,
-                    ZRange=None,
-                    add_Vbdr=False,
-                    timeRange=timeRange,
-                    timeFreq=None,
-                    sampMethod=sampMethod,
-                )
-                return cut_od
-            elif transformation not in _transf_list:
-                raise ValueError("transformation not supported")
-
+    if XRange is not None or YRange is not None:
         dYp1 = dmaskH["Yp1"].values
         dXp1 = dmaskH["Xp1"].values
         iY = [_np.min(dYp1), _np.max(dYp1)]
@@ -460,10 +422,13 @@ def cutout(
         if "face" in ds.dims:
             faces = dmaskH["face"].values
             ds = ds.isel(
-                Yp1=slice(iY[0], iY[1] + 1), Xp1=slice(iX[0], iX[1] + 1), face=faces
+                Yp1=slice(iY[0], iY[1] + 1),
+                Xp1=slice(iX[0], iX[1] + 1),
+                face=faces
             )
         else:
-            ds = ds.isel(Yp1=slice(iY[0], iY[1] + 1), Xp1=slice(iX[0], iX[1] + 1))
+            ds = ds.isel(Yp1=slice(iY[0], iY[1] + 1),
+                         Xp1=slice(iX[0], iX[1] + 1))
 
         Xcoords = od._grid.axes["X"].coords
         if "X" in dropAxes:
@@ -1420,6 +1385,57 @@ def particle_properties(od, times, Ypart, Xpart, Zpart, **kwargs):
     od._ds = od._ds.reset_coords()
 
     return od
+
+
+def get_maskH(ds, add_Hbdr, add_Vbdr, XRange, YRange):
+    """ Define this function to avoid repeated code. First time this runs,
+    the objective is to figure out which faces survive the cutout. This info
+    is then passed, when transforming llc-grids, to llc_rearrange. Second
+    time this code runs, it gets applied on a dataset without faces as a
+    dimension.
+    """
+    maskH = _xr.ones_like(ds["XG"])
+
+    if YRange is not None:
+        # Use arrays
+        YRange = _np.asarray(
+            [_np.min(YRange) - add_Hbdr, _np.max(YRange) + add_Hbdr]
+        )
+        YRange = YRange.astype(ds["YG"].dtype)
+
+        # Get the closest
+        for i, Y in enumerate(YRange):
+            diff = _np.fabs(ds["YG"] - Y)
+            YRange[i] = ds["YG"].where(diff == diff.min()).min().values
+        maskH = maskH.where(_np.logical_and(ds["YG"] >= YRange[0],
+                                            ds["YG"] <= YRange[-1]), 0)
+
+    if XRange is not None:
+        # Use arrays
+        XRange = _np.asarray(
+            [_np.min(XRange) - add_Hbdr, _np.max(XRange) + add_Hbdr]
+        )
+        XRange = XRange.astype(ds["XG"].dtype)
+
+        # Get the closest
+        for i, X in enumerate(XRange):
+            diff = _np.fabs(ds["XG"] - X)
+            XRange[i] = ds["XG"].where(diff == diff.min()).min().values
+        maskH = maskH.where(
+            _np.logical_and(ds["XG"] >= XRange[0],
+                            ds["XG"] <= XRange[-1]), 0
+        )
+    # Can't be all zeros
+    if maskH.sum() == 0:
+        raise ValueError("Zero grid points in the horizontal range")
+
+    # Find horizontal indexes
+    maskH = maskH.assign_coords(
+        Yp1=_np.arange(len(maskH["Yp1"])),
+        Xp1=_np.arange(len(maskH["Xp1"]))
+    )
+    dmaskH = maskH.where(maskH, drop=True)
+    return maskH, dmaskH
 
 
 class _subsampleMethods(object):
