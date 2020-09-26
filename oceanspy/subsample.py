@@ -264,6 +264,63 @@ def cutout(
                 ds = ds.isel(time_midp=slice(iT[0], iT[1]))
 
     # ---------------------------
+    # Vertical CUTOUT
+    # ---------------------------
+    # Initialize vertical mask
+    maskV = _xr.ones_like(ds["Zp1"])
+
+    if ZRange is not None:
+        # Use arrays
+        ZRange = _np.asarray([_np.min(ZRange) - add_Vbdr, _np.max(ZRange) + add_Vbdr])
+        ZRange = ZRange.astype(ds["Zp1"].dtype)
+
+        # Get the closest
+        for i, Z in enumerate(ZRange):
+            diff = _np.fabs(ds["Zp1"] - Z)
+            ZRange[i] = ds["Zp1"].where(diff == diff.min()).min().values
+        maskV = maskV.where(
+            _np.logical_and(ds["Zp1"] >= ZRange[0], ds["Zp1"] <= ZRange[-1]), 0
+        )
+
+        # Find vertical indexes
+        maskV = maskV.assign_coords(Zp1=_np.arange(len(maskV["Zp1"])))
+        dmaskV = maskV.where(maskV, drop=True)
+        dZp1 = dmaskV["Zp1"].values
+        iZ = [_np.min(dZp1), _np.max(dZp1)]
+        maskV["Zp1"] = ds["Zp1"]
+
+        # Indexis
+        if iZ[0] == iZ[1]:
+            if "Z" not in dropAxes:
+                if iZ[0] > 0:
+                    iZ[0] = iZ[0] - 1
+                else:
+                    iZ[1] = iZ[1] + 1
+        else:
+            dropAxes.pop("Z", None)
+
+        # Cutout
+        ds = ds.isel(Zp1=slice(iZ[0], iZ[1] + 1))
+        if "Z" in dropAxes:
+            if iZ[0] == len(ds["Z"]):
+                iZ[0] = iZ[0] - 1
+                iZ[1] = iZ[1] - 1
+            ds = ds.isel(Z=slice(iZ[0], iZ[1] + 1))
+        else:
+            ds = ds.isel(Z=slice(iZ[0], iZ[1]))
+
+        if len(ds["Zp1"]) == 1:
+            if "Zu" in ds.dims and len(ds["Zu"]) > 1:
+                ds = ds.sel(Zu=ds["Zp1"].values, method="nearest")
+            if "Zl" in ds.dims and len(ds["Zl"]) > 1:
+                ds = ds.sel(Zl=ds["Zp1"].values, method="nearest")
+        else:
+            if "Zu" in ds.dims and len(ds["Zu"]) > 1:
+                ds = ds.isel(Zu=slice(iZ[0], iZ[1]))
+            if "Zl" in ds.dims and len(ds["Zl"]) > 1:
+                ds = ds.isel(Zl=slice(iZ[0], iZ[1]))
+
+    # ---------------------------
     # Horizontal CUTOUT
     # ---------------------------
     if add_Hbdr is True:
@@ -350,7 +407,7 @@ def cutout(
                     grid_coords["time"].pop("time_midp", None)
                     grid_coords = {"add_midp": True, "grid_coords": grid_coords}
                 od = od.set_grid_coords(**grid_coords, overwrite=True)
-                od._ds.attrs["OceanSpy_description"] = "Cutout of LLC4320"
+                od._ds.attrs["OceanSpy_description"] = "Cutout of"
                 "simulation, with simple topology (face not a dimension)"
                 cut_od = cutout(
                     od,
@@ -439,63 +496,6 @@ def cutout(
             periodic.remove("Y")
         if (len(ds["Xp1"]) < lenX or "X" in dropAxes) and "X" in periodic:
             periodic.remove("X")
-
-    # ---------------------------
-    # Vertical CUTOUT
-    # ---------------------------
-    # Initialize vertical mask
-    maskV = _xr.ones_like(ds["Zp1"])
-
-    if ZRange is not None:
-        # Use arrays
-        ZRange = _np.asarray([_np.min(ZRange) - add_Vbdr, _np.max(ZRange) + add_Vbdr])
-        ZRange = ZRange.astype(ds["Zp1"].dtype)
-
-        # Get the closest
-        for i, Z in enumerate(ZRange):
-            diff = _np.fabs(ds["Zp1"] - Z)
-            ZRange[i] = ds["Zp1"].where(diff == diff.min()).min().values
-        maskV = maskV.where(
-            _np.logical_and(ds["Zp1"] >= ZRange[0], ds["Zp1"] <= ZRange[-1]), 0
-        )
-
-        # Find vertical indexes
-        maskV = maskV.assign_coords(Zp1=_np.arange(len(maskV["Zp1"])))
-        dmaskV = maskV.where(maskV, drop=True)
-        dZp1 = dmaskV["Zp1"].values
-        iZ = [_np.min(dZp1), _np.max(dZp1)]
-        maskV["Zp1"] = ds["Zp1"]
-
-        # Indexis
-        if iZ[0] == iZ[1]:
-            if "Z" not in dropAxes:
-                if iZ[0] > 0:
-                    iZ[0] = iZ[0] - 1
-                else:
-                    iZ[1] = iZ[1] + 1
-        else:
-            dropAxes.pop("Z", None)
-
-        # Cutout
-        ds = ds.isel(Zp1=slice(iZ[0], iZ[1] + 1))
-        if "Z" in dropAxes:
-            if iZ[0] == len(ds["Z"]):
-                iZ[0] = iZ[0] - 1
-                iZ[1] = iZ[1] - 1
-            ds = ds.isel(Z=slice(iZ[0], iZ[1] + 1))
-        else:
-            ds = ds.isel(Z=slice(iZ[0], iZ[1]))
-
-        if len(ds["Zp1"]) == 1:
-            if "Zu" in ds.dims and len(ds["Zu"]) > 1:
-                ds = ds.sel(Zu=ds["Zp1"].values, method="nearest")
-            if "Zl" in ds.dims and len(ds["Zl"]) > 1:
-                ds = ds.sel(Zl=ds["Zp1"].values, method="nearest")
-        else:
-            if "Zu" in ds.dims and len(ds["Zu"]) > 1:
-                ds = ds.isel(Zu=slice(iZ[0], iZ[1]))
-            if "Zl" in ds.dims and len(ds["Zl"]) > 1:
-                ds = ds.isel(Zl=slice(iZ[0], iZ[1]))
 
     # ---------------------------
     # Horizontal MASK
