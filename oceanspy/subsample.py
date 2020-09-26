@@ -345,7 +345,7 @@ def cutout(
     # Initialize horizontal mask
     if XRange is not None or YRange is not None:
 
-        maskH, dmaskH = get_maskH(ds, add_Hbdr, add_Vbdr, XRange, YRange)
+        maskH, dmaskH, XRange, YRange = get_maskH(ds, add_Hbdr, add_Vbdr, XRange, YRange)
 
     if transformation is not False and "face" in ds.dims:
         if XRange is None and YRange is None:
@@ -378,7 +378,7 @@ def cutout(
             "simulation, with simple topology (face not a dimension)"
             # Unpack the new dataset without face as dimension
             ds = od._ds
-            maskH, dmaskH = get_maskH(ds, add_Hbdr, add_Vbdr, XRange, YRange)
+            maskH, dmaskH, XRange, YRange = get_maskH(ds, add_Hbdr, add_Vbdr, XRange, YRange)
             fcon = None  # so it does not calculate new topology
         elif transformation not in _transf_list:
             raise ValueError("transformation not supported")
@@ -1435,7 +1435,7 @@ def get_maskH(ds, add_Hbdr, add_Vbdr, XRange, YRange):
         Xp1=_np.arange(len(maskH["Xp1"]))
     )
     dmaskH = maskH.where(maskH, drop=True)
-    return maskH, dmaskH
+    return maskH, dmaskH, XRange, YRange
 
 
 class _subsampleMethods(object):
