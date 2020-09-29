@@ -237,12 +237,11 @@ def test_time_resampling(od, timeFreq, sampMethod):
     elif timeFreq == "6H":
         assert len(new_od.dataset["time"]) == len(od.dataset["time"])
     elif timeFreq == "1D" and sampMethod == "mean":
-        with pytest.warns(RuntimeWarning):
-            # Test time only
-            new_ds = new_od.dataset
-            new_ds = new_ds.drop_vars("time_midp")
-            new_od = OceanDataset(new_ds)
-            new_od.subsample.cutout(timeFreq="2D", sampMethod=sampMethod)
+        # Test time only
+        new_ds = new_od.dataset
+        new_ds = new_ds.drop_vars("time_midp")
+        new_od = OceanDataset(new_ds)
+        new_od.subsample.cutout(timeFreq="2D", sampMethod=sampMethod)
 
 
 @pytest.mark.parametrize("od", [MITgcm_rect_bin])
