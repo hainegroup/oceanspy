@@ -330,8 +330,10 @@ def cutout(
     # ---------------------------
     if add_Hbdr is True:
         add_Hbdr = _np.mean(
-            [_np.fabs(od._ds["XG"].max() - od._ds["XG"].min()),
-             _np.fabs(od._ds["YG"].max() - od._ds["YG"].min())]
+            [
+                _np.fabs(od._ds["XG"].max() - od._ds["XG"].min()),
+                _np.fabs(od._ds["YG"].max() - od._ds["YG"].min()),
+            ]
         )
         add_Hbdr = add_Hbdr / _np.mean([len(od._ds["X"]), len(od._ds["Y"])])
     elif add_Hbdr is False:
@@ -345,11 +347,13 @@ def cutout(
     # Initialize horizontal mask
     if XRange is not None or YRange is not None:
 
-        maskH, dmaskH, XRange, YRange = get_maskH(ds, add_Hbdr, add_Vbdr, XRange, YRange)
+        maskH, dmaskH, XRange, YRange = get_maskH(
+            ds, add_Hbdr, add_Vbdr, XRange, YRange
+        )
 
     if transformation is not False and "face" in ds.dims:
         if XRange is None and YRange is None:
-            faces = 'all'
+            faces = "all"
         else:
             faces = dmaskH["face"].values  # gets faces that survives cutout
         _transf_list = ["arctic_crown", "arctic_centered"]
@@ -378,7 +382,9 @@ def cutout(
             "simulation, with simple topology (face not a dimension)"
             # Unpack the new dataset without face as dimension
             ds = od._ds
-            maskH, dmaskH, XRange, YRange = get_maskH(ds, add_Hbdr, add_Vbdr, XRange, YRange)
+            maskH, dmaskH, XRange, YRange = get_maskH(
+                ds, add_Hbdr, add_Vbdr, XRange, YRange
+            )
             fcon = None  # so it does not calculate new topology
         elif transformation not in _transf_list:
             raise ValueError("transformation not supported")
@@ -422,13 +428,10 @@ def cutout(
         if "face" in ds.dims:
             faces = dmaskH["face"].values
             ds = ds.isel(
-                Yp1=slice(iY[0], iY[1] + 1),
-                Xp1=slice(iX[0], iX[1] + 1),
-                face=faces
+                Yp1=slice(iY[0], iY[1] + 1), Xp1=slice(iX[0], iX[1] + 1), face=faces
             )
         else:
-            ds = ds.isel(Yp1=slice(iY[0], iY[1] + 1),
-                         Xp1=slice(iX[0], iX[1] + 1))
+            ds = ds.isel(Yp1=slice(iY[0], iY[1] + 1), Xp1=slice(iX[0], iX[1] + 1))
 
         Xcoords = od._grid.axes["X"].coords
         if "X" in dropAxes:
@@ -1398,23 +1401,20 @@ def get_maskH(ds, add_Hbdr, add_Vbdr, XRange, YRange):
 
     if YRange is not None:
         # Use arrays
-        YRange = _np.asarray(
-            [_np.min(YRange) - add_Hbdr, _np.max(YRange) + add_Hbdr]
-        )
+        YRange = _np.asarray([_np.min(YRange) - add_Hbdr, _np.max(YRange) + add_Hbdr])
         YRange = YRange.astype(ds["YG"].dtype)
 
         # Get the closest
         for i, Y in enumerate(YRange):
             diff = _np.fabs(ds["YG"] - Y)
             YRange[i] = ds["YG"].where(diff == diff.min()).min().values
-        maskH = maskH.where(_np.logical_and(ds["YG"] >= YRange[0],
-                                            ds["YG"] <= YRange[-1]), 0)
+        maskH = maskH.where(
+            _np.logical_and(ds["YG"] >= YRange[0], ds["YG"] <= YRange[-1]), 0
+        )
 
     if XRange is not None:
         # Use arrays
-        XRange = _np.asarray(
-            [_np.min(XRange) - add_Hbdr, _np.max(XRange) + add_Hbdr]
-        )
+        XRange = _np.asarray([_np.min(XRange) - add_Hbdr, _np.max(XRange) + add_Hbdr])
         XRange = XRange.astype(ds["XG"].dtype)
 
         # Get the closest
@@ -1422,8 +1422,7 @@ def get_maskH(ds, add_Hbdr, add_Vbdr, XRange, YRange):
             diff = _np.fabs(ds["XG"] - X)
             XRange[i] = ds["XG"].where(diff == diff.min()).min().values
         maskH = maskH.where(
-            _np.logical_and(ds["XG"] >= XRange[0],
-                            ds["XG"] <= XRange[-1]), 0
+            _np.logical_and(ds["XG"] >= XRange[0], ds["XG"] <= XRange[-1]), 0
         )
     # Can't be all zeros
     if maskH.sum() == 0:
@@ -1431,8 +1430,7 @@ def get_maskH(ds, add_Hbdr, add_Vbdr, XRange, YRange):
 
     # Find horizontal indexes
     maskH = maskH.assign_coords(
-        Yp1=_np.arange(len(maskH["Yp1"])),
-        Xp1=_np.arange(len(maskH["Xp1"]))
+        Yp1=_np.arange(len(maskH["Yp1"])), Xp1=_np.arange(len(maskH["Xp1"]))
     )
     dmaskH = maskH.where(maskH, drop=True)
     return maskH, dmaskH, XRange, YRange

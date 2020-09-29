@@ -30,9 +30,10 @@ class LLCtransformation:
         if isinstance(faces, list) or isinstance(faces, _np.ndarray):
             face = [fac for fac in faces if fac not in [2, 5, 6, 7, 10]]
             if len(face) > 0:
-                raise Warning("Range of latitudes is beyond the scope of"
-                              "this rearrangement of faces."
-                              )
+                raise Warning(
+                    "Range of latitudes is beyond the scope of"
+                    "this rearrangement of faces."
+                )
             faces = _np.array([2, 5, 6, 7, 10])
 
         if isinstance(varlist, str):
@@ -155,10 +156,10 @@ class LLCtransformation:
         Nx = len(ds["X"])
         Ny = len(ds["Y"])
 
-        if centered not in ['Atlantic', 'Pacific']:
-            raise ValueError("Centering option not recognized. Options are"
-                             "Atlantic or Pacific"
-                             )
+        if centered not in ["Atlantic", "Pacific"]:
+            raise ValueError(
+                "Centering option not recognized. Options are" "Atlantic or Pacific"
+            )
 
         if isinstance(faces, str):
             faces = _np.arange(13)
@@ -555,9 +556,11 @@ def chunk_sizes(faces, Nx, Ny, rotated=False):
                 tNy = Ny[0]
             elif len(B_list) == 2:
                 if min(B_list) == B_ref[0] and max(B_list) == B_ref[-1]:
-                    raise ValueError("These faces do not connect. Not"
-                                     "possible to create a single dataset"
-                                     "that minimizes nans.")
+                    raise ValueError(
+                        "These faces do not connect. Not"
+                        "possible to create a single dataset"
+                        "that minimizes nans."
+                    )
                 else:
                     tNy = len(B_list) * Ny[0]
             else:
@@ -573,9 +576,11 @@ def chunk_sizes(faces, Nx, Ny, rotated=False):
                 tNy = Ny[0]
             elif len(A_list) == 2:
                 if min(A_list) == A_ref[0] and max(A_list) == A_ref[-1]:
-                    raise ValueError("These faces do not connect. Not"
-                                     "possible to create a single datase"
-                                     "that minimizes nans")
+                    raise ValueError(
+                        "These faces do not connect. Not"
+                        "possible to create a single datase"
+                        "that minimizes nans"
+                    )
                     tNy = 0
                 else:
                     tNy = len(A_list) * Ny[0]
@@ -618,17 +623,20 @@ def chunk_sizes(faces, Nx, Ny, rotated=False):
                         if iA == iB:
                             tNy = len(A_list) * Ny[0]
                         else:
-                            raise ValueError("Not all faces connect equally,"
-                                             "ragged arrays not supported"
-                                             )
+                            raise ValueError(
+                                "Not all faces connect equally,"
+                                "ragged arrays not supported"
+                            )
                             tNy = 0
                 else:
                     tNy = len(A_list) * Ny[0]
             else:
                 tNy = 0
-                raise ValueError("Number of faces in facet A is not equal to"
-                                 "the number of faces in facet B. Ragged"
-                                 "arrays are not supported")
+                raise ValueError(
+                    "Number of faces in facet A is not equal to"
+                    "the number of faces in facet B. Ragged"
+                    "arrays are not supported"
+                )
     return tNy, tNx
 
 
@@ -835,15 +843,37 @@ def arct_connect(ds, varName, all_faces):
 
 
 def mates(ds):
-    vars_mates = ['ADVx_SLT', 'ADVy_SLT', 'ADVx_TH', 'ADVy_TH', 'DFxE_TH',
-                  'DFyE_TH', 'DFxE_SLT', 'DFyE_SLT', 'maskW', 'maskS',
-                  'TAUX', 'TAUY', 'U', 'V', 'UVELMASS', 'VVELMASS',
-                  'dxC', 'dyC', 'dxG', 'dyG', 'hFacW', 'hFacS', 'rAw', 'rAs']
+    vars_mates = [
+        "ADVx_SLT",
+        "ADVy_SLT",
+        "ADVx_TH",
+        "ADVy_TH",
+        "DFxE_TH",
+        "DFyE_TH",
+        "DFxE_SLT",
+        "DFyE_SLT",
+        "maskW",
+        "maskS",
+        "TAUX",
+        "TAUY",
+        "U",
+        "V",
+        "UVELMASS",
+        "VVELMASS",
+        "dxC",
+        "dyC",
+        "dxG",
+        "dyG",
+        "hFacW",
+        "hFacS",
+        "rAw",
+        "rAs",
+    ]
     for k in range(int(len(vars_mates) / 2)):
         nk = 2 * k
         if vars_mates[nk] in ds.variables:
-            ds[vars_mates[nk]].attrs['mates'] = vars_mates[nk + 1]
-            ds[vars_mates[nk + 1]].attrs['mates'] = vars_mates[nk]
+            ds[vars_mates[nk]].attrs["mates"] = vars_mates[nk + 1]
+            ds[vars_mates[nk + 1]].attrs["mates"] = vars_mates[nk]
     return ds
 
 
