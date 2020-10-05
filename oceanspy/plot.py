@@ -652,29 +652,32 @@ def horizontal_section(
     subplot_kws = kwargs.pop("subplot_kws", None)
     transform = kwargs.pop("transform", None)
 
-    if len(dims) == 0:
-        # Single plot
-        # Add ax
-        if ax is None:
-            ax = _plt.axes(projection=od.projection)
-        elif od.projection is not None and not hasattr(ax, "projection"):
-            od = od.set_projection(None)
-            _warnings.warn(
-                "\nSwitching projection off."
-                "If `ax` is passed, it needs"
-                " to be initialiazed with a projection.",
-                stacklevel=2,
-            )
-        kwargs["ax"] = ax
+    # Projection
+    if ax is None:
+        if subplot_kws is None:
+            subplot_kws = dict(projection=od.projection)
+        elif "projection" not in subplot_kws.keys():
+            subplot_kws["projection"] = od.projection
+    elif ax and od.projection is not None and not hasattr(ax, "projection"):
+        od = od.set_projection(None)
+        _warnings.warn(
+            "\nSwitching projection off."
+            "If `ax` is passed, it needs"
+            " to be initialiazed with a projection.",
+            stacklevel=2,
+        )
+    kwargs["ax"] = ax
+    kwargs["subplot_kws"] = subplot_kws
 
-    elif len(dims) == 1:
-        # Multiple plots:
+    # Multiple plots:
+    if len(dims) == 1:
         extra_name = dims[0]
 
         # TODO: For some reason, faceting and cartopy are not
         #       working very nice with our configurations
         #       Drop it for now, but we need to explore it more
-        if od.projection is not None:
+        sbp_kws_proj = kwargs["subplot_kws"].pop("projection", None)
+        if od.projection is not None or sbp_kws_proj is not None:
             _warnings.warn(
                 "\nSwitch projection off."
                 " This function currently"
@@ -683,6 +686,8 @@ def horizontal_section(
             )
             od = od.set_projection(None)
             transform = None
+            sbp_kws_proj = None
+        kwargs["subplot_kws"]["projection"] = sbp_kws_proj
 
         # Add col
         if col is None:
@@ -690,17 +695,7 @@ def horizontal_section(
         kwargs["col"] = col
         kwargs["col_wrap"] = col_wrap
 
-        # Add projection
-        if isinstance(subplot_kws, dict):
-            projection = subplot_kws.pop("projection", None)
-            if projection is None:
-                projection = od.projection
-            subplot_kws["projection"] = projection
-        else:
-            subplot_kws = {"projection": od.projection}
-        kwargs["subplot_kws"] = subplot_kws
-
-    else:
+    elif len(dims) != 0:
         raise ValueError(
             "There are too many dimensions: {}."
             "A maximum of 3 dimensions (including time)"
@@ -722,7 +717,6 @@ def horizontal_section(
     if contourName is not None:
         ax = args.pop("ax", None)
         transform = args.pop("transform", None)
-        subplot_kws = args.pop("subplot_kws", None)
         col_keys = ["colors", "cmap"]
         default_contour_kwargs = {
             key: contour_kwargs.pop(key, None) for key in col_keys
@@ -735,11 +729,10 @@ def horizontal_section(
             "y": Y_name_cont,
             "ax": ax,
             "transform": transform,
-            "subplot_kws": subplot_kws,
             "add_labels": False,
             **contour_kwargs,
         }
-        if ax is not None:
+        if len(dims) == 0:
             cont = da_contour.plot.contour(**args)
             _plt.clabel(cont, **clabel_kwargs)
         else:
@@ -753,7 +746,8 @@ def horizontal_section(
 
     # Labels and return
     add_labels = kwargs.pop("add_labels", None)
-    if ax is not None:
+    if len(dims) == 0:
+        ax = _plt.gca()
         if od.projection is None:
             _plt.tight_layout()
         else:

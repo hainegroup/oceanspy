@@ -16,7 +16,7 @@ def pytest_configure():
         "wget -v -O Data.tar.gz -L "
         "https://livejohnshopkins-my.sharepoint.com/"
         ":u:/g/personal/malmans2_jh_edu/"
-        "ERLGPTpYMyRWmGW0YqVyFaQBiHxDuDzSMQPC4_UfH5e5Qg"
+        "EVtxjAQL13tCt7dFHNrzsrwBuqdjDe3zrvrJ625YrjrF0g"
         "?download=1",
         "tar xvzf Data.tar.gz",
         "rm -f Data.tar.gz",
