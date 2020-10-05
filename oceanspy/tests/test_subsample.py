@@ -17,6 +17,10 @@ MITgcm_rect_bin = open_oceandataset.from_netcdf(
 )
 MITgcm_rect_nc = open_oceandataset.from_netcdf("{}MITgcm_rect_nc.nc" "".format(Datadir))
 
+ECCO_url = "{}catalog_ECCO.yaml".format(Datadir)
+ECCOod = open_oceandataset.from_catalog('LLC', ECCO_url)
+
+
 # =======
 # CUTOUT
 # =======
@@ -253,6 +257,27 @@ def test_reduce_variables(od, varList):
     assert (set(varList) - set(od.dataset.dims) - set(od.dataset.coords)) == set(
         new_od.dataset.data_vars
     )
+
+
+@pytest.mark.parametrize("od", [ECCOod])
+@pytest.mark.parametrize(
+    "XRange, YRange, ZRange, varList, transformation, centering", [
+        ([-90, 20], [20, 80], None, ['T'], 'arctic_crown', 'Atlantic'),
+    ],
+)
+def test_cutout_faces(od, XRange, YRange, ZRange, varList, transformation,
+                      centering):
+    args = {
+        "od": od,
+        "varList": varList,
+        "XRange": XRange,
+        "YRange": YRange,
+        "ZRange": ZRange,
+        "transformation": transformation,
+        "centering": centering,
+    }
+    new_od = od.subsample.cutout(**args)
+    assert (set(od.dataset.dims) - set(new_od.dataset.dims)) == set(['face'])
 
 
 # =======
