@@ -6,7 +6,6 @@ from oceanspy import open_oceandataset
 from oceanspy.llc_rearrange import (
     Dims,
     make_chunks,
-    make_array,
     pos_chunks,
     chunk_sizes,
     face_connect,
@@ -241,7 +240,6 @@ varlist = ['T', 'U', 'V']
 def test_transformation(od, faces, varlist, transf, centered, drop, expNX,
                         expNY):
     ds = od._ds.reset_coords()
-    grid_coords = od.grid_coords
     args = {
         "ds": ds,
         "varlist": varlist,
