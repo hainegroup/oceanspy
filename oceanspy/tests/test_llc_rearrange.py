@@ -10,6 +10,8 @@ from oceanspy.llc_rearrange import (
     chunk_sizes,
     face_connect,
     arct_connect,
+    make_array,
+    init_vars,
 )
 from oceanspy.llc_rearrange import LLCtransformation as LLC
 
