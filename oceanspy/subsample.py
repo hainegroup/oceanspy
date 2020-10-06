@@ -214,7 +214,6 @@ def cutout(
     # Unpack
     ds = od._ds
     periodic = od.grid_periodic
-    fcon = od.face_connections
 
     # ---------------------------
     # Time CUTOUT
@@ -385,7 +384,6 @@ def cutout(
             maskH, dmaskH, XRange, YRange = get_maskH(
                 ds, add_Hbdr, add_Vbdr, XRange, YRange
             )
-            fcon = None  # so it does not calculate new topology
         elif transformation not in _transf_list:
             raise ValueError("transformation not supported")
     elif transformation is False and "face" in ds.dims:
