@@ -194,12 +194,12 @@ def cutout(
     # Copy
     od = _copy.copy(od)
 
+    # list for coord variables
+    co_list = [var for var in od._ds.coords if var not in od._ds.dims]
     # Drop variables
     if varList is not None:
         # Make sure it's a list
         varList = list(varList)
-        # list for coord variables
-        co_list = [var for var in od._ds.coords if var not in od._ds.dims]
         varList = varList + co_list
         varList = _rename_aliased(od, varList)
 
@@ -369,6 +369,7 @@ def cutout(
             elif transformation == "arctic_centered":
                 _transformation = _llc_trans.arctic_centered
             dsnew = _transformation(**arg)
+            dsnew = dsnew.set_coords(co_list)
             grid_coords = od.grid_coords
             od._ds = dsnew
             manipulate_coords = {"coordsUVfromG": True}
@@ -493,23 +494,22 @@ def cutout(
             1,
             0,
         ).persist()
-        if "face" not in ds.dims:
-            maskU = _xr.where(
-                _np.logical_and(
-                    _np.logical_and(ds["YU"] >= minY, ds["YU"] <= maxY),
-                    _np.logical_and(ds["XU"] >= minX, ds["XU"] <= maxX),
-                ),
-                1,
-                0,
-            ).persist()
-            maskV = _xr.where(
-                _np.logical_and(
-                    _np.logical_and(ds["YV"] >= minY, ds["YV"] <= maxY),
-                    _np.logical_and(ds["XV"] >= minX, ds["XV"] <= maxX),
-                ),
-                1,
-                0,
-            ).persist()
+        maskU = _xr.where(
+            _np.logical_and(
+                _np.logical_and(ds["YU"] >= minY, ds["YU"] <= maxY),
+                _np.logical_and(ds["XU"] >= minX, ds["XU"] <= maxX),
+            ),
+            1,
+            0,
+        ).persist()
+        maskV = _xr.where(
+            _np.logical_and(
+                _np.logical_and(ds["YV"] >= minY, ds["YV"] <= maxY),
+                _np.logical_and(ds["XV"] >= minX, ds["XV"] <= maxX),
+            ),
+            1,
+            0,
+        ).persist()
 
         for var in ds.data_vars:
             if set(["X", "Y"]).issubset(ds[var].dims):
