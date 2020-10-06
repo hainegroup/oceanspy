@@ -52,7 +52,8 @@ cart_od = OceanDataset(ds).set_parameters({"rSphere": None})
 # OceanDataset
 # ============
 @pytest.mark.parametrize(
-    "dataset", [1, od.dataset, clean_od.dataset, alias_od.dataset, per_od.dataset, ECCOod]
+    "dataset", [1, od.dataset, clean_od.dataset,
+                alias_od.dataset, per_od.dataset, ECCOod]
 )
 def test_OceanDataset(dataset):
     if not isinstance(dataset, xr.Dataset):

@@ -70,7 +70,7 @@ def test_opening_and_saving(name, catalog_url):
                 [not np.isnan(od1.dataset[coord].values).any() for coord in coordsList]
             )
 
-        if name == 'ECCO_data':
+        if name == 'LLC':
             assert type(od1.face_connections['face']) == dict
             assert set(['face']).issubset(set(od1.dataset.dims))
 
