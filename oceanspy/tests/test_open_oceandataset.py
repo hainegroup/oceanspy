@@ -91,7 +91,11 @@ def test_opening_and_saving(name, catalog_url):
         od1.to_netcdf(filename)
 
         # Reopen
-        from_netcdf(filename)
+        if name == 'LLC':
+            args = {'decode_times': False}
+        else:
+            args = {}
+        from_netcdf(filename, **args)
 
         # Clean up
         subprocess.call("rm -f " + filename, shell=True)
