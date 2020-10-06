@@ -271,7 +271,6 @@ def test_reduce_variables(od, varList):
 def test_cutout_faces(od, XRange, YRange, ZRange, varList, transformation,
                       centering, NZ):
     args = {
-        "od": od,
         "varList": varList,
         "XRange": XRange,
         "YRange": YRange,

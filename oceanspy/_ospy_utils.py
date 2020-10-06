@@ -6,7 +6,6 @@
 import numpy
 import warnings
 import xgcm
-import xarray as _xr
 
 
 # =========

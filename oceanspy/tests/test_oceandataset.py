@@ -15,6 +15,8 @@ from oceanspy import AVAILABLE_PARAMETERS, DEFAULT_PARAMETERS, OCEANSPY_AXES
 # Directory
 Datadir = "./oceanspy/tests/Data/"
 od = open_oceandataset.from_netcdf("{}MITgcm_rect_nc.nc" "".format(Datadir))
+ECCO_url = "{}catalog_ECCO.yaml".format(Datadir)
+ECCOod = open_oceandataset.from_catalog('LLC', ECCO_url)
 
 # Remove global attributes
 ds = od.dataset
@@ -50,7 +52,7 @@ cart_od = OceanDataset(ds).set_parameters({"rSphere": None})
 # OceanDataset
 # ============
 @pytest.mark.parametrize(
-    "dataset", [1, od.dataset, clean_od.dataset, alias_od.dataset, per_od.dataset]
+    "dataset", [1, od.dataset, clean_od.dataset, alias_od.dataset, per_od.dataset, ECCOod]
 )
 def test_OceanDataset(dataset):
     if not isinstance(dataset, xr.Dataset):

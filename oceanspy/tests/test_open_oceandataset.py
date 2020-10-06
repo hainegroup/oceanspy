@@ -59,7 +59,10 @@ def test_opening_and_saving(name, catalog_url):
             assert set(dimsList).issubset(set(od1.dataset.dims))
 
             # Check coordinates
-            coordsList = ["XC", "YC", "XG", "YG", "XU", "YU", "XV", "YV"]
+            if name == 'LLC':
+                coordsList = ["XC", "YC", "XG", "YG"]
+            else:
+                coordsList = ["XC", "YC", "XG", "YG", "XU", "YU", "XV", "YV"]
             assert set(coordsList).issubset(set(od1.dataset.coords))
 
             # Check NaNs
