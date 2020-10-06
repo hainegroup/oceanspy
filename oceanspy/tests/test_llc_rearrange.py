@@ -258,6 +258,44 @@ def test_transformation(od, faces, varlist, transf, centered, drop, expNX,
     assert Ny == expNY
 
 
+@pytest.mark.parametrize(
+    "od, tNX, tNY, X0", [
+        (od, 100, 200, 0),
+        (od, 200, 400, 100),
+        (od, None, None, 'Five'),
+        (od, 'Four', None, None),
+        (od, 0, 0, 0),
+    ]
+)
+def test_make_vars(od, tNX, tNY, X0):
+    ds = od._ds.reset_coords()
+    if isinstance(tNX, int) and isinstance(tNY, int) and isinstance(X0, int):
+        nds = make_array(ds, tNX, tNY, X0)
+        assert (set(nds.dims) - set(ds.dims)) == set([])
+        assert nds.dims['X'] == tNX
+        assert nds.dims['Y'] == tNY
+        assert nds.dims['Z'] == ds.dims['Z']
+        assert nds.dims['time'] == ds.dims['time']
+    else:
+        with pytest.raises(TypeError):
+            nds = make_array(ds, tNX, tNY, X0)
+
+
+@pytest.mark.parametrize(
+    "od, tNX, tNY, X0, varlist", [
+        (od, 100, 200, 0, ['T']),
+        (od, 200, 400, 10, ['U']),
+        (od, 200, 400, 0, ['T', 'U', 'V'])
+    ]
+)
+def test_init_vars(od, tNX, tNY, X0, varlist):
+    ds = od._ds.reset_coords()
+    nds = make_array(ds, tNX, tNY, X0)
+    nds = init_vars(ds, nds, varlist)
+    for var in varlist:
+        assert set(ds[var].dims) - set(nds[var].dims) == set(["face"])
+
+
 def _is_connect(faces, rotated=False):
     """ do faces in a facet connect? Not applicable to arc cap, and only
     applicable to either rotated or not rotated facets"""
