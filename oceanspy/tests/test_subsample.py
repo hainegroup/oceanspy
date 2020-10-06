@@ -266,6 +266,7 @@ def test_reduce_variables(od, varList):
         ([-179, 179], [20, 80], None, ['U', 'V'], 'arctic_crown',
                                                   'Atlantic', 50),
         ([-179, 179], [55, 90], -100, ['T'], 'arctic_centered', 'Pacific', 1),
+        (None, None, None, ['T'], 'arctic_crown', 'Atlantic', 50)
     ],
 )
 def test_cutout_faces(od, XRange, YRange, ZRange, varList, transformation,
