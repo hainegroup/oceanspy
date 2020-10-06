@@ -262,9 +262,9 @@ def test_reduce_variables(od, varList):
 @pytest.mark.parametrize("od", [ECCOod])
 @pytest.mark.parametrize(
     "XRange, YRange, ZRange, varList, transformation, centered, NZ", [
-        ([-90, 20], [20, 80], None, ['T'], 'arctic_crown', 'Atlantic', 90),
+        ([-90, 20], [20, 80], None, ['T'], 'arctic_crown', 'Atlantic', 50),
         ([-179, 179], [20, 80], None, ['U', 'V'], 'arctic_crown',
-                                                  'Atlantic', 90),
+                                                  'Atlantic', 50),
         ([-179, 179], [55, 90], -100, ['T'], 'arctic_centered', 'Pacific', 1),
     ],
 )
