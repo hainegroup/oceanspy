@@ -2876,16 +2876,8 @@ def missing_horizontal_spacing(od):
         else:
             suf = "G"
 
-        # Interpolate
-        if "face" in ds.dims:
-            #  For some reason, grid.interp does not work, need to approach
-            #  it as a vector, which means calculating the same thing twice
-            delF = grid.interp_2d_vector(
-                {"X": ds["dxC"], "Y": ds["dyC"]}, boundary="extend"
-            )  # or fill?
-            deltas[var] = delF[axis]  # this will repeat, only one matters
-        else:
-            deltas[var] = grid.interp(ds[pref + suf], axis, boundary="extend")
+
+        deltas[var] = grid.interp(ds[pref + suf], axis, boundary="extend")
 
         # Add attributes
         if "U" in var:
