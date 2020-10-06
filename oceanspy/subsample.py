@@ -424,14 +424,7 @@ def cutout(
         else:
             dropAxes.pop("X", None)
 
-        # Cutout
-        if "face" in ds.dims:
-            faces = dmaskH["face"].values
-            ds = ds.isel(
-                Yp1=slice(iY[0], iY[1] + 1), Xp1=slice(iX[0], iX[1] + 1), face=faces
-            )
-        else:
-            ds = ds.isel(Yp1=slice(iY[0], iY[1] + 1), Xp1=slice(iX[0], iX[1] + 1))
+        ds = ds.isel(Yp1=slice(iY[0], iY[1] + 1), Xp1=slice(iX[0], iX[1] + 1))
 
         Xcoords = od._grid.axes["X"].coords
         if "X" in dropAxes:
