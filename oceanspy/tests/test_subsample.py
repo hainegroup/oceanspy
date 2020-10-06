@@ -266,7 +266,8 @@ def test_reduce_variables(od, varList):
         ([-179, 179], [20, 80], None, ['U', 'V'], 'arctic_crown',
                                                   'Atlantic', 50),
         ([-179, 179], [55, 90], -100, ['T'], 'arctic_centered', 'Pacific', 1),
-        (None, None, None, ['T'], 'arctic_crown', 'Atlantic', 50)
+        (None, None, None, ['T'], 'arctic_crown', 'Atlantic', 50),
+        (None, None, None, None, None, 'wrong', 'Atlantic', 50),
     ],
 )
 def test_cutout_faces(od, XRange, YRange, ZRange, varList, transformation,
@@ -279,9 +280,15 @@ def test_cutout_faces(od, XRange, YRange, ZRange, varList, transformation,
         "transformation": transformation,
         "centered": centered,
     }
-    new_od = od.subsample.cutout(**args)
-    assert (set(od.dataset.dims) - set(new_od.dataset.dims)) == set(['face'])
-    assert new_od._ds.dims['Z'] == NZ
+    if transformation not in ['arctic_crown', 'arctic_centered']:
+        with pytest.raises(ValueError):
+            new_od = od.subsample.cutout(**args)
+    else:
+        new_od = od.subsample.cutout(**args)
+        old_dims = od.dataset.dims
+        new_dims = new_od.dataset.dims
+        assert (set(old_dims) - set(new_dims)) == set(['face'])
+        assert new_od._ds.dims['Z'] == NZ
 
 
 # =======
