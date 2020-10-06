@@ -22,6 +22,7 @@ Datadir = "./oceanspy/tests/Data/"
 # Urls catalogs
 xmitgcm_url = "{}catalog_xmitgcm.yaml".format(Datadir)
 xarray_url = "{}catalog_xarray.yaml".format(Datadir)
+ECCO_url = "{}catalog_ECCO.yaml".format(Datadir)
 
 
 # Test SciServer
@@ -40,6 +41,7 @@ def test_find_entries(names):
         ("error", xarray_url),
         ("grd_rect", xarray_url),
         ("grd_curv", xarray_url),
+        ("LLC", ECCO_url),
     ],
 )
 def test_opening_and_saving(name, catalog_url):
@@ -64,6 +66,10 @@ def test_opening_and_saving(name, catalog_url):
             assert all(
                 [not np.isnan(od1.dataset[coord].values).any() for coord in coordsList]
             )
+
+        if name == 'ECCO_data':
+            assert type(od1.face_connections['face']) == dict
+            assert set(['face']).issubset(set(od1.dataset.dims))
 
         # Check shift
         if name == "xmitgcm_iters":
