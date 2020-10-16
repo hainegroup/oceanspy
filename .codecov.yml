@@ -1,0 +1,15 @@
+codecov:
+  ci:
+    - "travis.org"
+  require_ci_to_pass: yes
+
+coverage:
+  status:
+    project:
+      default:
+        # Require 90%
+        target: 1
+    patch: false
+    changes: false
+
+comment: off

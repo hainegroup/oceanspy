@@ -1,15 +1,13 @@
-codecov:
-  ci:
-    - "travis.org"
-  require_ci_to_pass: yes
+[run]
+branch = True
 
-coverage:
-  status:
-    project:
-      default:
-        # Require 90%
-        target: 1
-    patch: false
-    changes: false
-
-comment: off
+[report]
+exclude_lines =
+    if self.debug:
+    pragma: no cover
+    raise NotImplementedError
+    if __name__ == .__main__.:
+ignore_errors = True
+omit = oceanspy/tests/*
+       oceanspy/Catalogs/*
+       oceanspy/__init__.py
