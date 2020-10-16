@@ -73,4 +73,7 @@ SCISERVER_DATASETS = [
     "KangerFjord",
     "LLC4320",
     "ECCO",
+    "POP_CORE",
+    "POP_HYBRID",
+    "HYCOM",
 ]

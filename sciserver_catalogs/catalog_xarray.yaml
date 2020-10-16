@@ -647,159 +647,33 @@ sources:
 
   # ====================================================================
   # LLC4320
-  SST_LLC4320:
-    description: SST for LLC4320
+  SSS_LLC4320:
+    description: Surface fields for LLC4320
     driver: zarr
     model: MITGCM
     args:
-      urlpath: '/sciserver/filedb02-01/ocean/poseidon/LLC4320/SSDATA/SST'
+      urlpath: '/sciserver/filedb*/ocean/poseidon/LLC4320/2D/SS*'
+      chunks: {'i':4320, 'j':4320, 'time':1, 'face':1}
+      xarray_kwargs:
+        concat_dim: time
+        parallel: True
+        combine: nested
+      # drop_variables: ['XC','YC','iter','k','k_l','k_u','Z','Zl','Zu']
     metadata:
       rename:
         i: X
         j: Y
+        i_g: Xp1
+        j_g: Yp1
       parameters:
-        grid_type: llc
-      name: SST_LLC4320
+      name: SSS_LLC4320
       description: |
-        SST field for the LLC4320, a general, curvilinear ocean simulations on the cube-sphere.
+        Surface fields for the LLC4320, a general, curvilinear ocean simulations on the cube-sphere.
       citation: |
         Paper.
       projection:
       original_output: snapshot
 
-
-  # SSS_LLC4320:
-  #   description: Surface fields for LLC4320
-  #   driver: zarr
-  #   model: MITGCM
-  #   args:
-  #     urlpath: '/sciserver/filedb*/ocean/poseidon/LLC4320/2D/SS*'
-  #     chunks: {'i':4320, 'j':4320, 'time':1, 'face':1}
-  #     xarray_kwargs:
-  #       concat_dim: time
-  #       parallel: True
-  #       combine: nested
-  #     # drop_variables: ['XC','YC','iter','k','k_l','k_u','Z','Zl','Zu']
-  #   metadata:
-  #     rename:
-  #       i: X
-  #       j: Y
-  #       i_g: Xp1
-  #       j_g: Yp1
-  #     parameters:
-  #     name: SSS_LLC4320
-  #     description: |
-  #       Surface fields for the LLC4320, a general, curvilinear ocean simulations on the cube-sphere.
-  #     citation: |
-  #       Paper.
-  #     projection:
-  #     original_output: snapshot
-
-
-  # Eta_LLC4320:
-  #   description: Eta for LLC4320
-  #   driver: zarr
-  #   model: MITGCM
-  #   args:
-  #     urlpath: '/sciserver/filedb04-01/ocean/poseidon/Eta'
-  #     drop_variables: ['']
-  #   metadata:
-  #     rename:
-  #       i: X
-  #       j: Y
-  #     grid_coords: 
-  #       add_midp: True
-  #       grid_coords:
-  #         Y:
-  #           Y: 
-  #           Yp1: 0.5
-  #         X:
-  #           X: 
-  #           Xp1: 0.5
-  #         Z:
-  #           Z: 
-  #           Zp1: 0.5
-  #           Zu: 0.5
-  #           Zl: -0.5
-  #         time: 
-  #           time: -0.5
-  #     # shift_averages: 
-  #     #   averageList:
-  #     parameters:
-  #       rSphere: 6.371e+03
-  #       eq_state: jmd95
-  #       rho0: 1027
-  #       g: 9.81
-  #       eps_nh: 0 
-  #       omega: 7.292123516990375e-05
-  #       c_p: 3.986e+03
-  #       tempFrz0: 9.01e-02
-  #       dTempFrz_dS: -5.75e-02
-  #       grid_type: 'llc'
-  #     name: Eta_LLC4320
-  #     description: |
-  #       Sea surface height (Eta) field for the LLC4320, a general, curvilinear ocean simulations on the cube-sphere.
-  #     citation: |
-  #       Paper.
-  #     projection:
-  #     original_output: snapshot
-
-  # U_LLC4320:
-  #   description: U for LLC4320
-  #   driver: zarr
-  #   model: MITGCM
-  #   args:
-  #     urlpath: '/sciserver/filedb05-01/ocean/poseidon/U'
-  #     drop_variables: ['']
-  #   metadata:
-  #     rename:
-  #       i: X
-  #       i_g: Xg
-  #       j: Y
-  #       j_g: Yg
-  #       k: Z
-  #       k_l: Zl
-  #       k_p1: Zp1
-  #       k_u: Zu
-  #     # manipulate_coords:
-  #     #   fillna: False
-  #     #   coords1Dfrom2D: False
-  #     grid_coords: 
-  #       add_midp: True
-  #       grid_coords:
-  #         Y:
-  #           Y: 
-  #           Yp1: 0.5
-  #         X:
-  #           X: 
-  #           Xp1: 0.5
-  #         Z:
-  #           Z: 
-  #           Zp1: 0.5
-  #           Zu: 0.5
-  #           Zl: -0.5
-  #         time: 
-  #           time: -0.5
-  #     # shift_averages: 
-  #     #   averageList:
-  #     parameters:
-  #       rSphere: 6.371e+03
-  #       eq_state: jmd95
-  #       rho0: 1027
-  #       g: 9.81
-  #       eps_nh: 0 
-  #       omega: 7.292123516990375e-05
-  #       c_p: 3.986e+03
-  #       tempFrz0: 9.01e-02
-  #       dTempFrz_dS: -5.75e-02
-  #       grid_type: 'llc'
-  #     name: U_LLC4320
-  #     description: |
-  #       U (3D + time dependent) field for the LLC4320, a general, curvilinear ocean simulations on the cube-sphere.
-  #     citation: |
-  #       Paper.
-  #     projection:
-  #     original_output: snapshot
 
   grd_LLC4320:
     description: horizontal grid for LLC4320
@@ -890,66 +764,11 @@ sources:
       original_output: snapshot
 
 
-  # V_LLC4320:
-  #   description: V for LLC4320
-  #   driver: zarr
-  #   model: MITGCM
-  #   args:
-  #     urlpath: '/sciserver/filedb06-01/ocean/poseidon/V'
-  #     drop_variables: ['']
-  #   metadata:
-  #     rename:
-  #       i: X
-  #       i_g: Xg
-  #       j: Y
-  #       j_g: Yg
-  #       k: Z
-  #       k_l: Zl
-  #       k_p1: Zp1
-  #       k_u: Zu
-  #     grid_coords: 
-  #       add_midp: True
-  #       grid_coords:
-  #         Y:
-  #           Y: 
-  #           Yp1: 0.5
-  #         X:
-  #           X: 
-  #           Xp1: 0.5
-  #         Z:
-  #           Z: 
-  #           Zp1: 0.5
-  #           Zu: 0.5
-  #           Zl: -0.5
-  #         time: 
-  #           time: -0.5
-  #     # shift_averages: 
-  #     #   averageList:
-  #     parameters:
-  #       rSphere: 6.371e+03
-  #       eq_state: jmd95
-  #       rho0: 1027
-  #       g: 9.81
-  #       eps_nh: 0 
-  #       omega: 7.292123516990375e-05
-  #       c_p: 3.986e+03
-  #       tempFrz0: 9.01e-02
-  #       dTempFrz_dS: -5.75e-02
-  #       grid_type: 'llc'
-  #     name: V_LLC4320
-  #     description: |
-  #       V (3D + time dependent) field for the LLC4320, a general, curvilinear ocean simulations on the cube-sphere.
-  #     citation: |
-  #       Paper.
-  #     projection:
-  #     original_output: snapshot
-
-
-  UVEL_LLC90:
-    description: Zonal velocity for LLC90 ECCO data for 2017
+  UVEL_ECCO:
+    description: Zonal velocity for LLC90 ECCO data
     driver: netcdf
     args:
-      urlpath: '/scratch/ceph/haine/asiddi24/ECCO/ECCO_v4_r4/ecco.jpl.nasa.gov/drive/files/Version4/Release4/nctiles_monthly/UVEL/2017/*.nc'
+      urlpath: '/home/idies/workspace/OceanCirculation/ECCO_v4/UVEL/*.nc'
       xarray_kwargs:
         engine: netcdf4
         concat_dim: time
@@ -985,11 +804,11 @@ sources:
       original_output: snapshot
 
 
-  VVEL_LLC90:
-    description: Meridional velocity for LLC90 ECCO data for 2017
+  VVEL_ECCO:
+    description: Meridional velocity for LLC90 ECCO data
     driver: netcdf
     args:
-      urlpath: '/scratch/ceph/haine/asiddi24/ECCO/ECCO_v4_r4/ecco.jpl.nasa.gov/drive/files/Version4/Release4/nctiles_monthly/VVEL/2017/*.nc'
+      urlpath: '/home/idies/workspace/OceanCirculation/ECCO_v4/VVEL/*.nc'
       xarray_kwargs:
         engine: netcdf4
         concat_dim: time
@@ -1025,11 +844,11 @@ sources:
       original_output: snapshot
 
 
-  ETA_LLC90:
-    description: Sea surface height (ETA) for LLC90 ECCO data for 2017
+  ETA_ECCO:
+    description: Sea surface height (ETA) for LLC90 ECCO data
     driver: netcdf
     args:
-      urlpath: '/scratch/ceph/haine/asiddi24/ECCO/ECCO_v4_r4/ecco.jpl.nasa.gov/drive/files/Version4/Release4/nctiles_monthly/SSH/2017/*.nc'
+      urlpath: '/home/idies/workspace/OceanCirculation/ECCO_v4/SSH/*.nc'
       xarray_kwargs:
         engine: netcdf4
         concat_dim: time
@@ -1063,11 +882,11 @@ sources:
       original_output: snapshot
 
 
-  oceQnet_LLC90:
-    description: Net sea surface heat flux (Qnet) for LLC90 ECCO data for 2017
+  oceQnet_ECCO:
+    description: Net sea surface heat flux (Qnet) for LLC90 ECCO data
     driver: netcdf
     args:
-      urlpath: '/scratch/ceph/haine/asiddi24/ECCO/ECCO_v4_r4/ecco.jpl.nasa.gov/drive/files/Version4/Release4/nctiles_monthly/oceQnet/2017/*.nc'
+      urlpath: '/home/idies/workspace/OceanCirculation/ECCO_v4/oceQnet/*.nc'
       xarray_kwargs:
         engine: netcdf4
         concat_dim: time
@@ -1100,11 +919,12 @@ sources:
       projection:
       original_output: snapshot
 
-  oceTAUX_LLC90:
-    description: Zonal surface wind stresses (oceTAU) for LLC90 ECCO data for 2017
+
+  oceTAUX_ECCO:
+    description: Zonal surface wind stresses (oceTAU) for LLC90 ECCO data
     driver: netcdf
     args:
-      urlpath: '/scratch/ceph/haine/asiddi24/ECCO/ECCO_v4_r4/ecco.jpl.nasa.gov/drive/files/Version4/Release4/nctiles_monthly/oceTAUX/2017/*.nc'
+      urlpath: '/home/idies/workspace/OceanCirculation/ECCO_v4/oceTAUX/*.nc'
       xarray_kwargs:
         engine: netcdf4
         concat_dim: time
@@ -1138,11 +958,11 @@ sources:
       original_output: snapshot
 
 
-  oceTAUY_LLC90:
-    description: Meridional surface wind stresses (oceTAU) for LLC90 ECCO data for 2017
+  oceTAUY_ECCO:
+    description: Meridional surface wind stresses (oceTAU) for LLC90 ECCO data
     driver: netcdf
     args:
-      urlpath: '/scratch/ceph/haine/asiddi24/ECCO/ECCO_v4_r4/ecco.jpl.nasa.gov/drive/files/Version4/Release4/nctiles_monthly/oceTAUY/2017/*.nc'
+      urlpath: '/home/idies/workspace/OceanCirculation/ECCO_v4/oceTAUY/*.nc'
       xarray_kwargs:
         engine: netcdf4
         concat_dim: time
@@ -1176,11 +996,11 @@ sources:
       original_output: snapshot
 
 
-  THETA_LLC90:
-    description: Potential temperature (Theta) for LLC90 ECCO data for 2017
+  THETA_ECCO:
+    description: Potential temperature (Theta) for LLC90 ECCO data
     driver: netcdf
     args:
-      urlpath: '/scratch/ceph/haine/asiddi24/ECCO/ECCO_v4_r4/ecco.jpl.nasa.gov/drive/files/Version4/Release4/nctiles_monthly/THETA/2017/*.nc'
+      urlpath: '/home/idies/workspace/OceanCirculation/ECCO_v4/THETA/*.nc'
       xarray_kwargs:
         engine: netcdf4
         concat_dim: time
@@ -1216,11 +1036,11 @@ sources:
       original_output: snapshot
 
 
-  SALT_LLC90:
-    description: Salinity (Salt) for LLC90 ECCO data for 2017
+  SALT_ECCO:
+    description: Salinity for LLC90 ECCO data
     driver: netcdf
     args:
-      urlpath: '/scratch/ceph/haine/asiddi24/ECCO/ECCO_v4_r4/ecco.jpl.nasa.gov/drive/files/Version4/Release4/nctiles_monthly/SALT/2017/*.nc'
+      urlpath: '/home/idies/workspace/OceanCirculation/ECCO_v4/SALT/*.nc'
       xarray_kwargs:
         engine: netcdf4
         concat_dim: time
@@ -1256,11 +1076,11 @@ sources:
       original_output: snapshot
 
 
-  TFLUX_LLC90:
-    description: Surface temperature flux (TFLUX) for LLC90 ECCO data for 2017
+  TFLUX_ECCO:
+    description: Surface temperature flux (TFLUX) for LLC90 ECCO data
     driver: netcdf
     args:
-      urlpath: '/scratch/ceph/haine/asiddi24/ECCO/ECCO_v4_r4/ecco.jpl.nasa.gov/drive/files/Version4/Release4/nctiles_monthly/TFLUX/2017/*.nc'
+      urlpath: '/home/idies/workspace/OceanCirculation/ECCO_v4/TFLUX/*.nc'
       xarray_kwargs:
         engine: netcdf4
         concat_dim: time
@@ -1292,11 +1112,11 @@ sources:
       projection:
       original_output: snapshot
 
-  SFLUX_LLC90:
-    description: Surface salinity flux (TFLUX) for LLC90 ECCO data for 2017
+  SFLUX_ECCO:
+    description: Surface salinity flux (SFLUX) for LLC90 ECCO data
     driver: netcdf
     args:
-      urlpath: '/scratch/ceph/haine/asiddi24/ECCO/ECCO_v4_r4/ecco.jpl.nasa.gov/drive/files/Version4/Release4/nctiles_monthly/SFLUX/2017/*.nc'
+      urlpath: '/home/idies/workspace/OceanCirculation/ECCO_v4/SFLUX/*.nc'
       xarray_kwargs:
         engine: netcdf4
         concat_dim: time
@@ -1328,11 +1148,11 @@ sources:
       projection:
       original_output: snapshot
 
-  grd_LLC90:
+  grd_ECCO:
     description: horizontal grid for LLC90 ECCO data
     driver: netcdf
     args:
-      urlpath: '/scratch/ceph/haine/asiddi24/ECCO/ECCO_v4_r4/ecco.jpl.nasa.gov/drive/files/Version4/Release4/nctiles_grid/ECCO-GRID.nc'
+      urlpath: '/home/idies/workspace/OceanCirculation/ECCO_v4/GRID/ECCO-GRID.nc'
     metadata:
       model: MITGCM
       swap_dims:
@@ -1340,12 +1160,10 @@ sources:
         k_p1: Zp1
         k_l: Zl
       rename:
-        # Zu: Zed_u
         i: X
         i_g: Xp1
         j: Y
         j_g: Yp1
-        # k_u : Zu
         tile: face
       grid_coords:
         add_midp: True
@@ -1359,7 +1177,6 @@ sources:
           Z:
            Z:
            Zp1: 0.5
-           # Zu: 0.5
            Zl: -0.5
           time: 
             time: -0.5
@@ -1405,8 +1222,6 @@ sources:
             12: 
               X: tuple(((11, 'X', False), None))
               Y: tuple(((9, 'Y', False), (0, 'X', False)))
-      # shift_averages: 
-      #   averageList:
       parameters:
         rSphere: 6.371e+03
         eq_state: jmd95
@@ -1644,7 +1459,7 @@ sources:
       original_output: Monthly means.
 
   # California Coast
-  California_Coast:
+  HYCOM_test:
     description: Simulation off the Northern California Coast with HyCOM ocean mdoel
     driver: netcdf
     model: HyCOM

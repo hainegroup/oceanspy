@@ -236,7 +236,8 @@ f = urllib.request.urlopen(url)
 SCISERVER_DATASETS = yaml.safe_load(f)["datasets"]["sciserver"]
 
 for name in SCISERVER_DATASETS:
-    if name == "Arctic_Control":
+    HIDE = ["Arctic_Control", "LLC4320", "HYCOM", "POP_HYBRID", "POP_CORE"]
+    if name in HIDE:
         continue
 
     # Section
