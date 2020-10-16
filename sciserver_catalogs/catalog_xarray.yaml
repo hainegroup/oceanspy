@@ -645,8 +645,10 @@ sources:
         T: time
       original_output: snapshot
 
+# ======================================================================
+#  LLC4320 sample data
   SSS_LLC4320:
-    description: Surface fields for LLC4320
+    description: Surface salinity and temperature fields for LLC4320
     driver: zarr
     model: MITGCM
     args:
@@ -757,6 +759,8 @@ sources:
       projection:
       original_output: snapshot
 
+# ======================================================================
+# ECCO Data
   UVEL_ECCO:
     description: Zonal velocity for LLC90 ECCO data
     driver: netcdf
@@ -1226,6 +1230,8 @@ sources:
       projection:
       original_output: snapshot
 
+# ======================================================================
+# POP data (ocean only, CORE forcing)
   grd_CORE_POP:
     description: POP (version 2) model grid
     driver: netcdf
@@ -1330,6 +1336,8 @@ sources:
         Justin et al (2014), A new synoptic scale resolving global climate simulatoin using the Community Earth System Model. J. Adv. Model. Earth Syst., 6, 1065-1094. https:doi.org/10.1002/2014MS000363
       original_output: Monthly means.
 
+# ======================================================================
+# POP data atmos-ocean coupled
   grd_HYBRID_POP:
     description: POP (version 2) model grid
     driver: netcdf
@@ -1434,6 +1442,8 @@ sources:
         Justin et al (2014), A new synoptic scale resolving global climate simulatoin using the Community Earth System Model. J. Adv. Model. Earth Syst., 6, 1065-1094. https:doi.org/10.1002/2014MS000363
       original_output: Monthly means.
 
+# ======================================================================
+# HyCOM data test, interpolated onto lat-lon-depth coords
   HYCOM_test:
     description: Simulation off the Northern California Coast with HyCOM ocean mdoel
     driver: netcdf
@@ -1474,7 +1484,7 @@ sources:
             Zl: -0.5
           time: 
             time: -0.5
-      parameters: # need to double check this parameters. Add scale factors
+      parameters:
         temp_offset: 20
         temp_scale: 0.001
         temp_fill: -30000
