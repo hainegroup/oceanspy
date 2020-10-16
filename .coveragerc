@@ -11,3 +11,4 @@ ignore_errors = True
 omit = oceanspy/tests/*
        oceanspy/Catalogs/*
        oceanspy/__init__.py
+       docs/*
