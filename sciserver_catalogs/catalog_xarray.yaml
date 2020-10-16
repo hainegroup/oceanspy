@@ -645,8 +645,6 @@ sources:
         T: time
       original_output: snapshot
 
-  # ====================================================================
-  # LLC4320
   SSS_LLC4320:
     description: Surface fields for LLC4320
     driver: zarr
@@ -658,7 +656,6 @@ sources:
         concat_dim: time
         parallel: True
         combine: nested
-      # drop_variables: ['XC','YC','iter','k','k_l','k_u','Z','Zl','Zu']
     metadata:
       rename:
         i: X
@@ -673,7 +670,6 @@ sources:
         Paper.
       projection:
       original_output: snapshot
-
 
   grd_LLC4320:
     description: horizontal grid for LLC4320
@@ -700,7 +696,7 @@ sources:
             Xp1: 0.5
           time: 
             time: -0.5
-      face_connections: # topology
+      face_connections:
         face_connections:
           face:
             0:
@@ -742,8 +738,6 @@ sources:
             12: 
               X: tuple(((11, 'X', False), None))
               Y: tuple(((9, 'Y', False), (0, 'X', False)))
-      # shift_averages: 
-      #   averageList:
       parameters:
         rSphere: 6.371e+03
         eq_state: jmd95
@@ -762,7 +756,6 @@ sources:
         Paper.
       projection:
       original_output: snapshot
-
 
   UVEL_ECCO:
     description: Zonal velocity for LLC90 ECCO data
@@ -803,7 +796,6 @@ sources:
       projection:
       original_output: snapshot
 
-
   VVEL_ECCO:
     description: Meridional velocity for LLC90 ECCO data
     driver: netcdf
@@ -843,7 +835,6 @@ sources:
       projection:
       original_output: snapshot
 
-
   ETA_ECCO:
     description: Sea surface height (ETA) for LLC90 ECCO data
     driver: netcdf
@@ -880,7 +871,6 @@ sources:
         Paper.
       projection:
       original_output: snapshot
-
 
   oceQnet_ECCO:
     description: Net sea surface heat flux (Qnet) for LLC90 ECCO data
@@ -919,7 +909,6 @@ sources:
       projection:
       original_output: snapshot
 
-
   oceTAUX_ECCO:
     description: Zonal surface wind stresses (oceTAU) for LLC90 ECCO data
     driver: netcdf
@@ -957,7 +946,6 @@ sources:
       projection:
       original_output: snapshot
 
-
   oceTAUY_ECCO:
     description: Meridional surface wind stresses (oceTAU) for LLC90 ECCO data
     driver: netcdf
@@ -994,7 +982,6 @@ sources:
         Paper.
       projection:
       original_output: snapshot
-
 
   THETA_ECCO:
     description: Potential temperature (Theta) for LLC90 ECCO data
@@ -1035,7 +1022,6 @@ sources:
       projection:
       original_output: snapshot
 
-
   SALT_ECCO:
     description: Salinity for LLC90 ECCO data
     driver: netcdf
@@ -1074,7 +1060,6 @@ sources:
         Paper.
       projection:
       original_output: snapshot
-
 
   TFLUX_ECCO:
     description: Surface temperature flux (TFLUX) for LLC90 ECCO data
@@ -1180,7 +1165,7 @@ sources:
            Zl: -0.5
           time: 
             time: -0.5
-      face_connections: # topology
+      face_connections:
         face_connections:
           face:
             0:
@@ -1241,7 +1226,6 @@ sources:
       projection:
       original_output: snapshot
 
-
   grd_CORE_POP:
     description: POP (version 2) model grid
     driver: netcdf
@@ -1297,8 +1281,6 @@ sources:
         Justin et al (2014), A new synoptic scale resolving global climate simulatoin using the Community Earth System Model. J. Adv. Model. Earth Syst., 6, 1065-1094. https:doi.org/10.1002/2014MS000363
       original_output: Monthly means.
 
-# ======================================================================
-#  POP Core-forced
   fld_CORE_POP:
     description: Pop ocean (only) simulation forced with COREv2
     driver: netcdf
@@ -1347,7 +1329,6 @@ sources:
       citation: |
         Justin et al (2014), A new synoptic scale resolving global climate simulatoin using the Community Earth System Model. J. Adv. Model. Earth Syst., 6, 1065-1094. https:doi.org/10.1002/2014MS000363
       original_output: Monthly means.
-
 
   grd_HYBRID_POP:
     description: POP (version 2) model grid
@@ -1399,8 +1380,6 @@ sources:
         Justin et al (2014), A new synoptic scale resolving global climate simulation using the Community Earth System Model. J. Adv. Model. Earth Syst., 6, 1065-1094. https:doi.org/10.1002/2014MS000363
       original_output: Monthly means.
 
-
-#  POP coupled simulation
   fld_HYBRID_POP:
     description: Flow fields for the coupled atmos-ocean simulation for the CESM model (POPv2).
     driver: netcdf
@@ -1420,9 +1399,6 @@ sources:
         Nz: Z
         nlat: Y
         nlon: X
-      # manipulate_coords:
-      #   fillna: False
-      #   coords1Dfrom2D: False
       grid_coords: 
         add_midp: True
         grid_coords:
@@ -1458,7 +1434,6 @@ sources:
         Justin et al (2014), A new synoptic scale resolving global climate simulatoin using the Community Earth System Model. J. Adv. Model. Earth Syst., 6, 1065-1094. https:doi.org/10.1002/2014MS000363
       original_output: Monthly means.
 
-  # California Coast
   HYCOM_test:
     description: Simulation off the Northern California Coast with HyCOM ocean mdoel
     driver: netcdf
@@ -1500,13 +1475,6 @@ sources:
           time: 
             time: -0.5
       parameters: # need to double check this parameters. Add scale factors
-        rSphere: 6.371e+03
-        eq_state: jmd95
-        rho0: 1027
-        g: 9.81
-        eps_nh: 0
-        omega: 7.292123516990375e-05
-        c_p: 3.986e+03
         temp_offset: 20
         temp_scale: 0.001
         temp_fill: -30000
@@ -1518,10 +1486,7 @@ sources:
       description: |
         High-resolution grid of the (1/25 deg) numerical simulation covering the California Coast using the HyCOM model. The original grid has 41 (isopycnal) layers but these files were interpolated to 101 vertical levels.
       mates: | 
-        Sample files
+        Sample (test) files
       projection: Mercator
       original_output: snapshot.
-
-
-
 
