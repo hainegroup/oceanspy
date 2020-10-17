@@ -60,7 +60,7 @@ script:
       make clean;
       make html;
     elif [[ $TASK == "black" ]]; then
-      black --check . && black-nb --check .
+      black --check . && black-nb --check .;
     elif [[ $TASK == "flake8" ]]; then
       flake8;
     else
