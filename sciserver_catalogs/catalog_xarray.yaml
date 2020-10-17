@@ -2,16 +2,18 @@ plugins:
   source:
     - module: intake_xarray
 sources:
-  
+
   # ===========================
   # get_started
   grd_get_started:
     description: Grid of get_started
     driver: netcdf
+    model: MITGCM
     args:
       urlpath: /home/idies/workspace/OceanCirculation/exp_ASR/grid.nc
-      engine: netcdf4
-      drop_variables: ['RC', 'RF', 'RU', 'RL']
+      xarray_kwargs:
+        engine: netcdf4
+        drop_variables: ['RC', 'RF', 'RU', 'RL']
     metadata:
       manipulate_coords:
         fillna: True
@@ -57,7 +59,7 @@ sources:
       description: |
         Small cutout from EGshelfIIseas2km_ASR_crop.
       citation: |
-        Almansi et al., 2017 - JPO.
+        Almansi et al., 2020 - GRL.
       mates: |
         EGshelfIIseas2km_ASR_full: Full domain without variables to close budgets.
         EGshelfIIseas2km_ASR_crop: Cropped domain with variables to close budgets.
@@ -66,10 +68,11 @@ sources:
   fld_get_started:
     description: Full-Fields of get_started
     driver: netcdf
+    model: MITGCM
     args:
       urlpath: /home/idies/workspace/OceanCirculation/exp_ASR/full_2007-09-01.nc
-      engine: netcdf4
-      concat_dim: T
+      xarray_kwargs:
+        engine: netcdf4
     metadata:
       isel: 
         Z: slice(None, 55)
@@ -85,10 +88,11 @@ sources:
   avg_get_started:
     description: Cropped-Fields of get_started
     driver: netcdf
+    model: MITGCM
     args:
       urlpath: /home/idies/workspace/OceanCirculation/exp_ASR/crop_2007-09-01.nc
-      engine: netcdf4
-      concat_dim: T
+      xarray_kwargs:
+        engine: netcdf4
     metadata:
       isel: 
         time: slice(4)
@@ -97,19 +101,153 @@ sources:
       original_output: average
 
   # ===========================
+  # IGP
+  grd_IGPwinter:
+    description: Grid of IGPwinter
+    driver: netcdf
+    args:
+      urlpath: /home/idies/workspace/OceanCirculation/IGP/grid.nc
+      xarray_kwargs:
+        engine: netcdf4
+        drop_variables: ['RC', 'RF', 'RU', 'RL']
+    metadata:
+      manipulate_coords:
+        coordsUVfromG: True
+      grid_coords: 
+        add_midp: True
+        grid_coords:
+          Y:
+            Y: 
+            Yp1: 0.5
+          X:
+            X: 
+            Xp1: 0.5
+          Z:
+           Z: 
+           Zp1: 0.5
+           Zu: 0.5
+           Zl: -0.5
+          time: 
+            time: -0.5
+      shift_averages: 
+        averageList: ['UVELMASS', 'VVELMASS', 'WVELMASS',
+                      'ADVr_TH', 'ADVx_TH', 'ADVy_TH', 'DFrI_TH',
+                      'ADVr_SLT', 'ADVx_SLT', 'ADVy_SLT', 'DFrI_SLT',
+                      'KPPg_TH', 'KPPg_SLT', 'oceSPtnd',
+                      'oceQsw_AVG', 'TFLUX', 'SFLUX', 'oceFWflx_AVG']
+      parameters:
+        rSphere: 6.371e+03
+        eq_state: mdjwf
+        rho0: 1027
+        g: 9.8156
+        eps_nh: 0 
+        omega: 7.292123516990375e-05
+        c_p: 3.986e+03
+        tempFrz0: 9.01e-02
+        dTempFrz_dS: -5.75e-02
+      name: IGP
+      description: |
+        High-resolution numerical simulation carried out in parallel to the observational
+        component of the Iceland Greenland Seas Project (IGP).
+      citation: | 
+        Renfrew et al., 2019 - BAMS.
+      projection: Mercator
+
+  fld_IGPwinter:
+    description: Fields of IGPwinter
+    driver: netcdf
+    args:
+      urlpath: /home/idies/workspace/OceanCirculation/IGP/day*.nc
+      xarray_kwargs:
+        engine: netcdf4
+        concat_dim: T
+        parallel: True
+    metadata:
+      rename:
+        T: time  
+
+  # ===========================
+  # IGPyearlong
+  grd_IGPyearlong:
+    description: Grid of IGPyearlong
+    driver: netcdf
+    args:
+      urlpath: /home/idies/workspace/ocean_circulation/data01_01/IGP/grid.nc
+      xarray_kwargs:
+        engine: netcdf4
+        drop_variables: ['RC', 'RF', 'RU', 'RL']
+    metadata:
+      manipulate_coords:
+        coordsUVfromG: True
+      grid_coords: 
+        add_midp: True
+        grid_coords:
+          Y:
+            Y: 
+            Yp1: 0.5
+          X:
+            X: 
+            Xp1: 0.5
+          Z:
+           Z: 
+           Zp1: 0.5
+           Zu: 0.5
+           Zl: -0.5
+          time: 
+            time: -0.5
+      shift_averages: 
+        averageList: ['UVELMASS', 'VVELMASS', 'WVELMASS',
+                      'ADVr_TH', 'ADVx_TH', 'ADVy_TH', 'DFrI_TH',
+                      'ADVr_SLT', 'ADVx_SLT', 'ADVy_SLT', 'DFrI_SLT',
+                      'KPPg_TH', 'KPPg_SLT', 'oceSPtnd',
+                      'oceQsw_AVG', 'TFLUX', 'SFLUX', 'oceFWflx_AVG']
+      parameters:
+        rSphere: 6.371e+03
+        eq_state: mdjwf
+        rho0: 1027
+        g: 9.8156
+        eps_nh: 0 
+        omega: 7.292123516990375e-05
+        c_p: 3.986e+03
+        tempFrz0: 9.01e-02
+        dTempFrz_dS: -5.75e-02
+      name: IGPyearlong
+      description: |
+        High-resolution numerical simulation carried out in parallel to the observational
+        component of the Iceland Greenland Seas Project (IGP). Year-long simulation.
+      citation: | 
+        Renfrew et al., 2019 - BAMS.
+      projection: Mercator
+
+  fld_IGPyearlong:
+    description: Fields of IGPyearlong
+    driver: netcdf
+    args:
+      urlpath: /home/idies/workspace/ocean_circulation/data*_*/IGP/day_*.nc
+      xarray_kwargs:
+        engine: netcdf4
+        concat_dim: T
+        parallel: True
+    metadata:
+      rename:
+        T: time
+
+  # ===========================
   # EGshelfIIseas2km_ERAI_6H
   grd_EGshelfIIseas2km_ERAI_6H:
     description: Grid of EGshelfIIseas2km_ERAI_6H
     driver: netcdf
+    model: MITGCM
     args:
       urlpath: /home/idies/workspace/OceanCirculation/exp_ERAI/grid.nc
-      engine: netcdf4
-      drop_variables: ['RC', 'RF', 'RU', 'RL']
+      xarray_kwargs:
+        engine: netcdf4
+        drop_variables: ['RC', 'RF', 'RU', 'RL']
     metadata:
       manipulate_coords:
         fillna: True
         coords1Dfrom2D: True
-      grid_coords: 
+      grid_coords:
         add_midp: True
         grid_coords:
           Y:
@@ -150,11 +288,14 @@ sources:
   fld_EGshelfIIseas2km_ERAI_6H:
     description: 6H-Fields of EGshelfIIseas2km_ERAI_6H
     driver: netcdf
+    model: MITGCM
     args:
       urlpath: /home/idies/workspace/OceanCirculation/exp_ERAI/6H*.nc
-      engine: netcdf4
-      concat_dim: T
-      parallel: True
+      xarray_kwargs:
+        engine: netcdf4
+        concat_dim: T
+        parallel: True
+        combine: nested
     metadata:
       rename:
         T: time
@@ -165,10 +306,12 @@ sources:
   grd_EGshelfIIseas2km_ERAI_1D:
     description: Grid of EGshelfIIseas2km_ERAI_1D
     driver: netcdf
+    model: MITGCM
     args:
       urlpath: /home/idies/workspace/OceanCirculation/exp_ERAI/grid.nc
-      engine: netcdf4
-      drop_variables: ['RC', 'RF', 'RU', 'RL']
+      xarray_kwargs:
+        engine: netcdf4
+        drop_variables: ['RC', 'RF', 'RU', 'RL']
     metadata:
       manipulate_coords:
         fillna: True
@@ -214,11 +357,14 @@ sources:
   fld_EGshelfIIseas2km_ERAI_1D:
     description: 6H-Fields of EGshelfIIseas2km_ERAI_1D
     driver: netcdf
+    model: MITGCM
     args:
       urlpath: /home/idies/workspace/OceanCirculation/exp_ERAI/6H*.nc
-      engine: netcdf4
-      concat_dim: T
-      parallel: True
+      xarray_kwargs:
+        engine: netcdf4
+        concat_dim: T
+        parallel: True
+        combine: nested
     metadata:
       rename:
         T: time
@@ -229,11 +375,13 @@ sources:
   dailyEGshelfIIseas2km_ERAI_1D:
     description: Daily-Fields of EGshelfIIseas2km_ERAI_1D
     driver: netcdf
+    model: MITGCM
     args:
       urlpath: /home/idies/workspace/OceanCirculation/exp_ERAI/1D*.nc
-      engine: netcdf4
-      concat_dim: T
-      parallel: True
+      xarray_kwargs:
+        engine: netcdf4
+        concat_dim: T
+        parallel: True
     metadata:
       rename:
         T: time
@@ -244,10 +392,12 @@ sources:
   grd_EGshelfIIseas2km_ASR_full:
     description: Grid of EGshelfIIseas2km_ASR_full
     driver: netcdf
+    model: MITGCM
     args:
       urlpath: /home/idies/workspace/OceanCirculation/exp_ASR/grid.nc
-      engine: netcdf4
-      drop_variables: ['RC', 'RF', 'RU', 'RL']
+      xarray_kwargs:
+        engine: netcdf4
+        drop_variables: ['RC', 'RF', 'RU', 'RL']
     metadata:
       manipulate_coords:
         fillna: True
@@ -273,7 +423,7 @@ sources:
         eq_state: jmd95
         rho0: 1027
         g: 9.81
-        eps_nh: 0 
+        eps_nh: 0
         omega: 7.292123516990375e-05
         c_p: 3.986e+03
         tempFrz0: 9.01e-02
@@ -283,7 +433,7 @@ sources:
         High-resolution (~2km) numerical simulation covering the east Greenland shelf (EGshelf), 
         and the Iceland and Irminger Seas (IIseas) forced by the Arctic System Reanalysis (ASR). 
       citation: | 
-        Almansi et al., 2017 - JPO.
+        Almansi et al., 2020 - GRL.
       characteristics: |
         full: Full domain without variables to close budgets.
       mates: | 
@@ -293,11 +443,14 @@ sources:
   fld_EGshelfIIseas2km_ASR_full:
     description: Fields of EGshelfIIseas2km_ASR_full
     driver: netcdf
+    model: MITGCM
     args:
       urlpath: /home/idies/workspace/OceanCirculation/exp_ASR/full*.nc
-      engine: netcdf4
-      concat_dim: T
-      parallel: True
+      xarray_kwargs:
+        engine: netcdf4
+        concat_dim: T
+        parallel: True
+        combine: nested
     metadata:
       rename:
         T: time
@@ -308,10 +461,12 @@ sources:
   grd_EGshelfIIseas2km_ASR_crop:
     description: Grid of EGshelfIIseas2km_ASR_crop
     driver: netcdf
+    model: MITGCM
     args:
       urlpath: /home/idies/workspace/OceanCirculation/exp_ASR/grid.nc
-      engine: netcdf4
-      drop_variables: ['RC', 'RF', 'RU', 'RL']
+      xarray_kwargs:
+        engine: netcdf4
+        drop_variables: ['RC', 'RF', 'RU', 'RL']
     metadata:
       manipulate_coords:
         fillna: True
@@ -353,12 +508,12 @@ sources:
         c_p: 3.986e+03
         tempFrz0: 9.01e-02
         dTempFrz_dS: -5.75e-02
-      name: EGshelfIIseas2km_ASR_full
+      name: EGshelfIIseas2km_ASR_crop
       description: |
         High-resolution (~2km) numerical simulation covering the east Greenland shelf (EGshelf), 
         and the Iceland and Irminger Seas (IIseas) forced by the Arctic System Reanalysis (ASR). 
       citation: | 
-        Almansi et al., 2017 - JPO.
+        Almansi et al., 2020 - GRL.
       characteristics: | 
         crop: Cropped domain with variables to close budgets.
       mates: | 
@@ -368,11 +523,14 @@ sources:
   fld_EGshelfIIseas2km_ASR_crop:
     description: Full-Fields of EGshelfIIseas2km_ASR_crop
     driver: netcdf
+    model: MITGCM
     args:
       urlpath: /home/idies/workspace/OceanCirculation/exp_ASR/full*.nc
-      engine: netcdf4
-      concat_dim: T
-      parallel: True
+      xarray_kwargs:
+        engine: netcdf4
+        concat_dim: T
+        parallel: True
+        combine: nested
     metadata:
       isel: 
         Z: slice(None, 55)
@@ -388,11 +546,14 @@ sources:
   avg_EGshelfIIseas2km_ASR_crop:
     description: Cropped-Fields of EGshelfIIseas2km_ASR_crop
     driver: netcdf
+    model: MITGCM
     args:
       urlpath: /home/idies/workspace/OceanCirculation/exp_ASR/crop*.nc
-      engine: netcdf4
-      concat_dim: T
-      parallel: True
+      xarray_kwargs:
+        engine: netcdf4
+        concat_dim: T
+        parallel: True
+        combine: nested
     metadata:
       rename: 
         T: time
@@ -403,10 +564,13 @@ sources:
   grd_Arctic_Control:
     description: Grid of Arctic Control
     driver: netcdf
+    model: MITGCM
     args:
+      # urlpath: /sciserver/oceanography/exp_Arctic_Control/GRID/grid_glued_swapped.nc
       urlpath: /home/idies/workspace/OceanCirculation/exp_Arctic_Control/GRID/grid_glued_swapped.nc
-      engine: netcdf4
-      drop_variables: ['RC', 'RF', 'RU', 'RL']
+      xarray_kwargs:
+        engine: netcdf4
+        drop_variables: ['RC', 'RF', 'RU', 'RL']
     metadata:
       manipulate_coords:
         coordsUVfromG: True
@@ -438,6 +602,8 @@ sources:
         c_p: 3.986e+03
         tempFrz0: 9.01e-02
         dTempFrz_dS: -5.75e-02
+        grid_type: 'spherical'
+      # grid_type: spherical
       name: Arctic_Control
       description: |
         Curvilinear grid test. Setup by Dr. Renske Gelderloos.
@@ -446,29 +612,891 @@ sources:
   fld_Arctic_Control:
     description: Average fields of Arctic_Control
     driver: netcdf
+    model: MITGCM
     args:
+      # urlpath: /sciserver/oceanography/exp_Arctic_Control/days*/DIAGS/*.nc
       urlpath: /home/idies/workspace/OceanCirculation/exp_Arctic_Control/days*/DIAGS/*.nc
-      engine: netcdf4
-      concat_dim: T
-      parallel: True
-      drop_variables: ['diag_levels', 'iter', 'SIGMA0']
+      xarray_kwargs:
+        engine: netcdf4
+        concat_dim: T
+        parallel: True
+        combine: nested
+        drop_variables: ['diag_levels', 'iter', 'SIGMA0']
     metadata:
       rename:
         T: time
+        THETA: Temp
       original_output: average
             
   state_Arctic_Control:
     description: State variables of Arctic_Control
     driver: netcdf
+    model: MITGCM
     args:
+      # urlpath: /sciserver/oceanography/exp_Arctic_Control/days*/STATE/*.nc
       urlpath: /home/idies/workspace/OceanCirculation/exp_Arctic_Control/days*/STATE/*.nc
-      engine: netcdf4
-      concat_dim: T
-      parallel: True
+      xarray_kwargs:
+        engine: netcdf4
+        concat_dim: T
+        parallel: True
+        combine: nested
     metadata:
       rename:
         T: time
       original_output: snapshot
 
+# ======================================================================
+#  LLC4320 sample data
+  SSS_LLC4320:
+    description: Surface salinity and temperature fields for LLC4320
+    driver: zarr
+    model: MITGCM
+    args:
+      urlpath: '/sciserver/filedb*/ocean/poseidon/LLC4320/2D/SS*'
+      chunks: {'i':4320, 'j':4320, 'time':1, 'face':1}
+      xarray_kwargs:
+        concat_dim: time
+        parallel: True
+        combine: nested
+    metadata:
+      rename:
+        i: X
+        j: Y
+        i_g: Xp1
+        j_g: Yp1
+      parameters:
+      name: SSS_LLC4320
+      description: |
+        Surface fields for the LLC4320, a general, curvilinear ocean simulations on the cube-sphere.
+      citation: |
+        Paper.
+      projection:
+      original_output: snapshot
 
-    
+  grd_LLC4320:
+    description: horizontal grid for LLC4320
+    driver: zarr
+    args:
+      urlpath: '/sciserver/filedb05-01/ocean/poseidon/LLC4320/grid'
+    metadata:
+      swap_dims:
+        k: Z
+        k_p1: Zp1
+      rename:
+        i: X
+        i_g: Xp1
+        j: Y
+        j_g: Yp1
+      grid_coords: 
+        add_midp: True
+        grid_coords:
+          Y:
+            Y: 
+            Yp1: 0.5
+          X:
+            X: 
+            Xp1: 0.5
+          time: 
+            time: -0.5
+      face_connections:
+        face_connections:
+          face:
+            0:
+              X: tuple(((12, 'Y', False), (3, 'X', False)))
+              Y: tuple((None,(1,'Y',False)))
+            1:
+              X: tuple(((11,'Y',False),(4,'X',False)))
+              Y: tuple(((0,'Y',False),(2,'Y',False)))
+            2:
+              X: tuple(((10,'Y',False),(5, 'X', False)))
+              Y: tuple(((1, 'Y', False), (6, 'X', False)))
+            3:
+              X: tuple(((0, 'X', False), (9, 'Y', False)))
+              Y: tuple((None, (4, 'Y', False)))
+            4:
+              X: tuple(((1, 'X', False), (8, 'Y', False)))
+              Y: tuple(((3, 'Y', False), (5, 'Y', False)))
+            5:
+              X: tuple(((2, 'X', False), (7, 'Y', False)))
+              Y: tuple(((4, 'Y', False), (6, 'Y', False)))
+            6: 
+              X: tuple(((2, 'Y', False), (7, 'X', False)))
+              Y: tuple(((5, 'Y', False), (10, 'X', False)))
+            7:
+              X: tuple(((6, 'X', False), (8, 'X', False)))
+              Y: tuple(((5, 'X', False), (10, 'Y', False)))
+            8:
+              X: tuple(((7, 'X', False), (9, 'X', False)))
+              Y: tuple(((4, 'X', False), (11, 'Y', False)))
+            9:
+              X: tuple(((8, 'X', False), None))
+              Y: tuple(((3, 'X', False), (12, 'Y', False)))
+            10:
+              X: tuple(((6, 'Y', False), (11, 'X', False)))
+              Y: tuple(((7, 'Y', False), (2, 'X', False)))
+            11: 
+              X: tuple(((10, 'X', False), (12, 'X', False)))
+              Y: tuple(((8, 'Y', False), (1, 'X', False)))
+            12: 
+              X: tuple(((11, 'X', False), None))
+              Y: tuple(((9, 'Y', False), (0, 'X', False)))
+      parameters:
+        rSphere: 6.371e+03
+        eq_state: jmd95
+        rho0: 1027
+        g: 9.81
+        eps_nh: 0 
+        omega: 7.292123516990375e-05
+        c_p: 3.986e+03
+        tempFrz0: 9.01e-02
+        dTempFrz_dS: -5.75e-02
+        grid_type: llc
+      name: LLC4320
+      description: |
+        horizontal grid for LLC4320, a general, curvilinear ocean simulations on the cube-sphere.
+      citation: |
+        Paper.
+      projection:
+      original_output: snapshot
+
+# ======================================================================
+# ECCO Data
+  UVEL_ECCO:
+    description: Zonal velocity for LLC90 ECCO data
+    driver: netcdf
+    args:
+      urlpath: '/home/idies/workspace/OceanCirculation/ECCO_v4/UVEL/*.nc'
+      xarray_kwargs:
+        engine: netcdf4
+        concat_dim: time
+        parallel: True
+        combine: nested
+        drop_variables: ['time_bnds']
+    metadata:
+      swap_dims:
+        k: Z
+      rename:
+        i_g: Xp1
+        j: Y
+        tile: face
+        UVEL: U
+      model: MITGCM
+      parameters:
+        rSphere: 6.371e+03
+        eq_state: jmd95
+        rho0: 1027
+        g: 9.81
+        eps_nh: 0 
+        omega: 7.292123516990375e-05
+        c_p: 3.986e+03
+        tempFrz0: 9.01e-02
+        dTempFrz_dS: -5.75e-02
+        grid_type: llc
+      name: LLC90
+      description: |
+        horizontal UVEL for LLC90 ECCO data from the MITGCM, a general, curvilinear ocean simulation on the cube-sphere.
+      citation: |
+        Paper.
+      projection:
+      original_output: snapshot
+
+  VVEL_ECCO:
+    description: Meridional velocity for LLC90 ECCO data
+    driver: netcdf
+    args:
+      urlpath: '/home/idies/workspace/OceanCirculation/ECCO_v4/VVEL/*.nc'
+      xarray_kwargs:
+        engine: netcdf4
+        concat_dim: time
+        parallel: True
+        combine: nested
+        drop_variables: ['time_bnds']
+    metadata:
+      swap_dims:
+        k: Z
+      rename:
+        i: X
+        j_g: Yp1
+        tile: face
+        VVEL: V
+      model: MITGCM
+      parameters:
+        rSphere: 6.371e+03
+        eq_state: jmd95
+        rho0: 1027
+        g: 9.81
+        eps_nh: 0 
+        omega: 7.292123516990375e-05
+        c_p: 3.986e+03
+        tempFrz0: 9.01e-02
+        dTempFrz_dS: -5.75e-02
+        grid_type: llc
+      name: LLC90
+      description: |
+        horizontal VVEL for LLC90 ECCO data from the MITGCM, a general, curvilinear ocean simulation on the cube-sphere.
+      citation: |
+        Paper.
+      projection:
+      original_output: snapshot
+
+  ETA_ECCO:
+    description: Sea surface height (ETA) for LLC90 ECCO data
+    driver: netcdf
+    args:
+      urlpath: '/home/idies/workspace/OceanCirculation/ECCO_v4/SSH/*.nc'
+      xarray_kwargs:
+        engine: netcdf4
+        concat_dim: time
+        parallel: True
+        combine: nested
+        drop_variables: ['time_bnds']
+    metadata:
+      rename:
+        i: X
+        j: Y
+        tile: face
+        SSH: ETA
+      model: MITGCM
+      parameters:
+        rSphere: 6.371e+03
+        eq_state: jmd95
+        rho0: 1027
+        g: 9.81
+        eps_nh: 0 
+        omega: 7.292123516990375e-05
+        c_p: 3.986e+03
+        tempFrz0: 9.01e-02
+        dTempFrz_dS: -5.75e-02
+        grid_type: llc
+      name: LLC90
+      description: |
+        Sea surface height for LLC90 ECCO data from the MITGCM, a general, curvilinear ocean simulation on the cube-sphere.
+      citation: |
+        Paper.
+      projection:
+      original_output: snapshot
+
+  oceQnet_ECCO:
+    description: Net sea surface heat flux (Qnet) for LLC90 ECCO data
+    driver: netcdf
+    args:
+      urlpath: '/home/idies/workspace/OceanCirculation/ECCO_v4/oceQnet/*.nc'
+      xarray_kwargs:
+        engine: netcdf4
+        concat_dim: time
+        parallel: True
+        combine: nested
+        drop_variables: ['time_bnds']
+    metadata:
+      rename:
+        i: X
+        j: Y
+        tile: face
+        oceQnet: Qnet
+      model: MITGCM
+      parameters:
+        rSphere: 6.371e+03
+        eq_state: jmd95
+        rho0: 1027
+        g: 9.81
+        eps_nh: 0 
+        omega: 7.292123516990375e-05
+        c_p: 3.986e+03
+        tempFrz0: 9.01e-02
+        dTempFrz_dS: -5.75e-02
+        grid_type: llc
+      name: LLC90
+      description: |
+        Surface heat flux (oceQnet) for LLC90 ECCO data from the MITGCM, a general, curvilinear ocean simulation on the cube-sphere.
+      citation: |
+        Paper.
+      projection:
+      original_output: snapshot
+
+  oceTAUX_ECCO:
+    description: Zonal surface wind stresses (oceTAU) for LLC90 ECCO data
+    driver: netcdf
+    args:
+      urlpath: '/home/idies/workspace/OceanCirculation/ECCO_v4/oceTAUX/*.nc'
+      xarray_kwargs:
+        engine: netcdf4
+        concat_dim: time
+        parallel: True
+        combine: nested
+        drop_variables: ['time_bnds']
+    metadata:
+      rename:
+        i_g: Xp1
+        j: Y
+        tile: face
+        oceTAUX: TAUX
+      model: MITGCM
+      parameters:
+        rSphere: 6.371e+03
+        eq_state: jmd95
+        rho0: 1027
+        g: 9.81
+        eps_nh: 0 
+        omega: 7.292123516990375e-05
+        c_p: 3.986e+03
+        tempFrz0: 9.01e-02
+        dTempFrz_dS: -5.75e-02
+        grid_type: llc
+      name: LLC90
+      description: |
+        Zonal surface wind stress (oceTAUX) for LLC90 ECCO data from the MITGCM, a general, curvilinear ocean simulation on the cube-sphere.
+      citation: |
+        Paper.
+      projection:
+      original_output: snapshot
+
+  oceTAUY_ECCO:
+    description: Meridional surface wind stresses (oceTAU) for LLC90 ECCO data
+    driver: netcdf
+    args:
+      urlpath: '/home/idies/workspace/OceanCirculation/ECCO_v4/oceTAUY/*.nc'
+      xarray_kwargs:
+        engine: netcdf4
+        concat_dim: time
+        parallel: True
+        combine: nested
+        drop_variables: ['time_bnds']
+    metadata:
+      rename:
+        i: X
+        j_g: Yp1
+        tile: face
+        oceTAUY: TAUY
+      model: MITGCM
+      parameters:
+        rSphere: 6.371e+03
+        eq_state: jmd95
+        rho0: 1027
+        g: 9.81
+        eps_nh: 0 
+        omega: 7.292123516990375e-05
+        c_p: 3.986e+03
+        tempFrz0: 9.01e-02
+        dTempFrz_dS: -5.75e-02
+        grid_type: llc
+      name: LLC90
+      description: |
+        Meridional surface wind stress (oceTAUY) for LLC90 ECCO data from the MITGCM, a general, curvilinear ocean simulation on the cube-sphere.
+      citation: |
+        Paper.
+      projection:
+      original_output: snapshot
+
+  THETA_ECCO:
+    description: Potential temperature (Theta) for LLC90 ECCO data
+    driver: netcdf
+    args:
+      urlpath: '/home/idies/workspace/OceanCirculation/ECCO_v4/THETA/*.nc'
+      xarray_kwargs:
+        engine: netcdf4
+        concat_dim: time
+        parallel: True
+        combine: nested
+        drop_variables: ['time_bnds']
+    metadata:
+      swap_dims:
+        k: Z
+      rename:
+        i: X
+        j: Y
+        tile: face
+        THETA: T
+      model: MITGCM
+      parameters:
+        rSphere: 6.371e+03
+        eq_state: jmd95
+        rho0: 1027
+        g: 9.81
+        eps_nh: 0 
+        omega: 7.292123516990375e-05
+        c_p: 3.986e+03
+        tempFrz0: 9.01e-02
+        dTempFrz_dS: -5.75e-02
+        grid_type: llc
+      name: LLC90
+      description: |
+        Potential temperature (Theta) for LLC90 ECCO data from the MITGCM, a general, curvilinear ocean simulation on the cube-sphere.
+      citation: |
+        Paper.
+      projection:
+      original_output: snapshot
+
+  SALT_ECCO:
+    description: Salinity for LLC90 ECCO data
+    driver: netcdf
+    args:
+      urlpath: '/home/idies/workspace/OceanCirculation/ECCO_v4/SALT/*.nc'
+      xarray_kwargs:
+        engine: netcdf4
+        concat_dim: time
+        parallel: True
+        combine: nested
+        drop_variables: ['time_bnds']
+    metadata:
+      swap_dims:
+        k: Z
+      rename:
+        i: X
+        j: Y
+        tile: face
+        SALT: S
+      model: MITGCM
+      parameters:
+        rSphere: 6.371e+03
+        eq_state: jmd95
+        rho0: 1027
+        g: 9.81
+        eps_nh: 0 
+        omega: 7.292123516990375e-05
+        c_p: 3.986e+03
+        tempFrz0: 9.01e-02
+        dTempFrz_dS: -5.75e-02
+        grid_type: llc
+      name: LLC90
+      description: |
+        Salinity (Salt) for LLC90 ECCO data from the MITGCM, a general, curvilinear ocean simulation on the cube-sphere.
+      citation: |
+        Paper.
+      projection:
+      original_output: snapshot
+
+  TFLUX_ECCO:
+    description: Surface temperature flux (TFLUX) for LLC90 ECCO data
+    driver: netcdf
+    args:
+      urlpath: '/home/idies/workspace/OceanCirculation/ECCO_v4/TFLUX/*.nc'
+      xarray_kwargs:
+        engine: netcdf4
+        concat_dim: time
+        parallel: True
+        combine: nested
+        drop_variables: ['time_bnds']
+    metadata:
+      rename:
+        i: X
+        j: Y
+        tile: face
+      model: MITGCM
+      parameters:
+        rSphere: 6.371e+03
+        eq_state: jmd95
+        rho0: 1027
+        g: 9.81
+        eps_nh: 0 
+        omega: 7.292123516990375e-05
+        c_p: 3.986e+03
+        tempFrz0: 9.01e-02
+        dTempFrz_dS: -5.75e-02
+        grid_type: llc
+      name: LLC90
+      description: |
+        Surface temperature flux (Tflux) for LLC90 ECCO data from the MITGCM, a general, curvilinear ocean simulation on the cube-sphere.
+      citation: |
+        Paper.
+      projection:
+      original_output: snapshot
+
+  SFLUX_ECCO:
+    description: Surface salinity flux (SFLUX) for LLC90 ECCO data
+    driver: netcdf
+    args:
+      urlpath: '/home/idies/workspace/OceanCirculation/ECCO_v4/SFLUX/*.nc'
+      xarray_kwargs:
+        engine: netcdf4
+        concat_dim: time
+        parallel: True
+        combine: nested
+        drop_variables: ['time_bnds']
+    metadata:
+      rename:
+        i: X
+        j: Y
+        tile: face
+      model: MITGCM
+      parameters:
+        rSphere: 6.371e+03
+        eq_state: jmd95
+        rho0: 1027
+        g: 9.81
+        eps_nh: 0 
+        omega: 7.292123516990375e-05
+        c_p: 3.986e+03
+        tempFrz0: 9.01e-02
+        dTempFrz_dS: -5.75e-02
+        grid_type: llc
+      name: LLC90
+      description: |
+        Surface salinity flux (Sflux) for LLC90 ECCO data from the MITGCM, a general, curvilinear ocean simulation on the cube-sphere.
+      citation: |
+        Paper.
+      projection:
+      original_output: snapshot
+
+  grd_ECCO:
+    description: horizontal grid for LLC90 ECCO data
+    driver: netcdf
+    args:
+      urlpath: '/home/idies/workspace/OceanCirculation/ECCO_v4/GRID/ECCO-GRID.nc'
+    metadata:
+      model: MITGCM
+      swap_dims:
+        k: Z
+        k_p1: Zp1
+        k_l: Zl
+      rename:
+        i: X
+        i_g: Xp1
+        j: Y
+        j_g: Yp1
+        tile: face
+      grid_coords:
+        add_midp: True
+        grid_coords:
+          Y:
+            Y:
+            Yp1: 0.5
+          X:
+            X:
+            Xp1: 0.5
+          Z:
+           Z:
+           Zp1: 0.5
+           Zl: -0.5
+          time: 
+            time: -0.5
+      face_connections:
+        face_connections:
+          face:
+            0:
+              X: tuple(((12, 'Y', False), (3, 'X', False)))
+              Y: tuple((None,(1,'Y',False)))
+            1:
+              X: tuple(((11,'Y',False),(4,'X',False)))
+              Y: tuple(((0,'Y',False),(2,'Y',False)))
+            2:
+              X: tuple(((10,'Y',False),(5, 'X', False)))
+              Y: tuple(((1, 'Y', False), (6, 'X', False)))
+            3:
+              X: tuple(((0, 'X', False), (9, 'Y', False)))
+              Y: tuple((None, (4, 'Y', False)))
+            4:
+              X: tuple(((1, 'X', False), (8, 'Y', False)))
+              Y: tuple(((3, 'Y', False), (5, 'Y', False)))
+            5:
+              X: tuple(((2, 'X', False), (7, 'Y', False)))
+              Y: tuple(((4, 'Y', False), (6, 'Y', False)))
+            6: 
+              X: tuple(((2, 'Y', False), (7, 'X', False)))
+              Y: tuple(((5, 'Y', False), (10, 'X', False)))
+            7:
+              X: tuple(((6, 'X', False), (8, 'X', False)))
+              Y: tuple(((5, 'X', False), (10, 'Y', False)))
+            8:
+              X: tuple(((7, 'X', False), (9, 'X', False)))
+              Y: tuple(((4, 'X', False), (11, 'Y', False)))
+            9:
+              X: tuple(((8, 'X', False), None))
+              Y: tuple(((3, 'X', False), (12, 'Y', False)))
+            10:
+              X: tuple(((6, 'Y', False), (11, 'X', False)))
+              Y: tuple(((7, 'Y', False), (2, 'X', False)))
+            11: 
+              X: tuple(((10, 'X', False), (12, 'X', False)))
+              Y: tuple(((8, 'Y', False), (1, 'X', False)))
+            12: 
+              X: tuple(((11, 'X', False), None))
+              Y: tuple(((9, 'Y', False), (0, 'X', False)))
+      parameters:
+        rSphere: 6.371e+03
+        eq_state: jmd95
+        rho0: 1027
+        g: 9.81
+        eps_nh: 0
+        omega: 7.292123516990375e-05
+        c_p: 3.986e+03
+        tempFrz0: 9.01e-02
+        dTempFrz_dS: -5.75e-02
+        grid_type: llc
+      name: LLC4320
+      description: |
+        LLC90 ECCO data from the MITGCM, a general, curvilinear ocean simulation on the cube-sphere.
+      citation: |
+        Paper.
+      projection:
+      original_output: snapshot
+
+# ======================================================================
+# POP data (ocean only, CORE forcing)
+  grd_CORE_POP:
+    description: POP (version 2) model grid
+    driver: netcdf
+    model: POPv2
+    args:
+      urlpath: '/sciserver/filedb07-01/ocean/poseidon/POP/CORE/CESM_POPv2_CORE_0033.nc'
+      xarray_kwargs:
+        engine: netcdf4
+        drop_variables: ['time','Jstart','Jend','Istart','Iend','cp_air','cp_sw','fwflux_factor','grav','T0_Kelvin','heat_to_PW','hflux_factor','latent_heat_fusion','latent_heat_vapor','mass_to_Sv','momentum_factor','ocn_ref_salinity','omega','ppt_to_salt','radius','rho_air','rho_fw','rho_sw','salinity_factor','salt_to_Svppt','salt_to_mmday','salt_to_ppt','sea_ice_salinity','sflux_factor','sound','stefan_boltzmann','vonkar']
+        decode_times: False
+    metadata:
+      model: POP
+      rename:
+        nlat: Y
+        nlon: X
+        Nz: Z
+        Nw: Zw
+        Nw_top: Zw_top
+        Nz_150: Z_150
+        Nz_bot: Z_bot
+      grid_coords: 
+        add_midp: True
+        grid: B
+        grid_coords:
+          Y:
+            Y: 
+            Yp1: 0.5
+          X:
+            X: 
+            Xp1: 0.5
+          time: 
+            time: -0.5
+          Z:
+            Z:
+            Zp1: 0.5
+            Zu: 0.5
+            Zl: -0.5
+      parameters:
+        rSphere: 6.371e+03
+        eq_state: mdjwf
+        rho0: 1027
+        g: 9.81
+        eps_nh: 0 
+        omega: 7.292123516990375e-05
+        c_p: 3.986e+03
+        tempFrz0: 9.01e-02
+        dTempFrz_dS: -5.75e-02
+        grid_type: spherical
+      name: POP_grid
+      description: |
+        Grid for the POPv2 synoptic scale ocean model
+      citation: |
+        Justin et al (2014), A new synoptic scale resolving global climate simulatoin using the Community Earth System Model. J. Adv. Model. Earth Syst., 6, 1065-1094. https:doi.org/10.1002/2014MS000363
+      original_output: Monthly means.
+
+  fld_CORE_POP:
+    description: Pop ocean (only) simulation forced with COREv2
+    driver: netcdf
+    args:
+      urlpath: '/sciserver/filedb07-01/ocean/poseidon/POP/CORE/*.nc'
+      xarray_kwargs:
+        engine: netcdf4
+        drop_variables: ['']
+        decode_times: False
+        group: Flow_Vars
+        concat_dim: Nt
+        parallel: True
+        combine: nested
+    metadata:
+      model: POP
+      aliases:
+        SSH: Eta
+        SSH2: Eta2
+        UVEL: U
+        VVEL: V
+        UVEL2: U2
+        VVEL2: V2
+        WVEL: W
+        SALT: S
+        TEMP: Temp
+        SHF: 
+      rename:
+        Nt: time
+        Nz: Z 
+        Nw: Zw
+        nlat: Y
+        nlon: X
+      parameters:
+        rSphere: 6.371e+03
+        eq_state: mdjwf
+        rho0: 1027
+        g: 9.81
+        eps_nh: 0 
+        omega: 7.292123516990375e-05
+        c_p: 3.986e+03
+        tempFrz0: 9.01e-02
+        dTempFrz_dS: -5.75e-02
+      name: POP_Core
+      description: |
+        Fields from the ocean only, CORE-forced POPv2 ocean simulation for a subregion of the Subpolar North Atlantic, centered around Nordic Seas.
+      citation: |
+        Justin et al (2014), A new synoptic scale resolving global climate simulatoin using the Community Earth System Model. J. Adv. Model. Earth Syst., 6, 1065-1094. https:doi.org/10.1002/2014MS000363
+      original_output: Monthly means.
+
+# ======================================================================
+# POP data atmos-ocean coupled
+  grd_HYBRID_POP:
+    description: POP (version 2) model grid
+    driver: netcdf
+    args:
+      urlpath: '/sciserver/filedb07-01/ocean/poseidon/POP/HYBRID/CESM_POPv2_HYBRID_0086.nc'
+      xarray_kwargs:
+        engine: netcdf4
+        drop_variables: ['time','Jstart','Jend','Istart','Iend','cp_air','cp_sw','fwflux_factor','grav','T0_Kelvin','heat_to_PW','hflux_factor','latent_heat_fusion','latent_heat_vapor','mass_to_Sv','momentum_factor','ocn_ref_salinity','omega','ppt_to_salt','radius','rho_air','rho_fw','rho_sw','salinity_factor','salt_to_Svppt','salt_to_mmday','salt_to_ppt','sea_ice_salinity','sflux_factor','sound','stefan_boltzmann','vonkar']
+        decode_times: False
+    metadata:
+      model: POP
+      rename:
+        Nt: time
+        nlat: Y
+        nlon: X
+        Nz: Z
+      grid_coords: 
+        add_midp: True
+        grid_coords:
+          Y:
+            Y: 
+            Yp1: 0.5
+          X:
+            X: 
+            Xp1: 0.5
+          time: 
+            time: -0.5
+          Z:
+            Z: 
+            Zp1: 0.5
+            Zu: 0.5
+            Zl: -0.5
+      parameters:
+        rSphere: 6.371e+03
+        eq_state: mdjwf
+        rho0: 1027
+        g: 9.81
+        eps_nh: 0 
+        omega: 7.292123516990375e-05
+        c_p: 3.986e+03
+        tempFrz0: 9.01e-02
+        dTempFrz_dS: -5.75e-02
+        grid_type: spherical
+      name: POP_grid
+      description: |
+        Grid for the POPv2 synoptic scale ocean model
+      citation: |
+        Justin et al (2014), A new synoptic scale resolving global climate simulation using the Community Earth System Model. J. Adv. Model. Earth Syst., 6, 1065-1094. https:doi.org/10.1002/2014MS000363
+      original_output: Monthly means.
+
+  fld_HYBRID_POP:
+    description: Flow fields for the coupled atmos-ocean simulation for the CESM model (POPv2).
+    driver: netcdf
+    args:
+      urlpath: '/sciserver/filedb07-01/ocean/poseidon/POP/HYBRID/*.nc'
+      xarray_kwargs:
+        engine: netcdf4
+        drop_variables: ['']
+        group: Flow_Vars
+        concat_dim: Nt
+        parallel: True
+        combine: nested
+    metadata:
+      model: POP
+      rename:
+        Nt: time
+        Nz: Z
+        nlat: Y
+        nlon: X
+      grid_coords: 
+        add_midp: True
+        grid_coords:
+          Y:
+            Y: 
+            Yp1: 0.5
+          X:
+            X: 
+            Xp1: 0.5
+          time: 
+            time: -0.5
+          Z:
+            Z: 
+            Zp1: 0.5
+            Zu: 0.5
+            Zl: -0.5
+      shift_averages: 
+        averageList:
+      parameters:
+        rSphere: 6.371e+03
+        eq_state: mdjwf
+        rho0: 1027
+        g: 9.81
+        eps_nh: 0 
+        omega: 7.292123516990375e-05
+        c_p: 3.986e+03
+        tempFrz0: 9.01e-02
+        dTempFrz_dS: -5.75e-02
+      name: POP_Hybrid
+      description: |
+        Fields from the POPv2 coupled ocean simulation for a subregion of the Subpolar North Atlantic, centered around Nordic Seas.
+      citation: |
+        Justin et al (2014), A new synoptic scale resolving global climate simulatoin using the Community Earth System Model. J. Adv. Model. Earth Syst., 6, 1065-1094. https:doi.org/10.1002/2014MS000363
+      original_output: Monthly means.
+
+# ======================================================================
+# HyCOM data test, interpolated onto lat-lon-depth coords
+  HYCOM_test:
+    description: Simulation off the Northern California Coast with HyCOM ocean mdoel
+    driver: netcdf
+    model: HyCOM
+    args:
+      urlpath: /sciserver/oceanography/HyCOM/swot+smode/GLBy0.04_*.nc
+      xarray_kwargs:
+        engine: netcdf4
+        drop_variables: ['bottom_salinity','bottom_temp','bottom_u','bottom_v']
+        concat_dim: time
+        combine: by_coords
+        parallel: True
+        decode_cf: False
+    metadata:
+      rename:
+        water_temp: Temp
+        water_u: U
+        water_v: V
+        lon: X
+        lat: Y
+        depth: Z
+      manipulate_coords:
+        fillna: False
+        coords1Dfrom2D: False
+      grid_coords:
+        add_midp: True
+        grid_coords:
+          Y:
+            Y: 
+            Yp1: 0.5
+          X:
+            X: 
+            Xp1: 0.5
+          Z:
+            Z: 
+            Zp1: 0.5
+            Zu: 0.5
+            Zl: -0.5
+          time: 
+            time: -0.5
+      parameters:
+        temp_offset: 20
+        temp_scale: 0.001
+        temp_fill: -30000
+        sal_offset: 20
+        sal_scale: 0.001
+        sal_fill: -30000
+        ssh_fill: 1.2676e30
+      name: California_Coast
+      description: |
+        High-resolution grid of the (1/25 deg) numerical simulation covering the California Coast using the HyCOM model. The original grid has 41 (isopycnal) layers but these files were interpolated to 101 vertical levels.
+      mates: | 
+        Sample (test) files
+      projection: Mercator
+      original_output: snapshot.
+

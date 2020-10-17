@@ -9,7 +9,7 @@ If you would like to use OceanSpy for your own datasets and run it on a local ma
 Required dependencies
 ---------------------
 
-* Python 3.6, 3.7
+* Python 3.6, 3.7, 3.8
 * dask_
 * xarray_
 * xgcm_
@@ -44,8 +44,8 @@ Step-by-step instructions
     $ conda update conda
     $ conda config --set channel_priority strict
     $ conda config --prepend channels conda-forge
-    $ conda install -y oceanspy dask distributed bottleneck netCDF4 "xarray>=0.11.3" cartopy esmpy ffmpeg intake-xarray geopy "xgcm>=0.2" xesmf Ipython tqdm "xmitgcm>=0.3"
-    $ pip install ffmpeg
+    $ conda install -y oceanspy "xarray>=0.14.1" cartopy esmpy intake-xarray geopy xesmf esmf "xgcm>=0.2.0" Ipython tqdm ffmpeg aiohttp "pandas<1.1.0"
+    $ pip install git+https://github.com/MITgcm/xmitgcm.git
 
   The commands above install the latest stable release of OceanSpy along with its dependencies.
 
@@ -53,7 +53,7 @@ Step-by-step instructions
 
   .. code-block:: bash
 
-    $ pip install --upgrade git+https://github.com/malmans2/oceanspy.git
+    $ pip install --upgrade git+https://github.com/hainegroup/oceanspy.git
 
 
 .. note::
@@ -65,7 +65,7 @@ Step-by-step instructions
 		$ conda update conda
 		$ conda config --set channel_priority strict
 		$ conda config --prepend channels conda-forge
-		$ wget https://raw.githubusercontent.com/malmans2/oceanspy/master/sciserver_catalogs/environment.yml
+		$ wget https://raw.githubusercontent.com/hainegroup/oceanspy/master/sciserver_catalogs/environment.yml
 		$ conda env create -f environment.yml
 
 	Then, activate the Oceanography environment:

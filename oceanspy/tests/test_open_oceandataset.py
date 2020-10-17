@@ -6,22 +6,23 @@ import yaml
 import urllib
 
 # Import oceanspy
-from oceanspy.open_oceandataset import (from_netcdf,
-                                        from_catalog,
-                                        _find_entries)
+from oceanspy.open_oceandataset import from_netcdf, from_catalog, _find_entries
 
 # SCISERVER DATASETS
-url = ('https://raw.githubusercontent.com/malmans2/oceanspy/'
-       'master/sciserver_catalogs/datasets_list.yaml')
+url = (
+    "https://raw.githubusercontent.com/hainegroup/oceanspy/"
+    "master/sciserver_catalogs/datasets_list.yaml"
+)
 f = urllib.request.urlopen(url)
-SCISERVER_DATASETS = yaml.safe_load(f)['datasets']['sciserver']
+SCISERVER_DATASETS = yaml.safe_load(f)["datasets"]["sciserver"]
 
 # Directory
-Datadir = './oceanspy/tests/Data/'
+Datadir = "./oceanspy/tests/Data/"
 
 # Urls catalogs
 xmitgcm_url = "{}catalog_xmitgcm.yaml".format(Datadir)
 xarray_url = "{}catalog_xarray.yaml".format(Datadir)
+ECCO_url = "{}catalog_ECCO.yaml".format(Datadir)
 
 
 # Test SciServer
@@ -31,15 +32,20 @@ def test_find_entries(names):
         _find_entries(name, None)
 
 
-@pytest.mark.parametrize("name, catalog_url",
-                         [("xmitgcm_iters", xmitgcm_url),
-                          ("xmitgcm_no_iters", xmitgcm_url),
-                          ("xarray", xarray_url),
-                          ("error", xarray_url),
-                          ("grd_rect", xarray_url),
-                          ("grd_curv", xarray_url)])
+@pytest.mark.parametrize(
+    "name, catalog_url",
+    [
+        ("xmitgcm_iters", xmitgcm_url),
+        ("xmitgcm_no_iters", xmitgcm_url),
+        ("xarray", xarray_url),
+        ("error", xarray_url),
+        ("grd_rect", xarray_url),
+        ("grd_curv", xarray_url),
+        ("LLC", ECCO_url),
+    ],
+)
 def test_opening_and_saving(name, catalog_url):
-    if name == 'error':
+    if name == "error":
         # Open oceandataset
         with pytest.raises(ValueError):
             from_catalog(name, catalog_url)
@@ -48,31 +54,48 @@ def test_opening_and_saving(name, catalog_url):
         od1 = from_catalog(name, catalog_url)
 
         # Check dimensions
-        if name != 'xarray':
-            dimsList = ['X', 'Y', 'Xp1', 'Yp1']
+        if name != "xarray":
+            dimsList = ["X", "Y", "Xp1", "Yp1"]
             assert set(dimsList).issubset(set(od1.dataset.dims))
 
             # Check coordinates
-            coordsList = ['XC', 'YC', 'XG', 'YG', 'XU', 'YU', 'XV', 'YV']
+            if name == 'LLC':
+                coordsList = ["XC", "YC", "XG", "YG"]
+            else:
+                coordsList = ["XC", "YC", "XG", "YG", "XU", "YU", "XV", "YV"]
             assert set(coordsList).issubset(set(od1.dataset.coords))
 
             # Check NaNs
-            assert all([not np.isnan(od1.dataset[coord].values).any()
-                        for coord in coordsList])
+            assert all(
+                [not np.isnan(od1.dataset[coord].values).any() for coord in coordsList]
+            )
+
+        if name == 'LLC':
+            assert type(od1.face_connections['face']) == dict
+            assert set(['face']).issubset(set(od1.dataset.dims))
 
         # Check shift
-        if name == 'xmitgcm_iters':
+        if name == "xmitgcm_iters":
             sizes = od1.dataset.sizes
-            assert sizes['time'] - sizes['time_midp'] == 1
-            assert all(['time_midp' in od1.dataset[var].dims
-                        for var in od1.dataset.data_vars if 'ave' in var])
+            assert sizes["time"] - sizes["time_midp"] == 1
+            assert all(
+                [
+                    "time_midp" in od1.dataset[var].dims
+                    for var in od1.dataset.data_vars
+                    if "ave" in var
+                ]
+            )
 
         # Save to netcdf
-        filename = 'tmp.nc'
+        filename = "tmp.nc"
         od1.to_netcdf(filename)
 
         # Reopen
-        from_netcdf(filename)
+        if name == 'LLC':
+            args = {'decode_times': False}
+        else:
+            args = {}
+        from_netcdf(filename, **args)
 
         # Clean up
-        subprocess.call('rm -f ' + filename, shell=True)
+        subprocess.call("rm -f " + filename, shell=True)

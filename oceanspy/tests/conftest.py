@@ -7,14 +7,18 @@ def pytest_configure():
     print("\nHello! I'm downloading test data.")
 
     # Directory
-    Datadir = './oceanspy/tests/'
+    Datadir = "./oceanspy/tests/"
 
     # Download xmitgcm test
-    commands = ['cd {}'.format(Datadir),
-                'rm -fr Data',
-                'wget -v -O Data.tar.gz -L '
-                'https://jh.box.com/'
-                'shared/static/lezaefccn11zmbrvtvollmzgkbw9r8ie.gz',
-                'tar xvzf Data.tar.gz',
-                'rm -f Data.tar.gz']
-    subprocess.call('&&'.join(commands), shell=True)
+    commands = [
+        "cd {}".format(Datadir),
+        "rm -fr Data",
+        "wget -v -O Data.tar.gz -L "
+        "https://livejohnshopkins-my.sharepoint.com/"
+        ":u:/g/personal/malmans2_jh_edu/"
+        "EVtxjAQL13tCt7dFHNrzsrwBuqdjDe3zrvrJ625YrjrF0g"
+        "?download=1",
+        "tar xvzf Data.tar.gz",
+        "rm -f Data.tar.gz",
+    ]
+    subprocess.call("&&".join(commands), shell=True)

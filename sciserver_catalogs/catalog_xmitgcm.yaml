@@ -1,5 +1,5 @@
-# ===========================
-# KangerFjord
+  # ===========================
+  # KangerFjord
 KangerFjord:
   description: Kanger Fjord from SAMS
   args: 
@@ -36,10 +36,10 @@ KangerFjord:
           X: 
           Xp1: -0.5
         Z:
-         Z: 
-         Zp1: 0.5
-         Zu: 0.5
-         Zl: -0.5
+          Z: 
+          Zp1: 0.5
+          Zu: 0.5
+          Zl: -0.5
         time: 
           time: -0.5
     original_output: average
@@ -52,8 +52,8 @@ KangerFjord:
       Fraser et al., 2018 - JGR.
     projection: Mercator
     
-# ===========================
-# EGshelfSJsec500m_3H_hydro
+  # ===========================
+  # EGshelfSJsec500m_3H_hydro
 EGshelfSJsec500m_3H_hydro:
   description: EGshelfSJsec500m_3H_hydro
   args:
@@ -70,7 +70,7 @@ EGshelfSJsec500m_3H_hydro:
       XG: Xp1 
       YG: Yp1
     aliases:
-      T: Temp
+      Temp: T
       HFacC: hFacC
       HFacS: hFacS
       HFacW: hFacW
@@ -108,8 +108,8 @@ EGshelfSJsec500m_3H_hydro:
     projection: Mercator
     
     
-# ===========================
-# EGshelfSJsec500m_6H_hydro
+  # ===========================
+  # EGshelfSJsec500m_6H_hydro
 fldEGshelfSJsec500m_6H_hydro:
   description: Fields of EGshelfSJsec500m_6H_hydro
   args:
@@ -127,7 +127,7 @@ fldEGshelfSJsec500m_6H_hydro:
       XG: Xp1 
       YG: Yp1
     aliases:
-      T: Temp
+      Temp: T
       HFacC: hFacC
       HFacS: hFacS
       HFacW: hFacW
@@ -199,7 +199,7 @@ EGshelfSJsec500m_3H_NONhydro:
       XG: Xp1 
       YG: Yp1
     aliases:
-      T: Temp
+      Temp: T
       HFacC: hFacC
       HFacS: hFacS
       HFacW: hFacW
@@ -237,8 +237,8 @@ EGshelfSJsec500m_3H_NONhydro:
     projection: Mercator
     
     
-# ===========================
-# EGshelfSJsec500m_6H_NONhydro
+  # ===========================
+  # EGshelfSJsec500m_6H_NONhydro
 fldEGshelfSJsec500m_6H_NONhydro:
   description: Fields of EGshelfSJsec500m_6H_NONhydro
   args:
@@ -256,7 +256,7 @@ fldEGshelfSJsec500m_6H_NONhydro:
       XG: Xp1 
       YG: Yp1
     aliases:
-      T: Temp
+      Temp: T
       HFacC: hFacC
       HFacS: hFacS
       HFacW: hFacW

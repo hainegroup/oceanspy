@@ -1,6 +1,7 @@
 datasets:
   sciserver:
     - get_started
+    - IGPwinter
     - EGshelfIIseas2km_ASR_full
     - EGshelfIIseas2km_ASR_crop
     - EGshelfIIseas2km_ERAI_6H
@@ -11,3 +12,8 @@ datasets:
     - EGshelfSJsec500m_6H_NONhydro
     - Arctic_Control
     - KangerFjord
+    - HYCOM
+    - LLC4320
+    - ECCO
+    - CORE
+    - HYBRID
