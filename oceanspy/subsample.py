@@ -388,8 +388,9 @@ def cutout(
         elif transformation not in _transf_list:
             raise ValueError("transformation not supported")
     elif transformation is False and "face" in ds.dims:
-        raise ValueError("Most define a transformation to remove complex"
-                         "topology of dataset.")
+        raise ValueError(
+            "Most define a transformation to remove complex" "topology of dataset."
+        )
 
     # ---------------------------
     # Horizontal CUTOUT part II (continuation of original code)

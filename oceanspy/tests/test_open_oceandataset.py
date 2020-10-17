@@ -59,7 +59,7 @@ def test_opening_and_saving(name, catalog_url):
             assert set(dimsList).issubset(set(od1.dataset.dims))
 
             # Check coordinates
-            if name == 'LLC':
+            if name == "LLC":
                 coordsList = ["XC", "YC", "XG", "YG"]
             else:
                 coordsList = ["XC", "YC", "XG", "YG", "XU", "YU", "XV", "YV"]
@@ -70,9 +70,9 @@ def test_opening_and_saving(name, catalog_url):
                 [not np.isnan(od1.dataset[coord].values).any() for coord in coordsList]
             )
 
-        if name == 'LLC':
-            assert type(od1.face_connections['face']) == dict
-            assert set(['face']).issubset(set(od1.dataset.dims))
+        if name == "LLC":
+            assert type(od1.face_connections["face"]) == dict
+            assert set(["face"]).issubset(set(od1.dataset.dims))
 
         # Check shift
         if name == "xmitgcm_iters":
@@ -91,8 +91,8 @@ def test_opening_and_saving(name, catalog_url):
         od1.to_netcdf(filename)
 
         # Reopen
-        if name == 'LLC':
-            args = {'decode_times': False}
+        if name == "LLC":
+            args = {"decode_times": False}
         else:
             args = {}
         from_netcdf(filename, **args)
