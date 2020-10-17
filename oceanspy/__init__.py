@@ -1,6 +1,8 @@
 __author__ = """Mattia Almansi"""
 __email__ = "mattia.almansi@noc.ac.uk"
-__version__ = "0.1.0"
+# fmt: off
+__version__ = '0.1.0'
+# fmt: on
 
 from ._oceandataset import OceanDataset  # noqa: F401
 from . import (  # noqa: F401

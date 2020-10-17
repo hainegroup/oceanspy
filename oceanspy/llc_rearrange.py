@@ -30,10 +30,12 @@ class LLCtransformation:
         if isinstance(faces, list) or isinstance(faces, _np.ndarray):
             face = [fac for fac in faces if fac not in [2, 5, 6, 7, 10]]
             if len(face) > 0:
-                print("Range of latitudes is beyond the scope of"
-                      "this rearrangement of faces. Will retain read-only"
-                      "range of values that retain faces closest to"
-                      "Arctic cap")
+                print(
+                    "Range of latitudes is beyond the scope of"
+                    "this rearrangement of faces. Will retain read-only"
+                    "range of values that retain faces closest to"
+                    "Arctic cap"
+                )
             faces = _np.array([2, 5, 6, 7, 10])
 
         if isinstance(varlist, str):
@@ -568,8 +570,9 @@ def chunk_sizes(faces, Nx, Ny, rotated=False):
         else:
             tNx = 0
             tNy = 0
-            print("No data within group of facets (same ordering)"
-                  " survives the cutout.")
+            print(
+                "No data within group of facets (same ordering)" " survives the cutout."
+            )
     else:
         if len(B_list) == 0:
             tNx = Nx[0]

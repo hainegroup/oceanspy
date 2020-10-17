@@ -51,6 +51,8 @@ setup(
     test_suite="tests",
     tests_require=test_requirements,
     url="https://github.com/hainegroup/oceanspy",
-    version="0.1.0",
+    # fmt: off
+    version='0.1.0',
+    # fmt: on
     zip_safe=False,
 )
