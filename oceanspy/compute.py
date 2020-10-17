@@ -2876,7 +2876,6 @@ def missing_horizontal_spacing(od):
         else:
             suf = "G"
 
-        # Interpolate
         deltas[var] = grid.interp(ds[pref + suf], axis, boundary="extend")
 
         # Add attributes

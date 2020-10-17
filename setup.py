@@ -13,9 +13,14 @@ with open("HISTORY.rst") as history_file:
 
 requirements = ["dask", "xarray>=0.14.1", "xgcm>=0.2.0"]
 
-setup_requirements = ["pytest-runner"]
+setup_requirements = [
+    "pytest-runner",
+]
 
-test_requirements = ["pytest"]
+test_requirements = [
+    "pytest",
+]
+
 
 setup(
     author="Mattia Almansi",

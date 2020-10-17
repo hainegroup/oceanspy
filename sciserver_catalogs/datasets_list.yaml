@@ -12,3 +12,8 @@ datasets:
     - EGshelfSJsec500m_6H_NONhydro
     - Arctic_Control
     - KangerFjord
+    - HYCOM
+    - LLC4320
+    - ECCO
+    - CORE
+    - HYBRID

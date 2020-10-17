@@ -128,7 +128,6 @@ def from_catalog(name, catalog_url=None):
 
     # Store all dataset
     datasets = []
-    chunks = {}
     metadata = {}
     for entry in entries:
         if intake_switch:
@@ -162,9 +161,15 @@ def from_catalog(name, catalog_url=None):
         rename = mtdt.pop("rename", None)
         ds = ds.rename(rename)
 
+        # swaps dimension k (index space) to Z (depth) - LLC data
+        swap_dims = mtdt.pop("swap_dims", None)
+        if swap_dims is not None:
+            ds = ds.swap_dims(swap_dims)
+
         # Fix Z dimensions (Zmd, ...)
         default_Zs = ["Zp1", "Zu", "Zl", "Z"]
         # Make sure they're sorted with decreasing letter number
+
         default_Zs = sorted(default_Zs, key=len, reverse=True)
         for Zdim in default_Zs:  # pragma: no cover
             for dim, size in ds.sizes.items():
@@ -230,10 +235,19 @@ def from_catalog(name, catalog_url=None):
     if manipulate_coords is not None:
         od = od.manipulate_coords(**manipulate_coords)
 
+    grid_periodic = metadata.pop("grid_periodic", None)
+    if grid_periodic is not None:
+        od = od.set_grid_periodic(**grid_periodic)
+
     # Set grid coordinates
     grid_coords = metadata.pop("grid_coords", None)
     if grid_coords is not None:
         od = od.set_grid_coords(**grid_coords)
+
+    #  Set grid topology if present (e.g. llc4320)
+    face_connections = metadata.pop("face_connections", None)
+    if face_connections is not None:
+        od = od.set_face_connections(**face_connections)
 
     # Set attributes (use xmitgcm)
     try:
@@ -342,6 +356,32 @@ def from_catalog(name, catalog_url=None):
             )
         )
 
+        #  LLC4320 Surface Variables
+        variables["SSS"] = dict(
+            attrs=dict(
+                standard_name=("surface sea_water_salinity"),
+                units=variables["S"]["attrs"]["units"],
+            )
+        )
+        variables["SST"] = dict(
+            attrs=dict(
+                standard_name=("surface sea_water_temperature"),
+                units=variables["Temp"]["attrs"]["units"],
+            )
+        )
+        variables["SSU"] = dict(
+            attrs=dict(
+                standard_name=("surface sea_water_x_velocity"),
+                units=variables["U"]["attrs"]["units"],
+            )
+        )
+        variables["SSV"] = dict(
+            attrs=dict(
+                standard_name=("surface sea_water_y_velocity"),
+                units=variables["V"]["attrs"]["units"],
+            )
+        )
+
         # Extract variables in dataset only
         variables = _OrderedDict(
             **{var: variables[var] for var in od._ds.variables if var in variables}
@@ -376,7 +416,7 @@ def from_catalog(name, catalog_url=None):
 
 def _find_entries(name, catalog_url):
     """
-    Function used by from_catalog to decode xarray or xmitgcm catalogs.
+    Function used by from_catalog to decode xarray, zarr or xmitgcm catalogs.
     It is also used by conf.py in docs to create dataset.rst
 
     Parameters
@@ -408,7 +448,7 @@ def _find_entries(name, catalog_url):
     else:
         _check_instance({"catalog_url": catalog_url}, "str")
 
-    # Read catatog
+    # Read catalog
     try:
         if catalog_url is None:
             url = (
@@ -429,7 +469,7 @@ def _find_entries(name, catalog_url):
                 "master/sciserver_catalogs/catalog_xmitgcm.yaml"
             )
         else:
-            url = catalog_url
+            url = catalog_url  # provided by user
 
         # Is it an url?
         try:

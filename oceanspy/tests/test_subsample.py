@@ -17,6 +17,10 @@ MITgcm_rect_bin = open_oceandataset.from_netcdf(
 )
 MITgcm_rect_nc = open_oceandataset.from_netcdf("{}MITgcm_rect_nc.nc" "".format(Datadir))
 
+ECCO_url = "{}catalog_ECCO.yaml".format(Datadir)
+ECCOod = open_oceandataset.from_catalog('LLC', ECCO_url)
+
+
 # =======
 # CUTOUT
 # =======
@@ -253,6 +257,39 @@ def test_reduce_variables(od, varList):
     assert (set(varList) - set(od.dataset.dims) - set(od.dataset.coords)) == set(
         new_od.dataset.data_vars
     )
+
+
+@pytest.mark.parametrize("od", [ECCOod])
+@pytest.mark.parametrize(
+    "XRange, YRange, ZRange, varList, transformation, centered, NZ", [
+        ([-90, 20], [20, 80], None, ['T'], 'arctic_crown', 'Atlantic', 50),
+        ([-179, 179], [20, 80], None, ['U', 'V'], 'arctic_crown',
+                                                  'Atlantic', 50),
+        ([-179, 179], [55, 90], -100, ['T'], 'arctic_centered', 'Pacific', 1),
+        (None, None, None, ['T'], 'arctic_crown', 'Atlantic', 50),
+        (None, None, None, None, 'wrong', 'Atlantic', 50),
+        (None, None, None, None, False, 'Atlantic', np.nan),
+    ],
+)
+def test_cutout_faces(od, XRange, YRange, ZRange, varList, transformation,
+                      centered, NZ):
+    args = {
+        "varList": varList,
+        "XRange": XRange,
+        "YRange": YRange,
+        "ZRange": ZRange,
+        "transformation": transformation,
+        "centered": centered,
+    }
+    if transformation not in ['arctic_crown', 'arctic_centered']:
+        with pytest.raises(ValueError):
+            new_od = od.subsample.cutout(**args)
+    else:
+        new_od = od.subsample.cutout(**args)
+        old_dims = od.dataset.dims
+        new_dims = new_od.dataset.dims
+        assert (set(old_dims) - set(new_dims)) == set(['face'])
+        assert new_od._ds.dims['Z'] == NZ
 
 
 # =======

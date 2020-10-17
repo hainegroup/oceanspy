@@ -22,6 +22,7 @@ import functools as _functools
 # From OceanSpy (private)
 from . import utils as _utils
 from . import compute as _compute
+from .llc_rearrange import LLCtransformation as _llc_trans
 from ._ospy_utils import (
     _check_instance,
     _check_range,
@@ -55,6 +56,8 @@ def cutout(
     timeFreq=None,
     sampMethod="snapshot",
     dropAxes=False,
+    transformation=False,
+    centered="Atlantic",
 ):
     """
     Cutout the original dataset in space and time
@@ -101,6 +104,13 @@ def cutout(
         if one point only is in the range.
         If True, set dropAxes=od.grid_coords.
         If False, preserve original grid.
+    transformation: str, or bool
+        Lists the transformation of the llcgrid into a new one in which face
+        is no longer a dimension. Default is `False`. If `True`, need to
+        define how data will be centered
+    centered: str, or bool
+        default is `Atlantic`, and other options is `Pacific`. This refers
+        to which ocean appears centered on the data.
 
     Returns
     -------
@@ -184,136 +194,78 @@ def cutout(
     # Copy
     od = _copy.copy(od)
 
+    # list for coord variables
+    co_list = [var for var in od._ds.coords if var not in od._ds.dims]
+    # Drop variables
+    if varList is not None:
+        # Make sure it's a list
+        varList = list(varList)
+        varList = varList + co_list
+        varList = _rename_aliased(od, varList)
+
+        # Compute missing variables
+        od = _compute._add_missing_variables(od, varList)
+        # Drop useless
+        nvarlist = [v for v in od._ds.data_vars if v not in varList]
+        od._ds = od._ds.drop_vars(nvarlist)
+    else:  # this way, if applicable, llc_transf gets applied to all vars
+        varList = [var for var in od._ds.reset_coords().data_vars]
+
     # Unpack
     ds = od._ds
     periodic = od.grid_periodic
 
     # ---------------------------
-    # Horizontal CUTOUT
+    # Time CUTOUT
     # ---------------------------
-    if add_Hbdr is True:
-        add_Hbdr = _np.mean(
-            [
-                _np.fabs(od._ds["XG"].max() - od._ds["XG"].min()),
-                _np.fabs(od._ds["YG"].max() - od._ds["YG"].min()),
-            ]
+    # Initialize vertical mask
+    maskT = _xr.ones_like(ds["time"]).astype("int")
+
+    if timeRange is not None:
+
+        # Use arrays
+        timeRange = _np.asarray([_np.min(timeRange), _np.max(timeRange)]).astype(
+            ds["time"].dtype
         )
-        add_Hbdr = add_Hbdr / _np.mean([len(od._ds["X"]), len(od._ds["Y"])])
-    elif add_Hbdr is False:
-        add_Hbdr = 0
 
-    if add_Vbdr is True:
-        add_Vbdr = _np.fabs(od._ds["Zp1"].diff("Zp1")).max().values
-    elif add_Vbdr is False:
-        add_Vbdr = 0
-
-    # Initialize horizontal mask
-    if XRange is not None or YRange is not None:
-        maskH = _xr.ones_like(ds["XG"])
-
-        if YRange is not None:
-            # Use arrays
-            YRange = _np.asarray(
-                [_np.min(YRange) - add_Hbdr, _np.max(YRange) + add_Hbdr]
-            )
-            YRange = YRange.astype(ds["YG"].dtype)
-
-            # Get the closest
-            for i, Y in enumerate(YRange):
-                diff = _np.fabs(ds["YG"] - Y)
-                YRange[i] = ds["YG"].where(diff == diff.min()).min().values
-            maskH = maskH.where(
-                _np.logical_and(ds["YG"] >= YRange[0], ds["YG"] <= YRange[-1]), 0
-            )
-
-        if XRange is not None:
-            # Use arrays
-            XRange = _np.asarray(
-                [_np.min(XRange) - add_Hbdr, _np.max(XRange) + add_Hbdr]
-            )
-            XRange = XRange.astype(ds["XG"].dtype)
-
-            # Get the closest
-            for i, X in enumerate(XRange):
-                diff = _np.fabs(ds["XG"] - X)
-                XRange[i] = ds["XG"].where(diff == diff.min()).min().values
-            maskH = maskH.where(
-                _np.logical_and(ds["XG"] >= XRange[0], ds["XG"] <= XRange[-1]), 0
-            )
-
-        # Can't be all zeros
-        if maskH.sum() == 0:
-            raise ValueError("Zero grid points in the horizontal range")
-
-        # Find horizontal indexes
-        maskH = maskH.assign_coords(
-            Yp1=_np.arange(len(maskH["Yp1"])), Xp1=_np.arange(len(maskH["Xp1"]))
+        # Get the closest
+        for i, time in enumerate(timeRange):
+            if _np.issubdtype(ds["time"].dtype, _np.datetime64):
+                diff = _np.fabs(ds["time"].astype("float64") - time.astype("float64"))
+            else:
+                diff = _np.fabs(ds["time"] - time)
+            timeRange[i] = ds["time"].where(diff == diff.min(), drop=True).min().values
+        maskT = maskT.where(
+            _np.logical_and(ds["time"] >= timeRange[0], ds["time"] <= timeRange[-1]), 0
         )
-        dmaskH = maskH.where(maskH, drop=True)
-        dYp1 = dmaskH["Yp1"].values
-        dXp1 = dmaskH["Xp1"].values
-        iY = [_np.min(dYp1), _np.max(dYp1)]
-        iX = [_np.min(dXp1), _np.max(dXp1)]
-        maskH["Yp1"] = ds["Yp1"]
-        maskH["Xp1"] = ds["Xp1"]
 
-        # Original length
-        lenY = len(ds["Yp1"])
-        lenX = len(ds["Xp1"])
+        # Find time indexes
+        maskT = maskT.assign_coords(time=_np.arange(len(maskT["time"])))
+        dmaskT = maskT.where(maskT, drop=True)
+        dtime = dmaskT["time"].values
+        iT = [min(dtime), max(dtime)]
+        maskT["time"] = ds["time"]
 
         # Indexis
-        if iY[0] == iY[1]:
-            if "Y" not in dropAxes:
-                if iY[0] > 0:
-                    iY[0] = iY[0] - 1
+        if iT[0] == iT[1]:
+            if "time" not in dropAxes:
+                if iT[0] > 0:
+                    iT[0] = iT[0] - 1
                 else:
-                    iY[1] = iY[1] + 1
+                    iT[1] = iT[1] + 1
         else:
-            dropAxes.pop("Y", None)
-
-        if iX[0] == iX[1]:
-            if "X" not in dropAxes:
-                if iX[0] > 0:
-                    iX[0] = iX[0] - 1
-                else:
-                    iX[1] = iX[1] + 1
-        else:
-            dropAxes.pop("X", None)
+            dropAxes.pop("time", None)
 
         # Cutout
-        ds = ds.isel(Yp1=slice(iY[0], iY[1] + 1), Xp1=slice(iX[0], iX[1] + 1))
-
-        Xcoords = od._grid.axes["X"].coords
-        if "X" in dropAxes:
-            if iX[0] == len(ds["X"]):
-                iX[0] = iX[0] - 1
-                iX[1] = iX[1] - 1
-            ds = ds.isel(X=slice(iX[0], iX[1] + 1))
-        elif ("outer" in Xcoords and Xcoords["outer"] == "Xp1") or (
-            "left" in Xcoords and Xcoords["left"] == "Xp1"
-        ):
-            ds = ds.isel(X=slice(iX[0], iX[1]))
-        elif "right" in Xcoords and Xcoords["right"] == "Xp1":
-            ds = ds.isel(X=slice(iX[0] + 1, iX[1] + 1))
-
-        Ycoords = od._grid.axes["Y"].coords
-        if "Y" in dropAxes:
-            if iY[0] == len(ds["Y"]):
-                iY[0] = iY[0] - 1
-                iY[1] = iY[1] - 1
-            ds = ds.isel(Y=slice(iY[0], iY[1] + 1))
-        elif ("outer" in Ycoords and Ycoords["outer"] == "Yp1") or (
-            "left" in Ycoords and Ycoords["left"] == "Yp1"
-        ):
-            ds = ds.isel(Y=slice(iY[0], iY[1]))
-        elif "right" in Ycoords and Ycoords["right"] == "Yp1":
-            ds = ds.isel(Y=slice(iY[0] + 1, iY[1] + 1))
-
-        # Cut axis can't be periodic
-        if (len(ds["Yp1"]) < lenY or "Y" in dropAxes) and "Y" in periodic:
-            periodic.remove("Y")
-        if (len(ds["Xp1"]) < lenX or "X" in dropAxes) and "X" in periodic:
-            periodic.remove("X")
+        ds = ds.isel(time=slice(iT[0], iT[1] + 1))
+        if "time_midp" in ds.dims:
+            if "time" in dropAxes:
+                if iT[0] == len(ds["time_midp"]):
+                    iT[0] = iT[0] - 1
+                    iT[1] = iT[1] - 1
+                ds = ds.isel(time_midp=slice(iT[0], iT[1] + 1))
+            else:
+                ds = ds.isel(time_midp=slice(iT[0], iT[1]))
 
     # ---------------------------
     # Vertical CUTOUT
@@ -373,56 +325,140 @@ def cutout(
                 ds = ds.isel(Zl=slice(iZ[0], iZ[1]))
 
     # ---------------------------
-    # Time CUTOUT
+    # Horizontal CUTOUT (part I, split into two to avoid repeated code)
     # ---------------------------
-    # Initialize vertical mask
-    maskT = _xr.ones_like(ds["time"]).astype("int")
+    if add_Hbdr is True:
+        add_Hbdr = _np.mean(
+            [
+                _np.fabs(od._ds["XG"].max() - od._ds["XG"].min()),
+                _np.fabs(od._ds["YG"].max() - od._ds["YG"].min()),
+            ]
+        )
+        add_Hbdr = add_Hbdr / _np.mean([len(od._ds["X"]), len(od._ds["Y"])])
+    elif add_Hbdr is False:
+        add_Hbdr = 0
 
-    if timeRange is not None:
+    if add_Vbdr is True:
+        add_Vbdr = _np.fabs(od._ds["Zp1"].diff("Zp1")).max().values
+    elif add_Vbdr is False:
+        add_Vbdr = 0
 
-        # Use arrays
-        timeRange = _np.asarray([_np.min(timeRange), _np.max(timeRange)]).astype(
-            ds["time"].dtype
+    # Initialize horizontal mask
+    if XRange is not None or YRange is not None:
+
+        maskH, dmaskH, XRange, YRange = get_maskH(
+            ds, add_Hbdr, add_Vbdr, XRange, YRange
         )
 
-        # Get the closest
-        for i, time in enumerate(timeRange):
-            if _np.issubdtype(ds["time"].dtype, _np.datetime64):
-                diff = _np.fabs(ds["time"].astype("float64") - time.astype("float64"))
-            else:
-                diff = _np.fabs(ds["time"] - time)
-            timeRange[i] = ds["time"].where(diff == diff.min(), drop=True).min().values
-        maskT = maskT.where(
-            _np.logical_and(ds["time"] >= timeRange[0], ds["time"] <= timeRange[-1]), 0
-        )
+    if transformation is not False and "face" in ds.dims:
+        if XRange is None and YRange is None:
+            faces = "all"
+        else:
+            faces = dmaskH["face"].values  # gets faces that survives cutout
+        _transf_list = ["arctic_crown", "arctic_centered"]
+        if transformation in _transf_list:
+            arg = {
+                "ds": ds,
+                "varlist": varList,  # vars and grid coords to transform
+                "centered": centered,
+                "faces": faces,
+                "drop": True,  # required to calculate U-V grid points
+            }
+            if transformation == "arctic_crown":
+                _transformation = _llc_trans.arctic_crown
+            elif transformation == "arctic_centered":
+                _transformation = _llc_trans.arctic_centered
+            dsnew = _transformation(**arg)
+            dsnew = dsnew.set_coords(co_list)
+            grid_coords = od.grid_coords
+            od._ds = dsnew
+            manipulate_coords = {"coordsUVfromG": True}
+            od = od.manipulate_coords(**manipulate_coords)
+            if len(grid_coords["time"]) > 1:
+                grid_coords["time"].pop("time_midp", None)
+                grid_coords = {"add_midp": True, "grid_coords": grid_coords}
+            od = od.set_grid_coords(**grid_coords, overwrite=True)
+            od._ds.attrs["OceanSpy_description"] = "Cutout of"
+            "simulation, with simple topology (face not a dimension)"
+            # Unpack the new dataset without face as dimension
+            ds = od._ds
+            maskH, dmaskH, XRange, YRange = get_maskH(
+                ds, add_Hbdr, add_Vbdr, XRange, YRange
+            )
+        elif transformation not in _transf_list:
+            raise ValueError("transformation not supported")
+    elif transformation is False and "face" in ds.dims:
+        raise ValueError("Most define a transformation to remove complex"
+                         "topology of dataset.")
 
-        # Find time indexes
-        maskT = maskT.assign_coords(time=_np.arange(len(maskT["time"])))
-        dmaskT = maskT.where(maskT, drop=True)
-        dtime = dmaskT["time"].values
-        iT = [min(dtime), max(dtime)]
-        maskT["time"] = ds["time"]
+    # ---------------------------
+    # Horizontal CUTOUT part II (continuation of original code)
+    # ---------------------------
+
+    if XRange is not None or YRange is not None:
+        dYp1 = dmaskH["Yp1"].values
+        dXp1 = dmaskH["Xp1"].values
+        iY = [_np.min(dYp1), _np.max(dYp1)]
+        iX = [_np.min(dXp1), _np.max(dXp1)]
+        maskH["Yp1"] = ds["Yp1"]
+        maskH["Xp1"] = ds["Xp1"]
+
+        # Original length
+        lenY = len(ds["Yp1"])
+        lenX = len(ds["Xp1"])
 
         # Indexis
-        if iT[0] == iT[1]:
-            if "time" not in dropAxes:
-                if iT[0] > 0:
-                    iT[0] = iT[0] - 1
+        if iY[0] == iY[1]:
+            if "Y" not in dropAxes:
+                if iY[0] > 0:
+                    iY[0] = iY[0] - 1
                 else:
-                    iT[1] = iT[1] + 1
+                    iY[1] = iY[1] + 1
         else:
-            dropAxes.pop("time", None)
+            dropAxes.pop("Y", None)
 
-        # Cutout
-        ds = ds.isel(time=slice(iT[0], iT[1] + 1))
-        if "time_midp" in ds.dims:
-            if "time" in dropAxes:
-                if iT[0] == len(ds["time_midp"]):
-                    iT[0] = iT[0] - 1
-                    iT[1] = iT[1] - 1
-                ds = ds.isel(time_midp=slice(iT[0], iT[1] + 1))
-            else:
-                ds = ds.isel(time_midp=slice(iT[0], iT[1]))
+        if iX[0] == iX[1]:
+            if "X" not in dropAxes:
+                if iX[0] > 0:
+                    iX[0] = iX[0] - 1
+                else:
+                    iX[1] = iX[1] + 1
+        else:
+            dropAxes.pop("X", None)
+
+        ds = ds.isel(Yp1=slice(iY[0], iY[1] + 1), Xp1=slice(iX[0], iX[1] + 1))
+
+        Xcoords = od._grid.axes["X"].coords
+        if "X" in dropAxes:
+            if iX[0] == len(ds["X"]):
+                iX[0] = iX[0] - 1
+                iX[1] = iX[1] - 1
+            ds = ds.isel(X=slice(iX[0], iX[1] + 1))
+        elif ("outer" in Xcoords and Xcoords["outer"] == "Xp1") or (
+            "left" in Xcoords and Xcoords["left"] == "Xp1"
+        ):
+            ds = ds.isel(X=slice(iX[0], iX[1]))
+        elif "right" in Xcoords and Xcoords["right"] == "Xp1":
+            ds = ds.isel(X=slice(iX[0] + 1, iX[1] + 1))
+
+        Ycoords = od._grid.axes["Y"].coords
+        if "Y" in dropAxes:
+            if iY[0] == len(ds["Y"]):
+                iY[0] = iY[0] - 1
+                iY[1] = iY[1] - 1
+            ds = ds.isel(Y=slice(iY[0], iY[1] + 1))
+        elif ("outer" in Ycoords and Ycoords["outer"] == "Yp1") or (
+            "left" in Ycoords and Ycoords["left"] == "Yp1"
+        ):
+            ds = ds.isel(Y=slice(iY[0], iY[1]))
+        elif "right" in Ycoords and Ycoords["right"] == "Yp1":
+            ds = ds.isel(Y=slice(iY[0] + 1, iY[1] + 1))
+
+        # Cut axis can't be periodic
+        if (len(ds["Yp1"]) < lenY or "Y" in dropAxes) and "Y" in periodic:
+            periodic.remove("Y")
+        if (len(ds["Xp1"]) < lenX or "X" in dropAxes) and "X" in periodic:
+            periodic.remove("X")
 
     # ---------------------------
     # Horizontal MASK
@@ -474,15 +510,16 @@ def cutout(
             1,
             0,
         ).persist()
+
         for var in ds.data_vars:
             if set(["X", "Y"]).issubset(ds[var].dims):
-                ds[var] = ds[var].where(maskC)
+                ds[var] = ds[var].where(maskC, drop=True)
             elif set(["Xp1", "Yp1"]).issubset(ds[var].dims):
-                ds[var] = ds[var].where(maskG)
+                ds[var] = ds[var].where(maskG, drop=True)
             elif set(["Xp1", "Y"]).issubset(ds[var].dims):
-                ds[var] = ds[var].where(maskU)
+                ds[var] = ds[var].where(maskU, drop=True)
             elif set(["X", "Yp1"]).issubset(ds[var].dims):
-                ds[var] = ds[var].where(maskV)
+                ds[var] = ds[var].where(maskV, drop=True)
 
     # ---------------------------
     # TIME RESAMPLING
@@ -586,18 +623,6 @@ def cutout(
 
     # Cut axis can't be periodic
     od = od.set_grid_periodic(periodic)
-
-    # Drop variables
-    if varList is not None:
-        # Make sure it's a list
-        varList = list(varList)
-        varList = _rename_aliased(od, varList)
-
-        # Compute missing variables
-        od = _compute._add_missing_variables(od, varList)
-
-        # Drop useless
-        od._ds = od._ds.drop_vars([v for v in od._ds.data_vars if v not in varList])
 
     return od
 
@@ -1133,7 +1158,6 @@ def survey_stations(
 
 
 def particle_properties(od, times, Ypart, Xpart, Zpart, **kwargs):
-
     """
     Extract Eulerian properties of particles
     using nearest-neighbor interpolation.
@@ -1309,6 +1333,52 @@ def particle_properties(od, times, Ypart, Xpart, Zpart, **kwargs):
     od._ds = od._ds.reset_coords()
 
     return od
+
+
+def get_maskH(ds, add_Hbdr, add_Vbdr, XRange, YRange):
+    """ Define this function to avoid repeated code. First time this runs,
+    the objective is to figure out which faces survive the cutout. This info
+    is then passed, when transforming llc-grids, to llc_rearrange. Second
+    time this code runs, it gets applied on a dataset without faces as a
+    dimension.
+    """
+    maskH = _xr.ones_like(ds["XG"])
+
+    if YRange is not None:
+        # Use arrays
+        YRange = _np.asarray([_np.min(YRange) - add_Hbdr, _np.max(YRange) + add_Hbdr])
+        YRange = YRange.astype(ds["YG"].dtype)
+
+        # Get the closest
+        for i, Y in enumerate(YRange):
+            diff = _np.fabs(ds["YG"] - Y)
+            YRange[i] = ds["YG"].where(diff == diff.min()).min().values
+        maskH = maskH.where(
+            _np.logical_and(ds["YG"] >= YRange[0], ds["YG"] <= YRange[-1]), 0
+        )
+
+    if XRange is not None:
+        # Use arrays
+        XRange = _np.asarray([_np.min(XRange) - add_Hbdr, _np.max(XRange) + add_Hbdr])
+        XRange = XRange.astype(ds["XG"].dtype)
+
+        # Get the closest
+        for i, X in enumerate(XRange):
+            diff = _np.fabs(ds["XG"] - X)
+            XRange[i] = ds["XG"].where(diff == diff.min()).min().values
+        maskH = maskH.where(
+            _np.logical_and(ds["XG"] >= XRange[0], ds["XG"] <= XRange[-1]), 0
+        )
+    # Can't be all zeros
+    if maskH.sum() == 0:
+        raise ValueError("Zero grid points in the horizontal range")
+
+    # Find horizontal indexes
+    maskH = maskH.assign_coords(
+        Yp1=_np.arange(len(maskH["Yp1"])), Xp1=_np.arange(len(maskH["Xp1"]))
+    )
+    dmaskH = maskH.where(maskH, drop=True)
+    return maskH, dmaskH, XRange, YRange
 
 
 class _subsampleMethods(object):

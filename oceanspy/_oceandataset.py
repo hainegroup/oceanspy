@@ -143,6 +143,8 @@ class OceanDataset:
             more_info.append("   .grid_coords: %s" % type(self.grid_coords))
         if self.grid_periodic:
             more_info.append("   .grid_periodic: %s" % type(self.grid_periodic))
+        if self.face_connections:
+            more_info.append("   .face_connections: %s" % type(self.face_connections))
 
         info = "\n".join(main_info)
         info = info + "\n".join(more_info)
@@ -586,6 +588,56 @@ class OceanDataset:
 
         return self
 
+    # -----------------
+    #  face_connections
+    # -----------------
+    @property
+    def face_connections(self):
+        """
+        Defines the topology of the grid used by :py:obj:`xgcm.Grid`.
+
+        References
+        ----------
+
+        """
+        face_connections = self._read_from_global_attr("face_connections")
+        return face_connections
+
+    @face_connections.setter
+    def face_connections(self, face_connections):
+        """
+        Inhibit setter.
+        """
+        raise AttributeError(_setter_error_message("face_connections"))
+
+    def set_face_connections(self, face_connections):
+        """
+        Set face conections that define the grid topology that gets read by
+        :py:obj:`xgcm.Grid`
+        Parameters
+        ----------
+        face_connections: dict
+            Dictionary the connections of each face along each direction.
+        """
+        # check parameters
+        _check_instance({"face_connections": face_connections}, "dict")
+
+        for k in face_connections["face"].keys():
+            for axis in face_connections["face"][k].keys():
+                if type(face_connections["face"][k][axis]) == tuple:
+                    face_connections["face"][k][axis] = face_connections["face"][k][
+                        axis
+                    ]
+                else:
+                    face_connections["face"][k][axis] = eval(
+                        face_connections["face"][k][axis]
+                    )
+
+        self = self._store_as_global_attr(
+            name="face_connections", attr=face_connections, overwrite=True
+        )
+        return self
+
     # -------------------
     # grid
     # -------------------
@@ -605,7 +657,8 @@ class OceanDataset:
         dataset = self.dataset.copy()
         coords = self.grid_coords
         periodic = self.grid_periodic
-        grid = _create_grid(dataset, coords, periodic)
+        face_connections = self.face_connections
+        grid = _create_grid(dataset, coords, periodic, face_connections)
 
         return grid
 
@@ -631,7 +684,8 @@ class OceanDataset:
 
         dataset = self._ds.copy()
         periodic = self.grid_periodic
-        grid = _create_grid(dataset, coords, periodic)
+        face_connections = self.face_connections
+        grid = _create_grid(dataset, coords, periodic, face_connections)
 
         return grid
 
@@ -994,7 +1048,7 @@ class OceanDataset:
             for i, (point_pos, dim2roll) in enumerate(zip(["U", "V"], ["Yp1", "Xp1"])):
                 for dim in ["Y", "X"]:
                     coord = self._ds[dim + "G"].rolling(**{dim2roll: 2})
-                    coord = coord.mean().dropna(dim2roll)
+                    coord = coord.mean().dropna(dim2roll, "all")
                     coord = coord.drop_vars(coord.coords).rename(
                         {dim2roll: dim2roll[0]}
                     )
@@ -1044,42 +1098,6 @@ class OceanDataset:
                 add_coords = _OrderedDict(
                     XU=dict(
                         attrs=dict(
-                            standard_name="longitude_at_u_location",
-                            long_name="longitude",
-                            units="degrees_east",
-                            coordinate="YU XU",
-                        )
-                    ),
-                    YU=dict(
-                        attrs=dict(
-                            standard_name="latitude_at_u_location",
-                            long_name="latitude",
-                            units="degrees_north",
-                            coordinate="YU XU",
-                        )
-                    ),
-                    XV=dict(
-                        attrs=dict(
-                            standard_name="longitude_at_v_location",
-                            long_name="longitude",
-                            units="degrees_east",
-                            coordinate="YV XV",
-                        )
-                    ),
-                    YV=dict(
-                        attrs=dict(
-                            standard_name="latitude_at_v_location",
-                            long_name="latitude",
-                            units="degrees_north",
-                            coordinate="YV XV",
-                        )
-                    ),
-                )
-            else:
-                coords = variables.horizontal_coordinates_spherical
-                add_coords = _OrderedDict(
-                    XU=dict(
-                        attrs=dict(
                             standard_name=("plane_x_coordinate" "_at_u_location"),
                             long_name="x coordinate",
                             units="m",
@@ -1111,6 +1129,60 @@ class OceanDataset:
                         )
                     ),
                 )
+            else:
+                coords = variables.horizontal_coordinates_spherical
+
+                add_coords = _OrderedDict(
+                    XC=dict(
+                        attrs=dict(
+                            standard_name="longitude_at_T_location",
+                            long_name="longitude",
+                            units="degrees_east",
+                            coordinate="YC XC",
+                        )
+                    ),
+                    YC=dict(
+                        attrs=dict(
+                            standard_name="latitude_at_T_location",
+                            long_name="latitude",
+                            units="degrees_north",
+                            coordinate="YC XC",
+                        )
+                    ),
+                    XU=dict(
+                        attrs=dict(
+                            standard_name="longitude_at_u_location",
+                            long_name="longitude",
+                            units="degrees_east",
+                            coordinate="YU XU",
+                        )
+                    ),
+                    YU=dict(
+                        attrs=dict(
+                            standard_name="latitude_at_u_location",
+                            long_name="latitude",
+                            units="degrees_north",
+                            coordinate="YU XU",
+                        )
+                    ),
+                    XV=dict(
+                        attrs=dict(
+                            standard_name="longitude_at_v_location",
+                            long_name="longitude",
+                            units="degrees_east",
+                            coordinate="YV XV",
+                        )
+                    ),
+                    YV=dict(
+                        attrs=dict(
+                            standard_name="latitude_at_v_location",
+                            long_name="latitude",
+                            units="degrees_north",
+                            coordinate="YV XV",
+                        )
+                    ),
+                )
+
             coords = _OrderedDict(list(coords.items()) + list(add_coords.items()))
             for var in coords:
                 attrs = coords[var]["attrs"]

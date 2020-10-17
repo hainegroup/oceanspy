@@ -11,7 +11,7 @@ import xgcm
 # =========
 # FUNCTIONS
 # =========
-def _create_grid(dataset, coords, periodic):
+def _create_grid(dataset, coords, periodic, face_connections):
     """
     Create xgcm grid by adding comodo attributes to the
     dimensions of the dataset.
@@ -23,6 +23,8 @@ def _create_grid(dataset, coords, periodic):
         E.g., {'Y': {Y: None, Yp1: 0.5}}
     periodic: list
         List of periodic axes.
+    face_connections: dict
+        dictionary specifying grid topology
 
     Returns
     -------
@@ -55,7 +57,10 @@ def _create_grid(dataset, coords, periodic):
             stacklevel=2,
         )
     # Create grid
-    grid = xgcm.Grid(dataset, periodic=periodic)
+    if face_connections is None:
+        grid = xgcm.Grid(dataset, periodic=periodic)
+    else:
+        grid = xgcm.Grid(dataset, periodic=periodic, face_connections=face_connections)
     if len(grid.axes) == 0:
         grid = None
 

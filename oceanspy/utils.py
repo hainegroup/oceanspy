@@ -540,6 +540,17 @@ def densmdjwf(s, t, p):
     return rho
 
 
+def static_pressure(Z):
+    """
+    Returns the static pressure given depth.
+    """
+    # Coefficients to determine static pressure
+    c = [0.059808, -0.025, 0.100766, 2.28405e-7]
+    P = c[0] * _np.exp((c[1] * Z) - 1) + c[2] * Z + c[3] * (Z ** 2)
+    P = 10 * P  # decibars
+    return P
+
+
 def Coriolis_parameter(Y, omega=7.2921e-5):
     """
     Compute Coriolis parameter (both vertical and horizontal components).

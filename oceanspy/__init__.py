@@ -11,6 +11,7 @@ from . import (  # noqa: F401
     animate,
     utils,
     _ospy_utils,
+    llc_rearrange,
 )
 import numpy as _np
 
@@ -41,7 +42,8 @@ PARAMETERS_DESCRIPTION = {
     "dTempFrz_dS": "Freezing temp. of sea water (intercept)",
 }
 
-OCEANSPY_AXES = ["X", "Y", "Z", "time", "mooring", "station"]
+OCEANSPY_AXES = ["X", "Y", "Z", "face", "time", "mooring", "station"]
+
 
 AVAILABLE_PARAMETERS = {"eq_state": ["jmd95", "mdjwf"]}
 
@@ -69,4 +71,9 @@ SCISERVER_DATASETS = [
     "EGshelfSJsec500m_6H_NONhydro",
     "Arctic_Control",
     "KangerFjord",
+    "LLC4320",
+    "ECCO",
+    "CORE",
+    "HYBRID",
+    "HYCOM",
 ]

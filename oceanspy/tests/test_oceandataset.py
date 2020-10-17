@@ -15,6 +15,8 @@ from oceanspy import AVAILABLE_PARAMETERS, DEFAULT_PARAMETERS, OCEANSPY_AXES
 # Directory
 Datadir = "./oceanspy/tests/Data/"
 od = open_oceandataset.from_netcdf("{}MITgcm_rect_nc.nc" "".format(Datadir))
+ECCO_url = "{}catalog_ECCO.yaml".format(Datadir)
+ECCOod = open_oceandataset.from_catalog('LLC', ECCO_url)
 
 # Remove global attributes
 ds = od.dataset
@@ -46,11 +48,18 @@ for coord in ["XC", "YC", "XU", "YU", "XV", "YV", "XG", "YG"]:
 cart_od = OceanDataset(ds).set_parameters({"rSphere": None})
 
 
+# remove ECCO global attributes
+eds = ECCOod.dataset
+eds.attrs = {}
+clean_eod = OceanDataset(eds)
+
+
 # ============
 # OceanDataset
 # ============
 @pytest.mark.parametrize(
-    "dataset", [1, od.dataset, clean_od.dataset, alias_od.dataset, per_od.dataset]
+    "dataset", [1, od.dataset, clean_od.dataset,
+                alias_od.dataset, per_od.dataset, ECCOod]
 )
 def test_OceanDataset(dataset):
     if not isinstance(dataset, xr.Dataset):
@@ -267,6 +276,23 @@ def test_grid_periodic(od, grid_periodic):
     # Inhibit setter
     with pytest.raises(AttributeError):
         od.grid_periodic = grid_periodic
+
+
+ecco_fscons = ECCOod.face_connections
+ecco_grid_coords = ECCOod.grid_coords
+
+
+@pytest.mark.parametrize("od", [clean_eod, ECCOod])
+@pytest.mark.parametrize("topology", [[], ecco_fscons, ecco_fscons])
+def test_face_connections(od, topology, grid_coords=ecco_grid_coords):
+    new_od = od.set_grid_coords(grid_coords=grid_coords, overwrite=True)
+    if not isinstance(topology, dict):
+        with pytest.raises(TypeError):
+            new_od = new_od.set_face_connections(**topology)
+    else:
+        face_connections = {'face_connections': topology}
+        new_od = new_od.set_face_connections(**face_connections)
+        assert new_od.face_connections == topology
 
 
 @pytest.mark.parametrize(
