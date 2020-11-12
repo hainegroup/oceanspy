@@ -3,6 +3,7 @@ jupyter contrib nbextension install --user
 jupyter nbextension enable splitcell/splitcell
 
 # Download data
+cd binder
 myurl="https://livejohnshopkins-my.sharepoint.com/:u:/g/personal/malmans2_jh_edu/ETTi4yKjbvxOvraRKaydA3kBy_sOKNmkqGFP61CfsgW_bQ?"
 wget -v -O tmp.tar.gz -L ${myurl}download=1 &&
 tar xvzf tmp.tar.gz &&
