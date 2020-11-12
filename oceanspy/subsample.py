@@ -18,6 +18,7 @@ import numpy as _np
 import copy as _copy
 import warnings as _warnings
 import functools as _functools
+from packaging.version import parse as _parse_version
 
 # From OceanSpy (private)
 from . import utils as _utils
@@ -1106,7 +1107,8 @@ def survey_stations(
             ds[var].attrs = attrs
         elif var not in ["Xp1", "Yp1"]:
             ds[var] = ds_in[var].reset_coords(drop=True)
-    regridder.clean_weight_file()
+    if _parse_version(_xe.__version__) < _parse_version("0.4.0"):
+        regridder.clean_weight_file()
 
     # Extract transect
     ds = ds.isel(
