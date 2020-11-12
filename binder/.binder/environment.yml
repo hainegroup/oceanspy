@@ -26,5 +26,5 @@ dependencies:
   - tqdm
   - pip
   - pip:
-    - git+https://github.com/malmans2/oceanspy.git
+    - git+https://github.com/hainegroup/oceanspy.git
     - jupyter-contrib-nbextensions
