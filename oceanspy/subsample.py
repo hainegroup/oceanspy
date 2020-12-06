@@ -651,6 +651,12 @@ def mooring_array(od, Ymoor, Xmoor, **kwargs):
         Subsampled oceandataset.
     """
 
+    # Add indexes needed for transports
+    Yind, Xind = _xr.broadcast(od._ds["Y"], od._ds["X"])
+    od._ds["Xind"] = Xind.transpose(*od._ds["XC"].dims)
+    od._ds["Yind"] = Yind.transpose(*od._ds["YC"].dims)
+    od._ds = od._ds.set_coords(["Xind", "Yind"])
+
     # Check
     _check_native_grid(od, "mooring_array")
 
