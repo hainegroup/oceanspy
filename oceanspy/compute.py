@@ -2096,10 +2096,10 @@ def mooring_volume_transport(od):
     )
 
     # Extract left and right values
-    U1 = U_tran.isel(Xp1=1)
-    U0 = U_tran.isel(Xp1=0)
-    V1 = V_tran.isel(Yp1=1)
-    V0 = V_tran.isel(Yp1=0)
+    U1 = U_tran.isel(Xp1=1).fillna(0)
+    U0 = U_tran.isel(Xp1=0).fillna(0)
+    V1 = V_tran.isel(Yp1=1).fillna(0)
+    V0 = V_tran.isel(Yp1=0).fillna(0)
 
     # Initialize direction
     U0_dir = _np.zeros((len(XC), 2))
