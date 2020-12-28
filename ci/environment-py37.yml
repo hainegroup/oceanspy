@@ -23,12 +23,12 @@ dependencies:
   - codecov
   - flake8
   - ffmpeg
-  - black<20.8b1
+  - black
   - aiohttp
   - pandas
   - matplotlib
+  - xmitgcm
   - pip
   - pip:
-    - git+https://github.com/MITgcm/xmitgcm.git
     - black-nb
     - pre-commit

@@ -1345,7 +1345,7 @@ def particle_properties(od, times, Ypart, Xpart, Zpart, **kwargs):
 
 
 def get_maskH(ds, add_Hbdr, add_Vbdr, XRange, YRange):
-    """ Define this function to avoid repeated code. First time this runs,
+    """Define this function to avoid repeated code. First time this runs,
     the objective is to figure out which faces survive the cutout. This info
     is then passed, when transforming llc-grids, to llc_rearrange. Second
     time this code runs, it gets applied on a dataset without faces as a
