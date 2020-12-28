@@ -33,8 +33,7 @@ Ny = od._ds.dims["Y"]
     ],
 )
 def test_original_dims(od, var, expected):
-    """ test original dimensions
-    """
+    """test original dimensions"""
     dims = Dims([dim for dim in od._ds[var].dims][::-1])
     assert dims == expected
 
@@ -383,7 +382,7 @@ def test_init_vars(od, tNX, tNY, X0, varlist):
 
 
 def _is_connect(faces, rotated=False):
-    """ do faces in a facet connect? Not applicable to arc cap, and only
+    """do faces in a facet connect? Not applicable to arc cap, and only
     applicable to either rotated or not rotated facets"""
     if rotated is False:
         A_fac = _np.array([0, 1, 2])

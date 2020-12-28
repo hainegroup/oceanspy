@@ -7,7 +7,13 @@ class LLCtransformation:
     """ A class containing the transformation of LLCgrids"""
 
     def __init__(
-        self, ds, varlist, transformation, centered="Atlantic", faces="all", drop=False,
+        self,
+        ds,
+        varlist,
+        transformation,
+        centered="Atlantic",
+        faces="all",
+        drop=False,
     ):
         self._ds = ds  # xarray.DataSet
         self._varlist = varlist  # variables names to be transformed
@@ -17,9 +23,14 @@ class LLCtransformation:
 
     @classmethod
     def arctic_centered(
-        self, ds, varlist, centered="Arctic", faces="all", drop=False,
+        self,
+        ds,
+        varlist,
+        centered="Arctic",
+        faces="all",
+        drop=False,
     ):
-        """ Transforms the dataset by removing faces as a dimension, into a
+        """Transforms the dataset by removing faces as a dimension, into a
         new dataset centered at the arctic, while preserving the grid.
         """
         Nx = len(ds["X"])
@@ -149,9 +160,14 @@ class LLCtransformation:
 
     @classmethod
     def arctic_crown(
-        self, ds, varlist, centered, faces="all", drop=False,
+        self,
+        ds,
+        varlist,
+        centered,
+        faces="all",
+        drop=False,
     ):
-        """ Transforms the dataset in which faces appears as a dimension into
+        """Transforms the dataset in which faces appears as a dimension into
         one without faces, with grids and variables sharing a common grid
         orientation.
         """
@@ -370,7 +386,7 @@ def init_vars(ds, DSNEW, varlist):
 
 
 def drop_size(ds):
-    """ Drops a row and/or column from interior (scalar) points, creating
+    """Drops a row and/or column from interior (scalar) points, creating
     len(X)<len(Xp1) of staggered grids
     """
     coords = {}
