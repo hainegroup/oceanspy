@@ -655,6 +655,7 @@ sources:
       urlpath: '/sciserver/filedb*/ocean/poseidon/LLC4320/2D/SS*'
       chunks: {'i':4320, 'j':4320, 'time':1, 'face':1}
       xarray_kwargs:
+        engine: zarr
         concat_dim: time
         parallel: True
         combine: nested
@@ -677,7 +678,8 @@ sources:
     description: horizontal grid for LLC4320
     driver: zarr
     args:
-      urlpath: '/sciserver/filedb05-01/ocean/poseidon/LLC4320/grid'
+      urlpath: '/sciserver/filedb05-01/ocean/poseidon/LLC4320/SSDATA/grid'
+      engine: zarr
     metadata:
       swap_dims:
         k: Z
