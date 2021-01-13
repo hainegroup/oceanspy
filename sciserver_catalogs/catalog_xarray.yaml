@@ -679,7 +679,8 @@ sources:
     driver: zarr
     args:
       urlpath: '/sciserver/filedb05-01/ocean/poseidon/LLC4320/SSDATA/grid'
-      engine: zarr
+      xarray_kwargs:
+        engine: zarr
     metadata:
       swap_dims:
         k: Z
