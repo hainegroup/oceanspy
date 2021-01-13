@@ -682,9 +682,9 @@ sources:
       xarray_kwargs:
         engine: zarr
     metadata:
-      swap_dims:
-        k: Z
-        k_p1: Zp1
+      # swap_dims:
+      #   k: Z
+      #   k_p1: Zp1
       rename:
         i: X
         i_g: Xp1
