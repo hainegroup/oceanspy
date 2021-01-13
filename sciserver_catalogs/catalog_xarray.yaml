@@ -753,7 +753,6 @@ sources:
         c_p: 3.986e+03
         tempFrz0: 9.01e-02
         dTempFrz_dS: -5.75e-02
-        grid_type: llc
       name: LLC4320
       description: |
         horizontal grid for LLC4320, a general, curvilinear ocean simulations on the cube-sphere.
