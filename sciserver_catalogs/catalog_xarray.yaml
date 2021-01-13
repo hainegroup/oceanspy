@@ -658,7 +658,7 @@ sources:
         concat_dim: time
         parallel: True
         combine: nested
-        chunks: {'i':4320, 'j':4320, 'time':1, 'face':1}
+        # chunks: {'i':4320, 'j':4320, 'time':1, 'face':1}
     metadata:
       rename:
         i: X
