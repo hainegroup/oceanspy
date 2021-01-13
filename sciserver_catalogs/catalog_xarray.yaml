@@ -685,6 +685,8 @@ sources:
       swap_dims:
         k: Z
         k_p1: Zp1
+        k_l: Zl
+        k_u: Zu
       rename:
         i: X
         i_g: Xp1
