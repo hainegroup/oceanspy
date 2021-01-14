@@ -4,7 +4,7 @@
 History
 =======
 
-v0.2.0 (unreleased)
+v0.2.0 (2020-10-17)
 -------------------
 Integration with LLC grid such as the ECCO data and the family of LLC simulations, while preserving the original (native) grid. This allows for the calculation (closure) of budgets. This new functionality was developed by `Miguel Jimenez Urias`_.
 

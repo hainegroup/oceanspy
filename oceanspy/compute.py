@@ -2080,6 +2080,8 @@ def mooring_volume_transport(od):
     mooring = od._ds["mooring"]
     XC = od._ds["XC"].squeeze(("Y", "X"))
     YC = od._ds["YC"].squeeze(("Y", "X"))
+    Xind = od._ds["Xind"].squeeze(("Y", "X"))
+    Yind = od._ds["Yind"].squeeze(("Y", "X"))
     XU = od._ds["XU"].squeeze(("Y"))
     YU = od._ds["YU"].squeeze(("Y"))
     XV = od._ds["XV"].squeeze(("X"))
@@ -2094,10 +2096,10 @@ def mooring_volume_transport(od):
     )
 
     # Extract left and right values
-    U1 = U_tran.isel(Xp1=1)
-    U0 = U_tran.isel(Xp1=0)
-    V1 = V_tran.isel(Yp1=1)
-    V0 = V_tran.isel(Yp1=0)
+    U1 = U_tran.isel(Xp1=1).fillna(0)
+    U0 = U_tran.isel(Xp1=0).fillna(0)
+    V1 = V_tran.isel(Yp1=1).fillna(0)
+    V0 = V_tran.isel(Yp1=0).fillna(0)
 
     # Initialize direction
     U0_dir = _np.zeros((len(XC), 2))
@@ -2106,8 +2108,8 @@ def mooring_volume_transport(od):
     V1_dir = _np.zeros((len(YC), 2))
 
     # Steps
-    diffX = _np.diff(XC)
-    diffY = _np.diff(YC)
+    diffX = _np.diff(Xind)
+    diffY = _np.diff(Yind)
 
     # Closed array?
     if XC[0] == XC[-1] and YC[0] == YC[-1]:

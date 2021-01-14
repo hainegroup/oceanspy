@@ -19,7 +19,7 @@ matrix:
       - TASK=flake8
   - python: 3.8
     env:
-      - CONDA_ENV=py36
+      - CONDA_ENV=py38
       - TASK=black
   - python: 3.8
     env:
@@ -60,8 +60,7 @@ script:
       make clean;
       make html;
     elif [[ $TASK == "black" ]]; then
-      black --check .;
-      black-nb --check .;
+      black --check . && black-nb --check .;
     elif [[ $TASK == "flake8" ]]; then
       flake8;
     else

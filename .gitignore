@@ -1,5 +1,8 @@
 # This gitignore needs to be cleaned up!
 
+# This is built automatically when the documentation is compiled
+docs/datasets.rst
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
