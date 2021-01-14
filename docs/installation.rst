@@ -44,7 +44,7 @@ Step-by-step instructions
     $ conda update conda
     $ conda config --set channel_priority strict
     $ conda config --prepend channels conda-forge
-    $ conda install -y oceanspy "xarray>=0.14.1" cartopy esmpy intake-xarray geopy xesmf esmf "xgcm>=0.2.0" Ipython tqdm ffmpeg aiohttp "pandas<1.1.0"
+    $ conda install -y oceanspy xarray cartopy esmpy intake-xarray geopy "xesmf!=0.5.0,!=0.5.1" esmf xgcm Ipython tqdm ffmpeg aiohttp pandas
     $ pip install git+https://github.com/MITgcm/xmitgcm.git
 
   The commands above install the latest stable release of OceanSpy along with its dependencies.
