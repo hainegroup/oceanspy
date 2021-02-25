@@ -16,3 +16,4 @@ dependencies:
     - ipython
     - xgcm
     - aiohttp
+    - msgpack
