@@ -9,6 +9,7 @@ dependencies:
     - intake
     - intake-xarray
     - ipython
+    - msgpack-python
     - numpydoc
     - sphinx_rtd_theme
     - nbsphinx
