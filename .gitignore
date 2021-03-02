@@ -56,7 +56,7 @@ oceanspy/tests/Data/
 oceanspy/tests/.ipynb_checkpoints/
 oceanspy/tests/.nfs*
 oceanspy/tests/__pycache__/
-
+oceanspy/tests/Data.tar.gz
 
 # Translations
 *.mo
