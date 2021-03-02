@@ -1,12 +1,13 @@
 # Import modules
-import pytest
 import subprocess
-import numpy as np
-import yaml
 import urllib
 
+import numpy as np
+import pytest
+import yaml
+
 # Import oceanspy
-from oceanspy.open_oceandataset import from_netcdf, from_catalog, _find_entries
+from oceanspy.open_oceandataset import _find_entries, from_catalog, from_netcdf
 
 # SCISERVER DATASETS
 url = (

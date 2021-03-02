@@ -1,11 +1,11 @@
 # TODO: cartesian, and Xp1 Yp1 right are not tested.
-import pytest
 import numpy as np
+import pytest
 import xarray as xr
 from numpy.testing import assert_array_equal
 
 # From OceanSpy
-from oceanspy import open_oceandataset, OceanDataset
+from oceanspy import OceanDataset, open_oceandataset
 
 # Directory
 Datadir = "./oceanspy/tests/Data/"

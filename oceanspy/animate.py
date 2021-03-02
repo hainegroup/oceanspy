@@ -8,17 +8,21 @@ Animate using oceanspy plot functions.
 # 3. Add new functions to _animateMethods
 # 4. Add new functions to docs/api.rst
 
+import functools as _functools
+
+import numpy as _np
+
 # Required dependencies (private)
 import xarray as _xr
-import numpy as _np
-import oceanspy as _ospy
-import functools as _functools
 
 # From OceanSpy (private)
 from xarray.plot.utils import _determine_cmap_params
+
+import oceanspy as _ospy
+
 from . import compute as _compute
 from . import plot as _plot  # noqa: F401
-from ._ospy_utils import _check_instance, _rename_aliased, _ax_warning, _check_options
+from ._ospy_utils import _ax_warning, _check_instance, _check_options, _rename_aliased
 
 # Recommended dependencies (private)
 try:
@@ -28,9 +32,9 @@ except ImportError:  # pragma: no cover
     pass
 
 try:
-    from IPython.utils import io as _io
     from IPython.display import HTML as _HTML
     from IPython.display import display as _display
+    from IPython.utils import io as _io
 except ImportError:  # pragma: no cover
     pass
 

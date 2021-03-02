@@ -1,18 +1,18 @@
 # Import modules
+import numpy as np
 import pytest
 import xarray as xr
-import numpy as np
 from numpy.testing import assert_allclose, assert_array_almost_equal, assert_array_equal
 
 # From OceanSpy
-from oceanspy import open_oceandataset, OceanDataset
+from oceanspy import OceanDataset, open_oceandataset
 from oceanspy.compute import (
-    gradient,
-    divergence,
     curl,
+    divergence,
+    gradient,
+    integral,
     laplacian,
     weighted_mean,
-    integral,
 )
 
 # Directory

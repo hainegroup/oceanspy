@@ -11,27 +11,29 @@ Subsample OceanDataset objects.
 # 5. Add new functions to _subsampleMethods
 # 6. Add new functions to docs/api.rst
 
+import copy as _copy
+import functools as _functools
+import warnings as _warnings
+
+import numpy as _np
+import pandas as _pd
+
 # Required dependencies (private)
 import xarray as _xr
-import pandas as _pd
-import numpy as _np
-import copy as _copy
-import warnings as _warnings
-import functools as _functools
 from packaging.version import parse as _parse_version
 
 # From OceanSpy (private)
-from . import utils as _utils
 from . import compute as _compute
-from .llc_rearrange import LLCtransformation as _llc_trans
+from . import utils as _utils
 from ._ospy_utils import (
     _check_instance,
-    _check_range,
     _check_list_of_string,
     _check_native_grid,
     _check_part_position,
+    _check_range,
     _rename_aliased,
 )
+from .llc_rearrange import LLCtransformation as _llc_trans
 
 # Recommended dependencies (private)
 try:
