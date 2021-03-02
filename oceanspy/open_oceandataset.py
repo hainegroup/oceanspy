@@ -6,16 +6,17 @@ Open OceanDataset objects.
 # 1. All functions in this module must return an OceanDataset.
 # 2. Add new functions in docs/api.rst
 
+import urllib as _urllib
+import warnings as _warnings
+from collections import OrderedDict as _OrderedDict
+
 # Import oceanspy dependencies (private)
 import xarray as _xr
-import warnings as _warnings
 import yaml as _yaml
-import urllib as _urllib
 
 # Import from oceanspy (private)
 from ._oceandataset import OceanDataset as _OceanDataset
 from ._ospy_utils import _check_instance, _restore_coord_attrs
-from collections import OrderedDict as _OrderedDict
 
 # Import extra modules (private)
 try:
@@ -251,18 +252,18 @@ def from_catalog(name, catalog_url=None):
 
     # Set attributes (use xmitgcm)
     try:
+        from xmitgcm import default_diagnostics
+        from xmitgcm.utils import parse_available_diagnostics
         from xmitgcm.variables import (
-            vertical_coordinates,
+            extra_grid_variables,
             horizontal_grid_variables,
+            mask_variables,
+            package_state_variables,
+            state_variables,
+            vertical_coordinates,
             vertical_grid_variables,
             volume_grid_variables,
-            mask_variables,
-            state_variables,
-            package_state_variables,
-            extra_grid_variables,
         )
-        from xmitgcm.utils import parse_available_diagnostics
-        from xmitgcm import default_diagnostics
 
         diagnostics = parse_available_diagnostics(default_diagnostics.__file__)
         variables = _OrderedDict(

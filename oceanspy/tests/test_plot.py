@@ -1,16 +1,15 @@
 # TODO: add tests for aliased datasets.
 
 # Import modules
-import pytest
-import xarray as xr
-import numpy as np
-
-# From OceanSpy
-from oceanspy import open_oceandataset, OceanDataset
-from oceanspy.plot import TS_diagram, time_series, horizontal_section, vertical_section
-
 # Matplotlib (keep it below oceanspy)
 import matplotlib.pyplot as plt
+import numpy as np
+import pytest
+import xarray as xr
+
+# From OceanSpy
+from oceanspy import OceanDataset, open_oceandataset
+from oceanspy.plot import TS_diagram, horizontal_section, time_series, vertical_section
 
 # Directory
 Datadir = "./oceanspy/tests/Data/"

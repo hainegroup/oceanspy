@@ -1,16 +1,22 @@
 # General packages
-import pytest
-import cartopy
-import scipy
-import os
-import numpy as np
-import xarray as xr
 import copy as copy
+import os
 import shutil
 
+import cartopy
+import numpy as np
+import pytest
+import scipy
+import xarray as xr
+
 # Oceanspy modules
-from oceanspy import open_oceandataset, OceanDataset
-from oceanspy import AVAILABLE_PARAMETERS, DEFAULT_PARAMETERS, OCEANSPY_AXES
+from oceanspy import (
+    AVAILABLE_PARAMETERS,
+    DEFAULT_PARAMETERS,
+    OCEANSPY_AXES,
+    OceanDataset,
+    open_oceandataset,
+)
 
 # Directory
 Datadir = "./oceanspy/tests/Data/"

@@ -2,9 +2,10 @@
 # This modules collect useful functions used by OceanSpy.
 # All functions here must be private (names start with underscore `_`)
 
+import warnings
+
 # Import modules (can be public here)
 import numpy
-import warnings
 import xgcm
 
 

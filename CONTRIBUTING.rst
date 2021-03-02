@@ -135,7 +135,7 @@ It is written in reStructuredText_.
 Contributing to the Code
 ------------------------
 
-Continuous Integration and Test Coverage links: |travis| |codecov|
+Continuous Integration and Test Coverage links: |CI| |codecov|
 
 1. First, you need a local clone of ``oceanspy`` and a branch (follow the instructions in :ref:`using_git`).
 
@@ -145,13 +145,13 @@ Continuous Integration and Test Coverage links: |travis| |codecov|
            
     $ cd oceanspy
 
-3. Create a test environment (substituting ``pyxx`` with one of the available python versions):
+3. Create a test environment:
 
    .. code-block:: bash
     
     $ conda config --set channel_priority strict
     $ conda config --prepend channels conda-forge
-    $ conda env create -f ci/environment-pyxx.yml
+    $ conda env create -f ci/environment.yml
 
 4. Activate the test environment:
 
@@ -255,10 +255,10 @@ A reminder for the maintainers on how to deploy.
     :alt: Documentation
     :target: http://oceanspy.readthedocs.io/en/latest/?badge=latest
 
-.. |travis| image:: https://travis-ci.com/hainegroup/oceanspy.svg?branch=master
-    :alt: Travis
-    :target: https://travis-ci.com/hainegroup/oceanspy
-    
+.. |CI| image:: https://img.shields.io/github/workflow/status/hainegroup/oceanspy/CI?logo=github
+    :alt: CI
+    :target: https://github.com/hainegroup/oceanspy/actions
+ 
 .. |codecov| image:: https://codecov.io/github/hainegroup/oceanspy/coverage.svg?branch=master
     :alt: Coverage
     :target: https://codecov.io/github/hainegroup/oceanspy?branch=master

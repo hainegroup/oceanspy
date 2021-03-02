@@ -1,11 +1,28 @@
-# https://pre-commit.com/
+# .pre-commit-config.yaml
+
 repos:
-  - repo: https://github.com/ambv/black
-    rev: stable
+
+  - repo: https://github.com/pycqa/isort
+    rev: 5.7.0
     hooks:
-    - id: black
-      language_version: python3.7
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v2.4.0
+      - id: isort
+
+  - repo: https://github.com/psf/black
+    rev: 20.8b1
     hooks:
-    - id: flake8
+      - id: black
+
+  - repo: https://gitlab.com/pycqa/flake8.git
+    rev: 3.8.4
+    hooks:
+       - id: flake8
+
+  - repo: https://github.com/nbQA-dev/nbQA
+    rev: 0.5.9
+    hooks:
+      - id: nbqa-black
+        additional_dependencies: [black==20.8b1]
+        args: [--nbqa-mutate]
+      - id: nbqa-isort
+        additional_dependencies: [isort==5.7.0]
+        args: [--nbqa-mutate]

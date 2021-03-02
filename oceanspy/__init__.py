@@ -4,18 +4,31 @@ __email__ = "mattia.almansi@noc.ac.uk"
 __version__ = '0.2.0'
 # fmt: on
 
-from ._oceandataset import OceanDataset  # noqa: F401
-from . import (  # noqa: F401
-    open_oceandataset,
-    subsample,
-    compute,
-    plot,
-    animate,
-    utils,
-    _ospy_utils,
-    llc_rearrange,
-)
 import numpy as _np
+
+from . import (
+    _ospy_utils,
+    animate,
+    compute,
+    llc_rearrange,
+    open_oceandataset,
+    plot,
+    subsample,
+    utils,
+)
+from ._oceandataset import OceanDataset
+
+__all__ = (
+    "llc_rearrange",
+    "_ospy_utils",
+    "animate",
+    "compute",
+    "open_oceandataset",
+    "plot",
+    "subsample",
+    "utils",
+    "OceanDataset",
+)
 
 DEFAULT_PARAMETERS = {
     "rSphere": 6.371e3,

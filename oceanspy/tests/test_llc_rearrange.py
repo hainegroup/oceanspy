@@ -1,20 +1,19 @@
-import pytest
 import numpy as _np
+import pytest
 
 # From OceanSpy
 from oceanspy import open_oceandataset
+from oceanspy.llc_rearrange import Dims
+from oceanspy.llc_rearrange import LLCtransformation as LLC
 from oceanspy.llc_rearrange import (
-    Dims,
-    make_chunks,
-    pos_chunks,
+    arct_connect,
     chunk_sizes,
     face_connect,
-    arct_connect,
-    make_array,
     init_vars,
+    make_array,
+    make_chunks,
+    pos_chunks,
 )
-from oceanspy.llc_rearrange import LLCtransformation as LLC
-
 
 Datadir = "./oceanspy/tests/Data/"
 ECCO_url = "{}catalog_ECCO.yaml".format(Datadir)

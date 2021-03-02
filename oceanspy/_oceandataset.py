@@ -27,28 +27,30 @@
 #       (currently cleaned up so switched off)
 ##############################################################################
 
+import copy as _copy
+import sys as _sys
+import warnings as _warnings
+from collections import OrderedDict as _OrderedDict
+
+import numpy as _np
+
 # Required dependencies (private)
 import xarray as _xr
-import copy as _copy
-import numpy as _np
-import warnings as _warnings
-import sys as _sys
-from collections import OrderedDict as _OrderedDict
 
 # From OceanSpy (private)
 from . import utils as _utils
 from ._ospy_utils import (
     _check_instance,
-    _check_oceanspy_axes,
-    _setter_error_message,
     _check_list_of_string,
+    _check_oceanspy_axes,
     _create_grid,
     _rename_coord_attrs,
+    _setter_error_message,
 )
-from .subsample import _subsampleMethods
+from .animate import _animateMethods
 from .compute import _computeMethods
 from .plot import _plotMethods
-from .animate import _animateMethods
+from .subsample import _subsampleMethods
 
 # Recommended dependencies (private)
 try:
@@ -393,7 +395,7 @@ class OceanDataset:
         parameters: dict
             {'name': value}
         """
-        from oceanspy import DEFAULT_PARAMETERS, AVAILABLE_PARAMETERS, TYPE_PARAMETERS
+        from oceanspy import AVAILABLE_PARAMETERS, DEFAULT_PARAMETERS, TYPE_PARAMETERS
 
         # Check parameters
         _check_instance({"parameters": parameters}, "dict")

@@ -20,22 +20,25 @@ Create new variables using OceanDataset objects.
 # TODO: compute velocity magnitude
 #############################################################
 
-# Required dependencies (private)
-import xarray as _xr
-import oceanspy as _ospy
-import numpy as _np
-import warnings as _warnings
 import copy as _copy
 import functools as _functools
+import warnings as _warnings
 from collections import OrderedDict as _OrderedDict
+
+import numpy as _np
+
+# Required dependencies (private)
+import xarray as _xr
+
+import oceanspy as _ospy
 
 # From OceanSpy (private)
 from . import utils as _utils
 from ._ospy_utils import (
+    _check_ijk_components,
     _check_instance,
     _check_list_of_string,
     _handle_aliased,
-    _check_ijk_components,
     _rename_aliased,
 )
 
