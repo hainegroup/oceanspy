@@ -247,7 +247,6 @@ A reminder for the maintainers on how to deploy.
 .. _`releases' page`: https://github.com/hainegroup/oceanspy/releases
 .. _pytest: https://docs.pytest.org/en/latest
 .. _`pytest-html`: https://pypi.org/project/pytest-html
-.. _`PEP 8`: https://www.python.org/dev/peps/pep-0008
 
 
 .. |docs| image:: http://readthedocs.org/projects/oceanspy/badge/?version=latest
