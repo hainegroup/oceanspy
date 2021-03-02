@@ -177,13 +177,12 @@ Continuous Integration and Test Coverage links: |CI| |codecov|
 
 9. You can install and use `pytest-html`_ to produce a test report in html format.
 
-10. Make sure that the code follows the `PEP 8`_ style guide and the `black`_ format using the following commands:
+10. Make sure that the code follows the style guide using the following commands:
 
    .. code-block:: bash 
            
-    $ black .
-    $ black-nb .
-    $ flake8
+    $ conda install -c conda-forge pre-commit
+    $ pre-commit run --all
 
    .. note::
 
