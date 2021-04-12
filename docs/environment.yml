@@ -18,3 +18,4 @@ dependencies:
     - aiohttp
     - msgpack
     - toolz
+    - fsspec!=0.9.0
