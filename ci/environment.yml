@@ -25,3 +25,4 @@ dependencies:
   - pandas
   - matplotlib
   - xmitgcm
+  - fsspec!=0.9.0
