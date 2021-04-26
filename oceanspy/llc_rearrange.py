@@ -5,7 +5,7 @@ import xarray as _xr
 
 
 class LLCtransformation:
-    """ A class containing the transformation of LLCgrids"""
+    """A class containing the transformation of LLCgrids"""
 
     def __init__(
         self,
@@ -360,7 +360,7 @@ def make_array(ds, tNx, tNy, X0=0):
 
 
 def init_vars(ds, DSNEW, varlist):
-    """ initializes dataarray within dataset"""
+    """initializes dataarray within dataset"""
     for varName in varlist:
         dims = Dims([dim for dim in ds[varName].dims if dim != "face"][::-1])
         if len(dims) == 1:
