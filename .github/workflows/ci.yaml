@@ -24,6 +24,8 @@ jobs:
           activate-environment: oceanspy_test
           auto-update-conda: false
           python-version: ${{ matrix.python-version }}
+          miniforge-variant: Mambaforge
+          use-mamba: true
 
       - name: Set up conda environment
         shell: bash -l {0}
