@@ -1,5 +1,6 @@
-# .pre-commit-config.yaml
-
+# https://pre-commit.com/
+ci:
+    autofix_prs: false
 repos:
 
   - repo: https://github.com/pycqa/isort
