@@ -4,7 +4,7 @@ ci:
 repos:
 
   - repo: https://github.com/pycqa/isort
-    rev: 5.9.2
+    rev: 5.9.3
     hooks:
       - id: isort
 
@@ -19,7 +19,7 @@ repos:
        - id: flake8
 
   - repo: https://github.com/nbQA-dev/nbQA
-    rev: 0.13.1
+    rev: 1.1.0
     hooks:
       - id: nbqa-black
         additional_dependencies: [black]
