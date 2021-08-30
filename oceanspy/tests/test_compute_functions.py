@@ -1,35 +1,36 @@
 # Import modules
-import pytest
 import numpy as np
+import pytest
 import xarray as xr
+from numpy.testing import assert_allclose, assert_almost_equal, assert_array_equal
+
 import oceanspy as ospy
 
 # From OceanSpy
-from oceanspy import open_oceandataset
-from oceanspy import AVAILABLE_PARAMETERS
-from oceanspy.compute import gradient, divergence, curl
+from oceanspy import AVAILABLE_PARAMETERS, open_oceandataset
 from oceanspy.compute import (
-    missing_horizontal_spacing,
-    potential_density_anomaly,
     Brunt_Vaisala_frequency,
-    velocity_magnitude,
-    horizontal_velocity_magnitude,
-    vertical_relative_vorticity,
-    relative_vorticity,
-    kinetic_energy,
-    eddy_kinetic_energy,
-    horizontal_divergence_velocity,
-    shear_strain,
-    normal_strain,
-    Okubo_Weiss_parameter,
     Ertel_potential_vorticity,
-    mooring_volume_transport,
-    survey_aligned_velocities,
+    Okubo_Weiss_parameter,
+    curl,
+    divergence,
+    eddy_kinetic_energy,
+    gradient,
     heat_budget,
+    horizontal_divergence_velocity,
+    horizontal_velocity_magnitude,
+    kinetic_energy,
+    missing_horizontal_spacing,
+    mooring_volume_transport,
+    normal_strain,
+    potential_density_anomaly,
+    relative_vorticity,
     salt_budget,
+    shear_strain,
+    survey_aligned_velocities,
+    velocity_magnitude,
+    vertical_relative_vorticity,
 )
-
-from numpy.testing import assert_allclose, assert_array_equal, assert_almost_equal
 
 # Directory
 Datadir = "./oceanspy/tests/Data/"

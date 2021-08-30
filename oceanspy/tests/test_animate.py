@@ -1,17 +1,16 @@
 # TODO: add tests for aliased datasets.
 
 # Import modules
+# From matplotlib (keep it below oceanspy!)
+import matplotlib.pyplot as plt
+import numpy as np
 import pytest
 import xarray as xr
-import numpy as np
+from matplotlib.animation import FuncAnimation
 
 # From OceanSpy
 from oceanspy import open_oceandataset
 from oceanspy.animate import TS_diagram, horizontal_section, vertical_section
-
-# From matplotlib (keep it below oceanspy!)
-import matplotlib.pyplot as plt
-from matplotlib.animation import FuncAnimation
 
 # Directory
 Datadir = "./oceanspy/tests/Data/"

@@ -1,5 +1,8 @@
 # This gitignore needs to be cleaned up!
 
+# This is built automatically when the documentation is compiled
+docs/datasets.rst
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -53,7 +56,7 @@ oceanspy/tests/Data/
 oceanspy/tests/.ipynb_checkpoints/
 oceanspy/tests/.nfs*
 oceanspy/tests/__pycache__/
-
+oceanspy/tests/Data.tar.gz
 
 # Translations
 *.mo

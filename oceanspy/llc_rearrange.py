@@ -1,13 +1,20 @@
+import reprlib
+
 import numpy as _np
 import xarray as _xr
-import reprlib
 
 
 class LLCtransformation:
-    """ A class containing the transformation of LLCgrids"""
+    """A class containing the transformation of LLCgrids"""
 
     def __init__(
-        self, ds, varlist, transformation, centered="Atlantic", faces="all", drop=False,
+        self,
+        ds,
+        varlist,
+        transformation,
+        centered="Atlantic",
+        faces="all",
+        drop=False,
     ):
         self._ds = ds  # xarray.DataSet
         self._varlist = varlist  # variables names to be transformed
@@ -17,9 +24,14 @@ class LLCtransformation:
 
     @classmethod
     def arctic_centered(
-        self, ds, varlist, centered="Arctic", faces="all", drop=False,
+        self,
+        ds,
+        varlist,
+        centered="Arctic",
+        faces="all",
+        drop=False,
     ):
-        """ Transforms the dataset by removing faces as a dimension, into a
+        """Transforms the dataset by removing faces as a dimension, into a
         new dataset centered at the arctic, while preserving the grid.
         """
         Nx = len(ds["X"])
@@ -30,10 +42,12 @@ class LLCtransformation:
         if isinstance(faces, list) or isinstance(faces, _np.ndarray):
             face = [fac for fac in faces if fac not in [2, 5, 6, 7, 10]]
             if len(face) > 0:
-                print("Range of latitudes is beyond the scope of"
-                      "this rearrangement of faces. Will retain read-only"
-                      "range of values that retain faces closest to"
-                      "Arctic cap")
+                print(
+                    "Range of latitudes is beyond the scope of"
+                    "this rearrangement of faces. Will retain read-only"
+                    "range of values that retain faces closest to"
+                    "Arctic cap"
+                )
             faces = _np.array([2, 5, 6, 7, 10])
 
         if isinstance(varlist, str):
@@ -147,9 +161,14 @@ class LLCtransformation:
 
     @classmethod
     def arctic_crown(
-        self, ds, varlist, centered, faces="all", drop=False,
+        self,
+        ds,
+        varlist,
+        centered,
+        faces="all",
+        drop=False,
     ):
-        """ Transforms the dataset in which faces appears as a dimension into
+        """Transforms the dataset in which faces appears as a dimension into
         one without faces, with grids and variables sharing a common grid
         orientation.
         """
@@ -341,7 +360,7 @@ def make_array(ds, tNx, tNy, X0=0):
 
 
 def init_vars(ds, DSNEW, varlist):
-    """ initializes dataarray within dataset"""
+    """initializes dataarray within dataset"""
     for varName in varlist:
         dims = Dims([dim for dim in ds[varName].dims if dim != "face"][::-1])
         if len(dims) == 1:
@@ -368,7 +387,7 @@ def init_vars(ds, DSNEW, varlist):
 
 
 def drop_size(ds):
-    """ Drops a row and/or column from interior (scalar) points, creating
+    """Drops a row and/or column from interior (scalar) points, creating
     len(X)<len(Xp1) of staggered grids
     """
     coords = {}
@@ -568,8 +587,9 @@ def chunk_sizes(faces, Nx, Ny, rotated=False):
         else:
             tNx = 0
             tNy = 0
-            print("No data within group of facets (same ordering)"
-                  " survives the cutout.")
+            print(
+                "No data within group of facets (same ordering)" " survives the cutout."
+            )
     else:
         if len(B_list) == 0:
             tNx = Nx[0]

@@ -10,25 +10,28 @@ Plot using OceanDataset objects.
 # 4. Add new functions to _plotMethods
 # 5. Add new functions to docs/api.rst
 
+import functools as _functools
+import warnings as _warnings
+
+import numpy as _np
+import pandas as _pd
+
 # Required dependencies (private)
 import xarray as _xr
+
 import oceanspy as _ospy
-import numpy as _np
-import warnings as _warnings
-import functools as _functools
-import pandas as _pd
 
 # From oceanspy (private)
 from . import compute as _compute
 from ._ospy_utils import (
-    _rename_aliased,
     _check_instance,
     _check_mean_and_int_axes,
     _check_options,
+    _rename_aliased,
 )
 from .compute import _add_missing_variables
-from .compute import weighted_mean as _weighted_mean
 from .compute import integral as _integral
+from .compute import weighted_mean as _weighted_mean
 
 # Additional dependencies (private)
 try:

@@ -6,7 +6,11 @@ OceanSpy - A Python package to facilitate ocean model data analysis and visualiz
 
 |OceanSpy|
 
-|version| |conda forge| |docs| |travis| |codecov| |black| |license| |doi| |JOSS| |binder|
+|version| |conda forge| |docs| |CI| |pre-commit| |codecov| |black| |license| |doi| |JOSS| |binder|
+
+.. admonition:: Interactive Demo
+
+   Check out the interactive demonstration of OceanSpy at `www.bndr.it/nakt7 <https://bndr.it/nakt7>`_
 
 For publications, please cite the following paper:  
 
@@ -62,9 +66,9 @@ OceanSpy can be used as a standalone package for analysis of local circulation m
     :alt: Documentation
     :target: http://oceanspy.readthedocs.io/en/latest/?badge=latest
 
-.. |travis| image:: https://travis-ci.com/hainegroup/oceanspy.svg?branch=master
-    :alt: Travis
-    :target: https://travis-ci.com/hainegroup/oceanspy
+.. |CI| image:: https://img.shields.io/github/workflow/status/hainegroup/oceanspy/CI?logo=github
+    :alt: CI
+    :target: https://github.com/hainegroup/oceanspy/actions
     
 .. |codecov| image:: https://codecov.io/github/hainegroup/oceanspy/coverage.svg?branch=master
     :alt: Coverage
@@ -89,3 +93,7 @@ OceanSpy can be used as a standalone package for analysis of local circulation m
 .. |binder| image:: https://mybinder.org/badge_logo.svg
    :alt: binder
    :target: https://mybinder.org/v2/gh/hainegroup/oceanspy.git/master?filepath=binder
+
+.. |pre-commit| image:: https://results.pre-commit.ci/badge/github/hainegroup/oceanspy/master.svg
+   :target: https://results.pre-commit.ci/latest/github/hainegroup/oceanspy/master
+   :alt: pre-commit.ci status

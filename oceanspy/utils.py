@@ -2,10 +2,12 @@
 OceanSpy utilities that don't need OceanDataset objects.
 """
 
+import copy as _copy
+
+import numpy as _np
+
 # Required dependencies (private)
 import xarray as _xr
-import numpy as _np
-import copy as _copy
 
 # From oceanspy (private)
 from ._ospy_utils import _check_instance

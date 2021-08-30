@@ -13,20 +13,22 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
+import datetime
+
 # If extensions (or modules to document with autodoc) are in another
 # directory, add these directories to sys.path here. If the directory is
 # relative to the documentation root, use os.path.abspath to make it
 # absolute, like shown here.
 #
 import os
-import datetime
 import sys
-import yaml
 import urllib
 
+import yaml
+
 sys.path.insert(0, os.path.abspath(".."))
-import oceanspy
-from oceanspy.open_oceandataset import _find_entries
+import oceanspy  # noqa E402
+from oceanspy.open_oceandataset import _find_entries  # noqa E402
 
 # -- General configuration ---------------------------------------------
 

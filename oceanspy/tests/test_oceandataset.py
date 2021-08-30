@@ -1,22 +1,28 @@
 # General packages
-import pytest
-import cartopy
-import scipy
-import os
-import numpy as np
-import xarray as xr
 import copy as copy
+import os
 import shutil
 
+import cartopy
+import numpy as np
+import pytest
+import scipy
+import xarray as xr
+
 # Oceanspy modules
-from oceanspy import open_oceandataset, OceanDataset
-from oceanspy import AVAILABLE_PARAMETERS, DEFAULT_PARAMETERS, OCEANSPY_AXES
+from oceanspy import (
+    AVAILABLE_PARAMETERS,
+    DEFAULT_PARAMETERS,
+    OCEANSPY_AXES,
+    OceanDataset,
+    open_oceandataset,
+)
 
 # Directory
 Datadir = "./oceanspy/tests/Data/"
 od = open_oceandataset.from_netcdf("{}MITgcm_rect_nc.nc" "".format(Datadir))
 ECCO_url = "{}catalog_ECCO.yaml".format(Datadir)
-ECCOod = open_oceandataset.from_catalog('LLC', ECCO_url)
+ECCOod = open_oceandataset.from_catalog("LLC", ECCO_url)
 
 # Remove global attributes
 ds = od.dataset
@@ -58,8 +64,8 @@ clean_eod = OceanDataset(eds)
 # OceanDataset
 # ============
 @pytest.mark.parametrize(
-    "dataset", [1, od.dataset, clean_od.dataset,
-                alias_od.dataset, per_od.dataset, ECCOod]
+    "dataset",
+    [1, od.dataset, clean_od.dataset, alias_od.dataset, per_od.dataset, ECCOod],
 )
 def test_OceanDataset(dataset):
     if not isinstance(dataset, xr.Dataset):
@@ -290,7 +296,7 @@ def test_face_connections(od, topology, grid_coords=ecco_grid_coords):
         with pytest.raises(TypeError):
             new_od = new_od.set_face_connections(**topology)
     else:
-        face_connections = {'face_connections': topology}
+        face_connections = {"face_connections": topology}
         new_od = new_od.set_face_connections(**face_connections)
         assert new_od.face_connections == topology
 

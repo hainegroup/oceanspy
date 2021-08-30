@@ -11,26 +11,29 @@ Subsample OceanDataset objects.
 # 5. Add new functions to _subsampleMethods
 # 6. Add new functions to docs/api.rst
 
+import copy as _copy
+import functools as _functools
+import warnings as _warnings
+
+import numpy as _np
+import pandas as _pd
+
 # Required dependencies (private)
 import xarray as _xr
-import pandas as _pd
-import numpy as _np
-import copy as _copy
-import warnings as _warnings
-import functools as _functools
+from packaging.version import parse as _parse_version
 
 # From OceanSpy (private)
-from . import utils as _utils
 from . import compute as _compute
-from .llc_rearrange import LLCtransformation as _llc_trans
+from . import utils as _utils
 from ._ospy_utils import (
     _check_instance,
-    _check_range,
     _check_list_of_string,
     _check_native_grid,
     _check_part_position,
+    _check_range,
     _rename_aliased,
 )
+from .llc_rearrange import LLCtransformation as _llc_trans
 
 # Recommended dependencies (private)
 try:
@@ -388,8 +391,9 @@ def cutout(
         elif transformation not in _transf_list:
             raise ValueError("transformation not supported")
     elif transformation is False and "face" in ds.dims:
-        raise ValueError("Most define a transformation to remove complex"
-                         "topology of dataset.")
+        raise ValueError(
+            "Must define a transformation to remove complex" "topology of dataset."
+        )
 
     # ---------------------------
     # Horizontal CUTOUT part II (continuation of original code)
@@ -648,6 +652,12 @@ def mooring_array(od, Ymoor, Xmoor, **kwargs):
     od: OceanDataset
         Subsampled oceandataset.
     """
+
+    # Add indexes needed for transports
+    Yind, Xind = _xr.broadcast(od._ds["Y"], od._ds["X"])
+    od._ds["Xind"] = Xind.transpose(*od._ds["XC"].dims)
+    od._ds["Yind"] = Yind.transpose(*od._ds["YC"].dims)
+    od._ds = od._ds.set_coords(["Xind", "Yind"])
 
     # Check
     _check_native_grid(od, "mooring_array")
@@ -1105,7 +1115,8 @@ def survey_stations(
             ds[var].attrs = attrs
         elif var not in ["Xp1", "Yp1"]:
             ds[var] = ds_in[var].reset_coords(drop=True)
-    regridder.clean_weight_file()
+    if _parse_version(_xe.__version__) < _parse_version("0.4.0"):
+        regridder.clean_weight_file()
 
     # Extract transect
     ds = ds.isel(
@@ -1336,7 +1347,7 @@ def particle_properties(od, times, Ypart, Xpart, Zpart, **kwargs):
 
 
 def get_maskH(ds, add_Hbdr, add_Vbdr, XRange, YRange):
-    """ Define this function to avoid repeated code. First time this runs,
+    """Define this function to avoid repeated code. First time this runs,
     the objective is to figure out which faces survive the cutout. This info
     is then passed, when transforming llc-grids, to llc_rearrange. Second
     time this code runs, it gets applied on a dataset without faces as a
