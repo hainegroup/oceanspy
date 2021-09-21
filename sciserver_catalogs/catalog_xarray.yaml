@@ -775,11 +775,12 @@ sources:
         j: Y
         i_g: Xp1
         j_g: Yp1
+        time_snap: time_midp
         hFacC: HFacC
         hFacS: HFacS
         hFacW: HFacW
       grid_coords:
-        add_midp: True
+        add_midp: False
         grid_coords:
           Y:
             Y:
