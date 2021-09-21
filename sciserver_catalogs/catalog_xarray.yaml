@@ -795,7 +795,7 @@ sources:
       projection:
       original_output: snapshot
 
-  grd_ECCO_v4r4:
+  grd_ECCO_v4r4_test:
     description: horizontal grid for LLC90 ECCO data
     driver: netcdf
     args:
