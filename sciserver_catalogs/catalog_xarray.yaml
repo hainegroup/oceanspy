@@ -767,10 +767,6 @@ sources:
     model: MITGCM
     args:
       urlpath: '/sciserver/oceanography/ECCO_v4r4/ecco_v4r4'
-      chunks: {'time':1, 'time_snap':1, 'face':13, 'k':50, 'j':90, 'i':90}
-#       xarray_kwargs:
-#         parallel: True
-#         drop_variables: ['time_bnds']
     metadata:
       swap_dims: 
         k: Z
