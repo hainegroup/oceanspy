@@ -760,135 +760,135 @@ sources:
       original_output: snapshot
 
 # ======================================================================
-# ECCOv4r4 data
-#   ECCO_v4r4: 
-#     description: ECCO version 4 release 4 dataset with fields necessary to close heat, salt and volume budgets
-#     driver: zarr
-#     model: MITGCM
-#     args:
-#       urlpath: '/sciserver/oceanography/ECCO_v4r4/ecco_v4r4'
-#     metadata:
-#       swap_dims: 
-#         k: Z
-#       rename:
-#         i: X
-#         j: Y
-#         i_g: Xp1
-#         j_g: Yp1
-#         hFacC: HFacC
-#         hFacS: HFacS
-#         hFacW: HFacW
-#       parameters:
-#         rSphere: 6.371e+03
-#         eq_state: jmd95
-#         rho0: 1027
-#         g: 9.81
-#         eps_nh: 0 
-#         omega: 7.292123516990375e-05
-#         c_p: 3.986e+03
-#         tempFrz0: 9.01e-02
-#         dTempFrz_dS: -5.75e-02
-#         grid_type: llc
-#       name: ECCO_v4r4
-#       description: ECCO v4r4 3D dataset, ocean simulations on LLC90 grid
-#       citation: 
-#       projection:
-#       original_output: snapshot
-
-  grd_ECCO_v4r4:
-    description: horizontal grid for LLC90 ECCO data
-    driver: netcdf
+ECCOv4r4 data
+  ECCO_v4r4: 
+    description: ECCO version 4 release 4 dataset with fields necessary to close heat, salt and volume budgets
+    driver: zarr
+    model: MITGCM
     args:
-      urlpath: '/sciserver/oceanography/ECCO_v4/GRID/ECCO-GRID.nc'
+      urlpath: '/sciserver/oceanography/ECCO_v4r4/ecco_v4r4'
     metadata:
-      model: MITGCM
-      swap_dims:
+      swap_dims: 
         k: Z
-        k_p1: Zp1
-        k_l: Zl
-        k_u: Zu
       rename:
         i: X
-        i_g: Xp1
         j: Y
+        i_g: Xp1
         j_g: Yp1
-        tile: face
-      grid_coords:
-        add_midp: True
-        grid_coords:
-          Y:
-            Y:
-            Yp1: 0.5
-          X:
-            X:
-            Xp1: 0.5
-          Z:
-           Z:
-           Zp1: 0.5
-           Zu: 0.5
-           Zl: -0.5
-          time: 
-            time: -0.5
-      face_connections:
-        face_connections:
-          face:
-            0:
-              X: tuple(((12, 'Y', False), (3, 'X', False)))
-              Y: tuple((None,(1,'Y',False)))
-            1:
-              X: tuple(((11,'Y',False),(4,'X',False)))
-              Y: tuple(((0,'Y',False),(2,'Y',False)))
-            2:
-              X: tuple(((10,'Y',False),(5, 'X', False)))
-              Y: tuple(((1, 'Y', False), (6, 'X', False)))
-            3:
-              X: tuple(((0, 'X', False), (9, 'Y', False)))
-              Y: tuple((None, (4, 'Y', False)))
-            4:
-              X: tuple(((1, 'X', False), (8, 'Y', False)))
-              Y: tuple(((3, 'Y', False), (5, 'Y', False)))
-            5:
-              X: tuple(((2, 'X', False), (7, 'Y', False)))
-              Y: tuple(((4, 'Y', False), (6, 'Y', False)))
-            6: 
-              X: tuple(((2, 'Y', False), (7, 'X', False)))
-              Y: tuple(((5, 'Y', False), (10, 'X', False)))
-            7:
-              X: tuple(((6, 'X', False), (8, 'X', False)))
-              Y: tuple(((5, 'X', False), (10, 'Y', False)))
-            8:
-              X: tuple(((7, 'X', False), (9, 'X', False)))
-              Y: tuple(((4, 'X', False), (11, 'Y', False)))
-            9:
-              X: tuple(((8, 'X', False), None))
-              Y: tuple(((3, 'X', False), (12, 'Y', False)))
-            10:
-              X: tuple(((6, 'Y', False), (11, 'X', False)))
-              Y: tuple(((7, 'Y', False), (2, 'X', False)))
-            11: 
-              X: tuple(((10, 'X', False), (12, 'X', False)))
-              Y: tuple(((8, 'Y', False), (1, 'X', False)))
-            12: 
-              X: tuple(((11, 'X', False), None))
-              Y: tuple(((9, 'Y', False), (0, 'X', False)))
+        hFacC: HFacC
+        hFacS: HFacS
+        hFacW: HFacW
       parameters:
         rSphere: 6.371e+03
         eq_state: jmd95
         rho0: 1027
         g: 9.81
-        eps_nh: 0
+        eps_nh: 0 
         omega: 7.292123516990375e-05
         c_p: 3.986e+03
         tempFrz0: 9.01e-02
         dTempFrz_dS: -5.75e-02
         grid_type: llc
       name: ECCO_v4r4
-      description: |
-        ECCO v4r4 3D dataset, ocean simulations on LLC90 grid
-      citation: |
-        Paper.
+      description: ECCO v4r4 3D dataset, ocean simulations on LLC90 grid
+      citation: 
       projection:
       original_output: snapshot
+
+#   grd_ECCO_v4r4:
+#     description: horizontal grid for LLC90 ECCO data
+#     driver: netcdf
+#     args:
+#       urlpath: '/sciserver/oceanography/ECCO_v4/GRID/ECCO-GRID.nc'
+#     metadata:
+#       model: MITGCM
+#       swap_dims:
+#         k: Z
+#         k_p1: Zp1
+#         k_l: Zl
+#         k_u: Zu
+#       rename:
+#         i: X
+#         i_g: Xp1
+#         j: Y
+#         j_g: Yp1
+#         tile: face
+#       grid_coords:
+#         add_midp: True
+#         grid_coords:
+#           Y:
+#             Y:
+#             Yp1: 0.5
+#           X:
+#             X:
+#             Xp1: 0.5
+#           Z:
+#            Z:
+#            Zp1: 0.5
+#            Zu: 0.5
+#            Zl: -0.5
+#           time: 
+#             time: -0.5
+#       face_connections:
+#         face_connections:
+#           face:
+#             0:
+#               X: tuple(((12, 'Y', False), (3, 'X', False)))
+#               Y: tuple((None,(1,'Y',False)))
+#             1:
+#               X: tuple(((11,'Y',False),(4,'X',False)))
+#               Y: tuple(((0,'Y',False),(2,'Y',False)))
+#             2:
+#               X: tuple(((10,'Y',False),(5, 'X', False)))
+#               Y: tuple(((1, 'Y', False), (6, 'X', False)))
+#             3:
+#               X: tuple(((0, 'X', False), (9, 'Y', False)))
+#               Y: tuple((None, (4, 'Y', False)))
+#             4:
+#               X: tuple(((1, 'X', False), (8, 'Y', False)))
+#               Y: tuple(((3, 'Y', False), (5, 'Y', False)))
+#             5:
+#               X: tuple(((2, 'X', False), (7, 'Y', False)))
+#               Y: tuple(((4, 'Y', False), (6, 'Y', False)))
+#             6: 
+#               X: tuple(((2, 'Y', False), (7, 'X', False)))
+#               Y: tuple(((5, 'Y', False), (10, 'X', False)))
+#             7:
+#               X: tuple(((6, 'X', False), (8, 'X', False)))
+#               Y: tuple(((5, 'X', False), (10, 'Y', False)))
+#             8:
+#               X: tuple(((7, 'X', False), (9, 'X', False)))
+#               Y: tuple(((4, 'X', False), (11, 'Y', False)))
+#             9:
+#               X: tuple(((8, 'X', False), None))
+#               Y: tuple(((3, 'X', False), (12, 'Y', False)))
+#             10:
+#               X: tuple(((6, 'Y', False), (11, 'X', False)))
+#               Y: tuple(((7, 'Y', False), (2, 'X', False)))
+#             11: 
+#               X: tuple(((10, 'X', False), (12, 'X', False)))
+#               Y: tuple(((8, 'Y', False), (1, 'X', False)))
+#             12: 
+#               X: tuple(((11, 'X', False), None))
+#               Y: tuple(((9, 'Y', False), (0, 'X', False)))
+#       parameters:
+#         rSphere: 6.371e+03
+#         eq_state: jmd95
+#         rho0: 1027
+#         g: 9.81
+#         eps_nh: 0
+#         omega: 7.292123516990375e-05
+#         c_p: 3.986e+03
+#         tempFrz0: 9.01e-02
+#         dTempFrz_dS: -5.75e-02
+#         grid_type: llc
+#       name: ECCO_v4r4
+#       description: |
+#         ECCO v4r4 3D dataset, ocean simulations on LLC90 grid
+#       citation: |
+#         Paper.
+#       projection:
+#       original_output: snapshot
 
 # ======================================================================
 # POP data (ocean only, CORE forcing)
