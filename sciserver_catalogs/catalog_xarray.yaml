@@ -761,41 +761,41 @@ sources:
 
 # ======================================================================
 # ECCOv4r4 data
-  ECCO_v4r4: 
-    description: ECCO version 4 release 4 dataset with fields necessary to close heat, salt and volume budgets
-    driver: zarr
-    model: MITGCM
-    args:
-      urlpath: '/sciserver/oceanography/ECCO_v4r4/ecco_v4r4'
-    metadata:
-      swap_dims: 
-        k: Z
-      rename:
-        i: X
-        j: Y
-        i_g: Xp1
-        j_g: Yp1
-        hFacC: HFacC
-        hFacS: HFacS
-        hFacW: HFacW
-      parameters:
-        rSphere: 6.371e+03
-        eq_state: jmd95
-        rho0: 1027
-        g: 9.81
-        eps_nh: 0 
-        omega: 7.292123516990375e-05
-        c_p: 3.986e+03
-        tempFrz0: 9.01e-02
-        dTempFrz_dS: -5.75e-02
-        grid_type: llc
-      name: ECCO_v4r4
-      description: ECCO v4r4 3D dataset, ocean simulations on LLC90 grid
-      citation: 
-      projection:
-      original_output: snapshot
+#   ECCO_v4r4: 
+#     description: ECCO version 4 release 4 dataset with fields necessary to close heat, salt and volume budgets
+#     driver: zarr
+#     model: MITGCM
+#     args:
+#       urlpath: '/sciserver/oceanography/ECCO_v4r4/ecco_v4r4'
+#     metadata:
+#       swap_dims: 
+#         k: Z
+#       rename:
+#         i: X
+#         j: Y
+#         i_g: Xp1
+#         j_g: Yp1
+#         hFacC: HFacC
+#         hFacS: HFacS
+#         hFacW: HFacW
+#       parameters:
+#         rSphere: 6.371e+03
+#         eq_state: jmd95
+#         rho0: 1027
+#         g: 9.81
+#         eps_nh: 0 
+#         omega: 7.292123516990375e-05
+#         c_p: 3.986e+03
+#         tempFrz0: 9.01e-02
+#         dTempFrz_dS: -5.75e-02
+#         grid_type: llc
+#       name: ECCO_v4r4
+#       description: ECCO v4r4 3D dataset, ocean simulations on LLC90 grid
+#       citation: 
+#       projection:
+#       original_output: snapshot
 
-  grd_ECCO_v4r4_test:
+  grd_ECCO_v4r4:
     description: horizontal grid for LLC90 ECCO data
     driver: netcdf
     args:
