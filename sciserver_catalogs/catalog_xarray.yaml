@@ -1449,7 +1449,7 @@ sources:
     driver: netcdf
     model: HyCOM
     args:
-      urlpath: /sciserver/oceanography/HyCOM/swot+smode/GLBy0.04_*.nc
+      urlpath: /home/idies/workspace/OceanCirculation/HyCOM/swot+smode/GLBy0.04*.nc
       xarray_kwargs:
         engine: netcdf4
         drop_variables: ['bottom_salinity','bottom_temp','bottom_u','bottom_v']
@@ -1459,7 +1459,7 @@ sources:
         decode_cf: False
     metadata:
       rename:
-        water_temp: Temp
+        water_temp: T
         water_u: U
         water_v: V
         lon: X
@@ -1478,20 +1478,12 @@ sources:
             X: 
             Xp1: 0.5
           Z:
-            Z: 
+            Z:
             Zp1: 0.5
             Zu: 0.5
             Zl: -0.5
           time: 
             time: -0.5
-      parameters:
-        temp_offset: 20
-        temp_scale: 0.001
-        temp_fill: -30000
-        sal_offset: 20
-        sal_scale: 0.001
-        sal_fill: -30000
-        ssh_fill: 1.2676e30
       name: California_Coast
       description: |
         High-resolution grid of the (1/25 deg) numerical simulation covering the California Coast using the HyCOM model. The original grid has 41 (isopycnal) layers but these files were interpolated to 101 vertical levels.
