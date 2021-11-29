@@ -19,7 +19,7 @@ repos:
        - id: flake8
 
   - repo: https://github.com/nbQA-dev/nbQA
-    rev: 1.2.1
+    rev: 1.2.2
     hooks:
       - id: nbqa-black
         additional_dependencies: [black]
