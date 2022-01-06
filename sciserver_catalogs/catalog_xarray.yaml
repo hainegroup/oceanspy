@@ -1442,32 +1442,21 @@ sources:
         Justin et al (2014), A new synoptic scale resolving global climate simulatoin using the Community Earth System Model. J. Adv. Model. Earth Syst., 6, 1065-1094. https:doi.org/10.1002/2014MS000363
       original_output: Monthly means.
 
+
 # ======================================================================
 # HyCOM data test, interpolated onto lat-lon-depth coords
   HYCOM_test:
-    description: Simulation off the Northern California Coast with HyCOM ocean mdoel
-    driver: netcdf
+    description: Simulation off the Northern California Coast with HyCOM ocean model
+    driver: zarr
     model: HyCOM
     args:
-      urlpath: /home/idies/workspace/OceanCirculation/HyCOM/swot+smode/GLBy0.04*.nc
-      xarray_kwargs:
-        engine: netcdf4
-        drop_variables: ['bottom_salinity','bottom_temp','bottom_u','bottom_v']
-        concat_dim: time
-        combine: by_coords
-        parallel: True
-        decode_cf: False
+      urlpath: /home/idies/workspace/poseidon/data10_01/HyCOM
+    xarray_kwargs:
+        engine: zarr
     metadata:
       rename:
-        water_temp: T
-        water_u: U
-        water_v: V
-        lon: X
-        lat: Y
-        depth: Z
-      manipulate_coords:
-        fillna: False
-        coords1Dfrom2D: False
+        lon: XC
+        lat: YC
       grid_coords:
         add_midp: True
         grid_coords:
@@ -1478,17 +1467,18 @@ sources:
             X: 
             Xp1: 0.5
           Z:
-            Z:
+            Z: 
             Zp1: 0.5
             Zu: 0.5
             Zl: -0.5
           time: 
             time: -0.5
+      parameters:
       name: California_Coast
       description: |
         High-resolution grid of the (1/25 deg) numerical simulation covering the California Coast using the HyCOM model. The original grid has 41 (isopycnal) layers but these files were interpolated to 101 vertical levels.
       mates: | 
         Sample (test) files
       projection: Mercator
-      original_output: snapshot.
+      original_output: snapshot
 
