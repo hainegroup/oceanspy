@@ -57,14 +57,14 @@ def test_opening_and_saving(name, catalog_url):
         od1 = from_catalog(name, catalog_url)
 
         # Check dimensions
-        if name not in ["xarray", 'HyCOM']:
+        if name not in ["xarray", "HyCOM"]:
             dimsList = ["X", "Y", "Xp1", "Yp1"]
             assert set(dimsList).issubset(set(od1.dataset.dims))
 
             # Check coordinates
             if name == "LLC":
                 coordsList = ["XC", "YC", "XG", "YG"]
-            elif name == 'HyCOM':
+            elif name == "HyCOM":
                 coordsList = ["XC", "YC"]
             else:
                 coordsList = ["XC", "YC", "XG", "YG", "XU", "YU", "XV", "YV"]
