@@ -1,24 +1,26 @@
 # Import modules
-import subprocess
+import os
+
+import pooch
+from pooch import Untar
 
 
-# Download data
+# Download data if necessary
 def pytest_configure():
-    print("\nHello! I'm downloading test data.")
 
-    # Directory
-    Datadir = "./oceanspy/tests/"
-
-    # Download xmitgcm test
-    commands = [
-        "cd {}".format(Datadir),
-        "rm -fr Data",
-        "wget -v -O Data.tar.gz -L "
-        "https://livejohnshopkins-my.sharepoint.com/"
-        ":u:/g/personal/malmans2_jh_edu/"
-        "EVtxjAQL13tCt7dFHNrzsrwBuqdjDe3zrvrJ625YrjrF0g"
-        "?download=1",
-        "tar xvzf Data.tar.gz",
-        "rm -f Data.tar.gz",
-    ]
-    subprocess.call("&&".join(commands), shell=True)
+    fnames = pooch.retrieve(
+        url="https://zenodo.org/record/5825166/files/Data.tar.gz?download=1",
+        processor=Untar(),
+        known_hash="165bb4c0459a3b776efe9f94e8f7843140bc7e90b9d686af574cdb8c11006ba2",
+    )
+    symlink_args = dict(
+        src=f"{os.path.commonpath(fnames)}",
+        dst="./oceanspy/tests/Data",
+        target_is_directory=True,
+    )
+    try:
+        print(f"Linking {symlink_args['src']!r} to {symlink_args['dst']!r}")
+        os.symlink(**symlink_args)
+    except FileExistsError:
+        os.unlink("./oceanspy/tests/Data")
+        os.symlink(**symlink_args)
