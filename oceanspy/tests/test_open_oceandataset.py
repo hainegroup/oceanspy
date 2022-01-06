@@ -24,6 +24,7 @@ Datadir = "./oceanspy/tests/Data/"
 xmitgcm_url = "{}catalog_xmitgcm.yaml".format(Datadir)
 xarray_url = "{}catalog_xarray.yaml".format(Datadir)
 ECCO_url = "{}catalog_ECCO.yaml".format(Datadir)
+hycom_url = "{}hycom_test.yaml".format(Datadir)
 
 
 # Test SciServer
@@ -43,6 +44,7 @@ def test_find_entries(names):
         ("grd_rect", xarray_url),
         ("grd_curv", xarray_url),
         ("LLC", ECCO_url),
+        ("HyCOM", hycom_url),
     ],
 )
 def test_opening_and_saving(name, catalog_url):
@@ -55,13 +57,15 @@ def test_opening_and_saving(name, catalog_url):
         od1 = from_catalog(name, catalog_url)
 
         # Check dimensions
-        if name != "xarray":
+        if name not in ["xarray", 'HyCOM']:
             dimsList = ["X", "Y", "Xp1", "Yp1"]
             assert set(dimsList).issubset(set(od1.dataset.dims))
 
             # Check coordinates
             if name == "LLC":
                 coordsList = ["XC", "YC", "XG", "YG"]
+            elif name == 'HyCOM':
+                coordsList = ["XC", "YC"]
             else:
                 coordsList = ["XC", "YC", "XG", "YG", "XU", "YU", "XV", "YV"]
             assert set(coordsList).issubset(set(od1.dataset.coords))
