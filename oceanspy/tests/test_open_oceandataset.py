@@ -57,7 +57,7 @@ def test_opening_and_saving(name, catalog_url):
         od1 = from_catalog(name, catalog_url)
 
         # Check dimensions
-        if name not in ["xarray", "HyCOM"]:
+        if name not in ["xarray", "HYCOM"]:
             dimsList = ["X", "Y", "Xp1", "Yp1"]
             assert set(dimsList).issubset(set(od1.dataset.dims))
 
