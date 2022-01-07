@@ -44,7 +44,7 @@ def test_find_entries(names):
         ("grd_rect", xarray_url),
         ("grd_curv", xarray_url),
         ("LLC", ECCO_url),
-        ("HyCOM", hycom_url),
+        ("HYCOM", hycom_url),
     ],
 )
 def test_opening_and_saving(name, catalog_url):
@@ -64,7 +64,7 @@ def test_opening_and_saving(name, catalog_url):
             # Check coordinates
             if name == "LLC":
                 coordsList = ["XC", "YC", "XG", "YG"]
-            elif name == "HyCOM":
+            elif name == "HYCOM":
                 coordsList = ["XC", "YC"]
             else:
                 coordsList = ["XC", "YC", "XG", "YG", "XU", "YU", "XV", "YV"]
