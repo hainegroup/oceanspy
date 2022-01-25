@@ -228,7 +228,7 @@ class LLCtransformation:
         dsa7=[]
         dsa10=[]
         for _var in varlist:
-            if len(ds[_var]) > 1:  # so transformation is not performed on vars that are only z or time deep
+            if len(ds[_var].dims) > 1:  # so transformation is not performed on vars that are only z or time deep
                 *arc_faces, DS = arct_connect(ds, _var, faces)  ## This only works in the case the transformation involves the whole domain
             dsa2.append(DS[0])
             dsa5.append(DS[1])
