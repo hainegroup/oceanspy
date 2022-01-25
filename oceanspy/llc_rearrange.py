@@ -822,7 +822,25 @@ def rotate_vars(_ds):
 
 
 
+def shift_dataset(_ds, dims_c, dims_g):
+    """shifts a dataset along a dimension, setting its first element to zero. Need to provide the dimensions in the form
+    of [center, corner] points. This rotation is only used in the horizontal, and so dims_c is either one of `i`  or `j`, and
+    dims_g is either one of `i_g` or `j_g`. The pair most correspond to the same dimension.
+    
+    _ds: dataset
+    
+    dims_c: string, either 'i' or 'j'
+    
+    dims_g: string, either 'i_g' or 'j_g'. Should correspond to same dimension as dims_c.
+    
+    """
 
+    for _dim in [dims_c, dims_g]:
+        _ds['n' + _dim] = _ds[_dim] - int(_ds[_dim][0].data)
+    _ds = _ds.swap_dims({_dim: 'n' + _dim}).drop_vars([_dim]).rename({'n' + _dim: _dim})
+    
+    _ds = mates(_ds)
+    return _ds
 
 
 class Dims:
