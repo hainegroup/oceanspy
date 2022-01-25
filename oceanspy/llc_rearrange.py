@@ -629,7 +629,7 @@ def arct_connect(ds, varName, all_faces='all'):
     arc_faces = []
     metrics = ["dxC", "dyC", "dxG", "dyG", 'hFacW', 'hFacS'] # metric variables defined at vector points
     
-    if all_faces == 'all':
+    if all_faces is 'all':
         all_faces = [k for k in range(13)]
 
 
