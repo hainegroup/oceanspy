@@ -575,7 +575,12 @@ def face_connect(ds, all_faces):
     Determines the size of the final array consisting of connected faces. Does
     not consider the Arctic, since the Arctic cap is treated separatedly.
     """
+
     arc_cap = 6
+    DIMS = [dim for dim in ds['XC'].dims if dim != "face"]
+    dims = Dims(DIMS[::-1])
+
+
     Xdim = "X"
     Ydim = "Y"
 
