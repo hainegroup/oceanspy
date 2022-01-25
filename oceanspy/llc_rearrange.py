@@ -222,6 +222,11 @@ class LLCtransformation:
 
 #   ========================== Begin transformation =================
         # First the Arctic crown
+
+        dsa2=[]
+        dsa5=[]
+        dsa7=[]
+        dsa10=[]
         for _var in varlist:
             *arc_faces, DS = arct_connect(ds, varName, faces)  ## This only works in the case the transformation involves the whole domain
             dsa2.append(DS[0])
