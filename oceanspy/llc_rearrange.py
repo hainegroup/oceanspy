@@ -329,7 +329,8 @@ class LLCtransformation:
             raise ValueError("this is not an option. Choose between `Atlantic` or `Pacific`.")
 
         FACETS = shift_list_ds(FACETS, dims_c.X, dims_g.X)
-        DS = combine_list_ds(FACETS).isel(dims_c.X = slice(0, -1), dims_c.Y = slice(0, -1))
+        DS = combine_list_ds(FACETS)
+        nDS = DS.isel(dims_c.X = slice(0, -1), dims_c.Y = slice(0, -1))
 
         return DS
 
