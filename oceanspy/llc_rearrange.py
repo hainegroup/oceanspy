@@ -921,6 +921,20 @@ def shift_list_ds(_DS, dims_c, dims_g):
     return _DS
 
 
+def combine_list_ds(_DSlist):
+    """ combines a list of n-datasets"""
+    if len(_DSlist) == 1:  # a single face
+        _DSFacet = _DSlist[0]
+    if len(_DSlist) > 1:
+        _DSFacet = _DSlist[0]
+        for ii in range(1, len(_DSlist)):
+            with dask.config.set(**{'array.slicing.split_large_chunks': False}):
+                _DSFacet = _DSFacet.combine_first(_DSlist[ii])
+    
+        _DSFacet = mates(_DSFacet)
+
+    return _DSFacet
+
 
 
 class Dims:
