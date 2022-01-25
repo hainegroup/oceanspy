@@ -177,8 +177,6 @@ class LLCtransformation:
         one without faces, with grids and variables sharing a common grid
         orientation.
         """
-        Nx = len(ds["X"])
-        Ny = len(ds["Y"])
 
         if centered not in ["Atlantic", "Pacific"]:
             raise ValueError(
@@ -197,6 +195,10 @@ class LLCtransformation:
         DIMS_g = [dim for dim in ds['XG'].dims if dim not in ["face"]]  # horizontal dimensions on corner points
         dims_c = Dims(DIMS_c[::-1])  # j, i format
         dims_g = Dims(DIMS_g[::-1])
+
+        Nx = len(ds.dims_c.X)
+        Ny = len(ds.dims_c.Y)
+
 
         nrot_faces, Nx_nrot, Ny_nrot, rot_faces, Nx_rot, Ny_rot = face_connect(
             ds, faces
