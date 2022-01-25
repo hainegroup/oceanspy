@@ -921,6 +921,7 @@ def shift_list_ds(_DS, dims_c, dims_g):
     return _DS
 
 
+
 def combine_list_ds(_DSlist):
     """ combines a list of n-datasets"""
     if len(_DSlist) == 1:  # a single face
@@ -935,6 +936,20 @@ def combine_list_ds(_DSlist):
 
     return _DSFacet
 
+
+
+def shift_ocean(_ds, dims_c, dims_g):
+    """Shifts the entire dataset 180 in longitude, recentering the maps on either the Atlantic or the Pacific ocean"""
+    
+    Nij = int(len(_ds[dims_c]) / 2)
+    _ds = _ds.roll({dims_c: Nij, dims_g:Nij})
+    phase = 0 * _np.arange(len(_ds['i']))
+    phase[:Nij] = -int(Nij)
+    phase[Nij:] = int(Nij)
+    for _dim  in [dims_c, dims_g]:
+        _ds['n'+_dim] = _ds[_dim] + phase
+        _ds = _ds.swap_dims({_dim:'n'+_dim}).drop_vars([_dim]).rename({'n'+_dim:_dim})
+    return _ds
 
 
 class Dims:
