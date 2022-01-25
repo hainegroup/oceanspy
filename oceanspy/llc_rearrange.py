@@ -332,7 +332,7 @@ class LLCtransformation:
         DS = combine_list_ds(FACETS)
         nDS = DS.isel(dims_c.X = slice(0, -1), dims_c.Y = slice(0, -1))
 
-        return DS
+        return nDS
 
 
 
