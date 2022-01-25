@@ -767,7 +767,7 @@ def arct_connect(ds, varName, all_faces='all'):
                 arct = (arct * Mask) # 
                 ARCT.append(arct)
 
-    return arc_faces, ARCT
+    return arc_faces, Nx_ac_nrot, Ny_ac_nrot, Nx_ac_rot, Ny_ac_rot, ARCT
 
 
 
