@@ -228,7 +228,7 @@ class LLCtransformation:
         dsa7=[]
         dsa10=[]
         for _var in varlist:
-            print(_var)
+            # print(_var)
             if 'face' in ds[_var].dims:  # so transformation is not performed on vars that are only z or time deep
                 *arc_faces, DS = arct_connect(ds, _var, faces)  ## This only works in the case the transformation involves the whole domain
                 dsa2.append(DS[0])
@@ -240,7 +240,7 @@ class LLCtransformation:
                 dsa5.append(ds[_var])
                 dsa7.append(ds[_var])
                 dsa10.append(ds[_var])
-                
+
 
         DSa2 = _xr.merge(dsa2)
         DSa5 = _xr.merge(dsa5)
@@ -329,7 +329,7 @@ class LLCtransformation:
             raise ValueError("this is not an option. Choose between `Atlantic` or `Pacific`.")
 
         FACETS = shift_list_ds(FACETS, dims_c.X, dims_g.X)
-        DS = combine_list_ds(FACETS)
+        DS = combine_list_ds(FACETS).isel(dims_c.X = slice(0, -1), dims_c.Y = slice(0, -1))
 
         return DS
 
