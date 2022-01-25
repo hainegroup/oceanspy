@@ -843,6 +843,73 @@ def shift_dataset(_ds, dims_c, dims_g):
     return _ds
 
 
+
+def reverse_dataset(_ds, dims_c, dims_g, transpose=False):
+    """reverses the dataset along a dimension. Need to provide the dimensions in the form
+    of [center, corner] points. This rotation is only used in the horizontal, and so dims_c is either one of `i`  or `j`, and
+    dims_g is either one of `i_g` or `j_g`. The pair most correspond to the same dimension."""
+
+    for _dim in [dims_c, dims_g]:   # This part should be different for j_g points?
+        _ds['n' + _dim] = - _ds[_dim] +  int(_ds[_dim][-1].data) 
+        _ds = _ds.swap_dims({_dim:'n' + _dim}).drop_vars([_dim]).rename({'n' + _dim: _dim})
+        
+    _ds = mates(_ds)
+    
+    if transpose:
+        _ds = _ds.transpose()
+    return _ds
+
+
+
+
+def rotate_dataset(_ds, dims_c, dims_g, rev_x=False, rev_y=False, transpose=False):
+    """ Rotates a dataset along its horizontal dimensions (e.g. center and corner). It can also shift the dataset along a dimension, 
+    reserve its orientaton and transpose the whole dataset.
+
+    _ds : dataset
+
+    dims_c = [dims_c.X, dims_c.Y]
+    dims_c = [dims_g.X, dims_g.Y]
+
+    """
+
+
+    Nij = max(len(_ds[dims_c.X]), len(_ds[dims_c.Y]))  # max number of points of a face. If ECCO data, Nij  = 90. If LLC4320, Nij=4320
+
+    if rev_x is False:
+        fac_x = 1
+        x0 = 0
+    elif rev_x is True:
+        fac_x = -1
+        x0 = Nij - 1
+
+
+    if rev_y is False:
+        fac_y = 1
+        y0 = 0
+    elif rev_y is True:
+        fac_y = -1
+        y0 = Nij - 1
+
+
+    for _dimx, _dimy in [[dims_c.X, dims_c.Y], [dims_g.X, dims_g.Y]]:
+        _ds['n' + _dimx] = fac_x * _ds[_dimy] + x0
+        _ds['n' + _dimy] = fac_y * _ds[_dimx] + y0
+
+        _ds = _ds.swap_dims({_dimx: 'n' + _dimy, _dimy: 'n' + _dimx})
+        _ds = _ds.drop_vars({_dimx, _dimy}).rename({'n' + _dimx: _dimx, 'n' + _dimy: _dimy})
+    
+    _ds = mates(_ds)
+
+    if transpose:
+        _ds = _ds.transpose()
+
+    return _ds
+
+
+
+
+
 class Dims:
     axes = "XYZT"  # shortcut axis names
 
