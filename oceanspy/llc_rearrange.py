@@ -228,7 +228,7 @@ class LLCtransformation:
         dsa7=[]
         dsa10=[]
         for _var in varlist:
-            *arc_faces, DS = arct_connect(ds, varName, faces)  ## This only works in the case the transformation involves the whole domain
+            *arc_faces, DS = arct_connect(ds, _var, faces)  ## This only works in the case the transformation involves the whole domain
             dsa2.append(DS[0])
             dsa5.append(DS[1])
             dsa7.append(DS[2])
