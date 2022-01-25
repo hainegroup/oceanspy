@@ -467,6 +467,7 @@ def pos_chunks(faces, arc_faces, chunksY, chunksX):
     return POSY, POSX, POSY_arc, POSX_arc
 
 
+
 def chunk_sizes(faces, Nx, Ny, rotated=False):
     """
     Determines the total size of array that will connect all rotated or
@@ -625,12 +626,13 @@ def arct_connect(ds, varName, faces='all'):
     arc_faces = []
     metrics = ["dxC", "dyC", "dxG", "dyG", 'hFacW', 'hFacS'] # metric variables defined at vector points
     
-    if faces == 'all':
-        _faces = [k for k in range(13)]
+    if isinstance(faces, str):
+        if faces == 'all':
+            faces = [k for k in range(13)]
 
 
-    if arc_cap in _faces:
-        for k in _faces:
+    if arc_cap in faces:
+        for k in faces:
             if k == 2:
                 fac = 1
                 arc_faces.append(k)
