@@ -774,8 +774,8 @@ def mates(ds):
     for k in range(int(len(vars_mates) / 2)):
         nk = 2 * k
         if vars_mates[nk] in ds.variables:
-            ds[vars_mates[nk]].attrs["mates"] = vars_mates[nk + 1]
-            ds[vars_mates[nk + 1]].attrs["mates"] = vars_mates[nk]
+            ds[vars_mates[nk]].attrs["mate"] = vars_mates[nk + 1]
+            ds[vars_mates[nk + 1]].attrs["mate"] = vars_mates[nk]
     return ds
 
 
