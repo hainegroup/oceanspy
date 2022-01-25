@@ -615,6 +615,7 @@ def arct_connect(ds, varName, all_faces='all'):
     Ny_ac_rot = []
     ARCT = []
     arc_faces = []
+    metrics = ["dxC", "dyC", "dxG", "dyG", 'hFacW', 'hFacS'] # metric variables defined at vector points
     
     if all_faces == 'all':
         all_faces = [k for k in range(13)]
@@ -631,6 +632,7 @@ def arct_connect(ds, varName, all_faces='all'):
                 dtr = list(dims)[::-1]
                 dtr[-1], dtr[-2] = dtr[-2], dtr[-1]
                 mask2 = _xr.ones_like(ds[_varName].isel(face=arc_cap))
+                # TODO: Eval where, define argument outside
                 mask2 = mask2.where(
                     _np.logical_and(
                         ds[dims.X] < ds[dims.Y],
@@ -715,6 +717,8 @@ def arct_connect(ds, varName, all_faces='all'):
                 _varName = varName
                 DIMS = [dim for dim in ds[_varName].dims if dim != "face"]
                 dims = Dims(DIMS[::-1])
+#                 dtr = list(dims)[::-1]
+#                 dtr[-1], dtr[-2] = dtr[-2], dtr[-1]
                 arc_faces.append(k)
                 mask10 = _xr.ones_like(ds[_varName].isel(face=arc_cap))
                 mask10 = mask10.where(
