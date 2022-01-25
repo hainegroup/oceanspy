@@ -585,10 +585,6 @@ def face_connect(ds, all_faces):
     DIMS = [dim for dim in ds['XC'].dims if dim != "face"]
     dims = Dims(DIMS[::-1])
 
-
-    Xdim = "X"
-    Ydim = "Y"
-
     Nx_nrot = []
     Ny_nrot = []
     Nx_rot = []
@@ -618,7 +614,7 @@ def face_connect(ds, all_faces):
 ## ==================================================================================================================
 
 
-def arct_connect(ds, varName, all_faces='all'):
+def arct_connect(ds, varName, faces='all'):
 
     arc_cap = 6
     Nx_ac_nrot = []
@@ -629,12 +625,12 @@ def arct_connect(ds, varName, all_faces='all'):
     arc_faces = []
     metrics = ["dxC", "dyC", "dxG", "dyG", 'hFacW', 'hFacS'] # metric variables defined at vector points
     
-    if all_faces is 'all':
-        all_faces = [k for k in range(13)]
+    if faces == 'all':
+        _faces = [k for k in range(13)]
 
 
-    if arc_cap in all_faces:
-        for k in all_faces:
+    if arc_cap in _faces:
+        for k in _faces:
             if k == 2:
                 fac = 1
                 arc_faces.append(k)
