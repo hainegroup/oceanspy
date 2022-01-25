@@ -311,8 +311,6 @@ class LLCtransformation:
 
 
 
-
-
 ## ==================================================================================================================
 #                         Keep this code for now. some of it asseses whether faces connect or not
 ## ==================================================================================================================
@@ -717,8 +715,6 @@ def arct_connect(ds, varName, all_faces='all'):
                 _varName = varName
                 DIMS = [dim for dim in ds[_varName].dims if dim != "face"]
                 dims = Dims(DIMS[::-1])
-#                 dtr = list(dims)[::-1]
-#                 dtr[-1], dtr[-2] = dtr[-2], dtr[-1]
                 arc_faces.append(k)
                 mask10 = _xr.ones_like(ds[_varName].isel(face=arc_cap))
                 mask10 = mask10.where(
@@ -833,8 +829,6 @@ def reverse_dataset(_ds, dims_c, dims_g, transpose=False):
     return _ds
 
 
-
-
 def rotate_dataset(_ds, dims_c, dims_g, rev_x=False, rev_y=False, transpose=False):
     """ Rotates a dataset along its horizontal dimensions (e.g. center and corner). It can also shift the dataset along a dimension, 
     reserve its orientaton and transpose the whole dataset.
@@ -880,7 +874,6 @@ def rotate_dataset(_ds, dims_c, dims_g, rev_x=False, rev_y=False, transpose=Fals
     return _ds
 
 
-
 def shift_list_ds(_DS, dims_c, dims_g):
     """given a list of n-datasets, each element of the list gets along the dimensions provided (dims_c and dims_g) so that there is
     no overlap between them.
@@ -892,7 +885,6 @@ def shift_list_ds(_DS, dims_c, dims_g):
                 _DS[ii] = _DS[ii].swap_dims({_dim:'n'+_dim}).drop_vars([_dim]).rename({'n'+_dim:_dim})
 
     return _DS
-
 
 
 def combine_list_ds(_DSlist):
@@ -923,6 +915,7 @@ def shift_ocean(_ds, dims_c, dims_g):
         _ds['n'+_dim] = _ds[_dim] + phase
         _ds = _ds.swap_dims({_dim:'n'+_dim}).drop_vars([_dim]).rename({'n'+_dim:_dim})
     return _ds
+
 
 
 def flip_v(_ds, co_list = metrics):
