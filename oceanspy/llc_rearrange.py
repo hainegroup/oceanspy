@@ -952,6 +952,16 @@ def shift_ocean(_ds, dims_c, dims_g):
     return _ds
 
 
+def flip_v(_ds, co_list = metrics):
+    for _varName in _ds.variables:
+        DIMS = [dim for dim in _ds[_varName].dims if dim != "face"]
+        _dims = Dims(DIMS[::-1])
+        if "mate" in _ds[_varName].attrs:
+            if _varName not in co_list and len(_dims.Y) == 3:  # do not change sign of grid metrics
+                _ds[_varName] = -_ds[_varName]  
+    return _ds
+
+
 class Dims:
     axes = "XYZT"  # shortcut axis names
 
