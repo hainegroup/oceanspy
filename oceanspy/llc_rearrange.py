@@ -595,16 +595,16 @@ def face_connect(ds, all_faces):
 
     for k in [ii for ii in all_faces if ii not in [arc_cap]]:
         if k in transpose:
-            x0, xf = 0, int(len(ds[Xdim]))
-            y0, yf = 0, int(len(ds[Ydim]))
-            Nx_rot.append(len(ds[Xdim][x0:xf]))
-            Ny_rot.append(len(ds[Ydim][y0:yf]))
+            x0, xf = 0, int(len(ds[dims.X]))
+            y0, yf = 0, int(len(ds[dims.Y]))
+            Nx_rot.append(len(ds[dims.X][x0:xf]))
+            Ny_rot.append(len(ds[dims.Y][y0:yf]))
             rot_faces.append(k)
         else:
-            x0, xf = 0, int(len(ds[Xdim]))
-            y0, yf = 0, int(len(ds[Ydim]))
-            Nx_nrot.append(len(ds[Xdim][x0:xf]))
-            Ny_nrot.append(len(ds[Ydim][y0:yf]))
+            x0, xf = 0, int(len(ds[dims.X]))
+            y0, yf = 0, int(len(ds[dims.Y]))
+            Nx_nrot.append(len(ds[dims.X][x0:xf]))
+            Ny_nrot.append(len(ds[dims.Y][y0:yf]))
             nrot_faces.append(k)
     return nrot_faces, Nx_nrot, Ny_nrot, rot_faces, Nx_rot, Ny_rot
 
