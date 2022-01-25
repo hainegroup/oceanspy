@@ -304,6 +304,15 @@ class LLCtransformation:
         # combining Facet 3 & 4
         # ===== 
 
+        FACETS = [DSFacet3, DSFacet4]
+        FACETS = shift_list_ds(FACETS, dims_c.X, dims_g.X)
+        DSFacet34 = combine_list_ds(FACETS)
+
+        # ===== 
+        # combining all facets
+        # ===== 
+
+
         if centered == 'Pacific':
             FACETS = [DSFacet34, DSFacet12]  # centered on Pacific ocean
         elif centered == 'Atlantic':
