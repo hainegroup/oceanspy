@@ -1,5 +1,6 @@
 import reprlib
 
+import dask
 import numpy as _np
 import xarray as _xr
 
@@ -209,6 +210,10 @@ class LLCtransformation:
         elif len(varlist) == 0:
             raise ValueError("Empty list of variables")
 
+
+#   ========================== Begin transformation =================
+
+
         arc_faces, Nx_ac_nrot, Ny_ac_nrot, Nx_ac_rot, Ny_ac_rot, ARCT = arct_connect(
             ds, varName, faces
         )
@@ -332,6 +337,14 @@ class LLCtransformation:
         return DS
 
 
+
+
+
+## ==================================================================================================================
+#                         Keep this code for now. some of it asseses whether faces connect or not
+## ==================================================================================================================
+
+
 def make_chunks(Nx, Ny):
     chunksX = []
     chunksY = []
@@ -342,87 +355,6 @@ def make_chunks(Nx, Ny):
     return chunksX, chunksY
 
 
-def make_array(ds, tNx, tNy, X0=0):
-
-    crds = {
-        "X": (("X",), _np.arange(X0, X0 + tNx), {"axis": "X"}),
-        "Xp1": (("Xp1",), _np.arange(X0, X0 + tNx), {"axis": "X"}),
-        "Y": (("Y",), _np.arange(tNy), {"axis": "Y"}),
-        "Yp1": (("Yp1",), _np.arange(tNy), {"axis": "Y"}),
-    }
-    old_coords = ["X", "Xp1", "Y", "Yp1", "face"]
-    coords = [k for k in ds.coords if k not in old_coords]
-    for crd in coords:
-        array = ds.coords[crd].values
-        attrs = ds.coords[crd].attrs
-        crds = {**crds, **{crd: ((crd,), array, attrs)}}
-
-    dsnew = _xr.Dataset(coords=crds)
-    for dim in dsnew.dims:
-        dsnew[dim].attrs = ds[dim].attrs
-    return dsnew
-
-
-def init_vars(ds, DSNEW, varlist):
-    """initializes dataarray within dataset"""
-    for varName in varlist:
-        dims = Dims([dim for dim in ds[varName].dims if dim != "face"][::-1])
-        if len(dims) == 1:
-            ncoords = {dims.X: DSNEW.coords[dims.X]}
-        elif len(dims) == 2:
-            ncoords = {dims.X: DSNEW.coords[dims.X], dims.Y: DSNEW.coords[dims.Y]}
-        elif len(dims) == 3:
-            ncoords = {
-                dims.X: DSNEW.coords[dims.X],
-                dims.Y: DSNEW.coords[dims.Y],
-                dims.Z: DSNEW.coords[dims.Z],
-            }
-        elif len(dims) == 4:
-            ncoords = {
-                dims.X: DSNEW.coords[dims.X],
-                dims.Y: DSNEW.coords[dims.Y],
-                dims.Z: DSNEW.coords[dims.Z],
-                dims.T: DSNEW.coords[dims.T],
-            }
-        ds_new = _xr.DataArray(_np.nan, coords=ncoords, dims=dims._vars[::-1])
-        DSNEW[varName] = ds_new
-        DSNEW[varName].attrs = ds[varName].attrs
-    return DSNEW
-
-
-def drop_size(ds):
-    """Drops a row and/or column from interior (scalar) points, creating
-    len(X)<len(Xp1) of staggered grids
-    """
-    coords = {}
-    for crd in ds.coords:
-        if crd in ["X", "Y"]:
-            array = ds.coords[crd].values[0:-1]
-        else:
-            array = ds.coords[crd].values
-        attrs = ds.coords[crd].attrs
-        coords = {**coords, **{crd: ((crd,), array, attrs)}}
-
-    DS_final = _xr.Dataset(coords)
-    for dim in DS_final.dims:
-        DS_final[dim].attrs = ds[dim].attrs
-    for varName in ds.data_vars:
-        dims = Dims([dim for dim in ds[varName].dims][::-1])
-        if len(dims) == 1:
-            DS_final[varName] = ds[varName]
-        else:
-            if len(dims.X) + len(dims.Y) == 2:
-                arg = {dims.X: slice(0, -1), dims.Y: slice(0, -1)}
-            elif len(dims.X) + len(dims.Y) == 6:
-                arg = {}
-            elif len(dims.X) + len(dims.Y) == 4:
-                if len(dims.X) == 1:
-                    arg = {dims.X: slice(0, -1)}
-                elif len(dims.Y) == 1:
-                    arg = {dims.Y: slice(0, -1)}
-            DS_final[varName] = ds[varName].isel(**arg)
-        DS_final[varName].attrs = ds[varName].attrs
-    return DS_final
 
 
 def pos_chunks(faces, arc_faces, chunksY, chunksX):
@@ -699,7 +631,12 @@ def face_connect(ds, all_faces):
     return nrot_faces, Nx_nrot, Ny_nrot, rot_faces, Nx_rot, Ny_rot
 
 
-def arct_connect(ds, varName, all_faces):
+## ==================================================================================================================
+## ==================================================================================================================
+
+
+def arct_connect(ds, varName, all_faces='all'):
+
     arc_cap = 6
     Nx_ac_nrot = []
     Ny_ac_nrot = []
@@ -707,7 +644,10 @@ def arct_connect(ds, varName, all_faces):
     Ny_ac_rot = []
     ARCT = []
     arc_faces = []
-    metrics = ["dxC", "dyC", "dxG", "dyG"]
+    
+    if all_faces == 'all':
+        all_faces = [k for k in range(13)]
+
 
     if arc_cap in all_faces:
         for k in all_faces:
@@ -720,7 +660,6 @@ def arct_connect(ds, varName, all_faces):
                 dtr = list(dims)[::-1]
                 dtr[-1], dtr[-2] = dtr[-2], dtr[-1]
                 mask2 = _xr.ones_like(ds[_varName].isel(face=arc_cap))
-                # TODO: Eval where, define argument outside
                 mask2 = mask2.where(
                     _np.logical_and(
                         ds[dims.X] < ds[dims.Y],
@@ -734,32 +673,13 @@ def arct_connect(ds, varName, all_faces):
                 Nx_ac_nrot.append(0)
                 Ny_ac_nrot.append(len(ds[dims.Y][y0:yf]))
                 da_arg = {"face": arc_cap, dims.X: xslice, dims.Y: yslice}
-                sort_arg = {"variables": dims.Y, "ascending": False}
                 mask_arg = {dims.X: xslice, dims.Y: yslice}
                 if len(dims.X) + len(dims.Y) == 4:
-                    if len(dims.Y) == 1 and _varName not in metrics:
+                    if len(dims.Y) == 3 and _varName not in metrics:
                         fac = -1
-                    if "mates" in list(ds[_varName].attrs):
-                        _varName = ds[_varName].attrs["mates"]
-                    _DIMS = [dim for dim in ds[_varName].dims if dim != "face"]
-                    dims = Dims(_DIMS[::-1])
-                    dtr = list(dims)[::-1]
-                    dtr[-1], dtr[-2] = dtr[-2], dtr[-1]
-                    mask2 = _xr.ones_like(ds[_varName].isel(face=arc_cap))
-                    mask2 = mask2.where(
-                        _np.logical_and(
-                            ds[dims.X] < ds[dims.Y],
-                            ds[dims.X] < len(ds[dims.Y]) - ds[dims.Y],
-                        )
-                    )
-                    da_arg = {"face": arc_cap, dims.X: xslice, dims.Y: yslice}
-                    sort_arg = {"variables": dims.Y, "ascending": False}
-                    mask_arg = {dims.X: xslice, dims.Y: yslice}
                 arct = fac * ds[_varName].isel(**da_arg)
-                arct = arct.sortby(**sort_arg)
                 Mask = mask2.isel(**mask_arg)
-                Mask = Mask.sortby(**sort_arg)
-                arct = (arct * Mask).transpose(*dtr)
+                arct = (arct * Mask)
                 ARCT.append(arct)
 
             elif k == 5:
@@ -781,6 +701,9 @@ def arct_connect(ds, varName, all_faces):
                 yslice = slice(y0, yf)
                 Nx_ac_nrot.append(0)
                 Ny_ac_nrot.append(len(ds[dims.X][y0:yf]))
+                if len(dims.X) + len(dims.Y) == 4:
+                    if len(dims.Y) == 1 and _varName not in metrics:
+                        fac = -1
                 da_arg = {"face": arc_cap, dims.X: xslice, dims.Y: yslice}
                 mask_arg = {dims.X: xslice, dims.Y: yslice}
                 arct = ds[_varName].isel(**da_arg)
@@ -809,22 +732,6 @@ def arct_connect(ds, varName, all_faces):
                 yslice = slice(y0, yf)
                 Nx_ac_rot.append(len(ds[dims.Y][x0:xf]))
                 Ny_ac_rot.append(0)
-                if len(dims.X) + len(dims.Y) == 4:
-                    if len(dims.X) == 1 and _varName not in metrics:
-                        fac = -1
-                    if "mates" in list(ds[varName].attrs):
-                        _varName = ds[varName].attrs["mates"]
-                    DIMS = [dim for dim in ds[_varName].dims if dim != "face"]
-                    dims = Dims(DIMS[::-1])
-                    dtr = list(dims)[::-1]
-                    dtr[-1], dtr[-2] = dtr[-2], dtr[-1]
-                    mask7 = _xr.ones_like(ds[_varName].isel(face=arc_cap))
-                    mask7 = mask7.where(
-                        _np.logical_and(
-                            ds[dims.X] > ds[dims.Y],
-                            ds[dims.X] > len(ds[dims.Y]) - ds[dims.Y],
-                        )
-                    )
                 da_arg = {"face": arc_cap, dims.X: xslice, dims.Y: yslice}
                 mask_arg = {dims.X: xslice, dims.Y: yslice}
                 arct = fac * ds[_varName].isel(**da_arg)
@@ -837,6 +744,8 @@ def arct_connect(ds, varName, all_faces):
                 _varName = varName
                 DIMS = [dim for dim in ds[_varName].dims if dim != "face"]
                 dims = Dims(DIMS[::-1])
+#                 dtr = list(dims)[::-1]
+#                 dtr[-1], dtr[-2] = dtr[-2], dtr[-1]
                 arc_faces.append(k)
                 mask10 = _xr.ones_like(ds[_varName].isel(face=arc_cap))
                 mask10 = mask10.where(
@@ -851,20 +760,15 @@ def arct_connect(ds, varName, all_faces):
                 yslice = slice(y0, yf)
                 Nx_ac_rot.append(0)
                 Ny_ac_rot.append(len(ds[dims.Y][y0:yf]))
-                if len(dims.X) + len(dims.Y) == 4:
-                    if _varName not in metrics:
-                        fac = -1
                 da_arg = {"face": arc_cap, dims.X: xslice, dims.Y: yslice}
-                sort_arg = {"variables": [dims.X], "ascending": False}
                 mask_arg = {dims.X: xslice, dims.Y: yslice}
                 arct = fac * ds[_varName].isel(**da_arg)
-                arct = arct.sortby(**sort_arg)
                 Mask = mask10.isel(**mask_arg)
-                Mask = Mask.sortby(**sort_arg)
-                arct = arct * Mask
+                arct = (arct * Mask) # 
                 ARCT.append(arct)
 
-    return arc_faces, Nx_ac_nrot, Ny_ac_nrot, Nx_ac_rot, Ny_ac_rot, ARCT
+    return arc_faces, ARCT
+
 
 
 def mates(ds):
