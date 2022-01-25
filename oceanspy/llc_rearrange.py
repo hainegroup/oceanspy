@@ -908,6 +908,19 @@ def rotate_dataset(_ds, dims_c, dims_g, rev_x=False, rev_y=False, transpose=Fals
 
 
 
+def shift_list_ds(_DS, dims_c, dims_g):
+    """given a list of n-datasets, each element of the list gets along the dimensions provided (dims_c and dims_g) so that there is
+    no overlap between them.
+    """
+    if len(_DS) > 1:
+        for ii in range(1, len(_DS)):
+            for _dim  in [dims_c, dims_g]:
+                _DS[ii]['n' + _dim] = _DS[ii][_dim] - int(_DS[ii][_dim][0].data) + int(_DS[ii-1][_dim][-1].data + 1)
+                _DS[ii] = _DS[ii].swap_dims({_dim:'n'+_dim}).drop_vars([_dim]).rename({'n'+_dim:_dim})
+
+    return _DS
+
+
 
 
 class Dims:
