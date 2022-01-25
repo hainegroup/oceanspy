@@ -806,6 +806,25 @@ def mates(ds):
     return ds
 
 
+def rotate_vars(_ds):
+    """using the attribures `mates`, when this function is called it swaps the variables names. This issue is only applicable to llc grid in which the 
+    grid topology makes it so that u on a rotated face transforms to `+- v` on a lat lon grid. 
+    """
+    _vars = [var for var in _ds.variables]
+    rot_names = {}
+    for v in _vars:
+        if "mate" in _ds[v].attrs:
+            rot_names = {**rot_names, **{v: _ds[v].mate}}
+        
+
+    _ds = _ds.rename(rot_names)
+    return _ds
+
+
+
+
+
+
 class Dims:
     axes = "XYZT"  # shortcut axis names
 
