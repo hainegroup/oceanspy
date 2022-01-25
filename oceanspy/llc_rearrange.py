@@ -159,6 +159,7 @@ class LLCtransformation:
             dsnew = drop_size(dsnew)
         return dsnew
 
+
     @classmethod
     def arctic_crown(
         self,
@@ -168,7 +169,7 @@ class LLCtransformation:
         faces="all",
         drop=False,
     ):
-        """Transforms the dataset in which faces appears as a dimension into
+        """Transforms the dataset in which `face` appears as a dimension into
         one without faces, with grids and variables sharing a common grid
         orientation.
         """
@@ -183,7 +184,11 @@ class LLCtransformation:
         if isinstance(faces, str):
             faces = _np.arange(13)
 
-        ds = mates(ds).reset_coords()
+        metrics = ["dxC", "dyC", "dxG", "dyG", 'hFacW', 'hFacS'] # metric variables defined at vector points
+
+        co_list = [var for var in ds.coords if var not in ds.dims]
+
+        ds = mates(ds.reset_coords())
 
         nrot_faces, Nx_nrot, Ny_nrot, rot_faces, Nx_rot, Ny_rot = face_connect(
             ds, faces
@@ -247,7 +252,6 @@ class LLCtransformation:
         NR_dsnew = make_array(ds, tNx_nrot, tNy_nrot, X0)
         R_dsnew = make_array(ds, tNx_rot, tNy_rot, Xr0)
 
-        metrics = ["dxC", "dyC", "dxG", "dyG"]
 
         NR_dsnew = init_vars(ds, NR_dsnew, varlist)
         R_dsnew = init_vars(ds, R_dsnew, varlist)
