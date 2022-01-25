@@ -5,6 +5,10 @@ import numpy as _np
 import xarray as _xr
 
 
+# metric variables defined at vector points, defined as global within this file
+metrics = ["dxC", "dyC", "dxG", "dyG", 'hFacW', 'hFacS'] 
+
+
 class LLCtransformation:
     """A class containing the transformation of LLCgrids"""
 
@@ -96,7 +100,6 @@ class LLCtransformation:
         ds = mates(ds).reset_coords()
 
         dsnew = make_array(ds, 3 * Nx, 3 * Ny)
-        metrics = ["dxC", "dyC", "dxG", "dyG"]
 
         dsnew = init_vars(ds, dsnew, varlist)
 
@@ -185,11 +188,15 @@ class LLCtransformation:
         if isinstance(faces, str):
             faces = _np.arange(13)
 
-        metrics = ["dxC", "dyC", "dxG", "dyG", 'hFacW', 'hFacS'] # metric variables defined at vector points
 
         co_list = [var for var in ds.coords if var not in ds.dims]
 
         ds = mates(ds.reset_coords())
+
+        DIMS_c = [dim for dim in ds['XC'].dims if dim not in ["face"]]  # horizontal dimensions on tracer points.
+        DIMS_g = [dim for dim in ds['XG'].dims if dim not in ["face"]]  # horizontal dimensions on corner points
+        dims_c = Dims(DIMS_c[::-1])  # j, i format
+        dims_g = Dims(DIMS_g[::-1])
 
         nrot_faces, Nx_nrot, Ny_nrot, rot_faces, Nx_rot, Ny_rot = face_connect(
             ds, faces
@@ -212,127 +219,93 @@ class LLCtransformation:
 
 
 #   ========================== Begin transformation =================
+        # First the Arctic crown
+        for _var in varlist:
+            *arc_faces, DS = arct_connect(ds, varName, faces)  ## This only works in the case the transformation involves the whole domain
+            dsa2.append(DS[0])
+            dsa5.append(DS[1])
+            dsa7.append(DS[2])
+            dsa10.append(DS[3])
+
+        DSa2 = _xr.merge(dsa2)
+        DSa5 = _xr.merge(dsa5)
+        DSa7 = _xr.merge(dsa7)
+        DSa10 = _xr.merge(dsa10)
+
+        DSa7 = shift_dataset(DSa7, dims_c.X, dims_g.X)  # shift x-axis to 0 (smaller element).
+
+        DSa10 = shift_dataset(DSa10, dims_c.Y, dims_g.Y)  # shift in y
+        DSa10 = rotate_dataset(DSa10, dims_c, dims_g, rev_x=False, rev_y=True)  # rotate 90 degrees
+        DSa10 = rotate_vars(DSa10)  # renames variables. (u -> v and v -> u) due to rotation.
+
+        DSa2 = rotate_dataset(DSa2, dims_c, dims_g, rev_x=True, rev_y=False, transpose=True)  # rotate 90 degrees
+        DSa2 = rotate_vars(DSa2)
+
+        # ===== 
+        # Facet 1 
+        # involves faces [7, 8, 9] + arctic
+
+        Facet1 = [DSa7, ds.isel(face=7), ds.isel(face=8), ds.isel(face=9)]
+        Facet1 = shift_list_ds(Facet1, dims_c.X, dims_g.X)
+        DSFacet1 = combine_list_ds(Facet1)
+
+        DSFacet1 = rotate_dataset(DSFacet1, dims_c, dims_g, rev_x=False, rev_y=False, transpose=False)
+        DSFacet1 = reverse_dataset(DSFacet1, dims_c.Y, dims_g.Y)
+        DSFacet1 = rotate_vars(DSFacet1)
+        DSFacet1 = flip_v(DSFacet1)  # has correct orientation and data layout. This correct the orientation of the v-vectors.
 
 
-        arc_faces, Nx_ac_nrot, Ny_ac_nrot, Nx_ac_rot, Ny_ac_rot, ARCT = arct_connect(
-            ds, varName, faces
-        )
+        # ===== 
+        # Facet 2
+        # involves faces [10, 11, 12] + arctic
 
-        acnrot_faces = [k for k in arc_faces if k in _np.array([2, 5])]
-        acrot_faces = [k for k in arc_faces if k in _np.array([7, 10])]
+        Facet2 = [DSa10, ds.isel(face=10), ds.isel(face=11), ds.isel(face=12)]
+        Facet2 = shift_list_ds(Facet2, dims_c.X, dims_g.X)
+        DSFacet2 = combine_list_ds(Facet2)
+        DSFacet2 = rotate_dataset(DSFacet2, dims_c, dims_g)
 
-        tNy_nrot, tNx_nrot = chunk_sizes(nrot_faces, [Nx], [Ny])
-        tNy_rot, tNx_rot = chunk_sizes(rot_faces, [Nx], [Ny], rotated=True)
-
-        delNX = 0
-        delNY = 0
-        if len(ARCT) > 0:
-            delNX = int(Nx / 2)
-            delNY = int(Ny / 2)
-        tNy_nrot = tNy_nrot + delNY
-        tNy_rot = tNy_rot + delNX
-
-        Nx_nrot = _np.arange(0, tNx_nrot + 1, Nx)
-        Ny_nrot = _np.arange(0, tNy_nrot + 1, Ny)
-        Ny_rot = _np.arange(0, tNy_rot + 1, Ny)
-        Nx_rot = _np.arange(0, tNx_rot + 1, Nx)
-
-        chunksX_nrot, chunksY_nrot = make_chunks(Nx_nrot, Ny_nrot)
-        chunksX_rot, chunksY_rot = make_chunks(Nx_rot, Ny_rot)
-
-        POSY_nrot, POSX_nrot, POSYarc_nrot, POSXarc_nrot = pos_chunks(
-            nrot_faces, acnrot_faces, chunksY_nrot, chunksX_nrot
-        )
-        POSY_rot, POSX_rot, POSYa_rot, POSXa_rot = pos_chunks(
-            rot_faces, acrot_faces, chunksY_rot, chunksX_rot
-        )
-
-        X0 = 0
-        Xr0 = 0
-        if centered == "Atlantic":
-            X0 = tNx_rot
-        elif centered == "Pacific":
-            Xr0 = tNx_nrot
-
-        NR_dsnew = make_array(ds, tNx_nrot, tNy_nrot, X0)
-        R_dsnew = make_array(ds, tNx_rot, tNy_rot, Xr0)
+        DSFacet2 = reverse_dataset(DSFacet2, dims_c.Y, dims_g.Y, transpose=False)
+        DSFacet2 = rotate_vars(DSFacet2)
+        DSFacet2 = flip_v(DSFacet2)  # has correct orientation and data layout. This correct the orientation of the v-vectors.
 
 
-        NR_dsnew = init_vars(ds, NR_dsnew, varlist)
-        R_dsnew = init_vars(ds, R_dsnew, varlist)
+        # ===== 
+        # combining Facet 1 & 2
+        # ===== 
 
-        for varName in varlist:
-            vName = varName
-            fac = 1
-            DIM = [dim for dim in ds[varName].dims if dim != "face"][::-1]
-            dims = Dims(DIM)
-            if len(ds[varName].dims) == 1:
-                R_dsnew[varName] = (dims._vars[::-1], ds[varName].data)
-                NR_dsnew[varName] = (dims._vars[::-1], ds[varName].data)
-                NR_dsnew[varName].attrs = ds[varName].attrs
-                R_dsnew[varName].attrs = ds[varName].attrs
-            else:
-                if len(dims.X) + len(dims.Y) == 4:  # vector fields
-                    if "mates" in list(ds[varName].attrs):
-                        vName = ds[varName].attrs["mates"]
-                    if len(dims.X) == 1 and varName not in metrics:
-                        fac = -1
-                (
-                    arc_faces,
-                    Nx_ac_nrot,
-                    Ny_ac_nrot,
-                    Nx_ac_rot,
-                    Ny_ac_rot,
-                    ARCT,
-                ) = arct_connect(ds, varName, faces)
-                for k in range(len(nrot_faces)):
-                    data = ds[varName].isel(face=nrot_faces[k]).values
-                    xslice = slice(POSX_nrot[k][0], POSX_nrot[k][1])
-                    yslice = slice(POSY_nrot[k][0], POSY_nrot[k][1])
-                    arg = {dims.X: xslice, dims.Y: yslice}
-                    NR_dsnew[varName].isel(**arg)[:] = data
-                for k in range(len(rot_faces)):
-                    kk = len(rot_faces) - (k + 1)
-                    xslice = slice(POSX_rot[k][0], POSX_rot[k][1])
-                    if dims.Y == "Yp1":
-                        yslice = slice(POSY_rot[kk][0] + 1, POSY_rot[kk][1] + 1)
-                    else:
-                        yslice = slice(POSY_rot[kk][0], POSY_rot[kk][1])
-                    data = fac * ds[vName].isel(face=rot_faces[k])
-                    arg = {dims.Y: yslice, dims.X: xslice}
-                    ndims = Dims(list(data.dims)[::-1])
-                    dtr = list(ndims)[::-1]
-                    dtr[-1], dtr[-2] = dtr[-2], dtr[-1]
-                    sort_arg = {"variables": ndims.X, "ascending": False}
-                    data = data.sortby(**sort_arg).transpose(*dtr)
-                    R_dsnew[varName].isel(**arg)[:] = data.values
-                for k in range(len(acnrot_faces)):
-                    data = ARCT[k]
-                    xslice = slice(POSXarc_nrot[k][0], POSXarc_nrot[k][1])
-                    yslice = slice(POSYarc_nrot[k][0], POSYarc_nrot[k][1])
-                    arg = {dims.X: xslice, dims.Y: yslice}
-                    NR_dsnew[varName].isel(**arg)[:] = data.values
-                for k in range(len(acrot_faces)):
-                    tk = len(acnrot_faces) + k
-                    xslc = slice(POSXa_rot[k][0], POSXa_rot[k][1])
-                    yslc = slice(POSYa_rot[k][0], POSYa_rot[k][1])
-                    arg = {dims.Y: yslc, dims.X: xslc}
-                    data = ARCT[tk]
-                    if acrot_faces[k] == 7:
-                        sort_arg = {"variables": ndims.X, "ascending": False}
-                    elif acrot_faces[k] == 10:
-                        sort_arg = {"variables": dims.Y, "ascending": False}
-                    data = data.sortby(**sort_arg)
-                    R_dsnew[varName].isel(**arg)[:] = data.values
+        FACETS = [DSFacet1, DSFacet2]
+        FACETS = shift_list_ds(FACETS, dims_c.X, dims_g.X)
+        DSFacet12 = combine_list_ds(FACETS)
 
-        if centered == "Atlantic":
-            DS = R_dsnew.combine_first(NR_dsnew)
-        elif centered == "Pacific":
-            DS = NR_dsnew.combine_first(R_dsnew)
 
-        DS = DS.reset_coords()
-        if drop is True:
-            DS = drop_size(DS)
+        # ===== 
+        # Facet 3
+        # involves faces [0, 1, 2] + arctic
+
+        Facet3 = [ds.isel(face=0), ds.isel(face=1), ds.isel(face=2), DSa2]
+        Facet3 = shift_list_ds(Facet3, dims_c.Y, dims_g.Y)
+        DSFacet3 = combine_list_ds(Facet3)
+
+        # ===== 
+        # Facet 4
+        # involves faces [3, 4, 5] + arctic
+        Facet4 = [ds.isel(face=3), ds.isel(face=4), ds.isel(face=5), DSa5] 
+        Facet4 = shift_list_ds(Facet4, dims_c.Y, dims_g.Y)
+        DSFacet4 = combine_list_ds(Facet4)
+
+        # ===== 
+        # combining Facet 3 & 4
+        # ===== 
+
+        if centered == 'Pacific':
+            FACETS = [DSFacet34, DSFacet12]  # centered on Pacific ocean
+        elif centered == 'Atlantic':
+            FACETS = [DSFacet12, DSFacet34]  # centered at Atlantic ocean
+        else:
+            raise ValueError("this is not an option. Choose between `Atlantic` or `Pacific`.")
+
+        FACETS = shift_list_ds(FACETS, dims_c.X, dims_g.X)
+        DS = combine_list_ds(FACETS)
 
         return DS
 
