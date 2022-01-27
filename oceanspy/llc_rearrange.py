@@ -639,8 +639,8 @@ def arct_connect(ds, varName, faces='all'):
     Ny_ac_nrot = []
     Nx_ac_rot = []
     Ny_ac_rot = []
-    ARCT = []
-    arc_faces = []
+    ARCT = [0, 0, 0, 0]  # initialize the list. 
+    arc_faces = [0, 0, 0, 0]
     metrics = ["dxC", "dyC", "dxG", "dyG", 'hFacW', 'hFacS'] # metric variables defined at vector points
     
     if isinstance(faces, str):
@@ -652,7 +652,7 @@ def arct_connect(ds, varName, faces='all'):
         for k in faces:
             if k == 2:
                 fac = 1
-                arc_faces.append(k)
+                arc_faces[0] = k
                 _varName = varName
                 DIMS = [dim for dim in ds[_varName].dims if dim != "face"]
                 dims = Dims(DIMS[::-1])
@@ -680,11 +680,11 @@ def arct_connect(ds, varName, faces='all'):
                 arct = fac * ds[_varName].isel(**da_arg)
                 Mask = mask2.isel(**mask_arg)
                 arct = (arct * Mask)
-                ARCT.append(arct)
+                ARCT[0] = arct
 
             elif k == 5:
                 fac = 1
-                arc_faces.append(k)
+                arc_faces[1] = k
                 _varName = varName
                 DIMS = [dim for dim in ds[_varName].dims if dim != "face"]
                 dims = Dims(DIMS[::-1])
@@ -709,11 +709,11 @@ def arct_connect(ds, varName, faces='all'):
                 arct = ds[_varName].isel(**da_arg)
                 Mask = mask5.isel(**mask_arg)
                 arct = arct * Mask
-                ARCT.append(arct)
+                ARCT[1] = arct
 
             elif k == 7:
                 fac = 1
-                arc_faces.append(k)
+                arc_faces[2] = k
                 _varName = varName
                 DIMS = [dim for dim in ds[_varName].dims if dim != "face"]
                 dims = Dims(DIMS[::-1])
@@ -737,7 +737,7 @@ def arct_connect(ds, varName, faces='all'):
                 arct = fac * ds[_varName].isel(**da_arg)
                 Mask = mask7.isel(**mask_arg)
                 arct = (arct * Mask).transpose(*dtr)
-                ARCT.append(arct)
+                ARCT[2] = arct
 
             elif k == 10:
                 fac = 1
@@ -746,7 +746,7 @@ def arct_connect(ds, varName, faces='all'):
                 dims = Dims(DIMS[::-1])
 #                 dtr = list(dims)[::-1]
 #                 dtr[-1], dtr[-2] = dtr[-2], dtr[-1]
-                arc_faces.append(k)
+                arc_faces[3] = k
                 mask10 = _xr.ones_like(ds[_varName].isel(face=arc_cap))
                 mask10 = mask10.where(
                     _np.logical_and(
@@ -765,7 +765,7 @@ def arct_connect(ds, varName, faces='all'):
                 arct = fac * ds[_varName].isel(**da_arg)
                 Mask = mask10.isel(**mask_arg)
                 arct = (arct * Mask) # 
-                ARCT.append(arct)
+                ARCT[3] = arct
 
     return arc_faces, Nx_ac_nrot, Ny_ac_nrot, Nx_ac_rot, Ny_ac_rot, ARCT
 
