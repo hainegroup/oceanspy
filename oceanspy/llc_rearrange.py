@@ -223,29 +223,33 @@ class LLCtransformation:
 #   ========================== Begin transformation =================
         # First the Arctic crown
 
-        dsa2=[]
-        dsa5=[]
-        dsa7=[]
-        dsa10=[]
-        for _var in varlist:
-            # print(_var)
-            if 'face' in ds[_var].dims:  # so transformation is not performed on vars that are only z or time deep
-                arc_faces, *nnn, DS = arct_connect(ds, _var, faces)  ## This only works in the case the transformation involves the whole domain
-                dsa2.append(DS[0])
-                dsa5.append(DS[1])
-                dsa7.append(DS[2])
-                dsa10.append(DS[3])
+        dsa2 = []
+        dsa5 = []
+        dsa7 = []
+        dsa10 = []
+        ARCT = [dsa2, dsa5, dsa7, dsa10]  # initialize with symbolic representation of how arctic connects with rest of facets
+        for var_name in varlist:
+            if 'face' in ds[var_name].dims:  # so transformation is not performed on vars that are only z or time deep
+                # print(var_name)
+                arc_faces, *nnn, DS = arct_connect(ds, var_name, faces='all')
+                ARCT[0].append(DS[0])
+                ARCT[1].append(DS[1])
+                ARCT[2].append(DS[2])
+                ARCT[3].append(DS[3])
             else:
-                dsa2.append(ds[_var])
-                dsa5.append(ds[_var])
-                dsa7.append(ds[_var])
-                dsa10.append(ds[_var])
+                # print('here, '+ var_name)
+                ARCT[0].append(ds[var_name])
+                ARCT[1].append(ds[var_name])
+                ARCT[2].append(ds[var_name])
+                ARCT[3].append(ds[var_name])
+        
+        for i in range(len(ARCT)):  # Not all faces survive the cutout
+            if type(ARCT[i][0]) == xr.core.dataarray.DataArray:
+                ARCT[i] = xr.merge(ARCT[i])
 
+        DSa2, DSa5, DSa7, DSa10 = ARCT
 
-        DSa2 = _xr.merge(dsa2)
-        DSa5 = _xr.merge(dsa5)
-        DSa7 = _xr.merge(dsa7)
-        DSa10 = _xr.merge(dsa10)
+        # next lines only work if the whole dataset is being transformed. 
 
         DSa7 = shift_dataset(DSa7, dims_c.X, dims_g.X)  # shift x-axis to 0 (smaller element).
 
