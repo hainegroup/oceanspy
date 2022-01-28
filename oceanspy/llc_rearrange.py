@@ -846,7 +846,7 @@ def shift_dataset(_ds, dims_c, dims_g):
             _ds['n' + _dim] = _ds[_dim] - int(_ds[_dim][0].data)
         _ds = _ds.swap_dims({_dim: 'n' + _dim}).drop_vars([_dim]).rename({'n' + _dim: _dim})
     
-        _ds = mates(_ds):
+        _ds = mates(_ds)
     return _ds
 
 
