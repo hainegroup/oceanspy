@@ -9,8 +9,8 @@ import xarray as _xr
 metrics = ["dxC", "dyC", "dxG", "dyG", 'hFacW', 'hFacS'] 
 
 
-_datype = xr.core.dataarray.DataArray
-_dstype = xarray.core.dataset.Dataset
+_datype = _xr.core.dataarray.DataArray
+_dstype = _xr.core.dataset.Dataset
 
 class LLCtransformation:
     """A class containing the transformation of LLCgrids"""
