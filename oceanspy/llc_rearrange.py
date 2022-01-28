@@ -244,7 +244,7 @@ class LLCtransformation:
                 ARCT[3].append(ds[var_name])
         
         for i in range(len(ARCT)):  # Not all faces survive the cutout
-            if type(ARCT[i][0]) == xr.core.dataarray.DataArray:
+            if type(ARCT[i][0]) == _xr.core.dataarray.DataArray:
                 ARCT[i] = xr.merge(ARCT[i])
 
         DSa2, DSa5, DSa7, DSa10 = ARCT
