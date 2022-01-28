@@ -9,6 +9,9 @@ import xarray as _xr
 metrics = ["dxC", "dyC", "dxG", "dyG", 'hFacW', 'hFacS'] 
 
 
+_datype = xr.core.dataarray.DataArray
+_dstype = xarray.core.dataset.Dataset
+
 class LLCtransformation:
     """A class containing the transformation of LLCgrids"""
 
@@ -244,7 +247,7 @@ class LLCtransformation:
                 ARCT[3].append(ds[var_name])
         
         for i in range(len(ARCT)):  # Not all faces survive the cutout
-            if type(ARCT[i][0]) == _xr.core.dataarray.DataArray:
+            if type(ARCT[i][0]) == _datype:  # if data array then merge into dataset
                 ARCT[i] = _xr.merge(ARCT[i])
 
         DSa2, DSa5, DSa7, DSa10 = ARCT
@@ -814,14 +817,14 @@ def rotate_vars(_ds):
     """using the attribures `mates`, when this function is called it swaps the variables names. This issue is only applicable to llc grid in which the 
     grid topology makes it so that u on a rotated face transforms to `+- v` on a lat lon grid. 
     """
-    _vars = [var for var in _ds.variables]
-    rot_names = {}
-    for v in _vars:
-        if "mate" in _ds[v].attrs:
-            rot_names = {**rot_names, **{v: _ds[v].mate}}
+    if type(_ds) == _dstype:  # if a dataset transform otherwise pass
+        _vars = [var for var in _ds.variables]
+        rot_names = {}
+        for v in _vars:
+            if "mate" in _ds[v].attrs:
+                rot_names = {**rot_names, **{v: _ds[v].mate}}
         
-
-    _ds = _ds.rename(rot_names)
+        _ds = _ds.rename(rot_names)
     return _ds
 
 
@@ -838,12 +841,12 @@ def shift_dataset(_ds, dims_c, dims_g):
     dims_g: string, either 'i_g' or 'j_g'. Should correspond to same dimension as dims_c.
     
     """
-
-    for _dim in [dims_c, dims_g]:
-        _ds['n' + _dim] = _ds[_dim] - int(_ds[_dim][0].data)
-    _ds = _ds.swap_dims({_dim: 'n' + _dim}).drop_vars([_dim]).rename({'n' + _dim: _dim})
+    if type(_ds) == _dstype:  # if a dataset transform otherwise pass
+        for _dim in [dims_c, dims_g]:
+            _ds['n' + _dim] = _ds[_dim] - int(_ds[_dim][0].data)
+        _ds = _ds.swap_dims({_dim: 'n' + _dim}).drop_vars([_dim]).rename({'n' + _dim: _dim})
     
-    _ds = mates(_ds)
+        _ds = mates(_ds):
     return _ds
 
 
@@ -853,14 +856,16 @@ def reverse_dataset(_ds, dims_c, dims_g, transpose=False):
     of [center, corner] points. This rotation is only used in the horizontal, and so dims_c is either one of `i`  or `j`, and
     dims_g is either one of `i_g` or `j_g`. The pair most correspond to the same dimension."""
 
-    for _dim in [dims_c, dims_g]:   # This part should be different for j_g points?
-        _ds['n' + _dim] = - _ds[_dim] +  int(_ds[_dim][-1].data) 
-        _ds = _ds.swap_dims({_dim:'n' + _dim}).drop_vars([_dim]).rename({'n' + _dim: _dim})
+    if type(_ds) == _dstype:  # if a dataset transform otherwise pass
+
+        for _dim in [dims_c, dims_g]:   # This part should be different for j_g points?
+            _ds['n' + _dim] = - _ds[_dim] +  int(_ds[_dim][-1].data) 
+            _ds = _ds.swap_dims({_dim:'n' + _dim}).drop_vars([_dim]).rename({'n' + _dim: _dim})
         
-    _ds = mates(_ds)
+        _ds = mates(_ds)
     
-    if transpose:
-        _ds = _ds.transpose()
+        if transpose:
+            _ds = _ds.transpose()
     return _ds
 
 
@@ -875,38 +880,34 @@ def rotate_dataset(_ds, dims_c, dims_g, rev_x=False, rev_y=False, transpose=Fals
     dims_c = [dims_g.X, dims_g.Y]
 
     """
+    if type(_ds) == _dstype:  # if a dataset transform otherwise pass
 
+        Nij = max(len(_ds[dims_c.X]), len(_ds[dims_c.Y]))  # max number of points of a face. If ECCO data, Nij  = 90. If LLC4320, Nij=4320
 
-    Nij = max(len(_ds[dims_c.X]), len(_ds[dims_c.Y]))  # max number of points of a face. If ECCO data, Nij  = 90. If LLC4320, Nij=4320
+        if rev_x is False:
+            fac_x = 1
+            x0 = 0
+        elif rev_x is True:
+            fac_x = -1
+            x0 = Nij - 1
+        if rev_y is False:
+            fac_y = 1
+            y0 = 0
+        elif rev_y is True:
+            fac_y = -1
+            y0 = Nij - 1
 
-    if rev_x is False:
-        fac_x = 1
-        x0 = 0
-    elif rev_x is True:
-        fac_x = -1
-        x0 = Nij - 1
+        for _dimx, _dimy in [[dims_c.X, dims_c.Y], [dims_g.X, dims_g.Y]]:
+            _ds['n' + _dimx] = fac_x * _ds[_dimy] + x0
+            _ds['n' + _dimy] = fac_y * _ds[_dimx] + y0
 
-
-    if rev_y is False:
-        fac_y = 1
-        y0 = 0
-    elif rev_y is True:
-        fac_y = -1
-        y0 = Nij - 1
-
-
-    for _dimx, _dimy in [[dims_c.X, dims_c.Y], [dims_g.X, dims_g.Y]]:
-        _ds['n' + _dimx] = fac_x * _ds[_dimy] + x0
-        _ds['n' + _dimy] = fac_y * _ds[_dimx] + y0
-
-        _ds = _ds.swap_dims({_dimx: 'n' + _dimy, _dimy: 'n' + _dimx})
-        _ds = _ds.drop_vars({_dimx, _dimy}).rename({'n' + _dimx: _dimx, 'n' + _dimy: _dimy})
+            _ds = _ds.swap_dims({_dimx: 'n' + _dimy, _dimy: 'n' + _dimx})
+            _ds = _ds.drop_vars({_dimx, _dimy}).rename({'n' + _dimx: _dimx, 'n' + _dimy: _dimy})
     
-    _ds = mates(_ds)
+        _ds = mates(_ds)
 
-    if transpose:
-        _ds = _ds.transpose()
-
+        if transpose:
+           _ds = _ds.transpose()
     return _ds
 
 
@@ -955,12 +956,15 @@ def shift_ocean(_ds, dims_c, dims_g):
 
 
 def flip_v(_ds, co_list = metrics):
-    for _varName in _ds.variables:
-        DIMS = [dim for dim in _ds[_varName].dims if dim != "face"]
-        _dims = Dims(DIMS[::-1])
-        if "mate" in _ds[_varName].attrs:
-            if _varName not in co_list and len(_dims.Y) == 3:  # do not change sign of grid metrics
-                _ds[_varName] = -_ds[_varName]  
+    """ reverses the sign of the velocity field v.
+    """
+    if type(_ds) == _dstype:  # if a dataset transform otherwise pass
+        for _varName in _ds.variables:
+            DIMS = [dim for dim in _ds[_varName].dims if dim != "face"]
+            _dims = Dims(DIMS[::-1])
+            if "mate" in _ds[_varName].attrs:
+                if _varName not in co_list and len(_dims.Y) == 3:  # do not change sign of grid metrics
+                    _ds[_varName] = -_ds[_varName]  
     return _ds
 
 
