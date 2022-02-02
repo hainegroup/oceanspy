@@ -357,13 +357,12 @@ def cutout(
         if XRange is None and YRange is None:
             faces = "all"
         else:
-            faces = dmaskH["face"].values  # gets faces that survives cutout
+            faces = list(dmaskH["face"].values)  # gets faces that survives cutout
+            if faces == [2, 6, 10]:
+                transformation == 'subpolar_NA'
+            else:
+                faces = 'all'   ###### ================== experimental for now
             print(faces)
-            # if faces == [2, 6, 10]:
-            #     transformation == 'subpolar_NA'
-            # else:
-            faces = 'all'   ###### ================== experimental for now
-            # print(faces)
         _transf_list = ["arctic_crown", "arctic_centered", "subpolar_NA"]
         if transformation in _transf_list:
             arg = {
