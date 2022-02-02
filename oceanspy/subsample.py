@@ -359,7 +359,7 @@ def cutout(
         else:
             faces = list(dmaskH["face"].values)  # gets faces that survives cutout
             if faces == [2, 6, 10]:
-                transformation == 'subpolar_NA'
+                transformation = 'subpolar_NA'
                 # print('here')
             else:
                 faces = 'all'   ###### ================== experimental for now
