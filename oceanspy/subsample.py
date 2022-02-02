@@ -377,6 +377,7 @@ def cutout(
                 _transformation = _llc_trans.arctic_centered
             elif transformation == "subpolar_NA":
                 _transformation == _llc_trans.subpolar_NA
+            print(_transformation)
             dsnew = _transformation(**arg)
             dsnew = dsnew.set_coords(co_list)
             grid_coords = od.grid_coords
