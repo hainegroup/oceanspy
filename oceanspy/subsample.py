@@ -360,6 +360,7 @@ def cutout(
             faces = list(dmaskH["face"].values)  # gets faces that survives cutout
             if faces == [2, 6, 10]:
                 transformation == 'subpolar_NA'
+                # print('here')
             else:
                 faces = 'all'   ###### ================== experimental for now
             print(faces)
@@ -377,7 +378,7 @@ def cutout(
             elif transformation == "arctic_centered":
                 _transformation = _llc_trans.arctic_centered
             elif transformation == "subpolar_NA":
-                _transformation == _llc_trans.subpolar_NA
+                _transformation = _llc_trans.subpolar_NA
             print(_transformation)
             dsnew = _transformation(**arg)
             dsnew = dsnew.set_coords(co_list)
