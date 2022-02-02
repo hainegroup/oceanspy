@@ -394,6 +394,12 @@ class LLCtransformation:
 
         DSa2, DSa5, DSa7, DSa10 = ARCT  # only connections with faces 2 and 10 are arrays
 
+        DSa10 = shift_dataset(DSa10, dims_c.Y, dims_g.Y)  # shift in y
+        DSa10 = rotate_dataset(DSa10, dims_c, dims_g, rev_x=False, rev_y=True)  # rotate 90 degrees
+        DSa10 = rotate_vars(DSa10)  # renames variables. (u -> v and v -> u) due to rotation.
+
+        DSa2 = rotate_dataset(DSa2, dims_c, dims_g, rev_x=True, rev_y=False, transpose=True)  # rotate 90 degrees
+        DSa2 = rotate_vars(DSa2)
 
         ## ==== This transformation only involves the Facets 2 and 3 (plus the Arctic) 
         # =====
