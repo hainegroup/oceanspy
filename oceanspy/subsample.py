@@ -357,9 +357,12 @@ def cutout(
         if XRange is None and YRange is None:
             faces = "all"
         else:
-            # faces = dmaskH["face"].values  # gets faces that survives cutout
-            faces = 'all'   ###### ================== experimental for now
-        _transf_list = ["arctic_crown", "arctic_centered"]
+            faces = dmaskH["face"].values  # gets faces that survives cutout
+            if faces == [2, 6, 10]:
+                transformation == 'subpolar_NA'
+            else:
+                faces = 'all'   ###### ================== experimental for now
+        _transf_list = ["arctic_crown", "arctic_centered", "subpolar_NA"]
         if transformation in _transf_list:
             arg = {
                 "ds": ds,
@@ -372,6 +375,8 @@ def cutout(
                 _transformation = _llc_trans.arctic_crown
             elif transformation == "arctic_centered":
                 _transformation = _llc_trans.arctic_centered
+            elif transformation == "subpolar_NA":
+                _transformation == _llc_trans.subpolar_NA
             dsnew = _transformation(**arg)
             dsnew = dsnew.set_coords(co_list)
             grid_coords = od.grid_coords
