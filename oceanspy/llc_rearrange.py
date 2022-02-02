@@ -341,6 +341,106 @@ class LLCtransformation:
         return DS
 
 
+    @classmethod
+    def subpolar_NA(
+        self,
+        ds,
+        varlist,
+        centered,
+        faces=[2, 6, 10],
+        drop=False,
+    ):
+        """Transforms the dataset in which `face` appears as a dimension into
+        one without faces, with grids and variables sharing a common grid
+        orientation.
+        """
+
+        co_list = [var for var in ds.coords if var not in ds.dims]
+
+        ds = mates(ds.reset_coords())
+
+        DIMS_c = [dim for dim in ds['XC'].dims if dim not in ["face"]]  # horizontal dimensions on tracer points.
+        DIMS_g = [dim for dim in ds['XG'].dims if dim not in ["face"]]  # horizontal dimensions on corner points
+        dims_c = Dims(DIMS_c[::-1])  # j, i format
+        dims_g = Dims(DIMS_g[::-1])
+
+
+#   ========================== Begin transformation =================
+        # First the Arctic crown
+
+        dsa2 = []
+        dsa5 = []
+        dsa7 = []
+        dsa10 = []
+        ARCT = [dsa2, dsa5, dsa7, dsa10]  # initialize with symbolic representation of how arctic connects with rest of facets
+        for var_name in varlist:
+            if 'face' in ds[var_name].dims:  # so transformation is not performed on vars that are only z or time deep
+                # print(var_name)
+                arc_faces, *nnn, DS = arct_connect(ds, var_name, faces='all')
+                ARCT[0].append(DS[0])
+                ARCT[1].append(DS[1])
+                ARCT[2].append(DS[2])
+                ARCT[3].append(DS[3])
+            else:
+                # print('here, '+ var_name)
+                ARCT[0].append(ds[var_name])
+                ARCT[1].append(ds[var_name])
+                ARCT[2].append(ds[var_name])
+                ARCT[3].append(ds[var_name])
+        
+        for i in range(len(ARCT)):  # Not all faces survive the cutout
+            if type(ARCT[i][0]) == _datype:  # if data array then merge into dataset
+                ARCT[i] = _xr.merge(ARCT[i])
+
+        DSa2, DSa5, DSa7, DSa10 = ARCT  # only connections with faces 2 and 10 are arrays
+
+
+        ## ==== This transformation only involves the Facets 2 and 3 (plus the Arctic) 
+        # =====
+        # Facet 2
+        # involves faces [10, 11, 12] + arctic
+
+        Facet2 = [DSa10, ds.isel(face=10)]
+        Facet2 = shift_list_ds(Facet2, dims_c.X, dims_g.X)
+        DSFacet2 = combine_list_ds(Facet2)
+        DSFacet2 = rotate_dataset(DSFacet2, dims_c, dims_g)
+
+        DSFacet2 = reverse_dataset(DSFacet2, dims_c.Y, dims_g.Y, transpose=False)
+        DSFacet2 = rotate_vars(DSFacet2)
+        DSFacet2 = flip_v(DSFacet2)  # has correct orientation and data layout. This correct the orientation of the v-vectors.
+
+
+        # ===== 
+        # combining Facet 1 & 2
+        # ===== 
+
+        # FACETS = [DSFacet1, DSFacet2]
+        # FACETS = shift_list_ds(FACETS, dims_c.X, dims_g.X)
+        # DSFacet12 = combine_list_ds(FACETS)
+        DSFacet12 = DSFacet2
+
+
+        # ===== 
+        # Facet 3
+        # involves faces [0, 1, 2] + arctic
+
+        Facet3 = [ds.isel(face=2), DSa2]
+        Facet3 = shift_list_ds(Facet3, dims_c.Y, dims_g.Y)
+        DSFacet3 = combine_list_ds(Facet3)
+
+        # ===== 
+        # combining Facet 3 & 4
+        # ===== 
+
+        DSFacet34 = DSFacet3
+
+        FACETS = [DSFacet12, DSFacet34]
+
+        FACETS = shift_list_ds(FACETS, dims_c.X, dims_g.X)
+        DS = combine_list_ds(FACETS).isel(X = slice(0, -1), Y = slice(0, -1))
+
+        return DS
+
 
 ## ==================================================================================================================
 #                         Keep this code for now. some of it asseses whether faces connect or not
