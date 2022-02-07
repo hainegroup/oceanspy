@@ -297,7 +297,7 @@ class LLCtransformation:
 
         FACETS = [DSFacet1, DSFacet2]
         FACETS = shift_list_ds(FACETS, dims_c.X, dims_g.X)
-        DSFacet12 = combine_list_ds(FACETS)
+        DSFacet12 = combine_list_ds(FACETS).persist()
 
 
         # ===== 
@@ -306,14 +306,14 @@ class LLCtransformation:
 
         Facet3 = [ds.isel(face=0), ds.isel(face=1), ds.isel(face=2), DSa2]
         Facet3 = shift_list_ds(Facet3, dims_c.Y, dims_g.Y)
-        DSFacet3 = combine_list_ds(Facet3)
+        DSFacet3 = combine_list_ds(Facet3).persist()
 
         # ===== 
         # Facet 4
         # involves faces [3, 4, 5] + arctic
         Facet4 = [ds.isel(face=3), ds.isel(face=4), ds.isel(face=5), DSa5] 
         Facet4 = shift_list_ds(Facet4, dims_c.Y, dims_g.Y)
-        DSFacet4 = combine_list_ds(Facet4)
+        DSFacet4 = combine_list_ds(Facet4).persist()
 
         # ===== 
         # combining Facet 3 & 4
@@ -321,7 +321,7 @@ class LLCtransformation:
 
         FACETS = [DSFacet3, DSFacet4]
         FACETS = shift_list_ds(FACETS, dims_c.X, dims_g.X)
-        DSFacet34 = combine_list_ds(FACETS)
+        DSFacet34 = combine_list_ds(FACETS).persist()
 
         # ===== 
         # combining all facets
@@ -778,7 +778,7 @@ def arct_connect(ds, varName, faces='all'):
                         ds[dims.X] < ds[dims.Y],
                         ds[dims.X] < len(ds[dims.Y]) - ds[dims.Y],
                     )
-                ).persist()
+                )
                 x0, xf = 0, int(len(ds[dims.Y]) / 2)  # TODO: CHECK here!
                 y0, yf = 0, int(len(ds[dims.X]))
                 xslice = slice(x0, xf)
@@ -791,9 +791,9 @@ def arct_connect(ds, varName, faces='all'):
                     if len(dims.Y) == 3 and _varName not in metrics:
                         fac = -1
                 arct = fac * ds[_varName].isel(**da_arg)
-                Mask = mask2.isel(**mask_arg)
-                arct = (arct * Mask)
-                ARCT[0] = arct.persist()
+                Mask = mask2.isel(**mask_arg).persist()
+                arct = arct.where(Mask, drop=True)
+                ARCT[0] = arct
 
             elif k == 5:
                 fac = 1
@@ -807,7 +807,7 @@ def arct_connect(ds, varName, faces='all'):
                         ds[dims.X] > ds[dims.Y],
                         ds[dims.X] < len(ds[dims.Y]) - ds[dims.Y],
                     )
-                ).persist()
+                )
                 x0, xf = 0, int(len(ds[dims.X]))
                 y0, yf = 0, int(len(ds[dims.Y]) / 2)
                 xslice = slice(x0, xf)
@@ -820,9 +820,9 @@ def arct_connect(ds, varName, faces='all'):
                 da_arg = {"face": arc_cap, dims.X: xslice, dims.Y: yslice}
                 mask_arg = {dims.X: xslice, dims.Y: yslice}
                 arct = ds[_varName].isel(**da_arg)
-                Mask = mask5.isel(**mask_arg)
-                arct = arct * Mask
-                ARCT[1] = arct.persist()
+                Mask = mask5.isel(**mask_arg).persist()
+                arct = arct.where(Mask, drop=True)
+                ARCT[1] = arct
 
             elif k == 7:
                 fac = 1
@@ -838,7 +838,7 @@ def arct_connect(ds, varName, faces='all'):
                         ds[dims.X] > ds[dims.Y],
                         ds[dims.X] > len(ds[dims.Y]) - ds[dims.Y],
                     )
-                ).persist()
+                )
                 x0, xf = int(len(ds[dims.Y]) / 2), int(len(ds[dims.Y]))
                 y0, yf = 0, int(len(ds[dims.X]))
                 xslice = slice(x0, xf)
@@ -848,9 +848,9 @@ def arct_connect(ds, varName, faces='all'):
                 da_arg = {"face": arc_cap, dims.X: xslice, dims.Y: yslice}
                 mask_arg = {dims.X: xslice, dims.Y: yslice}
                 arct = fac * ds[_varName].isel(**da_arg)
-                Mask = mask7.isel(**mask_arg)
-                arct = (arct * Mask).transpose(*dtr)
-                ARCT[2] = arct.persist()
+                Mask = mask7.isel(**mask_arg).persist()
+                arct = arct.where(Mask, drop=True)
+                ARCT[2] = arct.transpose(*dtr)
 
             elif k == 10:
                 fac = 1
@@ -866,7 +866,7 @@ def arct_connect(ds, varName, faces='all'):
                         ds[dims.X] < ds[dims.Y],
                         ds[dims.X] > len(ds[dims.Y]) - ds[dims.Y],
                     )
-                ).persist()
+                )
                 x0, xf = 0, int(len(ds[dims.X]))
                 y0, yf = int(len(ds[dims.Y]) / 2), int(len(ds[dims.Y]))
                 xslice = slice(x0, xf)
@@ -876,9 +876,9 @@ def arct_connect(ds, varName, faces='all'):
                 da_arg = {"face": arc_cap, dims.X: xslice, dims.Y: yslice}
                 mask_arg = {dims.X: xslice, dims.Y: yslice}
                 arct = fac * ds[_varName].isel(**da_arg)
-                Mask = mask10.isel(**mask_arg)
-                arct = (arct * Mask) # 
-                ARCT[3] = arct.persist()
+                Mask = mask10.isel(**mask_arg).persist()
+                arct = arct.where(Mask, drop=True)
+                ARCT[3] = arct
 
     return arc_faces, Nx_ac_nrot, Ny_ac_nrot, Nx_ac_rot, Ny_ac_rot, ARCT
 
