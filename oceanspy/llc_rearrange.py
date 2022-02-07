@@ -796,7 +796,7 @@ def arct_connect(ds, varName, faces='all'):
                         fac = -1
                 arct = fac * ds[_varName].isel(**da_arg)
                 Mask = mask2.isel(**mask_arg)
-                arct = arct.where(Mask, drop=True)
+                arct = arct * Mask
                 ARCT[0] = arct
 
             elif k == 5:
@@ -825,7 +825,7 @@ def arct_connect(ds, varName, faces='all'):
                 mask_arg = {dims.X: xslice, dims.Y: yslice}
                 arct = ds[_varName].isel(**da_arg)
                 Mask = mask5.isel(**mask_arg)
-                arct = arct.where(Mask, drop=True)
+                arct = arct * Mask
                 ARCT[1] = arct
 
             elif k == 7:
@@ -853,8 +853,8 @@ def arct_connect(ds, varName, faces='all'):
                 mask_arg = {dims.X: xslice, dims.Y: yslice}
                 arct = fac * ds[_varName].isel(**da_arg)
                 Mask = mask7.isel(**mask_arg)
-                arct = arct.where(Mask, drop=True)
-                ARCT[2] = arct.transpose(*dtr)
+                arct = (arct * Mask).transpose(*dtr)
+                ARCT[2] = arct
 
             elif k == 10:
                 fac = 1
@@ -881,7 +881,7 @@ def arct_connect(ds, varName, faces='all'):
                 mask_arg = {dims.X: xslice, dims.Y: yslice}
                 arct = fac * ds[_varName].isel(**da_arg)
                 Mask = mask10.isel(**mask_arg)
-                arct = arct.where(Mask, drop=True)
+                arct = arct * Mask
                 ARCT[3] = arct
 
     return arc_faces, Nx_ac_nrot, Ny_ac_nrot, Nx_ac_rot, Ny_ac_rot, ARCT
