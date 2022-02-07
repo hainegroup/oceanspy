@@ -430,6 +430,7 @@ class LLCtransformation:
         DSFacet12 = DSFacet2
 
 
+
         # ===== 
         # Facet 3
         # involves faces [0, 1, 2] + arctic
@@ -447,7 +448,8 @@ class LLCtransformation:
         FACETS = [DSFacet12, DSFacet34]
 
         FACETS = shift_list_ds(FACETS, dims_c.X, dims_g.X)
-        DS = combine_list_ds(FACETS).isel(X = slice(0, -1), Y = slice(0, -1)).persist()
+        DS = combine_list_ds(FACETS).isel(X = slice(0, -1), Y = slice(0, -1))
+        del DSFacet12, DSFacet34, DSFacet3, DSFacet2
 
         return DS
 
