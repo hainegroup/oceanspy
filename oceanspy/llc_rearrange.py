@@ -778,7 +778,7 @@ def arct_connect(ds, varName, faces='all'):
                         ds[dims.X] < ds[dims.Y],
                         ds[dims.X] < len(ds[dims.Y]) - ds[dims.Y],
                     )
-                )
+                ).persist()
                 x0, xf = 0, int(len(ds[dims.Y]) / 2)  # TODO: CHECK here!
                 y0, yf = 0, int(len(ds[dims.X]))
                 xslice = slice(x0, xf)
@@ -793,7 +793,7 @@ def arct_connect(ds, varName, faces='all'):
                 arct = fac * ds[_varName].isel(**da_arg)
                 Mask = mask2.isel(**mask_arg)
                 arct = (arct * Mask)
-                ARCT[0] = arct
+                ARCT[0] = arct.persist()
 
             elif k == 5:
                 fac = 1
@@ -807,7 +807,7 @@ def arct_connect(ds, varName, faces='all'):
                         ds[dims.X] > ds[dims.Y],
                         ds[dims.X] < len(ds[dims.Y]) - ds[dims.Y],
                     )
-                )
+                ).persist()
                 x0, xf = 0, int(len(ds[dims.X]))
                 y0, yf = 0, int(len(ds[dims.Y]) / 2)
                 xslice = slice(x0, xf)
@@ -822,7 +822,7 @@ def arct_connect(ds, varName, faces='all'):
                 arct = ds[_varName].isel(**da_arg)
                 Mask = mask5.isel(**mask_arg)
                 arct = arct * Mask
-                ARCT[1] = arct
+                ARCT[1] = arct.persist()
 
             elif k == 7:
                 fac = 1
@@ -838,7 +838,7 @@ def arct_connect(ds, varName, faces='all'):
                         ds[dims.X] > ds[dims.Y],
                         ds[dims.X] > len(ds[dims.Y]) - ds[dims.Y],
                     )
-                )
+                ).persist()
                 x0, xf = int(len(ds[dims.Y]) / 2), int(len(ds[dims.Y]))
                 y0, yf = 0, int(len(ds[dims.X]))
                 xslice = slice(x0, xf)
@@ -850,7 +850,7 @@ def arct_connect(ds, varName, faces='all'):
                 arct = fac * ds[_varName].isel(**da_arg)
                 Mask = mask7.isel(**mask_arg)
                 arct = (arct * Mask).transpose(*dtr)
-                ARCT[2] = arct
+                ARCT[2] = arct.persist()
 
             elif k == 10:
                 fac = 1
@@ -866,7 +866,7 @@ def arct_connect(ds, varName, faces='all'):
                         ds[dims.X] < ds[dims.Y],
                         ds[dims.X] > len(ds[dims.Y]) - ds[dims.Y],
                     )
-                )
+                ).persist()
                 x0, xf = 0, int(len(ds[dims.X]))
                 y0, yf = int(len(ds[dims.Y]) / 2), int(len(ds[dims.Y]))
                 xslice = slice(x0, xf)
@@ -878,7 +878,7 @@ def arct_connect(ds, varName, faces='all'):
                 arct = fac * ds[_varName].isel(**da_arg)
                 Mask = mask10.isel(**mask_arg)
                 arct = (arct * Mask) # 
-                ARCT[3] = arct
+                ARCT[3] = arct.persist()
 
     return arc_faces, Nx_ac_nrot, Ny_ac_nrot, Nx_ac_rot, Ny_ac_rot, ARCT
 
@@ -971,7 +971,7 @@ def reverse_dataset(_ds, dims_c, dims_g, transpose=False):
         _ds = mates(_ds)
     
         if transpose:
-            _ds = _ds.transpose()
+            _ds = _ds.transpose().persist()
     return _ds
 
 
@@ -1013,7 +1013,7 @@ def rotate_dataset(_ds, dims_c, dims_g, rev_x=False, rev_y=False, transpose=Fals
         _ds = mates(_ds)
 
         if transpose:
-           _ds = _ds.transpose()
+           _ds = _ds.transpose().persist()
     return _ds
 
 
@@ -1040,7 +1040,7 @@ def combine_list_ds(_DSlist):
             with dask.config.set(**{'array.slicing.split_large_chunks': False}):
                 _DSFacet = _DSFacet.combine_first(_DSlist[ii])
     
-        _DSFacet = mates(_DSFacet)
+        _DSFacet = mates(_DSFacet.persis())
 
     return _DSFacet
 
@@ -1070,7 +1070,7 @@ def flip_v(_ds, co_list = metrics):
             _dims = Dims(DIMS[::-1])
             if "mate" in _ds[_varName].attrs:
                 if _varName not in co_list and len(_dims.Y) == 3:  # do not change sign of grid metrics
-                    _ds[_varName] = -_ds[_varName]  
+                    _ds[_varName] = -_ds[_varName].persist()
     return _ds
 
 
