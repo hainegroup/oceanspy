@@ -795,7 +795,7 @@ def arct_connect(ds, varName, faces='all'):
                     if len(dims.Y) == 3 and _varName not in metrics:
                         fac = -1
                 arct = fac * ds[_varName].isel(**da_arg)
-                Mask = mask2.isel(**mask_arg).persist()
+                Mask = mask2.isel(**mask_arg)
                 arct = arct.where(Mask, drop=True)
                 ARCT[0] = arct
 
@@ -824,7 +824,7 @@ def arct_connect(ds, varName, faces='all'):
                 da_arg = {"face": arc_cap, dims.X: xslice, dims.Y: yslice}
                 mask_arg = {dims.X: xslice, dims.Y: yslice}
                 arct = ds[_varName].isel(**da_arg)
-                Mask = mask5.isel(**mask_arg).persist()
+                Mask = mask5.isel(**mask_arg)
                 arct = arct.where(Mask, drop=True)
                 ARCT[1] = arct
 
@@ -852,7 +852,7 @@ def arct_connect(ds, varName, faces='all'):
                 da_arg = {"face": arc_cap, dims.X: xslice, dims.Y: yslice}
                 mask_arg = {dims.X: xslice, dims.Y: yslice}
                 arct = fac * ds[_varName].isel(**da_arg)
-                Mask = mask7.isel(**mask_arg).persist()
+                Mask = mask7.isel(**mask_arg)
                 arct = arct.where(Mask, drop=True)
                 ARCT[2] = arct.transpose(*dtr)
 
@@ -880,7 +880,7 @@ def arct_connect(ds, varName, faces='all'):
                 da_arg = {"face": arc_cap, dims.X: xslice, dims.Y: yslice}
                 mask_arg = {dims.X: xslice, dims.Y: yslice}
                 arct = fac * ds[_varName].isel(**da_arg)
-                Mask = mask10.isel(**mask_arg).persist()
+                Mask = mask10.isel(**mask_arg)
                 arct = arct.where(Mask, drop=True)
                 ARCT[3] = arct
 
