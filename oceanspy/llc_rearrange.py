@@ -297,7 +297,7 @@ class LLCtransformation:
 
         FACETS = [DSFacet1, DSFacet2]
         FACETS = shift_list_ds(FACETS, dims_c.X, dims_g.X)
-        DSFacet12 = combine_list_ds(FACETS).persist()
+        DSFacet12 = combine_list_ds(FACETS)
 
         del DSFacet1, DSFacet2
 
@@ -307,14 +307,14 @@ class LLCtransformation:
 
         Facet3 = [ds.isel(face=0), ds.isel(face=1), ds.isel(face=2), DSa2]
         Facet3 = shift_list_ds(Facet3, dims_c.Y, dims_g.Y)
-        DSFacet3 = combine_list_ds(Facet3).persist()
+        DSFacet3 = combine_list_ds(Facet3)
 
         # ===== 
         # Facet 4
         # involves faces [3, 4, 5] + arctic
         Facet4 = [ds.isel(face=3), ds.isel(face=4), ds.isel(face=5), DSa5] 
         Facet4 = shift_list_ds(Facet4, dims_c.Y, dims_g.Y)
-        DSFacet4 = combine_list_ds(Facet4).persist()
+        DSFacet4 = combine_list_ds(Facet4)
 
         # ===== 
         # combining Facet 3 & 4
@@ -322,7 +322,7 @@ class LLCtransformation:
 
         FACETS = [DSFacet3, DSFacet4]
         FACETS = shift_list_ds(FACETS, dims_c.X, dims_g.X)
-        DSFacet34 = combine_list_ds(FACETS).persist()
+        DSFacet34 = combine_list_ds(FACETS)
 
         del DSFacet3, DSFacet4
 
@@ -338,7 +338,7 @@ class LLCtransformation:
             raise ValueError("this is not an option. Choose between `Atlantic` or `Pacific`.")
 
         FACETS = shift_list_ds(FACETS, dims_c.X, dims_g.X)
-        DS = combine_list_ds(FACETS).isel(X = slice(0, -1), Y = slice(0, -1)).persist()
+        DS = combine_list_ds(FACETS).isel(X = slice(0, -1), Y = slice(0, -1))
 
         del DSFacet34, DSFacet12
 
