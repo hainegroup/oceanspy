@@ -336,7 +336,7 @@ class LLCtransformation:
             raise ValueError("this is not an option. Choose between `Atlantic` or `Pacific`.")
 
         FACETS = shift_list_ds(FACETS, dims_c.X, dims_g.X)
-        DS = combine_list_ds(FACETS).isel(X = slice(0, -1), Y = slice(0, -1))
+        DS = combine_list_ds(FACETS).isel(X = slice(0, -1), Y = slice(0, -1)).persist()
 
         return DS
 
@@ -443,7 +443,7 @@ class LLCtransformation:
         FACETS = [DSFacet12, DSFacet34]
 
         FACETS = shift_list_ds(FACETS, dims_c.X, dims_g.X)
-        DS = combine_list_ds(FACETS).isel(X = slice(0, -1), Y = slice(0, -1))
+        DS = combine_list_ds(FACETS).isel(X = slice(0, -1), Y = slice(0, -1)).persist()
 
         return DS
 
@@ -971,7 +971,7 @@ def reverse_dataset(_ds, dims_c, dims_g, transpose=False):
         _ds = mates(_ds)
     
         if transpose:
-            _ds = _ds.transpose().persist()
+            _ds = _ds.transpose()
     return _ds
 
 
@@ -1013,7 +1013,7 @@ def rotate_dataset(_ds, dims_c, dims_g, rev_x=False, rev_y=False, transpose=Fals
         _ds = mates(_ds)
 
         if transpose:
-           _ds = _ds.transpose().persist()
+           _ds = _ds.transpose()
     return _ds
 
 
@@ -1040,7 +1040,7 @@ def combine_list_ds(_DSlist):
             with dask.config.set(**{'array.slicing.split_large_chunks': False}):
                 _DSFacet = _DSFacet.combine_first(_DSlist[ii])
     
-        _DSFacet = mates(_DSFacet.persist())
+        _DSFacet = mates(_DSFacet)
 
     return _DSFacet
 
@@ -1070,7 +1070,7 @@ def flip_v(_ds, co_list = metrics):
             _dims = Dims(DIMS[::-1])
             if "mate" in _ds[_varName].attrs:
                 if _varName not in co_list and len(_dims.Y) == 3:  # do not change sign of grid metrics
-                    _ds[_varName] = -_ds[_varName].persist()
+                    _ds[_varName] = -_ds[_varName]
     return _ds
 
 
