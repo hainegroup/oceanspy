@@ -1040,7 +1040,7 @@ def combine_list_ds(_DSlist):
             with dask.config.set(**{'array.slicing.split_large_chunks': False}):
                 _DSFacet = _DSFacet.combine_first(_DSlist[ii])
     
-        _DSFacet = mates(_DSFacet.persis())
+        _DSFacet = mates(_DSFacet.persist())
 
     return _DSFacet
 
