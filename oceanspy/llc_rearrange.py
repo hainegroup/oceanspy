@@ -299,6 +299,7 @@ class LLCtransformation:
         FACETS = shift_list_ds(FACETS, dims_c.X, dims_g.X)
         DSFacet12 = combine_list_ds(FACETS).persist()
 
+        del DSFacet1, DSFacet2
 
         # ===== 
         # Facet 3
@@ -323,10 +324,11 @@ class LLCtransformation:
         FACETS = shift_list_ds(FACETS, dims_c.X, dims_g.X)
         DSFacet34 = combine_list_ds(FACETS).persist()
 
-        # ===== 
-        # combining all facets
-        # ===== 
+        del DSFacet3, DSFacet4
 
+        # =====
+        # combining all facets
+        # =====
 
         if centered == 'Pacific':
             FACETS = [DSFacet34, DSFacet12]  # centered on Pacific ocean
@@ -337,6 +339,8 @@ class LLCtransformation:
 
         FACETS = shift_list_ds(FACETS, dims_c.X, dims_g.X)
         DS = combine_list_ds(FACETS).isel(X = slice(0, -1), Y = slice(0, -1)).persist()
+
+        del DSFacet34, DSFacet12
 
         return DS
 
