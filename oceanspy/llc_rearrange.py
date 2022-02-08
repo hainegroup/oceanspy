@@ -22,12 +22,14 @@ class LLCtransformation:
         transformation,
         centered="Atlantic",
         faces="all",
+        chunks=None,
         drop=False,
     ):
         self._ds = ds  # xarray.DataSet
         self._varlist = varlist  # variables names to be transformed
         self._transformation = transformation  # str - type of transf
         self._centered = centered  # str - where to be centered
+        self._chunks = chunks  # dict - determining the relevant chunking of the dataset.
         self._faces = faces  # faces involved in transformation
 
     @classmethod
@@ -37,6 +39,7 @@ class LLCtransformation:
         varlist,
         centered="Arctic",
         faces="all",
+        chunks=None,
         drop=False,
     ):
         """Transforms the dataset by removing faces as a dimension, into a
@@ -174,6 +177,7 @@ class LLCtransformation:
         varlist,
         centered,
         faces="all",
+        chunks=None,
         drop=False,
     ):
         """Transforms the dataset in which `face` appears as a dimension into
@@ -340,7 +344,8 @@ class LLCtransformation:
         DS = combine_list_ds(FACETS).isel(X = slice(0, -1), Y = slice(0, -1))
 
         # rechunk data. In the ECCO data this is done automatically
-        DS = DS.chunk({'Z':Nz, 'Zu':Nz, 'Zl':Nz, 'Zp1':Nz + 1})
+        if chunks:
+            DS = DS.chunk(chunks)#.persist()
 
         return DS
 
@@ -353,6 +358,7 @@ class LLCtransformation:
         centered,
         faces=[2, 6, 10],
         drop=False,
+        chunks=None,
     ):
         """Transforms the dataset in which `face` appears as a dimension into
         one without faces, with grids and variables sharing a common grid
@@ -452,7 +458,8 @@ class LLCtransformation:
         DS = combine_list_ds(FACETS).isel(X = slice(0, -1), Y = slice(0, -1))
 
         # rechunk data. In the ECCO data this is done automatically
-        DS = DS.chunk({'Z':Nz, 'Zu':Nz, 'Zl':Nz, 'Zp1':Nz + 1})
+        if chunks:
+            DS = DS.chunk(chunks)#.persist()
 
 
         return DS

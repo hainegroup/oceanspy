@@ -61,6 +61,7 @@ def cutout(
     dropAxes=False,
     transformation=False,
     centered="Atlantic",
+    chunks=None,
 ):
     """
     Cutout the original dataset in space and time
@@ -370,6 +371,7 @@ def cutout(
                 "centered": centered,
                 "faces": faces,
                 "drop": True,  # required to calculate U-V grid points
+                "chunks": chunks,
             }
             if transformation == "arctic_crown":
                 _transformation = _llc_trans.arctic_crown
