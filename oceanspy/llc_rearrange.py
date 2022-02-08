@@ -201,6 +201,7 @@ class LLCtransformation:
 
         Nx = len(ds[dims_c.X])
         Ny = len(ds[dims_c.Y])
+        Nz = len(ds['Z'])  # length of array in vertical
 
 
         nrot_faces, Nx_nrot, Ny_nrot, rot_faces, Nx_rot, Ny_rot = face_connect(
@@ -338,6 +339,9 @@ class LLCtransformation:
         FACETS = shift_list_ds(FACETS, dims_c.X, dims_g.X)
         DS = combine_list_ds(FACETS).isel(X = slice(0, -1), Y = slice(0, -1))
 
+        # rechunk data. In the ECCO data this is done automatically
+        DS = DS.chunk({'Z':Nz, 'Zu':Nz, 'Zl':Nz, 'Zp1':Nz + 1})
+
         return DS
 
 
@@ -364,6 +368,7 @@ class LLCtransformation:
         dims_c = Dims(DIMS_c[::-1])  # j, i format
         dims_g = Dims(DIMS_g[::-1])
 
+        Nz = len(ds['Z'])  # length of array in vertical
 
 #   ========================== Begin transformation =================
         # First the Arctic crown
@@ -445,6 +450,10 @@ class LLCtransformation:
 
         FACETS = shift_list_ds(FACETS, dims_c.X, dims_g.X)
         DS = combine_list_ds(FACETS).isel(X = slice(0, -1), Y = slice(0, -1))
+
+        # rechunk data. In the ECCO data this is done automatically
+        DS = DS.chunk({'Z':Nz, 'Zu':Nz, 'Zl':Nz, 'Zp1':Nz + 1})
+
 
         return DS
 
