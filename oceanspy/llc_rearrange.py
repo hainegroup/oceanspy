@@ -995,7 +995,7 @@ def shift_list_ds(_DS, dims_c, dims_g, Ni, facet=1):
     """
     if facet in [1, 2]:
         facs = [0.5, 1, 1, 1]
-    elif facet in [3, 4]:
+    elif facet in [3, 4, 12, 34]:
         facs = [1, 1, 1, 1]
     if len(_DS) > 1:
         dim0 = 0
