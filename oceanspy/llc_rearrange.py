@@ -967,7 +967,7 @@ def shift_dataset(_ds, dims_c, dims_g):
     if type(_ds) == _dstype:  # if a dataset transform otherwise pass
         for _dim in [dims_c, dims_g]:
             _ds['n' + _dim] = _ds[_dim] - int(_ds[_dim][0].data)
-        _ds = _ds.swap_dims({_dim: 'n' + _dim}).drop_vars([_dim]).rename({'n' + _dim: _dim})
+            _ds = _ds.swap_dims({_dim: 'n' + _dim}).drop_vars([_dim]).rename({'n' + _dim: _dim})
     
         _ds = mates(_ds)
     return _ds
@@ -1035,7 +1035,7 @@ def rotate_dataset(_ds, dims_c, dims_g, rev_x=False, rev_y=False, transpose=Fals
 
 
 def shift_list_ds(_DS, dims_c, dims_g):
-    """given a list of n-datasets, each element of the list gets along the dimensions provided (dims_c and dims_g) so that there is
+    """given a list of n-datasets, each element of the list gets shifted along the dimensions provided (dims_c and dims_g) so that there is
     no overlap between them.
     """
     if len(_DS) > 1:
