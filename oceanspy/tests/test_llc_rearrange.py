@@ -10,6 +10,8 @@ from oceanspy.llc_rearrange import (
     arct_connect,
     shift_dataset,
     rotate_dataset,
+    mates,
+    rotate_vars,
 )
 
 Datadir = "./oceanspy/tests/Data/"
@@ -203,4 +205,20 @@ def test_rotate_dataset(ds, var, dimc, dimg, rot_dims):
         assert nvar.dims == rot_dims
     
 
+
+@pytest.mark.parametrize(
+    "ds, var, dims0, rot_dims",
+    [
+        (od.dataset.isel(face=2), 'T', ('time', 'Z', 'Y', 'X'), ('time', 'Z', 'Y', 'X')),
+        (od.dataset.isel(face=2), 'U', ('time', 'Z', 'Y', 'Xp1'), ('time', 'Z', 'Yp1', 'X')),
+        (od.dataset.isel(face=2), 'V', ('time', 'Z', 'Yp1', 'X'), ('time', 'Z', 'Y', 'Xp1')),
+        (mates(ds2), 'V', ('time', 'Z', 'Yp1', 'X'), ('time', 'Z', 'Y', 'Xp1')),
+    ]
+)
+
+def test_rotate_vars(ds, var, dims0, rot_dims):
+    nds = rotate_vars(ds)
+    if type(ds) == _dstype:
+        nvar = nds[var]
+        assert nvar.dims == rot_dims
 
