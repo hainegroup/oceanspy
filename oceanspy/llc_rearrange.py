@@ -289,7 +289,7 @@ class LLCtransformation:
         Facet3 = []
         Facet4 = []
 
-        for k in np.arange(13):
+        for k in _np.arange(13):
             if k in _faces:
                 if k in _facet1:
                     Facet1.append(ds.isel(face=k)) #
