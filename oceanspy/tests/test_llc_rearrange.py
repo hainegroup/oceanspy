@@ -8,6 +8,7 @@ from oceanspy.llc_rearrange import Dims
 from oceanspy.llc_rearrange import LLCtransformation as LLC
 from oceanspy.llc_rearrange import (
     arct_connect,
+    shift_dataset,
 )
 
 Datadir = "./oceanspy/tests/Data/"
@@ -35,23 +36,6 @@ def test_original_dims(od, var, expected):
 
 
 faces = [k for k in range(13)]
-nrot_expected = [0, 1, 2, 3, 4, 5]
-rot_expected = [7, 8, 9, 10, 11, 12]
-
-
-@pytest.mark.parametrize(
-    "od, faces, nrot_expected, rot_expected",
-    [
-        (od, faces, nrot_expected, rot_expected),
-        (od, faces[3:6], nrot_expected[3:6], []),
-        (od, faces[8:11], [], rot_expected[1:4]),
-    ],
-)
-def test_face_connect(od, faces, nrot_expected, rot_expected):
-    ds = od._ds
-    nrot_faces, a, b, rot_faces, *nn = face_connect(ds, faces)
-    assert nrot_faces == nrot_expected
-    assert rot_faces == rot_expected
 
 
 expected = [2, 5, 7, 10]  # most faces that connect with arctic cap face=6
@@ -151,4 +135,51 @@ def test_transformation(od, faces, varlist, transf, centered, drop, X0, X1, Y0, 
     assert xf == X1
     assert yi == Y0
     assert yf == Y1
+
+
+
+DIMS_c = [dim for dim in od.dataset['XC'].dims if dim not in ["face"]]
+DIMS_g = [dim for dim in od.dataset['XG'].dims if dim not in ["face"]]
+dims_c = Dims(DIMS_c[::-1])
+dims_g = Dims(DIMS_g[::-1])
+
+ds2=[]
+ds5=[]
+ds7=[]
+ds10=[]
+ARCT = [ds2, ds5, ds7, ds10]
+varlist = ['T', 'U', 'V']
+# create dataset
+for var_name in varlist:
+    *nnn, DS = arct_connect(od.dataset, var_name, faces='all')  # horizontal only
+    ARCT[0].append(DS[0])
+    ARCT[1].append(DS[1])
+    ARCT[2].append(DS[2])
+    ARCT[3].append(DS[3])
+for i in range(len(ARCT)):  # Not all faces survive the cutout
+    if type(ARCT[i][0]) == _datype:
+        ARCT[i] = _xr.merge(ARCT[i])
+
+ds2, ds5, ds7, ds10 = ARCT
+
+
+@pytest.mark.parametrize(
+    "ds, dimc, dimg, init_c, final_c, init_g, final_g",
+    [
+        (ds2, dims_c.X, dims_g.X, [0, 44], [0, 44], [0, 44], [0, 44]),
+        (ds7, dims_c.X, dims_g.X, [45, 89], [0, 44], [45, 89], [0, 44]),
+        (ds5, dims_c.Y, dims_g.Y, [0, 44], [0, 44], [0, 44], [0, 44]),
+        (ds10, dims_c.Y, dims_g.Y, [45, 89], [0, 44], [45, 89], [0, 44]),
+    ]
+)
+
+def test_shift_dataset(ds, dimc, dimg, init_c, final_c, init_g, final_g):
+    nds = shift_dataset(ds, dimc, dimg)
+    assert [int(ds[dimc][0].values), int(ds[dimc][-1].values)] == init_c
+    assert [int(ds[dimg][0].values), int(ds[dimg][-1].values)] == init_g
+
+    assert [int(nds[dimc][0].values), int(nds[dimc][-1].values)] == final_c
+    assert [int(nds[dimg][0].values), int(nds[dimg][-1].values)] == final_g
+
+    
 

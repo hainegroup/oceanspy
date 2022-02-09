@@ -71,11 +71,6 @@ class LLCtransformation:
         Ny = len(ds[dims_c.Y])
         Nz = len(ds['Z'])  # length of array in vertical
 
-
-        nrot_faces, Nx_nrot, Ny_nrot, rot_faces, Nx_rot, Ny_rot = face_connect(
-            ds, faces
-        )
-
         if isinstance(varlist, list):
             varName = varlist[0]
         elif isinstance(varlist, str):
@@ -617,22 +612,6 @@ def combine_list_ds(_DSlist):
         _DSFacet = mates(_DSFacet)
 
     return _DSFacet
-
-
-
-def shift_ocean(_ds, dims_c, dims_g):
-    """Shifts the entire dataset 180 in longitude, recentering the maps on either the Atlantic or the Pacific ocean"""
-    
-    Nij = int(len(_ds[dims_c]) / 2)
-    _ds = _ds.roll({dims_c: Nij, dims_g:Nij})
-    phase = 0 * _np.arange(len(_ds['i']))
-    phase[:Nij] = -int(Nij)
-    phase[Nij:] = int(Nij)
-    for _dim  in [dims_c, dims_g]:
-        _ds['n'+_dim] = _ds[_dim] + phase
-        _ds = _ds.swap_dims({_dim:'n'+_dim}).drop_vars([_dim]).rename({'n'+_dim:_dim})
-    return _ds
-
 
 
 def flip_v(_ds, co_list = metrics):
