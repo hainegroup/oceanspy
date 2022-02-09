@@ -328,13 +328,15 @@ class LLCtransformation:
         DSFacet1 = combine_list_ds(Facet1)
         DSFacet1 = rotate_vars(DSFacet1)
         DSFacet1 = rotate_dataset(DSFacet1, dims_c, dims_g, rev_x=False, rev_y=True, transpose=True, nface=int(3.5 * Nx))
-        for _var in DSFacet1.variables:
-            if len(DSFacet1[_var].dims) > 2:
-                DIMS = [dim for dim in DSFacet1[_var].dims]
-                _dims = Dims(DIMS[::-1])
-                dtr = list(_dims)
-                dtr[-2], dtr[-1] = dtr[-1], dtr[-2]
-                DSFacet1[_var] = DSFacet1[_var].transpose(*dtr)
+
+        if type(DSFacet2) == _dstype:
+            for _var in DSFacet1.variables:
+                if len(DSFacet1[_var].dims) > 2:
+                    DIMS = [dim for dim in DSFacet1[_var].dims]
+                    _dims = Dims(DIMS[::-1])
+                    dtr = list(_dims)
+                    dtr[-2], dtr[-1] = dtr[-1], dtr[-2]
+                    DSFacet1[_var] = DSFacet1[_var].transpose(*dtr)
         DSFacet1 = flip_v(DSFacet1)
 
         # ===== 
@@ -344,13 +346,15 @@ class LLCtransformation:
         DSFacet2 = combine_list_ds(Facet2)
         DSFacet2 = rotate_dataset(DSFacet2, dims_c, dims_g, rev_x=False, rev_y=True, transpose=True, nface=int(3.5 * Nx))
         DSFacet2 = rotate_vars(DSFacet2)
-        for _var in DSFacet2.variables:
-            if len(DSFacet2[_var].dims) > 2:
-                DIMS = [dim for dim in DSFacet2[_var].dims]
-                _dims = Dims(DIMS[::-1])
-                dtr = list(_dims)
-                dtr[-2], dtr[-1] = dtr[-1], dtr[-2]
-                DSFacet2[_var] = DSFacet2[_var].transpose(*dtr)
+
+        if type(DSFacet2) == _dstype:
+            for _var in DSFacet2.variables:
+                if len(DSFacet2[_var].dims) > 2:
+                    DIMS = [dim for dim in DSFacet2[_var].dims]
+                    _dims = Dims(DIMS[::-1])
+                    dtr = list(_dims)
+                    dtr[-2], dtr[-1] = dtr[-1], dtr[-2]
+                    DSFacet2[_var] = DSFacet2[_var].transpose(*dtr)
         DSFacet2 = flip_v(DSFacet2)
 
         # ===== 
