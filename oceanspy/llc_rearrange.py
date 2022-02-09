@@ -1029,7 +1029,6 @@ def rotate_dataset(_ds, dims_c, dims_g, rev_x=False, rev_y=False, transpose=Fals
                 y0 = nface - 1
 
         for _dimx, _dimy in [[dims_c.X, dims_c.Y], [dims_g.X, dims_g.Y]]:
-#             print(fac_y, y0)
             _ds['n' + _dimx] = fac_x * _ds[_dimy] + x0
             _ds['n' + _dimy] = fac_y * _ds[_dimx] + y0
 
@@ -1060,7 +1059,7 @@ def shift_list_ds(_DS, dims_c, dims_g, Ni, facet=1):
             else:
                 for _dim  in [dims_c, dims_g]:
                     dim0 = int(_DS[ii-1][_dim][-1].data + 1) # shift by the previous dataset. If there is no dataset to be merged, the shift is still done.
-            if type(_DS[ii]) == xr.core.dataset.Dataset:
+            if type(_DS[ii]) == _dstype = _xr.core.dataset.Dataset:
                 for _dim  in [dims_c, dims_g]:
                     _DS[ii]['n' + _dim] = _DS[ii][_dim] - int(_DS[ii][_dim][0].data) + dim0
                     _DS[ii] = _DS[ii].swap_dims({_dim:'n'+_dim}).drop_vars([_dim]).rename({'n'+_dim:_dim})
