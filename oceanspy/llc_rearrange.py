@@ -398,7 +398,7 @@ class LLCtransformation:
         else:
             raise ValueError("this is not an option. Choose between `Atlantic` or `Pacific`.")
 
-        FACETS = shift_list_ds(FACETS, dims_c.X, dims_g.X, 2 * Nx)
+        FACETS = shift_list_ds(FACETS, dims_c.X, dims_g.X, 2 * Nx, facet=1234)
         DS = combine_list_ds(FACETS)
 
         if drop:
