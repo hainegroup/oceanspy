@@ -1059,7 +1059,7 @@ def shift_list_ds(_DS, dims_c, dims_g, Ni, facet=1):
             else:
                 for _dim  in [dims_c, dims_g]:
                     dim0 = int(_DS[ii-1][_dim][-1].data + 1) # shift by the previous dataset. If there is no dataset to be merged, the shift is still done.
-            if type(_DS[ii]) == _dstype = _xr.core.dataset.Dataset:
+            if type(_DS[ii]) == _dstype:
                 for _dim  in [dims_c, dims_g]:
                     _DS[ii]['n' + _dim] = _DS[ii][_dim] - int(_DS[ii][_dim][0].data) + dim0
                     _DS[ii] = _DS[ii].swap_dims({_dim:'n'+_dim}).drop_vars([_dim]).rename({'n'+_dim:_dim})
