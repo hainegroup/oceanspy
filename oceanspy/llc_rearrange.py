@@ -866,7 +866,7 @@ def arct_connect(ds, varName, faces='all'):
                 mask_arg = {dims.X: xslice, dims.Y: yslice}
                 arct = fac * ds[_varName].isel(**da_arg)
                 Mask = mask7.isel(**mask_arg)
-                arct = (arct * Mask).transpose(*dtr)
+                arct = (arct * Mask) # .transpose(*dtr)  this makes it compatible with new code
                 ARCT[2] = arct
 
             elif k == 10:
