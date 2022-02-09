@@ -257,6 +257,14 @@ class LLCtransformation:
                 ARCT[i] = _xr.merge(ARCT[i])
 
         DSa2, DSa5, DSa7, DSa10 = ARCT
+        if type(DSa2) != _dstype:  # if there is no dataset pass a zero value
+            DSa2 = 0
+        if type(DSa5) != _dstype:
+            DSa5 = 0
+        if type(DSa7) != _dstype:
+            DSa7 = 0
+        if type(DSa10) != _dstype:
+            DSa10 = 0
 
         # next lines only work if the whole dataset is being transformed. 
 
@@ -270,39 +278,70 @@ class LLCtransformation:
         DSa2 = rotate_vars(DSa2)
 
         # ===== 
+        # Determine the facets involved in the cutout
+        _facet1 = [k for k in range(7, 10)]
+        _facet2 = [k for k in range(10, 13)]
+        _facet3 = [k for k in range(3)]
+        _facet4 = [k for k in range(3, 6)]
+
+        Facet1 = []
+        Facet2 = []
+        Facet3 = []
+        Facet4 = []
+
+        for k in np.arange(13):
+            if k in _faces:
+                if k in _facet1:
+                    Facet1.append(ds.isel(face=k)) #
+                elif k in _facet2:
+                    Facet2.append(ds.isel(face=k))
+                elif k in _facet3:
+                    Facet3.append(ds.isel(face=k))
+                elif k in _facet4:
+                    Facet4.append(ds.isel(face=k))
+            else:
+                if k in _facet1:
+                    Facet1.append(0)
+                elif k in _facet2:
+                    Facet2.append(0)
+                elif k in _facet3:
+                    Facet3.append(0)
+                elif k in _facet4:
+                    Facet4.append(0)
+
+        # ===== 
+        # Below are list for each facets containin either zero of a surviving face.
+
+        Facet1 = [DSa7] + Facet1
+        Facet2 = [DSa10] + Facet2
+        Facet3.append(DSa2)
+        Facet4.append(DSa5)
+
+        # ===== 
         # Facet 1 
-        # involves faces [7, 8, 9] + arctic
 
-        Facet1 = [DSa7, ds.isel(face=7), ds.isel(face=8), ds.isel(face=9)]
-        Facet1 = shift_list_ds(Facet1, dims_c.X, dims_g.X)
+        Facet1 = shift_list_ds(Facet1, dims_c.X, dims_g.X, Nx)  # Nx = Ny size of dim
+
         DSFacet1 = combine_list_ds(Facet1)
-
-        DSFacet1 = rotate_dataset(DSFacet1, dims_c, dims_g, rev_x=False, rev_y=False, transpose=False)
-        DSFacet1 = reverse_dataset(DSFacet1, dims_c.Y, dims_g.Y)
         DSFacet1 = rotate_vars(DSFacet1)
-        DSFacet1 = flip_v(DSFacet1)  # has correct orientation and data layout. This correct the orientation of the v-vectors.
-
+        DSFacet1 = flip_v(DSFacet1)
+        DSFacet1 = rotate_dataset(DSFacet1, dims_c, dims_g, rev_x=False, rev_y=True, transpose=True, nface=int(3.5 * Nx))
 
         # ===== 
         # Facet 2
-        # involves faces [10, 11, 12] + arctic
 
-        Facet2 = [DSa10, ds.isel(face=10), ds.isel(face=11), ds.isel(face=12)]
-        Facet2 = shift_list_ds(Facet2, dims_c.X, dims_g.X)
+        Facet2 = shift_list_ds(Facet2, dims_c.X, dims_g.X, Nx)
         DSFacet2 = combine_list_ds(Facet2)
-        DSFacet2 = rotate_dataset(DSFacet2, dims_c, dims_g)
-
-        DSFacet2 = reverse_dataset(DSFacet2, dims_c.Y, dims_g.Y, transpose=False)
+        DSFacet2 = rotate_dataset(DSFacet2, dims_c, dims_g, rev_x=False, rev_y=True, transpose=True, nface=int(3.5 * Nx))
         DSFacet2 = rotate_vars(DSFacet2)
-        DSFacet2 = flip_v(DSFacet2)  # has correct orientation and data layout. This correct the orientation of the v-vectors.
-
+        DSFacet2 = flip_v(DSFacet2)
 
         # ===== 
         # combining Facet 1 & 2
         # ===== 
 
         FACETS = [DSFacet1, DSFacet2]
-        FACETS = shift_list_ds(FACETS, dims_c.X, dims_g.X)
+        FACETS = shift_list_ds(FACETS, dims_c.X, dims_g.X, Nx)
         DSFacet12 = combine_list_ds(FACETS)
 
         del DSFacet1, DSFacet2
@@ -311,15 +350,12 @@ class LLCtransformation:
         # Facet 3
         # involves faces [0, 1, 2] + arctic
 
-        Facet3 = [ds.isel(face=0), ds.isel(face=1), ds.isel(face=2), DSa2]
-        Facet3 = shift_list_ds(Facet3, dims_c.Y, dims_g.Y)
+        Facet3 = shift_list_ds(Facet3, dims_c.Y, dims_g.Y, Nx, facet=3)
         DSFacet3 = combine_list_ds(Facet3)
 
         # ===== 
         # Facet 4
-        # involves faces [3, 4, 5] + arctic
-        Facet4 = [ds.isel(face=3), ds.isel(face=4), ds.isel(face=5), DSa5] 
-        Facet4 = shift_list_ds(Facet4, dims_c.Y, dims_g.Y)
+        Facet4 = shift_list_ds(Facet4, dims_c.Y, dims_g.Y, Nx, facet=4)
         DSFacet4 = combine_list_ds(Facet4)
 
         # ===== 
@@ -327,7 +363,7 @@ class LLCtransformation:
         # ===== 
 
         FACETS = [DSFacet3, DSFacet4]
-        FACETS = shift_list_ds(FACETS, dims_c.X, dims_g.X)
+        FACETS = shift_list_ds(FACETS, dims_c.X, dims_g.X, Nx)
         DSFacet34 = combine_list_ds(FACETS)
 
         # =====
@@ -341,7 +377,7 @@ class LLCtransformation:
         else:
             raise ValueError("this is not an option. Choose between `Atlantic` or `Pacific`.")
 
-        FACETS = shift_list_ds(FACETS, dims_c.X, dims_g.X)
+        FACETS = shift_list_ds(FACETS, dims_c.X, dims_g.X, 2*Np)
         DS = combine_list_ds(FACETS).isel(X = slice(0, -1), Y = slice(0, -1))
 
         # rechunk data. In the ECCO data this is done automatically
