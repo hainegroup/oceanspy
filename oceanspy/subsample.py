@@ -359,7 +359,7 @@ def cutout(
             faces = "all"
         else:
             faces = list(dmaskH["face"].values)  # gets faces that survives cutout
-        _transf_list = ["arctic_crown", "arctic_centered"]
+        _transf_list = ["arctic_crown"]
         if transformation in _transf_list:
             arg = {
                 "ds": ds,
@@ -371,8 +371,6 @@ def cutout(
             }
             if transformation == "arctic_crown":
                 _transformation = _llc_trans.arctic_crown
-            elif transformation == "arctic_centered":
-                _transformation = _llc_trans.arctic_centered
             dsnew = _transformation(**arg)
             dsnew = dsnew.set_coords(co_list)
             grid_coords = od.grid_coords
