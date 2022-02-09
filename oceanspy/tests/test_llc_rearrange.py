@@ -9,6 +9,7 @@ from oceanspy.llc_rearrange import LLCtransformation as LLC
 from oceanspy.llc_rearrange import (
     arct_connect,
     shift_dataset,
+    rotate_dataset,
 )
 
 Datadir = "./oceanspy/tests/Data/"
@@ -181,5 +182,25 @@ def test_shift_dataset(ds, dimc, dimg, init_c, final_c, init_g, final_g):
     assert [int(nds[dimc][0].values), int(nds[dimc][-1].values)] == final_c
     assert [int(nds[dimg][0].values), int(nds[dimg][-1].values)] == final_g
 
+
+
+@pytest.mark.parametrize(
+    "ds, var, dimc, dimg, rot_dims",
+    [
+        (od.dataset.isel(face=6), "T", dims_c, dims_g, ('time', 'Z', 'X', 'Y')),
+        (od.dataset.isel(face=6), "U", dims_c, dims_g, ('time', 'Z', 'X', 'Yp1')),
+        (od.dataset.isel(face=6), "V", dims_c, dims_g, ('time', 'Z', 'Xp1', 'Y')),
+        (0, 'T', dims_c, dims_g, ('time', 'Z', 'X', 'Y')),
+        ('string', 'T', dims_c, dims_g, ('time', 'Z', 'X', 'Y')),
+    ]
+)
+
+
+def test_rotate_dataset(ds, var, dimc, dimg, rot_dims):
+    nds = rotate_dataset(ds, dimc, dimg)
+    if type(ds) == _dstype:
+        nvar = nds[var]
+        assert nvar.dims == rot_dims
     
+
 
