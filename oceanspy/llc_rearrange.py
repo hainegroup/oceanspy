@@ -227,6 +227,9 @@ class LLCtransformation:
         elif len(varlist) == 0:
             raise ValueError("Empty list of variables")
 
+        drop_list = [var for var in ds.variables if var not in ds.dims and var not in varlist]
+        ds = ds.drop_vars(drop_list)
+
         # determine the faces involved in the cutout
 
 #   ========================== Begin transformation =================
