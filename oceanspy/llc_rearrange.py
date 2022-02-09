@@ -993,10 +993,14 @@ def shift_list_ds(_DS, dims_c, dims_g, Ni, facet=1):
     """given a list of n-datasets, each element of the list gets shifted along the dimensions provided (dims_c and dims_g) so that there is
     no overlap between them.
     """
+    fac = 1
     if facet in [1, 2]:
         facs = [0.5, 1, 1, 1]
     elif facet in [3, 4, 12, 34, 1234]:
         facs = [1, 1, 1, 1]
+    elif facet == 1234:
+        facs = [1, 1, 1, 1]
+        fac = 0  # only here.
     if len(_DS) > 1:
         dim0 = 0
         for ii in range(1, len(_DS)):
@@ -1007,7 +1011,7 @@ def shift_list_ds(_DS, dims_c, dims_g, Ni, facet=1):
                     dim0 = int(_DS[ii-1][_dim][-1].data + 1) # shift by the previous dataset. If there is no dataset to be merged, the shift is still done.
             if type(_DS[ii]) == _dstype:
                 for _dim  in [dims_c, dims_g]:
-                    _DS[ii]['n' + _dim] = _DS[ii][_dim] - int(_DS[ii][_dim][0].data) + dim0
+                    _DS[ii]['n' + _dim] = _DS[ii][_dim] - (fac * int(_DS[ii][_dim][0].data)) + dim0
                     _DS[ii] = _DS[ii].swap_dims({_dim:'n'+_dim}).drop_vars([_dim]).rename({'n'+_dim:_dim})
         DS = []
         for l in range(len(_DS)):
