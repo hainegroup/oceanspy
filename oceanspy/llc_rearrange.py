@@ -968,7 +968,7 @@ def shift_dataset(_ds, dims_c, dims_g):
         for _dim in [dims_c, dims_g]:
             _ds['n' + _dim] = _ds[_dim] - int(_ds[_dim][0].data)
             _ds = _ds.swap_dims({_dim: 'n' + _dim}).drop_vars([_dim]).rename({'n' + _dim: _dim})
-    
+
         _ds = mates(_ds)
     return _ds
 
@@ -993,7 +993,7 @@ def reverse_dataset(_ds, dims_c, dims_g, transpose=False):
 
 
 
-def rotate_dataset(_ds, dims_c, dims_g, rev_x=False, rev_y=False, transpose=False):
+def rotate_dataset(_ds, dims_c, dims_g, rev_x=False, rev_y=False, transpose=False, nface=1):
     """ Rotates a dataset along its horizontal dimensions (e.g. center and corner). It can also shift the dataset along a dimension, 
     reserve its orientaton and transpose the whole dataset.
 
@@ -1001,10 +1001,12 @@ def rotate_dataset(_ds, dims_c, dims_g, rev_x=False, rev_y=False, transpose=Fals
 
     dims_c = [dims_c.X, dims_c.Y]
     dims_c = [dims_g.X, dims_g.Y]
+    
+    nface=1: flag. A single dataset is being manipulated.
+    nface=int: correct number to use. This is the case a merger/concatenated dataset is being manipulated. Nij is no longer the size of the face. 
 
     """
     if type(_ds) == _dstype:  # if a dataset transform otherwise pass
-
         Nij = max(len(_ds[dims_c.X]), len(_ds[dims_c.Y]))  # max number of points of a face. If ECCO data, Nij  = 90. If LLC4320, Nij=4320
 
         if rev_x is False:
@@ -1012,15 +1014,22 @@ def rotate_dataset(_ds, dims_c, dims_g, rev_x=False, rev_y=False, transpose=Fals
             x0 = 0
         elif rev_x is True:
             fac_x = -1
-            x0 = Nij - 1
+            if nface == 1:
+                x0 = int(Nij) - 1
+            else:
+                X0 = nface
         if rev_y is False:
             fac_y = 1
             y0 = 0
         elif rev_y is True:
             fac_y = -1
-            y0 = Nij - 1
+            if nface == 1:
+                y0 = int(Nij) - 1
+            else:
+                y0 = nface - 1
 
         for _dimx, _dimy in [[dims_c.X, dims_c.Y], [dims_g.X, dims_g.Y]]:
+#             print(fac_y, y0)
             _ds['n' + _dimx] = fac_x * _ds[_dimy] + x0
             _ds['n' + _dimy] = fac_y * _ds[_dimx] + y0
 
@@ -1032,6 +1041,7 @@ def rotate_dataset(_ds, dims_c, dims_g, rev_x=False, rev_y=False, transpose=Fals
         if transpose:
            _ds = _ds.transpose()
     return _ds
+
 
 
 def shift_list_ds(_DS, dims_c, dims_g, Ni, facet=1):
