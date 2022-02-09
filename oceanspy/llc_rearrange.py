@@ -1055,7 +1055,7 @@ def shift_list_ds(_DS, dims_c, dims_g, Ni, facet=1):
         dim0 = 0
         for ii in range(1, len(_DS)):
             if type(_DS[ii-1]) == int:
-                dim0 = int(Ni * facs[ii-1] * (ii))
+                dim0 = int(Ni * sum(facs[:ii]))
             else:
                 for _dim  in [dims_c, dims_g]:
                     dim0 = int(_DS[ii-1][_dim][-1].data + 1) # shift by the previous dataset. If there is no dataset to be merged, the shift is still done.
