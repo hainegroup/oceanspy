@@ -377,7 +377,7 @@ class LLCtransformation:
         else:
             raise ValueError("this is not an option. Choose between `Atlantic` or `Pacific`.")
 
-        FACETS = shift_list_ds(FACETS, dims_c.X, dims_g.X, 2*Np)
+        FACETS = shift_list_ds(FACETS, dims_c.X, dims_g.X, 2 * Nx)
         DS = combine_list_ds(FACETS).isel(X = slice(0, -1), Y = slice(0, -1))
 
         # rechunk data. In the ECCO data this is done automatically
