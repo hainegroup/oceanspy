@@ -329,7 +329,7 @@ class LLCtransformation:
         DSFacet1 = rotate_vars(DSFacet1)
         DSFacet1 = rotate_dataset(DSFacet1, dims_c, dims_g, rev_x=False, rev_y=True, transpose=True, nface=int(3.5 * Nx))
 
-        if type(DSFacet2) == _dstype:
+        if type(DSFacet1) == _dstype:
             for _var in DSFacet1.variables:
                 if len(DSFacet1[_var].dims) > 2:
                     DIMS = [dim for dim in DSFacet1[_var].dims]
