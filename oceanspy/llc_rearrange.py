@@ -1066,9 +1066,19 @@ def shift_list_ds(_DS, dims_c, dims_g, Ni, facet=1):
 
 def combine_list_ds(_DSlist):
     """ combines a list of n-datasets"""
+    if len(_DSlist)==0:
+        _DSFacet = 0  # No dataset to combine. Return empty  
     if len(_DSlist) == 1:  # a single face
         _DSFacet = _DSlist[0]
-    if len(_DSlist) > 1:
+    elif len(_DSlist) == 2:
+        if type(_DSlist[0])==int:  # one is empty, pass directly
+            DS_Facet = _DSlist[1]            
+        elif type(_DSlist[1])==int: # the other is empty pass directly
+            DS_Facet = _DSlist[0] 
+        else:  # if there are two datasets then combine
+            with dask.config.set(**{'array.slicing.split_large_chunks': False}):
+                _DSFacet = _DSlist[0].combine_first(_DSlist[1])
+    if len(_DSlist) > 2:
         _DSFacet = _DSlist[0]
         for ii in range(1, len(_DSlist)):
             with dask.config.set(**{'array.slicing.split_large_chunks': False}):
