@@ -303,38 +303,6 @@ def test_make_chunks(faces, rot, NX, NY, expCX, expCY, epx, epy, epax, epay):
     assert epax == pxarc
 
 
-transf = ["arctic_crown"]
-cent = ["Atlantic", "Pacific"]
-varlist = ["T", "U", "V"]
-
-
-@pytest.mark.parametrize(
-    "od, faces, varlist, transf, centered, drop, expNX, expNY",
-    [
-        (od, [2, 6, 10], "all", transf[0], cent[0], True, 179, 134),
-        (od, [2, 5, 6, 7, 10], "T", transf[0], cent[0], False, 360, 135),
-        (od, faces[:6], "T", transf[0], cent[0], False, 180, 270),
-    ],
-)
-def test_transformation(od, faces, varlist, transf, centered, drop, expNX, expNY):
-    ds = od._ds.reset_coords()
-    args = {
-        "ds": ds,
-        "varlist": varlist,
-        "centered": centered,
-        "faces": faces,
-        "drop": drop,
-    }
-    if transf == "arctic_crown":
-        _transf = LLC.arctic_crown
-    elif transf == "arctic_centered":
-        _transf = LLC.arctic_centered
-    ds = _transf(**args)
-    Nx = ds.dims["X"]
-    Ny = ds.dims["Y"]
-    assert Nx == expNX
-    assert Ny == expNY
-
 
 
 @pytest.mark.parametrize(
