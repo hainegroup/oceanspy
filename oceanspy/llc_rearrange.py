@@ -227,6 +227,7 @@ class LLCtransformation:
         elif len(varlist) == 0:
             raise ValueError("Empty list of variables")
 
+        # determine the faces involved in the cutout
 
 #   ========================== Begin transformation =================
         # First the Arctic crown
@@ -239,7 +240,7 @@ class LLCtransformation:
         for var_name in varlist:
             if 'face' in ds[var_name].dims:  # so transformation is not performed on vars that are only z or time deep
                 # print(var_name)
-                arc_faces, *nnn, DS = arct_connect(ds, var_name, faces='all')
+                arc_faces, *nnn, DS = arct_connect(ds, var_name, faces=faces)
                 ARCT[0].append(DS[0])
                 ARCT[1].append(DS[1])
                 ARCT[2].append(DS[2])
