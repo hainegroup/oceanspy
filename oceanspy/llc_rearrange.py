@@ -1065,7 +1065,7 @@ def shift_list_ds(_DS, dims_c, dims_g, Ni, facet=1):
                     _DS[ii] = _DS[ii].swap_dims({_dim:'n'+_dim}).drop_vars([_dim]).rename({'n'+_dim:_dim})
         DS = []
         for l in range(len(_DS)):
-            if type(_DS[l]) == xr.core.dataset.Dataset:
+            if type(_DS[l]) == _dstype:
                 DS.append(_DS[l])
     else:
         DS = _DS
