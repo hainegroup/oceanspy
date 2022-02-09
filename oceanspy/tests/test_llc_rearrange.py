@@ -1,5 +1,6 @@
 import numpy as _np
 import pytest
+import xarray as _xr
 
 # From OceanSpy
 from oceanspy import open_oceandataset
@@ -20,6 +21,8 @@ od = open_oceandataset.from_catalog("LLC", ECCO_url)
 Nx = od._ds.dims["X"]
 Ny = od._ds.dims["Y"]
 
+_datype = _xr.core.dataarray.DataArray
+_dstype = _xr.core.dataset.Dataset
 
 @pytest.mark.parametrize(
     "od, var, expected",
@@ -55,28 +58,27 @@ def test_face_connect(od, faces, nrot_expected, rot_expected):
     assert rot_faces == rot_expected
 
 
-expected = [2, 5, 7, 10]  # faces that connect with arctic cap face=6
+expected = [2, 5, 7, 10]  # most faces that connect with arctic cap face=6
 acshape = (Nx // 2, Ny)
 
 
 @pytest.mark.parametrize(
-    "od, faces, expected, acshape",
+    "od, faces, expected, atype",
     [
-        (od, faces, expected, acshape),
-        (od, faces[:2], [], []),
-        (od, faces[:6], [], []),
-        (od, [0, 1, 2, 6], expected[:1], acshape),
-        (od, faces[:7], expected[:2], acshape),
-        (od, faces[6:], expected[2:], acshape),
+        (od, faces, expected, _datype),
+        (od, faces[:2], [0, 0, 0, 0], int),
+        (od, faces[:6], [0, 0, 0, 0], int),
+        (od, [0, 1, 2, 6], [2, 0, 0, 0], _datype),
+        (od, faces[:7], [2, 5, 0, 0], _datype),
+        (od, faces[6:], [0, 0, 7, 10], int),
     ],
 )
 def test_arc_connect(od, faces, expected, acshape):
     ds = od._ds
-    arc_faces, *a, ARCT = arct_connect(ds, "XG", faces)
+    arc_faces, *a, DS = arct_connect(ds, "XG", faces)
     assert arc_faces == expected
-    assert len(ARCT) == len(expected)
-    if len(ARCT) > 0:
-        assert ARCT[0].shape == acshape  # arctic crown
+    if len(DS) > 0:
+        assert type(DS[0]) == atype
 
 
 @pytest.mark.parametrize(
