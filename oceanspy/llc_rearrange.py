@@ -81,16 +81,6 @@ class LLCtransformation:
         elif len(varlist) == 0:
             raise ValueError("Empty list of variables")
 
-        # drop_list = [
-        #     var for var in ds.variables if var not in ds.dims and var not in varlist
-        # ]
-        # ds = ds.drop_vars(drop_list)
-
-        # determine the faces involved in the cutout
-
-        #   ========================== Begin transformation =================
-        # First the Arctic crown
-
         dsa2 = []
         dsa5 = []
         dsa7 = []
@@ -98,7 +88,7 @@ class LLCtransformation:
         ARCT = [dsa2, dsa5, dsa7, dsa10]
 
         for var_name in varlist:
-            if ("face" in ds[var_name].dims):
+            if "face" in ds[var_name].dims:
                 arc_faces, *nnn, DS = arct_connect(ds, var_name, faces=faces)
                 ARCT[0].append(DS[0])
                 ARCT[1].append(DS[1])
@@ -127,11 +117,13 @@ class LLCtransformation:
 
         DSa7 = shift_dataset(DSa7, dims_c.X, dims_g.X)
 
-        DSa10 = shift_dataset(DSa10, dims_c.Y, dims_g.Y) 
+        DSa10 = shift_dataset(DSa10, dims_c.Y, dims_g.Y)
         DSa10 = rotate_dataset(DSa10, dims_c, dims_g, rev_x=False, rev_y=True)
         DSa10 = rotate_vars(DSa10)
 
-        DSa2 = rotate_dataset(DSa2, dims_c, dims_g, rev_x=True, rev_y=False, transpose=True)
+        DSa2 = rotate_dataset(
+            DSa2, dims_c, dims_g, rev_x=True, rev_y=False, transpose=True
+        )
         DSa2 = rotate_vars(DSa2)
 
         # =====
@@ -456,7 +448,8 @@ def mates(ds):
 
 
 def rotate_vars(_ds):
-    """using the attribures `mates`, when this function is called it swaps the variables names. This issue is only applicable to llc grid in which the
+    """using the attribures `mates`, when this function is called it swaps the variables names.
+    This issue is only applicable to llc grid in which the
     grid topology makes it so that u on a rotated face transforms to `+- v` on a lat lon grid.
     """
     if type(_ds) == _dstype:  # if a dataset transform otherwise pass
@@ -472,9 +465,9 @@ def rotate_vars(_ds):
 
 
 def shift_dataset(_ds, dims_c, dims_g):
-    """shifts a dataset along a dimension, setting its first element to zero. Need to provide the dimensions in the form
-    of [center, corner] points. This rotation is only used in the horizontal, and so dims_c is either one of `i`  or `j`, and
-    dims_g is either one of `i_g` or `j_g`. The pair most correspond to the same dimension.
+    """shifts a dataset along a dimension, setting its first element to zero. Need to provide the dimensions in the
+    form of [center, corner] points. This rotation is only used in the horizontal, and so dims_c is either one of `i`
+    or `j`, and dims_g is either one of `i_g` or `j_g`. The pair most correspond to the same dimension.
 
     _ds: dataset
 
@@ -499,8 +492,8 @@ def shift_dataset(_ds, dims_c, dims_g):
 
 def reverse_dataset(_ds, dims_c, dims_g, transpose=False):
     """reverses the dataset along a dimension. Need to provide the dimensions in the form
-    of [center, corner] points. This rotation is only used in the horizontal, and so dims_c is either one of `i`  or `j`, and
-    dims_g is either one of `i_g` or `j_g`. The pair most correspond to the same dimension."""
+    of [center, corner] points. This rotation is only used in the horizontal, and so dims_c is either one of `i`  or
+    `j`, and dims_g is either one of `i_g` or `j_g`. The pair most correspond to the same dimension."""
 
     if type(_ds) == _dstype:  # if a dataset transform otherwise pass
         _ds = _copy.deepcopy(_ds)
@@ -523,8 +516,8 @@ def reverse_dataset(_ds, dims_c, dims_g, transpose=False):
 def rotate_dataset(
     _ds, dims_c, dims_g, rev_x=False, rev_y=False, transpose=False, nface=1
 ):
-    """Rotates a dataset along its horizontal dimensions (e.g. center and corner). It can also shift the dataset along a dimension,
-    reserve its orientaton and transpose the whole dataset.
+    """Rotates a dataset along its horizontal dimensions (e.g. center and corner). It can also shift the dataset
+    along a dimension, reserve its orientaton and transpose the whole dataset.
 
     _ds : dataset
 
@@ -532,7 +525,8 @@ def rotate_dataset(
     dims_c = [dims_g.X, dims_g.Y]
 
     nface=1: flag. A single dataset is being manipulated.
-    nface=int: correct number to use. This is the case a merger/concatenated dataset is being manipulated. Nij is no longer the size of the face.
+    nface=int: correct number to use. This is the case a merger/concatenated dataset is being manipulated. Nij is no
+        longer the size of the face.
 
     """
     if type(_ds) == _dstype:  # if a dataset transform otherwise pass
@@ -577,8 +571,8 @@ def rotate_dataset(
 
 
 def shift_list_ds(_DS, dims_c, dims_g, Ni, facet=1):
-    """given a list of n-datasets, each element of the list gets shifted along the dimensions provided (dims_c and dims_g) so that there is
-    no overlap between them.
+    """given a list of n-datasets, each element of the list gets shifted along the dimensions provided (dims_c and dims_g)
+    so that there is no overlap between them.
     """
     _DS = _copy.deepcopy(_DS)
     fac = 1
@@ -596,9 +590,7 @@ def shift_list_ds(_DS, dims_c, dims_g, Ni, facet=1):
                 dim0 = int(Ni * sum(facs[:ii]))
             else:
                 for _dim in [dims_c, dims_g]:
-                    dim0 = int(
-                        _DS[ii - 1][_dim][-1].data + 1
-                    )  # shift by the previous dataset. If there is no dataset to be merged, the shift is still done.
+                    dim0 = int(_DS[ii - 1][_dim][-1].data + 1)
             if type(_DS[ii]) == _dstype:
                 for _dim in [dims_c, dims_g]:
                     _DS[ii]["n" + _dim] = (
@@ -651,7 +643,7 @@ def flip_v(_ds, co_list=metrics):
             DIMS = [dim for dim in _ds[_varName].dims if dim != "face"]
             _dims = Dims(DIMS[::-1])
             if "mate" in _ds[_varName].attrs:
-                if (_varName not in co_list and len(_dims.Y) == 3):
+                if _varName not in co_list and len(_dims.Y) == 3:
                     _ds[_varName] = -_ds[_varName]
     return _ds
 
