@@ -448,9 +448,10 @@ def mates(ds):
 
 
 def rotate_vars(_ds):
-    """using the attribures `mates`, when this function is called it swaps the variables names.
-    This issue is only applicable to llc grid in which the
-    grid topology makes it so that u on a rotated face transforms to `+- v` on a lat lon grid.
+    """using the attribures `mates`, when this function is called it swaps the
+    variables names. This issue is only applicable to llc grid in which the grid
+    topology makes it so that u on a rotated face transforms to `+- v` on a lat lon
+    grid.
     """
     if type(_ds) == _dstype:  # if a dataset transform otherwise pass
         _ds = _copy.deepcopy(_ds)
@@ -465,15 +466,18 @@ def rotate_vars(_ds):
 
 
 def shift_dataset(_ds, dims_c, dims_g):
-    """shifts a dataset along a dimension, setting its first element to zero. Need to provide the dimensions in the
-    form of [center, corner] points. This rotation is only used in the horizontal, and so dims_c is either one of `i`
-    or `j`, and dims_g is either one of `i_g` or `j_g`. The pair most correspond to the same dimension.
+    """shifts a dataset along a dimension, setting its first element to zero. Need
+    to provide the dimensions in the form of [center, corner] points. This rotation
+    is only used in the horizontal, and so dims_c is either one of `i` or `j`, and
+    dims_g is either one of `i_g` or `j_g`. The pair most correspond to the same
+    dimension.
 
     _ds: dataset
 
     dims_c: string, either 'i' or 'j'
 
-    dims_g: string, either 'i_g' or 'j_g'. Should correspond to same dimension as dims_c.
+    dims_g: string, either 'i_g' or 'j_g'. Should correspond to same dimension as
+        dims_c.
 
     """
     if type(_ds) == _dstype:  # if a dataset transform otherwise pass
@@ -491,9 +495,10 @@ def shift_dataset(_ds, dims_c, dims_g):
 
 
 def reverse_dataset(_ds, dims_c, dims_g, transpose=False):
-    """reverses the dataset along a dimension. Need to provide the dimensions in the form
-    of [center, corner] points. This rotation is only used in the horizontal, and so dims_c is either one of `i`  or
-    `j`, and dims_g is either one of `i_g` or `j_g`. The pair most correspond to the same dimension."""
+    """reverses the dataset along a dimension. Need to provide the dimensions in the
+    form of [center, corner] points. This rotation is only used in the horizontal, and
+    so dims_c is either one of `i`  or `j`, and dims_g is either one of `i_g` or `j_g`.
+    The pair most correspond to the same dimension."""
 
     if type(_ds) == _dstype:  # if a dataset transform otherwise pass
         _ds = _copy.deepcopy(_ds)
@@ -516,8 +521,9 @@ def reverse_dataset(_ds, dims_c, dims_g, transpose=False):
 def rotate_dataset(
     _ds, dims_c, dims_g, rev_x=False, rev_y=False, transpose=False, nface=1
 ):
-    """Rotates a dataset along its horizontal dimensions (e.g. center and corner). It can also shift the dataset
-    along a dimension, reserve its orientaton and transpose the whole dataset.
+    """Rotates a dataset along its horizontal dimensions (e.g. center and corner). It
+    can also shift the dataset along a dimension, reserve its orientaton and transpose
+    the whole dataset.
 
     _ds : dataset
 
@@ -525,15 +531,12 @@ def rotate_dataset(
     dims_c = [dims_g.X, dims_g.Y]
 
     nface=1: flag. A single dataset is being manipulated.
-    nface=int: correct number to use. This is the case a merger/concatenated dataset is being manipulated. Nij is no
-        longer the size of the face.
-
+    nface=int: correct number to use. This is the case a merger/concatenated dataset is
+    being manipulated. Nij is no longer the size of the face.
     """
     if type(_ds) == _dstype:  # if a dataset transform otherwise pass
         _ds = _copy.deepcopy(_ds)
-        Nij = max(
-            len(_ds[dims_c.X]), len(_ds[dims_c.Y])
-        )  # max number of points of a face. If ECCO data, Nij  = 90. If LLC4320, Nij=4320
+        Nij = max(len(_ds[dims_c.X]), len(_ds[dims_c.Y]))
 
         if rev_x is False:
             fac_x = 1
@@ -571,8 +574,8 @@ def rotate_dataset(
 
 
 def shift_list_ds(_DS, dims_c, dims_g, Ni, facet=1):
-    """given a list of n-datasets, each element of the list gets shifted along the dimensions provided (dims_c and dims_g)
-    so that there is no overlap between them.
+    """given a list of n-datasets, each element of the list gets shifted along the
+    dimensions provided (dims_c and dims_g) so that there is no overlap between them.
     """
     _DS = _copy.deepcopy(_DS)
     fac = 1
