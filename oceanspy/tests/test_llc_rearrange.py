@@ -1,3 +1,4 @@
+import copy as _copy
 import numpy as _np
 import pytest
 import xarray as _xr
@@ -13,6 +14,7 @@ from oceanspy.llc_rearrange import (
     mates,
     rotate_vars,
     shift_list_ds,
+    combine_list_ds,
 )
 
 Datadir = "./oceanspy/tests/Data/"
@@ -66,13 +68,14 @@ def test_arc_connect(od, faces, expected, atype):
 
 
 transf = "arctic_crown"
-cent = ["Atlantic", "Pacific"]
+cent = ["Atlantic", "Pacific", "Arctic"]
 varlist = ["T", "U", "V", "XG", "YG"]
 
 @pytest.mark.parametrize(
     "od, faces, varlist, transf, centered, drop, X0, X1, Y0, Y1",
     [
         (od, 'all', varlist, transf, cent[0], False, 0, 359, 0, 314),
+        (od, 'all', varlist, transf, cent[2], False, 0, 359, 0, 314),
         (od, [2, 5, 6, 7, 10], varlist, transf, cent[0], False, 0, 359, 180, 314),
         (od, [2, 5, 7, 10], varlist, transf, cent[0], False, 0, 359, 180, 269),
         (od, [1, 4, 8, 11], varlist, transf, cent[0], False, 0, 359, 90, 179),
@@ -132,7 +135,8 @@ def test_transformation(od, faces, varlist, transf, centered, drop, X0, X1, Y0, 
         _transf = LLC.arctic_crown
     elif transf == "arctic_centered":
         _transf = LLC.arctic_centered
-    ds = _transf(**args)
+    with pytest.raises(ValueError):
+        ds = _transf(**args)
     xi, xf = int(ds["X"][0].values), int(ds["X"][-1].values)
     yi, yf = int(ds["Y"][0].values), int(ds["Y"][-1].values)
     assert xi == X0
@@ -262,3 +266,55 @@ def test_shift_list_ds(DSlist, dimsc, dimsg, Np, facet, expX):
         assert [int(nDSlist[0][dimsc][0].values), int(nDSlist[0][dimsc][-1].values)] == expX[0]
     else:
         assert type(nDSlist)==list
+
+
+
+list1 = [od.dataset.isel(face=0), od.dataset.isel(face=1), od.dataset.isel(face=2)]
+list2 = [0, od.dataset.isel(face=1), od.dataset.isel(face=2)]
+list3 = [0, 0, od.dataset.isel(face=3)]
+list4 = [0, od.dataset.isel(face=1), 0]
+
+nlist1x = shift_list_ds(_copy.copy(list1), dims_c.X, dims_g.X, Np, facet=3)
+nlist1y = shift_list_ds(_copy.copy(list1), dims_c.Y, dims_g.Y, Np, facet=3)
+nlist2x1 = shift_list_ds(_copy.copy(list2), dims_c.X, dims_g.X, Np, facet=1)
+nlist2x2 = shift_list_ds(_copy.copy(list2), dims_c.X, dims_g.X, Np, facet=3)
+nlist2y = shift_list_ds(_copy.copy(list2), dims_c.Y, dims_g.Y, Np, facet=3)
+nlist3x = shift_list_ds(_copy.copy(list3), dims_c.X, dims_g.X, Np, facet=2)
+nlist3y = shift_list_ds(_copy.copy(list3), dims_c.Y, dims_g.Y, Np, facet=4)
+nlist4x1 = shift_list_ds(_copy.copy(list4), dims_c.X, dims_g.X, Np, facet=1)
+nlist4y1 = shift_list_ds(_copy.copy(list4), dims_c.Y, dims_g.Y, Np, facet=1)
+nlist4x4 = shift_list_ds(_copy.copy(list4), dims_c.X, dims_g.X, Np, facet=1234)
+nlist4y4 = shift_list_ds(_copy.copy(list4), dims_c.Y, dims_g.Y, Np, facet=4)
+
+
+
+
+@pytest.mark.parametrize(
+    "DSlist, lenX, lenY, x0, x1, y0, y1",
+    [
+        (list1, int(Np), int(Np), 0, 89, 0, 89),
+        (nlist1x, int(3*Np), int(Np), 0, 269, 0, 89),
+        (nlist1y, int(Np), int(3*Np), 0, 89, 0, 269),
+        (nlist2x1, int(2 * Np), int(Np), 45, 224, 0, 89),
+        (nlist2x2, int(2 * Np), int(Np), 90, 269, 0, 89),
+        (nlist2y, int(Np), int(2*Np), 0, 89, 90, 269),
+        (nlist3x, int(Np), int(Np), 135, 224, 0, 89),
+        (nlist3y, int(Np), int(Np), 0, 89, 180, 269),
+        (nlist4x1, int(Np), int(Np), 45, 134, 0, 89),
+        (nlist4y1, int(Np), int(Np), 0, 89, 45, 134),
+        (nlist4x4, int(Np), int(Np), 90, 179, 0, 89),
+        (nlist4y4, int(Np), int(Np), 0, 89, 90, 179),
+    ]
+)
+
+
+def test_combine_list_ds(DSlist, lenX, lenY, x0, x1, y0, y1):
+    nDSlist = combine_list_ds(DSlist)
+    assert len(nDSlist.X) == lenX
+    assert len(nDSlist.Y) == lenY
+    assert [int(nDSlist.X[0].values), int(nDSlist.X[-1].values)] == [x0, x1]
+    assert [int(nDSlist.Y[0].values), int(nDSlist.Y[-1].values)] == [y0, y1]
+    
+
+
+

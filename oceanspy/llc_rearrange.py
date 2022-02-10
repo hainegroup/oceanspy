@@ -265,7 +265,7 @@ class LLCtransformation:
 
         # rechunk data. In the ECCO data this is done automatically
         if chunks:
-            DS = DS.chunk(chunks)#.persist()
+            DS = DS.chunk(chunks)
 
         return DS
 
