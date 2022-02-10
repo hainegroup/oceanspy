@@ -12,6 +12,7 @@ from oceanspy.llc_rearrange import (
     rotate_dataset,
     mates,
     rotate_vars,
+    shift_list_ds,
 )
 
 Datadir = "./oceanspy/tests/Data/"
@@ -222,3 +223,42 @@ def test_rotate_vars(ds, var, dims0, rot_dims):
         nvar = nds[var]
         assert nvar.dims == rot_dims
 
+
+
+list1 = [od.dataset.isel(face=0), od.dataset.isel(face=1), od.dataset.isel(face=2)]
+list2 = [0, od.dataset.isel(face=1), od.dataset.isel(face=2)]
+list3 = [0, 0, od.dataset.isel(face=3)]
+list4 = [0, 0, 0]
+list5 = [0, od.dataset.isel(face=1), 0]
+
+Np = len(od.dataset[dims_c.X])
+
+@pytest.mark.parametrize(
+    "DSlist, dimsc, dimsg, Np, facet, expX",
+    [
+        (list1, dims_c.X, dims_g.X, Np, 3, [[0, Np - 1], [Np, int(2*Np) - 1], [int(2*Np), int(3*Np)-1]]),
+        (list2, dims_c.X, dims_g.X, Np, 3, [[Np, 2*Np-1], [2*Np, 3*Np-1]]),
+        (list3, dims_c.X, dims_g.X, Np, 3, [[2*Np, 3*Np-1]]),
+        (list1, dims_c.X, dims_g.X, Np, 1, [[0, Np-1], [Np, 2*Np-1], [2*Np, 3*Np-1]]),
+        (list2, dims_c.X, dims_g.X, Np, 1, [[int(Np/2), int(1.5*Np)-1], [int(1.5*Np), int(2.5*Np)-1]]),
+        (list3, dims_c.X, dims_g.X, Np, 1, [[int(1.5*Np), int(2.5*Np)-1]]),
+        (list1, dims_c.Y, dims_g.Y, Np, 3, [[0, Np-1], [Np, 2*Np-1], [2*Np, 3*Np-1]]),
+        (list2, dims_c.Y, dims_g.Y, Np, 3, [[Np, 2*Np-1], [2*Np, 3*Np-1]]),
+        (list3, dims_c.Y, dims_g.Y, Np, 3, [[2*Np, 3*Np-1]]),
+        (list1, dims_c.Y, dims_g.Y, Np, 1, [[0, Np-1], [Np, 2*Np-1], [2*Np, 3*Np-1]]),
+        (list2, dims_c.Y, dims_g.Y, Np, 1, [[int(Np/2), int(1.5*Np)-1], [int(1.5*Np), int(2.5*Np)-1]]),
+        (list3, dims_c.Y, dims_g.Y, Np, 1, [[int(1.5*Np), int(2.5*Np)-1]]),
+        (list4, dims_c.Y, dims_g.Y, Np, 1, [0, 0, 0]),
+        (list5, dims_c.Y, dims_g.Y, Np, 3, [[int(Np), int(2*Np) - 1]]),
+        (list5, dims_c.X, dims_g.X, Np, 3, [[int(Np), int(2*Np) - 1]]),
+        (list5, dims_c.X, dims_g.X, Np, 2, [[int(Np/2), int(1.5*Np) - 1]]),
+    ]
+)
+
+def test_shift_list_ds(DSlist, dimsc, dimsg, Np, facet, expX):
+    nDSlist = shift_list_ds(DSlist, dimsc, dimsg, Np, facet)
+    if len(nDSlist) > 0:
+        assert len(nDSlist) == len(expX)
+        assert [int(nDSlist[0][dimsc][0].values), int(nDSlist[0][dimsc][-1].values)] == expX[0]
+    else:
+        assert type(nDSlist)==list
