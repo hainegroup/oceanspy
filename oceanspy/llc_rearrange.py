@@ -1,6 +1,6 @@
+import copy as _copy
 import reprlib
 
-import copy as _copy
 import dask
 import numpy as _np
 import xarray as _xr
@@ -672,7 +672,7 @@ def flip_v(_ds, co_list=metrics):
                 if (
                     _varName not in co_list and len(_dims.Y) == 3
                 ):  # do not change sign of grid metrics
-                    _ds[_varName] = -_copy.deepcopy(_ds[_varName])
+                    _ds[_varName] = -_ds[_varName]
     return _ds
 
 
