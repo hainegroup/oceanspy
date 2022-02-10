@@ -177,7 +177,7 @@ class LLCtransformation:
                 if k in _facet1:
                     faces1.append(0)
                 elif k in _facet2:
-                    Faces2.append(0)
+                    faces2.append(0)
                 elif k in _facet3:
                     faces3.append(0)
                 elif k in _facet4:
@@ -186,7 +186,7 @@ class LLCtransformation:
         # =====
         # Below are list for each facets containin either zero of a surviving face.
 
-        faces1 = [DSa7] + Faces1
+        faces1 = [DSa7] + faces1
         faces2 = [DSa10] + faces2
         faces3.append(DSa2)
         faces4.append(DSa5)
