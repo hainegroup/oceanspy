@@ -6,7 +6,7 @@ import numpy as _np
 import xarray as _xr
 
 # metric variables defined at vector points, defined as global within this file
-metrics = ["dxC", "dyC", "dxG", "dyG", "hFacW", "hFacS"]
+metrics = ["dxC", "dyC", "dxG", "dyG", "hFacW", "hFacS", "rAs", "rAw", "maskS", "maskW"]
 
 
 _datype = _xr.core.dataarray.DataArray
@@ -651,7 +651,6 @@ def flip_v(_ds, co_list=metrics):
             DIMS = [dim for dim in _ds[_varName].dims if dim != "face"]
             _dims = Dims(DIMS[::-1])
             if "mate" in _ds[_varName].attrs:
-                print(_varName, _dims)
                 if (_varName not in co_list and len(_dims.Y) == 3):
                     _ds[_varName] = -_ds[_varName]
     return _ds

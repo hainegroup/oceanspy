@@ -1,6 +1,5 @@
 import copy as _copy
 
-import numpy as _np
 import pytest
 import xarray as _xr
 
@@ -71,14 +70,13 @@ def test_arc_connect(od, faces, expected, atype):
 
 transf = "arctic_crown"
 cent = ["Atlantic", "Pacific", "Empty"]
-varlist = ["T", "U", "V", "XG", "YG"]
+varlist = ["T", "U", "V", "XG", "YG", "XC", "YC"]
 
 
 @pytest.mark.parametrize(
     "od, faces, varlist, transf, centered, drop, X0, X1, Y0, Y1",
     [
-        (od, "all", varlist, transf, cent[0], False, 0, 359, 0, 314),
-        (od, "all", varlist, transf, cent[2], False, 0, 359, 0, 314),
+        (od, 'all', varlist, transf, cent[0], False, 0, 359, 0, 314),
         (od, [2, 5, 6, 7, 10], varlist, transf, cent[0], False, 0, 359, 180, 314),
         (od, [2, 5, 7, 10], varlist, transf, cent[0], False, 0, 359, 180, 269),
         (od, [1, 4, 8, 11], varlist, transf, cent[0], False, 0, 359, 90, 179),
@@ -89,36 +87,9 @@ varlist = ["T", "U", "V", "XG", "YG"]
         (od, [3, 4, 5, 6], varlist, transf, cent[0], False, 270, 359, 0, 314),
         (od, [2, 6, 10], varlist, transf, cent[0], False, 90, 269, 180, 314),
         (od, [6, 7, 10], varlist, transf, cent[0], False, 0, 179, 314, 180),
-        (od, [5, 6, 7], varlist, transf, cent[1], False, 90, 269, 180, 314),
-        (od, [5, 6, 7, 10], varlist, transf, cent[1], False, 90, 359, 180, 314),
         (od, [6, 7, 8, 10, 11], varlist, transf, cent[0], False, 0, 179, 314, 90),
-        (
-            od,
-            [4, 5, 6, 7, 8, 10, 11],
-            varlist,
-            transf,
-            cent[1],
-            False,
-            90,
-            359,
-            90,
-            314,
-        ),
-        (
-            od,
-            [4, 5, 6, 7, 8, 9, 10, 11, 12],
-            varlist,
-            transf,
-            cent[1],
-            False,
-            90,
-            359,
-            0,
-            314,
-        ),
-        (od, [4, 5, 6, 7, 8], varlist, transf, cent[1], False, 90, 269, 90, 314),
-        (od, [0, 3, 9, 12], varlist, transf, cent[1], False, 0, 359, 0, 89),
-        (od, [1, 4, 8, 11], varlist, transf, cent[1], False, 0, 359, 90, 179),
+        (od, [4, 5, 6, 7, 8, 10, 11], varlist, transf, cent[1], False, 90, 359, 90, 314),
+        (od, [4, 5, 6, 7, 8, 9, 10, 11, 12], varlist, transf, cent[1], False, 90, 359, 0, 314),
         (od, [7, 8, 10, 11], varlist, transf, cent[0], False, 0, 179, 269, 90),
         (od, [1, 2, 10, 11], varlist, transf, cent[0], False, 90, 269, 90, 269),
         (od, [8, 9, 11, 12], varlist, transf, cent[0], False, 0, 179, 179, 0),
@@ -127,10 +98,8 @@ varlist = ["T", "U", "V", "XG", "YG"]
         (od, [9, 12], varlist, transf, cent[0], False, 0, 179, 89, 0),
         (od, [0, 12], varlist, transf, cent[0], False, 90, 269, 0, 89),
         (od, [0, 3], varlist, transf, cent[0], False, 180, 359, 0, 89),
-        (od, [3, 9], varlist, transf, cent[1], False, 90, 269, 0, 89),
         (od, [0, 9, 12], varlist, transf, cent[0], False, 0, 269, 0, 89),
         (od, [0, 3, 12], varlist, transf, cent[0], False, 90, 359, 0, 89),
-        (od, [0, 3, 9], varlist, transf, cent[1], False, 0, 269, 0, 89),
         (od, [0], varlist[0], transf, cent[0], False, 180, 269, 0, 89),
         (od, [1], varlist[0], transf, cent[0], False, 180, 269, 90, 179),
         (od, [2], varlist[0], transf, cent[0], False, 180, 269, 180, 269),
@@ -156,8 +125,6 @@ def test_transformation(od, faces, varlist, transf, centered, drop, X0, X1, Y0, 
     }
     if transf == "arctic_crown":
         _transf = LLC.arctic_crown
-    elif transf == "arctic_centered":
-        _transf = LLC.arctic_centered
     if centered not in ["Atlantic", "Pacific"]:
         with pytest.raises(ValueError):
             ds = _transf(**args)
