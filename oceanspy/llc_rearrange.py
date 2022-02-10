@@ -194,9 +194,9 @@ class LLCtransformation:
         # =====
         # Facet 1
 
-        Facet1 = shift_list_ds(Facet1, dims_c.X, dims_g.X, Nx)  # Nx = Ny size of dim
+        fFacet1 = shift_list_ds(Facet1, dims_c.X, dims_g.X, Nx)  # Nx = Ny size of dim
 
-        DSFacet1 = combine_list_ds(Facet1)
+        DSFacet1 = combine_list_ds(fFacet1)
         DSFacet1 = rotate_vars(DSFacet1)
         DSFacet1 = rotate_dataset(
             DSFacet1,
@@ -221,8 +221,8 @@ class LLCtransformation:
         # =====
         # Facet 2
 
-        Facet2 = shift_list_ds(Facet2, dims_c.X, dims_g.X, Nx)
-        DSFacet2 = combine_list_ds(Facet2)
+        fFacet2 = shift_list_ds(Facet2, dims_c.X, dims_g.X, Nx)
+        DSFacet2 = combine_list_ds(fFacet2)
         DSFacet2 = rotate_dataset(
             DSFacet2,
             dims_c,
@@ -249,8 +249,8 @@ class LLCtransformation:
         # =====
 
         FACETS = [DSFacet1, DSFacet2]
-        FACETS = shift_list_ds(FACETS, dims_c.X, dims_g.X, Nx, facet=12)
-        DSFacet12 = combine_list_ds(FACETS)
+        fFACETS = shift_list_ds(FACETS, dims_c.X, dims_g.X, Nx, facet=12)
+        DSFacet12 = combine_list_ds(fFACETS)
 
         del DSFacet1, DSFacet2
 
@@ -258,21 +258,21 @@ class LLCtransformation:
         # Facet 3
         # involves faces [0, 1, 2] + arctic
 
-        Facet3 = shift_list_ds(Facet3, dims_c.Y, dims_g.Y, Nx, facet=3)
-        DSFacet3 = combine_list_ds(Facet3)
+        fFacet3 = shift_list_ds(Facet3, dims_c.Y, dims_g.Y, Nx, facet=3)
+        DSFacet3 = combine_list_ds(fFacet3)
 
         # =====
         # Facet 4
-        Facet4 = shift_list_ds(Facet4, dims_c.Y, dims_g.Y, Nx, facet=4)
-        DSFacet4 = combine_list_ds(Facet4)
+        fFacet4 = shift_list_ds(Facet4, dims_c.Y, dims_g.Y, Nx, facet=4)
+        DSFacet4 = combine_list_ds(fFacet4)
 
         # =====
         # combining Facet 3 & 4
         # =====
 
         FACETS = [DSFacet3, DSFacet4]
-        FACETS = shift_list_ds(FACETS, dims_c.X, dims_g.X, Nx, facet=34)
-        DSFacet34 = combine_list_ds(FACETS)
+        fFACETS = shift_list_ds(FACETS, dims_c.X, dims_g.X, Nx, facet=34)
+        DSFacet34 = combine_list_ds(fFACETS)
 
         # =====
         # combining all facets
@@ -283,8 +283,8 @@ class LLCtransformation:
         elif centered == "Atlantic":
             FACETS = [DSFacet12, DSFacet34]  # centered at Atlantic ocean
 
-        FACETS = shift_list_ds(FACETS, dims_c.X, dims_g.X, 2 * Nx, facet=1234)
-        DS = combine_list_ds(FACETS)
+        fFACETS = shift_list_ds(FACETS, dims_c.X, dims_g.X, 2 * Nx, facet=1234)
+        DS = combine_list_ds(fFACETS)
 
         if drop:
             DS = DS.isel(X=slice(0, -1), Y=slice(0, -1))
