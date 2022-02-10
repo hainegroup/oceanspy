@@ -480,6 +480,7 @@ def rotate_vars(_ds):
     grid topology makes it so that u on a rotated face transforms to `+- v` on a lat lon grid.
     """
     if type(_ds) == _dstype:  # if a dataset transform otherwise pass
+        _ds = _copy.copy(_ds)
         _vars = [var for var in _ds.variables]
         rot_names = {}
         for v in _vars:
@@ -503,6 +504,7 @@ def shift_dataset(_ds, dims_c, dims_g):
 
     """
     if type(_ds) == _dstype:  # if a dataset transform otherwise pass
+        _ds = _copy.copy(_ds)
         for _dim in [dims_c, dims_g]:
             _ds["n" + _dim] = _ds[_dim] - int(_ds[_dim][0].data)
             _ds = (
@@ -521,6 +523,7 @@ def reverse_dataset(_ds, dims_c, dims_g, transpose=False):
     dims_g is either one of `i_g` or `j_g`. The pair most correspond to the same dimension."""
 
     if type(_ds) == _dstype:  # if a dataset transform otherwise pass
+        _ds = _copy.copy(_ds)
 
         for _dim in [dims_c, dims_g]:  # This part should be different for j_g points?
             _ds["n" + _dim] = -_ds[_dim] + int(_ds[_dim][-1].data)
@@ -553,6 +556,7 @@ def rotate_dataset(
 
     """
     if type(_ds) == _dstype:  # if a dataset transform otherwise pass
+        _ds = _copy.copy(_ds)
         Nij = max(
             len(_ds[dims_c.X]), len(_ds[dims_c.Y])
         )  # max number of points of a face. If ECCO data, Nij  = 90. If LLC4320, Nij=4320
@@ -596,6 +600,7 @@ def shift_list_ds(_DS, dims_c, dims_g, Ni, facet=1):
     """given a list of n-datasets, each element of the list gets shifted along the dimensions provided (dims_c and dims_g) so that there is
     no overlap between them.
     """
+    _DS = _copy.copy(_DS)
     fac = 1
     if facet in [1, 2]:
         facs = [0.5, 1, 1, 1]
@@ -649,10 +654,10 @@ def combine_list_ds(_DSlist):
             with dask.config.set(**{"array.slicing.split_large_chunks": False}):
                 _DSFacet = _DSlist[0].combine_first(_DSlist[1])
     elif len(_DSlist) > 2:
-        _DSFacet = _DSlist[0]
+        _DSFacet = _copy.copy(_DSlist[0])
         for ii in range(1, len(_DSlist)):
             with dask.config.set(**{"array.slicing.split_large_chunks": False}):
-                _DSFacet = _DSFacet.combine_first(_DSlist[ii])
+                _DSFacet = _DSFacet.combine_first(_copy.copy(_DSlist[ii]))
 
         _DSFacet = mates(_DSFacet)
 
@@ -669,7 +674,7 @@ def flip_v(_ds, co_list=metrics):
                 if (
                     _varName not in co_list and len(_dims.Y) == 3
                 ):  # do not change sign of grid metrics
-                    _ds[_varName] = -_ds[_varName]
+                    _ds[_varName] = -_copy.copy(_ds[_varName])
     return _ds
 
 
