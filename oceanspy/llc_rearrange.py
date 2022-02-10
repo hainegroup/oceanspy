@@ -237,7 +237,6 @@ class LLCtransformation:
 
         # =====
         # Facet 3
-        # involves faces [0, 1, 2] + arctic
 
         fFacet3 = shift_list_ds(faces3, dims_c.Y, dims_g.Y, Nx, facet=3)
         DSFacet3 = combine_list_ds(fFacet3)
@@ -647,14 +646,13 @@ def combine_list_ds(_DSlist):
 
 def flip_v(_ds, co_list=metrics):
     """reverses the sign of the velocity field v."""
-    if type(_ds) == _dstype:  # if a dataset transform otherwise pass
+    if type(_ds) == _dstype:
         for _varName in _ds.variables:
             DIMS = [dim for dim in _ds[_varName].dims if dim != "face"]
             _dims = Dims(DIMS[::-1])
             if "mate" in _ds[_varName].attrs:
-                if (
-                    _varName not in co_list and len(_dims.Y) == 3
-                ):  # do not change sign of grid metrics
+                print(_varName, _dims)
+                if (_varName not in co_list and len(_dims.Y) == 3):
                     _ds[_varName] = -_ds[_varName]
     return _ds
 
