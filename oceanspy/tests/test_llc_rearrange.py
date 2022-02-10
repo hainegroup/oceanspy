@@ -68,7 +68,7 @@ def test_arc_connect(od, faces, expected, atype):
 
 
 transf = "arctic_crown"
-cent = ["Atlantic", "Pacific", "Arctic"]
+cent = ["Atlantic", "Pacific", "Empty"]
 varlist = ["T", "U", "V", "XG", "YG"]
 
 @pytest.mark.parametrize(
@@ -105,7 +105,7 @@ varlist = ["T", "U", "V", "XG", "YG"]
         (od, [3, 9], varlist, transf, cent[1], False, 90, 269, 0, 89),
         (od, [0, 9, 12], varlist, transf, cent[0], False, 0, 269, 0, 89),
         (od, [0, 3, 12], varlist, transf, cent[0], False, 90, 359, 0, 89),
-        (od, [0, 3, 9], varlist, transf, cent[1], False, 0, 269, 0, 89),        
+        (od, [0, 3, 9], varlist, transf, cent[1], False, 0, 269, 0, 89),      
         (od, [0], varlist[0], transf, cent[0], False, 180, 269, 0, 89),
         (od, [1], varlist[0], transf, cent[0], False, 180, 269, 90, 179),
         (od, [2], varlist[0], transf, cent[0], False, 180, 269, 180, 269),
@@ -135,14 +135,17 @@ def test_transformation(od, faces, varlist, transf, centered, drop, X0, X1, Y0, 
         _transf = LLC.arctic_crown
     elif transf == "arctic_centered":
         _transf = LLC.arctic_centered
-    with pytest.raises(ValueError):
+    if centered not in ["Atlantic", "Pacific"]:
+        with pytest.raises(ValueError):
+            ds = _transf(**args)
+    else:
         ds = _transf(**args)
-    xi, xf = int(ds["X"][0].values), int(ds["X"][-1].values)
-    yi, yf = int(ds["Y"][0].values), int(ds["Y"][-1].values)
-    assert xi == X0
-    assert xf == X1
-    assert yi == Y0
-    assert yf == Y1
+        xi, xf = int(ds["X"][0].values), int(ds["X"][-1].values)
+        yi, yf = int(ds["Y"][0].values), int(ds["Y"][-1].values)
+        assert xi == X0
+        assert xf == X1
+        assert yi == Y0
+        assert yf == Y1
 
 
 
