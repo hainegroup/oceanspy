@@ -58,7 +58,7 @@ class LLCtransformation:
         if isinstance(faces, str):
             faces = _np.arange(13)
 
-        ds = _copy.copy(mates(ds.reset_coords()))
+        ds = _copy.deepcopy(mates(ds.reset_coords()))
 
         DIMS_c = [
             dim for dim in ds["XC"].dims if dim not in ["face"]
@@ -81,10 +81,10 @@ class LLCtransformation:
         elif len(varlist) == 0:
             raise ValueError("Empty list of variables")
 
-        drop_list = [
-            var for var in ds.variables if var not in ds.dims and var not in varlist
-        ]
-        ds = ds.drop_vars(drop_list)
+        # drop_list = [
+        #     var for var in ds.variables if var not in ds.dims and var not in varlist
+        # ]
+        # ds = ds.drop_vars(drop_list)
 
         # determine the faces involved in the cutout
 
