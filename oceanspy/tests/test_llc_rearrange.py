@@ -1,4 +1,5 @@
 import copy as _copy
+
 import numpy as _np
 import pytest
 import xarray as _xr
@@ -9,12 +10,12 @@ from oceanspy.llc_rearrange import Dims
 from oceanspy.llc_rearrange import LLCtransformation as LLC
 from oceanspy.llc_rearrange import (
     arct_connect,
-    shift_dataset,
-    rotate_dataset,
-    mates,
-    rotate_vars,
-    shift_list_ds,
     combine_list_ds,
+    mates,
+    rotate_dataset,
+    rotate_vars,
+    shift_dataset,
+    shift_list_ds,
 )
 
 Datadir = "./oceanspy/tests/Data/"
@@ -26,6 +27,7 @@ Ny = od._ds.dims["Y"]
 
 _datype = _xr.core.dataarray.DataArray
 _dstype = _xr.core.dataset.Dataset
+
 
 @pytest.mark.parametrize(
     "od, var, expected",
@@ -71,11 +73,12 @@ transf = "arctic_crown"
 cent = ["Atlantic", "Pacific", "Empty"]
 varlist = ["T", "U", "V", "XG", "YG"]
 
+
 @pytest.mark.parametrize(
     "od, faces, varlist, transf, centered, drop, X0, X1, Y0, Y1",
     [
-        (od, 'all', varlist, transf, cent[0], False, 0, 359, 0, 314),
-        (od, 'all', varlist, transf, cent[2], False, 0, 359, 0, 314),
+        (od, "all", varlist, transf, cent[0], False, 0, 359, 0, 314),
+        (od, "all", varlist, transf, cent[2], False, 0, 359, 0, 314),
         (od, [2, 5, 6, 7, 10], varlist, transf, cent[0], False, 0, 359, 180, 314),
         (od, [2, 5, 7, 10], varlist, transf, cent[0], False, 0, 359, 180, 269),
         (od, [1, 4, 8, 11], varlist, transf, cent[0], False, 0, 359, 90, 179),
@@ -89,8 +92,30 @@ varlist = ["T", "U", "V", "XG", "YG"]
         (od, [5, 6, 7], varlist, transf, cent[1], False, 90, 269, 180, 314),
         (od, [5, 6, 7, 10], varlist, transf, cent[1], False, 90, 359, 180, 314),
         (od, [6, 7, 8, 10, 11], varlist, transf, cent[0], False, 0, 179, 314, 90),
-        (od, [4, 5, 6, 7, 8, 10, 11], varlist, transf, cent[1], False, 90, 359, 90, 314),
-        (od, [4, 5, 6, 7, 8, 9, 10, 11, 12], varlist, transf, cent[1], False, 90, 359, 0, 314),
+        (
+            od,
+            [4, 5, 6, 7, 8, 10, 11],
+            varlist,
+            transf,
+            cent[1],
+            False,
+            90,
+            359,
+            90,
+            314,
+        ),
+        (
+            od,
+            [4, 5, 6, 7, 8, 9, 10, 11, 12],
+            varlist,
+            transf,
+            cent[1],
+            False,
+            90,
+            359,
+            0,
+            314,
+        ),
         (od, [4, 5, 6, 7, 8], varlist, transf, cent[1], False, 90, 269, 90, 314),
         (od, [0, 3, 9, 12], varlist, transf, cent[1], False, 0, 359, 0, 89),
         (od, [1, 4, 8, 11], varlist, transf, cent[1], False, 0, 359, 90, 179),
@@ -105,7 +130,7 @@ varlist = ["T", "U", "V", "XG", "YG"]
         (od, [3, 9], varlist, transf, cent[1], False, 90, 269, 0, 89),
         (od, [0, 9, 12], varlist, transf, cent[0], False, 0, 269, 0, 89),
         (od, [0, 3, 12], varlist, transf, cent[0], False, 90, 359, 0, 89),
-        (od, [0, 3, 9], varlist, transf, cent[1], False, 0, 269, 0, 89),      
+        (od, [0, 3, 9], varlist, transf, cent[1], False, 0, 269, 0, 89),
         (od, [0], varlist[0], transf, cent[0], False, 180, 269, 0, 89),
         (od, [1], varlist[0], transf, cent[0], False, 180, 269, 90, 179),
         (od, [2], varlist[0], transf, cent[0], False, 180, 269, 180, 269),
@@ -118,10 +143,8 @@ varlist = ["T", "U", "V", "XG", "YG"]
         (od, [10], varlist[0], transf, cent[0], False, 90, 179, 269, 180),
         (od, [11], varlist[0], transf, cent[0], False, 90, 179, 179, 90),
         (od, [12], varlist[0], transf, cent[0], False, 90, 179, 89, 0),
-    ]
+    ],
 )
-
-
 def test_transformation(od, faces, varlist, transf, centered, drop, X0, X1, Y0, Y1):
     ds = od._ds.reset_coords()
     args = {
@@ -148,21 +171,20 @@ def test_transformation(od, faces, varlist, transf, centered, drop, X0, X1, Y0, 
         assert yf == Y1
 
 
-
-DIMS_c = [dim for dim in od.dataset['XC'].dims if dim not in ["face"]]
-DIMS_g = [dim for dim in od.dataset['XG'].dims if dim not in ["face"]]
+DIMS_c = [dim for dim in od.dataset["XC"].dims if dim not in ["face"]]
+DIMS_g = [dim for dim in od.dataset["XG"].dims if dim not in ["face"]]
 dims_c = Dims(DIMS_c[::-1])
 dims_g = Dims(DIMS_g[::-1])
 
-ds2=[]
-ds5=[]
-ds7=[]
-ds10=[]
+ds2 = []
+ds5 = []
+ds7 = []
+ds10 = []
 ARCT = [ds2, ds5, ds7, ds10]
-varlist = ['T', 'U', 'V']
+varlist = ["T", "U", "V"]
 # create dataset
 for var_name in varlist:
-    *nnn, DS = arct_connect(od.dataset, var_name, faces='all')  # horizontal only
+    *nnn, DS = arct_connect(od.dataset, var_name, faces="all")  # horizontal only
     ARCT[0].append(DS[0])
     ARCT[1].append(DS[1])
     ARCT[2].append(DS[2])
@@ -181,9 +203,8 @@ ds2, ds5, ds7, ds10 = ARCT
         (ds7, dims_c.X, dims_g.X, [45, 89], [0, 44], [45, 89], [0, 44]),
         (ds5, dims_c.Y, dims_g.Y, [0, 44], [0, 44], [0, 44], [0, 44]),
         (ds10, dims_c.Y, dims_g.Y, [45, 89], [0, 44], [45, 89], [0, 44]),
-    ]
+    ],
 )
-
 def test_shift_dataset(ds, dimc, dimg, init_c, final_c, init_g, final_g):
     nds = shift_dataset(ds, dimc, dimg)
     assert [int(ds[dimc][0].values), int(ds[dimc][-1].values)] == init_c
@@ -193,43 +214,52 @@ def test_shift_dataset(ds, dimc, dimg, init_c, final_c, init_g, final_g):
     assert [int(nds[dimg][0].values), int(nds[dimg][-1].values)] == final_g
 
 
-
 @pytest.mark.parametrize(
     "ds, var, dimc, dimg, rot_dims",
     [
-        (od.dataset.isel(face=6), "T", dims_c, dims_g, ('time', 'Z', 'X', 'Y')),
-        (od.dataset.isel(face=6), "U", dims_c, dims_g, ('time', 'Z', 'X', 'Yp1')),
-        (od.dataset.isel(face=6), "V", dims_c, dims_g, ('time', 'Z', 'Xp1', 'Y')),
-        (0, 'T', dims_c, dims_g, ('time', 'Z', 'X', 'Y')),
-        ('string', 'T', dims_c, dims_g, ('time', 'Z', 'X', 'Y')),
-    ]
+        (od.dataset.isel(face=6), "T", dims_c, dims_g, ("time", "Z", "X", "Y")),
+        (od.dataset.isel(face=6), "U", dims_c, dims_g, ("time", "Z", "X", "Yp1")),
+        (od.dataset.isel(face=6), "V", dims_c, dims_g, ("time", "Z", "Xp1", "Y")),
+        (0, "T", dims_c, dims_g, ("time", "Z", "X", "Y")),
+        ("string", "T", dims_c, dims_g, ("time", "Z", "X", "Y")),
+    ],
 )
-
-
 def test_rotate_dataset(ds, var, dimc, dimg, rot_dims):
     nds = rotate_dataset(ds, dimc, dimg)
     if type(ds) == _dstype:
         nvar = nds[var]
         assert nvar.dims == rot_dims
-    
 
 
 @pytest.mark.parametrize(
     "ds, var, dims0, rot_dims",
     [
-        (od.dataset.isel(face=2), 'T', ('time', 'Z', 'Y', 'X'), ('time', 'Z', 'Y', 'X')),
-        (od.dataset.isel(face=2), 'U', ('time', 'Z', 'Y', 'Xp1'), ('time', 'Z', 'Yp1', 'X')),
-        (od.dataset.isel(face=2), 'V', ('time', 'Z', 'Yp1', 'X'), ('time', 'Z', 'Y', 'Xp1')),
-        (mates(ds2), 'V', ('time', 'Z', 'Yp1', 'X'), ('time', 'Z', 'Y', 'Xp1')),
-    ]
+        (
+            od.dataset.isel(face=2),
+            "T",
+            ("time", "Z", "Y", "X"),
+            ("time", "Z", "Y", "X"),
+        ),
+        (
+            od.dataset.isel(face=2),
+            "U",
+            ("time", "Z", "Y", "Xp1"),
+            ("time", "Z", "Yp1", "X"),
+        ),
+        (
+            od.dataset.isel(face=2),
+            "V",
+            ("time", "Z", "Yp1", "X"),
+            ("time", "Z", "Y", "Xp1"),
+        ),
+        (mates(ds2), "V", ("time", "Z", "Yp1", "X"), ("time", "Z", "Y", "Xp1")),
+    ],
 )
-
 def test_rotate_vars(ds, var, dims0, rot_dims):
     nds = rotate_vars(ds)
     if type(ds) == _dstype:
         nvar = nds[var]
         assert nvar.dims == rot_dims
-
 
 
 list1 = [od.dataset.isel(face=0), od.dataset.isel(face=1), od.dataset.isel(face=2)]
@@ -240,36 +270,80 @@ list5 = [0, od.dataset.isel(face=1), 0]
 
 Np = len(od.dataset[dims_c.X])
 
+
 @pytest.mark.parametrize(
     "DSlist, dimsc, dimsg, Np, facet, expX",
     [
-        (list1, dims_c.X, dims_g.X, Np, 3, [[0, Np - 1], [Np, int(2*Np) - 1], [int(2*Np), int(3*Np)-1]]),
-        (list2, dims_c.X, dims_g.X, Np, 3, [[Np, 2*Np-1], [2*Np, 3*Np-1]]),
-        (list3, dims_c.X, dims_g.X, Np, 3, [[2*Np, 3*Np-1]]),
-        (list1, dims_c.X, dims_g.X, Np, 1, [[0, Np-1], [Np, 2*Np-1], [2*Np, 3*Np-1]]),
-        (list2, dims_c.X, dims_g.X, Np, 1, [[int(Np/2), int(1.5*Np)-1], [int(1.5*Np), int(2.5*Np)-1]]),
-        (list3, dims_c.X, dims_g.X, Np, 1, [[int(1.5*Np), int(2.5*Np)-1]]),
-        (list1, dims_c.Y, dims_g.Y, Np, 3, [[0, Np-1], [Np, 2*Np-1], [2*Np, 3*Np-1]]),
-        (list2, dims_c.Y, dims_g.Y, Np, 3, [[Np, 2*Np-1], [2*Np, 3*Np-1]]),
-        (list3, dims_c.Y, dims_g.Y, Np, 3, [[2*Np, 3*Np-1]]),
-        (list1, dims_c.Y, dims_g.Y, Np, 1, [[0, Np-1], [Np, 2*Np-1], [2*Np, 3*Np-1]]),
-        (list2, dims_c.Y, dims_g.Y, Np, 1, [[int(Np/2), int(1.5*Np)-1], [int(1.5*Np), int(2.5*Np)-1]]),
-        (list3, dims_c.Y, dims_g.Y, Np, 1, [[int(1.5*Np), int(2.5*Np)-1]]),
+        (
+            list1,
+            dims_c.X,
+            dims_g.X,
+            Np,
+            3,
+            [[0, Np - 1], [Np, int(2 * Np) - 1], [int(2 * Np), int(3 * Np) - 1]],
+        ),
+        (list2, dims_c.X, dims_g.X, Np, 3, [[Np, 2 * Np - 1], [2 * Np, 3 * Np - 1]]),
+        (list3, dims_c.X, dims_g.X, Np, 3, [[2 * Np, 3 * Np - 1]]),
+        (
+            list1,
+            dims_c.X,
+            dims_g.X,
+            Np,
+            1,
+            [[0, Np - 1], [Np, 2 * Np - 1], [2 * Np, 3 * Np - 1]],
+        ),
+        (
+            list2,
+            dims_c.X,
+            dims_g.X,
+            Np,
+            1,
+            [[int(Np / 2), int(1.5 * Np) - 1], [int(1.5 * Np), int(2.5 * Np) - 1]],
+        ),
+        (list3, dims_c.X, dims_g.X, Np, 1, [[int(1.5 * Np), int(2.5 * Np) - 1]]),
+        (
+            list1,
+            dims_c.Y,
+            dims_g.Y,
+            Np,
+            3,
+            [[0, Np - 1], [Np, 2 * Np - 1], [2 * Np, 3 * Np - 1]],
+        ),
+        (list2, dims_c.Y, dims_g.Y, Np, 3, [[Np, 2 * Np - 1], [2 * Np, 3 * Np - 1]]),
+        (list3, dims_c.Y, dims_g.Y, Np, 3, [[2 * Np, 3 * Np - 1]]),
+        (
+            list1,
+            dims_c.Y,
+            dims_g.Y,
+            Np,
+            1,
+            [[0, Np - 1], [Np, 2 * Np - 1], [2 * Np, 3 * Np - 1]],
+        ),
+        (
+            list2,
+            dims_c.Y,
+            dims_g.Y,
+            Np,
+            1,
+            [[int(Np / 2), int(1.5 * Np) - 1], [int(1.5 * Np), int(2.5 * Np) - 1]],
+        ),
+        (list3, dims_c.Y, dims_g.Y, Np, 1, [[int(1.5 * Np), int(2.5 * Np) - 1]]),
         (list4, dims_c.Y, dims_g.Y, Np, 1, [0, 0, 0]),
-        (list5, dims_c.Y, dims_g.Y, Np, 3, [[int(Np), int(2*Np) - 1]]),
-        (list5, dims_c.X, dims_g.X, Np, 3, [[int(Np), int(2*Np) - 1]]),
-        (list5, dims_c.X, dims_g.X, Np, 2, [[int(Np/2), int(1.5*Np) - 1]]),
-    ]
+        (list5, dims_c.Y, dims_g.Y, Np, 3, [[int(Np), int(2 * Np) - 1]]),
+        (list5, dims_c.X, dims_g.X, Np, 3, [[int(Np), int(2 * Np) - 1]]),
+        (list5, dims_c.X, dims_g.X, Np, 2, [[int(Np / 2), int(1.5 * Np) - 1]]),
+    ],
 )
-
 def test_shift_list_ds(DSlist, dimsc, dimsg, Np, facet, expX):
     nDSlist = shift_list_ds(DSlist, dimsc, dimsg, Np, facet)
     if len(nDSlist) > 0:
         assert len(nDSlist) == len(expX)
-        assert [int(nDSlist[0][dimsc][0].values), int(nDSlist[0][dimsc][-1].values)] == expX[0]
+        assert [
+            int(nDSlist[0][dimsc][0].values),
+            int(nDSlist[0][dimsc][-1].values),
+        ] == expX[0]
     else:
-        assert type(nDSlist)==list
-
+        assert type(nDSlist) == list
 
 
 list1 = [od.dataset.isel(face=0), od.dataset.isel(face=1), od.dataset.isel(face=2)]
@@ -290,34 +364,26 @@ nlist4x4 = shift_list_ds(_copy.copy(list4), dims_c.X, dims_g.X, Np, facet=1234)
 nlist4y4 = shift_list_ds(_copy.copy(list4), dims_c.Y, dims_g.Y, Np, facet=4)
 
 
-
-
 @pytest.mark.parametrize(
     "DSlist, lenX, lenY, x0, x1, y0, y1",
     [
         (list1, int(Np), int(Np), 0, 89, 0, 89),
-        (nlist1x, int(3*Np), int(Np), 0, 269, 0, 89),
-        (nlist1y, int(Np), int(3*Np), 0, 89, 0, 269),
+        (nlist1x, int(3 * Np), int(Np), 0, 269, 0, 89),
+        (nlist1y, int(Np), int(3 * Np), 0, 89, 0, 269),
         (nlist2x1, int(2 * Np), int(Np), 45, 224, 0, 89),
         (nlist2x2, int(2 * Np), int(Np), 90, 269, 0, 89),
-        (nlist2y, int(Np), int(2*Np), 0, 89, 90, 269),
+        (nlist2y, int(Np), int(2 * Np), 0, 89, 90, 269),
         (nlist3x, int(Np), int(Np), 135, 224, 0, 89),
         (nlist3y, int(Np), int(Np), 0, 89, 180, 269),
         (nlist4x1, int(Np), int(Np), 45, 134, 0, 89),
         (nlist4y1, int(Np), int(Np), 0, 89, 45, 134),
         (nlist4x4, int(Np), int(Np), 90, 179, 0, 89),
         (nlist4y4, int(Np), int(Np), 0, 89, 90, 179),
-    ]
+    ],
 )
-
-
 def test_combine_list_ds(DSlist, lenX, lenY, x0, x1, y0, y1):
     nDSlist = combine_list_ds(DSlist)
     assert len(nDSlist.X) == lenX
     assert len(nDSlist.Y) == lenY
     assert [int(nDSlist.X[0].values), int(nDSlist.X[-1].values)] == [x0, x1]
     assert [int(nDSlist.Y[0].values), int(nDSlist.Y[-1].values)] == [y0, y1]
-    
-
-
-
