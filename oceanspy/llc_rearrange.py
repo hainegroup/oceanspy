@@ -1,6 +1,8 @@
 import reprlib
-import numpy as _np
+
+import copy as _copy
 import dask
+import numpy as _np
 import xarray as _xr
 
 # metric variables defined at vector points, defined as global within this file
@@ -56,7 +58,7 @@ class LLCtransformation:
         if isinstance(faces, str):
             faces = _np.arange(13)
 
-        ds = mates(ds.reset_coords())
+        ds = _copy.copy(mates(ds.reset_coords()))
 
         DIMS_c = [
             dim for dim in ds["XC"].dims if dim not in ["face"]
@@ -69,13 +71,10 @@ class LLCtransformation:
 
         Nx = len(ds[dims_c.X])
 
-        if isinstance(varlist, list):
-            varName = varlist[0]
-        elif isinstance(varlist, str):
+        if isinstance(varlist, str):
             if varlist == "all":
                 varlist = ds.data_vars
             else:
-                varName = varlist
                 varlist = [varlist]
         elif len(varlist) > 0:
             varlist = list(varlist)
@@ -295,10 +294,6 @@ class LLCtransformation:
             DS = DS.chunk(chunks)
 
         return DS
-
-
-## ==================================================================================================================
-## ==================================================================================================================
 
 
 def arct_connect(ds, varName, faces="all"):
@@ -643,17 +638,17 @@ def combine_list_ds(_DSlist):
     """combines a list of n-datasets"""
     if len(_DSlist) == 0:
         _DSFacet = 0  # No dataset to combine. Return empty
-    if len(_DSlist) == 1:  # a single face
+    elif len(_DSlist) == 1:  # a single face
         _DSFacet = _DSlist[0]
     elif len(_DSlist) == 2:
         if type(_DSlist[0]) == int:  # one is empty, pass directly
-            DS_Facet = _DSlist[1]
+            _DSFacet = _DSlist[1]
         elif type(_DSlist[1]) == int:  # the other is empty pass directly
-            DS_Facet = _DSlist[0]
+            _DSFacet = _DSlist[0]
         else:  # if there are two datasets then combine
             with dask.config.set(**{"array.slicing.split_large_chunks": False}):
                 _DSFacet = _DSlist[0].combine_first(_DSlist[1])
-    if len(_DSlist) > 2:
+    elif len(_DSlist) > 2:
         _DSFacet = _DSlist[0]
         for ii in range(1, len(_DSlist)):
             with dask.config.set(**{"array.slicing.split_large_chunks": False}):
