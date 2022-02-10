@@ -95,17 +95,10 @@ class LLCtransformation:
         dsa5 = []
         dsa7 = []
         dsa10 = []
-        ARCT = [
-            dsa2,
-            dsa5,
-            dsa7,
-            dsa10,
-        ]  # initialize with symbolic representation of how arctic connects with rest of facets
+        ARCT = [dsa2, dsa5, dsa7, dsa10]
+
         for var_name in varlist:
-            if (
-                "face" in ds[var_name].dims
-            ):  # so transformation is not performed on vars that are only z or time deep
-                # print(var_name)
+            if ("face" in ds[var_name].dims):
                 arc_faces, *nnn, DS = arct_connect(ds, var_name, faces=faces)
                 ARCT[0].append(DS[0])
                 ARCT[1].append(DS[1])
@@ -118,12 +111,12 @@ class LLCtransformation:
                 ARCT[2].append(ds[var_name])
                 ARCT[3].append(ds[var_name])
 
-        for i in range(len(ARCT)):  # Not all faces survive the cutout
-            if type(ARCT[i][0]) == _datype:  # if data array then merge into dataset
+        for i in range(len(ARCT)):
+            if type(ARCT[i][0]) == _datype:
                 ARCT[i] = _xr.merge(ARCT[i])
 
         DSa2, DSa5, DSa7, DSa10 = ARCT
-        if type(DSa2) != _dstype:  # if there is no dataset pass a zero value
+        if type(DSa2) != _dstype:
             DSa2 = 0
         if type(DSa5) != _dstype:
             DSa5 = 0
@@ -132,23 +125,13 @@ class LLCtransformation:
         if type(DSa10) != _dstype:
             DSa10 = 0
 
-        # next lines only work if the whole dataset is being transformed.
+        DSa7 = shift_dataset(DSa7, dims_c.X, dims_g.X)
 
-        DSa7 = shift_dataset(
-            DSa7, dims_c.X, dims_g.X
-        )  # shift x-axis to 0 (smaller element).
+        DSa10 = shift_dataset(DSa10, dims_c.Y, dims_g.Y) 
+        DSa10 = rotate_dataset(DSa10, dims_c, dims_g, rev_x=False, rev_y=True)
+        DSa10 = rotate_vars(DSa10)
 
-        DSa10 = shift_dataset(DSa10, dims_c.Y, dims_g.Y)  # shift in y
-        DSa10 = rotate_dataset(
-            DSa10, dims_c, dims_g, rev_x=False, rev_y=True
-        )  # rotate 90 degrees
-        DSa10 = rotate_vars(
-            DSa10
-        )  # renames variables. (u -> v and v -> u) due to rotation.
-
-        DSa2 = rotate_dataset(
-            DSa2, dims_c, dims_g, rev_x=True, rev_y=False, transpose=True
-        )  # rotate 90 degrees
+        DSa2 = rotate_dataset(DSa2, dims_c, dims_g, rev_x=True, rev_y=False, transpose=True)
         DSa2 = rotate_vars(DSa2)
 
         # =====
@@ -166,7 +149,7 @@ class LLCtransformation:
         for k in _np.arange(13):
             if k in faces:
                 if k in _facet1:
-                    faces1.append(ds.isel(face=k))  #
+                    faces1.append(ds.isel(face=k))
                 elif k in _facet2:
                     faces2.append(ds.isel(face=k))
                 elif k in _facet3:
@@ -194,7 +177,7 @@ class LLCtransformation:
         # =====
         # Facet 1
 
-        Facet1 = shift_list_ds(faces1, dims_c.X, dims_g.X, Nx)  # Nx = Ny size of dim
+        Facet1 = shift_list_ds(faces1, dims_c.X, dims_g.X, Nx)
 
         DSFacet1 = combine_list_ds(Facet1)
         DSFacet1 = rotate_vars(DSFacet1)
