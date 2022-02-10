@@ -158,45 +158,45 @@ class LLCtransformation:
         _facet3 = [k for k in range(3)]
         _facet4 = [k for k in range(3, 6)]
 
-        Facet1 = []
-        Facet2 = []
-        Facet3 = []
-        Facet4 = []
+        faces1 = []
+        faces2 = []
+        faces3 = []
+        faces4 = []
 
         for k in _np.arange(13):
             if k in faces:
                 if k in _facet1:
-                    Facet1.append(ds.isel(face=k))  #
+                    faces1.append(ds.isel(face=k))  #
                 elif k in _facet2:
-                    Facet2.append(ds.isel(face=k))
+                    faces2.append(ds.isel(face=k))
                 elif k in _facet3:
-                    Facet3.append(ds.isel(face=k))
+                    faces3.append(ds.isel(face=k))
                 elif k in _facet4:
-                    Facet4.append(ds.isel(face=k))
+                    faces4.append(ds.isel(face=k))
             else:
                 if k in _facet1:
-                    Facet1.append(0)
+                    faces1.append(0)
                 elif k in _facet2:
-                    Facet2.append(0)
+                    Faces2.append(0)
                 elif k in _facet3:
-                    Facet3.append(0)
+                    faces3.append(0)
                 elif k in _facet4:
-                    Facet4.append(0)
+                    faces4.append(0)
 
         # =====
         # Below are list for each facets containin either zero of a surviving face.
 
-        Facet1 = [DSa7] + Facet1
-        Facet2 = [DSa10] + Facet2
-        Facet3.append(DSa2)
-        Facet4.append(DSa5)
+        faces1 = [DSa7] + Faces1
+        faces2 = [DSa10] + faces2
+        faces3.append(DSa2)
+        faces4.append(DSa5)
 
         # =====
         # Facet 1
 
-        fFacet1 = shift_list_ds(Facet1, dims_c.X, dims_g.X, Nx)  # Nx = Ny size of dim
+        Facet1 = shift_list_ds(faces1, dims_c.X, dims_g.X, Nx)  # Nx = Ny size of dim
 
-        DSFacet1 = combine_list_ds(fFacet1)
+        DSFacet1 = combine_list_ds(Facet1)
         DSFacet1 = rotate_vars(DSFacet1)
         DSFacet1 = rotate_dataset(
             DSFacet1,
@@ -221,8 +221,8 @@ class LLCtransformation:
         # =====
         # Facet 2
 
-        fFacet2 = shift_list_ds(Facet2, dims_c.X, dims_g.X, Nx)
-        DSFacet2 = combine_list_ds(fFacet2)
+        Facet2 = shift_list_ds(faces2, dims_c.X, dims_g.X, Nx)
+        DSFacet2 = combine_list_ds(Facet2)
         DSFacet2 = rotate_dataset(
             DSFacet2,
             dims_c,
@@ -252,18 +252,16 @@ class LLCtransformation:
         fFACETS = shift_list_ds(FACETS, dims_c.X, dims_g.X, Nx, facet=12)
         DSFacet12 = combine_list_ds(fFACETS)
 
-        del DSFacet1, DSFacet2
-
         # =====
         # Facet 3
         # involves faces [0, 1, 2] + arctic
 
-        fFacet3 = shift_list_ds(Facet3, dims_c.Y, dims_g.Y, Nx, facet=3)
+        fFacet3 = shift_list_ds(faces3, dims_c.Y, dims_g.Y, Nx, facet=3)
         DSFacet3 = combine_list_ds(fFacet3)
 
         # =====
         # Facet 4
-        fFacet4 = shift_list_ds(Facet4, dims_c.Y, dims_g.Y, Nx, facet=4)
+        fFacet4 = shift_list_ds(faces4, dims_c.Y, dims_g.Y, Nx, facet=4)
         DSFacet4 = combine_list_ds(fFacet4)
 
         # =====
