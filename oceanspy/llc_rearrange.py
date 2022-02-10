@@ -1,16 +1,15 @@
 import reprlib
 
 import dask
-import numpy as _np
 import xarray as _xr
 
-
 # metric variables defined at vector points, defined as global within this file
-metrics = ["dxC", "dyC", "dxG", "dyG", 'hFacW', 'hFacS'] 
+metrics = ["dxC", "dyC", "dxG", "dyG", "hFacW", "hFacS"]
 
 
 _datype = _xr.core.dataarray.DataArray
 _dstype = _xr.core.dataset.Dataset
+
 
 class LLCtransformation:
     """A class containing the transformation of LLCgrids"""
@@ -29,10 +28,10 @@ class LLCtransformation:
         self._varlist = varlist  # variables names to be transformed
         self._transformation = transformation  # str - type of transf
         self._centered = centered  # str - where to be centered
-        self._chunks = chunks  # dict - determining the relevant chunking of the dataset.
+        self._chunks = (
+            chunks  # dict - determining the relevant chunking of the dataset.
+        )
         self._faces = faces  # faces involved in transformation
-
- 
 
     @classmethod
     def arctic_crown(
@@ -57,50 +56,56 @@ class LLCtransformation:
         if isinstance(faces, str):
             faces = _np.arange(13)
 
-
-        co_list = [var for var in ds.coords if var not in ds.dims]
-
         ds = mates(ds.reset_coords())
 
-        DIMS_c = [dim for dim in ds['XC'].dims if dim not in ["face"]]  # horizontal dimensions on tracer points.
-        DIMS_g = [dim for dim in ds['XG'].dims if dim not in ["face"]]  # horizontal dimensions on corner points
+        DIMS_c = [
+            dim for dim in ds["XC"].dims if dim not in ["face"]
+        ]  # horizontal dimensions on tracer points.
+        DIMS_g = [
+            dim for dim in ds["XG"].dims if dim not in ["face"]
+        ]  # horizontal dimensions on corner points
         dims_c = Dims(DIMS_c[::-1])  # j, i format
         dims_g = Dims(DIMS_g[::-1])
 
         Nx = len(ds[dims_c.X])
-        Ny = len(ds[dims_c.Y])
-        Nz = len(ds['Z'])  # length of array in vertical
 
         if isinstance(varlist, list):
             varName = varlist[0]
         elif isinstance(varlist, str):
             if varlist == "all":
                 varlist = ds.data_vars
-                varName = "XG"
             else:
                 varName = varlist
                 varlist = [varlist]
         elif len(varlist) > 0:
             varlist = list(varlist)
-            varName = "XG"
         elif len(varlist) == 0:
             raise ValueError("Empty list of variables")
 
-        drop_list = [var for var in ds.variables if var not in ds.dims and var not in varlist]
+        drop_list = [
+            var for var in ds.variables if var not in ds.dims and var not in varlist
+        ]
         ds = ds.drop_vars(drop_list)
 
         # determine the faces involved in the cutout
 
-#   ========================== Begin transformation =================
+        #   ========================== Begin transformation =================
         # First the Arctic crown
 
         dsa2 = []
         dsa5 = []
         dsa7 = []
         dsa10 = []
-        ARCT = [dsa2, dsa5, dsa7, dsa10]  # initialize with symbolic representation of how arctic connects with rest of facets
+        ARCT = [
+            dsa2,
+            dsa5,
+            dsa7,
+            dsa10,
+        ]  # initialize with symbolic representation of how arctic connects with rest of facets
         for var_name in varlist:
-            if 'face' in ds[var_name].dims:  # so transformation is not performed on vars that are only z or time deep
+            if (
+                "face" in ds[var_name].dims
+            ):  # so transformation is not performed on vars that are only z or time deep
                 # print(var_name)
                 arc_faces, *nnn, DS = arct_connect(ds, var_name, faces=faces)
                 ARCT[0].append(DS[0])
@@ -113,7 +118,7 @@ class LLCtransformation:
                 ARCT[1].append(ds[var_name])
                 ARCT[2].append(ds[var_name])
                 ARCT[3].append(ds[var_name])
-        
+
         for i in range(len(ARCT)):  # Not all faces survive the cutout
             if type(ARCT[i][0]) == _datype:  # if data array then merge into dataset
                 ARCT[i] = _xr.merge(ARCT[i])
@@ -128,18 +133,26 @@ class LLCtransformation:
         if type(DSa10) != _dstype:
             DSa10 = 0
 
-        # next lines only work if the whole dataset is being transformed. 
+        # next lines only work if the whole dataset is being transformed.
 
-        DSa7 = shift_dataset(DSa7, dims_c.X, dims_g.X)  # shift x-axis to 0 (smaller element).
+        DSa7 = shift_dataset(
+            DSa7, dims_c.X, dims_g.X
+        )  # shift x-axis to 0 (smaller element).
 
         DSa10 = shift_dataset(DSa10, dims_c.Y, dims_g.Y)  # shift in y
-        DSa10 = rotate_dataset(DSa10, dims_c, dims_g, rev_x=False, rev_y=True)  # rotate 90 degrees
-        DSa10 = rotate_vars(DSa10)  # renames variables. (u -> v and v -> u) due to rotation.
+        DSa10 = rotate_dataset(
+            DSa10, dims_c, dims_g, rev_x=False, rev_y=True
+        )  # rotate 90 degrees
+        DSa10 = rotate_vars(
+            DSa10
+        )  # renames variables. (u -> v and v -> u) due to rotation.
 
-        DSa2 = rotate_dataset(DSa2, dims_c, dims_g, rev_x=True, rev_y=False, transpose=True)  # rotate 90 degrees
+        DSa2 = rotate_dataset(
+            DSa2, dims_c, dims_g, rev_x=True, rev_y=False, transpose=True
+        )  # rotate 90 degrees
         DSa2 = rotate_vars(DSa2)
 
-        # ===== 
+        # =====
         # Determine the facets involved in the cutout
         _facet1 = [k for k in range(7, 10)]
         _facet2 = [k for k in range(10, 13)]
@@ -154,7 +167,7 @@ class LLCtransformation:
         for k in _np.arange(13):
             if k in faces:
                 if k in _facet1:
-                    Facet1.append(ds.isel(face=k)) #
+                    Facet1.append(ds.isel(face=k))  #
                 elif k in _facet2:
                     Facet2.append(ds.isel(face=k))
                 elif k in _facet3:
@@ -171,7 +184,7 @@ class LLCtransformation:
                 elif k in _facet4:
                     Facet4.append(0)
 
-        # ===== 
+        # =====
         # Below are list for each facets containin either zero of a surviving face.
 
         Facet1 = [DSa7] + Facet1
@@ -179,14 +192,22 @@ class LLCtransformation:
         Facet3.append(DSa2)
         Facet4.append(DSa5)
 
-        # ===== 
-        # Facet 1 
+        # =====
+        # Facet 1
 
         Facet1 = shift_list_ds(Facet1, dims_c.X, dims_g.X, Nx)  # Nx = Ny size of dim
 
         DSFacet1 = combine_list_ds(Facet1)
         DSFacet1 = rotate_vars(DSFacet1)
-        DSFacet1 = rotate_dataset(DSFacet1, dims_c, dims_g, rev_x=False, rev_y=True, transpose=True, nface=int(3.5 * Nx))
+        DSFacet1 = rotate_dataset(
+            DSFacet1,
+            dims_c,
+            dims_g,
+            rev_x=False,
+            rev_y=True,
+            transpose=True,
+            nface=int(3.5 * Nx),
+        )
 
         if type(DSFacet1) == _dstype:
             for _var in DSFacet1.variables:
@@ -198,12 +219,20 @@ class LLCtransformation:
                     DSFacet1[_var] = DSFacet1[_var].transpose(*dtr)
         DSFacet1 = flip_v(DSFacet1)
 
-        # ===== 
+        # =====
         # Facet 2
 
         Facet2 = shift_list_ds(Facet2, dims_c.X, dims_g.X, Nx)
         DSFacet2 = combine_list_ds(Facet2)
-        DSFacet2 = rotate_dataset(DSFacet2, dims_c, dims_g, rev_x=False, rev_y=True, transpose=True, nface=int(3.5 * Nx))
+        DSFacet2 = rotate_dataset(
+            DSFacet2,
+            dims_c,
+            dims_g,
+            rev_x=False,
+            rev_y=True,
+            transpose=True,
+            nface=int(3.5 * Nx),
+        )
         DSFacet2 = rotate_vars(DSFacet2)
 
         if type(DSFacet2) == _dstype:
@@ -216,9 +245,9 @@ class LLCtransformation:
                     DSFacet2[_var] = DSFacet2[_var].transpose(*dtr)
         DSFacet2 = flip_v(DSFacet2)
 
-        # ===== 
+        # =====
         # combining Facet 1 & 2
-        # ===== 
+        # =====
 
         FACETS = [DSFacet1, DSFacet2]
         FACETS = shift_list_ds(FACETS, dims_c.X, dims_g.X, Nx, facet=12)
@@ -226,21 +255,21 @@ class LLCtransformation:
 
         del DSFacet1, DSFacet2
 
-        # ===== 
+        # =====
         # Facet 3
         # involves faces [0, 1, 2] + arctic
 
         Facet3 = shift_list_ds(Facet3, dims_c.Y, dims_g.Y, Nx, facet=3)
         DSFacet3 = combine_list_ds(Facet3)
 
-        # ===== 
+        # =====
         # Facet 4
         Facet4 = shift_list_ds(Facet4, dims_c.Y, dims_g.Y, Nx, facet=4)
         DSFacet4 = combine_list_ds(Facet4)
 
-        # ===== 
+        # =====
         # combining Facet 3 & 4
-        # ===== 
+        # =====
 
         FACETS = [DSFacet3, DSFacet4]
         FACETS = shift_list_ds(FACETS, dims_c.X, dims_g.X, Nx, facet=34)
@@ -250,16 +279,16 @@ class LLCtransformation:
         # combining all facets
         # =====
 
-        if centered == 'Pacific':
+        if centered == "Pacific":
             FACETS = [DSFacet34, DSFacet12]  # centered on Pacific ocean
-        elif centered == 'Atlantic':
+        elif centered == "Atlantic":
             FACETS = [DSFacet12, DSFacet34]  # centered at Atlantic ocean
 
         FACETS = shift_list_ds(FACETS, dims_c.X, dims_g.X, 2 * Nx, facet=1234)
         DS = combine_list_ds(FACETS)
 
         if drop:
-            DS = DS.isel(X = slice(0, -1), Y = slice(0, -1))
+            DS = DS.isel(X=slice(0, -1), Y=slice(0, -1))
 
         # rechunk data. In the ECCO data this is done automatically
         if chunks:
@@ -272,21 +301,27 @@ class LLCtransformation:
 ## ==================================================================================================================
 
 
-def arct_connect(ds, varName, faces='all'):
+def arct_connect(ds, varName, faces="all"):
 
     arc_cap = 6
     Nx_ac_nrot = []
     Ny_ac_nrot = []
     Nx_ac_rot = []
     Ny_ac_rot = []
-    ARCT = [0, 0, 0, 0]  # initialize the list. 
+    ARCT = [0, 0, 0, 0]  # initialize the list.
     arc_faces = [0, 0, 0, 0]
-    metrics = ["dxC", "dyC", "dxG", "dyG", 'hFacW', 'hFacS'] # metric variables defined at vector points
-    
-    if isinstance(faces, str):
-        if faces == 'all':
-            faces = [k for k in range(13)]
+    metrics = [
+        "dxC",
+        "dyC",
+        "dxG",
+        "dyG",
+        "hFacW",
+        "hFacS",
+    ]  # metric variables defined at vector points
 
+    if isinstance(faces, str):
+        if faces == "all":
+            faces = [k for k in range(13)]
 
     if arc_cap in faces:
         for k in faces:
@@ -376,7 +411,7 @@ def arct_connect(ds, varName, faces='all'):
                 mask_arg = {dims.X: xslice, dims.Y: yslice}
                 arct = fac * ds[_varName].isel(**da_arg)
                 Mask = mask7.isel(**mask_arg)
-                arct = (arct * Mask) 
+                arct = arct * Mask
                 ARCT[2] = arct
 
             elif k == 10:
@@ -408,7 +443,6 @@ def arct_connect(ds, varName, faces='all'):
                 ARCT[3] = arct
 
     return arc_faces, Nx_ac_nrot, Ny_ac_nrot, Nx_ac_rot, Ny_ac_rot, ARCT
-
 
 
 def mates(ds):
@@ -447,8 +481,8 @@ def mates(ds):
 
 
 def rotate_vars(_ds):
-    """using the attribures `mates`, when this function is called it swaps the variables names. This issue is only applicable to llc grid in which the 
-    grid topology makes it so that u on a rotated face transforms to `+- v` on a lat lon grid. 
+    """using the attribures `mates`, when this function is called it swaps the variables names. This issue is only applicable to llc grid in which the
+    grid topology makes it so that u on a rotated face transforms to `+- v` on a lat lon grid.
     """
     if type(_ds) == _dstype:  # if a dataset transform otherwise pass
         _vars = [var for var in _ds.variables]
@@ -456,32 +490,34 @@ def rotate_vars(_ds):
         for v in _vars:
             if "mate" in _ds[v].attrs:
                 rot_names = {**rot_names, **{v: _ds[v].mate}}
-        
+
         _ds = _ds.rename(rot_names)
     return _ds
-
 
 
 def shift_dataset(_ds, dims_c, dims_g):
     """shifts a dataset along a dimension, setting its first element to zero. Need to provide the dimensions in the form
     of [center, corner] points. This rotation is only used in the horizontal, and so dims_c is either one of `i`  or `j`, and
     dims_g is either one of `i_g` or `j_g`. The pair most correspond to the same dimension.
-    
+
     _ds: dataset
-    
+
     dims_c: string, either 'i' or 'j'
-    
+
     dims_g: string, either 'i_g' or 'j_g'. Should correspond to same dimension as dims_c.
-    
+
     """
     if type(_ds) == _dstype:  # if a dataset transform otherwise pass
         for _dim in [dims_c, dims_g]:
-            _ds['n' + _dim] = _ds[_dim] - int(_ds[_dim][0].data)
-            _ds = _ds.swap_dims({_dim: 'n' + _dim}).drop_vars([_dim]).rename({'n' + _dim: _dim})
+            _ds["n" + _dim] = _ds[_dim] - int(_ds[_dim][0].data)
+            _ds = (
+                _ds.swap_dims({_dim: "n" + _dim})
+                .drop_vars([_dim])
+                .rename({"n" + _dim: _dim})
+            )
 
         _ds = mates(_ds)
     return _ds
-
 
 
 def reverse_dataset(_ds, dims_c, dims_g, transpose=False):
@@ -491,33 +527,40 @@ def reverse_dataset(_ds, dims_c, dims_g, transpose=False):
 
     if type(_ds) == _dstype:  # if a dataset transform otherwise pass
 
-        for _dim in [dims_c, dims_g]:   # This part should be different for j_g points?
-            _ds['n' + _dim] = - _ds[_dim] +  int(_ds[_dim][-1].data) 
-            _ds = _ds.swap_dims({_dim:'n' + _dim}).drop_vars([_dim]).rename({'n' + _dim: _dim})
-        
+        for _dim in [dims_c, dims_g]:  # This part should be different for j_g points?
+            _ds["n" + _dim] = -_ds[_dim] + int(_ds[_dim][-1].data)
+            _ds = (
+                _ds.swap_dims({_dim: "n" + _dim})
+                .drop_vars([_dim])
+                .rename({"n" + _dim: _dim})
+            )
+
         _ds = mates(_ds)
-    
+
         if transpose:
             _ds = _ds.transpose()
     return _ds
 
 
-
-def rotate_dataset(_ds, dims_c, dims_g, rev_x=False, rev_y=False, transpose=False, nface=1):
-    """ Rotates a dataset along its horizontal dimensions (e.g. center and corner). It can also shift the dataset along a dimension, 
+def rotate_dataset(
+    _ds, dims_c, dims_g, rev_x=False, rev_y=False, transpose=False, nface=1
+):
+    """Rotates a dataset along its horizontal dimensions (e.g. center and corner). It can also shift the dataset along a dimension,
     reserve its orientaton and transpose the whole dataset.
 
     _ds : dataset
 
     dims_c = [dims_c.X, dims_c.Y]
     dims_c = [dims_g.X, dims_g.Y]
-    
+
     nface=1: flag. A single dataset is being manipulated.
-    nface=int: correct number to use. This is the case a merger/concatenated dataset is being manipulated. Nij is no longer the size of the face. 
+    nface=int: correct number to use. This is the case a merger/concatenated dataset is being manipulated. Nij is no longer the size of the face.
 
     """
     if type(_ds) == _dstype:  # if a dataset transform otherwise pass
-        Nij = max(len(_ds[dims_c.X]), len(_ds[dims_c.Y]))  # max number of points of a face. If ECCO data, Nij  = 90. If LLC4320, Nij=4320
+        Nij = max(
+            len(_ds[dims_c.X]), len(_ds[dims_c.Y])
+        )  # max number of points of a face. If ECCO data, Nij  = 90. If LLC4320, Nij=4320
 
         if rev_x is False:
             fac_x = 1
@@ -527,7 +570,7 @@ def rotate_dataset(_ds, dims_c, dims_g, rev_x=False, rev_y=False, transpose=Fals
             if nface == 1:
                 x0 = int(Nij) - 1
             else:
-                X0 = nface
+                x0 = nface
         if rev_y is False:
             fac_y = 1
             y0 = 0
@@ -539,18 +582,19 @@ def rotate_dataset(_ds, dims_c, dims_g, rev_x=False, rev_y=False, transpose=Fals
                 y0 = nface - 1
 
         for _dimx, _dimy in [[dims_c.X, dims_c.Y], [dims_g.X, dims_g.Y]]:
-            _ds['n' + _dimx] = fac_x * _ds[_dimy] + x0
-            _ds['n' + _dimy] = fac_y * _ds[_dimx] + y0
+            _ds["n" + _dimx] = fac_x * _ds[_dimy] + x0
+            _ds["n" + _dimy] = fac_y * _ds[_dimx] + y0
 
-            _ds = _ds.swap_dims({_dimx: 'n' + _dimy, _dimy: 'n' + _dimx})
-            _ds = _ds.drop_vars({_dimx, _dimy}).rename({'n' + _dimx: _dimx, 'n' + _dimy: _dimy})
-    
+            _ds = _ds.swap_dims({_dimx: "n" + _dimy, _dimy: "n" + _dimx})
+            _ds = _ds.drop_vars({_dimx, _dimy}).rename(
+                {"n" + _dimx: _dimx, "n" + _dimy: _dimy}
+            )
+
         _ds = mates(_ds)
 
         if transpose:
-           _ds = _ds.transpose()
+            _ds = _ds.transpose()
     return _ds
-
 
 
 def shift_list_ds(_DS, dims_c, dims_g, Ni, facet=1):
@@ -568,59 +612,68 @@ def shift_list_ds(_DS, dims_c, dims_g, Ni, facet=1):
     if len(_DS) > 1:
         dim0 = 0
         for ii in range(1, len(_DS)):
-            if type(_DS[ii-1]) == int:
+            if type(_DS[ii - 1]) == int:
                 dim0 = int(Ni * sum(facs[:ii]))
             else:
-                for _dim  in [dims_c, dims_g]:
-                    dim0 = int(_DS[ii-1][_dim][-1].data + 1) # shift by the previous dataset. If there is no dataset to be merged, the shift is still done.
+                for _dim in [dims_c, dims_g]:
+                    dim0 = int(
+                        _DS[ii - 1][_dim][-1].data + 1
+                    )  # shift by the previous dataset. If there is no dataset to be merged, the shift is still done.
             if type(_DS[ii]) == _dstype:
-                for _dim  in [dims_c, dims_g]:
-                    _DS[ii]['n' + _dim] = _DS[ii][_dim] - (fac * int(_DS[ii][_dim][0].data)) + dim0
-                    _DS[ii] = _DS[ii].swap_dims({_dim:'n'+_dim}).drop_vars([_dim]).rename({'n'+_dim:_dim})
+                for _dim in [dims_c, dims_g]:
+                    _DS[ii]["n" + _dim] = (
+                        _DS[ii][_dim] - (fac * int(_DS[ii][_dim][0].data)) + dim0
+                    )
+                    _DS[ii] = (
+                        _DS[ii]
+                        .swap_dims({_dim: "n" + _dim})
+                        .drop_vars([_dim])
+                        .rename({"n" + _dim: _dim})
+                    )
         DS = []
-        for l in range(len(_DS)):
-            if type(_DS[l]) == _dstype:
-                DS.append(_DS[l])
+        for lll in range(len(_DS)):
+            if type(_DS[lll]) == _dstype:
+                DS.append(_DS[lll])
     else:
         DS = _DS
     return DS
 
 
-
 def combine_list_ds(_DSlist):
-    """ combines a list of n-datasets"""
-    if len(_DSlist)==0:
-        _DSFacet = 0  # No dataset to combine. Return empty  
+    """combines a list of n-datasets"""
+    if len(_DSlist) == 0:
+        _DSFacet = 0  # No dataset to combine. Return empty
     if len(_DSlist) == 1:  # a single face
         _DSFacet = _DSlist[0]
     elif len(_DSlist) == 2:
-        if type(_DSlist[0])==int:  # one is empty, pass directly
-            DS_Facet = _DSlist[1]            
-        elif type(_DSlist[1])==int: # the other is empty pass directly
-            DS_Facet = _DSlist[0] 
+        if type(_DSlist[0]) == int:  # one is empty, pass directly
+            DS_Facet = _DSlist[1]
+        elif type(_DSlist[1]) == int:  # the other is empty pass directly
+            DS_Facet = _DSlist[0]
         else:  # if there are two datasets then combine
-            with dask.config.set(**{'array.slicing.split_large_chunks': False}):
+            with dask.config.set(**{"array.slicing.split_large_chunks": False}):
                 _DSFacet = _DSlist[0].combine_first(_DSlist[1])
     if len(_DSlist) > 2:
         _DSFacet = _DSlist[0]
         for ii in range(1, len(_DSlist)):
-            with dask.config.set(**{'array.slicing.split_large_chunks': False}):
+            with dask.config.set(**{"array.slicing.split_large_chunks": False}):
                 _DSFacet = _DSFacet.combine_first(_DSlist[ii])
-    
+
         _DSFacet = mates(_DSFacet)
 
     return _DSFacet
 
 
-def flip_v(_ds, co_list = metrics):
-    """ reverses the sign of the velocity field v.
-    """
+def flip_v(_ds, co_list=metrics):
+    """reverses the sign of the velocity field v."""
     if type(_ds) == _dstype:  # if a dataset transform otherwise pass
         for _varName in _ds.variables:
             DIMS = [dim for dim in _ds[_varName].dims if dim != "face"]
             _dims = Dims(DIMS[::-1])
             if "mate" in _ds[_varName].attrs:
-                if _varName not in co_list and len(_dims.Y) == 3:  # do not change sign of grid metrics
+                if (
+                    _varName not in co_list and len(_dims.Y) == 3
+                ):  # do not change sign of grid metrics
                     _ds[_varName] = -_ds[_varName]
     return _ds
 
