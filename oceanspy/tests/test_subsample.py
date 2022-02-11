@@ -265,7 +265,7 @@ def test_reduce_variables(od, varList):
     [
         ([-90, 20], [20, 80], None, ["T"], "arctic_crown", "Atlantic", 50),
         ([-179, 179], [20, 80], None, ["U", "V"], "arctic_crown", "Atlantic", 50),
-        ([-31, -2], [58, 68.2], None, ['T'],  "arctic_crown", "Atlantic", 50),
+        ([-31, -2], [58, 68.2], None, ["T"], "arctic_crown", "Atlantic", 50),
         (None, None, None, ["T"], "arctic_crown", "Atlantic", 50),
         (None, None, None, None, "wrong", "Atlantic", 50),
         (None, None, None, None, False, "Atlantic", np.nan),

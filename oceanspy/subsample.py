@@ -376,7 +376,7 @@ def cutout(
             grid_coords = od.grid_coords
             od._ds = dsnew
             manipulate_coords = {"coordsUVfromG": True}
-            new_face_connections = {"face_connections": {None:{None, None}}}
+            new_face_connections = {"face_connections": {None: {None, None}}}
             od = od.set_face_connections(**new_face_connections)
             od = od.manipulate_coords(**manipulate_coords)
             if len(grid_coords["time"]) > 1:
