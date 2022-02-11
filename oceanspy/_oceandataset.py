@@ -624,7 +624,7 @@ class OceanDataset:
         # check parameters
         _check_instance({"face_connections": face_connections}, "dict")
 
-        if list(face_connections["face_connections"])[0] == "face":
+        if list(face_connections)[0] == "face":
 
             for k in face_connections["face"].keys():
                 for axis in face_connections["face"][k].keys():
@@ -636,7 +636,7 @@ class OceanDataset:
                         face_connections["face"][k][axis] = eval(
                             face_connections["face"][k][axis]
                         )
-        elif list(face_connections["face_connections"])[0] is None:
+        elif list(face_connections)[0] is None:
             face_connections = None
 
         self = self._store_as_global_attr(

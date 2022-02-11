@@ -60,6 +60,8 @@ def _create_grid(dataset, coords, periodic, face_connections):
     # Create grid
     if face_connections is None:
         grid = xgcm.Grid(dataset, periodic=periodic)
+    elif type(face_connections) is str:
+        grid = xgcm.Grid(dataset, periodic=periodic)
     else:
         grid = xgcm.Grid(dataset, periodic=periodic, face_connections=face_connections)
     if len(grid.axes) == 0:
