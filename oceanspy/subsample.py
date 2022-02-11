@@ -359,7 +359,6 @@ def cutout(
             faces = "all"
         else:
             faces = list(dmaskH["face"].values)  # gets faces that survives cutout
-            print(faces)
         _transf_list = ["arctic_crown"]
         if transformation in _transf_list:
             arg = {
