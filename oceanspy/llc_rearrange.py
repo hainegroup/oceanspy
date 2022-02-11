@@ -258,9 +258,9 @@ class LLCtransformation:
         fFACETS = shift_list_ds(FACETS, dims_c.X, dims_g.X, 2 * Nx, facet=1234)
         DS = combine_list_ds(fFACETS)
 
-        if 'face' in DS.coords:
+        if "face" in DS.coords:
             # only relevant when the transformation involves a single face
-            DS = DS.drop_vars(['face'])
+            DS = DS.drop_vars(["face"])
 
         if drop:
             DS = DS.isel(X=slice(0, -1), Y=slice(0, -1))
@@ -268,7 +268,6 @@ class LLCtransformation:
         # rechunk data. In the ECCO data this is done automatically
         if chunks:
             DS = DS.chunk(chunks)
-
 
         return DS
 
