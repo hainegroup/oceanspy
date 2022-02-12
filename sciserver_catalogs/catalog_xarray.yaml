@@ -735,6 +735,9 @@ sources:
         i_g: Xp1
         j: Y
         j_g: Yp1
+        hFacC: HFacC
+        hFacW: HFacW
+        hFacS: HFacS 
       grid_coords:
         add_midp: True
         grid_coords:
