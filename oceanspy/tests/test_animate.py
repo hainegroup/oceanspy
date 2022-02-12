@@ -10,7 +10,7 @@ from matplotlib.animation import FuncAnimation
 
 # From OceanSpy
 from oceanspy import open_oceandataset
-from oceanspy.animate import TS_diagram, horizontal_section, vertical_section
+from oceanspy.animate import TS_diagram, vertical_section
 
 # Directory
 Datadir = "./oceanspy/tests/Data/"
