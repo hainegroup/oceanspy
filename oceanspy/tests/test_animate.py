@@ -10,7 +10,7 @@ from matplotlib.animation import FuncAnimation
 
 # From OceanSpy
 from oceanspy import open_oceandataset
-from oceanspy.animate import TS_diagram, vertical_section
+from oceanspy.animate import TS_diagram, horizontal_section, vertical_section
 
 # Directory
 Datadir = "./oceanspy/tests/Data/"
@@ -79,26 +79,26 @@ def test_anim_TSdiagram_warn(od_in):
     assert isinstance(anim, FuncAnimation)
 
 
-# # ==================
-# # Horizontal section
-# # ==================
-# @pytest.mark.parametrize(
-#     "od_in, varName, meanAxes," " FuncAnimation_kwargs, cutout_kwargs",
-#     [
-#         (od, "Temp", True, None, None),
-#         (od, "Temp", True, {"repeat": False}, {"ZRange": 0}),
-#     ],
-# )
-# def test_anim_Hsection(od_in, varName, meanAxes, FuncAnimation_kwargs, cutout_kwargs):
-#     plt.close()
-#     anim = horizontal_section(
-#         od_in,
-#         varName=varName,
-#         meanAxes=meanAxes,
-#         FuncAnimation_kwargs=FuncAnimation_kwargs,
-#         cutout_kwargs=cutout_kwargs,
-#     )
-#     assert isinstance(anim, FuncAnimation)
+# ==================
+# Horizontal section
+# ==================
+@pytest.mark.parametrize(
+    "od_in, varName, meanAxes," " FuncAnimation_kwargs, cutout_kwargs",
+    [
+        (od, "Temp", True, None, None),
+        (od, "Temp", True, {"repeat": False}, {"ZRange": 0}),
+    ],
+)
+def test_anim_Hsection(od_in, varName, meanAxes, FuncAnimation_kwargs, cutout_kwargs):
+    plt.close()
+    anim = horizontal_section(
+        od_in,
+        varName=varName,
+        meanAxes=meanAxes,
+        FuncAnimation_kwargs=FuncAnimation_kwargs,
+        cutout_kwargs=cutout_kwargs,
+    )
+    assert isinstance(anim, FuncAnimation)
 
 
 # ================
