@@ -50,7 +50,7 @@ setup(
     setup_requires=setup_requirements,
     test_suite="tests",
     tests_require=test_requirements,
-    python_requires=">=3.7,<=3.9",
+    python_requires=">=3.7,<3.9",
     url="https://github.com/hainegroup/oceanspy",
     # fmt: off
     version='0.2.0',
