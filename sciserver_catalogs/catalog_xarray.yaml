@@ -645,60 +645,116 @@ sources:
         T: time
       original_output: snapshot
 
-# ======================================================================
-#  LLC4320 sample data
-  SSS_LLC4320:
-    description: Surface salinity and temperature fields for LLC4320
-    driver: zarr
-    model: MITGCM
-    args:
-      urlpath: '/sciserver/filedb*/ocean/poseidon/LLC4320/2D/SS*'
-      chunks: {'i':4320, 'j':4320, 'time':1, 'face':1}
-      xarray_kwargs:
-        concat_dim: time
-        parallel: True
-        combine: nested
-    metadata:
-      rename:
-        i: X
-        j: Y
-        i_g: Xp1
-        j_g: Yp1
-      parameters:
-      name: SSS_LLC4320
-      description: |
-        Surface fields for the LLC4320, a general, curvilinear ocean simulations on the cube-sphere.
-      citation: |
-        Paper.
-      projection:
-      original_output: snapshot
-
-  grd_LLC4320:
-    description: horizontal grid for LLC4320
+  LLC4320_scalars:
+    description: 10 day sample of hourly data from the LLC4320 simulation
     driver: zarr
     args:
-      urlpath: '/sciserver/filedb05-01/ocean/poseidon/LLC4320/grid'
+      urlpath: '/home/idies/workspace/poseidon/data*/llc4320_tests/10dayhourly/scalars'
+      engine: zarr
+      parallel: True
     metadata:
       swap_dims:
         k: Z
         k_p1: Zp1
+        k_u: Zu
+        k_l: Zl
+      rename:
+        Theta: Temp
+        Salt: S
+        i: X
+        i_g: Xp1
+        j: Y
+        j_g: Yp1
+      parameters:
+        rSphere: 6.371e+03
+        eq_state: jmd95
+        rho0: 1027
+        g: 9.81
+        eps_nh: 0
+        omega: 7.292123516990375e-05
+        c_p: 3.986e+03
+        tempFrz0: 9.01e-02
+        dTempFrz_dS: -5.75e-02
+      name: LLC4320
+      description: |
+        10 day hourly data from the LLC4320 simulations computed using the MITGCM, a general, curvilinear ocean simulation on the cube-sphere.
+      projection:
+      original_output: snapshot
+
+
+  LLC4320_velocities:
+    description: 10 day sample of hourly data from the LLC4320 simulation
+    driver: zarr
+    args:
+      urlpath: '/home/idies/workspace/poseidon/data*/llc4320_tests/10dayhourly/velocities'
+      engine: zarr
+      parallel: True
+    metadata:
+      swap_dims:
+        k: Z
+        k_p1: Zp1
+        k_u: Zu
+        k_l: Zl
       rename:
         i: X
         i_g: Xp1
         j: Y
         j_g: Yp1
-      grid_coords: 
-        add_midp: True
+      parameters:
+        rSphere: 6.371e+03
+        eq_state: jmd95
+        rho0: 1027
+        g: 9.81
+        eps_nh: 0
+        omega: 7.292123516990375e-05
+        c_p: 3.986e+03
+        tempFrz0: 9.01e-02
+        dTempFrz_dS: -5.75e-02
+      name: LLC4320
+      description: |
+        10 day hourly data from the LLC4320 simulations computed using the MITGCM, a general, curvilinear ocean simulation on the cube-sphere.
+      projection:
+      original_output: snapshot
+
+
+  LLC4320_grid:
+    description: 10 day sample of hourly data from the LLC4320 simulation
+    driver: zarr
+    args:
+      urlpath: '/home/idies/workspace/poseidon/data01_01/llc4320_grid/'
+      engine: zarr
+      drop_variables: ['CS', 'SN', 'PHrefC', 'PHrefF']
+    metadata:
+      swap_dims:
+        k: Z
+        k_p1: Zp1
+        k_u: Zu
+        k_l: Zl
+      rename:
+        i: X
+        j: Y
+        i_g: Xp1
+        j_g: Yp1
+        hFacC: HFacC
+        hFacW: HFacW
+        hFacS: HFacS 
+      grid_coords:
+        add_midp: False
         grid_coords:
           Y:
-            Y: 
+            Y:
             Yp1: 0.5
           X:
-            X: 
+            X:
             Xp1: 0.5
+          Z:
+           Z:
+           Zp1: 0.5
+           Zu: 0.5
+           Zl: -0.5
           time: 
             time: -0.5
-      face_connections:
+      face_connections: # topology
         face_connections:
           face:
             0:
@@ -739,7 +795,7 @@ sources:
               Y: tuple(((8, 'Y', False), (1, 'X', False)))
             12: 
               X: tuple(((11, 'X', False), None))
-              Y: tuple(((9, 'Y', False), (0, 'X', False)))
+              Y: tuple(((9, 'Y', False), (0, 'X', False)))  
       parameters:
         rSphere: 6.371e+03
         eq_state: jmd95
@@ -750,12 +806,9 @@ sources:
         c_p: 3.986e+03
         tempFrz0: 9.01e-02
         dTempFrz_dS: -5.75e-02
-        grid_type: llc
       name: LLC4320
       description: |
-        horizontal grid for LLC4320, a general, curvilinear ocean simulations on the cube-sphere.
-      citation: |
-        Paper.
+        10 day hourly data from the LLC4320 simulations computed using the MITGCM, a general, curvilinear ocean simulation on the cube-sphere.
       projection:
       original_output: snapshot
 
@@ -799,7 +852,7 @@ sources:
            Zl: -0.5
           time: 
             time: -0.5
-      face_connections:
+      face_connections: # topology
         face_connections:
           face:
             0:
@@ -856,7 +909,7 @@ sources:
       citation: 
       projection:
       original_output: snapshot
-
+      
 # ======================================================================
 # POP data (ocean only, CORE forcing)
   grd_CORE_POP:
@@ -1069,32 +1122,21 @@ sources:
         Justin et al (2014), A new synoptic scale resolving global climate simulatoin using the Community Earth System Model. J. Adv. Model. Earth Syst., 6, 1065-1094. https:doi.org/10.1002/2014MS000363
       original_output: Monthly means.
 
+
 # ======================================================================
 # HyCOM data test, interpolated onto lat-lon-depth coords
   HYCOM_test:
-    description: Simulation off the Northern California Coast with HyCOM ocean mdoel
-    driver: netcdf
+    description: Simulation off the Northern California Coast with HyCOM ocean model
+    driver: zarr
     model: HyCOM
     args:
-      urlpath: /sciserver/oceanography/HyCOM/swot+smode/GLBy0.04_*.nc
-      xarray_kwargs:
-        engine: netcdf4
-        drop_variables: ['bottom_salinity','bottom_temp','bottom_u','bottom_v']
-        concat_dim: time
-        combine: by_coords
-        parallel: True
-        decode_cf: False
+      urlpath: /home/idies/workspace/poseidon/data10_01/HyCOM
+    xarray_kwargs:
+        engine: zarr
     metadata:
       rename:
-        water_temp: Temp
-        water_u: U
-        water_v: V
-        lon: X
-        lat: Y
-        depth: Z
-      manipulate_coords:
-        fillna: False
-        coords1Dfrom2D: False
+        lon: XC
+        lat: YC
       grid_coords:
         add_midp: True
         grid_coords:
@@ -1111,19 +1153,11 @@ sources:
             Zl: -0.5
           time: 
             time: -0.5
-      parameters:
-        temp_offset: 20
-        temp_scale: 0.001
-        temp_fill: -30000
-        sal_offset: 20
-        sal_scale: 0.001
-        sal_fill: -30000
-        ssh_fill: 1.2676e30
       name: California_Coast
       description: |
         High-resolution grid of the (1/25 deg) numerical simulation covering the California Coast using the HyCOM model. The original grid has 41 (isopycnal) layers but these files were interpolated to 101 vertical levels.
       mates: | 
         Sample (test) files
       projection: Mercator
-      original_output: snapshot.
+      original_output: snapshot
 
