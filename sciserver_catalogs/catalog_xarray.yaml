@@ -819,7 +819,7 @@ sources:
     driver: zarr
     model: MITGCM
     args:
-      urlpath: '/sciserver/oceanography/ECCO_v4r4/ecco_v4r4'
+      urlpath: '/home/idies/workspace/OceanCirculation/ECCO_v4r4/ecco_v4r4'
       #drop_variables: ['k_u', 'k_p1', 'k_l', 'k']
     metadata:
       swap_dims: 
