@@ -168,7 +168,6 @@ def from_catalog(name, catalog_url=None):
             ds = ds.swap_dims(swap_dims)
             # drop k dimension
             # ds = ds.drop_vars(["k_p1", "k_u", "k_l", "k"]) This needs fixing
-            
         # Fix Z dimensions (Zmd, ...)
         default_Zs = ["Zp1", "Zu", "Zl", "Z"]
         # Make sure they're sorted with decreasing letter number
