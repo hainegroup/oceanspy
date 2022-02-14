@@ -732,14 +732,14 @@ sources:
         k_l: Zl
       rename:
         i: X
-        j: Y
         i_g: Xp1
+        j: Y
         j_g: Yp1
         hFacC: HFacC
         hFacW: HFacW
         hFacS: HFacS 
       grid_coords:
-        add_midp: False
+        add_midp: True
         grid_coords:
           Y:
             Y:
@@ -795,13 +795,13 @@ sources:
               Y: tuple(((8, 'Y', False), (1, 'X', False)))
             12: 
               X: tuple(((11, 'X', False), None))
-              Y: tuple(((9, 'Y', False), (0, 'X', False)))  
+              Y: tuple(((9, 'Y', False), (0, 'X', False)))
       parameters:
         rSphere: 6.371e+03
         eq_state: jmd95
         rho0: 1027
         g: 9.81
-        eps_nh: 0 
+        eps_nh: 0
         omega: 7.292123516990375e-05
         c_p: 3.986e+03
         tempFrz0: 9.01e-02
@@ -909,7 +909,8 @@ sources:
       citation: 
       projection:
       original_output: snapshot
-      
+
+
 # ======================================================================
 # POP data (ocean only, CORE forcing)
   grd_CORE_POP:
