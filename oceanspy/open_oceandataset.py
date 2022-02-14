@@ -166,9 +166,7 @@ def from_catalog(name, catalog_url=None):
         swap_dims = mtdt.pop("swap_dims", None)
         if swap_dims is not None:
             ds = ds.swap_dims(swap_dims)
-            # drop k dimension
-            ds = ds.drop_vars(["k_p1", "k_u", "k_l", "k"])
-        
+
         # Fix Z dimensions (Zmd, ...)
         default_Zs = ["Zp1", "Zu", "Zl", "Z"]
         # Make sure they're sorted with decreasing letter number
