@@ -56,7 +56,7 @@ ds["time_midp"] = np.array(T, dtype="datetime64") + np.timedelta64(
 for var in ["drF", "dxC", "dyC", "dxF", "dyF", "dxG", "dyG", "dxV", "dyU"]:
     ds[var] = xr.full_like(ds[var], step)
 for var in ["rA", "rAw", "rAs", "rAz"]:
-    ds[var] = xr.full_like(ds[var], step ** 2)
+    ds[var] = xr.full_like(ds[var], step**2)
 for var in ["HFacC", "HFacW", "HFacS"]:
     ds[var] = xr.ones_like(ds[var])
 
