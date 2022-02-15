@@ -837,7 +837,7 @@ sources:
         hFacS: HFacS
         hFacW: HFacW
       grid_coords:
-        add_midp: False
+        add_midp: True
         grid_coords:
           Y:
             Y:
