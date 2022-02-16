@@ -7,14 +7,14 @@ dependencies:
   - distributed
   - bottleneck
   - netCDF4
-  - xarray>=0.14.1
+  - xarray
   - cartopy
   - esmpy
   - intake-xarray
   - geopy
   - xesmf
   - esmf
-  - xgcm>=0.2.0
+  - xgcm
   - Ipython
   - tqdm
   - pytest
