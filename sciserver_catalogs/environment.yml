@@ -10,7 +10,6 @@ dependencies:
   - xarray
   - cartopy
   - esmpy
-  - intake-xarray
   - geopy
   - xesmf
   - esmf
@@ -43,3 +42,4 @@ dependencies:
     - black-nb
     - pre-commit
     - numbagg
+    - git+https://github.com/intake/intake-xarray.git
