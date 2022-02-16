@@ -128,7 +128,7 @@ def test_velocity_magnitude(od_in):
     U = (od_in._ds["U"].values[:, :, :, 1:] + od_in._ds["U"].values[:, :, :, :-1]) / 2
     V = (od_in._ds["V"].values[:, :, 1:, :] + od_in._ds["V"].values[:, :, :-1, :]) / 2
     W = (od_in._ds["W"].values[:, 1:, :, :] + od_in._ds["W"].values[:, :-1, :, :]) / 2
-    vel = np.sqrt(U[:, :-1, :, :] ** 2 + V[:, :-1, :, :] ** 2 + W ** 2)
+    vel = np.sqrt(U[:, :-1, :, :] ** 2 + V[:, :-1, :, :] ** 2 + W**2)
     assert_allclose(vel, ds_out["vel"].values[:, :-1, :, :])
 
     # Test shortcut
@@ -147,7 +147,7 @@ def test_horizontal_velocity_magnitude(od_in):
     # Check values
     U = (od_in._ds["U"].values[:, :, :, 1:] + od_in._ds["U"].values[:, :, :, :-1]) / 2
     V = (od_in._ds["V"].values[:, :, 1:, :] + od_in._ds["V"].values[:, :, :-1, :]) / 2
-    hor_vel = np.sqrt(U ** 2 + V ** 2)
+    hor_vel = np.sqrt(U**2 + V**2)
     assert_allclose(hor_vel, ds_out["hor_vel"].values)
 
     # Test shortcut
@@ -246,7 +246,7 @@ def test_kinetic_energy(od_in, eps_nh):
     # Check values
     U = (od_in._ds["U"].values[:, :, :, 1:] + od_in._ds["U"].values[:, :, :, :-1]) / 2
     V = (od_in._ds["V"].values[:, :, 1:, :] + od_in._ds["V"].values[:, :, :-1, :]) / 2
-    KE = (U ** 2 + V ** 2) / 2
+    KE = (U**2 + V**2) / 2
     if eps_nh == 0:
         assert_allclose(KE, ds_out["KE"].values)
     else:
@@ -276,7 +276,7 @@ def test_eddy_kinetic_energy(od_in, eps_nh):
     V = od_in._ds["V"] - od_in._ds["V"].mean("time")
     U = (U.values[:, :, :, 1:] + U.values[:, :, :, :-1]) / 2
     V = (V.values[:, :, 1:, :] + V.values[:, :, :-1, :]) / 2
-    EKE = (U ** 2 + V ** 2) / 2
+    EKE = (U**2 + V**2) / 2
     if eps_nh == 0:
         assert_allclose(EKE, ds_out["EKE"].values)
     else:
@@ -473,11 +473,9 @@ def test_survey_aligned_velocities(od_in, gridtype, rotate, survey):
         # Chek velocities
         vel_surv = np.sqrt(od_surv._ds["U"] ** 2 + od_surv._ds["V"] ** 2)
         vel_alig = np.sqrt(ds_out["tan_Vel"] ** 2 + ds_out["ort_Vel"] ** 2)
-        if rotate is False:
-            assert_allclose(vel_surv.values, vel_alig.values)
-        else:
-            # TODO: not exact match. Check with Renske!
-            assert_almost_equal(vel_surv.values, vel_alig.values, 4)
+        assert_almost_equal(
+            vel_surv.values, vel_alig.values, decimal=4 if rotate else 7
+        )
 
     else:
         with pytest.raises(ValueError):

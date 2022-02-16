@@ -624,16 +624,20 @@ class OceanDataset:
         # check parameters
         _check_instance({"face_connections": face_connections}, "dict")
 
-        for k in face_connections["face"].keys():
-            for axis in face_connections["face"][k].keys():
-                if type(face_connections["face"][k][axis]) == tuple:
-                    face_connections["face"][k][axis] = face_connections["face"][k][
-                        axis
-                    ]
-                else:
-                    face_connections["face"][k][axis] = eval(
-                        face_connections["face"][k][axis]
-                    )
+        if list(face_connections)[0] == "face":
+
+            for k in face_connections["face"].keys():
+                for axis in face_connections["face"][k].keys():
+                    if type(face_connections["face"][k][axis]) == tuple:
+                        face_connections["face"][k][axis] = face_connections["face"][k][
+                            axis
+                        ]
+                    else:
+                        face_connections["face"][k][axis] = eval(
+                            face_connections["face"][k][axis]
+                        )
+        elif list(face_connections)[0] is None:
+            face_connections = None
 
         self = self._store_as_global_attr(
             name="face_connections", attr=face_connections, overwrite=True

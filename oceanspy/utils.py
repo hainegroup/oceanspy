@@ -163,12 +163,12 @@ def great_circle_path(lat1, lon1, lat2, lon2, delta_km=None, R=None):
         # Define the vector that is normal to
         # both unit_radial_1 & unit_radial_2
         normal_vec = _np.cross(unit_radial_1, unit_radial_2)
-        unit_normal = normal_vec / _np.sqrt(_np.sum(normal_vec ** 2))
+        unit_normal = normal_vec / _np.sqrt(_np.sum(normal_vec**2))
 
         # Define the vector that is tangent to the great circle flight path at
         # (lat1,lon1)
         tangent_1_vec = _np.cross(unit_normal, unit_radial_1)
-        unit_tangent_1 = tangent_1_vec / _np.sqrt(_np.sum(tangent_1_vec ** 2))
+        unit_tangent_1 = tangent_1_vec / _np.sqrt(_np.sum(tangent_1_vec**2))
 
         # Determine the total arc distance from 1 to 2 (radians)
         total_arc_angle_1_to_2 = _np.arccos(unit_radial_1.dot(unit_radial_2))
@@ -548,7 +548,7 @@ def static_pressure(Z):
     """
     # Coefficients to determine static pressure
     c = [0.059808, -0.025, 0.100766, 2.28405e-7]
-    P = c[0] * _np.exp((c[1] * Z) - 1) + c[2] * Z + c[3] * (Z ** 2)
+    P = c[0] * _np.exp((c[1] * Z) - 1) + c[2] * Z + c[3] * (Z**2)
     P = 10 * P  # decibars
     return P
 
