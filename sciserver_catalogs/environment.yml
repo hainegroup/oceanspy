@@ -37,6 +37,7 @@ dependencies:
   - cf_xarray
   - oceanspy==0.2.0
   - pip
+  - pooch 
   - pip:
     - git+https://github.com/MITgcm/xmitgcm.git
     - black-nb
