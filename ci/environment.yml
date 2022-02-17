@@ -25,6 +25,7 @@ dependencies:
   - matplotlib
   - fsspec!=0.9.0
   - pooch
+  - xmitgcm
   - pip
   - pip:
     - git+https://github.com/MITgcm/xmitgcm.git
