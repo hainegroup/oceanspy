@@ -34,7 +34,6 @@ dependencies:
   - nc-time-axis
   - fastjmd95
   - cf_xarray
-  - oceanspy==0.2.0
   - pip
   - pooch 
   - pip:
@@ -43,3 +42,4 @@ dependencies:
     - pre-commit
     - numbagg
     - git+https://github.com/intake/intake-xarray.git
+    - git+https://github.com/hainegroup/oceanspy.git
