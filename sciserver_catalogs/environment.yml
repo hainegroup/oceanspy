@@ -35,11 +35,28 @@ dependencies:
   - fastjmd95
   - cf_xarray
   - pip
-  - pooch 
+  - pooch
+  - h5netcdf
+  - scipy
+  - pydap
+  - zarr
+  - fsspec
+  - cftime
+  - rasterio
+  - cfgrib
+  - matplotlib
+  - cf_xarray
+  - ipykernel
+  - numba
+  - xoak
+  - scikit-learn
+  - pys2index
+  - cmasher
+  - imageio
+  - pre-commit
   - pip:
     - git+https://github.com/MITgcm/xmitgcm.git
     - black-nb
-    - pre-commit
     - numbagg
     - git+https://github.com/intake/intake-xarray.git
     - git+https://github.com/hainegroup/oceanspy.git
