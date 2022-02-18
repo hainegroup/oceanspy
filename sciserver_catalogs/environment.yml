@@ -2,7 +2,7 @@ name: Oceanography
 channels:
   - conda-forge
 dependencies:
-  - python=3.8
+  - python=3.9
   - dask
   - distributed
   - bottleneck
@@ -33,7 +33,6 @@ dependencies:
   - xhistogram
   - nc-time-axis
   - fastjmd95
-  - cf_xarray
   - pip
   - pooch
   - h5netcdf
