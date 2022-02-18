@@ -53,8 +53,8 @@ dependencies:
   - cmasher
   - imageio
   - pre-commit
+  - xmitgcm
   - pip:
-    - git+https://github.com/MITgcm/xmitgcm.git
     - black-nb
     - numbagg
     - git+https://github.com/intake/intake-xarray.git
