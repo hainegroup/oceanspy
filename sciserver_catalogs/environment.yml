@@ -2,19 +2,18 @@ name: Oceanography
 channels:
   - conda-forge
 dependencies:
-  - python=3.8
+  - python=3.9
   - dask
   - distributed
   - bottleneck
   - netCDF4
-  - xarray>=0.14.1
-  - cartopy
+  - xarray
+  - cartopy<0.20
   - esmpy
-  - intake-xarray
   - geopy
   - xesmf
   - esmf
-  - xgcm>=0.2.0
+  - xgcm
   - Ipython
   - tqdm
   - pytest
@@ -34,11 +33,29 @@ dependencies:
   - xhistogram
   - nc-time-axis
   - fastjmd95
-  - cf_xarray
-  - oceanspy==0.2.0
   - pip
+  - pooch
+  - h5netcdf
+  - scipy
+  - pydap
+  - zarr
+  - fsspec
+  - cftime
+  - rasterio
+  - cfgrib
+  - matplotlib
+  - cf_xarray
+  - ipykernel
+  - numba
+  - xoak
+  - scikit-learn
+  - pys2index
+  - cmasher
+  - imageio
+  - pre-commit
+  - xmitgcm
   - pip:
-    - git+https://github.com/MITgcm/xmitgcm.git
     - black-nb
-    - pre-commit
     - numbagg
+    - git+https://github.com/intake/intake-xarray.git
+    - git+https://github.com/hainegroup/oceanspy.git
