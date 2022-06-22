@@ -10,62 +10,69 @@ import numpy as _np
 import xarray as _xr
 
 # From oceanspy (private)
-# from ._ospy_utils import _check_instance
+from ._ospy_utils import _check_instance
 
 # Recommended dependencies (private)
-# try:
-#     from geopy.distance import great_circle as _great_circle
-# except ImportError:  # pragma: no cover
-#     pass
+try:
+    from geopy.distance import great_circle as _great_circle
+except ImportError:  # pragma: no cover
+    pass
 
-def rel_lon(x,ref_lon):
-    '''
-    Change the definition of 0 longitude. 
+# Jiang being a bit lazy
+import numpy as np
+from numba import njit
+
+
+def rel_lon(x, ref_lon):
+    """
+    Change the definition of 0 longitude.
     Return how much east one need to go from ref_lon to x
-    This function aims to address the confusion caused by the discontinuity in longitude.
-    '''
-    return (x-ref_lon)%360
+    This function aims to address the confusion caused by
+    the discontinuity in longitude.
+    """
+    return (x - ref_lon) % 360
 
-# def spherical2cartesian(Y, X, R=None):
-#     """
-#     Convert spherical coordinates to cartesian.
 
-#     Parameters
-#     ----------
-#     Y: _xr.DataArray or array_like
-#         Spherical Y coordinate (latitude)
-#     X: _xr.DataArray or array_like
-#         Spherical X coordinate (longitude)
-#     R: scalar
-#         Earth radius in km
-#         If None, use geopy default
+def spherical2cartesian(Y, X, R=None):
+    """
+    Convert spherical coordinates to cartesian.
 
-#     Returns
-#     -------
-#     x: _xr.DataArray or array_like
-#         Cartesian x coordinate
-#     y: _xr.DataArray or array_like
-#         Cartesian y coordinate
-#     z: scalar
-#         Cartesian z coordinate
-#     """
-#     # Check parameters
-#     _check_instance({"R": R}, {"R": ["type(None)", "numpy.ScalarType"]})
+    Parameters
+    ----------
+    Y: _xr.DataArray or array_like
+        Spherical Y coordinate (latitude)
+    X: _xr.DataArray or array_like
+        Spherical X coordinate (longitude)
+    R: scalar
+        Earth radius in km
+        If None, use geopy default
 
-#     # Check parameters
-#     if R is None:
-#         from geopy.distance import EARTH_RADIUS
+    Returns
+    -------
+    x: _xr.DataArray or array_like
+        Cartesian x coordinate
+    y: _xr.DataArray or array_like
+        Cartesian y coordinate
+    z: scalar
+        Cartesian z coordinate
+    """
+    # Check parameters
+    _check_instance({"R": R}, {"R": ["type(None)", "numpy.ScalarType"]})
 
-#         R = EARTH_RADIUS
+    # Check parameters
+    if R is None:
+        from geopy.distance import EARTH_RADIUS
 
-#     # Convert
-#     Y_rad = _np.deg2rad(Y)
-#     X_rad = _np.deg2rad(X)
-#     x = R * _np.cos(Y_rad) * _np.cos(X_rad)
-#     y = R * _np.cos(Y_rad) * _np.sin(X_rad)
-#     z = R * _np.sin(Y_rad)
+        R = EARTH_RADIUS
 
-#     return x, y, z
+    # Convert
+    Y_rad = _np.deg2rad(Y)
+    X_rad = _np.deg2rad(X)
+    x = R * _np.cos(Y_rad) * _np.cos(X_rad)
+    y = R * _np.cos(Y_rad) * _np.sin(X_rad)
+    z = R * _np.sin(Y_rad)
+
+    return x, y, z
 
 
 def great_circle_path(lat1, lon1, lat2, lon2, delta_km=None, R=None):
@@ -594,12 +601,9 @@ def Coriolis_parameter(Y, omega=7.2921e-5):
 
     return f, e
 
-import numpy as np
-from numba import jit,njit
-from scipy import spatial
 
 @njit
-def spherical2cartesian(Y, X, R=6371.0):
+def spherical2cartesian_compiled(Y, X, R=6371.0):
     """
     Convert spherical coordinates to cartesian.
     Parameters
@@ -630,395 +634,405 @@ def spherical2cartesian(Y, X, R=6371.0):
 
     return x, y, z
 
+
 @njit
 def to_180(x):
-    '''
+    """
     convert any longitude scale to [-180,180)
-    '''
-    x = x%360
-    return x+(-1)*(x//180)*360
+    """
+    x = x % 360
+    return x + (-1) * (x // 180) * 360
 
-def local_to_latlon(u,v,cs,sn):
-    '''convert local vector to north-east '''
-    uu = u*cs-v*sn
-    vv = u*sn+v*cs
-    return uu,vv
 
-def get_combination(lst,select):
-    '''
+def local_to_latlon(u, v, cs, sn):
+    """convert local vector to north-east"""
+    uu = u * cs - v * sn
+    vv = u * sn + v * cs
+    return uu, vv
+
+
+def get_combination(lst, select):
+    """
     Iteratively find all the combination that
     has (select) amount of elements
     and every element belongs to lst
-    '''
-    n = len(lst)
-    if select==1:
+    """
+    if select == 1:
         return [[num] for num in lst]
     else:
         the_lst = []
-        for i,num in enumerate(lst):
-            sub_lst = get_combination(lst[i+1:],select-1)
+        for i, num in enumerate(lst):
+            sub_lst = get_combination(lst[i + 1 :], select - 1)
             for com in sub_lst:
                 com.append(num)
-#             print(sub_lst)
-            the_lst+=sub_lst
+            #             print(sub_lst)
+            the_lst += sub_lst
         return the_lst
 
-def grid2array(od,all_of_them = False):
-    '''
-    read the od grid things into numpy arrays 
+
+def grid2array(od, all_of_them=False):
+    """
+    read the od grid things into numpy arrays
     stored in this module
-    '''
-    global Z,Zl,dZ,dZl,dXC,dYC,dXG,dYG,XC,XG,YC,YG,CS,SN,tree,ts
-    Z = np.array(od._ds['Z'])
-    dZ = np.array(od._ds['drC'])
-    Zl = np.array(od._ds['Zl'])
-    dZl = np.array(od._ds['drF'])
+    """
+    global Z, Zl, dZ, dZl, dXC, dYC, dXG, dYG, XC, XG, YC, YG, CS, SN, tree, ts
+    Z = np.array(od._ds["Z"])
+    dZ = np.array(od._ds["drC"])
+    Zl = np.array(od._ds["Zl"])
+    dZl = np.array(od._ds["drF"])
 
-    dXC = np.array(od._ds['dxC']).astype('float32')
-    dYC = np.array(od._ds['dyC']).astype('float32')
+    dXC = np.array(od._ds["dxC"]).astype("float32")
+    dYC = np.array(od._ds["dyC"]).astype("float32")
 
-    XC = np.array(od._ds.XC).astype('float32')
-    YC = np.array(od._ds.YC).astype('float32')
-    
+    XC = np.array(od._ds.XC).astype("float32")
+    YC = np.array(od._ds.YC).astype("float32")
+
     if all_of_them:
-        dXG = np.array(od._ds['dxG']).astype('float32')
-        dYG = np.array(od._ds['dyG']).astype('float32')
-        XG = np.array(od._ds.XG).astype('float32')
-        YG = np.array(od._ds.YG).astype('float32')
+        dXG = np.array(od._ds["dxG"]).astype("float32")
+        dYG = np.array(od._ds["dyG"]).astype("float32")
+        XG = np.array(od._ds.XG).astype("float32")
+        YG = np.array(od._ds.YG).astype("float32")
 
-    CS = np.array(od._ds.CS).astype('float32')
-    SN = np.array(od._ds.SN).astype('float32')
-    ts = np.array(od._ds['time'])
-    ts = (ts-ts[0]).astype(float)
-    tree = od.create_tree('C')   
-    
+    CS = np.array(od._ds.CS).astype("float32")
+    SN = np.array(od._ds.SN).astype("float32")
+    ts = np.array(od._ds["time"])
+    ts = (ts - ts[0]).astype(float)
+    tree = od.create_tree("C")
+
+
 @njit
 def find_ind_z(array, value):
-    '''
+    """
     find the nearest level that is lower than the given level
-    '''
+    """
     array = np.asarray(array)
     idx = np.argmin(np.abs(array - value))
-    if array[idx]>value:
-    #z is special because it does not make much sense to interpolate beyond the two layers
-        idx+=1
+    if array[idx] > value:
+        # z is special because it does not make much sense
+        # to interpolate beyond the two layers
+        idx += 1
     return int(idx)
+
 
 @njit
 def find_ind_t(array, value):
-    '''
-    find the latest time that is before the given time
-    '''
+    """
+    find the latest time that
+    is before the given time
+    """
+
     array = np.asarray(array)
     idx = np.argmin(np.abs(array - value))
-    if array[idx]>value:
-        idx-=1
+    if array[idx] > value:
+        idx -= 1
     return int(idx)
 
-deg2m = 6271e3*np.pi/180
-def find_ind_h(Xs,Ys,tree,h_shape):
-    '''
+
+deg2m = 6271e3 * np.pi / 180
+
+
+def find_ind_h(Xs, Ys, tree, h_shape):
+    """
     use ckd tree to find the indexes,
     2-index case can be thinked about as having only 1 face,
     we don't support that yet. but i think it would be easy.
-    '''
-    x,y,z = spherical2cartesian(Ys,Xs)
-    _,index1d = tree.query(
-                np.array([x,y,z]).T
-            )
+    """
+    x, y, z = spherical2cartesian_compiled(Ys, Xs)
+    _, index1d = tree.query(np.array([x, y, z]).T)
     if len(h_shape) == 3:
-        faces,iys,ixs = np.unravel_index((index1d), h_shape)    
-    elif len(h_shape) ==2:
+        faces, iys, ixs = np.unravel_index((index1d), h_shape)
+    elif len(h_shape) == 2:
         faces = None
-        iys,ixs = np.unravel_index((index1d), h_shape)  
-    return faces,iys,ixs
+        iys, ixs = np.unravel_index((index1d), h_shape)
+    return faces, iys, ixs
+
 
 @njit
-def find_rel_z(depth,some_z,some_dz):
-    '''
+def find_rel_z(depth, some_z, some_dz):
+    """
     iz = the index
     rz  = how_much_higher_than_node/cell_size
     dz = cell_size
-    '''
+    """
     izs = np.zeros_like(depth)
-    rzs = np.ones_like(depth)*0.0#the way to create zeros with float32 type
-    dzs = np.ones_like(depth)*0.0
-    for i,d in enumerate(depth):
-        iz = find_ind_z(some_z,d)
-        izs[i] = iz 
-#         try:
-        delta_z = d-some_z[iz]
-#         except IndexError:
-#             raise IndexError('the point is too deep')
+    rzs = np.ones_like(depth) * 0.0  # the way to create zeros with float32 type
+    dzs = np.ones_like(depth) * 0.0
+    for i, d in enumerate(depth):
+        iz = find_ind_z(some_z, d)
+        izs[i] = iz
+        #         try:
+        delta_z = d - some_z[iz]
+        #         except IndexError:
+        #             raise IndexError('the point is too deep')
         Delta_z = some_dz[iz]
         dzs[i] = Delta_z
-        rzs[i] = delta_z/Delta_z
-    return izs,rzs,dzs
+        rzs[i] = delta_z / Delta_z
+    return izs, rzs, dzs
+
 
 @njit
-def find_rel_time(time,ts):
-    '''
+def find_rel_time(time, ts):
+    """
     it = the index
     rt  = how_much_later_than_the_closest_time/time_interval
     dt = time_interval
-    '''
+    """
     its = np.zeros(time.shape)
-    rts = np.ones(time.shape)*0.0
-    dts = np.ones(time.shape)*0.0
-    
-    for i,t in enumerate(time):
-        it = find_ind_t(ts,t)
-        delta_t = t-ts[it]
-        Delta_t = ts[it+1]-ts[it]
-        rt = delta_t/Delta_t
-        its[i] = it 
+    rts = np.ones(time.shape) * 0.0
+    dts = np.ones(time.shape) * 0.0
+
+    for i, t in enumerate(time):
+        it = find_ind_t(ts, t)
+        delta_t = t - ts[it]
+        Delta_t = ts[it + 1] - ts[it]
+        rt = delta_t / Delta_t
+        its[i] = it
         rts[i] = rt
         dts[i] = Delta_t
-    return its,rts,dts
+    return its, rts, dts
+
 
 @njit
-def find_rel_h_with_face(Xs,Ys,some_x,some_y,some_dx,some_dy,CS,SN,faces,iys,ixs):
-    '''
+def find_rel_h_with_face(
+    Xs, Ys, some_x, some_y, some_dx, some_dy, CS, SN, faces, iys, ixs
+):
+    """
     read find_rel_h for more info,
-    
-    '''
+
+    """
     n = len(Xs)
-    rx = np.ones_like(Xs)*0.0
-    ry = np.ones_like(Ys)*0.0
-    dx = np.ones_like(Xs)*0.0
-    dy = np.ones_like(Ys)*0.0
-    cs = np.ones_like(Xs)*0.0
-    sn = np.ones_like(Ys)*0.0
+    rx = np.ones_like(Xs) * 0.0
+    ry = np.ones_like(Ys) * 0.0
+    dx = np.ones_like(Xs) * 0.0
+    dy = np.ones_like(Ys) * 0.0
+    cs = np.ones_like(Xs) * 0.0
+    sn = np.ones_like(Ys) * 0.0
     for i in range(n):
-        base_lon = some_x[faces[i],iys[i],ixs[i]]
-        base_lat = some_y[faces[i],iys[i],ixs[i]]
+        base_lon = some_x[faces[i], iys[i], ixs[i]]
+        base_lat = some_y[faces[i], iys[i], ixs[i]]
 
-        cs[i] = CS[faces[i],iys[i],ixs[i]]
-        sn[i] = SN[faces[i],iys[i],ixs[i]]
+        cs[i] = CS[faces[i], iys[i], ixs[i]]
+        sn[i] = SN[faces[i], iys[i], ixs[i]]
 
-        Delta_x = some_dx[faces[i],iys[i],ixs[i]]
-        Delta_y = some_dy[faces[i],iys[i],ixs[i]]
-        
+        Delta_x = some_dx[faces[i], iys[i], ixs[i]]
+        Delta_y = some_dy[faces[i], iys[i], ixs[i]]
+
         dlon = to_180(Xs[i] - base_lon)
         dlat = to_180(Ys[i] - base_lat)
-        
+
         dx[i] = Delta_x
         dy[i] = Delta_y
 
-        rx[i] = (dlon*np.cos(base_lat*np.pi/180)*cs[i]+dlat*sn[i])*deg2m/Delta_x
-        ry[i] = (dlat*cs[i]-dlon*sn[i]*np.cos(base_lat*np.pi/180))*deg2m/Delta_y
-    
-    return rx,ry,cs,sn,dx,dy
+        rx[i] = (
+            (dlon * np.cos(base_lat * np.pi / 180) * cs[i] + dlat * sn[i])
+            * deg2m
+            / Delta_x
+        )
+        ry[i] = (
+            (dlat * cs[i] - dlon * sn[i] * np.cos(base_lat * np.pi / 180))
+            * deg2m
+            / Delta_y
+        )
+
+    return rx, ry, cs, sn, dx, dy
+
 
 @njit
-def find_rel_h_without_face(Xs,Ys,some_x,some_y,some_dx,some_dy,CS,SN,iys,ixs):
-    '''
+def find_rel_h_without_face(Xs, Ys, some_x, some_y, some_dx, some_dy, CS, SN, iys, ixs):
+    """
     read find_rel_h for more info,
-    
-    '''
+
+    """
     n = len(Xs)
-    rx = np.ones_like(Xs)*0.0
-    ry = np.ones_like(Ys)*0.0
-    dx = np.ones_like(Xs)*0.0
-    dy = np.ones_like(Ys)*0.0
-    cs = np.ones_like(Xs)*0.0
-    sn = np.ones_like(Ys)*0.0
+    rx = np.ones_like(Xs) * 0.0
+    ry = np.ones_like(Ys) * 0.0
+    dx = np.ones_like(Xs) * 0.0
+    dy = np.ones_like(Ys) * 0.0
+    cs = np.ones_like(Xs) * 0.0
+    sn = np.ones_like(Ys) * 0.0
     for i in range(n):
-        base_lon = some_x[iys[i],ixs[i]]
-        base_lat = some_y[iys[i],ixs[i]]
+        base_lon = some_x[iys[i], ixs[i]]
+        base_lat = some_y[iys[i], ixs[i]]
 
-        cs[i] = CS[iys[i],ixs[i]]
-        sn[i] = SN[iys[i],ixs[i]]
+        cs[i] = CS[iys[i], ixs[i]]
+        sn[i] = SN[iys[i], ixs[i]]
 
-        Delta_x = some_dx[iys[i],ixs[i]]
-        Delta_y = some_dy[iys[i],ixs[i]]
-        
+        Delta_x = some_dx[iys[i], ixs[i]]
+        Delta_y = some_dy[iys[i], ixs[i]]
+
         dlon = to_180(Xs[i] - base_lon)
         dlat = to_180(Ys[i] - base_lat)
-        
+
         dx[i] = Delta_x
         dy[i] = Delta_y
 
-        rx[i] = (dlon*np.cos(base_lat*np.pi/180)*cs[i]+dlat*sn[i])*deg2m/Delta_x
-        ry[i] = (dlat*cs[i]-dlon*sn[i]*np.cos(base_lat*np.pi/180))*deg2m/Delta_y
-    
-    return rx,ry,cs,sn,dx,dy
+        rx[i] = (
+            (dlon * np.cos(base_lat * np.pi / 180) * cs[i] + dlat * sn[i])
+            * deg2m
+            / Delta_x
+        )
+        ry[i] = (
+            (dlat * cs[i] - dlon * sn[i] * np.cos(base_lat * np.pi / 180))
+            * deg2m
+            / Delta_y
+        )
 
-def find_rel_h(Xs,Ys,some_x,some_y,some_dx,some_dy,CS,SN,tree):
-    '''
+    return rx, ry, cs, sn, dx, dy
+
+
+def find_rel_h(Xs, Ys, some_x, some_y, some_dx, some_dy, CS, SN, tree):
+    """
     very similar to find_rel_time/v
     rx,ry,dx,dy are defined the same way
     for example
     rx = "how much to the right of the node"/"size of the cell in left-right direction"
     dx = "size of the cell in left-right direction"
-    
+
     cs,sn is just the cos and sin of the grid orientation.
     It will come in handy when we transfer vectors.
-    '''
+    """
     h_shape = some_x.shape
-    faces,iys,ixs = find_ind_h(Xs,
-                               Ys,
-                               tree,
-                               h_shape
-                              )
+    faces, iys, ixs = find_ind_h(Xs, Ys, tree, h_shape)
     if faces is not None:
-        rx,ry,cs,sn,dx,dy = find_rel_h_with_face(Xs,
-                                               Ys,
-                                               some_x,
-                                               some_y,
-                                               some_dx,
-                                               some_dy,
-                                               CS,
-                                               SN,
-                                               faces,
-                                               iys,
-                                               ixs)
+        rx, ry, cs, sn, dx, dy = find_rel_h_with_face(
+            Xs, Ys, some_x, some_y, some_dx, some_dy, CS, SN, faces, iys, ixs
+        )
     else:
-        rx,ry,cs,sn,dx,dy = find_rel_h_without_face(Xs,
-                                               Ys,
-                                               some_x,
-                                               some_y,
-                                               some_dx,
-                                               some_dy,
-                                               CS,
-                                               SN,
-                                               iys,
-                                               ixs)
-    return faces,iys,ixs,rx,ry,cs,sn,dx,dy
+        rx, ry, cs, sn, dx, dy = find_rel_h_without_face(
+            Xs, Ys, some_x, some_y, some_dx, some_dy, CS, SN, iys, ixs
+        )
+    return faces, iys, ixs, rx, ry, cs, sn, dx, dy
 
-def find_rel_2d(Xs,Ys,od = None,gridtype = 'C'):
+
+def find_rel_2d(Xs, Ys, od=None, gridtype="C"):
     # give find_rel_h a new cover
-    global dXC,dYC,dZ,dXG,dYG,dZl,XC,XG,YC,YG,Z,Zl,CS,SN,tree
-    if od != None:
-        dXC = np.array(od._ds['dxC']).astype('float32')
-        dYC = np.array(od._ds['dyC']).astype('float32')
-        dXG = np.array(od._ds['dxG']).astype('float32')
-        dYG = np.array(od._ds['dyG']).astype('float32')
+    global dXC, dYC, dZ, dXG, dYG, dZl, XC, XG, YC, YG, Z, Zl, CS, SN, tree
+    if od is not None:
+        dXC = np.array(od._ds["dxC"]).astype("float32")
+        dYC = np.array(od._ds["dyC"]).astype("float32")
+        dXG = np.array(od._ds["dxG"]).astype("float32")
+        dYG = np.array(od._ds["dyG"]).astype("float32")
 
-        XC = np.array(od._ds.XC).astype('float32')
-        YC = np.array(od._ds.YC).astype('float32')
-        XG = np.array(od._ds.XG).astype('float32')
-        YG = np.array(od._ds.YG).astype('float32')
+        XC = np.array(od._ds.XC).astype("float32")
+        YC = np.array(od._ds.YC).astype("float32")
+        XG = np.array(od._ds.XG).astype("float32")
+        YG = np.array(od._ds.YG).astype("float32")
 
-        CS = np.array(od._ds.CS).astype('float32')
-        SN = np.array(od._ds.SN).astype('float32')
+        CS = np.array(od._ds.CS).astype("float32")
+        SN = np.array(od._ds.SN).astype("float32")
         tree = od.create_tree(gridtype)
-    if gridtype == 'C':
+    if gridtype == "C":
         some_x = XC
         some_y = YC
         some_dx = dXC
         some_dy = dYC
-    if gridtype == 'G':
+    if gridtype == "G":
         some_x = XG
         some_y = YG
         some_dx = dXG
         some_dy = dYG
-    faces,iys,ixs,rx,ry,cs,sn,dx,dy = find_rel_h(Xs,Ys,
-                                                 some_x,some_y,
-                                                 some_dx,some_dy,
-                                                 CS,SN,
-                                                 tree)
-    return faces,iys,ixs,rx,ry,cs,sn,dx,dy
+    faces, iys, ixs, rx, ry, cs, sn, dx, dy = find_rel_h(
+        Xs, Ys, some_x, some_y, some_dx, some_dy, CS, SN, tree
+    )
+    return faces, iys, ixs, rx, ry, cs, sn, dx, dy
 
-def find_rel_3d(x,y,z,od = None,htype = 'C',vtype = 'C'):
+
+def find_rel_3d(x, y, z, od=None, htype="C", vtype="C"):
     # patch rel_h,rel_z together and give them a simpler interface
-    global Z,Zl,dZ,dZl,dXC,dYC,dXG,dYG,XC,XG,YC,YG,CS,SN,tree,ts
-    if od!=None:
-        Z = np.array(od._ds['Z'])
-        Zl = np.array(od._ds['Zl'])
-        dZ = np.array(od._ds['drC'])
-        dZl = np.array(od._ds['drF'])
-        
-        dXC = np.array(od._ds['dxC']).astype('float32')
-        dYC = np.array(od._ds['dyC']).astype('float32')
-        dXG = np.array(od._ds['dxG']).astype('float32')
-        dYG = np.array(od._ds['dyG']).astype('float32')
+    global Z, Zl, dZ, dZl, dXC, dYC, dXG, dYG, XC, XG, YC, YG, CS, SN, tree, ts
+    if od is not None:
+        Z = np.array(od._ds["Z"])
+        Zl = np.array(od._ds["Zl"])
+        dZ = np.array(od._ds["drC"])
+        dZl = np.array(od._ds["drF"])
 
-        XC = np.array(od._ds.XC).astype('float32')
-        YC = np.array(od._ds.YC).astype('float32')
-        XG = np.array(od._ds.XG).astype('float32')
-        YG = np.array(od._ds.YG).astype('float32')
+        dXC = np.array(od._ds["dxC"]).astype("float32")
+        dYC = np.array(od._ds["dyC"]).astype("float32")
+        dXG = np.array(od._ds["dxG"]).astype("float32")
+        dYG = np.array(od._ds["dyG"]).astype("float32")
 
-        CS = np.array(od._ds.CS).astype('float32')
-        SN = np.array(od._ds.SN).astype('float32')
-    if htype == 'C':
+        XC = np.array(od._ds.XC).astype("float32")
+        YC = np.array(od._ds.YC).astype("float32")
+        XG = np.array(od._ds.XG).astype("float32")
+        YG = np.array(od._ds.YG).astype("float32")
+
+        CS = np.array(od._ds.CS).astype("float32")
+        SN = np.array(od._ds.SN).astype("float32")
+    if htype == "C":
         some_x = XC
         some_y = YC
         some_dx = dXC
         some_dy = dYC
-    if htype == 'G':
+    if htype == "G":
         some_x = XG
         some_y = YG
         some_dx = dXG
         some_dy = dYG
-    if vtype == 'C':
+    if vtype == "C":
         some_z = Z
         some_dz = dZ
-    if vtype == 'W':
+    if vtype == "W":
         some_z = Zl
         some_dz = dZl
-    iz,rz,dz = find_rel_z(z,some_z,some_dz)
-    faces,iys,ixs,rx,ry,cs,sn,dx,dy = find_rel_h(x,y,
-                                                 some_x,some_y,
-                                                 some_dx,some_dy,
-                                                 CS,SN,
-                                                 tree)
+    iz, rz, dz = find_rel_z(z, some_z, some_dz)
+    faces, iys, ixs, rx, ry, cs, sn, dx, dy = find_rel_h(
+        x, y, some_x, some_y, some_dx, some_dy, CS, SN, tree
+    )
     iz = iz.astype(int)
-    return iz,faces,iys,ixs,rx,ry,rz,cs,sn,dx,dy,dz 
+    return iz, faces, iys, ixs, rx, ry, rz, cs, sn, dx, dy, dz
+
 
 # import time
-def find_rel_4d(x,y,z,t,od = None,htype = 'C',vtype = 'C'):
+def find_rel_4d(x, y, z, t, od=None, htype="C", vtype="C"):
     # patch rel_h,rel_z,rel_time together and give them a simpler interface
-    global Z,Zl,dZ,dZl,dXC,dYC,dXG,dYG,XC,XG,YC,YG,CS,SN,tree,ts
-    if od!=None:
-        Z = np.array(od._ds['Z'])
-        Zl = np.array(od._ds['Zl'])
-        dZ = np.array(od._ds['drC'])
-        dZl = np.array(od._ds['drF'])
-        
-        dXC = np.array(od._ds['dxC']).astype('float32')
-        dYC = np.array(od._ds['dyC']).astype('float32')
-        dXG = np.array(od._ds['dxG']).astype('float32')
-        dYG = np.array(od._ds['dyG']).astype('float32')
+    global Z, Zl, dZ, dZl, dXC, dYC, dXG, dYG, XC, XG, YC, YG, CS, SN, tree, ts
+    if od is not None:
+        Z = np.array(od._ds["Z"])
+        Zl = np.array(od._ds["Zl"])
+        dZ = np.array(od._ds["drC"])
+        dZl = np.array(od._ds["drF"])
 
-        XC = np.array(od._ds.XC).astype('float32')
-        YC = np.array(od._ds.YC).astype('float32')
-        XG = np.array(od._ds.XG).astype('float32')
-        YG = np.array(od._ds.YG).astype('float32')
+        dXC = np.array(od._ds["dxC"]).astype("float32")
+        dYC = np.array(od._ds["dyC"]).astype("float32")
+        dXG = np.array(od._ds["dxG"]).astype("float32")
+        dYG = np.array(od._ds["dyG"]).astype("float32")
 
-        CS = np.array(od._ds.CS).astype('float32')
-        SN = np.array(od._ds.SN).astype('float32')
-        ts = np.array(od._ds['time'])
-        ts = (ts-ts[0]).astype(float)
+        XC = np.array(od._ds.XC).astype("float32")
+        YC = np.array(od._ds.YC).astype("float32")
+        XG = np.array(od._ds.XG).astype("float32")
+        YG = np.array(od._ds.YG).astype("float32")
+
+        CS = np.array(od._ds.CS).astype("float32")
+        SN = np.array(od._ds.SN).astype("float32")
+        ts = np.array(od._ds["time"])
+        ts = (ts - ts[0]).astype(float)
         tree = od.create_tree(htype)
-#     print(time.time()-t1)
-    if htype == 'C':
+    #     print(time.time()-t1)
+    if htype == "C":
         some_x = XC
         some_y = YC
         some_dx = dXC
         some_dy = dYC
-    if htype == 'G':
+    if htype == "G":
         some_x = XG
         some_y = YG
         some_dx = dXG
         some_dy = dYG
-    if vtype == 'C':
+    if vtype == "C":
         some_z = Z
         some_dz = dZ
-    if vtype == 'W':
+    if vtype == "W":
         some_z = Zl
         some_dz = dZl
-#     print(time.time()-t1)
-    iz,rz,dz = find_rel_z(z,some_z,some_dz)
-#     print(time.time()-t1)
-    faces,iys,ixs,rx,ry,cs,sn,dx,dy = find_rel_h(x,y,
-                                                 some_x,some_y,
-                                                 some_dx,some_dy,
-                                                 CS,SN,
-                                                 tree)
-#     print(time.time()-t1)
-    it,rt,dt = find_rel_time(t,ts)
-#     print(time.time()-t1)
+    #     print(time.time()-t1)
+    iz, rz, dz = find_rel_z(z, some_z, some_dz)
+    #     print(time.time()-t1)
+    faces, iys, ixs, rx, ry, cs, sn, dx, dy = find_rel_h(
+        x, y, some_x, some_y, some_dx, some_dy, CS, SN, tree
+    )
+    #     print(time.time()-t1)
+    it, rt, dt = find_rel_time(t, ts)
+    #     print(time.time()-t1)
     iz = iz.astype(int)
     it = it.astype(int)
-    return it,iz,faces,iys,ixs,rx,ry,rz,rt,cs,sn,dx,dy,dz,dt
+    return it, iz, faces, iys, ixs, rx, ry, rz, rt, cs, sn, dx, dy, dz, dt

@@ -263,17 +263,44 @@ def test_reduce_variables(od, varList):
 @pytest.mark.parametrize(
     "XRange, YRange, ZRange, varList, transformation, centered, NZ,clause",
     [
-        ([-90, 20], [20, 80], None, ["T"], "arctic_crown", "Atlantic",50,"np.logical_and(-10<new_od._ds.XC,new_od._ds.XC<0).any().compute()"),
-        ([20,-90], [20, 80], None, ["T"], "arctic_crown", "Atlantic",50,"(100<new_od._ds.XC).any().compute()"),
-        ([-179, 179], [20, 80], None, ["U", "V"], "arctic_crown", "Atlantic", 50,"True"),
-        ([-31, -2], [58, 68.2], None, ["T"], "arctic_crown", "Atlantic", 50,"True"),
-        (None, None, None, ["T"], "arctic_crown", "Atlantic", 50,"True"),
-        (None, None, None, None, "wrong", "Atlantic", 50,"True"),
-        (None, None, None, None, False, "Atlantic", np.nan,"True"),
+        (
+            [-90, 20],
+            [20, 80],
+            None,
+            ["T"],
+            "arctic_crown",
+            "Atlantic",
+            50,
+            "np.logical_and(-10<new_od._ds.XC,new_od._ds.XC<0).any().compute()",
+        ),
+        (
+            [20, -90],
+            [20, 80],
+            None,
+            ["T"],
+            "arctic_crown",
+            "Atlantic",
+            50,
+            "(100<new_od._ds.XC).any().compute()",
+        ),
+        (
+            [-179, 179],
+            [20, 80],
+            None,
+            ["U", "V"],
+            "arctic_crown",
+            "Atlantic",
+            50,
+            "True",
+        ),
+        ([-31, -2], [58, 68.2], None, ["T"], "arctic_crown", "Atlantic", 50, "True"),
+        (None, None, None, ["T"], "arctic_crown", "Atlantic", 50, "True"),
+        (None, None, None, None, "wrong", "Atlantic", 50, "True"),
+        (None, None, None, None, False, "Atlantic", np.nan, "True"),
     ],
 )
 def test_cutout_faces(
-    od, XRange, YRange, ZRange, varList, transformation, centered, NZ,clause
+    od, XRange, YRange, ZRange, varList, transformation, centered, NZ, clause
 ):
     args = {
         "varList": varList,

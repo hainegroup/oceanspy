@@ -351,14 +351,17 @@ def cutout(
     # Address the discontinuity in longitude
     ref_lon = 180
     if XRange is not None:
-        if _rel_lon(XRange[0],ref_lon)>_rel_lon(XRange[-1],ref_lon):# if the range crosses the discontinuity line. Redefining longitude is necessary.
-            ref_lon = XRange[0]-(XRange[0]-XRange[-1])/3
-            
+        if _rel_lon(XRange[0], ref_lon) > _rel_lon(
+            XRange[-1], ref_lon
+        ):  # if the range crosses the discontinuity line.
+            # Redefining longitude is necessary.
+            ref_lon = XRange[0] - (XRange[0] - XRange[-1]) / 3
+
     # Initialize horizontal mask
     if XRange is not None or YRange is not None:
-        
+
         maskH, dmaskH, XRange, YRange = get_maskH(
-            ds, add_Hbdr, add_Vbdr, XRange, YRange,ref_lon = ref_lon
+            ds, add_Hbdr, add_Vbdr, XRange, YRange, ref_lon=ref_lon
         )
     if transformation is not False and "face" in ds.dims:
         if XRange is None and YRange is None:
@@ -394,7 +397,7 @@ def cutout(
             # Unpack the new dataset without face as dimension
             ds = od._ds
             maskH, dmaskH, XRange, YRange = get_maskH(
-                ds, add_Hbdr, add_Vbdr, XRange, YRange,ref_lon = ref_lon
+                ds, add_Hbdr, add_Vbdr, XRange, YRange, ref_lon=ref_lon
             )
         elif transformation not in _transf_list:
             raise ValueError("transformation not supported")
@@ -493,8 +496,10 @@ def cutout(
         maskC = _xr.where(
             _np.logical_and(
                 _np.logical_and(ds["YC"] >= minY, ds["YC"] <= maxY),
-                _np.logical_and(_rel_lon(ds["XC"],ref_lon) >= _rel_lon(minX,ref_lon),
-                                _rel_lon(ds["XC"],ref_lon) <= _rel_lon(maxX,ref_lon)),
+                _np.logical_and(
+                    _rel_lon(ds["XC"], ref_lon) >= _rel_lon(minX, ref_lon),
+                    _rel_lon(ds["XC"], ref_lon) <= _rel_lon(maxX, ref_lon),
+                ),
             ),
             1,
             0,
@@ -502,8 +507,10 @@ def cutout(
         maskG = _xr.where(
             _np.logical_and(
                 _np.logical_and(ds["YG"] >= minY, ds["YG"] <= maxY),
-                _np.logical_and(_rel_lon(ds["XG"],ref_lon) >= _rel_lon(minX,ref_lon),
-                                _rel_lon(ds["XG"],ref_lon) <= _rel_lon(maxX,ref_lon)),
+                _np.logical_and(
+                    _rel_lon(ds["XG"], ref_lon) >= _rel_lon(minX, ref_lon),
+                    _rel_lon(ds["XG"], ref_lon) <= _rel_lon(maxX, ref_lon),
+                ),
             ),
             1,
             0,
@@ -511,8 +518,10 @@ def cutout(
         maskU = _xr.where(
             _np.logical_and(
                 _np.logical_and(ds["YU"] >= minY, ds["YU"] <= maxY),
-                _np.logical_and(_rel_lon(ds["XU"],ref_lon) >= _rel_lon(minX,ref_lon),
-                                _rel_lon(ds["XU"],ref_lon) <= _rel_lon(maxX,ref_lon)),
+                _np.logical_and(
+                    _rel_lon(ds["XU"], ref_lon) >= _rel_lon(minX, ref_lon),
+                    _rel_lon(ds["XU"], ref_lon) <= _rel_lon(maxX, ref_lon),
+                ),
             ),
             1,
             0,
@@ -520,8 +529,10 @@ def cutout(
         maskV = _xr.where(
             _np.logical_and(
                 _np.logical_and(ds["YV"] >= minY, ds["YV"] <= maxY),
-                _np.logical_and(_rel_lon(ds["XV"],ref_lon) >= _rel_lon(minX,ref_lon),
-                                _rel_lon(ds["XV"],ref_lon) <= _rel_lon(maxX,ref_lon)),
+                _np.logical_and(
+                    _rel_lon(ds["XV"], ref_lon) >= _rel_lon(minX, ref_lon),
+                    _rel_lon(ds["XV"], ref_lon) <= _rel_lon(maxX, ref_lon),
+                ),
             ),
             1,
             0,
@@ -1358,7 +1369,7 @@ def particle_properties(od, times, Ypart, Xpart, Zpart, **kwargs):
     return od
 
 
-def get_maskH(ds, add_Hbdr, add_Vbdr, XRange, YRange,ref_lon=0):
+def get_maskH(ds, add_Hbdr, add_Vbdr, XRange, YRange, ref_lon=0):
     """Define this function to avoid repeated code. First time this runs,
     the objective is to figure out which faces survive the cutout. This info
     is then passed, when transforming llc-grids, to llc_rearrange. Second
@@ -1390,8 +1401,11 @@ def get_maskH(ds, add_Hbdr, add_Vbdr, XRange, YRange,ref_lon=0):
             diff = _np.fabs(ds["XG"] - X)
             XRange[i] = ds["XG"].where(diff == diff.min()).min().values
         maskH = maskH.where(
-            _np.logical_and(_rel_lon(ds["XG"],ref_lon) >= _rel_lon(XRange[0],ref_lon),
-                            _rel_lon(ds["XG"],ref_lon) <= _rel_lon(XRange[-1],ref_lon)), 0
+            _np.logical_and(
+                _rel_lon(ds["XG"], ref_lon) >= _rel_lon(XRange[0], ref_lon),
+                _rel_lon(ds["XG"], ref_lon) <= _rel_lon(XRange[-1], ref_lon),
+            ),
+            0,
         )
     # Can't be all zeros
     if maskH.sum() == 0:
