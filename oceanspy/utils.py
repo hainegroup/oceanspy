@@ -20,7 +20,11 @@ except ImportError:  # pragma: no cover
 
 # Jiang being a bit lazy
 import numpy as np
-from numba import njit
+
+try:
+    from numba import njit
+except ImportError:  # pragma: no cover
+    pass
 
 
 def rel_lon(x, ref_lon):
