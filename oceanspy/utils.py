@@ -24,7 +24,9 @@ import numpy as np
 try:
     from numba import njit
 except ImportError:  # pragma: no cover
-    pass
+
+    def njit(f):
+        return f
 
 
 def rel_lon(x, ref_lon):
