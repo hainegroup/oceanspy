@@ -34,6 +34,7 @@ from ._ospy_utils import (
     _rename_aliased,
 )
 from .llc_rearrange import LLCtransformation as _llc_trans
+from .utils import rel_lon as _rel_lon
 
 # Recommended dependencies (private)
 try:
@@ -347,13 +348,18 @@ def cutout(
     elif add_Vbdr is False:
         add_Vbdr = 0
 
+    # Address the discontinuity in longitude
+    ref_lon = 180
+    if XRange is not None:
+        if _rel_lon(XRange[0],ref_lon)>_rel_lon(XRange[-1],ref_lon):# if the range crosses the discontinuity line. Redefining longitude is necessary.
+            ref_lon = XRange[0]-(XRange[0]-XRange[-1])/3
+            
     # Initialize horizontal mask
     if XRange is not None or YRange is not None:
-
+        
         maskH, dmaskH, XRange, YRange = get_maskH(
-            ds, add_Hbdr, add_Vbdr, XRange, YRange
+            ds, add_Hbdr, add_Vbdr, XRange, YRange,ref_lon = ref_lon
         )
-
     if transformation is not False and "face" in ds.dims:
         if XRange is None and YRange is None:
             faces = "all"
@@ -388,7 +394,7 @@ def cutout(
             # Unpack the new dataset without face as dimension
             ds = od._ds
             maskH, dmaskH, XRange, YRange = get_maskH(
-                ds, add_Hbdr, add_Vbdr, XRange, YRange
+                ds, add_Hbdr, add_Vbdr, XRange, YRange,ref_lon = ref_lon
             )
         elif transformation not in _transf_list:
             raise ValueError("transformation not supported")
@@ -487,7 +493,8 @@ def cutout(
         maskC = _xr.where(
             _np.logical_and(
                 _np.logical_and(ds["YC"] >= minY, ds["YC"] <= maxY),
-                _np.logical_and(ds["XC"] >= minX, ds["XC"] <= maxX),
+                _np.logical_and(_rel_lon(ds["XC"],ref_lon) >= _rel_lon(minX,ref_lon),
+                                _rel_lon(ds["XC"],ref_lon) <= _rel_lon(maxX,ref_lon)),
             ),
             1,
             0,
@@ -495,7 +502,8 @@ def cutout(
         maskG = _xr.where(
             _np.logical_and(
                 _np.logical_and(ds["YG"] >= minY, ds["YG"] <= maxY),
-                _np.logical_and(ds["XG"] >= minX, ds["XG"] <= maxX),
+                _np.logical_and(_rel_lon(ds["XG"],ref_lon) >= _rel_lon(minX,ref_lon),
+                                _rel_lon(ds["XG"],ref_lon) <= _rel_lon(maxX,ref_lon)),
             ),
             1,
             0,
@@ -503,7 +511,8 @@ def cutout(
         maskU = _xr.where(
             _np.logical_and(
                 _np.logical_and(ds["YU"] >= minY, ds["YU"] <= maxY),
-                _np.logical_and(ds["XU"] >= minX, ds["XU"] <= maxX),
+                _np.logical_and(_rel_lon(ds["XU"],ref_lon) >= _rel_lon(minX,ref_lon),
+                                _rel_lon(ds["XU"],ref_lon) <= _rel_lon(maxX,ref_lon)),
             ),
             1,
             0,
@@ -511,7 +520,8 @@ def cutout(
         maskV = _xr.where(
             _np.logical_and(
                 _np.logical_and(ds["YV"] >= minY, ds["YV"] <= maxY),
-                _np.logical_and(ds["XV"] >= minX, ds["XV"] <= maxX),
+                _np.logical_and(_rel_lon(ds["XV"],ref_lon) >= _rel_lon(minX,ref_lon),
+                                _rel_lon(ds["XV"],ref_lon) <= _rel_lon(maxX,ref_lon)),
             ),
             1,
             0,
@@ -1348,7 +1358,7 @@ def particle_properties(od, times, Ypart, Xpart, Zpart, **kwargs):
     return od
 
 
-def get_maskH(ds, add_Hbdr, add_Vbdr, XRange, YRange):
+def get_maskH(ds, add_Hbdr, add_Vbdr, XRange, YRange,ref_lon=0):
     """Define this function to avoid repeated code. First time this runs,
     the objective is to figure out which faces survive the cutout. This info
     is then passed, when transforming llc-grids, to llc_rearrange. Second
@@ -1372,7 +1382,7 @@ def get_maskH(ds, add_Hbdr, add_Vbdr, XRange, YRange):
 
     if XRange is not None:
         # Use arrays
-        XRange = _np.asarray([_np.min(XRange) - add_Hbdr, _np.max(XRange) + add_Hbdr])
+        XRange = _np.asarray([XRange[0] - add_Hbdr, XRange[-1] + add_Hbdr])
         XRange = XRange.astype(ds["XG"].dtype)
 
         # Get the closest
@@ -1380,7 +1390,8 @@ def get_maskH(ds, add_Hbdr, add_Vbdr, XRange, YRange):
             diff = _np.fabs(ds["XG"] - X)
             XRange[i] = ds["XG"].where(diff == diff.min()).min().values
         maskH = maskH.where(
-            _np.logical_and(ds["XG"] >= XRange[0], ds["XG"] <= XRange[-1]), 0
+            _np.logical_and(_rel_lon(ds["XG"],ref_lon) >= _rel_lon(XRange[0],ref_lon),
+                            _rel_lon(ds["XG"],ref_lon) <= _rel_lon(XRange[-1],ref_lon)), 0
         )
     # Can't be all zeros
     if maskH.sum() == 0:
