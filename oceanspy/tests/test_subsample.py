@@ -261,18 +261,19 @@ def test_reduce_variables(od, varList):
 
 @pytest.mark.parametrize("od", [ECCOod])
 @pytest.mark.parametrize(
-    "XRange, YRange, ZRange, varList, transformation, centered, NZ",
+    "XRange, YRange, ZRange, varList, transformation, centered, NZ,clause",
     [
-        ([-90, 20], [20, 80], None, ["T"], "arctic_crown", "Atlantic", 50),
-        ([-179, 179], [20, 80], None, ["U", "V"], "arctic_crown", "Atlantic", 50),
-        ([-31, -2], [58, 68.2], None, ["T"], "arctic_crown", "Atlantic", 50),
-        (None, None, None, ["T"], "arctic_crown", "Atlantic", 50),
-        (None, None, None, None, "wrong", "Atlantic", 50),
-        (None, None, None, None, False, "Atlantic", np.nan),
+        ([-90, 20], [20, 80], None, ["T"], "arctic_crown", "Atlantic",50,"np.logical_and(-10<new_od._ds.XC,new_od._ds.XC<0).any().compute()"),
+        ([20,-90], [20, 80], None, ["T"], "arctic_crown", "Atlantic",50,"(100<new_od._ds.XC).any().compute()"),
+        ([-179, 179], [20, 80], None, ["U", "V"], "arctic_crown", "Atlantic", 50,"True"),
+        ([-31, -2], [58, 68.2], None, ["T"], "arctic_crown", "Atlantic", 50,"True"),
+        (None, None, None, ["T"], "arctic_crown", "Atlantic", 50,"True"),
+        (None, None, None, None, "wrong", "Atlantic", 50,"True"),
+        (None, None, None, None, False, "Atlantic", np.nan,"True"),
     ],
 )
 def test_cutout_faces(
-    od, XRange, YRange, ZRange, varList, transformation, centered, NZ
+    od, XRange, YRange, ZRange, varList, transformation, centered, NZ,clause
 ):
     args = {
         "varList": varList,
@@ -291,6 +292,7 @@ def test_cutout_faces(
         new_dims = new_od.dataset.dims
         assert (set(old_dims) - set(new_dims)) == set(["face"])
         assert new_od._ds.dims["Z"] == NZ
+        assert eval(clause)
 
 
 # =======
