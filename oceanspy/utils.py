@@ -19,11 +19,15 @@ except ImportError:  # pragma: no cover
     pass
 
 import numpy as np
+
 try:
     import numba
+
     has_numba = True
 except ImportError:
     has_numba = False
+
+
 def compilable(f):
     if has_numba:
         return numba.njit(f)
