@@ -831,9 +831,9 @@ class OceanDataset:
 
         # Stack
         rid_value = 777777
-        x_stack = x.stack(points=x.dims).fillna(rid_value).values
-        y_stack = y.stack(points=y.dims).fillna(rid_value).values
-        z_stack = z.stack(points=z.dims).fillna(rid_value).values
+        x_stack = x.stack(points=x.dims).fillna(rid_value).data
+        y_stack = y.stack(points=y.dims).fillna(rid_value).data
+        z_stack = z.stack(points=z.dims).fillna(rid_value).data
 
         # Construct KD-tree
         tree = _spatial.cKDTree(_np.column_stack((x_stack, y_stack, z_stack)))

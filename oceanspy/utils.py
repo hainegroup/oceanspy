@@ -18,15 +18,16 @@ try:
 except ImportError:  # pragma: no cover
     pass
 
-# Jiang being a bit lazy
 import numpy as np
-
 try:
-    from numba import njit
-except ImportError:  # pragma: no cover
-
-    def njit(f):
-        return f
+    import numba
+    has_numba = True
+except ImportError:
+    has_numba = False
+def compilable(f):
+    if has_numba:
+        return numba.njit(f)
+    return f
 
 
 def rel_lon(x, ref_lon):
@@ -608,7 +609,7 @@ def Coriolis_parameter(Y, omega=7.2921e-5):
     return f, e
 
 
-@njit
+@compilable
 def spherical2cartesian_compiled(Y, X, R=6371.0):
     """
     Convert spherical coordinates to cartesian.
@@ -641,7 +642,7 @@ def spherical2cartesian_compiled(Y, X, R=6371.0):
     return x, y, z
 
 
-@njit
+@compilable
 def to_180(x):
     """
     convert any longitude scale to [-180,180)
@@ -706,7 +707,7 @@ def grid2array(od, all_of_them=False):
     tree = od.create_tree("C")
 
 
-@njit
+@compilable
 def find_ind_z(array, value):
     """
     find the nearest level that is lower than the given level
@@ -720,7 +721,7 @@ def find_ind_z(array, value):
     return int(idx)
 
 
-@njit
+@compilable
 def find_ind_t(array, value):
     """
     find the latest time that
@@ -753,7 +754,7 @@ def find_ind_h(Xs, Ys, tree, h_shape):
     return faces, iys, ixs
 
 
-@njit
+@compilable
 def find_rel_z(depth, some_z, some_dz):
     """
     iz = the index
@@ -776,7 +777,7 @@ def find_rel_z(depth, some_z, some_dz):
     return izs, rzs, dzs
 
 
-@njit
+@compilable
 def find_rel_time(time, ts):
     """
     it = the index
@@ -798,7 +799,7 @@ def find_rel_time(time, ts):
     return its, rts, dts
 
 
-@njit
+@compilable
 def find_rel_h_with_face(
     Xs, Ys, some_x, some_y, some_dx, some_dy, CS, SN, faces, iys, ixs
 ):
@@ -843,7 +844,7 @@ def find_rel_h_with_face(
     return rx, ry, cs, sn, dx, dy
 
 
-@njit
+@compilable
 def find_rel_h_without_face(Xs, Ys, some_x, some_y, some_dx, some_dy, CS, SN, iys, ixs):
     """
     read find_rel_h for more info,
