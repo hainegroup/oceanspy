@@ -37,6 +37,8 @@ from .llc_rearrange import LLCtransformation as _llc_trans
 from .utils import rel_lon as _rel_lon
 
 # Recommended dependencies (private)
+# Weird issue: I got NameError(_xe not defined) in 3.10 test
+# I have changed nothing here. And everything works fine yesterday
 try:
     from geopy.distance import great_circle as _great_circle
 except ImportError:  # pragma: no cover
