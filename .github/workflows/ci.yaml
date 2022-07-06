@@ -17,9 +17,9 @@ jobs:
     name: Build (${{ matrix.python-version }})
     runs-on: ubuntu-latest
     strategy:
-      fail-fast: false
       matrix:
-        python-version: ["3.9"]
+        include:
+        - python-version: '3.9'
     steps:
       - uses: actions/checkout@v3
       
