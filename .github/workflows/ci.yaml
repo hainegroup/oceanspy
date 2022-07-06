@@ -30,9 +30,9 @@ jobs:
           environment-name: oceanspy_test
           channels: conda-forge
           cache-env: true
-          cache-env-key: ubuntu-latest-${{ '{{ matrix.python-version }}' }}
+          cache-env-key: ubuntu-latest-${{ matrix.python-version }}
           extra-specs: |
-            python=${{ '{{matrix.python-version }}' }}
+            python=${{ matrix.python-version }}
 
       - name: Set up conda environment
         shell: bash -l {0}
