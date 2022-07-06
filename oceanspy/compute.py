@@ -2835,6 +2835,20 @@ def salt_budget(od):
 
 
 def missing_cs_sn(od):
+    """
+    Compute missing grid orientaioon.
+
+    Parameters
+    ----------
+    od: OceanDataset
+        oceandataset used to compute
+
+    Returns
+    -------
+    od: OceanDataset
+        | CS: cosine of the orientation angle
+        | SN: sine of the orientation angle
+    """
     xc = _np.deg2rad(_np.array(od._ds.XC))
     yc = _np.deg2rad(_np.array(od._ds.YC))
     cs = _np.zeros_like(xc)
