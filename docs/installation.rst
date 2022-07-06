@@ -9,7 +9,7 @@ If you would like to use OceanSpy for your own datasets and run it on a local ma
 Required dependencies
 ---------------------
 
-* Python 3.9, 3.10
+* Python 3.9
 * dask_
 * xarray_
 * xgcm_
