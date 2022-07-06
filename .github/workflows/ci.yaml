@@ -19,17 +19,20 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.9", "3.10"]
+        python-version: ["3.9"]
     steps:
       - uses: actions/checkout@v3
-      - uses: conda-incubator/setup-miniconda@v2
+      
+      - name: Install Conda environment with Micromamba
+        uses: mamba-org/provision-with-micromamba@v12
         with:
           environment-file: ci/environment.yml
-          activate-environment: oceanspy_test
-          auto-update-conda: false
-          python-version: ${{ matrix.python-version }}
-          miniforge-variant: Mambaforge
-          use-mamba: true
+          environment-name: oceanspy_test
+          channels: conda-forge
+          cache-env: true
+          cache-env-key: ubuntu-latest-${{ '{{ matrix.python-version }}' }}
+          extra-specs: |
+            python=${{ '{{matrix.python-version }}' }}
 
       - name: Set up conda environment
         shell: bash -l {0}
