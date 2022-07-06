@@ -58,7 +58,7 @@ Step-by-step instructions
 
 	.. code-block:: bash
 
-		$ conda env create -f https://raw.githubusercontent.com/hainegroup/oceanspy/master/sciserver_catalogs/environment.yml
+		$ conda env create -f https://raw.githubusercontent.com/hainegroup/oceanspy/main/sciserver_catalogs/environment.yml
 
 	Then, activate the Oceanography environment:
 

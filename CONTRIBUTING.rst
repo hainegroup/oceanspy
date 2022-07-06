@@ -41,7 +41,7 @@ Git_ is the distributed version control system used to develop OceanSpy, while G
     $ cd oceanspy
     $ git remote add upstream https://github.com/hainegroup/oceanspy.git
 
-6. Make a new branch from ``upstream/master``:
+6. Make a new branch from ``upstream/main``:
 
    .. code-block:: bash
         
@@ -52,7 +52,7 @@ Git_ is the distributed version control system used to develop OceanSpy, while G
 
    .. code-block:: bash
 
-    $ git merge upstream/master
+    $ git merge upstream/main
 
 8. Edit and/or add new files:
 
@@ -257,9 +257,9 @@ A reminder for the maintainers on how to deploy.
     :alt: CI
     :target: https://github.com/hainegroup/oceanspy/actions
  
-.. |codecov| image:: https://codecov.io/github/hainegroup/oceanspy/coverage.svg?branch=master
+.. |codecov| image:: https://codecov.io/github/hainegroup/oceanspy/coverage.svg?branch=main
     :alt: Coverage
-    :target: https://codecov.io/github/hainegroup/oceanspy?branch=master
+    :target: https://codecov.io/github/hainegroup/oceanspy?branch=main
 
 .. |version| image:: https://img.shields.io/pypi/v/oceanspy.svg?style=flat
     :alt: PyPI
