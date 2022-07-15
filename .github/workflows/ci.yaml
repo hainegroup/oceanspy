@@ -30,7 +30,6 @@ jobs:
           environment-name: oceanspy_test
           channels: conda-forge
           cache-env: true
-          cache-env-key: ubuntu-latest-${{ matrix.python-version }}
           extra-specs: |
             python=${{ matrix.python-version }}
 
