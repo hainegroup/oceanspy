@@ -109,4 +109,4 @@ The schematic below shows how OceanSpy is designed to be used by the oceanograph
 .. _SciServer: http://www.sciserver.org/
 .. |binder| image:: https://mybinder.org/badge_logo.svg
    :alt: binder
-   :target: https://mybinder.org/v2/gh/hainegroup/oceanspy/master?filepath=binder%2FTutorial.ipynb
+   :target: https://mybinder.org/v2/gh/hainegroup/oceanspy/main?filepath=binder%2FTutorial.ipynb

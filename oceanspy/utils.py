@@ -18,6 +18,41 @@ try:
 except ImportError:  # pragma: no cover
     pass
 
+try:
+    import numba
+
+    has_numba = True
+except ImportError:
+    has_numba = False
+
+
+def compilable(f):
+    if has_numba:
+        return numba.njit(f)
+    return f
+
+
+def rel_lon(x, ref_lon):
+    """
+    Change the definition of 0 longitude.
+    Return how much east one need to go from ref_lon to x
+    This function aims to address the confusion caused by
+    the discontinuity in longitude.
+
+    Parameters
+    ----------
+    x: float, numpy.array, dask.array
+        longitude to convert
+    ref_lon: float
+        a reference longitude. This longitude will become 0deg
+
+    Returns
+    -------
+    redefined_x: float, numpy.array, dask.array
+        converted longitude
+    """
+    return (x - ref_lon) % 360
+
 
 def spherical2cartesian(Y, X, R=None):
     """
@@ -586,3 +621,154 @@ def Coriolis_parameter(Y, omega=7.2921e-5):
     e = 2 * omega * _np.cos(Y_rad)
 
     return f, e
+
+
+@compilable
+def spherical2cartesian_compiled(Y, X, R=6371.0):
+    """
+    Convert spherical coordinates to cartesian.
+
+    Parameters
+    ----------
+    Y: np.array
+        Spherical Y coordinate (latitude)
+    X: np.array
+        Spherical X coordinate (longitude)
+    R: scalar
+        Earth radius in km
+        If None, use geopy default
+    Returns
+    -------
+    x: np.array
+        Cartesian x coordinate
+    y: np.array
+        Cartesian y coordinate
+    z: np.array
+        Cartesian z coordinate
+    """
+
+    # Convert
+    Y_rad = _np.deg2rad(Y)
+    X_rad = _np.deg2rad(X)
+    x = R * _np.cos(Y_rad) * _np.cos(X_rad)
+    y = R * _np.cos(Y_rad) * _np.sin(X_rad)
+    z = R * _np.sin(Y_rad)
+
+    return x, y, z
+
+
+@compilable
+def to_180(x):
+    """
+    convert any longitude scale to [-180,180)
+
+    Parameters
+    ----------
+    x: float ,numpy.array
+        angles in degree
+
+    Returns
+    -------
+    redefined_x: float,numpy.ndarray
+        the same angle coverted to [-180,180)
+    """
+    x = x % 360
+    return x + (-1) * (x // 180) * 360
+
+
+def local_to_latlon(u, v, cs, sn):
+    """
+    convert local vector to north-east
+
+    Parameters
+    ----------
+    u: float, numpy.array
+        the x component of the vector
+    v: float, numpy.array
+        the y component of the vector
+    cs: float, numpy.array
+        the cosine of the angle between grid and compass
+    sn: float, numpy.array
+        the sine of the angle between grid and compass
+
+    Returns
+    -------
+    uu: float, numpy.array
+        the eastward component of the vector
+    vv: float, numpy.array
+        the northward component of the vector
+    """
+    uu = u * cs - v * sn
+    vv = u * sn + v * cs
+    return uu, vv
+
+
+def get_combination(lst, select):
+    """
+    Iteratively find all the combination that
+    has (select) amount of elements
+    and every element belongs to lst
+
+    Parameters
+    ----------
+    lst: list
+        a iterable object to select from
+    select: int
+        the number of objects to select
+
+    Returns
+    -------
+    com_list: list
+        a list of all the possible combinations
+    """
+    # TODO: see if the one in itertools can replace this
+    if select == 1:
+        return [[num] for num in lst]
+    else:
+        the_lst = []
+        for i, num in enumerate(lst):
+            sub_lst = get_combination(lst[i + 1 :], select - 1)
+            for com in sub_lst:
+                com.append(num)
+            #             print(sub_lst)
+            the_lst += sub_lst
+        return the_lst
+
+
+def find_cs_sn(thetaA, phiA, thetaB, phiB):
+    """
+    theta is the angle
+    between the meridian crossing point A
+    and the geodesic connecting A and B
+
+    this function return cos and sin of theta
+
+    Parameters
+    ----------
+    thetaA: float,numpy.array
+        the latitude of the vertex of the angle
+    phiA: float,numpy.array
+        the longitude of the vertex of the angle
+    thetaB: float,numpy.array
+        the latitude of the point B
+    phiB: float,numpy.array
+        the longitude of the point B
+
+    Returns
+    -------
+    CS: float,numpy.array
+        the cosine of the angle
+    SN: float, numpy.array
+        the sine of the angle
+    """
+    # O being north pole
+    AO = _np.pi / 2 - thetaA
+    BO = _np.pi / 2 - thetaB
+    dphi = phiB - phiA
+    # Spherical law of cosine on AOB
+    cos_AB = _np.cos(BO) * _np.cos(AO) + _np.sin(BO) * _np.sin(AO) * _np.cos(dphi)
+    sin_AB = _np.sqrt(1 - cos_AB**2)
+    # spherical law of sine on triangle AOB
+    SN = _np.sin(BO) * _np.sin(dphi) / sin_AB
+    CS = _np.sign(thetaB - thetaA) * _np.sqrt(1 - SN**2)
+    return CS, SN
