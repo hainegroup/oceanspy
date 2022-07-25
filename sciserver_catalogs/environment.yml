@@ -7,7 +7,7 @@ dependencies:
   - distributed
   - bottleneck
   - netCDF4
-  - xarray
+  - xarray < 2022.6
   - cartopy<0.20
   - esmpy
   - geopy
