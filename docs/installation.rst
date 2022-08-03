@@ -9,7 +9,7 @@ If you would like to use OceanSpy for your own datasets and run it on a local ma
 Required dependencies
 ---------------------
 
-* Python 3.6, 3.7, 3.8
+* Python 3.9
 * dask_
 * xarray_
 * xgcm_
@@ -37,15 +37,11 @@ Step-by-step instructions
 
 1. First, download and install Miniconda_ or Anaconda_.
 
-2. The easiest way to install OceanSpy and the above mentioned dependencies is to use the conda-forge channel. Open a terminal, then run the following commands:
+2. The easiest way to install OceanSpy and the above mentioned dependencies is to use the conda-forge channel. Open a terminal, then run the following command:
 
   .. code-block:: bash
     
-    $ conda update conda
-    $ conda config --set channel_priority strict
-    $ conda config --prepend channels conda-forge
-    $ conda install -y oceanspy xarray "cartopy!=0.20.0,!=0.20.1" esmpy intake-xarray geopy "xesmf!=0.5.0,!=0.5.1" esmf xgcm Ipython tqdm ffmpeg aiohttp pandas
-    $ pip install git+https://github.com/MITgcm/xmitgcm.git
+    $ conda create -n oceanspy-env -c conda-forge oceanspy xarray "cartopy<0.20" esmpy intake-xarray geopy xesmf esmf xgcm Ipython tqdm ffmpeg aiohttp pandas xmitgcm
 
   The commands above install the latest stable release of OceanSpy along with its dependencies.
 
@@ -58,15 +54,11 @@ Step-by-step instructions
 
 .. note::
 		
-	**For experts:** Use the following commands to `Create an environment`_ identical to the Oceanography environment available on SciServer:
+	**For experts:** Use the following command to `Create an environment`_ identical to the Oceanography environment available on SciServer:
 
 	.. code-block:: bash
 
-		$ conda update conda
-		$ conda config --set channel_priority strict
-		$ conda config --prepend channels conda-forge
-		$ wget https://raw.githubusercontent.com/hainegroup/oceanspy/master/sciserver_catalogs/environment.yml
-		$ conda env create -f environment.yml
+		$ conda env create -f https://raw.githubusercontent.com/hainegroup/oceanspy/main/sciserver_catalogs/environment.yml
 
 	Then, activate the Oceanography environment:
 

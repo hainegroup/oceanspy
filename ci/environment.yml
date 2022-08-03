@@ -6,13 +6,13 @@ dependencies:
   - distributed
   - bottleneck
   - netCDF4
-  - xarray>=0.14.1
-  - cartopy!=0.20.0,!=0.20.1
+  - xarray
+  - cartopy<0.20
   - intake-xarray
   - geopy
-  - xesmf!=0.5.0,!=0.5.1
+  - xesmf
   - esmf
-  - xgcm>=0.2.0
+  - xgcm
   - Ipython
   - tqdm
   - pytest
@@ -26,5 +26,4 @@ dependencies:
   - fsspec!=0.9.0
   - pooch
   - pip
-  - pip:
-    - git+https://github.com/MITgcm/xmitgcm.git
+  - xmitgcm
