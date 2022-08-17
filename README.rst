@@ -10,7 +10,7 @@ OceanSpy - A Python package to facilitate ocean model data analysis and visualiz
 
 .. admonition:: Interactive Demo
 
-   Check out the interactive demonstration of OceanSpy at `www.bndr.it/nakt7 <https://bndr.it/nakt7>`_
+   Check out the interactive demonstration of OceanSpy at `www.bndr.it/gfvgd <https://bndr.it/gfvgd>`_
 
 For publications, please cite the following paper:  
 
