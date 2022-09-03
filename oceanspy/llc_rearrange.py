@@ -6,7 +6,7 @@ import numpy as _np
 import xarray as _xr
 
 # metric variables defined at vector points, defined as global within this file
-metrics = ["dxC", "dyC", "dxG", "dyG", "hFacW", "hFacS", "rAs", "rAw", "maskS", "maskW"]
+metrics = ["dxC", "dyC", "dxG", "dyG", "HFacW", "HFacS", "rAs", "rAw", "maskS", "maskW"]
 
 
 _datype = _xr.core.dataarray.DataArray
@@ -281,14 +281,6 @@ def arct_connect(ds, varName, faces="all"):
     Ny_ac_rot = []
     ARCT = [0, 0, 0, 0]  # initialize the list.
     arc_faces = [0, 0, 0, 0]
-    metrics = [
-        "dxC",
-        "dyC",
-        "dxG",
-        "dyG",
-        "hFacW",
-        "hFacS",
-    ]  # metric variables defined at vector points
 
     if isinstance(faces, str):
         if faces == "all":
@@ -438,8 +430,8 @@ def mates(ds):
         "dyC",
         "dxG",
         "dyG",
-        "hFacW",
-        "hFacS",
+        "HFacW",
+        "HFacS",
         "rAw",
         "rAs",
     ]
