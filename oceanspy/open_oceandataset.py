@@ -455,7 +455,7 @@ def _find_entries(name, catalog_url):
         if catalog_url is None:
             url = (
                 "https://raw.githubusercontent.com/Mikejmnez/oceanspy/"
-                "main/sciserver_catalogs/catalog_xarray.yaml"
+                "typo/sciserver_catalogs/catalog_xarray.yaml"
             )
         else:
             url = catalog_url
@@ -468,7 +468,7 @@ def _find_entries(name, catalog_url):
         if catalog_url is None:
             url = (
                 "https://raw.githubusercontent.com/Mikejmnez/oceanspy/"
-                "main/sciserver_catalogs/catalog_xmitgcm.yaml"
+                "typo/sciserver_catalogs/catalog_xmitgcm.yaml"
             )
         else:
             url = catalog_url  # provided by user
