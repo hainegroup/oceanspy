@@ -841,10 +841,10 @@ sources:
         grid_coords:
           Y:
             Y:
-            Yp1: 0.5
+            Yp1: -0.5
           X:
             X:
-            Xp1: 0.5
+            Xp1: -0.5
           Z:
            Z:
            Zp1: 0.5
