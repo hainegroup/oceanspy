@@ -11,6 +11,7 @@ from .utils import rel_lon as _rel_lon
 # metric variables defined at vector points, defined as global within this file
 metrics = ["dxC", "dyC", "dxG", "dyG", "HFacW", "HFacS", "rAs", "rAw", "maskS", "maskW"]
 
+ref_lon = 180
 
 _datype = _xr.core.dataarray.DataArray
 _dstype = _xr.core.dataset.Dataset
