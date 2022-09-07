@@ -651,6 +651,38 @@ def flip_v(_ds, co_list=metrics):
     return _ds
 
 
+def _edge_arc_data(_da, _face_ind, _dims):
+    """Determines the edge of the non-masked data values on each of the four triangles that make up
+    the arctic cap and that that will be retained (not dropped) in the cutout process. 
+    Only this subset of the face needs to be transformed.
+    
+    Output: Index location of the data edge of face = _face_ind along the geographical north dimension.
+    """
+    if _face_ind == 5:  # finds the first nan value along local y dim.
+        _value = True  
+        _dim = _dims.Y  
+        _shift = -1  # shifts back a position to the edge of the data.
+    elif _face_ind == 2:  # finds the first nan value along local x dim.
+        _value = True
+        _dim = _dims.X  
+        _shift = -1  # shifts back a position to the edge of the data.
+    elif _face_ind == 10:  # find the first value along local y.
+        _value = False
+        _dim = _dims.Y  
+        _shift = 0  # shifts back a position to the edge of the data.
+    elif _face_ind == 7:
+        _value = False
+        _dim = _dims.X
+        _shift = 0 
+        
+    for i in list(_da[_dim].data):
+        arg = {_dim: i}
+        if _np.isnan(_np.array(_da.sel(**arg).data)).all() == _value:
+            X0 = i + _shift
+            break
+    return X0
+
+
 class Dims:
     axes = "XYZT"  # shortcut axis names
 
