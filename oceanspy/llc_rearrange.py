@@ -33,6 +33,8 @@ class LLCtransformation:
     ):
         self._ds = ds  # xarray.DataSet
         self._varlist = varlist  # variables names to be transformed
+        self._XRange = XRange  # lon range of data to retain
+        self.YRange = YRange  # lat range of data to retain.
         self._transformation = transformation  # str - type of transf
         self._centered = centered  # str - where to be centered
         self._chunks = (
