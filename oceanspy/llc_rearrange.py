@@ -5,7 +5,7 @@ import dask
 import numpy as _np
 import xarray as _xr
 
-from.subsample import get_maskH
+from .subsample import get_maskH
 from .utils import rel_lon as _rel_lon
 
 
