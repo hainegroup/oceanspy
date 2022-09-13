@@ -737,6 +737,46 @@ def _edge_arc_data(_da, _face_ind, _dims):
     return X0
 
 
+def mask_var(_ds, var, XRange, YRange):
+    """Returns a dataset with masked variable. The masking region is determined by 
+    XRange and YRange. 
+    """
+    _ds = _copy.deepcopy(mates(_ds.reset_coords()))
+    minY = _ds["YG"].min().values
+    maxY = _ds["YG"].max().values
+
+    minX = _ds["XG"].min().values
+    maxX = _ds["XG"].max().values
+
+    if (YRange is not None or XRange is not None):
+        if YRange is not None:
+            minY = YRange[0]
+            maxY = YRange[1]
+        else:
+            minY = _ds["YG"].min().values
+            maxY = _ds["YG"].max().values
+        if XRange is not None:
+            minX = XRange[0]
+            maxX = XRange[1]
+        else:
+            minX = _ds["XG"].min().values
+            maxX = _ds["XG"].max().values
+    maskC = _xr.where(
+            _np.logical_and(
+                _np.logical_and(_ds["YC"] >= minY, _ds["YC"] <= maxY),
+                _np.logical_and(
+                    _rel_lon(_ds["XC"], ref_lon) >= _rel_lon(minX, ref_lon),
+                    _rel_lon(_ds["XC"], ref_lon) <= _rel_lon(maxX, ref_lon),
+                ),
+            ),
+            1,
+            0,
+        ).persist()
+
+    _ds[var] = _ds[var].where(maskC, drop=True)
+    return _ds
+
+
 class Dims:
     axes = "XYZT"  # shortcut axis names
 
