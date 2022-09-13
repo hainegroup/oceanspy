@@ -777,6 +777,54 @@ def mask_var(_ds, var, XRange, YRange):
     return _ds
 
 
+def arc_limits_mask(_ds, _var, faces=_faces):
+    """Estimates the limits of the masking region of the arctic.
+    """
+    dsa2 = []
+    dsa5 = []
+    dsa7 = []
+    dsa10 = []
+    ARCT = [dsa2, dsa5, dsa7, dsa10]
+
+    *nnn, DS = arct_connect(_ds, _var, faces=_faces, masking=True, opt=False)  ## This only works in the case the transformation involves the whole domain
+    ARCT[0].append(DS[0])
+    ARCT[1].append(DS[1])
+    ARCT[2].append(DS[2])
+    ARCT[3].append(DS[3])
+
+    for i in range(len(ARCT)):  # Not all faces survive the cutout
+        if type(ARCT[i][0]) == xr.core.dataarray.DataArray:
+            ARCT[i] = _xr.merge(ARCT[i])
+
+    DSa2, DSa5, DSa7, DSa10 = ARCT
+
+    if type(DSa2) != _dstype:
+        DSa2 = 0
+        [Xi_2, Xf_2] = [0, 0]
+    else:
+        [Xi_2, Xf_2] = [int(DSa2[var].X[0]), edge_arc_data(DSa2[var], 2, dims)]
+    if type(DSa5) != _dstype:
+        DSa5 = 0
+        [Yi_5, Yf_5] = [0, 0]
+    else:
+        [Yi_5, Yf_5] = [int(DSa5[var].Y[0]), edge_arc_data(DSa5[var], 5, dims)]
+    if type(DSa7) != _dstype:
+        DSa7 = 0
+        [Xi_7, Xf_7] = [0, 0]
+    else:
+        [Xi_7, Xf_7] = [edge_arc_data(DSa7[var], 7, dims), int(DSa7[var].X[-1])]
+    if type(DSa10) != _dstype:
+        DSa10 = 0
+        [Yi_10, Yf_10] = [0, 0]
+    else:
+        [Yi_10, Yf_10]= [edge_arc_data(DSa10[var], 10, dims), int(DSa10[var].Y[-1])]
+
+    arc_edges = [[Xi_2, Xf_2], [Yi_5, Yf_5], [Xi_7, Xf_7], [Yi_10, Yf_10]]
+
+    return arc_edges
+
+
+
 class Dims:
     axes = "XYZT"  # shortcut axis names
 
