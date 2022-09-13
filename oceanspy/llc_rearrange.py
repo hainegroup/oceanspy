@@ -326,7 +326,17 @@ class LLCtransformation:
         return DS
 
 
-def arct_connect(ds, varName, faces="all"):
+def arct_connect(ds, varName, faces="all", masking=False, opt=False, ranges=None):
+    """
+    Splits the arctic into four triangular regions. 
+    if `masking = True`: does not transpose data. Only use when masking for data not surviving the
+        cutout. Default is `masking=False`, which implies data in arct10 gets transposed.
+
+    `opt=True` must be accompanied by a list `range` with len=4. Each element of `range` is either
+        a pair of zeros (implies face does not survive the cutout), or a pair of integers of the form
+        `[X0, Xf]` or `[Y0, Yf]`. `opt=True` only when optimizing the cutout so that the transformation
+        of the arctic is done only with surviving data.
+    """
 
     arc_cap = 6
     Nx_ac_nrot = []
@@ -371,7 +381,12 @@ def arct_connect(ds, varName, faces="all"):
                         fac = -1
                 arct = fac * ds[_varName].isel(**da_arg)
                 Mask = mask2.isel(**mask_arg)
-                arct = arct * Mask
+                if opt:
+                    [Xi_2, Xf_2] = [ranges[0][0], ranges[0][1]]
+                    cu_arg = {dims.X: slice(Xi_2, Xf_2)}
+                    arct = (arct.sel(**cu_arg) * Mask.sel(**cu_arg)).persist()
+                else:
+                    arct = arct * Mask
                 ARCT[0] = arct
 
             elif k == 5:
@@ -400,7 +415,12 @@ def arct_connect(ds, varName, faces="all"):
                 mask_arg = {dims.X: xslice, dims.Y: yslice}
                 arct = ds[_varName].isel(**da_arg)
                 Mask = mask5.isel(**mask_arg)
-                arct = arct * Mask
+                if opt:
+                    [Yi_5, Yf_5]= [ranges[1][0], ranges[1][1]]
+                    cu_arg = {dims.Y: slice(Yi_5, Yf_5)}
+                    arct = (arct.sel(**cu_arg) * Mask.sel(**cu_arg)).persist()
+                else:
+                    arct = arct * Mask
                 ARCT[1] = arct
 
             elif k == 7:
@@ -428,7 +448,12 @@ def arct_connect(ds, varName, faces="all"):
                 mask_arg = {dims.X: xslice, dims.Y: yslice}
                 arct = fac * ds[_varName].isel(**da_arg)
                 Mask = mask7.isel(**mask_arg)
-                arct = arct * Mask
+                if opt:
+                    [Xi_7, Xf_7] = [ranges[2][0], ranges[2][1]]
+                    cu_arg = {dims.X: slice(Xi_7, Xf_7)}
+                    arct = (arct.sel(**cu_arg) * Mask.sel(**cu_arg)).persist()
+                else:
+                    arct = arct * Mask
                 ARCT[2] = arct
 
             elif k == 10:
@@ -459,7 +484,20 @@ def arct_connect(ds, varName, faces="all"):
                 mask_arg = {dims.X: xslice, dims.Y: yslice}
                 arct = fac * ds[_varName].isel(**da_arg)
                 Mask = mask10.isel(**mask_arg)
-                arct = (arct * Mask).transpose(*dtr)
+                if masking:
+                    if opt:
+                        [Yi_10, Yf_10] = [ranges[-1][0], ranges[-1][1]]
+                        cu_arg = {dims.Y: slice(Yi_10, Yf_10)}
+                        arct = (arct.sel(**cu_arg) * Mask.sel(**cu_arg)).persist()
+                    else:
+                        arct = (arct * Mask)
+                else:
+                    if opt:
+                        [Yi_10, Yf_10] = [ranges[-1][0], ranges[-1][1]]
+                        cu_arg = {dims.Y: slice(Yi_10, Yf_10)}
+                        arct = (arct.sel(**cu_arg) * Mask.sel(**cu_arg)).transpose(*dtr)
+                    else:
+                        arct = (arct * Mask).transpose(*dtr)
                 ARCT[3] = arct
 
     return arc_faces, Nx_ac_nrot, Ny_ac_nrot, Nx_ac_rot, Ny_ac_rot, ARCT
