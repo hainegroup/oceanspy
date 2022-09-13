@@ -814,7 +814,7 @@ def mask_var(_ds, var, XRange, YRange):
     return _ds
 
 
-def arc_limits_mask(_ds, _var, _faces):
+def arc_limits_mask(_ds, _var, _faces, _dims):
     """Estimates the limits of the masking region of the arctic.
     """
     dsa2 = []
@@ -839,22 +839,22 @@ def arc_limits_mask(_ds, _var, _faces):
         DSa2 = 0
         [Xi_2, Xf_2] = [0, 0]
     else:
-        [Xi_2, Xf_2] = [int(DSa2[_var].X[0]), _edge_arc_data(DSa2[_var], 2, dims)]
+        [Xi_2, Xf_2] = [int(DSa2[_var].X[0]), _edge_arc_data(DSa2[_var], 2, _dims)]
     if type(DSa5) != _dstype:
         DSa5 = 0
         [Yi_5, Yf_5] = [0, 0]
     else:
-        [Yi_5, Yf_5] = [int(DSa5[_var].Y[0]), _edge_arc_data(DSa5[_var], 5, dims)]
+        [Yi_5, Yf_5] = [int(DSa5[_var].Y[0]), _edge_arc_data(DSa5[_var], 5, _dims)]
     if type(DSa7) != _dstype:
         DSa7 = 0
         [Xi_7, Xf_7] = [0, 0]
     else:
-        [Xi_7, Xf_7] = [_edge_arc_data(DSa7[_var], 7, dims), int(DSa7[_var].X[-1])]
+        [Xi_7, Xf_7] = [_edge_arc_data(DSa7[_var], 7, _dims), int(DSa7[_var].X[-1])]
     if type(DSa10) != _dstype:
         DSa10 = 0
         [Yi_10, Yf_10] = [0, 0]
     else:
-        [Yi_10, Yf_10]= [_edge_arc_data(DSa10[_var], 10, dims), int(DSa10[_var].Y[-1])]
+        [Yi_10, Yf_10]= [_edge_arc_data(DSa10[_var], 10, _dims), int(DSa10[_var].Y[-1])]
 
     arc_edges = [[Xi_2, Xf_2], [Yi_5, Yf_5], [Xi_7, Xf_7], [Yi_10, Yf_10]]
 
