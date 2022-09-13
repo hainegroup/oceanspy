@@ -814,7 +814,7 @@ def mask_var(_ds, var, XRange, YRange):
     return _ds
 
 
-def arc_limits_mask(_ds, _var, faces=_faces):
+def arc_limits_mask(_ds, _var, _faces):
     """Estimates the limits of the masking region of the arctic.
     """
     dsa2 = []
