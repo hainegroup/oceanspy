@@ -487,14 +487,14 @@ def arct_connect(ds, varName, faces="all", masking=False, opt=False, ranges=None
                     if opt:
                         [Yi_10, Yf_10] = [ranges[-1][0], ranges[-1][1]]
                         cu_arg = {dims.Y: slice(Yi_10, Yf_10)}
-                        arct = (arct.sel(**cu_arg) * Mask.sel(**cu_arg)).persist()
+                        arct = (arct.sel(**cu_arg) * Mask.sel(**cu_arg))
                     else:
                         arct = (arct * Mask)
                 else:
                     if opt:
                         [Yi_10, Yf_10] = [ranges[-1][0], ranges[-1][1]]
                         cu_arg = {dims.Y: slice(Yi_10, Yf_10)}
-                        arct = (arct.sel(**cu_arg) * Mask.sel(**cu_arg)).transpose(*dtr)
+                        arct = (arct.sel(**cu_arg) * Mask.sel(**cu_arg)).transpose(*dtr).persist()
                     else:
                         arct = (arct * Mask).transpose(*dtr)
                 ARCT[3] = arct
