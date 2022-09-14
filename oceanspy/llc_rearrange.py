@@ -477,7 +477,7 @@ def arct_connect(ds, varName, faces="all", masking=False, opt=False, ranges=None
                 Nx_ac_rot.append(0)
                 Ny_ac_rot.append(len(ds[dims.Y][y0:yf]))
                 if len(dims.X) + len(dims.Y) == 4:
-                    if len(dims.Y) == 3 and _varName not in metrics:
+                    if len(dims.Y) == 1 and _varName not in metrics:
                         fac = -1
                 da_arg = {"face": arc_cap, dims.X: xslice, dims.Y: yslice}
                 mask_arg = {dims.X: xslice, dims.Y: yslice}
