@@ -264,6 +264,7 @@ class LLCtransformation:
         FACETS = [DSFacet3, DSFacet4]
         fFACETS = shift_list_ds(FACETS, dims_c.X, dims_g.X, Nx, facet=34)
         DSFacet34 = combine_list_ds(fFACETS)
+        DSFacet34 = shift_dataset(DSFacet34, dims_c.Y, dims_g.Y)
 
         # =====
         # combining all facets
