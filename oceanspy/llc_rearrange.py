@@ -243,7 +243,7 @@ class LLCtransformation:
         # =====
 
         FACETS = [DSFacet1, DSFacet2]
-        fFACETS = shift_list_ds(FACETS, dims_c.Y, dims_g.Y, Nx, facet=12)
+        fFACETS = shift_list_ds(FACETS, dims_c.X, dims_g.X, Nx, facet=12)
         DSFacet12 = combine_list_ds(fFACETS)
 
         # =====
