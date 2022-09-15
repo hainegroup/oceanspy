@@ -7,7 +7,6 @@ import xarray as _xr
 
 from .utils import rel_lon as _rel_lon
 
-
 # metric variables defined at vector points, defined as global within this file
 metrics = ["dxC", "dyC", "dxG", "dyG", "HFacW", "HFacS", "rAs", "rAw", "maskS", "maskW"]
 
@@ -26,7 +25,7 @@ class LLCtransformation:
         varlist,
         XRange=None,
         YRange=None,
-        transformation='arctic_crown',
+        transformation="arctic_crown",
         centered="Atlantic",
         faces="all",
         chunks=None,
@@ -91,9 +90,8 @@ class LLCtransformation:
         elif len(varlist) == 0:
             raise ValueError("Empty list of variables")
 
-
-        # # Mask data (repeated code from subsamble). Only need one data var first, to figure out
-        # # the data range 
+        # # Mask data (repeated code from subsamble). Only need one data var first,
+        # to figure out the data range
 
         # minY = ds["YG"].min().values
         # maxY = ds["YG"].max().values
@@ -114,7 +112,7 @@ class LLCtransformation:
         #     else:
         #         minX = ds["XG"].min().values
         #         maxX = ds["XG"].max().values
-        
+
         # maskC = _xr.where(
         #     _np.logical_and(
         #         _np.logical_and(ds["YC"] >= minY, ds["YC"] <= maxY),
@@ -126,13 +124,14 @@ class LLCtransformation:
         #     1,
         #     0,
         # ).persist()
-    
+
         # for var in ds.data_vars:
         #     if set(["X", "Y"]).issubset(ds[var].dims):
         #         ds[var] = ds[var].where(maskC, drop=True)
 
-        # Just made nan data that will not be included in cutout in only centered vars. Need to 
-        # figure out a way to drop the nans as these will not survive the cutout.
+        # Just made nan data that will not be included in cutout in only centered
+        # vars. Need to figure out a way to drop the nans as these will not
+        # survive the cutout.
 
         dsa2 = []
         dsa5 = []
@@ -264,12 +263,20 @@ class LLCtransformation:
         # combining all facets
         # =====
 
-        # First, check if there is data in both DSFacet12 and DSFacet34. 
+        # First, check if there is data in both DSFacet12 and DSFacet34.
         # If not, then there is no need to transpose data in DSFacet12.
 
         if type(DSFacet12) == _dstype:
-            if type(DSFacet34)== _dstype:
-                DSFacet12 = rotate_dataset(DSFacet12, dims_c, dims_g, rev_x=False, rev_y=True, transpose=True, nface=int(3.5 * Np))
+            if type(DSFacet34) == _dstype:
+                DSFacet12 = rotate_dataset(
+                    DSFacet12,
+                    dims_c,
+                    dims_g,
+                    rev_x=False,
+                    rev_y=True,
+                    transpose=True,
+                    nface=int(3.5 * Nx),
+                )
                 DSFacet12 = rotate_vars(DSFacet12)
 
         if centered == "Pacific":
@@ -296,14 +303,16 @@ class LLCtransformation:
 
 def arct_connect(ds, varName, faces="all", masking=False, opt=False, ranges=None):
     """
-    Splits the arctic into four triangular regions. 
-    if `masking = True`: does not transpose data. Only use when masking for data not surviving the
-        cutout. Default is `masking=False`, which implies data in arct10 gets transposed.
+    Splits the arctic into four triangular regions.
+    if `masking = True`: does not transpose data. Only use when masking for data not
+        surviving the cutout. Default is `masking=False`, which implies data in arct10
+        gets transposed.
 
-    `opt=True` must be accompanied by a list `range` with len=4. Each element of `range` is either
-        a pair of zeros (implies face does not survive the cutout), or a pair of integers of the form
-        `[X0, Xf]` or `[Y0, Yf]`. `opt=True` only when optimizing the cutout so that the transformation
-        of the arctic is done only with surviving data.
+    `opt=True` must be accompanied by a list `range` with len=4. Each element of
+        `range` is either a pair of zeros (implies face does not survive the cutout),
+        or a pair of integers of the form `[X0, Xf]` or `[Y0, Yf]`. `opt=True` only
+        when optimizing the cutout so that the transformation of the arctic is done
+        only with surviving data.
     """
 
     arc_cap = 6
@@ -384,7 +393,7 @@ def arct_connect(ds, varName, faces="all", masking=False, opt=False, ranges=None
                 arct = ds[_varName].isel(**da_arg)
                 Mask = mask5.isel(**mask_arg)
                 if opt:
-                    [Yi_5, Yf_5]= [ranges[1][0], ranges[1][1]]
+                    [Yi_5, Yf_5] = [ranges[1][0], ranges[1][1]]
                     cu_arg = {dims.Y: slice(Yi_5, Yf_5)}
                     arct = (arct.sel(**cu_arg) * Mask.sel(**cu_arg)).persist()
                 else:
@@ -456,14 +465,18 @@ def arct_connect(ds, varName, faces="all", masking=False, opt=False, ranges=None
                     if opt:
                         [Yi_10, Yf_10] = [ranges[-1][0], ranges[-1][1]]
                         cu_arg = {dims.Y: slice(Yi_10, Yf_10)}
-                        arct = (arct.sel(**cu_arg) * Mask.sel(**cu_arg))
+                        arct = arct.sel(**cu_arg) * Mask.sel(**cu_arg)
                     else:
-                        arct = (arct * Mask)
+                        arct = arct * Mask
                 else:
                     if opt:
                         [Yi_10, Yf_10] = [ranges[-1][0], ranges[-1][1]]
                         cu_arg = {dims.Y: slice(Yi_10, Yf_10)}
-                        arct = (arct.sel(**cu_arg) * Mask.sel(**cu_arg)).transpose(*dtr).persist()
+                        arct = (
+                            (arct.sel(**cu_arg) * Mask.sel(**cu_arg))
+                            .transpose(*dtr)
+                            .persist()
+                        )
                     else:
                         arct = (arct * Mask).transpose(*dtr)
                 ARCT[3] = arct
@@ -712,29 +725,30 @@ def flip_v(_ds, co_list=metrics):
 
 
 def _edge_arc_data(_da, _face_ind, _dims):
-    """Determines the edge of the non-masked data values on each of the four triangles that make up
-    the arctic cap and that that will be retained (not dropped) in the cutout process. 
-    Only this subset of the face needs to be transformed.
-    
-    Output: Index location of the data edge of face = _face_ind along the geographical north dimension.
+    """Determines the edge of the non-masked data values on each of the four triangles
+    that make up the arctic cap and that that will be retained (not dropped) in the
+    cutout process. Only this subset of the face needs to be transformed.
+
+    Output: Index location of the data edge of face = _face_ind along the geographical
+    north dimension.
     """
     if _face_ind == 5:  # finds the first nan value along local y dim.
-        _value = True  
-        _dim = _dims.Y  
+        _value = True
+        _dim = _dims.Y
         _shift = -1  # shifts back a position to the edge of the data.
     elif _face_ind == 2:  # finds the first nan value along local x dim.
         _value = True
-        _dim = _dims.X  
+        _dim = _dims.X
         _shift = -1  # shifts back a position to the edge of the data.
     elif _face_ind == 10:  # find the first value along local y.
         _value = False
-        _dim = _dims.Y  
+        _dim = _dims.Y
         _shift = 0  # shifts back a position to the edge of the data.
     elif _face_ind == 7:
         _value = False
         _dim = _dims.X
-        _shift = 0 
-        
+        _shift = 0
+
     for i in list(_da[_dim].data):
         arg = {_dim: i}
         if _np.isnan(_np.array(_da.sel(**arg).data)).all() == _value:
@@ -744,8 +758,8 @@ def _edge_arc_data(_da, _face_ind, _dims):
 
 
 def mask_var(_ds, var, XRange, YRange):
-    """Returns a dataset with masked variable. The masking region is determined by 
-    XRange and YRange. 
+    """Returns a dataset with masked variable. The masking region is determined by
+    XRange and YRange.
     """
     _ds = _copy.deepcopy(mates(_ds.reset_coords()))
     minY = _ds["YG"].min().values
@@ -754,7 +768,7 @@ def mask_var(_ds, var, XRange, YRange):
     minX = _ds["XG"].min().values
     maxX = _ds["XG"].max().values
 
-    if (YRange is not None or XRange is not None):
+    if YRange is not None or XRange is not None:
         if YRange is not None:
             minY = YRange[0]
             maxY = YRange[1]
@@ -768,31 +782,32 @@ def mask_var(_ds, var, XRange, YRange):
             minX = _ds["XG"].min().values
             maxX = _ds["XG"].max().values
     maskC = _xr.where(
+        _np.logical_and(
+            _np.logical_and(_ds["YC"] >= minY, _ds["YC"] <= maxY),
             _np.logical_and(
-                _np.logical_and(_ds["YC"] >= minY, _ds["YC"] <= maxY),
-                _np.logical_and(
-                    _rel_lon(_ds["XC"], ref_lon) >= _rel_lon(minX, ref_lon),
-                    _rel_lon(_ds["XC"], ref_lon) <= _rel_lon(maxX, ref_lon),
-                ),
+                _rel_lon(_ds["XC"], ref_lon) >= _rel_lon(minX, ref_lon),
+                _rel_lon(_ds["XC"], ref_lon) <= _rel_lon(maxX, ref_lon),
             ),
-            1,
-            0,
-        ).persist()
+        ),
+        1,
+        0,
+    ).persist()
 
     _ds[var] = _ds[var].where(maskC, drop=True)
     return _ds
 
 
 def arc_limits_mask(_ds, _var, _faces, _dims):
-    """Estimates the limits of the masking region of the arctic.
-    """
+    """Estimates the limits of the masking region of the arctic."""
     dsa2 = []
     dsa5 = []
     dsa7 = []
     dsa10 = []
     ARCT = [dsa2, dsa5, dsa7, dsa10]
 
-    *nnn, DS = arct_connect(_ds, _var, faces=_faces, masking=True, opt=False)  ## This only works in the case the transformation involves the whole domain
+    *nnn, DS = arct_connect(
+        _ds, _var, faces=_faces, masking=True, opt=False
+    )  # This only works in the case the transformation involves the whole domain
     ARCT[0].append(DS[0])
     ARCT[1].append(DS[1])
     ARCT[2].append(DS[2])
@@ -823,12 +838,14 @@ def arc_limits_mask(_ds, _var, _faces, _dims):
         DSa10 = 0
         [Yi_10, Yf_10] = [0, 0]
     else:
-        [Yi_10, Yf_10]= [_edge_arc_data(DSa10[_var], 10, _dims), int(DSa10[_var].Y[-1])]
+        [Yi_10, Yf_10] = [
+            _edge_arc_data(DSa10[_var], 10, _dims),
+            int(DSa10[_var].Y[-1]),
+        ]
 
     arc_edges = [[Xi_2, Xf_2], [Yi_5, Yf_5], [Xi_7, Xf_7], [Yi_10, Yf_10]]
 
     return arc_edges
-
 
 
 class Dims:
