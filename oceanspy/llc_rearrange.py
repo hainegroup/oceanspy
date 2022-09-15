@@ -276,7 +276,6 @@ class LLCtransformation:
             if type(DSFacet34) == _dstype:
                 DSFacet12 = DSFacet12.transpose()
 
-
         if centered == "Pacific":
             FACETS = [DSFacet34, DSFacet12]  # centered on Pacific ocean
         elif centered == "Atlantic":
