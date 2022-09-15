@@ -264,6 +264,14 @@ class LLCtransformation:
         # combining all facets
         # =====
 
+        # First, check if there is data in both DSFacet12 and DSFacet34. 
+        # If not, then there is no need to transpose data in DSFacet12.
+
+        if type(DSFacet12) == _dstype:
+            if type(DSFacet34)== _dstype:
+                DSFacet12 = rotate_dataset(DSFacet12, dims_c, dims_g, rev_x=False, rev_y=True, transpose=True, nface=int(3.5 * Np))
+                DSFacet12 = rotate_vars(DSFacet12)
+
         if centered == "Pacific":
             FACETS = [DSFacet34, DSFacet12]  # centered on Pacific ocean
         elif centered == "Atlantic":
