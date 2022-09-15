@@ -278,11 +278,10 @@ class LLCtransformation:
                 for _var in DSFacet12.data_vars:
                     DIMS = [dim for dim in DSFacet12[_var].dims]
                     dims = Dims(DIMS[::-1])
-                    if len(dims)>1 and 'nv' not in DIMS:
+                    if len(dims) > 1 and "nv" not in DIMS:
                         dtr = list(dims)[::-1]
                         dtr[-1], dtr[-2] = dtr[-2], dtr[-1]
-                        DSFacet12[_var] = DSFacet12[_var].transpose(*dtr) 
-
+                        DSFacet12[_var] = DSFacet12[_var].transpose(*dtr)
 
         if centered == "Pacific":
             FACETS = [DSFacet34, DSFacet12]  # centered on Pacific ocean
