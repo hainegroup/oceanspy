@@ -718,7 +718,7 @@ def combine_list_ds(_DSlist):
             _DSFacet = _DSlist[0]
         else:  # if there are two datasets then combine
             with dask.config.set(**{"array.slicing.split_large_chunks": False}):
-                _DSFacet = _DSlist[0].combine_first(_DSlist[1])
+                _DSFacet = _DSlist[0].combine_first(_DSlist[1])  #
     elif len(_DSlist) > 2:
         _DSFacet = _copy.deepcopy(_DSlist[0])
         for ii in range(1, len(_DSlist)):
@@ -737,7 +737,7 @@ def flip_v(_ds, co_list=metrics):
             DIMS = [dim for dim in _ds[_varName].dims if dim != "face"]
             _dims = Dims(DIMS[::-1])
             if "mate" in _ds[_varName].attrs:
-                if _varName not in co_list and len(_dims.Y) == 3:
+                if _varName not in co_list and len(_dims.X) == 3:
                     _ds[_varName] = -_ds[_varName]
     return _ds
 
