@@ -224,6 +224,9 @@ class LLCtransformation:
         Facet1 = shift_list_ds(faces1, dims_c.X, dims_g.X, Nx)
         DSFacet1 = combine_list_ds(Facet1)
         DSFacet1 = flip_v(DSFacet1)
+        DSFacet1 = reverse_dataset(DSFacet1, dims_c.X, dims_g.X)
+        DSFacet1 = rotate_dataset(DSFacet1, dims_c, dims_g)
+        DSFacet1 = rotate_vars(DSFacet1)
 
         # =====
         # Facet 2
@@ -231,6 +234,9 @@ class LLCtransformation:
         Facet2 = shift_list_ds(faces2, dims_c.X, dims_g.X, Nx)
         DSFacet2 = combine_list_ds(Facet2)
         DSFacet2 = flip_v(DSFacet2)
+        DSFacet2 = reverse_dataset(DSFacet2, dims_c.X, dims_g.X)
+        DSFacet2 = rotate_dataset(DSFacet2, dims_c, dims_g)
+        DSFacet2 = rotate_vars(DSFacet2)
 
         # =====
         # combining Facet 1 & 2
@@ -268,16 +274,8 @@ class LLCtransformation:
 
         if type(DSFacet12) == _dstype:
             if type(DSFacet34) == _dstype:
-                DSFacet12 = rotate_dataset(
-                    DSFacet12,
-                    dims_c,
-                    dims_g,
-                    rev_x=False,
-                    rev_y=True,
-                    transpose=True,
-                    nface=int(3.5 * Nx),
-                )
-                DSFacet12 = rotate_vars(DSFacet12)
+                DSFacet12 = DSFacet12.transpose()
+
 
         if centered == "Pacific":
             FACETS = [DSFacet34, DSFacet12]  # centered on Pacific ocean
@@ -601,7 +599,7 @@ def rotate_dataset(
     _ds : dataset
 
     dims_c = [dims_c.X, dims_c.Y]
-    dims_c = [dims_g.X, dims_g.Y]
+    dims_g = [dims_g.X, dims_g.Y]
 
     nface=1: flag. A single dataset is being manipulated.
     nface=int: correct number to use. This is the case a merger/concatenated dataset is
