@@ -237,38 +237,9 @@ class OceanDataset:
 
         return self
 
-    def __setitem__(self, key, item):
-        if isinstance(item, _xr.DataArray):
-            # we only allow setting value into dataset
-            if self.aliases is None:
-                self._ds[key] = item
-            else:
-                if key in self.aliases.keys():
-                    # if it is one of those new names
-                    self._ds[key] = item
-                elif key in self.aliases.values():
-                    # if it is one of the original names
-                    self.dataset[key] = item
-                else:
-                    # if it is neither, then put it in the original dataset
-                    self.dataset[key] = item
-        else:
-            raise Exception("Only xr.DataArray can be assigned this way.")
 
     def __getitem__(self, key):
-        if key in self.__dict__.keys():
-            # use this scheme to retrieve other objects
-            return self.__dict__[key]
-        else:
-            if self.aliases:
-                if key in self.aliases.keys():
-                    # if it is one of the new name
-                    return self.dataset[self.aliases[key]]
-                else:
-                    # this is the same structure as setitem,more concise
-                    return self.dataset[key]
-            else:
-                return self._ds[key]
+        return self._ds[key]
 
     # -------------------
     # aliases
