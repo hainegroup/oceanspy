@@ -2,7 +2,7 @@ name: rise-environment
 channels:
   - conda-forge
 dependencies:
-  - python
+  - python < 3.10
   - numpy
   - matplotlib
   - pandas
@@ -12,14 +12,14 @@ dependencies:
   - distributed
   - bottleneck
   - netCDF4
-  - xarray
-  - cartopy
+  - xarray < 2022.6
+  - cartopy < 0.20
   - esmpy
   - intake-xarray
   - geopy
-  - xesmf!=0.5.0,!=0.5.1
+  - xesmf
   - esmf
-  - xgcm
+  - xgcm < 0.7
   - Ipython
   - xmitgcm
   - ffmpeg

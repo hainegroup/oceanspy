@@ -9,7 +9,7 @@ If you would like to use OceanSpy for your own datasets and run it on a local ma
 Required dependencies
 ---------------------
 
-* Python 3.9, 3.10
+* Python 3.9
 * dask_
 * xarray_
 * xgcm_
@@ -58,7 +58,7 @@ Step-by-step instructions
 
 	.. code-block:: bash
 
-		$ conda env create -f https://raw.githubusercontent.com/hainegroup/oceanspy/master/sciserver_catalogs/environment.yml
+		$ conda env create -f https://raw.githubusercontent.com/hainegroup/oceanspy/main/sciserver_catalogs/environment.yml
 
 	Then, activate the Oceanography environment:
 

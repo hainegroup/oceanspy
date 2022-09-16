@@ -196,7 +196,7 @@ nbsphinx_prolog = r"""
 
         This page was generated from `{{ docname }}`__.
 
-    __ https://github.com/hainegroup/oceanspy/blob/master
+    __ https://github.com/hainegroup/oceanspy/blob/main
         /{{ docname }}
 """
 
@@ -232,7 +232,7 @@ rst.write(
 # SCISERVER DATASETS
 url = (
     "https://raw.githubusercontent.com/hainegroup/oceanspy/"
-    "master/sciserver_catalogs/datasets_list.yaml"
+    "main/sciserver_catalogs/datasets_list.yaml"
 )
 f = urllib.request.urlopen(url)
 SCISERVER_DATASETS = yaml.safe_load(f)["datasets"]["sciserver"]

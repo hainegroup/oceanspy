@@ -1,8 +1,8 @@
 - first_name: Mattia
   last_name: Almansi
   institution: Johns Hopkins University
-  website: https://malmans2.github.io/
-  email: mattia.almansi@noc.ac.uk
+  website:
+  email: m.almansi@bopen.eu
   github: malmans2
   twitter: MattiaAlmansi
 
@@ -45,6 +45,15 @@
   email: mjimen17@jhu.edu 
   github: Mikejmnez
   twitter:
+
+- first_name: Wenrui 
+  last_name: Jiang
+  institution: Johns Hopkins University
+  website: 
+  email: wjiang33@jhu.edu
+  github: MaceKuailv
+  twitter: 
+
 
 # Copy and past the following lines,
 # then uncomment everything fill with your info.
