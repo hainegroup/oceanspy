@@ -10,7 +10,7 @@ OceanSpy - A Python package to facilitate ocean model data analysis and visualiz
 
 .. admonition:: Interactive Demo
 
-   Check out the interactive demonstration of OceanSpy at `www.bndr.it/nakt7 <https://bndr.it/nakt7>`_
+   Check out the interactive demonstration of OceanSpy at `www.bndr.it/gfvgd <https://bndr.it/gfvgd>`_
 
 For publications, please cite the following paper:  
 
@@ -50,7 +50,7 @@ OceanSpy can be used as a standalone package for analysis of local circulation m
 .. _Datasets: https://oceanspy.readthedocs.io/en/latest/datasets.html
 .. _`feedback submission`: https://github.com/hainegroup/oceanspy/issues
 
-.. |OceanSpy| image:: https://github.com/hainegroup/oceanspy/raw/master/docs/_static/oceanspy_logo_blue.png
+.. |OceanSpy| image:: https://github.com/hainegroup/oceanspy/raw/main/docs/_static/oceanspy_logo_blue.png
    :alt: OceanSpy image
    :target: https://oceanspy.readthedocs.io
 
@@ -70,9 +70,9 @@ OceanSpy can be used as a standalone package for analysis of local circulation m
     :alt: CI
     :target: https://github.com/hainegroup/oceanspy/actions
     
-.. |codecov| image:: https://codecov.io/github/hainegroup/oceanspy/coverage.svg?branch=master
+.. |codecov| image:: https://codecov.io/github/hainegroup/oceanspy/coverage.svg?branch=main
     :alt: Coverage
-    :target: https://codecov.io/github/hainegroup/oceanspy?branch=master
+    :target: https://codecov.io/github/hainegroup/oceanspy?branch=main
 
 .. |black| image:: https://img.shields.io/badge/code%20style-black-000000.svg
     :alt: black
@@ -92,8 +92,8 @@ OceanSpy can be used as a standalone package for analysis of local circulation m
 
 .. |binder| image:: https://mybinder.org/badge_logo.svg
    :alt: binder
-   :target: https://mybinder.org/v2/gh/hainegroup/oceanspy.git/master?filepath=binder
+   :target: https://mybinder.org/v2/gh/hainegroup/oceanspy.git/main?filepath=binder
 
-.. |pre-commit| image:: https://results.pre-commit.ci/badge/github/hainegroup/oceanspy/master.svg
-   :target: https://results.pre-commit.ci/latest/github/hainegroup/oceanspy/master
+.. |pre-commit| image:: https://results.pre-commit.ci/badge/github/hainegroup/oceanspy/main.svg
+   :target: https://results.pre-commit.ci/latest/github/hainegroup/oceanspy/main
    :alt: pre-commit.ci status

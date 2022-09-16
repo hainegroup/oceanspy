@@ -691,9 +691,9 @@ def mooring_array(od, Ymoor, Xmoor, **kwargs):
 
     # Cutout
     if "YRange" not in kwargs:
-        kwargs["YRange"] = Ymoor
+        kwargs["YRange"] = [_np.min(Ymoor), _np.max(Ymoor)]
     if "XRange" not in kwargs:
-        kwargs["XRange"] = Xmoor
+        kwargs["XRange"] = [_np.min(Xmoor), _np.max(Xmoor)]
     if "add_Hbdr" not in kwargs:
         kwargs["add_Hbdr"] = True
     od = od.subsample.cutout(**kwargs)
@@ -1075,9 +1075,9 @@ def survey_stations(
 
     # Cutout
     if "YRange" not in kwargs:
-        kwargs["YRange"] = Y_surv
+        kwargs["YRange"] = [_np.min(Y_surv), _np.max(Y_surv)]
     if "XRange" not in kwargs:
-        kwargs["XRange"] = X_surv
+        kwargs["XRange"] = [_np.min(X_surv), _np.max(X_surv)]
     if "add_Hbdr" not in kwargs:
         kwargs["add_Hbdr"] = True
     od = od.subsample.cutout(**kwargs)

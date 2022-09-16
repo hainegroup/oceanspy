@@ -33,7 +33,6 @@ setup(
         "Operating System :: OS Independent",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.9",
-        "Programming Language :: Python :: 3.10",
     ],
     description=(
         "OceanSpy: A Python package to"

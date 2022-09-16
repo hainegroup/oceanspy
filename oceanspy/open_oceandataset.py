@@ -437,7 +437,7 @@ def _find_entries(name, catalog_url):
     if catalog_url is None:  # pragma: no cover
         url = (
             "https://raw.githubusercontent.com/hainegroup/oceanspy/"
-            "master/sciserver_catalogs/datasets_list.yaml"
+            "main/sciserver_catalogs/datasets_list.yaml"
         )
         f = _urllib.request.urlopen(url)
         SCISERVER_DATASETS = _yaml.safe_load(f)["datasets"]["sciserver"]
@@ -455,7 +455,7 @@ def _find_entries(name, catalog_url):
         if catalog_url is None:
             url = (
                 "https://raw.githubusercontent.com/hainegroup/oceanspy/"
-                "master/sciserver_catalogs/catalog_xarray.yaml"
+                "main/sciserver_catalogs/catalog_xarray.yaml"
             )
         else:
             url = catalog_url
@@ -468,7 +468,7 @@ def _find_entries(name, catalog_url):
         if catalog_url is None:
             url = (
                 "https://raw.githubusercontent.com/hainegroup/oceanspy/"
-                "master/sciserver_catalogs/catalog_xmitgcm.yaml"
+                "main/sciserver_catalogs/catalog_xmitgcm.yaml"
             )
         else:
             url = catalog_url  # provided by user

@@ -99,7 +99,7 @@ Check out `Tutorial <Tutorial.ipynb#Tutorial>`_, Use Cases, and :ref:`api` to le
 
 .. admonition:: Interactive Demo
 
-   You can interactively explore many more features at `www.bndr.it/nakt7 <https://bndr.it/nakt7>`_
+   You can interactively explore many more features at `www.bndr.it/gfvgd <https://bndr.it/gfvgd>`_
 
 The schematic below shows how OceanSpy is designed to be used by the oceanographic community.
 
@@ -109,4 +109,4 @@ The schematic below shows how OceanSpy is designed to be used by the oceanograph
 .. _SciServer: http://www.sciserver.org/
 .. |binder| image:: https://mybinder.org/badge_logo.svg
    :alt: binder
-   :target: https://mybinder.org/v2/gh/hainegroup/oceanspy/master?filepath=binder%2FTutorial.ipynb
+   :target: https://mybinder.org/v2/gh/hainegroup/oceanspy/main?filepath=binder%2FTutorial.ipynb
