@@ -882,7 +882,7 @@ def _edge_facet_data(_Facet_list, _var, _dims, _axis):
             xf = _np.where(_np.array(X0)==1)[0][-1]
             XRange.append([x0, xf]) # xf+1?
         else:
-            XRange.append([np.nan, np.nan]) # no data
+            XRange.append([_np.nan, _np.nan]) # no data
     return XRange
 
 
