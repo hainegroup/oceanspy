@@ -763,7 +763,7 @@ def _edge_arc_data(_da, _face_ind, _dims):
 
 def mask_var(_ds, var, XRange, YRange):
     """Returns a dataset with masked variable. The masking region is determined by
-    XRange and YRange.
+    XRange and YRange. var must be latitude or longitude at corner points
     """
     _ds = _copy.deepcopy(mates(_ds.reset_coords()))
     minY = _ds["YG"].min().values
@@ -785,19 +785,19 @@ def mask_var(_ds, var, XRange, YRange):
         else:
             minX = _ds["XG"].min().values
             maxX = _ds["XG"].max().values
-    maskC = _xr.where(
+    maskG = _xr.where(
         _np.logical_and(
-            _np.logical_and(_ds["YC"] >= minY, _ds["YC"] <= maxY),
+            _np.logical_and(_ds["YG"] >= minY, _ds["YG"] <= maxY),
             _np.logical_and(
-                _rel_lon(_ds["XC"], ref_lon) >= _rel_lon(minX, ref_lon),
-                _rel_lon(_ds["XC"], ref_lon) <= _rel_lon(maxX, ref_lon),
+                _rel_lon(_ds["XG"], ref_lon) >= _rel_lon(minX, ref_lon),
+                _rel_lon(_ds["XG"], ref_lon) <= _rel_lon(maxX, ref_lon),
             ),
         ),
         1,
         0,
     ).persist()
 
-    _ds[var] = _ds[var].where(maskC, drop=True)
+    _ds[var] = _ds[var].where(maskG, drop=True)
     return _ds
 
 
