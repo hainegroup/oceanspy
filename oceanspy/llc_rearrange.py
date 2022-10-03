@@ -852,6 +852,40 @@ def arc_limits_mask(_ds, _var, _faces, _dims):
     return arc_edges
 
 
+def _edge_facet_data(_Facet_list, _var, _dims, _axis):
+    """Determines the edge of the non-masked data values on each of the four Facets, 
+    and that that will be retained (not dropped) in the cutout process. 
+    Only this subset of the face needs to be transformed.
+    
+    Output: Index location of the data edge of face = _face_ind along the geographical
+    north dimension.
+    """
+    
+    if _axis == 0:
+        _dim = _dims.Y
+    elif _axis == 1:
+        _dim = _dims.X
+    
+    XRange = []
+    for i in range(len(_Facet_list)):
+        if type(_Facet_list[i]) == _dstype:
+            # there is data
+            _da = _Facet_list[i][_var].load()  # load into memory 2d data.
+            X0 = []
+            for j in list(_da[_dim].data):
+                arg = {_dim: j}
+                if _np.isnan(_np.array(_da.sel(**arg).data)).all() == True:
+                    X0.append(0)
+                else:
+                    X0.append(1)
+            x0 = _np.where(_np.array(X0)==1)[0][0]
+            xf = _np.where(_np.array(X0)==1)[0][-1]
+            XRange.append([x0, xf]) # xf+1?
+        else:
+            XRange.append([np.nan, np.nan]) # no data
+    return XRange
+
+
 class Dims:
     axes = "XYZT"  # shortcut axis names
 
