@@ -96,7 +96,7 @@ class LLCtransformation:
 # 
         if faces is 'all':
             faces = _np.arange(13)
-        elif faces is None:
+        elif faces is True:
             if XRange is not None and YRange is not None:
                 maskH, dmaskH, XRange, YRange = get_maskH(ds, add_Hbdr+0.5, XRange, YRange, ref_lon=ref_lon)
                 faces = list(dmaskH["face"].values)
@@ -106,7 +106,7 @@ class LLCtransformation:
             else:
                 raise ValueError("Need to refine spatial range of cutout")
 
-
+        print(faces)
         cuts = arc_limits_mask(ds, 'YG', faces, dims_g)
 
 # 
