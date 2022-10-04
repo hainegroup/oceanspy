@@ -196,14 +196,14 @@ class LLCtransformation:
 
         # Slicing the faces to remove nan-edges
         for axis in range(2):
-            edges1 = _edge_facet_data(Facet1, 'YG', dims_g, axis)
-            Facet1 = slice_datasets(Facet1, 1, dims_c, dims_g, edges1, axis)
-            edges2 = _edge_facet_data(Facet2, 'YG', dims_g, axis)
-            Facet2 = slice_datasets(Facet2, 2, dims_c, dims_g, edges2, axis)
-            edges3 = _edge_facet_data(Facet3, 'YG', dims_g, axis)
-            Facet3 = slice_datasets(Facet3, 3, dims_c, dims_g, edges3, axis)
-            edges4 = _edge_facet_data(Facet4, 'YG', dims_g, axis)
-            Facet4 = slice_datasets(Facet4, 4, dims_c, dims_g, edges4, axis)
+            edges1 = _edge_facet_data(faces1, 'YG', dims_g, axis)
+            faces1 = slice_datasets(faces1, 1, dims_c, dims_g, edges1, axis)
+            edges2 = _edge_facet_data(faces2, 'YG', dims_g, axis)
+            faces2 = slice_datasets(faces2, 2, dims_c, dims_g, edges2, axis)
+            edges3 = _edge_facet_data(faces3, 'YG', dims_g, axis)
+            faces3 = slice_datasets(faces3, 3, dims_c, dims_g, edges3, axis)
+            edges4 = _edge_facet_data(faces4, 'YG', dims_g, axis)
+            faces4 = slice_datasets(faces4, 4, dims_c, dims_g, edges4, axis)
 
 
         # =====
