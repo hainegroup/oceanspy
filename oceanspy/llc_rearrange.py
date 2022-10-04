@@ -194,6 +194,18 @@ class LLCtransformation:
         faces3.append(DSa2)
         faces4.append(DSa5)
 
+        # Slicing the faces to remove nan-edges
+        for axis in range(2):
+            edges1 = _edge_facet_data(Facet1, 'YG', dims_g, axis)
+            Facet1 = slice_datasets(Facet1, 1, dims_c, dims_g, edges1, axis)
+            edges2 = _edge_facet_data(Facet2, 'YG', dims_g, axis)
+            Facet2 = slice_datasets(Facet2, 2, dims_c, dims_g, edges2, axis)
+            edges3 = _edge_facet_data(Facet3, 'YG', dims_g, axis)
+            Facet3 = slice_datasets(Facet3, 3, dims_c, dims_g, edges3, axis)
+            edges4 = _edge_facet_data(Facet4, 'YG', dims_g, axis)
+            Facet4 = slice_datasets(Facet4, 4, dims_c, dims_g, edges4, axis)
+
+
         # =====
         # Facet 1
 
@@ -258,6 +270,7 @@ class LLCtransformation:
                         dtr = list(dims)[::-1]
                         dtr[-1], dtr[-2] = dtr[-2], dtr[-1]
                         DSFacet12[_var] = DSFacet12[_var].transpose(*dtr).persist()
+
 
         if centered == "Pacific":
             FACETS = [DSFacet34, DSFacet12]  # centered on Pacific ocean
