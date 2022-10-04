@@ -103,7 +103,7 @@ class LLCtransformation:
                 ds = mask_var(ds, XRange, YRange)  # masks latitude
 
             else:
-                raise ValueError("Need to refine spatial range fo cutout")
+                raise ValueError("Need to refine spatial range of cutout")
 
 
         cuts = arc_limits_mask(ds, 'YG', faces, dims_g)
@@ -123,7 +123,6 @@ class LLCtransformation:
                 ARCT[2].append(DS[2])
                 ARCT[3].append(DS[3])
             else:
-                # print('here, '+ var_name)
                 ARCT[0].append(ds[var_name])
                 ARCT[1].append(ds[var_name])
                 ARCT[2].append(ds[var_name])
