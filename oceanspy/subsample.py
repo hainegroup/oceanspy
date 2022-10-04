@@ -361,7 +361,7 @@ def cutout(
     if XRange is not None or YRange is not None:
 
         maskH, dmaskH, XRange, YRange = get_maskH(
-            ds, add_Hbdr, add_Vbdr, XRange, YRange, ref_lon=ref_lon
+            ds, add_Hbdr, XRange, YRange, ref_lon=ref_lon
         )
     if transformation is not False and "face" in ds.dims:
         if XRange is None and YRange is None:
@@ -397,7 +397,7 @@ def cutout(
             # Unpack the new dataset without face as dimension
             ds = od._ds
             maskH, dmaskH, XRange, YRange = get_maskH(
-                ds, add_Hbdr, add_Vbdr, XRange, YRange, ref_lon=ref_lon
+                ds, add_Hbdr, XRange, YRange, ref_lon=ref_lon
             )
         elif transformation not in _transf_list:
             raise ValueError("transformation not supported")
@@ -1369,7 +1369,7 @@ def particle_properties(od, times, Ypart, Xpart, Zpart, **kwargs):
     return od
 
 
-def get_maskH(ds, add_Hbdr, add_Vbdr, XRange, YRange, ref_lon=0):
+def get_maskH(ds, add_Hbdr, XRange, YRange, ref_lon=0):
     """Define this function to avoid repeated code. First time this runs,
     the objective is to figure out which faces survive the cutout. This info
     is then passed, when transforming llc-grids, to llc_rearrange. Second
