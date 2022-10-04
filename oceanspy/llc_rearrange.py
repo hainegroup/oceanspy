@@ -23,6 +23,7 @@ class LLCtransformation:
         self,
         ds,
         varlist,
+        add_Hbdr=0,
         XRange=None,
         YRange=None,
         transformation="arctic_crown",
@@ -47,6 +48,7 @@ class LLCtransformation:
         self,
         ds,
         varlist,
+        add_Hbdr=0,
         XRange=None,
         YRange=None,
         centered="Atlantic",
@@ -90,48 +92,6 @@ class LLCtransformation:
         elif len(varlist) == 0:
             raise ValueError("Empty list of variables")
 
-        # # Mask data (repeated code from subsamble). Only need one data var first,
-        # to figure out the data range
-
-        # minY = ds["YG"].min().values
-        # maxY = ds["YG"].max().values
-
-        # minX = ds["XG"].min().values
-        # maxX = ds["XG"].max().values
-
-        # if (YRange is not None or XRange is not None):
-        #     if YRange is not None:
-        #         minY = YRange[0]
-        #         maxY = YRange[1]
-        #     else:
-        #         minY = ds["YG"].min().values
-        #         maxY = ds["YG"].max().values
-        #     if XRange is not None:
-        #         minX = XRange[0]
-        #         maxX = XRange[1]
-        #     else:
-        #         minX = ds["XG"].min().values
-        #         maxX = ds["XG"].max().values
-
-        # maskC = _xr.where(
-        #     _np.logical_and(
-        #         _np.logical_and(ds["YC"] >= minY, ds["YC"] <= maxY),
-        #         _np.logical_and(
-        #             _rel_lon(ds["XC"], ref_lon) >= _rel_lon(minX, ref_lon),
-        #             _rel_lon(ds["XC"], ref_lon) <= _rel_lon(maxX, ref_lon),
-        #         ),
-        #     ),
-        #     1,
-        #     0,
-        # ).persist()
-
-        # for var in ds.data_vars:
-        #     if set(["X", "Y"]).issubset(ds[var].dims):
-        #         ds[var] = ds[var].where(maskC, drop=True)
-
-        # Just made nan data that will not be included in cutout in only centered
-        # vars. Need to figure out a way to drop the nans as these will not
-        # survive the cutout.
 
         dsa2 = []
         dsa5 = []
