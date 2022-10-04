@@ -623,6 +623,57 @@ def Coriolis_parameter(Y, omega=7.2921e-5):
     return f, e
 
 
+def get_maskH(ds, add_Hbdr, XRange, YRange, ref_lon=0):
+    """Define this function to avoid repeated code. First time this runs,
+    the objective is to figure out which faces survive the cutout. This info
+    is then passed, when transforming llc-grids, to llc_rearrange. Second
+    time this code runs, it gets applied on a dataset without faces as a
+    dimension.
+    """
+    maskH = _xr.ones_like(ds["XG"])
+
+    if YRange is not None:
+        # Use arrays
+        YRange = _np.asarray([_np.min(YRange) - add_Hbdr, _np.max(YRange) + add_Hbdr])
+        YRange = YRange.astype(ds["YG"].dtype)
+
+        # Get the closest
+        for i, Y in enumerate(YRange):
+            diff = _np.fabs(ds["YG"] - Y)
+            YRange[i] = ds["YG"].where(diff == diff.min()).min().values
+        maskH = maskH.where(
+            _np.logical_and(ds["YG"] >= YRange[0], ds["YG"] <= YRange[-1]), 0
+        )
+
+    if XRange is not None:
+        # Use arrays
+        XRange = _np.asarray([XRange[0] - add_Hbdr, XRange[-1] + add_Hbdr])
+        XRange = XRange.astype(ds["XG"].dtype)
+
+        # Get the closest
+        for i, X in enumerate(XRange):
+            diff = _np.fabs(ds["XG"] - X)
+            XRange[i] = ds["XG"].where(diff == diff.min()).min().values
+        maskH = maskH.where(
+            _np.logical_and(
+                _rel_lon(ds["XG"], ref_lon) >= _rel_lon(XRange[0], ref_lon),
+                _rel_lon(ds["XG"], ref_lon) <= _rel_lon(XRange[-1], ref_lon),
+            ),
+            0,
+        )
+    # Can't be all zeros
+    if maskH.sum() == 0:
+        raise ValueError("Zero grid points in the horizontal range")
+
+    # Find horizontal indexes
+    maskH = maskH.assign_coords(
+        Yp1=_np.arange(len(maskH["Yp1"])), Xp1=_np.arange(len(maskH["Xp1"]))
+    )
+    dmaskH = maskH.where(maskH, drop=True)
+    return maskH, dmaskH, XRange, YRange
+
+
+
 @compilable
 def spherical2cartesian_compiled(Y, X, R=6371.0):
     """
@@ -772,3 +823,5 @@ def find_cs_sn(thetaA, phiA, thetaB, phiB):
     SN = _np.sin(BO) * _np.sin(dphi) / sin_AB
     CS = _np.sign(thetaB - thetaA) * _np.sqrt(1 - SN**2)
     return CS, SN
+
+
