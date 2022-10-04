@@ -106,7 +106,7 @@ class LLCtransformation:
                 raise ValueError("Need to refine spatial range fo cutout")
 
 
-        cuts = arc_limits_mask(ds, var, faces, dims)
+        cuts = arc_limits_mask(ds, 'YG', faces, dims_g)
 
 # 
         dsa2 = []
