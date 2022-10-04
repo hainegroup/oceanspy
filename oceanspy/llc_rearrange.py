@@ -93,12 +93,14 @@ class LLCtransformation:
         elif len(varlist) == 0:
             raise ValueError("Empty list of variables")
 
-# 
-        if faces is 'all':
+        #
+        if faces is "all":
             faces = _np.arange(13)
         elif faces is True:
             if XRange is not None and YRange is not None:
-                maskH, dmaskH, XRange, YRange = get_maskH(ds, add_Hbdr+0.5, XRange, YRange, ref_lon=ref_lon)
+                maskH, dmaskH, XRange, YRange = get_maskH(
+                    ds, add_Hbdr + 0.5, XRange, YRange, ref_lon=ref_lon
+                )
                 faces = list(dmaskH["face"].values)
 
                 ds = mask_var(ds, XRange, YRange)  # masks latitude
@@ -106,10 +108,10 @@ class LLCtransformation:
             else:
                 raise ValueError("Need to refine spatial range of cutout")
 
-        print('faces in the cutout', faces)
-        cuts = arc_limits_mask(ds, 'YG', faces, dims_g)
+        print("faces in the cutout", faces)
+        cuts = arc_limits_mask(ds, "YG", faces, dims_g)
 
-# 
+        #
         dsa2 = []
         dsa5 = []
         dsa7 = []
@@ -196,15 +198,14 @@ class LLCtransformation:
 
         # Slicing the faces to remove nan-edges
         for axis in range(2):
-            edges1 = _edge_facet_data(faces1, 'YG', dims_g, axis)
+            edges1 = _edge_facet_data(faces1, "YG", dims_g, axis)
             faces1 = slice_datasets(faces1, 1, dims_c, dims_g, edges1, axis)
-            edges2 = _edge_facet_data(faces2, 'YG', dims_g, axis)
+            edges2 = _edge_facet_data(faces2, "YG", dims_g, axis)
             faces2 = slice_datasets(faces2, 2, dims_c, dims_g, edges2, axis)
-            edges3 = _edge_facet_data(faces3, 'YG', dims_g, axis)
+            edges3 = _edge_facet_data(faces3, "YG", dims_g, axis)
             faces3 = slice_datasets(faces3, 3, dims_c, dims_g, edges3, axis)
-            edges4 = _edge_facet_data(faces4, 'YG', dims_g, axis)
+            edges4 = _edge_facet_data(faces4, "YG", dims_g, axis)
             faces4 = slice_datasets(faces4, 4, dims_c, dims_g, edges4, axis)
-
 
         # =====
         # Facet 1
@@ -270,7 +271,6 @@ class LLCtransformation:
                         dtr = list(dims)[::-1]
                         dtr[-1], dtr[-2] = dtr[-2], dtr[-1]
                         DSFacet12[_var] = DSFacet12[_var].transpose(*dtr).persist()
-
 
         if centered == "Pacific":
             FACETS = [DSFacet34, DSFacet12]  # centered on Pacific ocean
@@ -751,7 +751,7 @@ def _edge_arc_data(_da, _face_ind, _dims):
 
 
 def mask_var(_ds, XRange, YRange):
-    """Returns a dataset with masked latitude at C and G points (YC and YG). 
+    """Returns a dataset with masked latitude at C and G points (YC and YG).
     The masking region is determined by XRange and YRange. Used to estimate the
     extend of actual data to be retained
     """
@@ -800,8 +800,8 @@ def mask_var(_ds, XRange, YRange):
         0,
     ).persist()
 
-    _ds['YC'] = _ds['YC'].where(maskC, drop=True)
-    _ds['YG'] = _ds['YG'].where(maskG, drop=True)
+    _ds["YC"] = _ds["YC"].where(maskC, drop=True)
+    _ds["YG"] = _ds["YG"].where(maskG, drop=True)
     return _ds
 
 
@@ -857,19 +857,19 @@ def arc_limits_mask(_ds, _var, _faces, _dims):
 
 
 def _edge_facet_data(_Facet_list, _var, _dims, _axis):
-    """Determines the edge of the non-masked data values on each of the four Facets, 
-    and that that will be retained (not dropped) in the cutout process. 
+    """Determines the edge of the non-masked data values on each of the four Facets,
+    and that that will be retained (not dropped) in the cutout process.
     Only this subset of the face needs to be transformed.
-    
+
     Output: Index location of the data edge of face = _face_ind along the geographical
     north dimension.
     """
-    
+
     if _axis == 0:
         _dim = _dims.Y
     elif _axis == 1:
         _dim = _dims.X
-    
+
     XRange = []
     for i in range(len(_Facet_list)):
         if type(_Facet_list[i]) == _dstype:
@@ -882,42 +882,41 @@ def _edge_facet_data(_Facet_list, _var, _dims, _axis):
                     X0.append(0)
                 else:
                     X0.append(1)
-            x0 = _np.where(_np.array(X0)==1)[0][0]
-            xf = _np.where(_np.array(X0)==1)[0][-1]
-            XRange.append([x0, xf]) # xf+1?
+            x0 = _np.where(_np.array(X0) == 1)[0][0]
+            xf = _np.where(_np.array(X0) == 1)[0][-1]
+            XRange.append([x0, xf])  # xf+1?
         else:
-            XRange.append([_np.nan, _np.nan]) # no data
+            XRange.append([_np.nan, _np.nan])  # no data
     return XRange
-
 
 
 def slice_datasets(_DSfacet, _facet_ind, dims_c, dims_g, _edges, _axis):
     """
     Slices a list of dataset along an axis. The range of index retained is
-    defined in Ranges, an argument of the function. How the list of dataset, 
+    defined in Ranges, an argument of the function. How the list of dataset,
     which together define a Facet with facet index (1-4), depends on the facet
     index and the axis (0 or 1).
     """
-    if _axis == 0: # local y always the case for all facets
+    if _axis == 0:  # local y always the case for all facets
         _dim_c = dims_c.Y
         _dim_g = dims_g.Y
         if _facet_ind == 1 or _facet_ind == 2:
             flag = 1  #  max and min ranges
-        elif _facet_ind ==3 or _facet_ind ==4:
-            flag = 0        
-    elif _axis == 1: # local x always the case.
-        _dim_c = dims_c.X
-        _dim_g = dims_g.X        
-        if _facet_ind ==1 or _facet_ind ==2:
+        elif _facet_ind == 3 or _facet_ind == 4:
             flag = 0
-        elif _facet_ind ==3 or _facet_ind ==4:
+    elif _axis == 1:  # local x always the case.
+        _dim_c = dims_c.X
+        _dim_g = dims_g.X
+        if _facet_ind == 1 or _facet_ind == 2:
+            flag = 0
+        elif _facet_ind == 3 or _facet_ind == 4:
             flag = 1
 
     _DSFacet = _copy.deepcopy(_DSfacet)
     for i in range(len(_DSFacet)):
         for _dim in [_dim_c, _dim_g]:
             if flag:
-                if len(_edges)==1:
+                if len(_edges) == 1:
                     ii_0 = _edges[0]
                     ii_1 = _edges[1]
                 elif len(_edges) > 1:
@@ -932,11 +931,10 @@ def slice_datasets(_DSfacet, _facet_ind, dims_c, dims_g, _edges, _axis):
             else:
                 ii_0 = _edges[i][0]
                 ii_1 = _edges[i][1]
-            arg = {_dim: slice(ii_0, ii_1+1)}
+            arg = {_dim: slice(ii_0, ii_1 + 1)}
             if type(_DSFacet[i]) == _dstype:
                 _DSFacet[i] = _DSFacet[i].isel(**arg)
     return _DSFacet
-
 
 
 class Dims:

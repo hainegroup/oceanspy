@@ -673,7 +673,6 @@ def get_maskH(ds, add_Hbdr, XRange, YRange, ref_lon=0):
     return maskH, dmaskH, XRange, YRange
 
 
-
 @compilable
 def spherical2cartesian_compiled(Y, X, R=6371.0):
     """
@@ -823,5 +822,3 @@ def find_cs_sn(thetaA, phiA, thetaB, phiB):
     SN = _np.sin(BO) * _np.sin(dphi) / sin_AB
     CS = _np.sign(thetaB - thetaA) * _np.sqrt(1 - SN**2)
     return CS, SN
-
-
