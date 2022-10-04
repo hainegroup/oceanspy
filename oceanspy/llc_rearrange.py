@@ -94,7 +94,7 @@ class LLCtransformation:
             raise ValueError("Empty list of variables")
 
         #
-        if faces is "all":
+        if faces == "all":
             faces = _np.arange(13)
         elif faces is True:
             if XRange is not None and YRange is not None:
@@ -120,7 +120,9 @@ class LLCtransformation:
 
         for var_name in varlist:
             if "face" in ds[var_name].dims:
-                arc_faces, *nnn, DS = arct_connect(ds, var_name, faces=faces)
+                arc_faces, *nnn, DS = arct_connect(
+                    ds, var_name, faces=faces, masking=False, opt=True, ranges=cuts
+                )
                 ARCT[0].append(DS[0])
                 ARCT[1].append(DS[1])
                 ARCT[2].append(DS[2])
@@ -878,7 +880,7 @@ def _edge_facet_data(_Facet_list, _var, _dims, _axis):
             X0 = []
             for j in list(_da[_dim].data):
                 arg = {_dim: j}
-                if _np.isnan(_np.array(_da.sel(**arg).data)).all() == True:
+                if _np.isnan(_np.array(_da.sel(**arg).data)).all() is True:
                     X0.append(0)
                 else:
                     X0.append(1)
@@ -901,7 +903,7 @@ def slice_datasets(_DSfacet, _facet_ind, dims_c, dims_g, _edges, _axis):
         _dim_c = dims_c.Y
         _dim_g = dims_g.Y
         if _facet_ind == 1 or _facet_ind == 2:
-            flag = 1  #  max and min ranges
+            flag = 1  # max and min ranges
         elif _facet_ind == 3 or _facet_ind == 4:
             flag = 0
     elif _axis == 1:  # local x always the case.
