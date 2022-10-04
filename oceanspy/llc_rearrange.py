@@ -61,6 +61,9 @@ class LLCtransformation:
         orientation.
         """
 
+        if "face" not in ds.dims:
+            raise ValueError("face does not appear as a dimension of the dataset")
+
         if centered not in ["Atlantic", "Pacific"]:
             raise ValueError(
                 "Centering option not recognized. Options are" "Atlantic or Pacific"
