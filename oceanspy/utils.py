@@ -656,8 +656,8 @@ def get_maskH(ds, add_Hbdr, XRange, YRange, ref_lon=0):
             XRange[i] = ds["XG"].where(diff == diff.min()).min().values
         maskH = maskH.where(
             _np.logical_and(
-                _rel_lon(ds["XG"], ref_lon) >= _rel_lon(XRange[0], ref_lon),
-                _rel_lon(ds["XG"], ref_lon) <= _rel_lon(XRange[-1], ref_lon),
+                rel_lon(ds["XG"], ref_lon) >= rel_lon(XRange[0], ref_lon),
+                rel_lon(ds["XG"], ref_lon) <= rel_lon(XRange[-1], ref_lon),
             ),
             0,
         )
