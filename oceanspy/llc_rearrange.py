@@ -61,7 +61,7 @@ class LLCtransformation:
         one without faces, with grids and variables sharing a common grid
         orientation.
         """
-
+        print("Warning: This is an experimental feature")
         if "face" not in ds.dims:
             raise ValueError("face does not appear as a dimension of the dataset")
 
@@ -106,7 +106,7 @@ class LLCtransformation:
             else:
                 raise ValueError("Need to refine spatial range of cutout")
 
-        print(faces)
+        print('faces in the cutout', faces)
         cuts = arc_limits_mask(ds, 'YG', faces, dims_g)
 
 # 
