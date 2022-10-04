@@ -866,7 +866,6 @@ def _edge_facet_data(_Facet_list, _var, _dims, _axis):
     Output: Index location of the data edge of face = _face_ind along the geographical
     north dimension.
     """
-    print(_var)
     if _axis == 0:
         _dim = _dims.Y
     elif _axis == 1:
