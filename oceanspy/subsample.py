@@ -358,17 +358,11 @@ def cutout(
             # Redefining longitude is necessary.
             ref_lon = XRange[0] - (XRange[0] - XRange[-1]) / 3
 
-    # Initialize horizontal mask
-    if XRange is not None or YRange is not None:
-
-        maskH, dmaskH, XRange, YRange = get_maskH(
-            ds, add_Hbdr, XRange, YRange, ref_lon=ref_lon
-        )
     if transformation is not False and "face" in ds.dims:
         if XRange is None and YRange is None:
             faces = "all"
         else:
-            faces = list(dmaskH["face"].values)  # gets faces that survives cutout
+            faces = True  # actual values will be calculated later
         _transf_list = ["arctic_crown"]
         if transformation in _transf_list:
             arg = {
@@ -376,6 +370,9 @@ def cutout(
                 "varlist": varList,  # vars and grid coords to transform
                 "centered": centered,
                 "faces": faces,
+                "add_Hbdr": add_Hbdr,
+                "XRange": XRange,
+                "YRange": YRange,
                 "drop": True,  # required to calculate U-V grid points
                 "chunks": chunks,
             }
@@ -397,9 +394,6 @@ def cutout(
             "simulation, with simple topology (face not a dimension)"
             # Unpack the new dataset without face as dimension
             ds = od._ds
-            maskH, dmaskH, XRange, YRange = get_maskH(
-                ds, add_Hbdr, XRange, YRange, ref_lon=ref_lon
-            )
         elif transformation not in _transf_list:
             raise ValueError("transformation not supported")
     elif transformation is False and "face" in ds.dims:
@@ -410,8 +404,11 @@ def cutout(
     # ---------------------------
     # Horizontal CUTOUT part II (continuation of original code)
     # ---------------------------
-
+    # Initialize horizontal mask
     if XRange is not None or YRange is not None:
+        maskH, dmaskH, XRange, YRange = get_maskH(
+            ds, add_Hbdr, XRange, YRange, ref_lon=ref_lon
+        )
         dYp1 = dmaskH["Yp1"].values
         dXp1 = dmaskH["Xp1"].values
         iY = [_np.min(dYp1), _np.max(dYp1)]
