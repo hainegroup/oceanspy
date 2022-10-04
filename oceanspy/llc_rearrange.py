@@ -28,7 +28,7 @@ class LLCtransformation:
         YRange=None,
         transformation="arctic_crown",
         centered="Atlantic",
-        faces="all",
+        faces=None,
         chunks=None,
         drop=False,
     ):
@@ -52,7 +52,7 @@ class LLCtransformation:
         XRange=None,
         YRange=None,
         centered="Atlantic",
-        faces="all",
+        faces=None,
         chunks=None,
         drop=False,
     ):
@@ -65,9 +65,6 @@ class LLCtransformation:
             raise ValueError(
                 "Centering option not recognized. Options are" "Atlantic or Pacific"
             )
-
-        if isinstance(faces, str):
-            faces = _np.arange(13)
 
         ds = _copy.deepcopy(mates(ds.reset_coords()))
 
@@ -92,7 +89,23 @@ class LLCtransformation:
         elif len(varlist) == 0:
             raise ValueError("Empty list of variables")
 
+# 
+        if faces is 'all':
+            faces = _np.arange(13)
+        elif faces is None:
+            if XRange is not None and YRange is not None:
+                maskH, dmaskH, XRange, YRange = get_maskH(ds, add_Hbdr+0.5, XRange, YRange, ref_lon=ref_lon)
+                faces = list(dmaskH["face"].values)
 
+                ds = mask_var(ds, XRange, YRange)  # masks latitude
+
+            else:
+                raise ValueError("Need to refine spatial range fo cutout")
+
+
+        cuts = arc_limits_mask(_ds, var, _faces, dims)
+
+# 
         dsa2 = []
         dsa5 = []
         dsa7 = []
