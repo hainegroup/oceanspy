@@ -83,6 +83,11 @@ class LLCtransformation:
 
         Nx = len(ds[dims_c.X])
 
+        if Nx == 90:  # ECCO dataset
+            add_Hbdr = add_Hbdr + 2
+        else:
+            add_Hbdr = add_Hbdr + 0.25
+
         if isinstance(varlist, str):
             if varlist == "all":
                 varlist = ds.data_vars
@@ -99,7 +104,7 @@ class LLCtransformation:
         elif faces is True:
             if XRange is not None and YRange is not None:
                 maskH, dmaskH, XRange, YRange = get_maskH(
-                    ds, add_Hbdr + 0.5, XRange, YRange, ref_lon=ref_lon
+                    ds, add_Hbdr, XRange, YRange, ref_lon=ref_lon
                 )
                 faces = list(dmaskH["face"].values)
 
