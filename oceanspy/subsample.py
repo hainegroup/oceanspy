@@ -61,8 +61,7 @@ def cutout(
     timeFreq=None,
     sampMethod="snapshot",
     dropAxes=False,
-    transformation=False,
-    centered="Atlantic",
+    centered=None,
     chunks=None,
 ):
     """
@@ -110,13 +109,10 @@ def cutout(
         if one point only is in the range.
         If True, set dropAxes=od.grid_coords.
         If False, preserve original grid.
-    transformation: str, or bool
-        Lists the transformation of the llcgrid into a new one in which face
-        is no longer a dimension. Default is `False`. If `True`, need to
-        define how data will be centered
-    centered: str, or bool
-        default is `Atlantic`, and other options is `Pacific`. This refers
-        to which ocean appears centered on the data.
+    centered: str or bool.
+        Only used when `face` is a dimension. When str, 'Atlantic' or 'Pacific'
+        are the only possible choices. Default is `None` and centered is estimated
+        during the cutout.
 
     Returns
     -------
@@ -358,27 +354,23 @@ def cutout(
             # Redefining longitude is necessary.
             ref_lon = XRange[0] - (XRange[0] - XRange[-1]) / 3
 
-    if transformation is not False and "face" in ds.dims:
+    if "face" in ds.dims:
         if XRange is None and YRange is None:
             faces = "all"
         else:
             faces = True  # actual values will be calculated later
-        _transf_list = ["arctic_crown"]
-        if transformation in _transf_list:
-            arg = {
-                "ds": ds,
-                "varlist": varList,  # vars and grid coords to transform
-                "centered": centered,
-                "faces": faces,
-                "add_Hbdr": add_Hbdr,
-                "XRange": XRange,
-                "YRange": YRange,
-                "drop": True,  # required to calculate U-V grid points
-                "chunks": chunks,
+        arg = {
+            "ds": ds,
+            "varlist": varList,  # vars and grid coords to transform
+            "faces": faces,
+            "add_Hbdr": add_Hbdr,
+            "XRange": XRange,
+            "YRange": YRange,
+            "centered": centered,
+            "drop": True,  # required to calculate U-V grid points
+            "chunks": chunks,
             }
-            if transformation == "arctic_crown":
-                _transformation = _llc_trans.arctic_crown
-            dsnew = _transformation(**arg)
+            dsnew =  _llc_trans.arctic_crown.arctic_crown(**arg)
             dsnew = dsnew.set_coords(co_list)
             grid_coords = od.grid_coords
             od._ds = dsnew
@@ -394,12 +386,6 @@ def cutout(
             "simulation, with simple topology (face not a dimension)"
             # Unpack the new dataset without face as dimension
             ds = od._ds
-        elif transformation not in _transf_list:
-            raise ValueError("transformation not supported")
-    elif transformation is False and "face" in ds.dims:
-        raise ValueError(
-            "Must define a transformation to remove complex" "topology of dataset."
-        )
 
     # ---------------------------
     # Horizontal CUTOUT part II (continuation of original code)

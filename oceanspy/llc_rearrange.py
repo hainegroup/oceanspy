@@ -27,9 +27,8 @@ class LLCtransformation:
         add_Hbdr=0,
         XRange=None,
         YRange=None,
-        transformation="arctic_crown",
-        centered="Atlantic",
         faces=None,
+        centered=False,
         chunks=None,
         drop=False,
     ):
@@ -37,12 +36,9 @@ class LLCtransformation:
         self._varlist = varlist  # variables names to be transformed
         self._XRange = XRange  # lon range of data to retain
         self.YRange = YRange  # lat range of data to retain.
-        self._transformation = transformation  # str - type of transf
-        self._centered = centered  # str - where to be centered
-        self._chunks = (
-            chunks  # dict - determining the relevant chunking of the dataset.
-        )
+        self._chunks = chunks # dict.
         self._faces = faces  # faces involved in transformation
+        self._centered = centered,
 
     @classmethod
     def arctic_crown(
@@ -52,8 +48,8 @@ class LLCtransformation:
         add_Hbdr=0,
         XRange=None,
         YRange=None,
-        centered="Atlantic",
         faces=None,
+        centered=None,
         chunks=None,
         drop=False,
     ):
@@ -65,10 +61,6 @@ class LLCtransformation:
         if "face" not in ds.dims:
             raise ValueError("face does not appear as a dimension of the dataset")
 
-        if centered not in ["Atlantic", "Pacific"]:
-            raise ValueError(
-                "Centering option not recognized. Options are" "Atlantic or Pacific"
-            )
 
         ds = _copy.deepcopy(mates(ds.reset_coords()))
 
@@ -263,6 +255,17 @@ class LLCtransformation:
         DSFacet34 = shift_dataset(DSFacet34, dims_c.Y, dims_g.Y)
 
         # =====
+        # determine `centered` , i.e. order in which facets are combined
+        # only a factor is there is data in facets with different topology
+        # =====
+
+        if centered is None:  # estimates the centering based on cutout
+            centered = "Atlantic" # default, below scenarios to change this
+            if _np.isnan(edges3):
+                if _np.isnnan(edges2) == False:
+                centered = "Pacific" 
+            
+        # =====
         # combining all facets
         # =====
 
@@ -283,6 +286,7 @@ class LLCtransformation:
                         dtr = list(dims)[::-1]
                         dtr[-1], dtr[-2] = dtr[-2], dtr[-1]
                         DSFacet12[_var] = DSFacet12[_var].transpose(*dtr).persist()
+
 
         if centered == "Pacific":
             FACETS = [DSFacet34, DSFacet12]  # centered on Pacific ocean
