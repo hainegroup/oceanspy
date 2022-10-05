@@ -269,7 +269,7 @@ class LLCtransformation:
                 # two lines below asserts correct
                 # staggering of center and corner points
                 # in latitude (otherwise, lat has a jump)
-                DSFacet12['Y'] = DSFacet12['Y'] - 1
+                DSFacet12["Y"] = DSFacet12["Y"] - 1
                 DSFacet12 = DSFacet12.isel(Y=slice(0, -1))
                 for _var in DSFacet12.data_vars:
                     DIMS = [dim for dim in DSFacet12[_var].dims]
@@ -278,10 +278,6 @@ class LLCtransformation:
                         dtr = list(dims)[::-1]
                         dtr[-1], dtr[-2] = dtr[-2], dtr[-1]
                         DSFacet12[_var] = DSFacet12[_var].transpose(*dtr).persist()
-
-        if type(DSFacet12) == _dstype: # 
-            
-            
 
         if centered == "Pacific":
             FACETS = [DSFacet34, DSFacet12]  # centered on Pacific ocean
