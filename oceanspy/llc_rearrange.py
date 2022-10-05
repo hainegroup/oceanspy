@@ -36,9 +36,9 @@ class LLCtransformation:
         self._varlist = varlist  # variables names to be transformed
         self._XRange = XRange  # lon range of data to retain
         self.YRange = YRange  # lat range of data to retain.
-        self._chunks = chunks # dict.
+        self._chunks = chunks  # dict.
         self._faces = faces  # faces involved in transformation
-        self._centered = centered,
+        self._centered = (centered,)
 
     @classmethod
     def arctic_crown(
@@ -60,7 +60,6 @@ class LLCtransformation:
         print("Warning: This is an experimental feature")
         if "face" not in ds.dims:
             raise ValueError("face does not appear as a dimension of the dataset")
-
 
         ds = _copy.deepcopy(mates(ds.reset_coords()))
 
@@ -260,11 +259,10 @@ class LLCtransformation:
         # =====
 
         if centered is None:  # estimates the centering based on cutout
-            centered = "Atlantic" # default, below scenarios to change this
+            centered = "Atlantic"  # default, below scenarios to change this
             if _np.isnan(edges3):
-                if _np.isnnan(edges2) == False:
-                centered = "Pacific" 
-            
+                centered = "Pacific"
+
         # =====
         # combining all facets
         # =====
@@ -286,7 +284,6 @@ class LLCtransformation:
                         dtr = list(dims)[::-1]
                         dtr[-1], dtr[-2] = dtr[-2], dtr[-1]
                         DSFacet12[_var] = DSFacet12[_var].transpose(*dtr).persist()
-
 
         if centered == "Pacific":
             FACETS = [DSFacet34, DSFacet12]  # centered on Pacific ocean

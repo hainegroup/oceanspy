@@ -370,7 +370,8 @@ def cutout(
             "drop": True,  # required to calculate U-V grid points
             "chunks": chunks,
             }
-            dsnew =  _llc_trans.arctic_crown(**arg)
+            _transformation = _llc_trans.arctic_crown
+            dsnew = _transformation(**arg)
             dsnew = dsnew.set_coords(co_list)
             grid_coords = od.grid_coords
             od._ds = dsnew
