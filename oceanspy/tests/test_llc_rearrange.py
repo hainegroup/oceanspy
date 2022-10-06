@@ -506,8 +506,8 @@ def test_transformation(od, faces, varlist, transf, centered, drop, X0, X1, Y0, 
         "faces": faces,
         "drop": drop,
     }
-    if transf == "arctic_crown":
-        _transf = LLC.arctic_crown
+
+    _transf = LLC.arctic_crown
     if centered not in ["Atlantic", "Pacific"]:
         with pytest.raises(ValueError):
             ds = _transf(**args)

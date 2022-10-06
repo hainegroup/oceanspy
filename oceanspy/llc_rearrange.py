@@ -92,7 +92,7 @@ class LLCtransformation:
         #
         if faces == "all":
             faces = _np.arange(13)
-        elif faces is True:
+        elif faces is None:
             if XRange is not None and YRange is not None:
                 maskH, dmaskH, XRange, YRange = get_maskH(
                     ds, add_Hbdr, XRange, YRange, ref_lon=ref_lon
