@@ -25,6 +25,7 @@ class LLCtransformation:
         ds,
         varlist,
         add_Hbdr=0,
+        ref_lon=180,
         XRange=None,
         YRange=None,
         faces=None,
@@ -46,6 +47,7 @@ class LLCtransformation:
         ds,
         varlist,
         add_Hbdr=0,
+        ref_lon=180,
         XRange=None,
         YRange=None,
         faces=None,
@@ -99,7 +101,7 @@ class LLCtransformation:
                 )
                 faces = list(dmaskH["face"].values)
 
-                ds = mask_var(ds, XRange, YRange)  # masks latitude
+                ds = mask_var(ds, XRange, YRange, ref_lon)  # masks latitude
 
             else:
                 raise ValueError("Need to refine spatial range of cutout")
