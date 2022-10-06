@@ -776,19 +776,13 @@ def mask_var(_ds, XRange, YRange):
     minX = _ds["XG"].min().values
     maxX = _ds["XG"].max().values
 
-    if YRange is not None or XRange is not None:
-        if YRange is not None:
-            minY = YRange[0]
-            maxY = YRange[1]
-        else:
-            minY = _ds["YG"].min().values
-            maxY = _ds["YG"].max().values
-        if XRange is not None:
-            minX = XRange[0]
-            maxX = XRange[1]
-        else:
-            minX = _ds["XG"].min().values
-            maxX = _ds["XG"].max().values
+    if YRange is not None:
+        minY = YRange[0]
+        maxY = YRange[1]
+    if XRange is not None:
+        minX = XRange[0]
+        maxX = XRange[1]
+
     maskG = _xr.where(
         _np.logical_and(
             _np.logical_and(_ds["YG"] >= minY, _ds["YG"] <= maxY),

@@ -1946,6 +1946,8 @@ acshape = (Nx // 2, Ny)
     ],
 )
 def test_arc_connect(od, faces, expected, atype):
+    # need to improve, this behavior, by adding ranges=cuts, opt=true 
+    # (i.e. transpose) and masking of variable (XG). when cuts is given.
     ds = od._ds
     arc_faces, *a, DS = arct_connect(ds, "XG", faces)
     assert arc_faces == expected
@@ -2261,3 +2263,44 @@ def test_combine_list_ds(DSlist, lenX, lenY, x0, x1, y0, y1):
     assert len(nDSlist.Y) == lenY
     assert [int(nDSlist.X[0].values), int(nDSlist.X[-1].values)] == [x0, x1]
     assert [int(nDSlist.Y[0].values), int(nDSlist.Y[-1].values)] == [y0, y1]
+
+
+
+
+
+
+
+
+
+
+# def test_mask_var(ds, XRange, YRange, faces):
+# _ds = mask_var(ds, XRange, YRange)
+# need to make sure that there is data only in the faces given by
+# variable faces.
+# 
+
+
+# def test_arc_limits_mask(ds, var, _faces, dims, ranges)
+# cuts = arc_limits_mask(ds, var, _faces, dims)
+# test that cuts is a list of zeros for each side of the arctic cap
+# if there is no data surviving the cutout there. Also, test the
+# correct range of data when data in the arctic cap is retained.
+# 
+# 
+
+# def test_edge_facet_data(facet, "YG", dims_g, axis)
+# identifies the ranges where there is data.
+# facet is a list with a dataset as its elements. 
+# test for each facet the expected behavior. Also when there is no
+# data it returns nans
+# 
+
+
+# def test_slice_datasets(facet, facet_ind, var, dims, axis)
+# 
+# 
+# 
+
+
+
+
