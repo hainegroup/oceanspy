@@ -9,13 +9,18 @@ from oceanspy.llc_rearrange import Dims
 from oceanspy.llc_rearrange import LLCtransformation as LLC
 from oceanspy.llc_rearrange import (
     arct_connect,
+    arc_limits_mask,
     combine_list_ds,
+    _edge_arc_data,
     mates,
+    mask_var,
     rotate_dataset,
     rotate_vars,
     shift_dataset,
     shift_list_ds,
+    slice_datasets,
 )
+from oceanspy.utils import get_maskH
 
 Datadir = "./oceanspy/tests/Data/"
 ECCO_url = "{}catalog_ECCO.yaml".format(Datadir)
@@ -519,6 +524,8 @@ def test_transformation(od, faces, varlist, transf, centered, drop, X0, X1, Y0, 
         assert xf == X1
         assert yi == Y0
         assert yf == Y1
+
+
 
 
 DIMS_c = [dim for dim in od.dataset["XC"].dims if dim not in ["face"]]
