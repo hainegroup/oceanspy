@@ -763,7 +763,7 @@ def _edge_arc_data(_da, _face_ind, _dims):
     return X0
 
 
-def mask_var(_ds, XRange, YRange):
+def mask_var(_ds, XRange, YRange, ref_lon=180):
     """Returns a dataset with masked latitude at C and G points (YC and YG).
     The masking region is determined by XRange and YRange. Used to estimate the
     extend of actual data to be retained.
