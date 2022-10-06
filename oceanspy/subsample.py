@@ -364,6 +364,7 @@ def cutout(
             "varlist": varList,  # vars and grid coords to transform
             "faces": faces,
             "add_Hbdr": add_Hbdr,
+            "ref_lon": ref_lon,
             "XRange": XRange,
             "YRange": YRange,
             "centered": centered,
