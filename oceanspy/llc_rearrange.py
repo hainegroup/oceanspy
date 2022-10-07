@@ -757,6 +757,7 @@ def _edge_arc_data(_da, _face_ind, _dims):
         _dim = _dims.X
         _shift = 0
 
+    _da = _da.load()  # load into memory single face single variable.
     for i in list(_da[_dim].data):
         arg = {_dim: i}
         if _np.isnan(_np.array(_da.sel(**arg).data)).all() == _value:
@@ -821,6 +822,7 @@ def arc_limits_mask(_ds, _var, _faces, _dims):
     dsa7 = []
     dsa10 = []
     ARCT = [dsa2, dsa5, dsa7, dsa10]
+
 
     *nnn, DS = arct_connect(
         _ds, _var, faces=_faces, masking=True, opt=False
