@@ -1060,9 +1060,9 @@ def survey_stations(
 
     # Cutout
     if "YRange" not in kwargs:
-        kwargs["YRange"] = [_np.min(Y_surv), _np.max(Y_surv)]
+        kwargs["YRange"] = Y_surv
     if "XRange" not in kwargs:
-        kwargs["XRange"] = [_np.min(X_surv), _np.max(X_surv)]
+        kwargs["XRange"] = X_surv
     if "add_Hbdr" not in kwargs:
         kwargs["add_Hbdr"] = True
     od = od.subsample.cutout(**kwargs)
