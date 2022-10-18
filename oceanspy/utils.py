@@ -32,26 +32,61 @@ def compilable(f):
     return f
 
 
-def rel_lon(x, ref_lon):
-    """
-    Change the definition of 0 longitude.
-    Return how much east one need to go from ref_lon to x
-    This function aims to address the confusion caused by
-    the discontinuity in longitude.
+# def rel_lon(x, ref_lon):
+#     """
+#     Change the definition of 0 longitude.
+#     Return how much east one need to go from ref_lon to x
+#     This function aims to address the confusion caused by
+#     the discontinuity in longitude.
+
+#     Parameters
+#     ----------
+#     x: float, numpy.array, dask.array
+#         longitude to convert
+#     ref_lon: float
+#         a reference longitude. This longitude will become 0deg
+
+#     Returns
+#     -------
+#     redefined_x: float, numpy.array, dask.array
+#         converted longitude
+#     """
+#     return (x - ref_lon) % 360
+
+
+def _rel_lon(x):
+    """ Resets the definition of ref_lon, by default the discontinuity at 180 longitude.
+    Checks that there is no sign change in x and if there is, the only change that
+    is allowed is when crossing zero. Otherwise resets ref_lon.
 
     Parameters
     ----------
-    x: float, numpy.array, dask.array
-        longitude to convert
-    ref_lon: float
-        a reference longitude. This longitude will become 0deg
+
+    x: numpy.array. 
+        array with longitude values.
 
     Returns
     -------
-    redefined_x: float, numpy.array, dask.array
-        converted longitude
+
+    redefined_x: numpy.array.
+        converted longitude.
     """
-    return (x - ref_lon) % 360
+    ref_lon = 180
+    if (_np.sign(x) == _np.sign(x[0])).all():
+        _ref_lon = ref_lon
+    else:  # there is a change in sign 
+        if abs(_np.min(x)) <= 2 and abs(_np.max(x)) < 179:
+            _ref_lon = ref_lon
+        else:  # crossing across dicontinuity
+            lp = _np.where(x > 0)[0]
+            lm = _np.where(x < 0)[0]
+
+            X0 = _np.min(x[lp])
+            X1 = _np.min(x[lm])
+
+            _ref_lon = X0 - (X0 - X1) / 3
+
+    return _ref_lon
 
 
 def spherical2cartesian(Y, X, R=None):

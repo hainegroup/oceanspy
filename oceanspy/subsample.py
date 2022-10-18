@@ -34,8 +34,7 @@ from ._ospy_utils import (
     _rename_aliased,
 )
 from .llc_rearrange import LLCtransformation as _llc_trans
-from .utils import get_maskH
-from .utils import rel_lon as _rel_lon
+from .utils import get_maskH, _rel_lon
 
 # Recommended dependencies (private)
 try:
@@ -345,14 +344,14 @@ def cutout(
     elif add_Vbdr is False:
         add_Vbdr = 0
 
-    # Address the discontinuity in longitude
-    ref_lon = 180
-    if XRange is not None:
-        if _rel_lon(XRange[0], ref_lon) > _rel_lon(
-            XRange[-1], ref_lon
-        ):  # if the range crosses the discontinuity line.
-            # Redefining longitude is necessary.
-            ref_lon = XRange[0] - (XRange[0] - XRange[-1]) / 3
+    # # Address the discontinuity in longitude
+    # ref_lon = 180
+    # if XRange is not None:
+    #     if _rel_lon(_np.min(XRange), ref_lon) > _rel_lon(
+    #         _np.max(XRange), ref_lon
+    #     ):  # if the range crosses the discontinuity line.
+    #         # Redefining longitude is necessary.
+    #         ref_lon = _np.min(XRange) - (_np.min(XRange) - _np.max(XRange)) / 3
 
     if "face" in ds.dims:
         if XRange is None and YRange is None:
@@ -393,6 +392,7 @@ def cutout(
     # ---------------------------
     # Initialize horizontal mask
     if XRange is not None or YRange is not None:
+        ref_lon = _rel_lon(XRange)
         maskH, dmaskH, XRange, YRange = get_maskH(
             ds, add_Hbdr, XRange, YRange, ref_lon=ref_lon
         )
