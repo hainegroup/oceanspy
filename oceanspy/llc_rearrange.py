@@ -720,14 +720,19 @@ def combine_list_ds(_DSlist):
     return _DSFacet
 
 
-def flip_v(_ds, co_list=metrics):
-    """reverses the sign of the velocity field v."""
+def flip_v(_ds, co_list=metrics, dims=True, _len=3):
+    """reverses the sign of the vector fields by default along the corner coordinate 
+    (Xp1 or Yp1). If dims is True, for each variable we infer the dimensions. Otherwise, 
+    dims is given
+
+    """
     if type(_ds) == _dstype:
         for _varName in _ds.variables:
-            DIMS = [dim for dim in _ds[_varName].dims if dim != "face"]
-            _dims = Dims(DIMS[::-1])
+            if dims:
+                DIMS = [dim for dim in _ds[_varName].dims if dim != "face"]
+                _dims = Dims(DIMS[::-1])
             if "mate" in _ds[_varName].attrs:
-                if _varName not in co_list and len(_dims.X) == 3:
+                if _varName not in co_list and len(_dims.X) == _len:
                     _ds[_varName] = -_ds[_varName]
     return _ds
 
