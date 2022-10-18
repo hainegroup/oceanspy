@@ -2,7 +2,7 @@
 import pytest
 
 # From OceanSpy
-from oceanspy.utils import cartesian_path, great_circle_path, spherical2cartesian, _rel_lon
+from oceanspy.utils import cartesian_path, great_circle_path, spherical2cartesian, _reset_range
 
 
 def test_RNone():
@@ -32,18 +32,20 @@ X3 = _np.array([-20, 20])  # crossing in zero.
 X4 = _np.array([-20, -1])  # no crossing.
 
 @pytest.mark.parametrize(
-    "XRange, expected",
+    "XRange, x0, expected_ref",
     [
-        (X0, 53.67),
-        (X1, 53.67), 
-        (X2, 53.67),
-        (X3, 180),
-        (X4, 180),
+        (X0, X0, 53.67),
+        (X1, X0, 53.67), 
+        (X2, X0, 53.67),
+        (X3, X3, 180),
+        (X4, X4, 180),
     ]
 )
-def test_rel_lon(XRange, expected):
+def test_reset_range(XRange, x0, expected_ref):
     """ test the function rel_lon which redefines the reference long.
     """
-    ref_lon = _rel_lon(XRange)
-    assert _np.round(ref_lon, 2) == expected
+    x_range, ref_lon = _reset_range(XRange)
+    assert len(x) == 2
+    assert x_range == x0
+    assert _np.round(ref_lon, 2) == expected_ref
 

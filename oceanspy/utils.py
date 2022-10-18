@@ -32,30 +32,28 @@ def compilable(f):
     return f
 
 
-# def rel_lon(x, ref_lon):
-#     """
-#     Change the definition of 0 longitude.
-#     Return how much east one need to go from ref_lon to x
-#     This function aims to address the confusion caused by
-#     the discontinuity in longitude.
-
-#     Parameters
-#     ----------
-#     x: float, numpy.array, dask.array
-#         longitude to convert
-#     ref_lon: float
-#         a reference longitude. This longitude will become 0deg
-
-#     Returns
-#     -------
-#     redefined_x: float, numpy.array, dask.array
-#         converted longitude
-#     """
-#     return (x - ref_lon) % 360
+def rel_lon(x, ref_lon):
+    """
+    Change the definition of 0 longitude.
+    Return how much east one need to go from ref_lon to x
+    This function aims to address the confusion caused by
+    the discontinuity in longitude.
+    Parameters
+    ----------
+    x: float, numpy.array, dask.array
+        longitude to convert
+    ref_lon: float
+        a reference longitude. This longitude will become 0deg
+    Returns
+    -------
+    redefined_x: float, numpy.array, dask.array
+        converted longitude
+    """
+    return (x - ref_lon) % 360
 
 
-def _rel_lon(x):
-    """ Resets the definition of ref_lon, by default the discontinuity at 180 longitude.
+def _reset_range(x):
+    """ Resets the definition of ref_lon, by default the discontinuity at 180 long.
     Checks that there is no sign change in x and if there is, the only change that
     is allowed is when crossing zero. Otherwise resets ref_lon.
 
@@ -67,15 +65,20 @@ def _rel_lon(x):
 
     Returns
     -------
-
+    
+    x0, x1: numpy.array
+        endpoints of cutout.
     redefined_x: numpy.array.
         converted longitude.
     """
+
     ref_lon = 180
     if (_np.sign(x) == _np.sign(x[0])).all():
         _ref_lon = ref_lon
+        X0, X1 = _np.min(x), _np.max(x)
     else:  # there is a change in sign 
-        if len(x) == 2:  # list of end points
+        if len(x) == 2:  # list of end points already
+            X0, X1 = x
             if x[0] > x[1]:  # across discontinuity
                 _ref_lon = x[0] - (x[0] - x[1]) / 3
             else:
@@ -83,6 +86,7 @@ def _rel_lon(x):
         else: # array of values 
             if abs(_np.min(x)) <= 2 and abs(_np.max(x)) < 179:
                 _ref_lon = ref_lon
+                X0, X1 = _np.min(x), _np.max(x)
             else:  # crossing across dicontinuity
                 lp = _np.where(x > 0)[0]
                 lm = _np.where(x < 0)[0]
@@ -92,7 +96,8 @@ def _rel_lon(x):
 
                 _ref_lon = X0 - (X0 - X1) / 3
 
-    return _ref_lon
+    x = _np.array(X0, X1)
+    return x, _ref_lon
 
 
 def spherical2cartesian(Y, X, R=None):
