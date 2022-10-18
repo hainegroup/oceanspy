@@ -34,14 +34,13 @@ X3 = _np.array([-20, -1])  # no crossing.
 @pytest.mark.parametrize(
     "XRange, expected",
     [
-    (X0, 53.66),
-    (X1, 53.66), 
-    (X2, 53.66),
-    (X3, 180),
-    (X4, 180),
+        (X0, 53.66),
+        (X1, 53.66), 
+        (X2, 53.66),
+        (X3, 180),
+        (X4, 180),
     ]
 )
-
 def test_rel_lon(XRange, expected):
     """ test the function rel_lon which redefines the reference long.
     """
