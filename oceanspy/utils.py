@@ -75,16 +75,22 @@ def _rel_lon(x):
     if (_np.sign(x) == _np.sign(x[0])).all():
         _ref_lon = ref_lon
     else:  # there is a change in sign 
-        if abs(_np.min(x)) <= 2 and abs(_np.max(x)) < 179:
-            _ref_lon = ref_lon
-        else:  # crossing across dicontinuity
-            lp = _np.where(x > 0)[0]
-            lm = _np.where(x < 0)[0]
+        if len(x) == 2:  # list of end points
+            if x[0] > x[1]:  # across discontinuity
+                _ref_lon = x[0] - (x[0] - x[1]) / 3
+            else:
+                _ref_lon = ref_lon
+        else: # array of values 
+            if abs(_np.min(x)) <= 2 and abs(_np.max(x)) < 179:
+                _ref_lon = ref_lon
+            else:  # crossing across dicontinuity
+                lp = _np.where(x > 0)[0]
+                lm = _np.where(x < 0)[0]
 
-            X0 = _np.min(x[lp])
-            X1 = _np.min(x[lm])
+                X0 = _np.min(x[lp])
+                X1 = _np.max(x[lm])
 
-            _ref_lon = X0 - (X0 - X1) / 3
+                _ref_lon = X0 - (X0 - X1) / 3
 
     return _ref_lon
 
