@@ -96,7 +96,7 @@ def _reset_range(x):
 
                 _ref_lon = X0 - (X0 - X1) / 3
 
-    x = _np.array(X0, X1)
+    x = _np.array([X0, X1])
     return x, _ref_lon
 
 

@@ -45,7 +45,7 @@ def test_reset_range(XRange, x0, expected_ref):
     """ test the function rel_lon which redefines the reference long.
     """
     x_range, ref_lon = _reset_range(XRange)
-    assert len(x) == 2
+    assert len(x_range) == 2
     assert x_range == x0
     assert _np.round(ref_lon, 2) == expected_ref
 

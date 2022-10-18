@@ -5,7 +5,7 @@ import dask
 import numpy as _np
 import xarray as _xr
 
-from .utils import get_maskH, rel_lon, _reset_range
+from .utils import get_maskH, _rel_lon, _reset_range
 
 # metric variables defined at vector points, defined as global within this file
 metrics = ["dxC", "dyC", "dxG", "dyG", "HFacW", "HFacS", "rAs", "rAw", "maskS", "maskW"]
