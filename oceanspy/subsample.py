@@ -34,7 +34,7 @@ from ._ospy_utils import (
     _rename_aliased,
 )
 from .llc_rearrange import LLCtransformation as _llc_trans
-from .utils import get_maskH, _rel_lon
+from .utils import get_maskH, _rel_lon, _reset_range
 
 # Recommended dependencies (private)
 try:
@@ -392,7 +392,7 @@ def cutout(
     # ---------------------------
     # Initialize horizontal mask
     if XRange is not None or YRange is not None:
-        ref_lon = _rel_lon(XRange)
+        XRange, ref_lon = _reset_range(XRange)
         maskH, dmaskH, XRange, YRange = get_maskH(
             ds, add_Hbdr, XRange, YRange, ref_lon=ref_lon
         )

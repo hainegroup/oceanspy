@@ -32,7 +32,7 @@ def compilable(f):
     return f
 
 
-def rel_lon(x, ref_lon):
+def _rel_lon(x, ref_lon):
     """
     Change the definition of 0 longitude.
     Return how much east one need to go from ref_lon to x
@@ -702,8 +702,8 @@ def get_maskH(ds, add_Hbdr, XRange, YRange, ref_lon=0):
             XRange[i] = ds["XG"].where(diff == diff.min()).min().values
         maskH = maskH.where(
             _np.logical_and(
-                rel_lon(ds["XG"], ref_lon) >= rel_lon(XRange[0], ref_lon),
-                rel_lon(ds["XG"], ref_lon) <= rel_lon(XRange[-1], ref_lon),
+                _rel_lon(ds["XG"], ref_lon) >= _rel_lon(XRange[0], ref_lon),
+                _rel_lon(ds["XG"], ref_lon) <= _rel_lon(XRange[-1], ref_lon),
             ),
             0,
         )
