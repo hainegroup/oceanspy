@@ -61,7 +61,6 @@ class LLCtransformation:
 
         ds = _copy.deepcopy(mates(ds.reset_coords()))
 
-
         DIMS_c = [
             dim for dim in ds["XC"].dims if dim not in ["face"]
         ]  # horizontal dimensions on tracer points.
@@ -94,10 +93,10 @@ class LLCtransformation:
         if XRange is None and YRange is None:
             faces = _np.arange(13)
         elif XRange is not None and YRange is not None:
-            if _np.max(abs(XRange)) > 180 or _np.max(abs(YRange))>90:
+            if _np.max(abs(XRange)) > 180 or _np.max(abs(YRange)) > 90:
                 raise ValueError("Range of lat and/or lon is not acceptable.")
             else:
-                ref_lon = _rel_lon(XRange)
+                XRange, ref_lon = _reset_range(XRange)
                 maskH, dmaskH, XRange, YRange = get_maskH(
                     ds, add_Hbdr, XRange, YRange, ref_lon=ref_lon
                 )
