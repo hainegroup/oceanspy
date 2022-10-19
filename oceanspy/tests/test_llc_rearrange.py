@@ -20,7 +20,7 @@ from oceanspy.llc_rearrange import (
     shift_list_ds,
     slice_datasets,
 )
-from oceanspy.utils import _rel_lon, _reset_range, get_maskH
+from oceanspy.utils import _reset_range, get_maskH
 
 Datadir = "./oceanspy/tests/Data/"
 ECCO_url = "{}catalog_ECCO.yaml".format(Datadir)
