@@ -345,25 +345,12 @@ def cutout(
         add_Vbdr = 0
 
     # # Address the discontinuity in longitude
-    # ref_lon = 180
-    # if XRange is not None:
-    #     if _rel_lon(_np.min(XRange), ref_lon) > _rel_lon(
-    #         _np.max(XRange), ref_lon
-    #     ):  # if the range crosses the discontinuity line.
-    #         # Redefining longitude is necessary.
-    #         ref_lon = _np.min(XRange) - (_np.min(XRange) - _np.max(XRange)) / 3
 
     if "face" in ds.dims:
-        if XRange is None and YRange is None:
-            faces = "all"
-        else:
-            faces = True  # actual values will be calculated later
         arg = {
             "ds": ds,
             "varlist": varList,  # vars and grid coords to transform
-            "faces": faces,
             "add_Hbdr": add_Hbdr,
-            "ref_lon": ref_lon,
             "XRange": XRange,
             "YRange": YRange,
             "centered": centered,

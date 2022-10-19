@@ -23,7 +23,6 @@ class LLCtransformation:
         ds,
         varlist,
         add_Hbdr=0,
-        ref_lon=180,
         XRange=None,
         YRange=None,
         faces=None,
@@ -45,7 +44,6 @@ class LLCtransformation:
         ds,
         varlist,
         add_Hbdr=0,
-        ref_lon=180,
         XRange=None,
         YRange=None,
         faces=None,
@@ -62,6 +60,7 @@ class LLCtransformation:
             raise ValueError("face does not appear as a dimension of the dataset")
 
         ds = _copy.deepcopy(mates(ds.reset_coords()))
+
 
         DIMS_c = [
             dim for dim in ds["XC"].dims if dim not in ["face"]
@@ -92,18 +91,20 @@ class LLCtransformation:
         #
         if faces == "all":
             faces = _np.arange(13)
-        elif faces is None:
-            if XRange is not None and YRange is not None:
+        if XRange is None and YRange is None:
+            faces = _np.arange(13)
+        elif XRange is not None and YRange is not None:
+            if _np.max(abs(XRange)) > 180 or _np.max(abs(YRange))>90:
+                raise ValueError("Range of lat and/or lon is not acceptable.")
+            else:
                 ref_lon = _rel_lon(XRange)
                 maskH, dmaskH, XRange, YRange = get_maskH(
                     ds, add_Hbdr, XRange, YRange, ref_lon=ref_lon
                 )
                 faces = list(dmaskH["face"].values)
-
                 ds = mask_var(ds, XRange, YRange, ref_lon)  # masks latitude
-
-            else:
-                raise ValueError("Need to refine spatial range of cutout")
+        else:
+            raise ValueError("Need to refine spatial range of cutout")
 
         print("faces in the cutout", faces)
         cuts = arc_limits_mask(ds, "YG", faces, dims_g)
