@@ -94,7 +94,7 @@ def _reset_range(x):
                     X0 = _np.min(x[ll+1:])
                     X1 = _np.max(x[:ll+1])
                 _ref_lon = X0 - (X0 - X1) / 3
-            else:
+            else:  # no discontinuity
                 X0 = _np.min(x)
                 X1 = _np.max(x)
                 _ref_lon = ref_lon
@@ -696,7 +696,7 @@ def get_maskH(ds, add_Hbdr, XRange, YRange, ref_lon=0):
 
     if XRange is not None:
         # Use arrays
-        XRange = _np.asarray([_np.min(XRange) - add_Hbdr, _np.max(XRange) + add_Hbdr])
+        XRange = _np.asarray([XRange[0] - add_Hbdr, XRange[-1] + add_Hbdr])
         XRange = XRange.astype(ds["XG"].dtype)
 
         # Get the closest
