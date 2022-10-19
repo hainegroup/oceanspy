@@ -85,14 +85,18 @@ def _reset_range(x):
                 _ref_lon = ref_lon
         else: # array of values.
             _del =  abs(x[1:] - x[:-1]) # only works with one crossing
-            ll = _np.where(_del == max(_del))[0][0]
-            if x[ll] > x[ll+1]:  # track starts west of jump
-                X0 = _np.min(x[:ll+1])
-                X1 = _np.max(x[ll+1:])
-            else:
-                X0 = _np.min(x[ll+1:])
-                X1 = _np.max(x[:ll+1])
+            if len(_np.where(abs(_del) > 300)[0]) > 0:  # there's discontinuity
 
+                ll = _np.where(_del == max(_del))[0][0]
+                if x[ll] > x[ll+1]:  # track starts west of jump
+                    X0 = _np.min(x[:ll+1])
+                    X1 = _np.max(x[ll+1:])
+                else:
+                    X0 = _np.min(x[ll+1:])
+                    X1 = _np.max(x[:ll+1])
+            else:
+                X0 = _np.min(x)
+                X1 = _np.max(x)
             _ref_lon = X0 - (X0 - X1) / 3
 
     x = _np.array([X0, X1])
