@@ -5,7 +5,7 @@ import dask
 import numpy as _np
 import xarray as _xr
 
-from .utils import get_maskH, _rel_lon, _reset_range
+from .utils import _rel_lon, _reset_range, get_maskH
 
 # metric variables defined at vector points, defined as global within this file
 metrics = ["dxC", "dyC", "dxG", "dyG", "HFacW", "HFacS", "rAs", "rAw", "maskS", "maskW"]
@@ -720,8 +720,8 @@ def combine_list_ds(_DSlist):
 
 
 def flip_v(_ds, co_list=metrics, dims=True, _len=3):
-    """reverses the sign of the vector fields by default along the corner coordinate 
-    (Xp1 or Yp1). If dims is True, for each variable we infer the dimensions. Otherwise, 
+    """reverses the sign of the vector fields by default along the corner coordinate
+    (Xp1 or Yp1). If dims is True, for each variable we infer the dimensions. Otherwise,
     dims is given
 
     """
@@ -827,7 +827,6 @@ def arc_limits_mask(_ds, _var, _faces, _dims):
     dsa10 = []
     ARCT = [dsa2, dsa5, dsa7, dsa10]
 
-
     *nnn, DS = arct_connect(
         _ds, _var, faces=_faces, masking=True, opt=False
     )  # This only works in the case the transformation involves the whole domain
@@ -846,17 +845,26 @@ def arc_limits_mask(_ds, _var, _faces, _dims):
         DSa2 = 0
         [Xi_2, Xf_2] = [0, 0]
     else:
-        [Xi_2, Xf_2] = [int(DSa2[_var][_dims.X][0]), _edge_arc_data(DSa2[_var], 2, _dims)]
+        [Xi_2, Xf_2] = [
+            int(DSa2[_var][_dims.X][0]),
+            _edge_arc_data(DSa2[_var], 2, _dims),
+        ]
     if type(DSa5) != _dstype:
         DSa5 = 0
         [Yi_5, Yf_5] = [0, 0]
     else:
-        [Yi_5, Yf_5] = [int(DSa5[_var][_dims.Y][0]), _edge_arc_data(DSa5[_var], 5, _dims)]
+        [Yi_5, Yf_5] = [
+            int(DSa5[_var][_dims.Y][0]),
+            _edge_arc_data(DSa5[_var], 5, _dims),
+        ]
     if type(DSa7) != _dstype:
         DSa7 = 0
         [Xi_7, Xf_7] = [0, 0]
     else:
-        [Xi_7, Xf_7] = [_edge_arc_data(DSa7[_var], 7, _dims), int(DSa7[_var][_dims.X][-1])]
+        [Xi_7, Xf_7] = [
+            _edge_arc_data(DSa7[_var], 7, _dims),
+            int(DSa7[_var][_dims.X][-1]),
+        ]
     if type(DSa10) != _dstype:
         DSa10 = 0
         [Yi_10, Yf_10] = [0, 0]

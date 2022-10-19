@@ -34,7 +34,7 @@ from ._ospy_utils import (
     _rename_aliased,
 )
 from .llc_rearrange import LLCtransformation as _llc_trans
-from .utils import get_maskH, _rel_lon, _reset_range
+from .utils import _rel_lon, _reset_range, get_maskH
 
 # Recommended dependencies (private)
 try:

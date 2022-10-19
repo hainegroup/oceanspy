@@ -53,19 +53,19 @@ def _rel_lon(x, ref_lon):
 
 
 def _reset_range(x):
-    """ Resets the definition of ref_lon, by default the discontinuity at 180 long.
+    """Resets the definition of ref_lon, by default the discontinuity at 180 long.
     Checks that there is no sign change in x and if there is, the only change that
     is allowed is when crossing zero. Otherwise resets ref_lon.
 
     Parameters
     ----------
 
-    x: numpy.array. 
+    x: numpy.array.
         array with longitude values.
 
     Returns
     -------
-    
+
     x0, x1: numpy.array
         endpoints of cutout.
     redefined_x: numpy.array.
@@ -73,26 +73,26 @@ def _reset_range(x):
     """
 
     ref_lon = 180
-    if (_np.sign(x) == _np.sign(x[0])).all(): # no sign change
+    if (_np.sign(x) == _np.sign(x[0])).all():  # no sign change
         _ref_lon = ref_lon
         X0, X1 = _np.min(x), _np.max(x)
-    else:  # change in sign 
+    else:  # change in sign
         if len(x) == 2:  # list of end points
             X0, X1 = x
             if x[0] > x[1]:  # across discontinuity
                 _ref_lon = x[0] - (x[0] - x[1]) / 3
             else:
                 _ref_lon = ref_lon
-        else: # array of values.
-            _del =  abs(x[1:] - x[:-1]) # only works with one crossing
+        else:  # array of values.
+            _del = abs(x[1:] - x[:-1])  # only works with one crossing
             if len(_np.where(abs(_del) > 300)[0]) > 0:  # there's discontinuity
                 ll = _np.where(_del == max(_del))[0][0]
-                if x[ll] > x[ll+1]:  # track starts west of jump
-                    X0 = _np.min(x[:ll+1])
-                    X1 = _np.max(x[ll+1:])
+                if x[ll] > x[ll + 1]:  # track starts west of jump
+                    X0 = _np.min(x[: ll + 1])
+                    X1 = _np.max(x[ll + 1 :])
                 else:
-                    X0 = _np.min(x[ll+1:])
-                    X1 = _np.max(x[:ll+1])
+                    X0 = _np.min(x[ll + 1 :])
+                    X1 = _np.max(x[: ll + 1])
                 _ref_lon = X0 - (X0 - X1) / 3
             else:  # no discontinuity
                 X0 = _np.min(x)

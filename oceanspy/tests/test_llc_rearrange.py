@@ -20,7 +20,7 @@ from oceanspy.llc_rearrange import (
     shift_list_ds,
     slice_datasets,
 )
-from oceanspy.utils import get_maskH
+from oceanspy.utils import _rel_lon, _reset_range, get_maskH
 
 Datadir = "./oceanspy/tests/Data/"
 ECCO_url = "{}catalog_ECCO.yaml".format(Datadir)
@@ -2161,6 +2161,7 @@ varlist = ["T", "U", "V", "XG", "YG", "XC", "YC"]
     ],
 )
 def test_transformation(od, faces, varlist, transf, centered, drop, X0, X1, Y0, Y1):
+    """Test the transformation fn by checking the final dimensions."""
     ds = od._ds.reset_coords()
     args = {
         "ds": ds,
