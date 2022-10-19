@@ -90,8 +90,8 @@ def _reset_range(x):
                 X0 = _np.min(x[:ll+1])
                 X1 = _np.max(x[ll+1:])
             else:
-                X0 = np.min(x[ll+1:])
-                X1 = np.max(x[:ll+1])
+                X0 = _np.min(x[ll+1:])
+                X1 = _np.max(x[:ll+1])
 
             _ref_lon = X0 - (X0 - X1) / 3
 
