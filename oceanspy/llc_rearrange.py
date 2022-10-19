@@ -261,8 +261,8 @@ class LLCtransformation:
 
         if centered is None:  # estimates the centering based on cutout
             centered = "Atlantic"  # default, below scenarios to change this
-            if _np.isnan(edges3):
-                centered = "Pacific"
+        if type(DSFacet3) == int:
+            centered = "Pacific"
 
         # =====
         # combining all facets
