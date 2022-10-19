@@ -83,21 +83,20 @@ def _reset_range(x):
                 _ref_lon = x[0] - (x[0] - x[1]) / 3
             else:
                 _ref_lon = ref_lon
-        else: # array of values 
-            if abs(_np.min(x)) <= 2 and abs(_np.max(x)) < 179:
-                _ref_lon = ref_lon
-                X0, X1 = _np.min(x), _np.max(x)
-            else:  # crossing across dicontinuity
-                lp = _np.where(x > 0)[0]
-                lm = _np.where(x < 0)[0]
+        else: # array of values.
+            _del =  abs(x[1:] - x[:-1]) # only works with one crossing
+            ll = _np.where(_del == max(_del))[0][0]
+            if x[ll] > x[ll+1]:  # track starts west of jump
+                X0 = _np.min(x[:ll+1])
+                X1 = _np.max(x[ll+1:])
+            else:
+                X0 = np.min(x[ll+1:])
+                X1 = np.max(x[:ll+1])
 
-                X0 = _np.min(x[lp])
-                X1 = _np.max(x[lm])
-
-                _ref_lon = X0 - (X0 - X1) / 3
+            _ref_lon = X0 - (X0 - X1) / 3
 
     x = _np.array([X0, X1])
-    return x, _ref_lon
+    return x, _np.round(_ref_lon, 2)
 
 
 def spherical2cartesian(Y, X, R=None):
