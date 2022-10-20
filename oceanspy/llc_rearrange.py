@@ -88,10 +88,10 @@ class LLCtransformation:
             raise ValueError("Empty list of variables")
 
         #
-        if faces == "all":
+        if faces == "all" or (XRange is None and YRange is None):
             faces = _np.arange(13)
-        if XRange is None and YRange is None:
-            faces = _np.arange(13)
+            # XRange = _np.array([-177, 177])
+            # YRange = _np.array([-87, 87])
         elif XRange is not None and YRange is not None:
             if _np.max(abs(XRange)) > 180 or _np.max(abs(YRange)) > 90:
                 raise ValueError("Range of lat and/or lon is not acceptable.")

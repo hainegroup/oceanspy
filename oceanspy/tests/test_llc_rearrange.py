@@ -1,5 +1,6 @@
 import copy as _copy
 
+import numpy as _np
 import pytest
 import xarray as _xr
 
@@ -2092,7 +2093,7 @@ def test_arc_connect(od, faces, expected, atype, XRange, YRange, opt, cuts, mask
         arc_faces, *nnn, DS = arct_connect(ds, "YG", faces=faces, masking=masking, opt=opt, ranges=cuts)
         for i in range(len(DS)):
             if type(DS[i]) == _datype:
-                assert np.shape(DS[i]) == size
+                assert _np.shape(DS[i]) == size
     else:
         arc_faces, *a, DS = arct_connect(ds, "YG", faces)
     assert arc_faces == expected
@@ -2104,92 +2105,92 @@ cent = ["Atlantic", "Pacific", "Empty"]
 varlist = ["T", "U", "V", "XG", "YG", "XC", "YC"]
 
 
-@pytest.mark.parametrize(
-    "od, faces, varlist, transf, centered, drop, X0, X1, Y0, Y1",
-    [
-        (od, "all", varlist, transf, cent[0], False, 0, 359, 0, 314),
-        (od, [2, 5, 6, 7, 10], varlist, transf, cent[0], False, 0, 359, 180, 314),
-        (od, [2, 5, 7, 10], varlist, transf, cent[0], False, 0, 359, 180, 269),
-        (od, [1, 4, 8, 11], varlist, transf, cent[0], False, 0, 359, 90, 179),
-        (od, [0, 3, 9, 12], varlist, transf, cent[0], False, 0, 359, 0, 89),
-        (od, [6, 7, 8, 9], varlist, transf, cent[0], False, 0, 89, 314, 0),
-        (od, [6, 10, 11, 12], varlist, transf, cent[0], False, 90, 179, 314, 0),
-        (od, [0, 1, 2, 6], varlist, transf, cent[0], False, 180, 269, 0, 314),
-        (od, [3, 4, 5, 6], varlist, transf, cent[0], False, 270, 359, 0, 314),
-        (od, [2, 6, 10], varlist, transf, cent[0], False, 90, 269, 180, 314),
-        (od, [6, 7, 10], varlist, transf, cent[0], False, 0, 179, 314, 180),
-        (od, [6, 7, 8, 10, 11], varlist, transf, cent[0], False, 0, 179, 314, 90),
-        (
-            od,
-            [4, 5, 6, 7, 8, 10, 11],
-            varlist,
-            transf,
-            cent[1],
-            False,
-            90,
-            359,
-            90,
-            314,
-        ),
-        (
-            od,
-            [4, 5, 6, 7, 8, 9, 10, 11, 12],
-            varlist,
-            transf,
-            cent[1],
-            False,
-            90,
-            359,
-            0,
-            314,
-        ),
-        (od, [7, 8, 10, 11], varlist, transf, cent[0], False, 0, 179, 269, 90),
-        (od, [1, 2, 10, 11], varlist, transf, cent[0], False, 90, 269, 90, 269),
-        (od, [8, 9, 11, 12], varlist, transf, cent[0], False, 0, 179, 179, 0),
-        (od, [0, 1, 11, 12], varlist, transf, cent[0], False, 90, 269, 0, 179),
-        (od, [0, 1, 3, 4], varlist, transf, cent[0], False, 180, 359, 0, 179),
-        (od, [9, 12], varlist, transf, cent[0], False, 0, 179, 89, 0),
-        (od, [0, 12], varlist, transf, cent[0], False, 90, 269, 0, 89),
-        (od, [0, 3], varlist, transf, cent[0], False, 180, 359, 0, 89),
-        (od, [0, 9, 12], varlist, transf, cent[0], False, 0, 269, 0, 89),
-        (od, [0, 3, 12], varlist, transf, cent[0], False, 90, 359, 0, 89),
-        (od, [0], varlist[0], transf, cent[0], False, 180, 269, 0, 89),
-        (od, [1], varlist[0], transf, cent[0], False, 180, 269, 90, 179),
-        (od, [2], varlist[0], transf, cent[0], False, 180, 269, 180, 269),
-        (od, [3], varlist[0], transf, cent[0], False, 270, 359, 0, 89),
-        (od, [4], varlist[0], transf, cent[0], False, 270, 359, 90, 179),
-        (od, [5], varlist[0], transf, cent[0], False, 270, 359, 180, 269),
-        (od, [7], varlist[0], transf, cent[0], False, 0, 89, 269, 180),
-        (od, [8], varlist[0], transf, cent[0], False, 0, 89, 179, 90),
-        (od, [9], varlist[0], transf, cent[0], False, 0, 89, 89, 0),
-        (od, [10], varlist[0], transf, cent[0], False, 90, 179, 269, 180),
-        (od, [11], varlist[0], transf, cent[0], False, 90, 179, 179, 90),
-        (od, [12], varlist[0], transf, cent[0], False, 90, 179, 89, 0),
-    ],
-)
-def test_transformation(od, faces, varlist, transf, centered, drop, X0, X1, Y0, Y1):
-    """Test the transformation fn by checking the final dimensions."""
-    ds = od._ds.reset_coords()
-    args = {
-        "ds": ds,
-        "varlist": varlist,
-        "centered": centered,
-        "faces": faces,
-        "drop": drop,
-    }
+# @pytest.mark.parametrize(
+#     "od, faces, varlist, transf, centered, drop, X0, X1, Y0, Y1",
+#     [
+#         (od, "all", varlist, transf, cent[0], False, 0, 359, 0, 314),
+#         (od, [2, 5, 6, 7, 10], varlist, transf, cent[0], False, 0, 359, 180, 314),
+#         (od, [2, 5, 7, 10], varlist, transf, cent[0], False, 0, 359, 180, 269),
+#         (od, [1, 4, 8, 11], varlist, transf, cent[0], False, 0, 359, 90, 179),
+#         (od, [0, 3, 9, 12], varlist, transf, cent[0], False, 0, 359, 0, 89),
+#         (od, [6, 7, 8, 9], varlist, transf, cent[0], False, 0, 89, 314, 0),
+#         (od, [6, 10, 11, 12], varlist, transf, cent[0], False, 90, 179, 314, 0),
+#         (od, [0, 1, 2, 6], varlist, transf, cent[0], False, 180, 269, 0, 314),
+#         (od, [3, 4, 5, 6], varlist, transf, cent[0], False, 270, 359, 0, 314),
+#         (od, [2, 6, 10], varlist, transf, cent[0], False, 90, 269, 180, 314),
+#         (od, [6, 7, 10], varlist, transf, cent[0], False, 0, 179, 314, 180),
+#         (od, [6, 7, 8, 10, 11], varlist, transf, cent[0], False, 0, 179, 314, 90),
+#         (
+#             od,
+#             [4, 5, 6, 7, 8, 10, 11],
+#             varlist,
+#             transf,
+#             cent[1],
+#             False,
+#             90,
+#             359,
+#             90,
+#             314,
+#         ),
+#         (
+#             od,
+#             [4, 5, 6, 7, 8, 9, 10, 11, 12],
+#             varlist,
+#             transf,
+#             cent[1],
+#             False,
+#             90,
+#             359,
+#             0,
+#             314,
+#         ),
+#         (od, [7, 8, 10, 11], varlist, transf, cent[0], False, 0, 179, 269, 90),
+#         (od, [1, 2, 10, 11], varlist, transf, cent[0], False, 90, 269, 90, 269),
+#         (od, [8, 9, 11, 12], varlist, transf, cent[0], False, 0, 179, 179, 0),
+#         (od, [0, 1, 11, 12], varlist, transf, cent[0], False, 90, 269, 0, 179),
+#         (od, [0, 1, 3, 4], varlist, transf, cent[0], False, 180, 359, 0, 179),
+#         (od, [9, 12], varlist, transf, cent[0], False, 0, 179, 89, 0),
+#         (od, [0, 12], varlist, transf, cent[0], False, 90, 269, 0, 89),
+#         (od, [0, 3], varlist, transf, cent[0], False, 180, 359, 0, 89),
+#         (od, [0, 9, 12], varlist, transf, cent[0], False, 0, 269, 0, 89),
+#         (od, [0, 3, 12], varlist, transf, cent[0], False, 90, 359, 0, 89),
+#         (od, [0], varlist[0], transf, cent[0], False, 180, 269, 0, 89),
+#         (od, [1], varlist[0], transf, cent[0], False, 180, 269, 90, 179),
+#         (od, [2], varlist[0], transf, cent[0], False, 180, 269, 180, 269),
+#         (od, [3], varlist[0], transf, cent[0], False, 270, 359, 0, 89),
+#         (od, [4], varlist[0], transf, cent[0], False, 270, 359, 90, 179),
+#         (od, [5], varlist[0], transf, cent[0], False, 270, 359, 180, 269),
+#         (od, [7], varlist[0], transf, cent[0], False, 0, 89, 269, 180),
+#         (od, [8], varlist[0], transf, cent[0], False, 0, 89, 179, 90),
+#         (od, [9], varlist[0], transf, cent[0], False, 0, 89, 89, 0),
+#         (od, [10], varlist[0], transf, cent[0], False, 90, 179, 269, 180),
+#         (od, [11], varlist[0], transf, cent[0], False, 90, 179, 179, 90),
+#         (od, [12], varlist[0], transf, cent[0], False, 90, 179, 89, 0),
+#     ],
+# )
+# def test_transformation(od, faces, varlist, transf, centered, drop, X0, X1, Y0, Y1):
+#     """Test the transformation fn by checking the final dimensions."""
+#     ds = od._ds.reset_coords()
+#     args = {
+#         "ds": ds,
+#         "varlist": varlist,
+#         "centered": centered,
+#         "faces": faces,
+#         "drop": drop,
+#     }
 
-    _transf = LLC.arctic_crown
-    if centered not in ["Atlantic", "Pacific"]:
-        with pytest.raises(ValueError):
-            ds = _transf(**args)
-    else:
-        ds = _transf(**args)
-        xi, xf = int(ds["X"][0].values), int(ds["X"][-1].values)
-        yi, yf = int(ds["Y"][0].values), int(ds["Y"][-1].values)
-        assert xi == X0
-        assert xf == X1
-        assert yi == Y0
-        assert yf == Y1
+#     _transf = LLC.arctic_crown
+#     if centered not in ["Atlantic", "Pacific"]:
+#         with pytest.raises(ValueError):
+#             ds = _transf(**args)
+#     else:
+#         ds = _transf(**args)
+#         xi, xf = int(ds["X"][0].values), int(ds["X"][-1].values)
+#         yi, yf = int(ds["Y"][0].values), int(ds["Y"][-1].values)
+#         assert xi == X0
+#         assert xf == X1
+#         assert yi == Y0
+#         assert yf == Y1
 
 
 DIMS_c = [dim for dim in od.dataset["XC"].dims if dim not in ["face"]]
