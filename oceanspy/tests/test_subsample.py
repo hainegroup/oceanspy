@@ -283,10 +283,9 @@ def test_reduce_variables(od, varList):
             56,
             359,
         ),
-        ([-31, -2], [58, 68.2], None, ["T"], "Atlantic", 50),
-        # (None, None, None, ["T"], "Atlantic", 50),
+        # ([-31, -2], [58, 68.2], None, ["T"], "Atlantic", 50), # has ARCTIC DATA
+        (None, None, None, ["T"], "Atlantic", 50, ),
         # (None, None, None, None, "Atlantic", 50),
-        # (None, None, None, None, "Atlantic", np.nan),
     ],
 )
 def test_cutout_faces(
