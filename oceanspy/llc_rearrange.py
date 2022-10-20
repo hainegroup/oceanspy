@@ -323,6 +323,7 @@ class LLCtransformation:
         if chunks:
             DS = DS.chunk(chunks)
 
+        DS = DS.drop_vars(_var_)
         return DS
 
 
