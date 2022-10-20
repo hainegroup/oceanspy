@@ -88,7 +88,7 @@ class LLCtransformation:
             raise ValueError("Empty list of variables")
 
         #
-        if faces == "all":
+        if faces is None :
             faces = _np.arange(13)
 
         if XRange is not None and YRange is not None:
@@ -109,11 +109,9 @@ class LLCtransformation:
 
             opt = False
             cuts = None
-            if faces is None:
-                faces = _np.arange(13)  # all faces
 
 
-        print("faces in the cutout", faces)
+        print("faces in the cutout", faces, opt, cuts)
         
 
         #
