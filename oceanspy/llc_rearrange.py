@@ -89,8 +89,7 @@ class LLCtransformation:
 
         #
         if faces == "all":
-            faces = _np.arange(13)
-        # elif XRange is None and YRange is None:
+            faces = _np.arange(13)            
         #     faces = _np.arange(13)
             # XRange = _np.array([-177, 177])
             # YRange = _np.array([-87, 87])
@@ -104,8 +103,8 @@ class LLCtransformation:
                 )
                 faces = list(dmaskH["face"].values)
                 ds = mask_var(ds, XRange, YRange, ref_lon)  # masks latitude
-        else:
-            raise ValueError("Need to refine spatial range of cutout")
+        # else:
+        #     raise ValueError("Need to refine spatial range of cutout")
 
         print("faces in the cutout", faces)
         cuts = arc_limits_mask(ds, "YG", faces, dims_g)
