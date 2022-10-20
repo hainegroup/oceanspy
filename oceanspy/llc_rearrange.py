@@ -102,7 +102,7 @@ class LLCtransformation:
                 faces = list(dmaskH["face"].values)
                 ds = mask_var(ds, XRange, YRange, ref_lon)  # masks latitude
                 _var_ = 'nYG'  # copy variable created in mask_var. Will discard
-
+                varlist = varlist + [_var_]
                 cuts = arc_limits_mask(ds, _var_, faces, dims_g, XRange, YRange)
 
                 opt = True
@@ -206,14 +206,14 @@ class LLCtransformation:
         # Only when XRange and YRange given.
         if XRange is not None and YRange is not None:
             for axis in range(2):
-                edges = _edge_facet_data(faces1, _var_, dims_g, axis)
-                faces1 = slice_datasets(faces1, 1, dims_c, dims_g, edges, axis)
-                edges = _edge_facet_data(faces2, _var_, dims_g, axis)
-                faces2 = slice_datasets(faces2, 2, dims_c, dims_g, edges, axis)
-                edges = _edge_facet_data(faces3, _var_, dims_g, axis)
-                faces3 = slice_datasets(faces3, 3, dims_c, dims_g, edges, axis)
-                edges = _edge_facet_data(faces4, _var_, dims_g, axis)
-                faces4 = slice_datasets(faces4, 4, dims_c, dims_g, edges, axis)
+                edges1 = _edge_facet_data(faces1, _var_, dims_g, axis)
+                faces1 = slice_datasets(faces1, 1, dims_c, dims_g, edges1, axis)
+                edges2 = _edge_facet_data(faces2, _var_, dims_g, axis)
+                faces2 = slice_datasets(faces2, 2, dims_c, dims_g, edges2, axis)
+                edges3 = _edge_facet_data(faces3, _var_, dims_g, axis)
+                faces3 = slice_datasets(faces3, 3, dims_c, dims_g, edges3, axis)
+                edges4 = _edge_facet_data(faces4, _var_, dims_g, axis)
+                faces4 = slice_datasets(faces4, 4, dims_c, dims_g, edges4, axis)
 
         # =====
         # Facet 1
