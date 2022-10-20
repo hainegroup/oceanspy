@@ -323,7 +323,8 @@ class LLCtransformation:
         if chunks:
             DS = DS.chunk(chunks)
 
-        DS = DS.drop_vars(_var_)
+        if XRange is not None and YRange is not None:
+            DS = DS.drop_vars(_var_)
         return DS
 
 
