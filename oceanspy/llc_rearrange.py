@@ -205,7 +205,6 @@ class LLCtransformation:
         # Only when XRange and YRange given.
         if XRange is not None and YRange is not None:
             for axis in range(2):
-                print('should not be here')
                 edges = _edge_facet_data(faces1, "YG", dims_g, axis)
                 faces1 = slice_datasets(faces1, 1, dims_c, dims_g, edges, axis)
                 edges = _edge_facet_data(faces2, "YG", dims_g, axis)
