@@ -53,7 +53,7 @@ def _rel_lon(x, ref_lon):
 
 
 def _reset_range(x):
-    """Resets the definition of ref_lon, by default the discontinuity at 180 long.
+    """Resets the definition of XRange, by default the discontinuity at 180 long.
     Checks that there is no sign change in x and if there is, the only change that
     is allowed is when crossing zero. Otherwise resets ref_lon.
 
@@ -80,7 +80,10 @@ def _reset_range(x):
         if len(x) == 2:  # list of end points
             X0, X1 = x
             if x[0] > x[1]:  # across discontinuity
-                _ref_lon = x[0] - (x[0] - x[1]) / 3
+                if x[1]-x[0] > 300: # across a discontinuity (Delta X =360)
+                    _ref_lon = x[0] - (x[0] - x[1]) / 3
+                else:  # XRange decreases, but not necessarity a dicont.
+                    _ref_lon = ref_lon
             else:
                 _ref_lon = ref_lon
         else:  # array of values.
