@@ -103,8 +103,6 @@ class LLCtransformation:
                 )
                 faces = list(dmaskH["face"].values)
                 ds = mask_var(ds, XRange, YRange, ref_lon)  # masks latitude
-        # else:
-        #     raise ValueError("Need to refine spatial range of cutout")
 
         print("faces in the cutout", faces)
         cuts = arc_limits_mask(ds, "YG", faces, dims_g)
@@ -820,7 +818,7 @@ def mask_var(_ds, XRange, YRange, ref_lon=180):
     return _ds
 
 
-def arc_limits_mask(_ds, _var, _faces, _dims):
+def arc_limits_mask(_ds, _var, _faces, _dims, XRange, YRange):
     """Estimates the limits of the masking region of the arctic."""
     dsa2 = []
     dsa5 = []
@@ -846,34 +844,39 @@ def arc_limits_mask(_ds, _var, _faces, _dims):
         DSa2 = 0
         [Xi_2, Xf_2] = [0, 0]
     else:
-        [Xi_2, Xf_2] = [
-            int(DSa2[_var][_dims.X][0]),
-            _edge_arc_data(DSa2[_var], 2, _dims),
-        ]
+        if XRange is None and YRange is None:
+            Xf_2 = DSa2[_var][_dims.X][-1]
+        else:
+            Xf_2 = _edge_arc_data(DSa2[_var], 2, _dims)
+        Xi_2 = int(DSa2[_var][_dims.X][0]),
     if type(DSa5) != _dstype:
         DSa5 = 0
         [Yi_5, Yf_5] = [0, 0]
     else:
-        [Yi_5, Yf_5] = [
-            int(DSa5[_var][_dims.Y][0]),
-            _edge_arc_data(DSa5[_var], 5, _dims),
-        ]
+        if XRange is None and YRange is None:
+            Yf_5 = int(DSa5[_var][_dims.Y][-1])
+        else:
+            Yf_5 =  _edge_arc_data(DSa5[_var], 5, _dims)
+        Yi_5 = int(DSa5[_var][_dims.Y][0])
     if type(DSa7) != _dstype:
         DSa7 = 0
         [Xi_7, Xf_7] = [0, 0]
     else:
-        [Xi_7, Xf_7] = [
-            _edge_arc_data(DSa7[_var], 7, _dims),
-            int(DSa7[_var][_dims.X][-1]),
-        ]
+        if XRange is None and YRange is None:
+            Xi_7 = int(DSa7[_var][_dims.X][0])
+        else:
+            Xi_7 = _edge_arc_data(DSa7[_var], 7, _dims)
+        Xi_7 = int(DSa7[_var][_dims.X][-1])
+
     if type(DSa10) != _dstype:
         DSa10 = 0
         [Yi_10, Yf_10] = [0, 0]
     else:
-        [Yi_10, Yf_10] = [
-            _edge_arc_data(DSa10[_var], 10, _dims),
-            int(DSa10[_var][_dims.Y][-1]),
-        ]
+        if XRange is None and YRange is None:
+            Yi_10 = int(DSa10[_var][_dims.Y][0])
+        else:
+            Yi_10 = _edge_arc_data(DSa10[_var], 10, _dims)
+        Yf_10 = int(DSa10[_var][_dims.Y][-1])
 
     arc_edges = [[Xi_2, Xf_2], [Yi_5, Yf_5], [Xi_7, Xf_7], [Yi_10, Yf_10]]
 
