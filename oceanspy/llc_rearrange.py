@@ -278,6 +278,10 @@ class LLCtransformation:
                 if YRange is not None:
                     DSFacet12["Y"] = DSFacet12["Y"] - 1
                     DSFacet12 = DSFacet12.isel(Y=slice(0, -1))
+                elif YRange is None:
+                    DSFacet12["YG"] = DSFacet12["YG"] - 1
+                    DSFacet12 = DSFacet12.isel(Yp1=slice(0, -1))
+
                 for _var in DSFacet12.data_vars:
                     DIMS = [dim for dim in DSFacet12[_var].dims]
                     dims = Dims(DIMS[::-1])
