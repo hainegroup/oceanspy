@@ -288,7 +288,7 @@ class LLCtransformation:
                     if len(dims) > 1 and "nv" not in DIMS:
                         dtr = list(dims)[::-1]
                         dtr[-1], dtr[-2] = dtr[-2], dtr[-1]
-                        if YRange is not None:
+                        if YRange is not None and XRange is not None:
                             DSFacet12[_var] = DSFacet12[_var].transpose(*dtr).persist()
                         else:
                             DSFacet12[_var] = DSFacet12[_var].transpose(*dtr)
