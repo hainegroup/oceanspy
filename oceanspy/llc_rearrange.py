@@ -91,7 +91,7 @@ class LLCtransformation:
         if faces == "all":
             faces = _np.arange(13)
 
-        elif XRange is not None and YRange is not None:
+        if XRange is not None and YRange is not None:
             if _np.max(abs(XRange)) > 180 or _np.max(abs(YRange)) > 90:
                 raise ValueError("Range of lat and/or lon is not acceptable.")
             else:
@@ -104,16 +104,17 @@ class LLCtransformation:
 
                 cuts = arc_limits_mask(ds, "YG", faces, dims_g, XRange, YRange)
 
-        print("faces in the cutout", faces)
-        
-        if XRange is None and YRange is None:  # this should only apply to ECCO
+                opt = True
+        else:
+
             opt = False
             cuts = None
             if faces is None:
                 faces = _np.arange(13)  # all faces
-        else:
-            opt = True
-            assert type(cuts) == list
+
+
+        print("faces in the cutout", faces)
+        
 
         #
         dsa2 = []
@@ -206,6 +207,7 @@ class LLCtransformation:
         # Only when XRange and YRange given.
         if XRange is not None and YRange is not None:
             for axis in range(2):
+                print('should not be here')
                 edges = _edge_facet_data(faces1, "YG", dims_g, axis)
                 faces1 = slice_datasets(faces1, 1, dims_c, dims_g, edges, axis)
                 edges = _edge_facet_data(faces2, "YG", dims_g, axis)
