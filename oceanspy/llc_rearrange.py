@@ -105,7 +105,7 @@ class LLCtransformation:
                 ds = mask_var(ds, XRange, YRange, ref_lon)  # masks latitude
 
         print("faces in the cutout", faces)
-        cuts = arc_limits_mask(ds, "YG", faces, dims_g)
+        cuts = arc_limits_mask(ds, "YG", faces, dims_g, XRange, YRange)
 
         #
         dsa2 = []
