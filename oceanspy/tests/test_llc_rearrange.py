@@ -2105,10 +2105,10 @@ cent = ["Atlantic", "Pacific", "Empty"]
 varlist = ["T", "U", "V", "XG", "YG", "XC", "YC"]
 
 
-# @pytest.mark.parametrize(
-#     "od, faces, varlist, transf, centered, drop, X0, X1, Y0, Y1",
-#     [
-#         (od, "all", varlist, transf, cent[0], False, 0, 359, 0, 314),
+@pytest.mark.parametrize(
+    "od, faces, varlist, transf, centered, drop, X0, X1, Y0, Y1",
+    [
+        (od, "all", varlist, transf, cent[0], False, 0, 359, 0, 314),
 #         (od, [2, 5, 6, 7, 10], varlist, transf, cent[0], False, 0, 359, 180, 314),
 #         (od, [2, 5, 7, 10], varlist, transf, cent[0], False, 0, 359, 180, 269),
 #         (od, [1, 4, 8, 11], varlist, transf, cent[0], False, 0, 359, 90, 179),
@@ -2166,31 +2166,31 @@ varlist = ["T", "U", "V", "XG", "YG", "XC", "YC"]
 #         (od, [10], varlist[0], transf, cent[0], False, 90, 179, 269, 180),
 #         (od, [11], varlist[0], transf, cent[0], False, 90, 179, 179, 90),
 #         (od, [12], varlist[0], transf, cent[0], False, 90, 179, 89, 0),
-#     ],
-# )
-# def test_transformation(od, faces, varlist, transf, centered, drop, X0, X1, Y0, Y1):
-#     """Test the transformation fn by checking the final dimensions."""
-#     ds = od._ds.reset_coords()
-#     args = {
-#         "ds": ds,
-#         "varlist": varlist,
-#         "centered": centered,
-#         "faces": faces,
-#         "drop": drop,
-#     }
+    ],
+)
+def test_transformation(od, faces, varlist, transf, centered, drop, X0, X1, Y0, Y1):
+    """Test the transformation fn by checking the final dimensions."""
+    ds = od._ds.reset_coords()
+    args = {
+        "ds": ds,
+        "varlist": varlist,
+        "centered": centered,
+        "faces": faces,
+        "drop": drop,
+    }
 
-#     _transf = LLC.arctic_crown
-#     if centered not in ["Atlantic", "Pacific"]:
-#         with pytest.raises(ValueError):
-#             ds = _transf(**args)
-#     else:
-#         ds = _transf(**args)
-#         xi, xf = int(ds["X"][0].values), int(ds["X"][-1].values)
-#         yi, yf = int(ds["Y"][0].values), int(ds["Y"][-1].values)
-#         assert xi == X0
-#         assert xf == X1
-#         assert yi == Y0
-#         assert yf == Y1
+    _transf = LLC.arctic_crown
+    if centered not in ["Atlantic", "Pacific"]:
+        with pytest.raises(ValueError):
+            ds = _transf(**args)
+    else:
+        ds = _transf(**args)
+        xi, xf = int(ds["X"][0].values), int(ds["X"][-1].values)
+        yi, yf = int(ds["Y"][0].values), int(ds["Y"][-1].values)
+        assert xi == X0
+        assert xf == X1
+        assert yi == Y0
+        assert yf == Y1
 
 
 DIMS_c = [dim for dim in od.dataset["XC"].dims if dim not in ["face"]]
