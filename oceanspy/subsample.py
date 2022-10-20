@@ -348,7 +348,11 @@ def cutout(
     ref_lon = 180
 
     if "face" in ds.dims:
-        XRange, ref_lon = _reset_range(XRange)
+        if XRange is None and YRange is None:
+            faces = 'all'
+        else:
+            XRange, ref_lon = _reset_range(XRange)
+            
         arg = {
             "ds": ds,
             "varlist": varList,  # vars and grid coords to transform
@@ -381,7 +385,6 @@ def cutout(
     # ---------------------------
     # Initialize horizontal mask
     if XRange is not None or YRange is not None:
-        
         maskH, dmaskH, XRange, YRange = get_maskH(
             ds, add_Hbdr, XRange, YRange, ref_lon=ref_lon
         )
