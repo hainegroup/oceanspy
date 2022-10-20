@@ -92,6 +92,8 @@ class LLCtransformation:
             faces = _np.arange(13)
 
         if XRange is not None and YRange is not None:
+            XRange = _np.array(XRange)
+            YRange = _np.array(YRange)
             if _np.max(abs(XRange)) > 180 or _np.max(abs(YRange)) > 90:
                 raise ValueError("Range of lat and/or lon is not acceptable.")
             else:
