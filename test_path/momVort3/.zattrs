@@ -1,0 +1,12 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "time",
+        "Z",
+        "Yp1",
+        "Xp1"
+    ],
+    "coordinates": "YG XG",
+    "description": "3rd component (vertical) of Vorticity",
+    "original_output": "snapshot",
+    "units": "s^-1"
+}

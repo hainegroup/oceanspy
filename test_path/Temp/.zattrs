@@ -1,0 +1,13 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "time",
+        "Z",
+        "Y",
+        "X"
+    ],
+    "_coordinates": "XC YC RC iter",
+    "coordinates": "YC XC",
+    "long_name": "potential_temperature",
+    "original_output": "snapshot",
+    "units": "degC"
+}

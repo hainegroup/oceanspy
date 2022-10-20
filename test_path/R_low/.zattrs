@@ -1,0 +1,9 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "Y",
+        "X"
+    ],
+    "coordinates": "YC XC",
+    "description": "base of fluid in r-units",
+    "units": "m"
+}

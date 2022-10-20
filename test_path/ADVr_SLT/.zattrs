@@ -1,0 +1,12 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "time_midp",
+        "Zl",
+        "Y",
+        "X"
+    ],
+    "coordinates": "YC XC",
+    "description": "Vertical   Advective Flux of Salinity",
+    "original_output": "average",
+    "units": "psu.m^3/s"
+}

@@ -1,0 +1,12 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "time_midp",
+        "Z",
+        "Y",
+        "Xp1"
+    ],
+    "coordinates": "XU YU",
+    "description": "Zonal      Advective Flux of Pot.Temperature",
+    "original_output": "average",
+    "units": "degC.m^3/s"
+}

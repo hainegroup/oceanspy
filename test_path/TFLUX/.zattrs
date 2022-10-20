@@ -1,0 +1,11 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "time_midp",
+        "Y",
+        "X"
+    ],
+    "coordinates": "YC XC",
+    "description": "total heat flux (match heat-content variations), >0 increases theta",
+    "original_output": "average",
+    "units": "W/m^2"
+}

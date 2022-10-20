@@ -345,8 +345,10 @@ def cutout(
         add_Vbdr = 0
 
     # # Address the discontinuity in longitude
+    ref_lon = 180
 
     if "face" in ds.dims:
+        XRange, ref_lon = _reset_range(XRange)
         arg = {
             "ds": ds,
             "varlist": varList,  # vars and grid coords to transform
@@ -379,7 +381,7 @@ def cutout(
     # ---------------------------
     # Initialize horizontal mask
     if XRange is not None or YRange is not None:
-        XRange, ref_lon = _reset_range(XRange)
+        
         maskH, dmaskH, XRange, YRange = get_maskH(
             ds, add_Hbdr, XRange, YRange, ref_lon=ref_lon
         )

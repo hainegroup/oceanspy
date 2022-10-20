@@ -1,0 +1,11 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "time",
+        "Y",
+        "X"
+    ],
+    "coordinates": "YC XC",
+    "description": "atmospheric pressure field",
+    "original_output": "snapshot",
+    "units": "N/m^2"
+}

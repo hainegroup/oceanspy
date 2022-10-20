@@ -1,0 +1,8 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "Y",
+        "X"
+    ],
+    "description": "X coordinate of cell center (T-P point)",
+    "units": "degree_east"
+}

@@ -1,0 +1,11 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "time",
+        "Y",
+        "X"
+    ],
+    "coordinates": "YC XC",
+    "description": "SEAICE effective ice thickness",
+    "original_output": "snapshot",
+    "units": "m"
+}

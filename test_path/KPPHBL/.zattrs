@@ -1,0 +1,11 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "Y",
+        "X"
+    ],
+    "_coordinates": "XC YC iter",
+    "cell_methods": "T: mean",
+    "coordinates": "YC XC",
+    "long_name": "KPP_boundary_layer_depth",
+    "units": "m"
+}

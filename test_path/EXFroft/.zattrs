@@ -1,0 +1,11 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "time",
+        "Y",
+        "X"
+    ],
+    "coordinates": "YC XC",
+    "description": "river runoff temperature",
+    "original_output": "snapshot",
+    "units": "deg C"
+}
