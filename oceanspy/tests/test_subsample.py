@@ -284,7 +284,7 @@ def test_reduce_variables(od, varList):
             359,
         ),
         # ([-31, -2], [58, 68.2], None, ["T"], "Atlantic", 50), # has ARCTIC DATA
-        (None, None, None, ["T"], "Atlantic", 50, ),
+        (None, None, None, ["T"], "Atlantic", 50, 314, 359),
         # (None, None, None, None, "Atlantic", 50),
     ],
 )
