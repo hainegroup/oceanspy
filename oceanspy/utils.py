@@ -73,36 +73,38 @@ def _reset_range(x):
     """
 
     ref_lon = 180
-    if (_np.sign(x) == _np.sign(x[0])).all():  # no sign change
-        _ref_lon = ref_lon
-        X0, X1 = _np.min(x), _np.max(x)
-    else:  # change in sign
-        if len(x) == 2:  # list of end points
-            X0, X1 = x
-            if x[0] > x[1]:  # across discontinuity
-                if abs(x[1] - x[0]) > 300: # across a discontinuity (Delta X =360)
-                    _ref_lon = x[0] - (x[0] - x[1]) / 3
-                else:  # XRange decreases, but not necessarity a dicont.
-                    _ref_lon = ref_lon
-            else:
-                _ref_lon = ref_lon
-        else:  # array of values.
-            _del = abs(x[1:] - x[:-1])  # only works with one crossing
-            if len(_np.where(abs(_del) > 300)[0]) > 0:  # there's discontinuity
-                ll = _np.where(_del == max(_del))[0][0]
-                if x[ll] > x[ll + 1]:  # track starts west of jump
-                    X0 = _np.min(x[: ll + 1])
-                    X1 = _np.max(x[ll + 1 :])
+    if x is not None:
+        if (_np.sign(x) == _np.sign(x[0])).all():  # no sign change
+            _ref_lon = ref_lon
+            X0, X1 = _np.min(x), _np.max(x)
+        else:  # change in sign
+            if len(x) == 2:  # list of end points
+                X0, X1 = x
+                if x[0] > x[1]:  # across discontinuity
+                    if abs(x[1] - x[0]) > 300: # across a discontinuity (Delta X =360)
+                        _ref_lon = x[0] - (x[0] - x[1]) / 3
+                    else:  # XRange decreases, but not necessarity a dicont.
+                        _ref_lon = ref_lon
                 else:
-                    X0 = _np.min(x[ll + 1 :])
-                    X1 = _np.max(x[: ll + 1])
-                _ref_lon = X0 - (X0 - X1) / 3
-            else:  # no discontinuity
-                X0 = _np.min(x)
-                X1 = _np.max(x)
-                _ref_lon = ref_lon
-
-    x = _np.array([X0, X1])
+                    _ref_lon = ref_lon
+            else:  # array of values.
+                _del = abs(x[1:] - x[:-1])  # only works with one crossing
+                if len(_np.where(abs(_del) > 300)[0]) > 0:  # there's discontinuity
+                    ll = _np.where(_del == max(_del))[0][0]
+                    if x[ll] > x[ll + 1]:  # track starts west of jump
+                        X0 = _np.min(x[: ll + 1])
+                        X1 = _np.max(x[ll + 1 :])
+                    else:
+                        X0 = _np.min(x[ll + 1 :])
+                        X1 = _np.max(x[: ll + 1])
+                    _ref_lon = X0 - (X0 - X1) / 3
+                else:  # no discontinuity
+                    X0 = _np.min(x)
+                    X1 = _np.max(x)
+                    _ref_lon = ref_lon
+        x = _np.array([X0, X1])
+    else:
+        _ref_lon = ref_lon
     return x, _np.round(_ref_lon, 2)
 
 
