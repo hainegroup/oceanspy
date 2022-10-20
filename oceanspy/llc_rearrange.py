@@ -279,8 +279,8 @@ class LLCtransformation:
                     DSFacet12["Y"] = DSFacet12["Y"] - 1
                     DSFacet12 = DSFacet12.isel(Y=slice(0, -1))
                 elif YRange is None:
-                    DSFacet12["YG"] = DSFacet12["YG"] - 1
-                    DSFacet12 = DSFacet12.isel(Yp1=slice(0, -1))
+                    DSFacet34["YG"] = DSFacet34["YG"] - 1
+                    DSFacet34 = DSFacet34.isel(Yp1=slice(0, -1))
 
                 for _var in DSFacet12.data_vars:
                     DIMS = [dim for dim in DSFacet12[_var].dims]
@@ -288,7 +288,10 @@ class LLCtransformation:
                     if len(dims) > 1 and "nv" not in DIMS:
                         dtr = list(dims)[::-1]
                         dtr[-1], dtr[-2] = dtr[-2], dtr[-1]
-                        DSFacet12[_var] = DSFacet12[_var].transpose(*dtr).persist()
+                        if YRange is not None:
+                            DSFacet12[_var] = DSFacet12[_var].transpose(*dtr).persist()
+                        else:
+                            DSFacet12[_var] = DSFacet12[_var].transpose(*dtr)
 
         if centered == "Pacific":
             FACETS = [DSFacet34, DSFacet12]  # centered on Pacific ocean
