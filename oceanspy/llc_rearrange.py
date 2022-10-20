@@ -848,7 +848,7 @@ def arc_limits_mask(_ds, _var, _faces, _dims, XRange, YRange):
             Xf_2 = int(DSa2[_var][_dims.X][-1])
         else:
             Xf_2 = _edge_arc_data(DSa2[_var], 2, _dims)
-        Xi_2 = int(DSa2[_var][_dims.X][0]),
+        Xi_2 = int(DSa2[_var][_dims.X][0])
     if type(DSa5) != _dstype:
         DSa5 = 0
         [Yi_5, Yf_5] = [0, 0]
