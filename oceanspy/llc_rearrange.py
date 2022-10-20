@@ -89,10 +89,8 @@ class LLCtransformation:
 
         #
         if faces == "all":
-            faces = _np.arange(13)            
-        #     faces = _np.arange(13)
-            # XRange = _np.array([-177, 177])
-            # YRange = _np.array([-87, 87])
+            faces = _np.arange(13)
+
         elif XRange is not None and YRange is not None:
             if _np.max(abs(XRange)) > 180 or _np.max(abs(YRange)) > 90:
                 raise ValueError("Range of lat and/or lon is not acceptable.")
@@ -104,8 +102,18 @@ class LLCtransformation:
                 faces = list(dmaskH["face"].values)
                 ds = mask_var(ds, XRange, YRange, ref_lon)  # masks latitude
 
+                cuts = arc_limits_mask(ds, "YG", faces, dims_g, XRange, YRange)
+
         print("faces in the cutout", faces)
-        cuts = arc_limits_mask(ds, "YG", faces, dims_g, XRange, YRange)
+        
+        if XRange is None and YRange is None:  # this should only apply to ECCO
+            opt = False
+            cuts = None
+            if faces is None:
+                faces = _np.arange(13)  # all faces
+        else:
+            opt = True
+            assert type(cuts) == list
 
         #
         dsa2 = []
@@ -117,7 +125,7 @@ class LLCtransformation:
         for var_name in varlist:
             if "face" in ds[var_name].dims:
                 arc_faces, *nnn, DS = arct_connect(
-                    ds, var_name, faces=faces, masking=False, opt=True, ranges=cuts
+                    ds, var_name, faces=faces, masking=False, opt=opt, ranges=cuts
                 )
                 ARCT[0].append(DS[0])
                 ARCT[1].append(DS[1])
@@ -194,16 +202,18 @@ class LLCtransformation:
         faces3.append(DSa2)
         faces4.append(DSa5)
 
-        # Slicing the faces to remove nan-edges
-        for axis in range(2):
-            edges1 = _edge_facet_data(faces1, "YG", dims_g, axis)
-            faces1 = slice_datasets(faces1, 1, dims_c, dims_g, edges1, axis)
-            edges2 = _edge_facet_data(faces2, "YG", dims_g, axis)
-            faces2 = slice_datasets(faces2, 2, dims_c, dims_g, edges2, axis)
-            edges3 = _edge_facet_data(faces3, "YG", dims_g, axis)
-            faces3 = slice_datasets(faces3, 3, dims_c, dims_g, edges3, axis)
-            edges4 = _edge_facet_data(faces4, "YG", dims_g, axis)
-            faces4 = slice_datasets(faces4, 4, dims_c, dims_g, edges4, axis)
+        # Slicing the faces to remove nan-edges. 
+        # Only when XRange and YRange given.
+        if XRange is not None and YRange is not None:
+            for axis in range(2):
+                edges = _edge_facet_data(faces1, "YG", dims_g, axis)
+                faces1 = slice_datasets(faces1, 1, dims_c, dims_g, edges, axis)
+                edges = _edge_facet_data(faces2, "YG", dims_g, axis)
+                faces2 = slice_datasets(faces2, 2, dims_c, dims_g, edges, axis)
+                edges = _edge_facet_data(faces3, "YG", dims_g, axis)
+                faces3 = slice_datasets(faces3, 3, dims_c, dims_g, edges, axis)
+                edges = _edge_facet_data(faces4, "YG", dims_g, axis)
+                faces4 = slice_datasets(faces4, 4, dims_c, dims_g, edges, axis)
 
         # =====
         # Facet 1
@@ -778,7 +788,7 @@ def _edge_arc_data(_da, _face_ind, _dims):
     return X0
 
 
-def mask_var(_ds, XRange, YRange, ref_lon=180):
+def mask_var(_ds, XRange=None, YRange=None, _faces='all', ref_lon=180):
     """Returns a dataset with masked latitude at C and G points (YC and YG).
     The masking region is determined by XRange and YRange. Used to estimate the
     extend of actual data to be retained.
@@ -821,6 +831,7 @@ def mask_var(_ds, XRange, YRange, ref_lon=180):
         1,
         0,
     ).persist()
+
 
     _ds["YC"] = _ds["YC"].where(maskC, drop=True)
     _ds["YG"] = _ds["YG"].where(maskG, drop=True)
