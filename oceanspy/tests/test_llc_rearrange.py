@@ -2069,27 +2069,34 @@ faces = [k for k in range(13)]
 
 expected = [2, 5, 7, 10]  # most faces that connect with arctic cap face=6
 acshape = (Nx // 2, Ny)
-
+cuts = [[0, 28], [0, 0], [0, 0], [0, 0]]
 
 @pytest.mark.parametrize(
-    "od, faces, expected, atype",
+    "od, faces, expected, atype, XRange, YRange, opt, cuts, opt, masking, size"
     [
-        (od, faces, expected, _datype),
-        (od, faces[:2], [0, 0, 0, 0], int),
-        (od, faces[:6], [0, 0, 0, 0], int),
-        (od, [0, 1, 2, 6], [2, 0, 0, 0], _datype),
-        (od, faces[:7], [2, 5, 0, 0], _datype),
-        (od, faces[6:], [0, 0, 7, 10], int),
+        (od, faces, expected, _datype, None, None, False, 0, False, None),
+        (od, faces[:2], [0, 0, 0, 0], int, None, None, False,0, False, None),
+        (od, faces[:6], [0, 0, 0, 0], int, None, None, False, 0, False, None),
+        (od, [0, 1, 2, 6], [2, 0, 0, 0], _datype, None, None, False, 0, False, None),
+        (od, faces[:7], [2, 5, 0, 0], _datype, None, None, False, 0, False, None),
+        (od, faces[6:], [0, 0, 7, 10], int, None, None, False, 0, False, None),
+        (od, [2, 6], [2, 0, 0, 0], _datype, [-30,  22], [60. , 80.2], cuts, True, False, (90, 29)),
+        (od, [2, 6], [2, 0, 0, 0], _datype, [-30,  22], [60. , 80.2], cuts, True, True, (90, 29)),
     ],
 )
-def test_arc_connect(od, faces, expected, atype):
+def test_arc_connect(od, faces, expected, atype, , XRange, YRange, opt, cuts, opt, masking, size):
     # need to improve, this behavior, by adding ranges=cuts, opt=true
     # (i.e. transpose) and masking of variable (XG). when cuts is given.
     ds = od._ds
-    arc_faces, *a, DS = arct_connect(ds, "XG", faces)
+    if XRange is not None and YRange is not None:
+        arc_faces, *nnn, DS = arct_connect(ds, "YG", faces=faces, masking=masking, opt=opt, ranges=cuts)
+        for i in range(len(DS)):
+            if type(DS[i]) == _datype:
+                assert np.shape(DS[i]) == size
+    else:
+        arc_faces, *a, DS = arct_connect(ds, "YG", faces)
     assert arc_faces == expected
-    if len(DS) > 0:
-        assert type(DS[0]) == atype
+    assert type(DS[0]) == atype
 
 
 transf = "arctic_crown"

@@ -84,7 +84,7 @@ class LLCtransformation:
                 varlist = [varlist]
         elif len(varlist) > 0:
             varlist = list(varlist)
-        elif len(varlist) == 0:
+        elif len(varlist) == 0:  # accept None too.
             raise ValueError("Empty list of variables")
 
         #
