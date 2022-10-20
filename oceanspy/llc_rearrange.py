@@ -902,7 +902,7 @@ def _edge_facet_data(_Facet_list, _var, _dims, _axis):
             # there is data
             _da = _Facet_list[i][_var].load()  # load into memory 2d data.
             X0 = []
-            for j in range(len(_da[_dim].data)):
+            for j in list(_da[_dim].data):
                 arg = {_dim: j}
                 if _np.isnan(_np.array(_da.sel(**arg).data)).all():
                     X0.append(0)
