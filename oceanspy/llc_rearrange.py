@@ -111,7 +111,7 @@ class LLCtransformation:
             cuts = None
 
 
-        print("faces in the cutout", faces, opt, cuts)
+        print("faces in the cutout", faces)
         
 
         #
