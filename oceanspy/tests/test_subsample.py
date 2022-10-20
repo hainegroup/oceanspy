@@ -261,7 +261,7 @@ def test_reduce_variables(od, varList):
 
 @pytest.mark.parametrize("od", [ECCOod])
 @pytest.mark.parametrize(
-    "XRange, YRange, ZRange, varList, centered, NZ",
+    "XRange, YRange, ZRange, varList, centered, NZ, NY, NX",
     [
         (
             [-90, 20],
@@ -270,6 +270,8 @@ def test_reduce_variables(od, varList):
             ["T"],
             "Atlantic",
             50,
+            56,
+            110
         ),
         (
             [-170, 170],
@@ -286,7 +288,7 @@ def test_reduce_variables(od, varList):
     ],
 )
 def test_cutout_faces(
-    od, XRange, YRange, ZRange, varList, centered, NZ
+    od, XRange, YRange, ZRange, varList, centered, NZ, NY, NX,
 ):
     args = {
         "varList": varList,
@@ -299,7 +301,10 @@ def test_cutout_faces(
     old_dims = od.dataset.dims
     new_dims = new_od.dataset.dims
     assert (set(old_dims) - set(new_dims)) == set(["face"])
-    assert new_od._ds.dims["Z"] == NZ
+    assert new_dims["Z"] == NZ
+    assert new_dims["Y"] == NY
+    assert new_dims["X"] == NX
+
 
 
 # =======
