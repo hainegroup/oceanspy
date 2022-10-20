@@ -271,7 +271,7 @@ def test_reduce_variables(od, varList):
             "Atlantic",
             50,
             56,
-            110
+            110,
         ),
         (
             [-170, 170],
@@ -280,6 +280,8 @@ def test_reduce_variables(od, varList):
             ["U", "V"],
             "Atlantic",
             50,
+            56,
+            359,
         ),
         ([-31, -2], [58, 68.2], None, ["T"], "Atlantic", 50),
         # (None, None, None, ["T"], "Atlantic", 50),
