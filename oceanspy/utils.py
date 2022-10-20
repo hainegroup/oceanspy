@@ -80,7 +80,7 @@ def _reset_range(x):
         if len(x) == 2:  # list of end points
             X0, X1 = x
             if x[0] > x[1]:  # across discontinuity
-                if x[1]-x[0] > 300: # across a discontinuity (Delta X =360)
+                if abs(x[1] - x[0]) > 300: # across a discontinuity (Delta X =360)
                     _ref_lon = x[0] - (x[0] - x[1]) / 3
                 else:  # XRange decreases, but not necessarity a dicont.
                     _ref_lon = ref_lon
