@@ -798,10 +798,7 @@ def mask_var(_ds, XRange=None, YRange=None, _faces='all', ref_lon=180):
     _ds = _copy.deepcopy(mates(_ds.reset_coords()))
 
     nYG = _copy.deepcopy(_ds['YG'])
-    nYC = _copy.deepcopy(_ds['YC'])
-
     _ds['nYG'] = nYG
-    _ds['nYC'] = nYC
 
     minY = _ds["YG"].min().values
     maxY = _ds["YG"].max().values
@@ -828,20 +825,6 @@ def mask_var(_ds, XRange=None, YRange=None, _faces='all', ref_lon=180):
         0,
     ).persist()
 
-    maskC = _xr.where(
-        _np.logical_and(
-            _np.logical_and(_ds["YC"] >= minY, _ds["YC"] <= maxY),
-            _np.logical_and(
-                _rel_lon(_ds["XC"], ref_lon) >= _rel_lon(minX, ref_lon),
-                _rel_lon(_ds["XC"], ref_lon) <= _rel_lon(maxX, ref_lon),
-            ),
-        ),
-        1,
-        0,
-    ).persist()
-
-
-    _ds["nYC"] = _ds["nYC"].where(maskC, drop=True)
     _ds["nYG"] = _ds["nYG"].where(maskG, drop=True)
     return _ds
 
