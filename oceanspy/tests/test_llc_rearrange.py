@@ -2583,7 +2583,9 @@ _zeros = [0, 0]
         (od, A01_lon, A01_lat, [0, 0], [0, 0], [0, 0], [0, 0]),
         (od, P01_lon, P01_lat, [0, 0], [0, 0], [0, 0], [0, 0]),
         (od, P06_lon, P06_lat, [0, 0], [0, 0], [0, 0], [0, 0]),
-        (od, [60, 80.2], [-30, 22], [0, 28], [0, 0], [0, 0], [0, 0]),
+        (od, [-31, -2], [58, 68.2], [0, 3], [0, 0], [0, 0], [0, 0]),
+        (od, [160, -160], [58, 85.2], [0, 0], [0, 0], [52, 89], [0, 0]),
+        (od, [160, 100], [58, 85.2], [0, 0], [0, 39], [51, 89], [0, 0])
     ],
 )
 def test_arc_limits_mask(od, XRange, YRange, A, B, C, D):
@@ -2594,11 +2596,12 @@ def test_arc_limits_mask(od, XRange, YRange, A, B, C, D):
     XRange = _np.array(XRange)
     YRange = _np.array(YRange)
     XRange, ref_lon = _reset_range(XRange)
-    var_='nYG'
-    maskH, dmaskH, XRange, YRange = get_maskH(ds, 0, XRange, YRange, ref_lon=ref_lon)
+    add_Hbdr = 2
+    maskH, dmaskH, XRange, YRange = get_maskH(ds, add_Hbdr, XRange, YRange, ref_lon=ref_lon)
     _faces = list(dmaskH["face"].values)
     ds = mask_var(ds, XRange, YRange, ref_lon=ref_lon)
-    cuts = arc_limits_mask(_ds, _var_, _faces, dims_g, XRange, YRange)
+    _var_='nYG'
+    cuts = arc_limits_mask(ds, _var_, _faces, dims_g, XRange, YRange)
 
     assert cuts[0] == A
     assert cuts[1] == B
