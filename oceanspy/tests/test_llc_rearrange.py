@@ -1746,7 +1746,7 @@ P16_lat = [
 ]
 
 
-IO5_lon = [
+I05_lon = [
     30.3437,
     30.5138,
     31.1739,
@@ -1798,7 +1798,7 @@ IO5_lon = [
     114.4665,
 ]
 
-IO5_lat = [
+I05_lat = [
     -31.0777,
     -31.1679,
     -31.6528,
@@ -1950,7 +1950,7 @@ I06S_lat = [
 ]
 
 
-IO8SO9N_lon = [
+I08S09N_lon = [
     78.3815,
     78.1253,
     80.3926,
@@ -1996,7 +1996,7 @@ IO8SO9N_lon = [
     87.0693,
 ]
 
-IO8SO9N_lat = [
+I08S09N_lat = [
     -66.6027,
     -66.2999,
     -64.5799,
@@ -2101,6 +2101,16 @@ def test_arc_connect(od, faces, expected, atype, XRange, YRange, opt, cuts, mask
 
 
 varlist = ["T", "U", "V", "XG", "YG", "XC", "YC"]
+XRanges_A = [A01_lon, A03_lon, A05_lon, A10_lon, A12_lon, A16_lon, A24_lon]
+YRanges_A = [A01_lat, A03_lat, A05_lat, A10_lat, A12_lat, A16_lat, A24_lat]
+XRanges_P = [P01_lon, P02_lon, P04_lon, P06_lon, P10_lon, P11_lon, P14_lon, P16_lon]
+YRanges_P = [P01_lat, P02_lat, P04_lat, P06_lat, P10_lat, P11_lat, P14_lat, P16_lat]
+XRanges_I = [I05_lon, I06S_lon, I08S09N_lon]
+YRanges_I = [I05_lat, I06S_lat, I08S09N_lat]
+
+_XRanges_ = XRanges_A + XRanges_P + XRanges_I
+_YRanges_ = YRanges_A + YRanges_P + YRanges_I
+
 
 
 @pytest.mark.parametrize(
@@ -2151,6 +2161,7 @@ varlist = ["T", "U", "V", "XG", "YG", "XC", "YC"]
         (od, [10], varlist[0], None, None, 270, 359, 89, 0),
         (od, [11], varlist[0], None, None, 270, 359, 89, 0),
         (od, [12], varlist[0], None, None, 270, 359, 89, 0),
+        (od, None, varlist, _XRanges_[0], _YRanges_[0], 90, 134, 0, 24)
     ],
 )
 def test_transformation(od, faces, varlist, XRange, YRange, X0, X1, Y0, Y1):
