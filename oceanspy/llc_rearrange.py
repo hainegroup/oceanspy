@@ -211,6 +211,7 @@ class LLCtransformation:
                 faces4 = slice_datasets(faces4, 4, dims_c, dims_g, edges4, axis)
 
             # Here, address shifts in Arctic
+            # arctic exchange with face 10
             if type(faces2[0]) == _dstype:
                 faces2[0]['Yp1'] = faces2[0]['Yp1'] + 1
 
