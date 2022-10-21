@@ -921,52 +921,6 @@ def _edge_facet_data(_Facet_list, _var, _dims, _axis):
     return XRange
 
 
-# def slice_datasets(_DSfacet, _facet_ind, dims_c, dims_g, _edges, _axis):
-#     """
-#     Slices a list of dataset along an axis. The range of index retained is
-#     defined in Ranges, an argument of the function. How the list of dataset,
-#     which together define a Facet with facet index (1-4), depends on the facet
-#     index and the axis (0 or 1).
-#     """
-#     if _axis == 0:  # local y always the case for all facets
-#         _dim_c = dims_c.Y
-#         _dim_g = dims_g.Y
-#         if _facet_ind == 1 or _facet_ind == 2:
-#             flag = 1  # max and min ranges
-#         elif _facet_ind == 3 or _facet_ind == 4:
-#             flag = 0
-#     elif _axis == 1:  # local x always the case.
-#         _dim_c = dims_c.X
-#         _dim_g = dims_g.X
-#         if _facet_ind == 1 or _facet_ind == 2:
-#             flag = 0
-#         elif _facet_ind == 3 or _facet_ind == 4:
-#             flag = 1
-
-#     _DSFacet = _copy.deepcopy(_DSfacet)
-#     for i in range(len(_DSFacet)):
-#         for _dim in [_dim_c, _dim_g]:
-#             if flag:
-#                 if len(_edges) == 1:
-#                     ii_0 = _edges[0]
-#                     ii_1 = _edges[1]
-#                 elif len(_edges) > 1:
-#                     ii_0 = _np.nanmin([_edges[i][0] for i in range(len(_edges))])
-#                     ii_1 = _np.nanmax([_edges[i][1] for i in range(len(_edges))])
-#                     if _np.isnan(ii_0) and _np.isnan(ii_1):
-#                         ii_0 = 0
-#                         ii_1 = 0
-#                     else:
-#                         ii_0 = int(ii_0)
-#                         ii_1 = int(ii_1)
-#             else:
-#                 ii_0 = _edges[i][0]
-#                 ii_1 = _edges[i][1]
-#             arg = {_dim: slice(ii_0, ii_1 + 1)}
-#             if type(_DSFacet[i]) == _dstype:
-#                 _DSFacet[i] = _DSFacet[i].isel(**arg)
-#     return _DSFacet
-
 def slice_datasets(_DSfacet, _facet_ind, dims_c, dims_g, _edges, _axis):
     """
     Slices a list of dataset along an axis. The range of index retained is
