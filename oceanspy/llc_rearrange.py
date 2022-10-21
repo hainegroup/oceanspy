@@ -21,7 +21,7 @@ class LLCtransformation:
     def __init__(
         self,
         ds,
-        varlist,
+        varList=None,
         add_Hbdr=0,
         XRange=None,
         YRange=None,
@@ -31,7 +31,7 @@ class LLCtransformation:
         drop=False,
     ):
         self._ds = ds  # xarray.DataSet
-        self._varlist = varlist  # variables names to be transformed
+        self._varList = varList  # variables names to be transformed
         self._XRange = XRange  # lon range of data to retain
         self.YRange = YRange  # lat range of data to retain.
         self._chunks = chunks  # dict.
@@ -42,7 +42,7 @@ class LLCtransformation:
     def arctic_crown(
         self,
         ds,
-        varlist,
+        varList = None,
         add_Hbdr=0,
         XRange=None,
         YRange=None,
@@ -77,15 +77,10 @@ class LLCtransformation:
         else:
             add_Hbdr = add_Hbdr + 0.25
 
-        if isinstance(varlist, str):
-            if varlist == "all":
-                varlist = ds.data_vars
-            else:
-                varlist = [varlist]
-        elif len(varlist) > 0:
-            varlist = list(varlist)
-        elif len(varlist) == 0:  # accept None too.
-            raise ValueError("Empty list of variables")
+        if varList is None:
+            varList = ds.data_vars
+
+        varList = list(varList)
 
         #
         if faces is None:
@@ -104,7 +99,7 @@ class LLCtransformation:
                 faces = list(dmaskH["face"].values)
                 ds = mask_var(ds, XRange, YRange, ref_lon)  # masks latitude
                 _var_ = "nYG"  # copy variable created in mask_var. Will discard
-                varlist = varlist + [_var_]
+                varList = varList + [_var_]
                 cuts = arc_limits_mask(ds, _var_, faces, dims_g, XRange, YRange)
 
                 opt = True
@@ -122,7 +117,7 @@ class LLCtransformation:
         dsa10 = []
         ARCT = [dsa2, dsa5, dsa7, dsa10]
 
-        for var_name in varlist:
+        for var_name in varList:
             if "face" in ds[var_name].dims:
                 arc_faces, *nnn, DS = arct_connect(
                     ds, var_name, faces=faces, masking=False, opt=opt, ranges=cuts
