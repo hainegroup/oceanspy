@@ -216,7 +216,7 @@ class LLCtransformation:
 
             # Arctic exchange with face 2
             if type(faces3[3]) == _dstype:
-                faces3['Xp1'] = faces3['Xp1'] + 1
+                faces3[3]['Xp1'] = faces3[3]['Xp1'] + 1
 
         # =====
         # Facet 1
