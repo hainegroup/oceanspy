@@ -2701,15 +2701,12 @@ def test_edge_facet_data(od, XRange, YRange, axis, A, B, C, D):
     assert edges4 == D
 
 
-
 ds = od._ds
 XRange = _np.array(A01_lon)
 YRange = _np.array(A01_lat)
 XRange, ref_lon = _reset_range(XRange)
 add_Hbdr = 2
-maskH, dmaskH, XRange, YRange = get_maskH(
-    ds, add_Hbdr, XRange, YRange, ref_lon=ref_lon
-)
+maskH, dmaskH, XRange, YRange = get_maskH(ds, add_Hbdr, XRange, YRange, ref_lon=ref_lon)
 _faces = list(dmaskH["face"].values)
 ds = mask_var(ds, XRange, YRange, ref_lon=ref_lon)
 
@@ -2718,7 +2715,7 @@ DSa5 = 0
 DSa7 = 0
 DSa10 = 0
 
-    # define Facets as lists
+# define Facets as lists
 _facet1 = [k for k in range(7, 10)]
 _facet2 = [k for k in range(10, 13)]
 _facet3 = [k for k in range(3)]
@@ -2755,9 +2752,6 @@ Facet3.append(DSa2)
 Facet4.append(DSa5)
 
 
-
-
-
 @pytest.mark.parametrize(
     "Facet, Find, axis, i, Nx, Ny",
     [
@@ -2771,11 +2765,9 @@ Facet4.append(DSa5)
         (Facet4, 4, 1, 0, None, None),
     ],
 )
-
 def test_slice_datasets(Facet, Find, axis, i, Nx, Ny):
-    """Test fn that slices the datasets within each facets. 
-    """
-    edge = _edge_facet_data(Facet, 'nYG', dims_g, axis)
+    """Test fn that slices the datasets within each facets."""
+    edge = _edge_facet_data(Facet, "nYG", dims_g, axis)
     Facet = slice_datasets(Facet, Find, dims_c, dims_g, edge, axis)
 
     if Nx is None:
@@ -2783,18 +2775,3 @@ def test_slice_datasets(Facet, Find, axis, i, Nx, Ny):
     else:
         assert len(Facet[i].X) == Nx
         assert len(Facet[i].Y) == Ny
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
