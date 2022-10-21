@@ -2359,7 +2359,7 @@ ARCT = [ds2, ds5, ds7, ds10]
 varlist = ["T", "U", "V"]
 # create dataset
 for var_name in varlist:
-    *nnn, DS = arct_connect(od.dataset, var_name, faces="all")  # horizontal only
+    *nnn, DS = arct_connect(od.dataset, var_name, faces=None)  # horizontal only
     ARCT[0].append(DS[0])
     ARCT[1].append(DS[1])
     ARCT[2].append(DS[2])
@@ -2564,20 +2564,47 @@ def test_combine_list_ds(DSlist, lenX, lenY, x0, x1, y0, y1):
     assert [int(nDSlist.Y[0].values), int(nDSlist.Y[-1].values)] == [y0, y1]
 
 
-# def test_mask_var(ds, XRange, YRange, faces):
-# _ds = mask_var(ds, XRange, YRange)
-# need to make sure that there is data only in the faces given by
-# variable faces.
-#
+@pytest.mark.parametrize(
+    "od, XRange, YRange",
+    [
+        (od, None, None),
+    ],
+)
+def test_mask_var(od, XRange, YRange):
+    ds = od._ds
+    ds = mask_var(ds, XRange, YRange)
+    assert _np.isnan(ds["nYG"].data).all()
 
+_zeros = [0, 0]
 
-# def test_arc_limits_mask(ds, var, _faces, dims, ranges)
-# cuts = arc_limits_mask(ds, var, _faces, dims)
+@pytest.mark.parametrize(
+    "od, XRange, YRange, A, B, C, D",
+    [
+        (od, A01_lon, A01_lat, [0, 0], [0, 0], [0, 0], [0, 0]),
+        (od, P01_lon, P01_lat, [0, 0], [0, 0], [0, 0], [0, 0]),
+        (od, P06_lon, P06_lat, [0, 0], [0, 0], [0, 0], [0, 0]),
+        (od, [60, 80.2], [-30, 22], [0, 28], [0, 0], [0, 0], [0, 0]),
+    ],
+)
+def test_arc_limits_mask(od, XRange, YRange, A, B, C, D):
 # test that cuts is a list of zeros for each side of the arctic cap
 # if there is no data surviving the cutout there. Also, test the
 # correct range of data when data in the arctic cap is retained.
-#
-#
+    ds = od._ds
+    XRange = _np.array(XRange)
+    YRange = _np.array(YRange)
+    XRange, ref_lon = _reset_range(XRange)
+    var_='nYG'
+    maskH, dmaskH, XRange, YRange = get_maskH(ds, 0, XRange, YRange, ref_lon=ref_lon)
+    _faces = list(dmaskH["face"].values)
+    ds = mask_var(ds, XRange, YRange, ref_lon=ref_lon)
+    cuts = arc_limits_mask(_ds, _var_, _faces, dims_g, XRange, YRange)
+
+    assert cuts[0] == A
+    assert cuts[1] == B
+    assert cuts[2] == C
+    assert cuts[3] == D
+
 
 # def test_edge_facet_data(facet, "YG", dims_g, axis)
 # identifies the ranges where there is data.
