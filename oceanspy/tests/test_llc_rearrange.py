@@ -2701,7 +2701,100 @@ def test_edge_facet_data(od, XRange, YRange, axis, A, B, C, D):
     assert edges4 == D
 
 
-# def test_slice_datasets(facet, facet_ind, var, dims, axis)
-#
-#
-#
+
+ds = od._ds
+XRange = _np.array(A01_lon)
+YRange = _np.array(A01_lat)
+XRange, ref_lon = _reset_range(XRange)
+add_Hbdr = 2
+maskH, dmaskH, XRange, YRange = get_maskH(
+    ds, add_Hbdr, XRange, YRange, ref_lon=ref_lon
+)
+_faces = list(dmaskH["face"].values)
+ds = mask_var(ds, XRange, YRange, ref_lon=ref_lon)
+
+DSa2 = 0
+DSa5 = 0
+DSa7 = 0
+DSa10 = 0
+
+    # define Facets as lists
+_facet1 = [k for k in range(7, 10)]
+_facet2 = [k for k in range(10, 13)]
+_facet3 = [k for k in range(3)]
+_facet4 = [k for k in range(3, 6)]
+
+Facet1 = []
+Facet2 = []
+Facet3 = []
+Facet4 = []
+
+for k in _np.arange(13):
+    if k in _faces:
+        if k in _facet1:
+            Facet1.append(ds.isel(face=k))  #
+        elif k in _facet2:
+            Facet2.append(ds.isel(face=k))
+        elif k in _facet3:
+            Facet3.append(ds.isel(face=k))
+        elif k in _facet4:
+            Facet4.append(ds.isel(face=k))
+    else:
+        if k in _facet1:
+            Facet1.append(0)
+        elif k in _facet2:
+            Facet2.append(0)
+        elif k in _facet3:
+            Facet3.append(0)
+        elif k in _facet4:
+            Facet4.append(0)
+
+Facet1 = [DSa7] + Facet1
+Facet2 = [DSa10] + Facet2
+Facet3.append(DSa2)
+Facet4.append(DSa5)
+
+
+
+
+
+@pytest.mark.parametrize(
+    "Facet, Find, axis, i, Nx, Ny",
+    [
+        (Facet1, 1, 0, 0, None, None),
+        (Facet2, 2, 0, 1, 90, 18),
+        (Facet3, 3, 0, 2, 90, 25),
+        (Facet4, 4, 0, 0, None, None),
+        (Facet1, 1, 1, 0, None, None),
+        (Facet2, 2, 1, 1, 25, 90),
+        (Facet3, 3, 1, 2, 27, 90),
+        (Facet4, 4, 1, 0, None, None),
+    ],
+)
+
+def test_slice_datasets(Facet, Find, axis, i, Nx, Ny):
+    """Test fn that slices the datasets within each facets. 
+    """
+    edge = _edge_facet_data(Facet, 'nYG', dims_g, axis)
+    Facet = slice_datasets(Facet, Find, dims_c, dims_g, edge, axis)
+
+    if Nx is None:
+        assert Facet == [0, 0, 0, 0]
+    else:
+        assert len(Facet[i].X) == Nx
+        assert len(Facet[i].Y) == Ny
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
