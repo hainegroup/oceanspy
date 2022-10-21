@@ -2247,7 +2247,7 @@ def test_arc_connect(
     assert type(DS[0]) == atype
 
 
-varlist = ["T", "U", "V", "XG", "YG", "XC", "YC"]
+varList = ["T", "U", "V", "XG", "YG", "XC", "YC"]
 XRanges_A = [A01_lon, A03_lon, A05_lon, A10_lon, A12_lon, A16_lon, A24_lon]
 YRanges_A = [A01_lat, A03_lat, A05_lat, A10_lat, A12_lat, A16_lat, A24_lat]
 XRanges_P = [P01_lon, P02_lon, P04_lon, P06_lon, P10_lon, P11_lon, P14_lon, P16_lon]
@@ -2260,24 +2260,24 @@ _YRanges_ = YRanges_A + YRanges_P + YRanges_I
 
 
 @pytest.mark.parametrize(
-    "od, faces, varlist, XRange, YRange, X0, X1, Y0, Y1",
+    "od, faces, varList, XRange, YRange, X0, X1, Y0, Y1",
     [
-        (od, None, varlist, None, None, 0, 359, 0, 314),
-        (od, [2, 5, 6, 7, 10], varlist, None, None, 0, 359, 0, 134),
-        (od, [2, 5, 7, 10], varlist, None, None, 0, 359, 0, 89),
-        (od, [1, 4, 8, 11], varlist, None, None, 0, 359, 0, 89),
-        (od, [0, 3, 9, 12], varlist, None, None, 0, 359, 0, 89),
-        (od, [6, 7, 8, 9], varlist, None, None, 180, 269, 314, 0),
-        (od, [6, 10, 11, 12], varlist, None, None, 270, 359, 314, 0),
-        (od, [0, 1, 2, 6], varlist, None, None, 180, 269, 0, 314),
-        (od, [3, 4, 5, 6], varlist, None, None, 90, 179, 0, 314),
-        (od, [2, 6, 10], varlist, None, None, 90, 269, 0, 134),
-        (od, [6, 7, 10], varlist, None, None, 180, 359, 134, 0),
-        (od, [6, 7, 8, 10, 11], varlist, None, None, 180, 359, 224, 0),
+        (od, None, varList, None, None, 0, 359, 0, 314),
+        (od, [2, 5, 6, 7, 10], varList, None, None, 0, 359, 0, 134),
+        (od, [2, 5, 7, 10], varList, None, None, 0, 359, 0, 89),
+        (od, [1, 4, 8, 11], varList, None, None, 0, 359, 0, 89),
+        (od, [0, 3, 9, 12], varList, None, None, 0, 359, 0, 89),
+        (od, [6, 7, 8, 9], varList, None, None, 180, 269, 314, 0),
+        (od, [6, 10, 11, 12], varList, None, None, 270, 359, 314, 0),
+        (od, [0, 1, 2, 6], varList, None, None, 180, 269, 0, 314),
+        (od, [3, 4, 5, 6], varList, None, None, 90, 179, 0, 314),
+        (od, [2, 6, 10], varList, None, None, 90, 269, 0, 134),
+        (od, [6, 7, 10], varList, None, None, 180, 359, 134, 0),
+        (od, [6, 7, 8, 10, 11], varList, None, None, 180, 359, 224, 0),
         (
             od,
             [4, 5, 6, 7, 8, 10, 11],
-            varlist,
+            varList,
             None,
             None,
             90,
@@ -2285,54 +2285,54 @@ _YRanges_ = YRanges_A + YRanges_P + YRanges_I
             0,
             224,
         ),
-        (od, [7, 8, 10, 11], varlist, None, None, 180, 359, 179, 0),
-        (od, [1, 2, 10, 11], varlist, None, None, 90, 269, 0, 179),
-        (od, [8, 9, 11, 12], varlist, None, None, 180, 359, 179, 0),
-        (od, [0, 1, 11, 12], varlist, None, None, 90, 269, 0, 179),
-        (od, [0, 1, 3, 4], varlist, None, None, 180, 359, 0, 179),
-        (od, [9, 12], varlist, None, None, 180, 359, 89, 0),
-        (od, [0, 12], varlist, None, None, 90, 269, 0, 89),
-        (od, [0, 3], varlist, None, None, 180, 359, 0, 89),
-        (od, [0, 9, 12], varlist, None, None, 0, 269, 0, 89),
-        (od, [0, 3, 12], varlist, None, None, 90, 359, 0, 89),
-        (od, [0], varlist[0], None, None, 180, 269, 0, 89),
-        (od, [1], varlist[0], None, None, 180, 269, 0, 89),
-        (od, [2], varlist[0], None, None, 180, 269, 0, 89),
-        (od, [3], varlist[0], None, None, 90, 179, 0, 89),
-        (od, [4], varlist[0], None, None, 90, 179, 0, 89),
-        (od, [5], varlist[0], None, None, 90, 179, 0, 89),
-        (od, [7], varlist[0], None, None, 180, 269, 89, 0),
-        (od, [8], varlist[0], None, None, 180, 269, 89, 0),
-        (od, [9], varlist[0], None, None, 180, 269, 89, 0),
-        (od, [10], varlist[0], None, None, 270, 359, 89, 0),
-        (od, [11], varlist[0], None, None, 270, 359, 89, 0),
-        (od, [12], varlist[0], None, None, 270, 359, 89, 0),
-        (od, None, varlist, _XRanges_[0], _YRanges_[0], 90, 134, 0, 24),
-        (od, None, varlist, _XRanges_[1], _YRanges_[1], 90, 158, 0, 8),
-        (od, None, varlist, _XRanges_[2], _YRanges_[2], 90, 157, 0, 6),
-        (od, None, varlist, _XRanges_[3], _YRanges_[3], 90, 156, 0, 7),
-        (od, None, varlist, _XRanges_[4], _YRanges_[4], 90, 161, 0, 72),
-        (od, None, varlist, _XRanges_[5], _YRanges_[5], 180, 201, 0, 179),
-        (od, None, varlist, _XRanges_[6], _YRanges_[6], 90, 129, 0, 55),
-        (od, None, varlist, P01_lon, P01_lat, 203, 275, 6, 0),
-        (od, None, varlist, _XRanges_[8], _YRanges_[8], 90, 202, 0, 8),
-        (od, None, varlist, _XRanges_[9], _YRanges_[9], 90, 241, 0, 6),
-        (od, None, varlist, _XRanges_[10], _YRanges_[10], 219, 328, 5, 0),
-        (od, None, varlist, _XRanges_[11], _YRanges_[11], 90, 102, 0, 56),
-        (od, None, varlist, _XRanges_[12], _YRanges_[12], 180, 196, 84, 0),
-        (od, None, varlist, _XRanges_[13], _YRanges_[13], 212, 225, 127, 0),
-        (od, None, varlist, _XRanges_[14], _YRanges_[14], 243, 250, 191, 0),
-        (od, None, varlist, _XRanges_[15], _YRanges_[15], 247, 334, 0, 9),
-        (od, None, varlist, _XRanges_[16], _YRanges_[16], 245, 251, 0, 68),
-        (od, None, varlist, _XRanges_[17], _YRanges_[17], 90, 110, 0, 118),
+        (od, [7, 8, 10, 11], varList, None, None, 180, 359, 179, 0),
+        (od, [1, 2, 10, 11], varList, None, None, 90, 269, 0, 179),
+        (od, [8, 9, 11, 12], varList, None, None, 180, 359, 179, 0),
+        (od, [0, 1, 11, 12], varList, None, None, 90, 269, 0, 179),
+        (od, [0, 1, 3, 4], varList, None, None, 180, 359, 0, 179),
+        (od, [9, 12], varList, None, None, 180, 359, 89, 0),
+        (od, [0, 12], varList, None, None, 90, 269, 0, 89),
+        (od, [0, 3], varList, None, None, 180, 359, 0, 89),
+        (od, [0, 9, 12], varList, None, None, 0, 269, 0, 89),
+        (od, [0, 3, 12], varList, None, None, 90, 359, 0, 89),
+        (od, [0], varList[0], None, None, 180, 269, 0, 89),
+        (od, [1], varList[0], None, None, 180, 269, 0, 89),
+        (od, [2], varList[0], None, None, 180, 269, 0, 89),
+        (od, [3], varList[0], None, None, 90, 179, 0, 89),
+        (od, [4], varList[0], None, None, 90, 179, 0, 89),
+        (od, [5], varList[0], None, None, 90, 179, 0, 89),
+        (od, [7], varList[0], None, None, 180, 269, 89, 0),
+        (od, [8], varList[0], None, None, 180, 269, 89, 0),
+        (od, [9], varList[0], None, None, 180, 269, 89, 0),
+        (od, [10], varList[0], None, None, 270, 359, 89, 0),
+        (od, [11], varList[0], None, None, 270, 359, 89, 0),
+        (od, [12], varList[0], None, None, 270, 359, 89, 0),
+        (od, None, varList, _XRanges_[0], _YRanges_[0], 90, 134, 0, 24),
+        (od, None, varList, _XRanges_[1], _YRanges_[1], 90, 158, 0, 8),
+        (od, None, varList, _XRanges_[2], _YRanges_[2], 90, 157, 0, 6),
+        (od, None, varList, _XRanges_[3], _YRanges_[3], 90, 156, 0, 7),
+        (od, None, varList, _XRanges_[4], _YRanges_[4], 90, 161, 0, 72),
+        (od, None, varList, _XRanges_[5], _YRanges_[5], 180, 201, 0, 179),
+        (od, None, varList, _XRanges_[6], _YRanges_[6], 90, 129, 0, 55),
+        (od, None, varList, P01_lon, P01_lat, 203, 275, 6, 0),
+        (od, None, varList, _XRanges_[8], _YRanges_[8], 90, 202, 0, 8),
+        (od, None, varList, _XRanges_[9], _YRanges_[9], 90, 241, 0, 6),
+        (od, None, varList, _XRanges_[10], _YRanges_[10], 219, 328, 5, 0),
+        (od, None, varList, _XRanges_[11], _YRanges_[11], 90, 102, 0, 56),
+        (od, None, varList, _XRanges_[12], _YRanges_[12], 180, 196, 84, 0),
+        (od, None, varList, _XRanges_[13], _YRanges_[13], 212, 225, 127, 0),
+        (od, None, varList, _XRanges_[14], _YRanges_[14], 243, 250, 191, 0),
+        (od, None, varList, _XRanges_[15], _YRanges_[15], 247, 334, 0, 9),
+        (od, None, varList, _XRanges_[16], _YRanges_[16], 245, 251, 0, 68),
+        (od, None, varList, _XRanges_[17], _YRanges_[17], 90, 110, 0, 118),
     ],
 )
-def test_transformation(od, faces, varlist, XRange, YRange, X0, X1, Y0, Y1):
+def test_transformation(od, faces, varList, XRange, YRange, X0, X1, Y0, Y1):
     """Test the transformation fn by checking the final dimensions."""
     ds = od._ds.reset_coords()
     args = {
         "ds": ds,
-        "varlist": varlist,
+        "varList": varList,
         "XRange": XRange,
         "YRange": YRange,
         "faces": faces,
@@ -2357,9 +2357,9 @@ ds5 = []
 ds7 = []
 ds10 = []
 ARCT = [ds2, ds5, ds7, ds10]
-varlist = ["T", "U", "V"]
+varList = ["T", "U", "V"]
 # create dataset
-for var_name in varlist:
+for var_name in varList:
     *nnn, DS = arct_connect(od.dataset, var_name, faces=None)  # horizontal only
     ARCT[0].append(DS[0])
     ARCT[1].append(DS[1])
