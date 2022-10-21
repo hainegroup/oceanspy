@@ -2779,3 +2779,58 @@ def test_slice_datasets(Facet, Find, axis, i, Nx, Ny):
     else:
         assert len(Facet[i].X) == Nx
         assert len(Facet[i].Y) == Ny
+
+
+
+@pytest.mark.parametrize(
+    "od, XRange, YRange, F_indx, Nx",
+    [
+        (od, [-31, 25], [58, 85.2], 2, 18),
+    ],
+)
+def test_edge_arc_data(od, XRange, YRange, F_indx, Nx):
+    """ tests edge_arc_data, which find the northtern most
+    point within the arctic cap that survives the cutout, taking
+    into account that the Facet index with which the arctic 
+    exchanges data ("triangle of influence").
+    F_indx = {2, 5, 7, 10} (Face number).
+    """
+    ds = od._ds
+    XRange = _np.array(XRange)
+    YRange = _np.array(YRange)
+    XRange, ref_lon = _reset_range(XRange)
+    add_Hbdr = 2
+    _var_ = 'nYG'
+    maskH, dmaskH, XRange, YRange = get_maskH(ds, add_Hbdr, XRange, YRange, ref_lon=ref_lon)
+    _faces = list(dmaskH["face"].values)
+    ds = mask_var(ds, XRange, YRange, ref_lon=ref_lon)
+
+    dsa2 = []
+    dsa5 = []
+    dsa7 = []
+    dsa10 = []
+    ARCT = [dsa2, dsa5, dsa7, dsa10]
+
+    *nnn, DS = arct_connect(
+        ds, _var_, faces=_faces, masking=True, opt=False
+    )
+    ARCT[0].append(DS[0])
+    ARCT[1].append(DS[1])
+    ARCT[2].append(DS[2])
+    ARCT[3].append(DS[3])
+
+    for i in range(len(ARCT)):  # Not all faces survive the cutout
+        if type(ARCT[i][0]) == _datype:
+            ARCT[i] = _xr.merge(ARCT[i])
+
+    face_order = _np.array([2, 5, 7, 10])
+    ll = _np.where(face_order==F_indx)[0][0]
+
+    DSa = ARCT[ll]  # Extract the dataset with arctic data in a triangle.
+
+    Xf = edge_arc_data(DSa[_var_], F_indx, dims_g)
+
+    assert Xf == Nx
+
+
+
