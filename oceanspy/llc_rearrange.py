@@ -202,13 +202,13 @@ class LLCtransformation:
         if XRange is not None and YRange is not None:
             for axis in range(2):
                 edges1 = _edge_facet_data(faces1, _var_, dims_g, axis)
-                faces1 = slice_datasets(faces1, 1, dims_c, dims_g, edges1, axis)
+                faces1 = slice_datasets(faces1, dims_c, dims_g, edges1, axis)
                 edges2 = _edge_facet_data(faces2, _var_, dims_g, axis)
-                faces2 = slice_datasets(faces2, 2, dims_c, dims_g, edges2, axis)
+                faces2 = slice_datasets(faces2, dims_c, dims_g, edges2, axis)
                 edges3 = _edge_facet_data(faces3, _var_, dims_g, axis)
-                faces3 = slice_datasets(faces3, 3, dims_c, dims_g, edges3, axis)
+                faces3 = slice_datasets(faces3, dims_c, dims_g, edges3, axis)
                 edges4 = _edge_facet_data(faces4, _var_, dims_g, axis)
-                faces4 = slice_datasets(faces4, 4, dims_c, dims_g, edges4, axis)
+                faces4 = slice_datasets(faces4, dims_c, dims_g, edges4, axis)
 
             # Here, address shifts in Arctic
             # arctic exchange with face 10
@@ -934,7 +934,7 @@ def _edge_facet_data(_Facet_list, _var, _dims, _axis):
     return XRange
 
 
-def slice_datasets(_DSfacet, _facet_ind, dims_c, dims_g, _edges, _axis):
+def slice_datasets(_DSfacet, dims_c, dims_g, _edges, _axis):
     """
     Slices a list of dataset along an axis. The range of index retained is
     defined in Ranges, an argument of the function. How the list of dataset,
@@ -944,17 +944,9 @@ def slice_datasets(_DSfacet, _facet_ind, dims_c, dims_g, _edges, _axis):
     if _axis == 0:  # local y always the case for all facets
         _dim_c = dims_c.Y
         _dim_g = dims_g.Y
-        # if _facet_ind == 1 or _facet_ind == 2:
-        #     flag = 1  # max and min ranges
-        # elif _facet_ind == 3 or _facet_ind == 4:
-        #     flag = 0
     elif _axis == 1:  # local x always the case.
         _dim_c = dims_c.X
         _dim_g = dims_g.X
-        # if _facet_ind == 1 or _facet_ind == 2:
-        #     flag = [0, 0, 0, 0]
-        # elif _facet_ind == 3 or _facet_ind == 4:
-        #     flags = [0, 0, 0, 1]
 
     _DSFacet = _copy.deepcopy(_DSfacet)
     for i in range(len(_DSFacet)):
