@@ -2785,7 +2785,7 @@ def test_slice_datasets(Facet, Find, axis, i, Nx, Ny):
 @pytest.mark.parametrize(
     "od, XRange, YRange, F_indx, Nx",
     [
-        (od, [-31, 25], [58, 85.2], 2, 18),
+        (od, [-31, 25], [58, 85.2], 2, 39),
     ],
 )
 def test_edge_arc_data(od, XRange, YRange, F_indx, Nx):
