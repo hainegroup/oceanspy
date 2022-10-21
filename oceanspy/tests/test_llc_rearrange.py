@@ -10,10 +10,10 @@ from oceanspy.llc_rearrange import Dims
 from oceanspy.llc_rearrange import LLCtransformation as LLC
 from oceanspy.llc_rearrange import (
     _edge_arc_data,
+    _edge_facet_data,
     arc_limits_mask,
     arct_connect,
     combine_list_ds,
-    _edge_facet_data,
     mask_var,
     mates,
     rotate_dataset,
@@ -2614,7 +2614,6 @@ def test_arc_limits_mask(od, XRange, YRange, A, B, C, D):
     assert cuts[3] == D
 
 
-
 _nans = [[_np.nan, _np.nan], [_np.nan, _np.nan], [_np.nan, _np.nan], [_np.nan, _np.nan]]
 _nans1 = _copy.deepcopy(_nans)
 _nans2 = _copy.deepcopy(_nans)
@@ -2632,19 +2631,21 @@ _nans4[2] = [0, 26]
     [
         (od, A01_lon, A01_lat, 0, _nans, _nans1, _nans2, _nans),
         (od, A01_lon, A01_lat, 1, _nans, _nans3, _nans4, _nans),
-    ]
+    ],
 )
 def test_edge_facet_data(od, XRange, YRange, axis, A, B, C, D):
-# identifies the ranges where there is data within each faces
-# facet is a list with a dataset as its elements.
-# test for each facet the expected behavior. When there is no
-# data it returns nans
+    # identifies the ranges where there is data within each faces
+    # facet is a list with a dataset as its elements.
+    # test for each facet the expected behavior. When there is no
+    # data it returns nans
     ds = od._ds
     XRange = _np.array(XRange)
     YRange = _np.array(YRange)
     XRange, ref_lon = _reset_range(XRange)
     add_Hbdr = 2
-    maskH, dmaskH, XRange, YRange = get_maskH(ds, add_Hbdr, XRange, YRange, ref_lon=ref_lon)
+    maskH, dmaskH, XRange, YRange = get_maskH(
+        ds, add_Hbdr, XRange, YRange, ref_lon=ref_lon
+    )
     _faces = list(dmaskH["face"].values)
     ds = mask_var(ds, XRange, YRange, ref_lon=ref_lon)
 
@@ -2667,7 +2668,7 @@ def test_edge_facet_data(od, XRange, YRange, axis, A, B, C, D):
     for k in _np.arange(13):
         if k in _faces:
             if k in _facet1:
-                Facet1.append(ds.isel(face=k)) #
+                Facet1.append(ds.isel(face=k))  #
             elif k in _facet2:
                 Facet2.append(ds.isel(face=k))
             elif k in _facet3:
@@ -2683,23 +2684,21 @@ def test_edge_facet_data(od, XRange, YRange, axis, A, B, C, D):
                 Facet3.append(0)
             elif k in _facet4:
                 Facet4.append(0)
-            
+
     Facet1 = [DSa7] + Facet1
     Facet2 = [DSa10] + Facet2
     Facet3.append(DSa2)
     Facet4.append(DSa5)
 
-    edges1 = _edge_facet_data(Facet1, 'nYG', dims_g, axis)
-    edges2 = _edge_facet_data(Facet2, 'nYG', dims_g, axis)
-    edges3 = _edge_facet_data(Facet3, 'nYG', dims_g, axis)
-    edges4 = _edge_facet_data(Facet4, 'nYG', dims_g, axis)
+    edges1 = _edge_facet_data(Facet1, "nYG", dims_g, axis)
+    edges2 = _edge_facet_data(Facet2, "nYG", dims_g, axis)
+    edges3 = _edge_facet_data(Facet3, "nYG", dims_g, axis)
+    edges4 = _edge_facet_data(Facet4, "nYG", dims_g, axis)
 
     assert edges1 == A
     assert edges2 == B
     assert edges3 == C
     assert edges4 == D
-
-
 
 
 # def test_slice_datasets(facet, facet_ind, var, dims, axis)
