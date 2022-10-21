@@ -2769,7 +2769,7 @@ Facet4.append(DSa5)
         (Facet4, 1, 0, None, None),
     ],
 )
-def test_slice_datasets(Facet, Find, axis, i, Nx, Ny):
+def test_slice_datasets(Facet, axis, i, Nx, Ny):
     """Test fn that slices the datasets within each facets."""
     edge = _edge_facet_data(Facet, "nYG", dims_g, axis)
     Facet = slice_datasets(Facet, dims_c, dims_g, edge, axis)
@@ -2786,6 +2786,9 @@ def test_slice_datasets(Facet, Find, axis, i, Nx, Ny):
     "od, XRange, YRange, F_indx, Nx",
     [
         (od, [-31, 25], [58, 85.2], 2, 39),
+        (od, [-120, -60], [58, 85.2], 10, 52),
+        (od, [160, -150], [58, 85.2], 7, 52),
+        (od, [60, 130], [58, 85.2], 5, 38),
     ],
 )
 def test_edge_arc_data(od, XRange, YRange, F_indx, Nx):
@@ -2828,7 +2831,7 @@ def test_edge_arc_data(od, XRange, YRange, F_indx, Nx):
 
     DSa = ARCT[ll]  # Extract the dataset with arctic data in a triangle.
 
-    Xf = edge_arc_data(DSa[_var_], F_indx, dims_g)
+    Xf = _edge_arc_data(DSa[_var_], F_indx, dims_g)
 
     assert Xf == Nx
 
