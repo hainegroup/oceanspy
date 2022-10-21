@@ -348,7 +348,7 @@ def cutout(
 
         arg = {
             "ds": ds,
-            "varlist": varList,  # vars and grid coords to transform
+            "varList": varList,  # vars and grid coords to transform
             "add_Hbdr": add_Hbdr,
             "XRange": XRange,
             "YRange": YRange,
