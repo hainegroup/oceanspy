@@ -589,12 +589,13 @@ def shift_dataset(_ds, dims_c, dims_g):
     if type(_ds) == _dstype:  # if a dataset transform otherwise pass
         _ds = _copy.deepcopy(_ds)
         for _dim in [dims_c, dims_g]:
-            _ds["n" + _dim] = _ds[_dim] - int(_ds[_dim][0].data)
-            _ds = (
-                _ds.swap_dims({_dim: "n" + _dim})
-                .drop_vars([_dim])
-                .rename({"n" + _dim: _dim})
-            )
+            if int(_ds[_dim][0].data) < int(_ds[_dim][1].data):
+                _ds["n" + _dim] = _ds[_dim] - int(_ds[_dim][0].data)
+                _ds = (
+                    _ds.swap_dims({_dim: "n" + _dim})
+                    .drop_vars([_dim])
+                    .rename({"n" + _dim: _dim})
+                )
 
         _ds = mates(_ds)
     return _ds

@@ -2267,7 +2267,7 @@ _YRanges_ = YRanges_A + YRanges_P + YRanges_I
         (od, [2, 5, 7, 10], varList, None, None, 0, 359, 0, 89),
         (od, [1, 4, 8, 11], varList, None, None, 0, 359, 0, 89),
         (od, [0, 3, 9, 12], varList, None, None, 0, 359, 0, 89),
-        (od, [6, 7, 8, 9], varList, None, None, 180, 269, 314, 0),
+        (od, [6, 7, 8, 9], varList, None, None, 0, 89, 314, 0),
         (od, [6, 10, 11, 12], varList, None, None, 270, 359, 314, 0),
         (od, [0, 1, 2, 6], varList, None, None, 180, 269, 0, 314),
         (od, [3, 4, 5, 6], varList, None, None, 90, 179, 0, 314),
