@@ -345,8 +345,6 @@ def cutout(
         add_Vbdr = 0
 
     if "face" in ds.dims:
-        if XRange is None and YRange is None:
-            faces = "all"
 
         arg = {
             "ds": ds,
