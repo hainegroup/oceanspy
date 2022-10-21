@@ -316,8 +316,10 @@ class LLCtransformation:
             # only relevant when the transformation involves a single face
             DS = DS.drop_vars(["face"])
 
+        #  shift
         DS = shift_dataset(DS, dims_c.X, dims_g.X)
         DS = shift_dataset(DS, dims_c.Y, dims_g.Y)
+
 
         if drop:
             if len(DS.X) == len(DS.Xp1):
