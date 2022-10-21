@@ -2781,7 +2781,6 @@ def test_slice_datasets(Facet, axis, i, Nx, Ny):
         assert len(Facet[i].Y) == Ny
 
 
-
 @pytest.mark.parametrize(
     "od, XRange, YRange, F_indx, Nx",
     [
@@ -2792,9 +2791,9 @@ def test_slice_datasets(Facet, axis, i, Nx, Ny):
     ],
 )
 def test_edge_arc_data(od, XRange, YRange, F_indx, Nx):
-    """ tests edge_arc_data, which find the northtern most
+    """tests edge_arc_data, which find the northtern most
     point within the arctic cap that survives the cutout, taking
-    into account that the Facet index with which the arctic 
+    into account that the Facet index with which the arctic
     exchanges data ("triangle of influence").
     F_indx = {2, 5, 7, 10} (Face number).
     """
@@ -2803,8 +2802,10 @@ def test_edge_arc_data(od, XRange, YRange, F_indx, Nx):
     YRange = _np.array(YRange)
     XRange, ref_lon = _reset_range(XRange)
     add_Hbdr = 2
-    _var_ = 'nYG'
-    maskH, dmaskH, XRange, YRange = get_maskH(ds, add_Hbdr, XRange, YRange, ref_lon=ref_lon)
+    _var_ = "nYG"
+    maskH, dmaskH, XRange, YRange = get_maskH(
+        ds, add_Hbdr, XRange, YRange, ref_lon=ref_lon
+    )
     _faces = list(dmaskH["face"].values)
     ds = mask_var(ds, XRange, YRange, ref_lon=ref_lon)
 
@@ -2814,9 +2815,7 @@ def test_edge_arc_data(od, XRange, YRange, F_indx, Nx):
     dsa10 = []
     ARCT = [dsa2, dsa5, dsa7, dsa10]
 
-    *nnn, DS = arct_connect(
-        ds, _var_, faces=_faces, masking=True, opt=False
-    )
+    *nnn, DS = arct_connect(ds, _var_, faces=_faces, masking=True, opt=False)
     ARCT[0].append(DS[0])
     ARCT[1].append(DS[1])
     ARCT[2].append(DS[2])
@@ -2827,13 +2826,10 @@ def test_edge_arc_data(od, XRange, YRange, F_indx, Nx):
             ARCT[i] = _xr.merge(ARCT[i])
 
     face_order = _np.array([2, 5, 7, 10])
-    ll = _np.where(face_order==F_indx)[0][0]
+    ll = _np.where(face_order == F_indx)[0][0]
 
     DSa = ARCT[ll]  # Extract the dataset with arctic data in a triangle.
 
     Xf = _edge_arc_data(DSa[_var_], F_indx, dims_g)
 
     assert Xf == Nx
-
-
-
