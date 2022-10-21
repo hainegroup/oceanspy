@@ -88,7 +88,7 @@ class LLCtransformation:
             raise ValueError("Empty list of variables")
 
         #
-        if faces is None :
+        if faces is None:
             faces = _np.arange(13)
 
         if XRange is not None and YRange is not None:
@@ -103,7 +103,7 @@ class LLCtransformation:
                 )
                 faces = list(dmaskH["face"].values)
                 ds = mask_var(ds, XRange, YRange, ref_lon)  # masks latitude
-                _var_ = 'nYG'  # copy variable created in mask_var. Will discard
+                _var_ = "nYG"  # copy variable created in mask_var. Will discard
                 varlist = varlist + [_var_]
                 cuts = arc_limits_mask(ds, _var_, faces, dims_g, XRange, YRange)
 
@@ -113,9 +113,7 @@ class LLCtransformation:
             opt = False
             cuts = None
 
-
         print("faces in the cutout", faces)
-        
 
         #
         dsa2 = []
@@ -204,7 +202,7 @@ class LLCtransformation:
         faces3.append(DSa2)
         faces4.append(DSa5)
 
-        # Slicing the faces to remove nan-edges. 
+        # Slicing the faces to remove nan-edges.
         # Only when XRange and YRange given.
         if XRange is not None and YRange is not None:
             for axis in range(2):
@@ -292,7 +290,7 @@ class LLCtransformation:
                     DSFacet12 = DSFacet12.isel(Y=slice(0, -1))
                 elif YRange is None:
                     DSFacet34["Yp1"] = DSFacet34["Yp1"] - 1
-                    Ny=len(DSFacet34["YG"].Yp1)
+                    Ny = len(DSFacet34["YG"].Yp1)
                     DSFacet34 = DSFacet34.isel(Yp1=slice(0, -1))
 
                 for _var in DSFacet12.data_vars:
@@ -800,8 +798,8 @@ def mask_var(_ds, XRange=None, YRange=None, ref_lon=180):
 
     _ds = _copy.deepcopy(mates(_ds.reset_coords()))
 
-    nYG = _copy.deepcopy(_ds['YG'])
-    _ds['nYG'] = nYG
+    nYG = _copy.deepcopy(_ds["YG"])
+    _ds["nYG"] = nYG
 
     minY = _ds["YG"].min().values
     maxY = _ds["YG"].max().values
@@ -870,7 +868,7 @@ def arc_limits_mask(_ds, _var, _faces, _dims, XRange, YRange):
         if XRange is None and YRange is None:
             Yf_5 = int(DSa5[_var][_dims.Y][-1])
         else:
-            Yf_5 =  _edge_arc_data(DSa5[_var], 5, _dims)
+            Yf_5 = _edge_arc_data(DSa5[_var], 5, _dims)
         Yi_5 = int(DSa5[_var][_dims.Y][0])
     if type(DSa7) != _dstype:
         DSa7 = 0

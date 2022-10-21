@@ -289,7 +289,15 @@ def test_reduce_variables(od, varList):
     ],
 )
 def test_cutout_faces(
-    od, XRange, YRange, ZRange, varList, centered, NZ, NY, NX,
+    od,
+    XRange,
+    YRange,
+    ZRange,
+    varList,
+    centered,
+    NZ,
+    NY,
+    NX,
 ):
     args = {
         "varList": varList,
@@ -305,7 +313,6 @@ def test_cutout_faces(
     assert new_dims["Z"] == NZ
     assert new_dims["Y"] == NY
     assert new_dims["X"] == NX
-
 
 
 # =======
