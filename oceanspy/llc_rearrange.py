@@ -316,17 +316,14 @@ class LLCtransformation:
             # only relevant when the transformation involves a single face
             DS = DS.drop_vars(["face"])
 
-        #  shift
-        DS = shift_dataset(DS, dims_c.X, dims_g.X)
-        DS = shift_dataset(DS, dims_c.Y, dims_g.Y)
+        # #  shift
+        # DS = shift_dataset(DS, dims_c.X, dims_g.X)
+        # DS = shift_dataset(DS, dims_c.Y, dims_g.Y)
 
 
         if drop:
-            if len(DS.X) == len(DS.Xp1):
-                DS = DS.isel(Y=slice(0, -1))
-            if len(DS.Y) == len(DS.Yp1):
-                DS = DS.isel(Y=slice(0, -1))
-
+            DS = DS.isel(X=slice(0, -1), Y=slice(0, -1))
+# 
         # rechunk data. In the ECCO data this is done automatically
         if chunks:
             DS = DS.chunk(chunks)
