@@ -42,7 +42,7 @@ class LLCtransformation:
     def arctic_crown(
         self,
         ds,
-        varList = None,
+        varList=None,
         add_Hbdr=0,
         XRange=None,
         YRange=None,
