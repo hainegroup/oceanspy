@@ -2756,26 +2756,26 @@ Facet3.append(DSa2)
 Facet4.append(DSa5)
 
 
-# @pytest.mark.parametrize(
-#     "Facet, Find, axis, i, Nx, Ny",
-#     [
-#         (Facet1, 1, 0, 0, None, None),
-#         (Facet2, 2, 0, 1, 90, 18),
-#         (Facet3, 3, 0, 2, 90, 25),
-#         (Facet4, 4, 0, 0, None, None),
-#         (Facet1, 1, 1, 0, None, None),
-#         (Facet2, 2, 1, 1, 25, 90),
-#         (Facet3, 3, 1, 2, 27, 90),
-#         (Facet4, 4, 1, 0, None, None),
-#     ],
-# )
-# def test_slice_datasets(Facet, Find, axis, i, Nx, Ny):
-#     """Test fn that slices the datasets within each facets."""
-#     edge = _edge_facet_data(Facet, "nYG", dims_g, axis)
-#     Facet = slice_datasets(Facet, Find, dims_c, dims_g, edge, axis)
+@pytest.mark.parametrize(
+    "Facet, axis, i, Nx, Ny",
+    [
+        (Facet1, 0, 0, None, None),
+        (Facet2, 0, 1, 90, 18),
+        (Facet3, 0, 2, 90, 25),
+        (Facet4, 0, 0, None, None),
+        (Facet1, 1, 0, None, None),
+        (Facet2, 1, 1, 25, 90),
+        (Facet3, 1, 2, 27, 90),
+        (Facet4, 1, 0, None, None),
+    ],
+)
+def test_slice_datasets(Facet, Find, axis, i, Nx, Ny):
+    """Test fn that slices the datasets within each facets."""
+    edge = _edge_facet_data(Facet, "nYG", dims_g, axis)
+    Facet = slice_datasets(Facet, dims_c, dims_g, edge, axis)
 
-#     if Nx is None:
-#         assert Facet == [0, 0, 0, 0]
-#     else:
-#         assert len(Facet[i].X) == Nx
-#         assert len(Facet[i].Y) == Ny
+    if Nx is None:
+        assert Facet == [0, 0, 0, 0]
+    else:
+        assert len(Facet[i].X) == Nx
+        assert len(Facet[i].Y) == Ny
