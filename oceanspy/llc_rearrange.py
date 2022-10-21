@@ -213,11 +213,11 @@ class LLCtransformation:
             # Here, address shifts in Arctic
             # arctic exchange with face 10
             if type(faces2[0]) == _dstype:
-                faces2[0]['Yp1'] = faces2[0]['Yp1'] + 1
+                faces2[0]["Yp1"] = faces2[0]["Yp1"] + 1
 
             # Arctic exchange with face 2
             if type(faces3[3]) == _dstype:
-                faces3[3]['Xp1'] = faces3[3]['Xp1'] + 1
+                faces3[3]["Xp1"] = faces3[3]["Xp1"] + 1
 
         # =====
         # Facet 1
@@ -323,10 +323,9 @@ class LLCtransformation:
         # DS = shift_dataset(DS, dims_c.X, dims_g.X)
         # DS = shift_dataset(DS, dims_c.Y, dims_g.Y)
 
-
         if drop:
             DS = DS.isel(X=slice(0, -1), Y=slice(0, -1))
-# 
+        #
         # rechunk data. In the ECCO data this is done automatically
         if chunks:
             DS = DS.chunk(chunks)
@@ -945,17 +944,17 @@ def slice_datasets(_DSfacet, _facet_ind, dims_c, dims_g, _edges, _axis):
     if _axis == 0:  # local y always the case for all facets
         _dim_c = dims_c.Y
         _dim_g = dims_g.Y
-        if _facet_ind == 1 or _facet_ind == 2:
-            flag = 1  # max and min ranges
-        elif _facet_ind == 3 or _facet_ind == 4:
-            flag = 0
+        # if _facet_ind == 1 or _facet_ind == 2:
+        #     flag = 1  # max and min ranges
+        # elif _facet_ind == 3 or _facet_ind == 4:
+        #     flag = 0
     elif _axis == 1:  # local x always the case.
         _dim_c = dims_c.X
         _dim_g = dims_g.X
-        if _facet_ind == 1 or _facet_ind == 2:
-            flag = [0, 0, 0, 0]
-        elif _facet_ind == 3 or _facet_ind == 4:
-            flags = [0, 0, 0, 1]
+        # if _facet_ind == 1 or _facet_ind == 2:
+        #     flag = [0, 0, 0, 0]
+        # elif _facet_ind == 3 or _facet_ind == 4:
+        #     flags = [0, 0, 0, 1]
 
     _DSFacet = _copy.deepcopy(_DSfacet)
     for i in range(len(_DSFacet)):
