@@ -2325,6 +2325,7 @@ _YRanges_ = YRanges_A + YRanges_P + YRanges_I
         (od, None, varList, _XRanges_[15], _YRanges_[15], 247, 334, 0, 9),
         (od, None, varList, _XRanges_[16], _YRanges_[16], 245, 251, 0, 68),
         (od, None, varList, _XRanges_[17], _YRanges_[17], 90, 110, 0, 118),
+        (od, None, varList, [-31, 25], [58, 85.2], 5, 65, 0, 71)
     ],
 )
 def test_transformation(od, faces, varList, XRange, YRange, X0, X1, Y0, Y1):
