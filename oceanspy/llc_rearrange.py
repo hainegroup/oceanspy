@@ -320,8 +320,8 @@ class LLCtransformation:
             DS = DS.drop_vars(["face"])
 
         # #  shift
-        # DS = shift_dataset(DS, dims_c.X, dims_g.X)
-        # DS = shift_dataset(DS, dims_c.Y, dims_g.Y)
+        DS = shift_dataset(DS, dims_c.X, dims_g.X)
+        DS = shift_dataset(DS, dims_c.Y, dims_g.Y)
 
         if drop:
             DS = DS.isel(X=slice(0, -1), Y=slice(0, -1))
