@@ -290,7 +290,6 @@ class LLCtransformation:
                     DSFacet12 = DSFacet12.isel(Y=slice(0, -1))
                 elif YRange is None:
                     DSFacet34["Yp1"] = DSFacet34["Yp1"] - 1
-                    Ny = len(DSFacet34["YG"].Yp1)
                     DSFacet34 = DSFacet34.isel(Yp1=slice(0, -1))
 
                 for _var in DSFacet12.data_vars:
@@ -328,7 +327,7 @@ class LLCtransformation:
         return DS
 
 
-def arct_connect(ds, varName, faces="all", masking=False, opt=False, ranges=None):
+def arct_connect(ds, varName, faces=None, masking=False, opt=False, ranges=None):
     """
     Splits the arctic into four triangular regions.
     if `masking = True`: does not transpose data. Only use when masking for data not
@@ -350,9 +349,8 @@ def arct_connect(ds, varName, faces="all", masking=False, opt=False, ranges=None
     ARCT = [0, 0, 0, 0]  # initialize the list.
     arc_faces = [0, 0, 0, 0]
 
-    if isinstance(faces, str):
-        if faces == "all":
-            faces = [k for k in range(13)]
+    if faces is None:
+        faces = [k for k in range(13)]
 
     if arc_cap in faces:
         for k in faces:

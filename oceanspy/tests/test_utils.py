@@ -39,6 +39,7 @@ X4 = _np.arange(-20, 20, 2)  # no crossing.
 XX = list(_np.arange(161, 180, 2)) + list(_np.arange(-179, 20, 2))
 X5 = _np.array(XX)
 X6 = _np.array(XX[::-1])
+X7 = _np.array([20, -20])
 
 
 @pytest.mark.parametrize(
@@ -51,6 +52,7 @@ X6 = _np.array(XX[::-1])
         (X4, X3, 180),
         (X5, _np.array([161, 19]), 113.67),
         (X6, _np.array([161, 19]), 113.67),
+        (X7, X7, 180),
     ],
 )
 def test_reset_range(XRange, x0, expected_ref):
