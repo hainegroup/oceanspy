@@ -237,6 +237,9 @@ class OceanDataset:
 
         return self
 
+    def __getitem__(self, key):
+        return self._ds[key]
+
     # -------------------
     # aliases
     # -------------------
