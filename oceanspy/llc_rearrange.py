@@ -289,13 +289,12 @@ class LLCtransformation:
                 # two lines below asserts correct
                 # staggering of center and corner points
                 # in latitude (otherwise, lat has a jump)
-            if YRange is not None:
+            if YRange is not None and type(DSFacet34) == _dstype:
                 DSFacet12["Y"] = DSFacet12["Y"] - 1
                 DSFacet12 = DSFacet12.isel(Y=slice(0, -1))
-            elif YRange is None:
+            elif YRange is None and type(DSFacet34) == _dstype:
                 DSFacet34["Yp1"] = DSFacet34["Yp1"] - 1
                 DSFacet34 = DSFacet34.isel(Yp1=slice(0, -1))
-
             for _var in DSFacet12.data_vars:
                 DIMS = [dim for dim in DSFacet12[_var].dims]
                 dims = Dims(DIMS[::-1])
