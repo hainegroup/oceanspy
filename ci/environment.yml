@@ -12,7 +12,7 @@ dependencies:
   - geopy
   - xesmf
   - esmf
-  - xgcm
+  - xgcm < 0.7
   - Ipython
   - tqdm
   - pytest
