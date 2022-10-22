@@ -339,7 +339,7 @@ def cutout(
                 _np.fabs(od._ds["YG"].max() - od._ds["YG"].min()),
             ]
         )
-        add_Hbdr = 1.5*add_Hbdr / _np.mean([len(od._ds["X"]), len(od._ds["Y"])])
+        add_Hbdr = 1.5 * add_Hbdr / _np.mean([len(od._ds["X"]), len(od._ds["Y"])])
     elif add_Hbdr is False:
         add_Hbdr = 0
 
@@ -1120,11 +1120,13 @@ def survey_stations(
     # Interpolate
     try:
         regridder = _xe.Regridder(ds_in, ds, **xesmf_regridder_kwargs)
-    except:
-        raise Exception("""
+    except ValueError:
+        raise ValueError(
+            """
         An error occured when creating the xesmf.Regridder object,
-        try add_Hbdr = M, where M>1.5delta x
-        """)
+        try add_Hbdr = M, where M>1.5 times horizontal spacing
+        """
+        )
     regridder._grid_in = None  # See https://github.com/JiaweiZhuang/xESMF/issues/71
     regridder._grid_out = None  # See https://github.com/JiaweiZhuang/xESMF/issues/71
     interp_vars = [
