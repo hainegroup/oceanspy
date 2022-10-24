@@ -261,65 +261,58 @@ def test_reduce_variables(od, varList):
 
 @pytest.mark.parametrize("od", [ECCOod])
 @pytest.mark.parametrize(
-    "XRange, YRange, ZRange, varList, transformation, centered, NZ,clause",
+    "XRange, YRange, ZRange, varList, centered, NZ, NY, NX",
     [
         (
             [-90, 20],
-            [20, 80],
+            [20, 60],
             None,
             ["T"],
-            "arctic_crown",
             "Atlantic",
             50,
-            "np.logical_and(-10<new_od._ds.XC,new_od._ds.XC<0).any().compute()",
+            56,
+            110,
         ),
         (
-            [20, -90],
-            [20, 80],
-            None,
-            ["T"],
-            "arctic_crown",
-            "Atlantic",
-            50,
-            "(100<new_od._ds.XC).any().compute()",
-        ),
-        (
-            [-179, 179],
-            [20, 80],
+            [-170, 170],
+            [20, 60],
             None,
             ["U", "V"],
-            "arctic_crown",
             "Atlantic",
             50,
-            "True",
+            56,
+            359,
         ),
-        ([-31, -2], [58, 68.2], None, ["T"], "arctic_crown", "Atlantic", 50, "True"),
-        (None, None, None, ["T"], "arctic_crown", "Atlantic", 50, "True"),
-        (None, None, None, None, "wrong", "Atlantic", 50, "True"),
-        (None, None, None, None, False, "Atlantic", np.nan, "True"),
+        # ([-31, -2], [58, 68.2], None, ["T"], "Atlantic", 50), # has ARCTIC DATA
+        (None, None, None, ["T"], "Atlantic", 50, 314, 359),
+        (None, None, None, None, None, 50, 314, 359),
     ],
 )
 def test_cutout_faces(
-    od, XRange, YRange, ZRange, varList, transformation, centered, NZ, clause
+    od,
+    XRange,
+    YRange,
+    ZRange,
+    varList,
+    centered,
+    NZ,
+    NY,
+    NX,
 ):
     args = {
         "varList": varList,
         "XRange": XRange,
         "YRange": YRange,
         "ZRange": ZRange,
-        "transformation": transformation,
         "centered": centered,
     }
-    if transformation not in ["arctic_crown"]:
-        with pytest.raises(ValueError):
-            new_od = od.subsample.cutout(**args)
-    else:
-        new_od = od.subsample.cutout(**args)
-        old_dims = od.dataset.dims
-        new_dims = new_od.dataset.dims
-        assert (set(old_dims) - set(new_dims)) == set(["face"])
-        assert new_od._ds.dims["Z"] == NZ
-        assert eval(clause)
+    new_od = od.subsample.cutout(**args)
+    old_dims = od.dataset.dims
+    new_dims = new_od.dataset.dims
+    assert (set(old_dims) - set(new_dims)) == set(["face"])
+    assert new_dims["Z"] == NZ
+    assert new_dims["Y"] == NY
+    assert new_dims["X"] == NX
 
 
 # =======

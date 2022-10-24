@@ -32,26 +32,80 @@ def compilable(f):
     return f
 
 
-def rel_lon(x, ref_lon):
+def _rel_lon(x, ref_lon):
     """
     Change the definition of 0 longitude.
     Return how much east one need to go from ref_lon to x
     This function aims to address the confusion caused by
     the discontinuity in longitude.
-
     Parameters
     ----------
     x: float, numpy.array, dask.array
         longitude to convert
     ref_lon: float
         a reference longitude. This longitude will become 0deg
-
     Returns
     -------
     redefined_x: float, numpy.array, dask.array
         converted longitude
     """
     return (x - ref_lon) % 360
+
+
+def _reset_range(x):
+    """Resets the definition of XRange, by default the discontinuity at 180 long.
+    Checks that there is no sign change in x and if there is, the only change that
+    is allowed is when crossing zero. Otherwise resets ref_lon.
+
+    Parameters
+    ----------
+
+    x: numpy.array.
+        array with longitude values.
+
+    Returns
+    -------
+
+    x0, x1: numpy.array
+        endpoints of cutout.
+    redefined_x: numpy.array.
+        converted longitude.
+    """
+
+    ref_lon = 180
+    if x is not None:
+        if (_np.sign(x) == _np.sign(x[0])).all():  # no sign change
+            _ref_lon = ref_lon
+            X0, X1 = _np.min(x), _np.max(x)
+        else:  # change in sign
+            if len(x) == 2:  # list of end points
+                X0, X1 = x
+                if x[0] > x[1]:  # across discontinuity
+                    if abs(x[1] - x[0]) > 300:  # across a discontinuity (Delta X =360)
+                        _ref_lon = x[0] - (x[0] - x[1]) / 3
+                    else:  # XRange decreases, but not necessarity a dicont.
+                        _ref_lon = ref_lon
+                else:
+                    _ref_lon = ref_lon
+            else:  # array of values.
+                _del = abs(x[1:] - x[:-1])  # only works with one crossing
+                if len(_np.where(abs(_del) > 300)[0]) > 0:  # there's discontinuity
+                    ll = _np.where(_del == max(_del))[0][0]
+                    if x[ll] > x[ll + 1]:  # track starts west of jump
+                        X0 = _np.min(x[: ll + 1])
+                        X1 = _np.max(x[ll + 1 :])
+                    else:
+                        X0 = _np.min(x[ll + 1 :])
+                        X1 = _np.max(x[: ll + 1])
+                    _ref_lon = X0 - (X0 - X1) / 3
+                else:  # no discontinuity
+                    X0 = _np.min(x)
+                    X1 = _np.max(x)
+                    _ref_lon = ref_lon
+        x = _np.array([X0, X1])
+    else:
+        _ref_lon = ref_lon
+    return x, _np.round(_ref_lon, 2)
 
 
 def spherical2cartesian(Y, X, R=None):
@@ -621,6 +675,56 @@ def Coriolis_parameter(Y, omega=7.2921e-5):
     e = 2 * omega * _np.cos(Y_rad)
 
     return f, e
+
+
+def get_maskH(ds, add_Hbdr, XRange, YRange, ref_lon=0):
+    """Define this function to avoid repeated code. First time this runs,
+    the objective is to figure out which faces survive the cutout. This info
+    is then passed, when transforming llc-grids, to llc_rearrange. Second
+    time this code runs, it gets applied on a dataset without faces as a
+    dimension.
+    """
+    maskH = _xr.ones_like(ds["XG"])
+
+    if YRange is not None:
+        # Use arrays
+        YRange = _np.asarray([_np.min(YRange) - add_Hbdr, _np.max(YRange) + add_Hbdr])
+        YRange = YRange.astype(ds["YG"].dtype)
+
+        # Get the closest
+        for i, Y in enumerate(YRange):
+            diff = _np.fabs(ds["YG"] - Y)
+            YRange[i] = ds["YG"].where(diff == diff.min()).min().values
+        maskH = maskH.where(
+            _np.logical_and(ds["YG"] >= YRange[0], ds["YG"] <= YRange[-1]), 0
+        )
+
+    if XRange is not None:
+        # Use arrays
+        XRange = _np.asarray([XRange[0] - add_Hbdr, XRange[-1] + add_Hbdr])
+        XRange = XRange.astype(ds["XG"].dtype)
+
+        # Get the closest
+        for i, X in enumerate(XRange):
+            diff = _np.fabs(ds["XG"] - X)
+            XRange[i] = ds["XG"].where(diff == diff.min()).min().values
+        maskH = maskH.where(
+            _np.logical_and(
+                _rel_lon(ds["XG"], ref_lon) >= _rel_lon(XRange[0], ref_lon),
+                _rel_lon(ds["XG"], ref_lon) <= _rel_lon(XRange[-1], ref_lon),
+            ),
+            0,
+        )
+    # Can't be all zeros
+    if maskH.sum() == 0:
+        raise ValueError("Zero grid points in the horizontal range")
+
+    # Find horizontal indexes
+    maskH = maskH.assign_coords(
+        Yp1=_np.arange(len(maskH["Yp1"])), Xp1=_np.arange(len(maskH["Xp1"]))
+    )
+    dmaskH = maskH.where(maskH, drop=True)
+    return maskH, dmaskH, XRange, YRange
 
 
 @compilable
