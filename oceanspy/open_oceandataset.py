@@ -454,8 +454,8 @@ def _find_entries(name, catalog_url):
     try:
         if catalog_url is None:
             url = (
-                "https://raw.githubusercontent.com/Mikejmnez/oceanspy/"
-                "typo/sciserver_catalogs/catalog_xarray.yaml"
+                "https://raw.githubusercontent.com/hainegroup/oceanspy/"
+                "main/sciserver_catalogs/catalog_xarray.yaml"
             )
         else:
             url = catalog_url
@@ -467,8 +467,8 @@ def _find_entries(name, catalog_url):
     except ValidationError:
         if catalog_url is None:
             url = (
-                "https://raw.githubusercontent.com/Mikejmnez/oceanspy/"
-                "typo/sciserver_catalogs/catalog_xmitgcm.yaml"
+                "https://raw.githubusercontent.com/hainegroup/oceanspy/"
+                "main/sciserver_catalogs/catalog_xmitgcm.yaml"
             )
         else:
             url = catalog_url  # provided by user
