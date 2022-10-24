@@ -1,8 +1,0 @@
-{
-    "OceanSpy_description": "High-resolution (~2km) numerical simulation covering the east Greenland shelf (EGshelf), and the Iceland and Irminger Seas (IIseas). Citation: Almansi et al., 2017 - JPO.",
-    "OceanSpy_grid_coords": "{'Y': {'Y': None, 'Yp1': 0.5}, 'X': {'X': None, 'Xp1': 0.5}, 'Z': {'Z': None, 'Zp1': 0.5, 'Zu': 0.5, 'Zl': -0.5}, 'time': {'time': -0.5, 'time_midp': None}}",
-    "OceanSpy_grid_periodic": "[]",
-    "OceanSpy_name": "EGshelfIIseas2km_ASR",
-    "OceanSpy_parameters": "{'rSphere': 6371.0, 'eq_state': 'jmd95', 'rho0': 1027, 'g': 9.81, 'eps_nh': 0, 'omega': 7.292123516990375e-05, 'c_p': 3986.0, 'tempFrz0': 0.0901, 'dTempFrz_dS': -0.0575}",
-    "OceanSpy_projection": "Mercator(**{'central_longitude': -17.492164499999916, 'min_latitude': 68.98687050000011, 'max_latitude': 72.01916150000011, 'globe': None, 'latitude_true_scale': 70.45938840259753})"
-}

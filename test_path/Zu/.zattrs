@@ -1,8 +1,0 @@
-{
-    "_ARRAY_DIMENSIONS": [
-        "Zu"
-    ],
-    "long_name": "vertical coordinate of lower cell interface",
-    "positive": "up",
-    "units": "meters"
-}

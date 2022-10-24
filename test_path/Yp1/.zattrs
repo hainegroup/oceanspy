@@ -1,7 +1,0 @@
-{
-    "_ARRAY_DIMENSIONS": [
-        "Yp1"
-    ],
-    "description": "Y coordinate of cell corner (Vorticity point)",
-    "units": "degree_north"
-}
