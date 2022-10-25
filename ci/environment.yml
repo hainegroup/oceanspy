@@ -12,7 +12,7 @@ dependencies:
   - geopy
   - xesmf
   - esmf
-  - xgcm
+  - xgcm < 0.7
   - Ipython
   - tqdm
   - pytest
@@ -22,7 +22,7 @@ dependencies:
   - ffmpeg
   - aiohttp
   - pandas
-  - matplotlib
+  - matplotlib < 3.5.3 
   - fsspec!=0.9.0
   - pooch
   - pip
