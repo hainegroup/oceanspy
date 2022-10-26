@@ -820,7 +820,6 @@ def mask_var(_ds, XRange=None, YRange=None, ref_lon=180):
         minY = YRange[0]
         maxY = YRange[1]
 
-
     if XRange is None:
         minX = _ds["XG"].min().values
         maxX = _ds["XG"].max().values
