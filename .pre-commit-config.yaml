@@ -9,7 +9,7 @@ repos:
       - id: isort
 
   - repo: https://github.com/psf/black
-    rev: 22.8.0
+    rev: 22.10.0
     hooks:
       - id: black
 
@@ -19,7 +19,7 @@ repos:
        - id: flake8
 
   - repo: https://github.com/nbQA-dev/nbQA
-    rev: 1.4.0
+    rev: 1.5.3
     hooks:
       - id: nbqa-black
         additional_dependencies: [black]
