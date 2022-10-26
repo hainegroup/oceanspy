@@ -685,9 +685,9 @@ def get_maskH(ds, add_Hbdr, XRange, YRange, ref_lon=0):
     dimension.
     """
     if 'face' in ds.dims and len(ds.X) == 4320:
-        maskH = _xr.ones_like(ds["XG"].isel(Xp1=slice(0, 4320, 10), Yp1=slice(0, 4320, 10)))
-    else:
-        maskH = _xr.ones_like(ds["XG"])
+        ds = ds.isel(Xp1=slice(0, 4320, 10), Yp1=slice(0, 4320, 10)).persist()
+
+    maskH = _xr.ones_like(ds["XG"])
 
     if YRange is not None:
         # Use arrays
