@@ -813,16 +813,18 @@ def mask_var(_ds, XRange=None, YRange=None, ref_lon=180):
     nYG = _copy.deepcopy(_ds["YG"])
     _ds["nYG"] = nYG
 
-    minY = _ds["YG"].min().values
-    maxY = _ds["YG"].max().values
-
-    minX = _ds["XG"].min().values
-    maxX = _ds["XG"].max().values
-
-    if YRange is not None:
+    if YRange is None:
+        minY = _ds["YG"].min().values
+        maxY = _ds["YG"].max().values
+    else:
         minY = YRange[0]
         maxY = YRange[1]
-    if XRange is not None:
+
+
+    if XRange is None:
+        minX = _ds["XG"].min().values
+        maxX = _ds["XG"].max().values
+    else:
         minX = XRange[0]
         maxX = XRange[1]
 
