@@ -470,9 +470,10 @@ def test_survey_aligned_velocities(od_in, gridtype, rotate, survey):
             # Test shortcut
             od_surv.compute.survey_aligned_velocities()
 
-        # Chek velocities
+        # Check velocities
         vel_surv = np.sqrt(od_surv._ds["U"] ** 2 + od_surv._ds["V"] ** 2)
         vel_alig = np.sqrt(ds_out["tan_Vel"] ** 2 + ds_out["ort_Vel"] ** 2)
+        # see issue 70 (https://github.com/hainegroup/oceanspy/issues/70) for more information.
         assert_almost_equal(
             vel_surv.values, vel_alig.values, decimal=4 if rotate else 7
         )
