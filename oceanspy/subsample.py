@@ -335,7 +335,7 @@ def cutout(
                 _np.fabs(od._ds["YG"].max() - od._ds["YG"].min()),
             ]
         )
-        add_Hbdr = 1.5*add_Hbdr / _np.mean([len(od._ds["X"]), len(od._ds["Y"])])
+        add_Hbdr = 1.5 * add_Hbdr / _np.mean([len(od._ds["X"]), len(od._ds["Y"])])
     elif add_Hbdr is False:
         add_Hbdr = 0
 
