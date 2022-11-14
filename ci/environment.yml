@@ -7,7 +7,7 @@ dependencies:
   - bottleneck
   - netCDF4
   - xarray
-  - cartopy<0.20
+  - cartopy
   - intake-xarray
   - geopy
   - xesmf

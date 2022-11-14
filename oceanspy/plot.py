@@ -748,7 +748,7 @@ def horizontal_section(
                 _plt.clabel(cont, **clabel_kwargs)
 
     # Labels and return
-    add_labels = kwargs.pop("add_labels", None)
+    add_labels = kwargs.pop("add_labels", False)
     if len(dims) == 0:
         ax = _plt.gca()
         if od.projection is None:
