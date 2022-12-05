@@ -324,7 +324,7 @@ class LLCtransformation:
 
         if drop:
             DS = _LLC_check_sizes(DS)
-        #
+        
         # rechunk data. In the ECCO data this is done automatically
         if chunks:
             DS = DS.chunk(chunks)
@@ -984,7 +984,7 @@ def _LLC_check_sizes(_DS):
 
     if Nx_c == Nx_g:
         arg = {dims_c.X: slice(0, -1)}
-        _DS = _DS.isel(**arg)
+        _DS = _copy.deepcopy(_DS.isel(**arg))
     else:
         delta = Nx_g - Nx_c
         if delta < 0:
@@ -995,10 +995,10 @@ def _LLC_check_sizes(_DS):
         else:
             if delta == 2:  # len(_g) = len(_c)+2. Can but shouldn't happen.
                 arg = {dims_g: slice(0, -1)}
-                _DS = _DS.isel(**arg)
+                _DS = _copy.deepcopy(_DS.isel(**arg))
     if Ny_c == Ny_g:
         arg = {dims_c.Y: slice(0, -1)}
-        _DS = _DS.isel(**arg)
+        _DS = _copy.deepcopy(_DS.isel(**arg))
 
     return _DS
 
