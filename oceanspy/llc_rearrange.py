@@ -323,7 +323,7 @@ class LLCtransformation:
         DS = shift_dataset(DS, dims_c.Y, dims_g.Y)
 
         if drop:
-            DS = LLC_check_sizes(DS)
+            DS = _LLC_check_sizes(DS)
         #
         # rechunk data. In the ECCO data this is done automatically
         if chunks:
@@ -968,7 +968,7 @@ def slice_datasets(_DSfacet, dims_c, dims_g, _edges, _axis):
 
 def _LLC_check_sizes(_DS):
     """
-    Checks and asserts len of center and corner points are in agreement. Because there is no face anymore
+    Checks and asserts len of center and corner points are in agreement. 
     """
     DIMS = [dim for dim in _DS["XC"].dims]
     dims_c = Dims(DIMS[::-1])
@@ -993,8 +993,8 @@ def _LLC_check_sizes(_DS):
             )
         else:
             if delta == 2:  # len(_g) = len(_c)+2. Can but shouldn't happen.
-                args = {dims_g: slice(0, -1)}
-                _DS = DS.isel(**arg)
+                arg = {dims_g: slice(0, -1)}
+                _DS = _DS.isel(**arg)
     if Ny_c == Ny_g:
         arg = {dims_c.Y: slice(0, -1)}
         _DS = _DS.isel(**arg)
