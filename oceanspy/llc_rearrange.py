@@ -968,7 +968,7 @@ def slice_datasets(_DSfacet, dims_c, dims_g, _edges, _axis):
 
 def _LLC_check_sizes(_DS):
     """
-    Checks and asserts len of center and corner points are in agreement. 
+    Checks and asserts len of center and corner points are in agreement.
     """
     DIMS = [dim for dim in _DS["XC"].dims]
     dims_c = Dims(DIMS[::-1])
@@ -989,7 +989,8 @@ def _LLC_check_sizes(_DS):
         delta = Nx_g - Nx_c
         if delta < 0:
             raise ValueError(
-                "Inconsistent sizes at corner (_g) and center (_c) points after cutout `len(_g) < len(_c)."
+                "Inconsistent sizes at corner (_g) and center (_c) points"
+                "after cutout `len(_g) < len(_c)."
             )
         else:
             if delta == 2:  # len(_g) = len(_c)+2. Can but shouldn't happen.
