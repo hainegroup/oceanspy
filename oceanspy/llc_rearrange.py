@@ -971,7 +971,7 @@ def slice_datasets(_DSfacet, dims_c, dims_g, _edges, _axis):
     return _DSFacet
 
 
-def LLC_check_sizes(_DS):
+def _LLC_check_sizes(_DS):
     """
     Checks and asserts len of center and corner points are in agreement. Because there is no face anymore
     """
