@@ -971,6 +971,40 @@ def slice_datasets(_DSfacet, dims_c, dims_g, _edges, _axis):
     return _DSFacet
 
 
+def LLC_check_sizes(_DS):
+    """
+    Checks and asserts len of center and corner points are in agreement. Because there is no face anymore
+    """
+    DIMS = [dim for dim in _DS['XC'].dims]
+    dims_c = Dims(DIMS[::-1])
+
+    DIMS = [dim for dim in _DS['XG'].dims]
+    dims_g = Dims(DIMS[::-1])
+
+    # total number of scalar points.
+    Nx_c = len(_DS[dims_c.X])
+    Ny_c = len(_DS[dims_c.Y])
+    Nx_g = len(_DS[dims_g.X])
+    Ny_g = len(_DS[dims_g.Y])
+    
+    if Nx_c == Nx_g:
+        arg = {dims_c.X: slice(0, -1)}
+        _DS = _DS.isel(**arg)
+    else:
+        delta = Nx_g - Nx_c
+        if delta < 0:
+            raise ValueError('Inconsistent sizes at corner (_g) and center (_c) points after cutout `len(_g) < len(_c).')
+        else:
+            if delta ==2 : # len(_g) = len(_c)+2. Can but shouldn't happen.
+                args = {dims_g:slice(0, -1)}
+                _DS = DS.isel(**arg)
+    if Ny_c == Ny_g:
+        arg = {dims_c.Y: slice(0, -1)}
+        _DS = _DS.isel(**arg)
+        
+    return _DS
+    
+
 class Dims:
     axes = "XYZT"  # shortcut axis names
 
