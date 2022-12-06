@@ -970,6 +970,11 @@ def _LLC_check_sizes(_DS):
     """
     Checks and asserts len of center and corner points are in agreement.
     """
+    YG = _DS['YG'].dropna('Yp1', 'all')
+    y0 = int(YG['Yp1'][0])
+    y1 = int(YG['Yp1'][-1]) + 1
+    _DS = _copy.deepcopy(_DS.isel(Yp1=slice(y0, y1)))
+
     DIMS = [dim for dim in _DS["XC"].dims]
     dims_c = Dims(DIMS[::-1])
 
