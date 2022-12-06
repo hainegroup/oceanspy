@@ -1,9 +1,0 @@
-{
-    "_ARRAY_DIMENSIONS": [
-        "Y",
-        "X"
-    ],
-    "coordinates": "YC XC",
-    "description": "x cell face separation",
-    "units": "m"
-}

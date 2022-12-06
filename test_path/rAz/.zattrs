@@ -1,9 +1,0 @@
-{
-    "_ARRAY_DIMENSIONS": [
-        "Yp1",
-        "Xp1"
-    ],
-    "coordinates": "YG XG",
-    "description": "r-face area at cell corner",
-    "units": "m^2"
-}

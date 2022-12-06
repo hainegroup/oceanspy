@@ -1,8 +1,0 @@
-{
-    "_ARRAY_DIMENSIONS": [
-        "time"
-    ],
-    "calendar": "proleptic_gregorian",
-    "long_name": "model_time",
-    "units": "hours since 2007-09-01"
-}
