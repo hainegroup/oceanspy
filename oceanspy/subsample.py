@@ -358,16 +358,21 @@ def cutout(
         }
         dsnew = _llc_trans.arctic_crown(**arg)
         dsnew = dsnew.set_coords(co_list)
-        grid_coords = od.grid_coords
+        # grid_coords = od.grid_coords
+        grid_coords = {
+            'Y': {'Y': None, 'Yp1': 0.5},
+            'X': {'X': None, 'Xp1': 0.5}, 
+            'Z': {'Z': None, 'Zp1': 0.5, 'Zu': 0.5, 'Zl': -0.5},
+            'time': {'time': -0.5}}
+        # if len(grid_coords["time"]) > 1:
+            # grid_coords["time"].pop("time_midp", None)
+        grid_coords = {"add_midp": True, "overwrite": True, "grid_coords": grid_coords}
         od._ds = dsnew
         manipulate_coords = {"coordsUVfromG": True}
         new_face_connections = {"face_connections": {None: {None, None}}}
         od = od.set_face_connections(**new_face_connections)
         od = od.manipulate_coords(**manipulate_coords)
-        if len(grid_coords["time"]) > 1:
-            grid_coords["time"].pop("time_midp", None)
-            grid_coords = {"add_midp": True, "grid_coords": grid_coords}
-        od = od.set_grid_coords(**grid_coords, overwrite=True)
+        od = od.set_grid_coords(**grid_coords)
         od._ds.attrs["OceanSpy_description"] = "Cutout of"
         "simulation, with simple topology (face not a dimension)"
         # Unpack the new dataset without face as dimension
