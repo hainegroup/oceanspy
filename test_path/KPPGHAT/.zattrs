@@ -1,0 +1,12 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "Z",
+        "Y",
+        "X"
+    ],
+    "_coordinates": "XC YC RC iter",
+    "cell_methods": "T: mean",
+    "coordinates": "YC XC",
+    "long_name": "KPP_nonlocal_transport_coefficient",
+    "units": "s/m^2"
+}

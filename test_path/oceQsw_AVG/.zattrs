@@ -1,0 +1,11 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "time_midp",
+        "Y",
+        "X"
+    ],
+    "coordinates": "YC XC",
+    "description": "net Short-Wave radiation (+=down), >0 increases theta",
+    "original_output": "average",
+    "units": "W/m^2"
+}

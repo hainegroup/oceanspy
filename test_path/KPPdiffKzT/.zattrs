@@ -1,0 +1,12 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "Z",
+        "Y",
+        "X"
+    ],
+    "_coordinates": "XC YC RC iter",
+    "cell_methods": "T: mean",
+    "coordinates": "YC XC",
+    "long_name": "KPP_vertical_heat_diffusion_coefficient",
+    "units": "m^2/s"
+}

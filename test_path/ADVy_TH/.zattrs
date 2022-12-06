@@ -1,0 +1,12 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "time_midp",
+        "Z",
+        "Yp1",
+        "X"
+    ],
+    "coordinates": "YV XV",
+    "description": "Meridional Advective Flux of Pot.Temperature",
+    "original_output": "average",
+    "units": "degC.m^3/s"
+}

@@ -1,0 +1,12 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "time_midp",
+        "Z",
+        "Y",
+        "X"
+    ],
+    "coordinates": "YC XC",
+    "description": "salt tendency due to salt plume flux >0 increases salinity",
+    "original_output": "average",
+    "units": "g/m^2/s"
+}

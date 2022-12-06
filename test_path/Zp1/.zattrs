@@ -1,0 +1,8 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "Zp1"
+    ],
+    "long_name": "vertical coordinate of cell interface",
+    "positive": "up",
+    "units": "meters"
+}

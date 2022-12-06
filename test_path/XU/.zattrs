@@ -1,0 +1,8 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "Y",
+        "Xp1"
+    ],
+    "description": "X coordinate of U point",
+    "units": "degree_east"
+}

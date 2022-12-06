@@ -1,0 +1,11 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "time",
+        "Y",
+        "X"
+    ],
+    "coordinates": "YC XC",
+    "description": "model surface forcing for Salinity, >0 increases salinity",
+    "original_output": "snapshot",
+    "units": "g/m^2/s"
+}

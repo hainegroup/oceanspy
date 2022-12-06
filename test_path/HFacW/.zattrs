@@ -1,0 +1,10 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "Z",
+        "Y",
+        "Xp1"
+    ],
+    "coordinates": "XU YU",
+    "description": "vertical fraction of open cell at West face",
+    "units": "-"
+}

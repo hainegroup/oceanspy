@@ -1,0 +1,9 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "Y",
+        "Xp1"
+    ],
+    "coordinates": "XU YU",
+    "description": "y cell corner separation",
+    "units": "m"
+}
