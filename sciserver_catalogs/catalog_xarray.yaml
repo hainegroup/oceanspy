@@ -162,6 +162,7 @@ sources:
         engine: netcdf4
         concat_dim: T
         parallel: True
+        combine: nested
     metadata:
       rename:
         T: time  
@@ -228,6 +229,7 @@ sources:
         engine: netcdf4
         concat_dim: T
         parallel: True
+        combine: nested
     metadata:
       rename:
         T: time
@@ -382,6 +384,7 @@ sources:
         engine: netcdf4
         concat_dim: T
         parallel: True
+        combine: nested
     metadata:
       rename:
         T: time
