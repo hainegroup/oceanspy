@@ -360,12 +360,13 @@ def cutout(
         dsnew = dsnew.set_coords(co_list)
         # grid_coords = od.grid_coords
         grid_coords = {
-            'Y': {'Y': None, 'Yp1': 0.5},
-            'X': {'X': None, 'Xp1': 0.5}, 
-            'Z': {'Z': None, 'Zp1': 0.5, 'Zu': 0.5, 'Zl': -0.5},
-            'time': {'time': -0.5}}
+            "Y": {"Y": None, "Yp1": 0.5},
+            "X": {"X": None, "Xp1": 0.5},
+            "Z": {"Z": None, "Zp1": 0.5, "Zu": 0.5, "Zl": -0.5},
+            "time": {"time": -0.5},
+        }
         # if len(grid_coords["time"]) > 1:
-            # grid_coords["time"].pop("time_midp", None)
+        # grid_coords["time"].pop("time_midp", None)
         grid_coords = {"add_midp": True, "overwrite": True, "grid_coords": grid_coords}
         od._ds = dsnew
         manipulate_coords = {"coordsUVfromG": True}

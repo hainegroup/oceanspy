@@ -322,9 +322,12 @@ class LLCtransformation:
         DS = shift_dataset(DS, dims_c.X, dims_g.X)
         DS = shift_dataset(DS, dims_c.Y, dims_g.Y)
 
+        if type(DSFacet34) == int:
+            DS = _reorder_ds(DS, dims_c, dims_g).persist()
+
         if drop:
             DS = _LLC_check_sizes(DS)
-        
+
         # rechunk data. In the ECCO data this is done automatically
         if chunks:
             DS = DS.chunk(chunks)
@@ -970,9 +973,9 @@ def _LLC_check_sizes(_DS):
     """
     Checks and asserts len of center and corner points are in agreement.
     """
-    YG = _DS['YG'].dropna('Yp1', 'all')
-    y0 = int(YG['Yp1'][0])
-    y1 = int(YG['Yp1'][-1]) + 1
+    YG = _DS["YG"].dropna("Yp1", "all")
+    y0 = int(YG["Yp1"][0])
+    y1 = int(YG["Yp1"][-1]) + 1
     _DS = _copy.deepcopy(_DS.isel(Yp1=slice(y0, y1)))
 
     DIMS = [dim for dim in _DS["XC"].dims]
@@ -1005,6 +1008,30 @@ def _LLC_check_sizes(_DS):
         arg = {dims_c.Y: slice(0, -1)}
         _DS = _copy.deepcopy(_DS.isel(**arg))
 
+    return _DS
+
+
+def _reorder_ds(_ds, dims_c, dims_g):
+    """Only needed when Pacific -centered data. Corrects the ordering
+    of y-dim and transposes the data, all lazily."""
+
+    _DS = _copy.deepcopy(_ds)
+    for _dim in [dims_c.Y, dims_g.Y]:
+        _DS["n" + _dim] = -(_DS[_dim] - (int(_DS[_dim][0].data)))
+        _DS = (
+            _DS.swap_dims({_dim: "n" + _dim})
+            .drop_vars([_dim])
+            .rename({"n" + _dim: _dim})
+        )
+
+    for var in _ds.data_vars:
+        DIMS = [dim for dim in _ds[var].dims]
+        dims = Dims(DIMS[::-1])
+        if len(dims) > 1 and "nv" not in DIMS:
+            dtr = list(dims)[::-1]
+            dtr[-1], dtr[-2] = dtr[-2], dtr[-1]
+            _da = _ds[var].transpose(*dtr)[::-1, :]
+            _DS[var] = _da
     return _DS
 
 
