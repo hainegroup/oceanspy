@@ -322,20 +322,18 @@ class LLCtransformation:
         DS = shift_dataset(DS, dims_c.X, dims_g.X)
         DS = shift_dataset(DS, dims_c.Y, dims_g.Y)
 
+        if type(DSFacet34) == int:
+            DS = _reorder_ds(DS, dims_c, dims_g).persist()
+
         if drop:
-            # if len(DS.X) == len(DS.Xp1):
-            #     if len(DS.Y) == len(DS.Yp1):
-            DS = DS.isel(X=slice(0, -1), Y=slice(0, -1))
-            #     else:
-            #         DS = DS.isel(X=slice(0, -1))
-            # elif len(DS.Y) == len(DS.Yp1):
-            #     DS = DS.isel(Y=slice(0, -1))
-        #
+            DS = _LLC_check_sizes(DS)
+
         # rechunk data. In the ECCO data this is done automatically
         if chunks:
             DS = DS.chunk(chunks)
 
         if XRange is not None and YRange is not None:
+            # drop copy var = 'nYg' (line 101)
             DS = DS.drop_vars(_var_)
         return DS
 
@@ -969,6 +967,72 @@ def slice_datasets(_DSfacet, dims_c, dims_g, _edges, _axis):
                 arg = {_dim: slice(ii_0, ii_1 + 1)}
                 _DSFacet[i] = _DSFacet[i].isel(**arg)
     return _DSFacet
+
+
+def _LLC_check_sizes(_DS):
+    """
+    Checks and asserts len of center and corner points are in agreement.
+    """
+    YG = _DS["YG"].dropna("Yp1", "all")
+    y0 = int(YG["Yp1"][0])
+    y1 = int(YG["Yp1"][-1]) + 1
+    _DS = _copy.deepcopy(_DS.isel(Yp1=slice(y0, y1)))
+
+    DIMS = [dim for dim in _DS["XC"].dims]
+    dims_c = Dims(DIMS[::-1])
+
+    DIMS = [dim for dim in _DS["XG"].dims]
+    dims_g = Dims(DIMS[::-1])
+
+    # total number of scalar points.
+    Nx_c = len(_DS[dims_c.X])
+    Ny_c = len(_DS[dims_c.Y])
+    Nx_g = len(_DS[dims_g.X])
+    Ny_g = len(_DS[dims_g.Y])
+
+    if Nx_c == Nx_g:
+        arg = {dims_c.X: slice(0, -1)}
+        _DS = _copy.deepcopy(_DS.isel(**arg))
+    else:
+        delta = Nx_g - Nx_c
+        if delta < 0:
+            raise ValueError(
+                "Inconsistent sizes at corner (_g) and center (_c) points"
+                "after cutout `len(_g) < len(_c)."
+            )
+        else:
+            if delta == 2:  # len(_g) = len(_c)+2. Can but shouldn't happen.
+                arg = {dims_g: slice(0, -1)}
+                _DS = _copy.deepcopy(_DS.isel(**arg))
+    if Ny_c == Ny_g:
+        arg = {dims_c.Y: slice(0, -1)}
+        _DS = _copy.deepcopy(_DS.isel(**arg))
+
+    return _DS
+
+
+def _reorder_ds(_ds, dims_c, dims_g):
+    """Only needed when Pacific -centered data. Corrects the ordering
+    of y-dim and transposes the data, all lazily."""
+
+    _DS = _copy.deepcopy(_ds)
+    for _dim in [dims_c.Y, dims_g.Y]:
+        _DS["n" + _dim] = -(_DS[_dim] - (int(_DS[_dim][0].data)))
+        _DS = (
+            _DS.swap_dims({_dim: "n" + _dim})
+            .drop_vars([_dim])
+            .rename({"n" + _dim: _dim})
+        )
+
+    for var in _ds.data_vars:
+        DIMS = [dim for dim in _ds[var].dims]
+        dims = Dims(DIMS[::-1])
+        if len(dims) > 1 and "nv" not in DIMS:
+            dtr = list(dims)[::-1]
+            dtr[-1], dtr[-2] = dtr[-2], dtr[-1]
+            _da = _ds[var].transpose(*dtr)[::-1, :]
+            _DS[var] = _da
+    return _DS
 
 
 class Dims:
