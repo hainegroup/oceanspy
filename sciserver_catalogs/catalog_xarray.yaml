@@ -662,8 +662,8 @@ sources:
         k_u: Zu
         k_l: Zl
       rename:
-        Theta: THETA
-        Salt: SALT
+        Theta: Temp
+        Salt: S
         i: X
         i_g: Xp1
         j: Y
@@ -726,6 +726,7 @@ sources:
     args:
       urlpath: '/home/idies/workspace/poseidon/data01_01/llc4320_grid/'
       engine: zarr
+      # drop_variables: ['CS', 'SN', 'PHrefC', 'PHrefF']
     metadata:
       swap_dims:
         k: Z
