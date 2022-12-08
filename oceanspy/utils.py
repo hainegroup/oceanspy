@@ -45,7 +45,6 @@ def _viewer_to_range(p):
     lon: list.
     lat: list.
     """
-    # _check_instance("p": p)
     _check_instance({"p": p}, {"p": ['list']})
     _check_instance({"p[0]": p[0]}, {"p[0]": ['dict']})
     _check_instance({"type": p[0]['type']}, {"type": 'str'})
@@ -56,7 +55,6 @@ def _viewer_to_range(p):
         print('extracting '+ p[0]['type'])
     else:
         raise ValueError("not a type extracted by poseidon viewer")
-
 
     p_type = p[0]['type']
 
@@ -73,9 +71,6 @@ def _viewer_to_range(p):
         lat.append(coords[i][1])
 
     return lon, lat
-
-
-
 
 
 def _rel_lon(x, ref_lon):

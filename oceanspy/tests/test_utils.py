@@ -8,11 +8,21 @@ from oceanspy.utils import (
     cartesian_path,
     great_circle_path,
     spherical2cartesian,
+    _viewer_to_range,
 )
 
 
 def test_RNone():
     spherical2cartesian(1, 1)
+
+
+def test_error_viewer_to_range():
+    with pytest.raises(ValueError):
+        _viewer_to_range(0)
+        _viewer_to_range(['not from viewer'])
+        _viewer_to_range([{'type': 'other'}])
+        _viewer_to_range([{'type': 'Polygon', 'coordinates': 'a'}])
+
 
 
 def test_error_path():
