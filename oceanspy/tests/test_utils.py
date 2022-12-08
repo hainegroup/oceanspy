@@ -19,10 +19,9 @@ def test_RNone():
 def test_error_viewer_to_range():
     with pytest.raises(TypeError):
         viewer_to_range(0)
-        viewer_to_range(['not from viewer'])
-        viewer_to_range([{'type': 'other'}])
-        viewer_to_range([{'type': 'Polygon', 'coordinates': 'a'}])
-
+        viewer_to_range(["not from viewer"])
+        viewer_to_range([{"type": "other"}])
+        viewer_to_range([{"type": "Polygon", "coordinates": "a"}])
 
 
 def test_error_path():
@@ -56,11 +55,10 @@ coords3 = [[[0, 6], [0, 7], [0, 8], [0, 9], [0, 10], [0, 11]]]
     ],
 )
 def test_viewer_to_range(coords, types, lon, lat):
-    p = [{'type': types, 'coordinates': list(coords)}]
+    p = [{"type": types, "coordinates": list(coords)}]
     x, y = viewer_to_range(p)
     assert x == lon
     assert y == lat
-
 
 
 X0 = _np.array([161, -161])  # track begins west, ends east
