@@ -261,14 +261,13 @@ def test_reduce_variables(od, varList):
 
 @pytest.mark.parametrize("od", [ECCOod])
 @pytest.mark.parametrize(
-    "XRange, YRange, ZRange, varList, centered, NZ, NY, NX",
+    "XRange, YRange, ZRange, varList, NZ, NY, NX",
     [
         (
             [-90, 20],
             [20, 60],
             None,
             ["T"],
-            "Atlantic",
             50,
             56,
             110,
@@ -278,14 +277,15 @@ def test_reduce_variables(od, varList):
             [20, 60],
             None,
             ["U", "V"],
-            "Atlantic",
             50,
             56,
             359,
         ),
-        # ([-31, -2], [58, 68.2], None, ["T"], "Atlantic", 50), # has ARCTIC DATA
-        (None, None, None, ["T"], "Atlantic", 50, 314, 359),
-        (None, None, None, None, None, 50, 314, 359),
+        ([-31, -2], [58, 85.2], None, None, 50, 62, 34),
+        ([160, -150], [58, 85.2], None, None, 50, 61, 48),
+        ([60, 130], [58, 85.2], None, None, 50, 62, 68),
+        (None, None, None, ["T"], 50, 314, 359),
+        (None, None, None, None, 50, 314, 359),
     ],
 )
 def test_cutout_faces(
@@ -294,7 +294,6 @@ def test_cutout_faces(
     YRange,
     ZRange,
     varList,
-    centered,
     NZ,
     NY,
     NX,
@@ -304,15 +303,23 @@ def test_cutout_faces(
         "XRange": XRange,
         "YRange": YRange,
         "ZRange": ZRange,
-        "centered": centered,
     }
     new_od = od.subsample.cutout(**args)
     old_dims = od.dataset.dims
     new_dims = new_od.dataset.dims
+
+    Yp1 = new_od.dataset["Yp1"]
+    Xp1 = new_od.dataset["Xp1"]
+
     assert (set(old_dims) - set(new_dims)) == set(["face"])
     assert new_dims["Z"] == NZ
     assert new_dims["Y"] == NY
     assert new_dims["X"] == NX
+    assert new_dims["Y"] == new_dims["Yp1"] - 1
+    assert new_dims["X"] == new_dims["Xp1"] - 1
+
+    assert int(Yp1[-1]) == new_dims["Yp1"] + int(Yp1[0]) - 1
+    assert int(Xp1[-1]) == new_dims["Xp1"] + int(Xp1[0]) - 1
 
 
 # =======
