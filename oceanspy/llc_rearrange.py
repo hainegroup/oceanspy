@@ -133,7 +133,7 @@ class LLCtransformation:
                 ARCT[3].append(ds[var_name])
 
         for i in range(len(ARCT)):
-            if type(ARCT[i][0]) == _datype:
+            if all(type(item) != int for item in ARCT[i]):
                 ARCT[i] = _xr.merge(ARCT[i])
 
         DSa2, DSa5, DSa7, DSa10 = ARCT
