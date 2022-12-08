@@ -58,7 +58,7 @@ def _viewer_to_range(p):
 
     p_type = p[0]['type']
 
-    if p_type is 'Polygon':
+    if p_type == 'Polygon':
         coords = p[0]['coordinates'][0]
     elif p_type in ['LineString', 'Point']:
         coords = p[0]['coordinates']
