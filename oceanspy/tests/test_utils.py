@@ -8,7 +8,7 @@ from oceanspy.utils import (
     cartesian_path,
     great_circle_path,
     spherical2cartesian,
-    _viewer_to_range,
+    viewer_to_range,
 )
 
 
@@ -17,11 +17,11 @@ def test_RNone():
 
 
 def test_error_viewer_to_range():
-    with pytest.raises(ValueError):
-        _viewer_to_range(0)
-        _viewer_to_range(['not from viewer'])
-        _viewer_to_range([{'type': 'other'}])
-        _viewer_to_range([{'type': 'Polygon', 'coordinates': 'a'}])
+    with pytest.raises(TypeError):
+        viewer_to_range(0)
+        viewer_to_range(['not from viewer'])
+        viewer_to_range([{'type': 'other'}])
+        viewer_to_range([{'type': 'Polygon', 'coordinates': 'a'}])
 
 
 
@@ -37,6 +37,30 @@ def test_error_path():
 
     with pytest.raises(ValueError):
         cartesian_path(1, 2, 3, 4, delta=-1)
+
+
+coords1 = [[[0, 0], [1, 1], [2, 2], [3, 3], [4, 4], [5, 5]]]
+coords2 = [[[5, 0], [4, 1], [3, 2], [2, 3], [1, 4], [0, 5]]]
+coords3 = [[[0, 6], [0, 7], [0, 8], [0, 9], [0, 10], [0, 11]]]
+
+
+@pytest.mark.parametrize(
+    "coords, types, lon, lat",
+    [
+        (coords1, "Polygon", [0, 1, 2, 3, 4, 5], [0, 1, 2, 3, 4, 5]),
+        (coords2, "Polygon", [5, 4, 3, 2, 1, 0], [0, 1, 2, 3, 4, 5]),
+        (coords3, "Polygon", [0, 0, 0, 0, 0, 0], [6, 7, 8, 9, 10, 11]),
+        (coords1, "LineString", [[0, 0]], [[1, 1]]),
+        (coords2, "LineString", [[5, 0]], [[4, 1]]),
+        (coords3, "LineString", [[0, 6]], [[0, 7]]),
+    ],
+)
+def test_viewer_to_range(coords, types, lon, lat):
+    p = [{'type': types, 'coordinates': list(coords)}]
+    x, y = viewer_to_range(p)
+    assert x == lon
+    assert y == lat
+
 
 
 X0 = _np.array([161, -161])  # track begins west, ends east
