@@ -68,7 +68,7 @@ def _viewer_to_range(p):
     lon = []
     lat = []
 
-    for i in range(coords):
+    for i in range(len(coords)):
         lon.append(coords[i][0])
         lat.append(coords[i][1])
 
