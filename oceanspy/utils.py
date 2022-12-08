@@ -32,6 +32,48 @@ def compilable(f):
     return f
 
 
+def viewer_to_range(p):
+    """
+    Takes the output from the poseidon viewer `p` and returns the coordinate
+    trajectories in X and Y in a way that is compatible with oceanspy.subsample
+    functions.
+    Parameters
+    ----------
+    p: list.
+        data exported from the Poseidon viewer
+    Returns
+    -------
+    lon: list.
+    lat: list.
+    """
+    _check_instance({"p": p}, {"p": ["list"]})
+    _check_instance({"p[0]": p[0]}, {"p[0]": ["dict"]})
+    _check_instance({"type": p[0]["type"]}, {"type": "str"})
+    _check_instance({"coord": p[0]["coordinates"]}, {"coord": "list"})
+
+    if p[0]["type"] in ["Polygon", "LineString", "Point"]:
+        # print messege
+        print("extracting " + p[0]["type"])
+    else:
+        raise TypeError("not a type extracted by poseidon viewer")
+
+    p_type = p[0]["type"]
+
+    if p_type == "Polygon":
+        coords = p[0]["coordinates"][0]
+    elif p_type in ["LineString", "Point"]:
+        coords = p[0]["coordinates"]
+
+    lon = []
+    lat = []
+
+    for i in range(len(coords)):
+        lon.append(coords[i][0])
+        lat.append(coords[i][1])
+
+    return lon, lat
+
+
 def _rel_lon(x, ref_lon):
     """
     Change the definition of 0 longitude.
