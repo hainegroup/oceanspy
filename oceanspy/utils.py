@@ -55,7 +55,7 @@ def viewer_to_range(p):
         # print messege
         print("extracting " + p[0]["type"])
     else:
-        raise ValueError("not a type extracted by poseidon viewer")
+        raise TypeError("not a type extracted by poseidon viewer")
 
     p_type = p[0]["type"]
 
