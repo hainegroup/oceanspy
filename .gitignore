@@ -4,9 +4,6 @@ oceanspy/tests/Data
 # setuptools-scm
 version.py
 
-# Sphinx automatic generation of API
-docs/_api/
-
 # Created by https://www.toptal.com/developers/gitignore/api/python,jupyternotebooks,vim,visualstudiocode,pycharm
 # Edit at https://www.toptal.com/developers/gitignore?templates=python,jupyternotebooks,vim,visualstudiocode,pycharm
 
