@@ -22,7 +22,7 @@ authors:
 affiliations:
  - name: Department of Earth and Planetary Sciences, The Johns Hopkins University
    index: 1
-date: \today 
+date: \today
 bibliography: paper.bib
 ---
 
@@ -30,7 +30,7 @@ bibliography: paper.bib
 Simulations of ocean currents using numerical circulation models are becoming increasingly realistic. At the same time, these models generate increasingly large volumes of model output data. These trends make analysis of the model data harder for two reasons. First, researchers must use high-performance data-analysis clusters to access these large data sets.
 Second, they must post-process the data to extract oceanographically-useful information.
 Moreover, the increasing model realism encourages researchers to compare simulations to observations of the natural ocean.
-To achieve this task model data must be analyzed in the way observational oceanographers analyze field measurements; and, ideally, by the observational oceanographers themselves. 
+To achieve this task model data must be analyzed in the way observational oceanographers analyze field measurements; and, ideally, by the observational oceanographers themselves.
 The OceanSpy package addresses these needs.
 
 # Summary
@@ -39,13 +39,13 @@ OceanSpy enables extraction, processing, and visualization of model data to (i) 
 
 # Features
 ## Extraction of oceanographic properties
-OceanSpy can extract information from the model data at user-defined points, along synthetic ship 'surveys', or at synthetic 'mooring arrays'. 
-Model fields, such as, temperature, salinity, and velocity, can be extracted at arbitrary locations in the model 4D space. Thus, simulations can be compared with observations from Lagrangian (drifting) instruments in the ocean. 
-The 'survey' extraction mode mimics a sequence of arbitrary hydrographic 'stations' (vertical profiles) connected by great-circle paths. The data on the vertical profiles are interpolated from the regular model grid onto the 'station' locations. 
-The 'mooring array' mimics a set of oceanographic moorings at arbitrary locations. It differs from a 'survey' because data is extracted on the native model grid. This mode enables exact calculation of the model material fluxes through an arbitrary curve in latitude/longitude space, for example. 
+OceanSpy can extract information from the model data at user-defined points, along synthetic ship 'surveys', or at synthetic 'mooring arrays'.
+Model fields, such as, temperature, salinity, and velocity, can be extracted at arbitrary locations in the model 4D space. Thus, simulations can be compared with observations from Lagrangian (drifting) instruments in the ocean.
+The 'survey' extraction mode mimics a sequence of arbitrary hydrographic 'stations' (vertical profiles) connected by great-circle paths. The data on the vertical profiles are interpolated from the regular model grid onto the 'station' locations.
+The 'mooring array' mimics a set of oceanographic moorings at arbitrary locations. It differs from a 'survey' because data is extracted on the native model grid. This mode enables exact calculation of the model material fluxes through an arbitrary curve in latitude/longitude space, for example.
 
 ## Computation of useful diagnostics
-OceanSpy can compute new diagnostics that are not part of the model output. These diagnostics include vector calculus and oceanographic quantities, as shown in Table \ref{table:1}. For example, OceanSpy can calculate the Ertel potential vorticity field and the component of the velocity vector perpendicular to a 'survey' section. In addition, OceanSpy can calculate volume-weighted averages. When the required model output fields are available, it can also calculate heat and salt budget terms to machine precision. 
+OceanSpy can compute new diagnostics that are not part of the model output. These diagnostics include vector calculus and oceanographic quantities, as shown in Table \ref{table:1}. For example, OceanSpy can calculate the Ertel potential vorticity field and the component of the velocity vector perpendicular to a 'survey' section. In addition, OceanSpy can calculate volume-weighted averages. When the required model output fields are available, it can also calculate heat and salt budget terms to machine precision.
 
 | Diagnostic name | Description     |
 |-:|:---|
@@ -62,7 +62,7 @@ OceanSpy can compute new diagnostics that are not part of the model output. Thes
 | Eddy kinetic energy | $\displaystyle{EKE = \frac{1}{2}\left[ (u-\overline{u})^2 + (v-\overline{v})^2 + \epsilon_{nh} (w-\overline{w})^2 \right]}$ |
 | Horizontal divergence | $\displaystyle{\nabla_{H} \cdot {\bf u} = \frac{\partial u}{\partial x}+\frac{\partial v}{\partial y} }$  |
 | Horizontal shear strain | $\displaystyle{S_s = \frac{\partial v}{\partial x}+\frac{\partial u}{\partial y}}$ |
-| Horizontal normal strain | $\displaystyle{S_n = \frac{\partial u}{\partial x}-\frac{\partial v}{\partial y}}$ | 
+| Horizontal normal strain | $\displaystyle{S_n = \frac{\partial u}{\partial x}-\frac{\partial v}{\partial y}}$ |
 | Okubo-Weiss parameter | $\displaystyle{OW = S_n^2 + S_s^2 - \zeta^2}$ |
 | Ertel potential vorticity | $\displaystyle{Q = - \frac{\omega \cdot \nabla \rho}{\rho}  =}\displaystyle{(f + \zeta)\frac{N^2}{g} + \frac{\left(\zeta_H+e\hat{\mathbf{y}}\right)\cdot\nabla_H\rho}{\rho_0}}$ |
 
@@ -84,7 +84,6 @@ Using the 'mooring' and 'survey' functionality of OceanSpy, one easily samples t
 OceanSpy is part of an ongoing effort to democratize large numerical ocean simulation data sets, which is funded through NSF (\#1835640: Collaborative Research: Framework: Data: Toward Exascale Community Ocean Circulation Modeling).
 
 # Acknowledgments
-This material is based upon work supported by the National Science Foundation under Grant Number OAC-1835640, OCE-1633124, and OCE-1756863 and by the Institute for Data Intensive Engineering and Science at John Hopkins University. The authors thank Aleksi Nummelin and Ryan Abernathey for providing constructive comments that helped us improve the code, and Salvatore Palena for designing the OceanSpy logo. 
+This material is based upon work supported by the National Science Foundation under Grant Number OAC-1835640, OCE-1633124, and OCE-1756863 and by the Institute for Data Intensive Engineering and Science at John Hopkins University. The authors thank Aleksi Nummelin and Ryan Abernathey for providing constructive comments that helped us improve the code, and Salvatore Palena for designing the OceanSpy logo.
 
 # References
-

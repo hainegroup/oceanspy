@@ -1,30 +1,30 @@
 name: rise-environment
 channels:
-  - conda-forge
+- conda-forge
 dependencies:
-  - python < 3.10
-  - numpy
-  - matplotlib
-  - pandas
-  - bokeh
-  - rise
-  - dask
-  - distributed
-  - bottleneck
-  - netCDF4
-  - xarray < 2022.6
-  - cartopy < 0.20
-  - esmpy
-  - intake-xarray
-  - geopy
-  - xesmf
-  - esmf
-  - xgcm < 0.7
-  - Ipython
-  - xmitgcm
-  - ffmpeg
-  - tqdm
-  - pip
-  - pip:
-    - git+https://github.com/hainegroup/oceanspy.git
-    - jupyter-contrib-nbextensions
+- python < 3.10
+- numpy
+- matplotlib
+- pandas
+- bokeh
+- rise
+- dask
+- distributed
+- bottleneck
+- netCDF4
+- xarray < 2022.6
+- cartopy < 0.20
+- esmpy
+- intake-xarray
+- geopy
+- xesmf
+- esmf
+- xgcm < 0.7
+- Ipython
+- xmitgcm
+- ffmpeg
+- tqdm
+- pip
+- pip:
+  - git+https://github.com/hainegroup/oceanspy.git
+  - jupyter-contrib-nbextensions

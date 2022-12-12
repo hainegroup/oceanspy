@@ -1,7 +1,5 @@
 # General packages
 import copy as copy
-import os
-import shutil
 
 import cartopy
 import numpy as np
@@ -420,13 +418,12 @@ def test_merge_into_oceandataset(od, obj, overwrite):
 
 @pytest.mark.parametrize("od", [od])
 @pytest.mark.parametrize("compute", [True, False])
-def test_save_load(od, compute):
-    path = "test_path"
+def test_save_load(tmp_path, od, compute):
 
-    od.to_netcdf(path=path + ".nc", compute=compute)
-    open_oceandataset.from_netcdf(path + ".nc")
-    os.remove(path + ".nc")
+    nc_path = str(tmp_path / "test.nc")
+    od.to_netcdf(path=nc_path, compute=compute)
+    open_oceandataset.from_netcdf(nc_path)
 
-    od.to_zarr(path=path, compute=compute)
-    open_oceandataset.from_zarr(path)
-    shutil.rmtree(path, ignore_errors=True)
+    zarr_path = str(tmp_path / "test.zarr")
+    od.to_zarr(path=zarr_path, compute=compute)
+    open_oceandataset.from_zarr(zarr_path)

@@ -19,18 +19,18 @@ Optional dependencies
 
 For optimal performance and to enable all OceanSpy features, it is highly recommended that you install the following dependencies:
 
-* bottleneck_  
-* Cartopy_  
-* Dask.distributed_  
-* ESMPy_  
-* FFmpeg_  
-* GeoPy_  
-* intake_xarray_  
-* IPython_  
-* netCDF4_  
-* tqdm_  
-* xESMF_  
-* xmitgcm_  
+* bottleneck_
+* Cartopy_
+* Dask.distributed_
+* ESMPy_
+* FFmpeg_
+* GeoPy_
+* intake_xarray_
+* IPython_
+* netCDF4_
+* tqdm_
+* xESMF_
+* xmitgcm_
 
 Step-by-step instructions
 -------------------------
@@ -40,7 +40,7 @@ Step-by-step instructions
 2. The easiest way to install OceanSpy and the above mentioned dependencies is to use the conda-forge channel. Open a terminal, then run the following command:
 
   .. code-block:: bash
-    
+
     $ conda create -n oceanspy-env -c conda-forge oceanspy xarray "cartopy<0.20" esmpy intake-xarray geopy xesmf esmf xgcm Ipython tqdm ffmpeg aiohttp pandas xmitgcm
 
   The commands above install the latest stable release of OceanSpy along with its dependencies.
@@ -53,7 +53,7 @@ Step-by-step instructions
 
 
 .. note::
-		
+
 	**For experts:** Use the following command to `Create an environment`_ identical to the Oceanography environment available on SciServer:
 
 	.. code-block:: bash
