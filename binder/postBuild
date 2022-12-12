@@ -8,4 +8,3 @@ myurl="https://livejohnshopkins-my.sharepoint.com/:u:/g/personal/malmans2_jh_edu
 wget -v -O tmp.tar.gz -L ${myurl}download=1 &&
 tar xvzf tmp.tar.gz &&
 rm -f tmp.tar.gz
-

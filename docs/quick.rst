@@ -46,7 +46,7 @@ Steps 9 to 15 demonstrate a subset of the commonly used OceanSpy commands.
 
 .. code-block:: ipython
     :class: no-execute
-        
+
     import oceanspy as ospy
     od = ospy.open_oceandataset.from_catalog('get_started')
 
@@ -68,7 +68,7 @@ Steps 9 to 15 demonstrate a subset of the commonly used OceanSpy commands.
 
 .. code-block:: ipython
     :class: no-execute
- 
+
     od_cutout = od_cutout.compute.potential_density_anomaly()
 
 13. Use the following line to store the cutout in netCDF format:

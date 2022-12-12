@@ -1,61 +1,61 @@
 name: Oceanography
 channels:
-  - conda-forge
+- conda-forge
 dependencies:
-  - python=3.9
-  - dask
-  - distributed
-  - bottleneck
-  - netCDF4
-  - xarray
-  - cartopy<0.20
-  - esmpy
-  - geopy
-  - xesmf
-  - esmf
-  - xgcm < 0.7
-  - Ipython
-  - tqdm
-  - pytest
-  - pytest-cov
-  - pytest-env
-  - codecov
-  - flake8
-  - ffmpeg
-  - black<20.8b1
-  - aiohttp
-  - pandas
-  - eofs
-  - cmocean
-  - gsw
-  - pycwt
-  - seaborn
-  - xhistogram
-  - nc-time-axis
-  - fastjmd95
-  - pip
-  - pooch
-  - h5netcdf
-  - scipy
-  - pydap
-  - zarr
-  - fsspec
-  - cftime
-  - rasterio
-  - cfgrib
-  - matplotlib < 3.5.3
-  - cf_xarray
-  - ipykernel
-  - numba
-  - xoak
-  - scikit-learn
-  - pys2index
-  - cmasher
-  - imageio
-  - pre-commit
-  - xmitgcm
-  - pip:
-    - black-nb
-    - numbagg
-    - git+https://github.com/intake/intake-xarray.git
-    - git+https://github.com/hainegroup/oceanspy.git
+- python=3.9
+- dask
+- distributed
+- bottleneck
+- netCDF4
+- xarray
+- cartopy<0.20
+- esmpy
+- geopy
+- xesmf
+- esmf
+- xgcm < 0.7
+- Ipython
+- tqdm
+- pytest
+- pytest-cov
+- pytest-env
+- codecov
+- flake8
+- ffmpeg
+- black<20.8b1
+- aiohttp
+- pandas
+- eofs
+- cmocean
+- gsw
+- pycwt
+- seaborn
+- xhistogram
+- nc-time-axis
+- fastjmd95
+- pip
+- pooch
+- h5netcdf
+- scipy
+- pydap
+- zarr
+- fsspec
+- cftime
+- rasterio
+- cfgrib
+- matplotlib < 3.5.3
+- cf_xarray
+- ipykernel
+- numba
+- xoak
+- scikit-learn
+- pys2index
+- cmasher
+- imageio
+- pre-commit
+- xmitgcm
+- pip:
+  - black-nb
+  - numbagg
+  - git+https://github.com/intake/intake-xarray.git
+  - git+https://github.com/hainegroup/oceanspy.git

@@ -12,7 +12,7 @@ OceanSpy - A Python package to facilitate ocean model data analysis and visualiz
 
    Check out the interactive demonstration of OceanSpy at `www.bndr.it/gfvgd <https://bndr.it/gfvgd>`_
 
-For publications, please cite the following paper:  
+For publications, please cite the following paper:
 
 Almansi, M., R. Gelderloos, T. W. N. Haine, A. Saberi, and A. H. Siddiqui (2019). OceanSpy: A Python package to facilitate ocean model data analysis and visualization. *Journal of Open Source Software*, 4(39), 1506, doi: https://doi.org/10.21105/joss.01506 .
 
@@ -20,9 +20,9 @@ This material is based upon work supported by the National Science Foundation un
 
 What is OceanSpy?
 -----------------
-**OceanSpy** is an open-source and user-friendly Python package that enables scientists and interested amateurs to analyze and visualize ocean model datasets. 
-OceanSpy builds on software packages developed by the Pangeo_ community, in particular xarray_, dask_, and xgcm_. 
-The integration of dask facilitates scalability, which is important for the petabyte-scale simulations that are becoming available. 
+**OceanSpy** is an open-source and user-friendly Python package that enables scientists and interested amateurs to analyze and visualize ocean model datasets.
+OceanSpy builds on software packages developed by the Pangeo_ community, in particular xarray_, dask_, and xgcm_.
+The integration of dask facilitates scalability, which is important for the petabyte-scale simulations that are becoming available.
 
 Why OceanSpy?
 -------------
@@ -69,7 +69,7 @@ OceanSpy can be used as a standalone package for analysis of local circulation m
 .. |CI| image:: https://img.shields.io/github/workflow/status/hainegroup/oceanspy/CI?logo=github
     :alt: CI
     :target: https://github.com/hainegroup/oceanspy/actions
-    
+
 .. |codecov| image:: https://codecov.io/github/hainegroup/oceanspy/coverage.svg?branch=main
     :alt: Coverage
     :target: https://codecov.io/github/hainegroup/oceanspy?branch=main
@@ -81,11 +81,11 @@ OceanSpy can be used as a standalone package for analysis of local circulation m
 .. |license| image:: https://img.shields.io/github/license/mashape/apistatus.svg
    :alt: License
    :target: https://github.com/hainegroup/oceanspy
-   
+
 .. |doi| image:: https://zenodo.org/badge/DOI/10.5281/zenodo.3270646.svg
    :alt: doi
    :target: https://doi.org/10.5281/zenodo.3270646
-   
+
 .. |JOSS| image:: http://joss.theoj.org/papers/10.21105/joss.01506/status.svg
    :alt: JOSS
    :target: https://doi.org/10.21105/joss.01506

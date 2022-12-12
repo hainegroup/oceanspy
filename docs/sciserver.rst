@@ -11,10 +11,10 @@ After creating a user account on Sciserver, use one of the following useful feat
 Compute Interact
 ----------------
 
-SciServer allows to analyze data with an interactive notebook. 
+SciServer allows to analyze data with an interactive notebook.
 Step-by-step instructions for using the interactive mode are available in :ref:`quick`.
 
-The interactive mode runs on a Virtual Machine with 16 cores shared between multiple users. 
+The interactive mode runs on a Virtual Machine with 16 cores shared between multiple users.
 Use it for notebooks that don’t require heavy computations, or to test and design notebooks.
 
 **For experts**: To install packages that are not available by default on the ``Oceanography image``, open a new terminal, then follow these step-by-step instructions:
@@ -22,22 +22,22 @@ Use it for notebooks that don’t require heavy computations, or to test and des
 1. Activate the Oceanography environment:
 
   .. code-block:: bash
-		
+
 		$ conda activate Oceanography
 
 .. note::
-		
+
 	If you get a `CommandNotFoundError`, use the following command:
 
 	.. code-block:: bash
 
-		$ conda init bash		
+		$ conda init bash
 
 	Then, open a new terminal and start from scratch:
 
 	.. code-block:: bash
 
-		$ conda activate Oceanography	
+		$ conda activate Oceanography
 
 2. Optional: We suggest to use the following ``conda`` configuration commands:
 
@@ -58,7 +58,7 @@ Compute Jobs
 ------------
 
 `Compute Jobs`_ allows to run notebooks asynchronously.
-Use the job mode to fully exploit the computational power of SciServer. 
+Use the job mode to fully exploit the computational power of SciServer.
 For larger jobs (8 hour maximum), you have exclusive access to 32 logical CPU cores and 240GiB of memory.
 
 .. note::
@@ -73,7 +73,7 @@ For larger jobs (8 hour maximum), you have exclusive access to 32 logical CPU co
 6. Click on ``Compute Image`` and select ``Oceanography``.
 7. Click on ``Data Volumes`` and select ``Ocean Circulation``.
 8. Click on ``User Volumes`` and select the volumes that are needed by the Job (e.g., ``persistent`` and/or ``scratch``).
-9. Click on ``Notebook`` and select the Jupyter Notebook that you want to execute. 
+9. Click on ``Notebook`` and select the Jupyter Notebook that you want to execute.
 10. Select a ``Working Directory``, which is the location where the executed notebook and its output will be stored (you can just use the default ``jobs`` directory that will be created in your ``Temporary volume``).
 
 The ``Oceanography image`` does not include any extra packages installed in your interactive containers.

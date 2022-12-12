@@ -1,6 +1,6 @@
 plugins:
   source:
-    - module: intake_xarray
+  - module: intake_xarray
 sources:
 
   # ===========================
@@ -16,27 +16,27 @@ sources:
         drop_variables: ['RC', 'RF', 'RU', 'RL']
     metadata:
       manipulate_coords:
-        fillna: True
-        coords1Dfrom2D: True
-      grid_coords: 
-        add_midp: True
+        fillna: true
+        coords1Dfrom2D: true
+      grid_coords:
+        add_midp: true
         grid_coords:
           Y:
-            Y: 
+            Y:
             Yp1: 0.5
           X:
-            X: 
+            X:
             Xp1: 0.5
           Z:
-           Z: 
-           Zp1: 0.5
-           Zu: 0.5
-           Zl: -0.5
-          time: 
+            Z:
+            Zp1: 0.5
+            Zu: 0.5
+            Zl: -0.5
+          time:
             time: -0.5
-      shift_averages: 
+      shift_averages:
         averageList:
-      isel: 
+      isel:
         Z: slice(None, 55)
         Zp1: slice(None, 56)
         Zu: slice(None, 55)
@@ -50,8 +50,8 @@ sources:
         eq_state: jmd95
         rho0: 1027
         g: 9.81
-        eps_nh: 0 
-        omega: 7.292123516990375e-05
+        eps_nh: 0
+        omega: 7.292123516990373e-05
         c_p: 3.986e+03
         tempFrz0: 9.01e-02
         dTempFrz_dS: -5.75e-02
@@ -64,7 +64,7 @@ sources:
         EGshelfIIseas2km_ASR_full: Full domain without variables to close budgets.
         EGshelfIIseas2km_ASR_crop: Cropped domain with variables to close budgets.
       projection: Mercator
-            
+
   fld_get_started:
     description: Full-Fields of get_started
     driver: netcdf
@@ -74,7 +74,7 @@ sources:
       xarray_kwargs:
         engine: netcdf4
     metadata:
-      isel: 
+      isel:
         Z: slice(None, 55)
         Zl: slice(None, 55)
         X: slice(529, 736)
@@ -84,7 +84,7 @@ sources:
       rename:
         T: time
       original_output: snapshot
-      
+
   avg_get_started:
     description: Cropped-Fields of get_started
     driver: netcdf
@@ -94,9 +94,9 @@ sources:
       xarray_kwargs:
         engine: netcdf4
     metadata:
-      isel: 
+      isel:
         time: slice(4)
-      rename: 
+      rename:
         T: time
       original_output: average
 
@@ -112,36 +112,32 @@ sources:
         drop_variables: ['RC', 'RF', 'RU', 'RL']
     metadata:
       manipulate_coords:
-        coordsUVfromG: True
-      grid_coords: 
-        add_midp: True
+        coordsUVfromG: true
+      grid_coords:
+        add_midp: true
         grid_coords:
           Y:
-            Y: 
+            Y:
             Yp1: 0.5
           X:
-            X: 
+            X:
             Xp1: 0.5
           Z:
-           Z: 
-           Zp1: 0.5
-           Zu: 0.5
-           Zl: -0.5
-          time: 
+            Z:
+            Zp1: 0.5
+            Zu: 0.5
+            Zl: -0.5
+          time:
             time: -0.5
-      shift_averages: 
-        averageList: ['UVELMASS', 'VVELMASS', 'WVELMASS',
-                      'ADVr_TH', 'ADVx_TH', 'ADVy_TH', 'DFrI_TH',
-                      'ADVr_SLT', 'ADVx_SLT', 'ADVy_SLT', 'DFrI_SLT',
-                      'KPPg_TH', 'KPPg_SLT', 'oceSPtnd',
-                      'oceQsw_AVG', 'TFLUX', 'SFLUX', 'oceFWflx_AVG']
+      shift_averages:
+        averageList: ['UVELMASS', 'VVELMASS', 'WVELMASS', 'ADVr_TH', 'ADVx_TH', 'ADVy_TH', 'DFrI_TH', 'ADVr_SLT', 'ADVx_SLT', 'ADVy_SLT', 'DFrI_SLT', 'KPPg_TH', 'KPPg_SLT', 'oceSPtnd', 'oceQsw_AVG', 'TFLUX', 'SFLUX', 'oceFWflx_AVG']
       parameters:
         rSphere: 6.371e+03
         eq_state: mdjwf
         rho0: 1027
         g: 9.8156
-        eps_nh: 0 
-        omega: 7.292123516990375e-05
+        eps_nh: 0
+        omega: 7.292123516990373e-05
         c_p: 3.986e+03
         tempFrz0: 9.01e-02
         dTempFrz_dS: -5.75e-02
@@ -149,7 +145,7 @@ sources:
       description: |
         High-resolution numerical simulation carried out in parallel to the observational
         component of the Iceland Greenland Seas Project (IGP).
-      citation: | 
+      citation: |
         Renfrew et al., 2019 - BAMS.
       projection: Mercator
 
@@ -161,11 +157,11 @@ sources:
       xarray_kwargs:
         engine: netcdf4
         concat_dim: T
-        parallel: True
+        parallel: true
         combine: nested
     metadata:
       rename:
-        T: time  
+        T: time
 
   # ===========================
   # IGPyearlong
@@ -179,36 +175,32 @@ sources:
         drop_variables: ['RC', 'RF', 'RU', 'RL']
     metadata:
       manipulate_coords:
-        coordsUVfromG: True
-      grid_coords: 
-        add_midp: True
+        coordsUVfromG: true
+      grid_coords:
+        add_midp: true
         grid_coords:
           Y:
-            Y: 
+            Y:
             Yp1: 0.5
           X:
-            X: 
+            X:
             Xp1: 0.5
           Z:
-           Z: 
-           Zp1: 0.5
-           Zu: 0.5
-           Zl: -0.5
-          time: 
+            Z:
+            Zp1: 0.5
+            Zu: 0.5
+            Zl: -0.5
+          time:
             time: -0.5
-      shift_averages: 
-        averageList: ['UVELMASS', 'VVELMASS', 'WVELMASS',
-                      'ADVr_TH', 'ADVx_TH', 'ADVy_TH', 'DFrI_TH',
-                      'ADVr_SLT', 'ADVx_SLT', 'ADVy_SLT', 'DFrI_SLT',
-                      'KPPg_TH', 'KPPg_SLT', 'oceSPtnd',
-                      'oceQsw_AVG', 'TFLUX', 'SFLUX', 'oceFWflx_AVG']
+      shift_averages:
+        averageList: ['UVELMASS', 'VVELMASS', 'WVELMASS', 'ADVr_TH', 'ADVx_TH', 'ADVy_TH', 'DFrI_TH', 'ADVr_SLT', 'ADVx_SLT', 'ADVy_SLT', 'DFrI_SLT', 'KPPg_TH', 'KPPg_SLT', 'oceSPtnd', 'oceQsw_AVG', 'TFLUX', 'SFLUX', 'oceFWflx_AVG']
       parameters:
         rSphere: 6.371e+03
         eq_state: mdjwf
         rho0: 1027
         g: 9.8156
-        eps_nh: 0 
-        omega: 7.292123516990375e-05
+        eps_nh: 0
+        omega: 7.292123516990373e-05
         c_p: 3.986e+03
         tempFrz0: 9.01e-02
         dTempFrz_dS: -5.75e-02
@@ -216,7 +208,7 @@ sources:
       description: |
         High-resolution numerical simulation carried out in parallel to the observational
         component of the Iceland Greenland Seas Project (IGP). Year-long simulation.
-      citation: | 
+      citation: |
         Renfrew et al., 2019 - BAMS.
       projection: Mercator
 
@@ -228,7 +220,7 @@ sources:
       xarray_kwargs:
         engine: netcdf4
         concat_dim: T
-        parallel: True
+        parallel: true
         combine: nested
     metadata:
       rename:
@@ -247,46 +239,46 @@ sources:
         drop_variables: ['RC', 'RF', 'RU', 'RL']
     metadata:
       manipulate_coords:
-        fillna: True
-        coords1Dfrom2D: True
+        fillna: true
+        coords1Dfrom2D: true
       grid_coords:
-        add_midp: True
+        add_midp: true
         grid_coords:
           Y:
-            Y: 
+            Y:
             Yp1: 0.5
           X:
-            X: 
+            X:
             Xp1: 0.5
           Z:
-           Z: 
-           Zp1: 0.5
-           Zu: 0.5
-           Zl: -0.5
-          time: 
+            Z:
+            Zp1: 0.5
+            Zu: 0.5
+            Zl: -0.5
+          time:
             time: -0.5
       parameters:
         rSphere: 6.371e+03
         eq_state: jmd95
         rho0: 1027
         g: 9.81
-        eps_nh: 0 
-        omega: 7.292123516990375e-05
+        eps_nh: 0
+        omega: 7.292123516990373e-05
         c_p: 3.986e+03
         tempFrz0: 9.01e-02
         dTempFrz_dS: -5.75e-02
       name: EGshelfIIseas2km_ERAI_6H
       description: |
-        High-resolution (~2km) numerical simulation covering the east Greenland shelf (EGshelf), 
-        and the Iceland and Irminger Seas (IIseas) forced by ERA-Interim. 
-      citation: | 
+        High-resolution (~2km) numerical simulation covering the east Greenland shelf (EGshelf),
+        and the Iceland and Irminger Seas (IIseas) forced by ERA-Interim.
+      citation: |
         Almansi et al., 2017 - JPO.
-      characteristics: | 
+      characteristics: |
         6H: 6-hour resolution without sea ice and external forcing variables.
-      mates: | 
+      mates: |
         EGshelfIIseas2km_ERAI_1D: 1-day resolution with sea ice and external forcing variables.
       projection: Mercator
-            
+
   fld_EGshelfIIseas2km_ERAI_6H:
     description: 6H-Fields of EGshelfIIseas2km_ERAI_6H
     driver: netcdf
@@ -296,14 +288,14 @@ sources:
       xarray_kwargs:
         engine: netcdf4
         concat_dim: T
-        parallel: True
+        parallel: true
         combine: nested
     metadata:
       rename:
         T: time
       original_output: snapshot
-      
-  # ===========================  
+
+  # ===========================
   # EGshelfIIseas2km_ERAI_1D
   grd_EGshelfIIseas2km_ERAI_1D:
     description: Grid of EGshelfIIseas2km_ERAI_1D
@@ -316,43 +308,43 @@ sources:
         drop_variables: ['RC', 'RF', 'RU', 'RL']
     metadata:
       manipulate_coords:
-        fillna: True
-        coords1Dfrom2D: True
-      grid_coords: 
-        add_midp: True
+        fillna: true
+        coords1Dfrom2D: true
+      grid_coords:
+        add_midp: true
         grid_coords:
           Y:
-            Y: 
+            Y:
             Yp1: 0.5
           X:
-            X: 
+            X:
             Xp1: 0.5
           Z:
-           Z: 
-           Zp1: 0.5
-           Zu: 0.5
-           Zl: -0.5
-          time: 
+            Z:
+            Zp1: 0.5
+            Zu: 0.5
+            Zl: -0.5
+          time:
             time: -0.5
       parameters:
         rSphere: 6.371e+03
         eq_state: jmd95
         rho0: 1027
         g: 9.81
-        eps_nh: 0 
-        omega: 7.292123516990375e-05
+        eps_nh: 0
+        omega: 7.292123516990373e-05
         c_p: 3.986e+03
         tempFrz0: 9.01e-02
         dTempFrz_dS: -5.75e-02
       name: EGshelfIIseas2km_ERAI_1D
       description: |
-        High-resolution (~2km) numerical simulation covering the east Greenland shelf (EGshelf), 
-        and the Iceland and Irminger Seas (IIseas) forced by ERA-Interim. 
-      citation: | 
+        High-resolution (~2km) numerical simulation covering the east Greenland shelf (EGshelf),
+        and the Iceland and Irminger Seas (IIseas) forced by ERA-Interim.
+      citation: |
         Almansi et al., 2017 - JPO.
-      characteristics: | 
+      characteristics: |
         1D: 1-day resolution with sea ice and external forcing variables.
-      mates: | 
+      mates: |
         EGshelfIIseas2km_ERAI_6H: 6-hour resolution without sea ice and external forcing variables.
       projection: Mercator
 
@@ -365,13 +357,13 @@ sources:
       xarray_kwargs:
         engine: netcdf4
         concat_dim: T
-        parallel: True
+        parallel: true
         combine: nested
     metadata:
       rename:
         T: time
       original_output: snapshot
-      isel: 
+      isel:
         time: slice(None, None, 4)
 
   dailyEGshelfIIseas2km_ERAI_1D:
@@ -383,13 +375,13 @@ sources:
       xarray_kwargs:
         engine: netcdf4
         concat_dim: T
-        parallel: True
+        parallel: true
         combine: nested
     metadata:
       rename:
         T: time
       original_output: snapshot
-      
+
   # ===========================
   # EGshelfIIseas2km_ASR_full
   grd_EGshelfIIseas2km_ASR_full:
@@ -403,23 +395,23 @@ sources:
         drop_variables: ['RC', 'RF', 'RU', 'RL']
     metadata:
       manipulate_coords:
-        fillna: True
-        coords1Dfrom2D: True
-      grid_coords: 
-        add_midp: True
+        fillna: true
+        coords1Dfrom2D: true
+      grid_coords:
+        add_midp: true
         grid_coords:
           Y:
-            Y: 
+            Y:
             Yp1: 0.5
           X:
-            X: 
+            X:
             Xp1: 0.5
           Z:
-           Z: 
-           Zp1: 0.5
-           Zu: 0.5
-           Zl: -0.5
-          time: 
+            Z:
+            Zp1: 0.5
+            Zu: 0.5
+            Zl: -0.5
+          time:
             time: -0.5
       parameters:
         rSphere: 6.371e+03
@@ -427,19 +419,19 @@ sources:
         rho0: 1027
         g: 9.81
         eps_nh: 0
-        omega: 7.292123516990375e-05
+        omega: 7.292123516990373e-05
         c_p: 3.986e+03
         tempFrz0: 9.01e-02
         dTempFrz_dS: -5.75e-02
       name: EGshelfIIseas2km_ASR_full
       description: |
-        High-resolution (~2km) numerical simulation covering the east Greenland shelf (EGshelf), 
-        and the Iceland and Irminger Seas (IIseas) forced by the Arctic System Reanalysis (ASR). 
-      citation: | 
+        High-resolution (~2km) numerical simulation covering the east Greenland shelf (EGshelf),
+        and the Iceland and Irminger Seas (IIseas) forced by the Arctic System Reanalysis (ASR).
+      citation: |
         Almansi et al., 2020 - GRL.
       characteristics: |
         full: Full domain without variables to close budgets.
-      mates: | 
+      mates: |
         EGshelfIIseas2km_ASR_crop: Cropped domain with variables to close budgets.
       projection: Mercator
 
@@ -452,13 +444,13 @@ sources:
       xarray_kwargs:
         engine: netcdf4
         concat_dim: T
-        parallel: True
+        parallel: true
         combine: nested
     metadata:
       rename:
         T: time
       original_output: snapshot
-       
+
   # ===========================
   # EGshelfIIseas2km_ASR_crop
   grd_EGshelfIIseas2km_ASR_crop:
@@ -472,27 +464,27 @@ sources:
         drop_variables: ['RC', 'RF', 'RU', 'RL']
     metadata:
       manipulate_coords:
-        fillna: True
-        coords1Dfrom2D: True
-      grid_coords: 
-        add_midp: True
+        fillna: true
+        coords1Dfrom2D: true
+      grid_coords:
+        add_midp: true
         grid_coords:
           Y:
-            Y: 
+            Y:
             Yp1: 0.5
           X:
-            X: 
+            X:
             Xp1: 0.5
           Z:
-           Z: 
-           Zp1: 0.5
-           Zu: 0.5
-           Zl: -0.5
-          time: 
+            Z:
+            Zp1: 0.5
+            Zu: 0.5
+            Zl: -0.5
+          time:
             time: -0.5
-      shift_averages: 
+      shift_averages:
         averageList:
-      isel: 
+      isel:
         Z: slice(None, 55)
         Zp1: slice(None, 56)
         Zu: slice(None, 55)
@@ -506,23 +498,23 @@ sources:
         eq_state: jmd95
         rho0: 1027
         g: 9.81
-        eps_nh: 0 
-        omega: 7.292123516990375e-05
+        eps_nh: 0
+        omega: 7.292123516990373e-05
         c_p: 3.986e+03
         tempFrz0: 9.01e-02
         dTempFrz_dS: -5.75e-02
       name: EGshelfIIseas2km_ASR_crop
       description: |
-        High-resolution (~2km) numerical simulation covering the east Greenland shelf (EGshelf), 
-        and the Iceland and Irminger Seas (IIseas) forced by the Arctic System Reanalysis (ASR). 
-      citation: | 
+        High-resolution (~2km) numerical simulation covering the east Greenland shelf (EGshelf),
+        and the Iceland and Irminger Seas (IIseas) forced by the Arctic System Reanalysis (ASR).
+      citation: |
         Almansi et al., 2020 - GRL.
-      characteristics: | 
+      characteristics: |
         crop: Cropped domain with variables to close budgets.
-      mates: | 
+      mates: |
         EGshelfIIseas2km_ASR_full: Full domain without variables to close budgets.
       projection: Mercator
-            
+
   fld_EGshelfIIseas2km_ASR_crop:
     description: Full-Fields of EGshelfIIseas2km_ASR_crop
     driver: netcdf
@@ -532,10 +524,10 @@ sources:
       xarray_kwargs:
         engine: netcdf4
         concat_dim: T
-        parallel: True
+        parallel: true
         combine: nested
     metadata:
-      isel: 
+      isel:
         Z: slice(None, 55)
         Zl: slice(None, 55)
         X: slice(529, 736)
@@ -545,7 +537,7 @@ sources:
       rename:
         T: time
       original_output: snapshot
-      
+
   avg_EGshelfIIseas2km_ASR_crop:
     description: Cropped-Fields of EGshelfIIseas2km_ASR_crop
     driver: netcdf
@@ -555,13 +547,13 @@ sources:
       xarray_kwargs:
         engine: netcdf4
         concat_dim: T
-        parallel: True
+        parallel: true
         combine: nested
     metadata:
-      rename: 
+      rename:
         T: time
       original_output: average
-  
+
   # ===========================
   # Arctic Control
   grd_Arctic_Control:
@@ -576,32 +568,32 @@ sources:
         drop_variables: ['RC', 'RF', 'RU', 'RL']
     metadata:
       manipulate_coords:
-        coordsUVfromG: True
-      grid_coords: 
-        add_midp: True
+        coordsUVfromG: true
+      grid_coords:
+        add_midp: true
         grid_coords:
           Y:
-            Y: 
+            Y:
             Yp1: 0.5
           X:
-            X: 
+            X:
             Xp1: 0.5
           Z:
-           Z: 
-           Zp1: 0.5
-           Zu: 0.5
-           Zl: -0.5
-          time: 
+            Z:
+            Zp1: 0.5
+            Zu: 0.5
+            Zl: -0.5
+          time:
             time: -0.5
-      shift_averages: 
+      shift_averages:
         averageList:
       parameters:
         rSphere: 6.371e+03
         eq_state: jmd95
         rho0: 1027
         g: 9.81
-        eps_nh: 0 
-        omega: 7.292123516990375e-05
+        eps_nh: 0
+        omega: 7.292123516990373e-05
         c_p: 3.986e+03
         tempFrz0: 9.01e-02
         dTempFrz_dS: -5.75e-02
@@ -611,7 +603,7 @@ sources:
       description: |
         Curvilinear grid test. Setup by Dr. Renske Gelderloos.
       projection: NorthPolarStereo
-        
+
   fld_Arctic_Control:
     description: Average fields of Arctic_Control
     driver: netcdf
@@ -622,7 +614,7 @@ sources:
       xarray_kwargs:
         engine: netcdf4
         concat_dim: T
-        parallel: True
+        parallel: true
         combine: nested
         drop_variables: ['diag_levels', 'iter', 'SIGMA0']
     metadata:
@@ -630,7 +622,7 @@ sources:
         T: time
         THETA: Temp
       original_output: average
-            
+
   state_Arctic_Control:
     description: State variables of Arctic_Control
     driver: netcdf
@@ -641,7 +633,7 @@ sources:
       xarray_kwargs:
         engine: netcdf4
         concat_dim: T
-        parallel: True
+        parallel: true
         combine: nested
     metadata:
       rename:
@@ -654,7 +646,7 @@ sources:
     args:
       urlpath: '/home/idies/workspace/poseidon/data*/llc4320_tests/10dayhourly/scalars'
       engine: zarr
-      parallel: True
+      parallel: true
     metadata:
       swap_dims:
         k: Z
@@ -674,7 +666,7 @@ sources:
         rho0: 1027
         g: 9.81
         eps_nh: 0
-        omega: 7.292123516990375e-05
+        omega: 7.292123516990373e-05
         c_p: 3.986e+03
         tempFrz0: 9.01e-02
         dTempFrz_dS: -5.75e-02
@@ -691,7 +683,7 @@ sources:
     args:
       urlpath: '/home/idies/workspace/poseidon/data*/llc4320_tests/10dayhourly/velocities'
       engine: zarr
-      parallel: True
+      parallel: true
     metadata:
       swap_dims:
         k: Z
@@ -709,7 +701,7 @@ sources:
         rho0: 1027
         g: 9.81
         eps_nh: 0
-        omega: 7.292123516990375e-05
+        omega: 7.292123516990373e-05
         c_p: 3.986e+03
         tempFrz0: 9.01e-02
         dTempFrz_dS: -5.75e-02
@@ -739,9 +731,9 @@ sources:
         j_g: Yp1
         hFacC: HFacC
         hFacW: HFacW
-        hFacS: HFacS 
+        hFacS: HFacS
       grid_coords:
-        add_midp: True
+        add_midp: true
         grid_coords:
           Y:
             Y:
@@ -750,11 +742,11 @@ sources:
             X:
             Xp1: -0.5
           Z:
-           Z:
-           Zp1: 0.5
-           Zu: 0.5
-           Zl: -0.5
-          time: 
+            Z:
+            Zp1: 0.5
+            Zu: 0.5
+            Zl: -0.5
+          time:
             time: -0.5
       face_connections: # topology
         face_connections:
@@ -777,7 +769,7 @@ sources:
             5:
               X: tuple(((2, 'X', False), (7, 'Y', False)))
               Y: tuple(((4, 'Y', False), (6, 'Y', False)))
-            6: 
+            6:
               X: tuple(((2, 'Y', False), (7, 'X', False)))
               Y: tuple(((5, 'Y', False), (10, 'X', False)))
             7:
@@ -792,10 +784,10 @@ sources:
             10:
               X: tuple(((6, 'Y', False), (11, 'X', False)))
               Y: tuple(((7, 'Y', False), (2, 'X', False)))
-            11: 
+            11:
               X: tuple(((10, 'X', False), (12, 'X', False)))
               Y: tuple(((8, 'Y', False), (1, 'X', False)))
-            12: 
+            12:
               X: tuple(((11, 'X', False), None))
               Y: tuple(((9, 'Y', False), (0, 'X', False)))
       parameters:
@@ -804,7 +796,7 @@ sources:
         rho0: 1027
         g: 9.81
         eps_nh: 0
-        omega: 7.292123516990375e-05
+        omega: 7.292123516990373e-05
         c_p: 3.986e+03
         tempFrz0: 9.01e-02
         dTempFrz_dS: -5.75e-02
@@ -816,7 +808,7 @@ sources:
 
 # ======================================================================
 # ECCOv4r4 data
-  ECCO_v4r4: 
+  ECCO_v4r4:
     description: ECCO version 4 release 4 dataset with fields necessary to close heat, salt and volume budgets
     driver: zarr
     model: MITGCM
@@ -824,7 +816,7 @@ sources:
       urlpath: '/home/idies/workspace/OceanCirculation/ECCO_v4r4/ecco_v4r4'
       #drop_variables: ['k_u', 'k_p1', 'k_l', 'k']
     metadata:
-      swap_dims: 
+      swap_dims:
         k: Z
         k_p1: Zp1
         k_u: Zu
@@ -839,7 +831,7 @@ sources:
         hFacS: HFacS
         hFacW: HFacW
       grid_coords:
-        add_midp: True
+        add_midp: true
         grid_coords:
           Y:
             Y:
@@ -848,11 +840,11 @@ sources:
             X:
             Xp1: -0.5
           Z:
-           Z:
-           Zp1: 0.5
-           Zu: 0.5
-           Zl: -0.5
-          time: 
+            Z:
+            Zp1: 0.5
+            Zu: 0.5
+            Zl: -0.5
+          time:
             time: -0.5
       face_connections: # topology
         face_connections:
@@ -875,7 +867,7 @@ sources:
             5:
               X: tuple(((2, 'X', False), (7, 'Y', False)))
               Y: tuple(((4, 'Y', False), (6, 'Y', False)))
-            6: 
+            6:
               X: tuple(((2, 'Y', False), (7, 'X', False)))
               Y: tuple(((5, 'Y', False), (10, 'X', False)))
             7:
@@ -890,25 +882,25 @@ sources:
             10:
               X: tuple(((6, 'Y', False), (11, 'X', False)))
               Y: tuple(((7, 'Y', False), (2, 'X', False)))
-            11: 
+            11:
               X: tuple(((10, 'X', False), (12, 'X', False)))
               Y: tuple(((8, 'Y', False), (1, 'X', False)))
-            12: 
+            12:
               X: tuple(((11, 'X', False), None))
-              Y: tuple(((9, 'Y', False), (0, 'X', False)))  
+              Y: tuple(((9, 'Y', False), (0, 'X', False)))
       parameters:
         rSphere: 6.371e+03
         eq_state: jmd95
         rho0: 1027
         g: 9.81
-        eps_nh: 0 
-        omega: 7.292123516990375e-05
+        eps_nh: 0
+        omega: 7.292123516990373e-05
         c_p: 3.986e+03
         tempFrz0: 9.01e-02
         dTempFrz_dS: -5.75e-02
       name: ECCO_v4r4
       description: ECCO v4r4 3D dataset, ocean simulations on LLC90 grid
-      citation: 
+      citation:
       projection:
       original_output: snapshot
 
@@ -922,32 +914,31 @@ sources:
     args:
       urlpath: /home/idies/workspace/poseidon/data10_01/HyCOM
     xarray_kwargs:
-        engine: zarr
+      engine: zarr
     metadata:
       rename:
         lon: XC
         lat: YC
       grid_coords:
-        add_midp: True
+        add_midp: true
         grid_coords:
           Y:
-            Y: 
+            Y:
             Yp1: 0.5
           X:
-            X: 
+            X:
             Xp1: 0.5
           Z:
-            Z: 
+            Z:
             Zp1: 0.5
             Zu: 0.5
             Zl: -0.5
-          time: 
+          time:
             time: -0.5
       name: California_Coast
       description: |
         High-resolution grid of the (1/25 deg) numerical simulation covering the California Coast using the HyCOM model. The original grid has 41 (isopycnal) layers but these files were interpolated to 101 vertical levels.
-      mates: | 
+      mates: |
         Sample (test) files
       projection: Mercator
       original_output: snapshot
-

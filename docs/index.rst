@@ -17,7 +17,7 @@
    Kogur
    Particles
    Statistics
-   
+
 .. toctree::
    :maxdepth: 1
    :caption: Help & Reference
@@ -26,4 +26,3 @@
    contributing
    people
    history
-

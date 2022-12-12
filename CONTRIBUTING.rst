@@ -4,7 +4,7 @@
 Contributing
 ============
 | Report bugs and submit feedback at https://github.com/hainegroup/oceanspy/issues.
-| Don't forget to add yourself to the list of :ref:`people` contributing to OceanSpy! 
+| Don't forget to add yourself to the list of :ref:`people` contributing to OceanSpy!
 
 .. _using_git:
 
@@ -15,7 +15,7 @@ Git_ is the distributed version control system used to develop OceanSpy, while G
 
 **Go to** GitHub_:
 
-1. If you don't have an account yet, Sign up. Otherwise, Sign in. 
+1. If you don't have an account yet, Sign up. Otherwise, Sign in.
 
 2. Go to the OceanSpy_ GitHub repository, then fork the project using the fork button.
 
@@ -30,21 +30,21 @@ Git_ is the distributed version control system used to develop OceanSpy, while G
 
 4. Create a local clone:
 
-   .. code-block:: bash 
+   .. code-block:: bash
 
     $ git clone https://github.com/your_username_here/oceanspy.git
 
 5. Move into your local clone directory, then set up a remote that points to the original:
 
    .. code-block:: bash
-    
+
     $ cd oceanspy
     $ git remote add upstream https://github.com/hainegroup/oceanspy.git
 
 6. Make a new branch from ``upstream/main``:
 
    .. code-block:: bash
-        
+
     $ git fetch upstream
     $ git checkout -b name_of_your_new_branch
 
@@ -62,21 +62,21 @@ Git_ is the distributed version control system used to develop OceanSpy, while G
 9. To stage files ready for a commit, use the following command:
 
    .. code-block:: bash
-           
+
     $ git add .
 
 10. To save changes, use the following command:
 
-   .. code-block:: bash 
-               
-    $ git commit -m "Message describing your edits" 
+   .. code-block:: bash
+
+    $ git commit -m "Message describing your edits"
 
    You can repeat ``git add`` and ``git commit`` multiple times before pushing the branch online.
 
 11. To push the branch online, use the following command:
 
    .. code-block:: bash
-           
+
     $ git push -u origin name_of_your_branch
 
 12. Go to your OceanSpy fork on GitHub_ *(https://github.com/your_username_here/oceanspy)* and click on ``Compare and Pull``.
@@ -97,13 +97,13 @@ It is written in reStructuredText_.
 
 2. Move into the directory containing the documentation:
 
-   .. code-block:: bash 
-           
+   .. code-block:: bash
+
     $ cd oceanspy/docs
 
 3. In order to build the documentation, you need to create a Conda_ environment:
 
-   .. code-block:: bash 
+   .. code-block:: bash
 
     $ conda config --set channel_priority strict
     $ conda config --prepend channels conda-forge
@@ -120,7 +120,7 @@ It is written in reStructuredText_.
 5. To build the documentation, use the following command:
 
    .. code-block:: bash
-           
+
     $ make html
 
    If you want to start from a clean build, run ``make clean`` before ``make html``.
@@ -142,13 +142,13 @@ Continuous Integration and Test Coverage links: |CI| |codecov|
 2. If you are not already into your local clone directory, move there:
 
    .. code-block:: bash
-           
+
     $ cd oceanspy
 
 3. Create a test environment:
 
    .. code-block:: bash
-    
+
     $ conda config --set channel_priority strict
     $ conda config --prepend channels conda-forge
     $ conda env create -f ci/environment.yml
@@ -161,8 +161,8 @@ Continuous Integration and Test Coverage links: |CI| |codecov|
 
 5. Install OceanSpy in development mode:
 
-   .. code-block:: bash 
-           
+   .. code-block:: bash
+
     $ pip install -e .
 
 6. Edit and/or add new files.
@@ -171,7 +171,7 @@ Continuous Integration and Test Coverage links: |CI| |codecov|
 
 8. Make sure that the code is well tested by adding or improving tests in the ``oceanspy/tests`` repository. The python package used to test OceanSpy is pytest_. Use the following command to run the test and measure the code coverage:
 
-   .. code-block:: bash 
+   .. code-block:: bash
 
     $ py.test oceanspy -v --cov=oceanspy --cov-config .coveragerc --cov-report term-missing
 
@@ -179,8 +179,8 @@ Continuous Integration and Test Coverage links: |CI| |codecov|
 
 10. Make sure that the code follows the style guide using the following commands:
 
-   .. code-block:: bash 
-           
+   .. code-block:: bash
+
     $ conda install -c conda-forge pre-commit
     $ pre-commit run --all
 
@@ -188,52 +188,23 @@ Continuous Integration and Test Coverage links: |CI| |codecov|
 
     Run the following command to automatically run `black` and `flake8` each time `git commit` is used:
 
-      .. code-block:: bash 
+      .. code-block:: bash
 
        $ pre-commit install
-           
+
 
 
 Deploying
 ---------
 
-Python Package Index (PyPI) link: |version|
+|version| |conda-version|
 
-A reminder for the maintainers on how to deploy.
+1. Issue a new release on GitHub
 
-1. Download and install bump2version
+2. The release on PyPI is done automatically
 
-   .. code-block:: bash
+3. Merge the `oceanspy-feedstock`_ PR automatically opened by conda-forge
 
-    $ pip install --upgrade bump2version
-
-2. Update ``HISTORY.rst``
-
-3. Use git to ``add`` and ``commit`` changes
-
-4. Update version number
-
-   .. code-block:: bash
-
-    $ bump2version patch # possible: major / minor / patch
-
-5. Release on PyPI_ by uploading both sdist and wheel:
-
-   .. code-block:: bash
-
-    $ python setup.py sdist upload
-    $ python setup.py bdist_wheel upload 
-
-6. Use git to ``push``
-
-7. Push tags
-
-   .. code-block:: bash
-
-    $ git push --tags
-
-8. Add the release's notes on the `releases' page`_ (copy and paste from ``HISTORY.rst``)
-   
 
 .. _black: "https://black.readthedocs.io"
 .. _Git: https://git-scm.com
@@ -247,7 +218,7 @@ A reminder for the maintainers on how to deploy.
 .. _`releases' page`: https://github.com/hainegroup/oceanspy/releases
 .. _pytest: https://docs.pytest.org/en/latest
 .. _`pytest-html`: https://pypi.org/project/pytest-html
-
+.. _`oceanspy-feedstock`: https://github.com/conda-forge/oceanspy-feedstock
 
 .. |docs| image:: http://readthedocs.org/projects/oceanspy/badge/?version=latest
     :alt: Documentation
@@ -256,13 +227,15 @@ A reminder for the maintainers on how to deploy.
 .. |CI| image:: https://img.shields.io/github/workflow/status/hainegroup/oceanspy/CI?logo=github
     :alt: CI
     :target: https://github.com/hainegroup/oceanspy/actions
- 
+
 .. |codecov| image:: https://codecov.io/github/hainegroup/oceanspy/coverage.svg?branch=main
     :alt: Coverage
     :target: https://codecov.io/github/hainegroup/oceanspy?branch=main
 
 .. |version| image:: https://img.shields.io/pypi/v/oceanspy.svg?style=flat
     :alt: PyPI
-    :target: https://pypi.python.org/pypi/oceanspy
+    :target: https://pypi.python.orig/pypi/oceanspy
 
-
+.. |conda-version| image:: https://anaconda.org/conda-forge/oceanspy/badges/version.svg
+    :alt: conda-forge
+    :target: https://anaconda.org/conda-forge/oceanspy

@@ -2,5 +2,5 @@
 # pep8speaks will use the flake8 configs in `setup.cfg`
 
 scanner:
-    diff_only: False
-    linter: flake8
+  diff_only: false
+  linter: flake8

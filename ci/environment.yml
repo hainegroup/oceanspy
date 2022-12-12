@@ -1,29 +1,29 @@
 name: oceanspy_test
 channels:
-  - conda-forge  
+- conda-forge
 dependencies:
-  - dask
-  - distributed
-  - bottleneck
-  - netCDF4
-  - xarray
-  - cartopy
-  - intake-xarray
-  - geopy
-  - xesmf
-  - esmf
-  - xgcm < 0.7
-  - Ipython
-  - tqdm
-  - pytest
-  - pytest-cov
-  - pytest-env
-  - codecov
-  - ffmpeg
-  - aiohttp
-  - pandas
-  - matplotlib < 3.5.3 
-  - fsspec!=0.9.0
-  - pooch
-  - pip
-  - xmitgcm
+- dask
+- distributed
+- bottleneck
+- netCDF4
+- xarray
+- cartopy
+- intake-xarray
+- geopy
+- xesmf
+- esmf
+- xgcm < 0.7
+- Ipython
+- tqdm
+- pytest
+- pytest-cov
+- pytest-env
+- codecov
+- ffmpeg
+- aiohttp
+- pandas
+- matplotlib < 3.5.3
+- fsspec!=0.9.0
+- pooch
+- pip
+- xmitgcm
