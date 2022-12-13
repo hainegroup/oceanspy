@@ -6,7 +6,7 @@ History
 
 v0.3.0 (2022-12-12)
 -------------------
-Migrated master to main (PR 239 by `Mattia Almansi`_). Allow oceandataset to have dict-style access to 
+Migrated master to main (PR 239 by `Mattia Almansi`_). Allow oceandataset to have dict-style access to
 variables (PR 262 by `Wenrui Jiang`_). Enhancement of oceanspy functionality to sample ocean data defined on llc-grids (PRs 214, 268 and 272, 284 by `Miguel Jimenez Urias`_). Integration with Poseidon viewer in Sciserver (PR 284 by `Miguel Jimenez Urias`_). HyCOM data can be accessed through SciServer (PR 206 by `Miguel Jimenez Urias`_). Bug and other fixes (by `Mattia Almansi`_, `Ali Siddiqui`_, `Tom Haine`_, `Wenrui Jiang`_ and `Miguel Jimenez Urias`_). See release notes for a full list of changes.
 
 v0.2.0 (2020-10-17)
