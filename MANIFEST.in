@@ -1,11 +1,15 @@
-include AUTHORS.rst
 include CONTRIBUTING.rst
 include HISTORY.rst
-include LICENSE
 include README.rst
+include LICENSE
 
-recursive-include oceanspy/tests *
-recursive-exclude * __pycache__
-recursive-exclude * *.py[co]
+graft oceanspy
+
+prune assets
+prune docs
+prune binder
+prune paper
+prune sciserver_catalogs/
+prune *.egg-info
 
 recursive-include docs *.rst conf.py Makefile make.bat *.jpg *.png *.gif

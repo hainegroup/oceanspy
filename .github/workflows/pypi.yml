@@ -3,11 +3,11 @@ name: Publish to PyPI
 on:
   pull_request:
   push:
-  #   branches:
-  #     - main
-  # release:
-  #   types:
-  #     - published
+    branches:
+      - main
+  release:
+    types:
+      - published
 
 jobs:
   packages:
@@ -20,9 +20,9 @@ jobs:
       with:
         python-version: "3.x"
 
-    # - name: Get tags
-    #   run: git fetch --depth=1 origin +refs/tags/*:refs/tags/*
-    #   shell: bash
+    - name: Get tags
+      run: git fetch --depth=1 origin +refs/tags/*:refs/tags/*
+      shell: bash
 
     - name: Install build tools
       run: |
@@ -41,7 +41,7 @@ jobs:
       run: |
         cd dist && python -m pip install oceanspy*.whl
         python -m twine check *
-        python -c "import oceanspy; print(f'oceanspy v{oceanspy.__version__}')" && python -m pytest --pyargs oceanspy
+        python -c "import oceanspy; print(f'oceanspy v{oceanspy.__version__}')"
       shell: bash
 
     - name: Publish a Python distribution to PyPI

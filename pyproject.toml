@@ -36,7 +36,7 @@ testpaths = ["oceanspy/tests"]
 addopts = "-v --cov"
 
 [tool.setuptools]
-py-modules = ["oceanspy"]
+packages = ["oceanspy"]
 
 [tool.setuptools_scm]
 write_to = "oceanspy/version.py"
