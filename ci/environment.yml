@@ -1,4 +1,4 @@
-name: oceanspy_test
+name: ospy_test
 channels:
 - conda-forge
 dependencies:
