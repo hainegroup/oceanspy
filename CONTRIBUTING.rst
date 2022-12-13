@@ -199,11 +199,13 @@ Deploying
 
 |version| |conda-version|
 
-1. Issue a new release on GitHub
+1. Update ``HISTORY.rst``
 
-2. The release on PyPI is done automatically
+2. Issue a new release on GitHub
 
-3. Merge the `oceanspy-feedstock`_ PR automatically opened by conda-forge
+3. The release on PyPI is done automatically
+
+4. Merge the `oceanspy-feedstock`_ PR automatically opened by conda-forge
 
 
 .. _black: "https://black.readthedocs.io"
