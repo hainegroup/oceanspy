@@ -4,6 +4,9 @@
 History
 =======
 
+v0.3.1 (2022-12-14)
+Fix tarball and wheel for new release (PR 295 by `Filipe Fernandes`_).
+
 v0.3.0 (2022-12-12)
 -------------------
 Migrated master to main (PR 239 by `Mattia Almansi`_). Allow oceandataset to have dict-style access to
@@ -27,4 +30,5 @@ Initial release published in the `Journal of Open Source Software`_.
 .. _`Ali Siddiqui`: https://github.com/asiddi24
 .. _`Miguel Jimenez Urias`: https://github.com/Mikejmnez
 .. _`Wenrui Jiang`: https://github.com/MaceKuailv
+.. _`Filipe Fernandes`: https://github.com/ocefpaf
 .. _`Journal of Open Source Software`: https://joss.theoj.org
