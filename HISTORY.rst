@@ -5,6 +5,7 @@ History
 =======
 
 v0.3.1 (2022-12-14)
+-------------------
 Fix tarball and wheel for new release (PR 295 by `Filipe Fernandes`_).
 
 v0.3.0 (2022-12-12)
