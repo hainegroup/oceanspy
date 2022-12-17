@@ -2,7 +2,7 @@ name: rise-environment
 channels:
 - conda-forge
 dependencies:
-- python < 3.10
+- python
 - numpy
 - matplotlib
 - pandas
