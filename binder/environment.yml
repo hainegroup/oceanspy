@@ -12,7 +12,7 @@ dependencies:
 - distributed
 - bottleneck
 - netCDF4
-- xarray < 2022.6
+- xarray
 - cartopy < 0.20
 - esmpy
 - intake-xarray
