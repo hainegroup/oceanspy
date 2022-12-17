@@ -11,7 +11,7 @@ dependencies:
 - intake-xarray
 - geopy
 - xesmf
-- esmf < 8.4
+- esmf
 - xgcm < 0.7
 - Ipython
 - tqdm
