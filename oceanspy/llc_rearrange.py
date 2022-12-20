@@ -21,7 +21,7 @@ _dstype = _xr.core.dataset.Dataset
 
 
 class LLCtransformation:
-    """A class containing the transformation of LLCgrids"""
+    """A class containing the transformation types of LLCgrids"""
 
     def __init__(
         self,
@@ -526,6 +526,9 @@ def arct_connect(ds, varName, faces=None, masking=False, opt=False, ranges=None)
 
 
 def mates(ds):
+    """Defines, when needed, the variable pair and stores the name of the pair (mate)
+    variable as an attribute. This is needed to accurately rotate a vector field.
+    """
     vars_mates = [
         "ADVx_SLT",
         "ADVy_SLT",
@@ -561,7 +564,7 @@ def mates(ds):
 
 
 def rotate_vars(_ds):
-    """using the attribures `mates`, when this function is called it swaps the
+    """Using the attribures `mates`, when this function is called it swaps the
     variables names. This issue is only applicable to llc grid in which the grid
     topology makes it so that u on a rotated face transforms to `+- v` on a lat lon
     grid.
@@ -580,7 +583,7 @@ def rotate_vars(_ds):
 
 
 def shift_dataset(_ds, dims_c, dims_g):
-    """shifts a dataset along a dimension, setting its first element to zero. Need
+    """Shifts a dataset along a dimension, setting its first element to zero. Need
     to provide the dimensions in the form of [center, corner] points. This rotation
     is only used in the horizontal, and so dims_c is either one of `i` or `j`, and
     dims_g is either one of `i_g` or `j_g`. The pair most correspond to the same
@@ -610,7 +613,7 @@ def shift_dataset(_ds, dims_c, dims_g):
 
 
 def reverse_dataset(_ds, dims_c, dims_g, transpose=False):
-    """reverses the dataset along a dimension. Need to provide the dimensions in the
+    """Reverses the dataset along a dimension. Need to provide the dimensions in the
     form of [center, corner] points. This rotation is only used in the horizontal, and
     so dims_c is either one of `i`  or `j`, and dims_g is either one of `i_g` or `j_g`.
     The pair most correspond to the same dimension."""
@@ -689,8 +692,9 @@ def rotate_dataset(
 
 
 def shift_list_ds(_DS, dims_c, dims_g, Ni, facet=1):
-    """given a list of n-datasets, each element of the list gets shifted along the
-    dimensions provided (dims_c and dims_g) so that there is no overlap between them.
+    """Given a list of n-datasets with matching dimensions, each element of the list
+    gets shifted along the dimensions provided (by dims_c and dims_g) so that there
+    is no overlap of values between them.
     """
     _DS = _copy.deepcopy(_DS)
     fac = 1
@@ -730,7 +734,9 @@ def shift_list_ds(_DS, dims_c, dims_g, Ni, facet=1):
 
 
 def combine_list_ds(_DSlist):
-    """combines a list of n-datasets"""
+    """Combines a list of N-xarray.datasets along a dimension. Datasets must have
+    matching dimensions. See `xr.combine_first()`
+    """
     if len(_DSlist) == 0:
         _DSFacet = 0  # No dataset to combine. Return empty
     elif len(_DSlist) == 1:  # a single face
@@ -755,7 +761,7 @@ def combine_list_ds(_DSlist):
 
 
 def flip_v(_ds, co_list=metrics, dims=True, _len=3):
-    """reverses the sign of the vector fields by default along the corner coordinate
+    """Reverses the sign of the vector fields by default along the corner coordinate
     (Xp1 or Yp1). If dims is True, for each variable we infer the dimensions. Otherwise,
     dims is given
 
