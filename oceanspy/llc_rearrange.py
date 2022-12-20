@@ -1,3 +1,8 @@
+"""
+OceanSpy functionality that transforms a dataset with LLC geometry characterized by
+13 faces (or tiles), into one with simple geometry.
+"""
+
 import copy as _copy
 import reprlib
 
