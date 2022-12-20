@@ -1023,7 +1023,7 @@ def _LLC_check_sizes(_DS):
 
 
 def _reorder_ds(_ds, dims_c, dims_g):
-    """Only needed when Pacific -centered data. Corrects the ordering
+    """Only needed when Pacific-centered data. Corrects the ordering
     of y-dim and transposes the data, all lazily."""
 
     _DS = _copy.deepcopy(_ds)
@@ -1047,6 +1047,8 @@ def _reorder_ds(_ds, dims_c, dims_g):
 
 
 class Dims:
+    """Creates a shortcut for dimension`s names associated with an arbitrary variable.
+    """
     axes = "XYZT"  # shortcut axis names
 
     def __init__(self, vars):
