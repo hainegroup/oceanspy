@@ -239,7 +239,3 @@ Class
 ..    :toctree: generated/
 
 ..    llc_rearrange.LLCtransformation.arctic_crown
-
-
-
-

@@ -1047,8 +1047,8 @@ def _reorder_ds(_ds, dims_c, dims_g):
 
 
 class Dims:
-    """Creates a shortcut for dimension`s names associated with an arbitrary variable.
-    """
+    """Creates a shortcut for dimension`s names associated with an arbitrary variable."""
+
     axes = "XYZT"  # shortcut axis names
 
     def __init__(self, vars):
