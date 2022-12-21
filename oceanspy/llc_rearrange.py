@@ -780,6 +780,11 @@ def shift_list_ds(_DS, dims_c, dims_g, Ni, facet=1):
 def combine_list_ds(_DSlist):
     """Combines a list of N-xarray.datasets along a dimension. Datasets must have
     matching dimensions. See `xr.combine_first()`
+
+    References
+    ----------
+    https://docs.xarray.dev/en/stable/generated/xarray.Dataset.combine_first.html
+
     """
     if len(_DSlist) == 0:
         _DSFacet = 0  # No dataset to combine. Return empty
