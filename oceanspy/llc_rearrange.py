@@ -99,16 +99,29 @@ class LLCtransformation:
             if True (default), the transformed dataset has dimensions consistent with a
             staggered C-grid.
 
+
+        Returns
+        -------
+
+        ds: xarray.Dataset
+            face is no longer a dimension of the dataset.
+
+
+        Notes
+        -----
+        This functionality is very similar to subsample.cutout and takes similar arguments.
+
+
         References
         ----------
         https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html
-        
+
         https://docs.xarray.dev/en/stable/generated/xarray.Dataset.chunk.html
+
 
         See Also
         --------
         subsample.cutout
-
         """
 
         print("Warning: This is an experimental feature")
