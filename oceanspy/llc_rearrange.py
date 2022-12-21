@@ -47,7 +47,24 @@ class LLCtransformation:
         self._chunks = chunks
         self._drop = drop
 
-        """
+    @classmethod
+    def arctic_crown(
+        self,
+        ds,
+        varList=None,
+        add_Hbdr=0,
+        XRange=None,
+        YRange=None,
+        faces=None,
+        centered=None,
+        chunks=None,
+        drop=True,
+    ):
+        """This transformation splits the arctic cap (face=6) into four triangular
+        regions and combines all faces in a quasi lat-lon grid. The triangular
+        arctic regions form a crown atop faces {7, 10, 2, 5}. The final size of
+        the transformed dataset depends XRange, YRange or faces.
+
         Parameters
         ----------
         dataset: xarray.Dataset
@@ -83,25 +100,6 @@ class LLCtransformation:
             staggered C-grid.
         """
 
-
-    @classmethod
-    def arctic_crown(
-        self,
-        ds,
-        varList=None,
-        add_Hbdr=0,
-        XRange=None,
-        YRange=None,
-        faces=None,
-        centered=None,
-        chunks=None,
-        drop=True,
-    ):
-        """This transformation splits the arctic cap (face=6) into four triangular
-        regions and combines all faces in a quasi lat-lon grid. The triangular
-        arctic regions form a crown atop faces {7, 10, 2, 5}. The final size of
-        the transformed dataset depends XRange, YRange or faces.
-        """
         print("Warning: This is an experimental feature")
         if "face" not in ds.dims:
             raise ValueError("face does not appear as a dimension of the dataset")
