@@ -109,9 +109,9 @@ class LLCtransformation:
 
         Notes
         -----
-        This functionality is very similar to subsample.cutout, takes on similar
-        arguments and is used internally by subsample.cutout when extracting cutout
-        regions of datasets with face as a dimension.
+        This functionality is very similar to, takes on similar arguments and is used
+        internally by subsample.cutout when extracting cutout regions of datasets with
+        face as a dimension.
 
 
         References
