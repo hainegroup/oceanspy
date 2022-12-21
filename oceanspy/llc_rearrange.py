@@ -67,7 +67,7 @@ class LLCtransformation:
         Parameters
         ----------
         dataset: xarray.Dataset
-            The multi-dimensional, in memory, array database. E.g. `oceandataset._ds`.
+            The multi-dimensional, in memory, array database. e.g., `oceandataset._ds`.
         varList: 1D array_like, str, or None
             List of variables (strings).
         YRange: 1D array_like, scalar, or None
