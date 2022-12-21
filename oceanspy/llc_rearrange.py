@@ -95,9 +95,8 @@ class LLCtransformation:
     ):
         """This transformation splits the arctic cap (face=6) into four triangular
         regions and combines all faces in a quasi lat-lon grid. The triangular
-        arctic regions form a crown atop the faces 7, 10, 2, and 5. The final size of
-        the transformed dataset depends on the range of lat and longitude, or the number
-        of faces to be retains by the transformation.
+        arctic regions form a crown atop faces {7, 10, 2, 5}. The final size of
+        the transformed dataset depends XRange, YRange or faces.
         """
         print("Warning: This is an experimental feature")
         if "face" not in ds.dims:
