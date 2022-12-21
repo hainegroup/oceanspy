@@ -75,8 +75,8 @@ class LLCtransformation:
             Y axis limits (e.g., latitudes).
             If len(YRange)>2, max and min values are used.
         XRange: 1D array_like, scalar, or None
-            X axis limits (e.g., longitudes).
-            If len(XRange)>2, max and min values are used.
+            X axis limits (e.g., longitudes). Can handle (periodic) discontinuity at 
+            lon=180 deg E.
         add_Hbdr: bool, scal
             If scalar, add and subtract `add_Hbdr` to the the horizontal range.
             of the horizontal ranges.
