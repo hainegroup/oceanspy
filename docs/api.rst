@@ -219,7 +219,7 @@ Functions
    utils.Coriolis_parameter
 
 LLC-transformation
-=========
+==================
 .. autosummary::
    :toctree: generated/
 
