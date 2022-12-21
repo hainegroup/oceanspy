@@ -21,40 +21,7 @@ _dstype = _xr.core.dataset.Dataset
 
 
 class LLCtransformation:
-    """A class containing the transformation types of LLCgrids
-    Parameters
-    ----------
-    dataset: xarray.Dataset
-        The multi-dimensional, in memory, array database. E.g. `oceandataset._ds`.
-    varList: 1D array_like, str, or None
-        List of variables (strings).
-    YRange: 1D array_like, scalar, or None
-        Y axis limits (e.g., latitudes).
-        If len(YRange)>2, max and min values are used.
-    XRange: 1D array_like, scalar, or None
-        X axis limits (e.g., longitudes).
-        If len(XRange)>2, max and min values are used.
-    add_Hbdr: bool, scal
-        If scalar, add and subtract `add_Hbdr` to the the horizontal range.
-        of the horizontal ranges.
-        If True, automatically estimate add_Hbdr.
-        If False, add_Hbdr is set to zero.
-    faces: 1D array_like, scalar, or None
-        List of faces to be transformed.
-        If None, entire dataset is transformed.
-        When both [XRange, YRange] and faces are defined, [XRange, YRange] is used.
-    centered: str or bool.
-        If 'Atlantic' (default), the transformation creates a dataset in which the
-        Atlantic Ocean lies at the center of the domain.
-        If 'Pacific', the transformed data has a layout in which the Pacific Ocean
-        lies at the center of the domain.
-        This option is only relevant when transforming the entire dataset.
-    chunks: dict
-        rechunks the dataset according to the spefications of the dictionary. See
-        xarray.chunk().
-    drop: bool.
-        if True (default), the transformed dataset has dimensions consistent with a
-        staggered C-grid.
+    """A class containing the transformation types of LLCgrids.
     """
 
     def __init__(
@@ -79,6 +46,43 @@ class LLCtransformation:
         self._centered = centered
         self._chunks = chunks
         self._drop = drop
+
+        """
+        Parameters
+        ----------
+        dataset: xarray.Dataset
+            The multi-dimensional, in memory, array database. E.g. `oceandataset._ds`.
+        varList: 1D array_like, str, or None
+            List of variables (strings).
+        YRange: 1D array_like, scalar, or None
+            Y axis limits (e.g., latitudes).
+            If len(YRange)>2, max and min values are used.
+        XRange: 1D array_like, scalar, or None
+            X axis limits (e.g., longitudes).
+            If len(XRange)>2, max and min values are used.
+        add_Hbdr: bool, scal
+            If scalar, add and subtract `add_Hbdr` to the the horizontal range.
+            of the horizontal ranges.
+            If True, automatically estimate add_Hbdr.
+            If False, add_Hbdr is set to zero.
+        faces: 1D array_like, scalar, or None
+            List of faces to be transformed.
+            If None, entire dataset is transformed.
+            When both [XRange, YRange] and faces are defined, [XRange, YRange] is used.
+        centered: str or bool.
+            If 'Atlantic' (default), the transformation creates a dataset in which the
+            Atlantic Ocean lies at the center of the domain.
+            If 'Pacific', the transformed data has a layout in which the Pacific Ocean
+            lies at the center of the domain.
+            This option is only relevant when transforming the entire dataset.
+        chunks: dict
+            rechunks the dataset according to the spefications of the dictionary. See
+            xarray.chunk().
+        drop: bool.
+            if True (default), the transformed dataset has dimensions consistent with a
+            staggered C-grid.
+        """
+
 
     @classmethod
     def arctic_crown(
