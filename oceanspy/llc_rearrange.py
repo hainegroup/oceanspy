@@ -91,12 +91,17 @@ class LLCtransformation:
             If 'Pacific', the transformed data has a layout in which the Pacific Ocean
             lies at the center of the domain.
             This option is only relevant when transforming the entire dataset.
-        chunks: dict
-            rechunks the dataset according to the spefications of the dictionary. See
-            xarray.chunk().
+        chunks: bool or dict.
+            If False (default) - chunking is automatic.
+            If dict, rechunks the dataset according to the spefications of the
+            dictionary. See xarray.chunk().
         drop: bool.
             if True (default), the transformed dataset has dimensions consistent with a
             staggered C-grid.
+
+        References
+        ----------
+        https://docs.xarray.dev/en/stable/generated/xarray.Dataset.chunk.html
         """
 
         print("Warning: This is an experimental feature")
