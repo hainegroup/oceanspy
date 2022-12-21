@@ -21,8 +21,7 @@ _dstype = _xr.core.dataset.Dataset
 
 
 class LLCtransformation:
-    """A class containing the transformation types of LLCgrids.
-    """
+    """A class containing the transformation types of LLCgrids."""
 
     def __init__(
         self,
@@ -75,7 +74,7 @@ class LLCtransformation:
             Y axis limits (e.g., latitudes).
             If len(YRange)>2, max and min values are used.
         XRange: 1D array_like, scalar, or None
-            X axis limits (e.g., longitudes). Can handle (periodic) discontinuity at 
+            X axis limits (e.g., longitudes). Can handle (periodic) discontinuity at
             lon=180 deg E.
         add_Hbdr: bool, scal
             If scalar, add and subtract `add_Hbdr` to the the horizontal range.
