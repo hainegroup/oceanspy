@@ -40,8 +40,8 @@ class LLCtransformation:
         If True, automatically estimate add_Hbdr.
         If False, add_Hbdr is set to zero.
     faces: 1D array_like, scalar, or None
-        List of faces to be transformed. 
-        If None, entire dataset is transformed. 
+        List of faces to be transformed.
+        If None, entire dataset is transformed.
         When both [XRange, YRange] and faces are defined, [XRange, YRange] is used.
     centered: str or bool.
         If 'Atlantic' (default), the transformation creates a dataset in which the
@@ -71,7 +71,7 @@ class LLCtransformation:
     ):
         self._ds = ds  # xarray.DataSet
         self._varList = varList  # variables names to be transformed
-        self._add_Hbdr = add_Hbdr 
+        self._add_Hbdr = add_Hbdr
         self._XRange = XRange  # lon range of data to retain
         self._YRange = YRange  # lat range of data to retain.
         self._chunks = chunks  # dict.
@@ -1086,7 +1086,8 @@ def _reorder_ds(_ds, dims_c, dims_g):
 
 
 class Dims:
-    """Creates a shortcut for dimension`s names associated with an arbitrary variable."""
+    """Creates a shortcut for dimension`s names associated with an arbitrary
+    variable."""
 
     axes = "XYZT"  # shortcut axis names
 
