@@ -2,6 +2,8 @@
 OceanSpy utilities that don't need OceanDataset objects.
 """
 
+import ast as _ast
+
 import copy as _copy
 
 import numpy as _np
@@ -37,6 +39,7 @@ def viewer_to_range(p):
     Takes the output from the poseidon viewer `p` and returns the coordinate
     trajectories in X and Y in a way that is compatible with oceanspy.subsample
     functions.
+
     Parameters
     ----------
     p: list.
@@ -46,6 +49,12 @@ def viewer_to_range(p):
     lon: list.
     lat: list.
     """
+
+    if type(p) == str:
+        if p[0] == '[' and p[-1] == ']':
+            p = _ast.literal_eval(p) # turn string into list
+        else:
+            TypeError("not a type extracted by poseidon viewer")
     _check_instance({"p": p}, {"p": ["list"]})
     _check_instance({"p[0]": p[0]}, {"p[0]": ["dict"]})
     _check_instance({"type": p[0]["type"]}, {"type": "str"})
@@ -61,15 +70,21 @@ def viewer_to_range(p):
 
     if p_type == "Polygon":
         coords = p[0]["coordinates"][0]
-    elif p_type in ["LineString", "Point"]:
+    elif p_type == "Point": 
+        coords = p[0]["coordinates"]
+    elif p_type == "LineString":
         coords = p[0]["coordinates"]
 
     lon = []
     lat = []
 
-    for i in range(len(coords)):
-        lon.append(coords[i][0])
-        lat.append(coords[i][1])
+    if p_type == "Point":
+        lon.append(coords[0])
+        lat.append(coords[1])
+    else:
+        for i in range(len(coords)):
+            lon.append(coords[i][0])
+            lat.append(coords[i][1])
 
     return lon, lat
 
