@@ -2340,6 +2340,7 @@ def test_transformation(od, faces, varList, XRange, YRange, X0, X1, Y0, Y1):
         "XRange": XRange,
         "YRange": YRange,
         "faces": faces,
+        "drop": False
     }
 
     ds = LLC.arctic_crown(**args)
