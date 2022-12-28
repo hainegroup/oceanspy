@@ -6,6 +6,7 @@ OceanSpy functionality that transforms a dataset with LLC geometry characterized
 import copy as _copy
 import reprlib
 
+import xgcm.Grid as Grid
 import dask
 import numpy as _np
 import xarray as _xr
@@ -1111,6 +1112,26 @@ def _reorder_ds(_ds, dims_c, dims_g):
             _da = _ds[var].transpose(*dtr)[::-1, :]
             _DS[var] = _da
     return _DS
+
+
+def llc_local_to_lat_lon(ds):
+    """
+    Takes all vector fields and rotates them to orient them along geographical
+    coordinates.
+    """
+    _ds = copy.deepcopy(ds)
+
+    grid_coords = {"Y": {"center": "Y", "outer": "Yp1"},
+                   "X": {"center": "X", "outer": "Xp1"},
+                   "Z": {"center": "Z", "outer": "Zp1", "right": "Zu", "left": "Zl"},
+                   "time": {'center':"time_midp", "left": "time"},
+                   }
+    # create grid object to interpolate
+    grid = Grid(_ds, grid=grid_coords)
+
+    
+    
+    return _ds
 
 
 class Dims:
