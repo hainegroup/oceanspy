@@ -1127,10 +1127,20 @@ def llc_local_to_lat_lon(ds):
                    "time": {'center':"time_midp", "left": "time"},
                    }
     # create grid object to interpolate
-    grid = Grid(_ds, grid=grid_coords)
+    grid = Grid(_ds, grid=grid_coords, periodic=[])
 
-    
-    
+    CS = _ds['CS'] # cosine of angle between logical and lon axis.
+    SN = _ds['SN'] # sine of angle between logical and lon axis.
+
+
+    CSU = grid.interp(CS, axis='X', boundary='extrapolate')
+    CSV = grid.interp(CS, axis='Y', boundary='extrapolate')
+
+    SNU = grid.interp(SN, axis='X', boundary='extrapolate')
+    SNV = grid.interp(SN, axis='Y', boundary='extrapolate')
+
+
+
     return _ds
 
 
