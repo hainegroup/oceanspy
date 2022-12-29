@@ -34,7 +34,6 @@ class LLCtransformation:
         faces=None,
         centered=False,
         chunks=None,
-        drop=True,
     ):
         self._ds = ds  # xarray.DataSet
         self._varList = varList  # variables names to be transformed
@@ -45,7 +44,6 @@ class LLCtransformation:
         self._faces = faces  # faces involved in transformation
         self._centered = centered
         self._chunks = chunks
-        self._drop = drop
 
     @classmethod
     def arctic_crown(
@@ -58,7 +56,6 @@ class LLCtransformation:
         faces=None,
         centered=None,
         chunks=None,
-        drop=True,
     ):
         """This transformation splits the arctic cap (face=6) into four triangular
         regions and combines all faces in a quasi lat-lon grid. The triangular
@@ -96,10 +93,6 @@ class LLCtransformation:
             If False (default) - chunking is automatic.
             If dict, rechunks the dataset according to the spefications of the
             dictionary. See xarray.chunk().
-        drop: bool.
-            if True (default), the transformed dataset has dimensions consistent with a
-            staggered C-grid.
-
 
         Returns
         -------
@@ -402,8 +395,7 @@ class LLCtransformation:
         if type(DSFacet34) == int:
             DS = _reorder_ds(DS, dims_c, dims_g).persist()
 
-        if drop:
-            DS = _LLC_check_sizes(DS)
+        DS = _LLC_check_sizes(DS)
 
         # rechunk data. In the ECCO data this is done automatically
         if chunks:
@@ -412,6 +404,8 @@ class LLCtransformation:
         if XRange is not None and YRange is not None:
             # drop copy var = 'nYg' (line 101)
             DS = DS.drop_vars(_var_)
+
+        print(len(DS.X), len(DS.Xp1))
 
         DS = llc_local_to_lat_lon(DS)
 
@@ -1148,7 +1142,8 @@ def llc_local_to_lat_lon(ds, co_list=metrics):
                    "X": {"center": "X", "outer": "Xp1"},
                    "Z": {"center": "Z", "outer": "Zp1", "right": "Zu", "left": "Zl"},
                    "time": {'center':"time_midp", "left": "time"},
-                   }
+                }
+
     # create grid object to interpolate
     grid = Grid(_ds, coords=grid_coords, periodic=[])
 
@@ -1170,16 +1165,18 @@ def llc_local_to_lat_lon(ds, co_list=metrics):
         if len(dims.X) + len(dims.Y) == 4:  # vector field (metric)
             if len(dims.Y) == 1 and var not in co_list: # u vector
                 _da = _copy.deepcopy(_ds[var])
-                mate = _ds[var].mate
-                _ds = _ds.drop_vars([var])
-                VU = grid.interp(grid.interp(_ds[mate], axis='Y', boundary='extrapolate'), axis='X', boundary='extrapolate')
-                _ds[var] = _da * CSU - VU * SNU
+                if 'mate' in _ds[var].attrs:
+                    mate = _ds[var].mate
+                    _ds = _ds.drop_vars([var])
+                    VU = grid.interp(grid.interp(_ds[mate], axis='Y', boundary='extrapolate'), axis='X', boundary='extrapolate')
+                    _ds[var] = _da * CSU - VU * SNU
             elif len(dims.Y) == 3 and var not in co_list: # v vector
                 _da = _copy.deepcopy(_ds[var])
-                mate = _ds[var].mate
-                _ds = _ds.drop_vars([var])
-                UV = grid.interp(grid.interp(_ds[mate], axis='X', boundary='extrapolate'), axis='Y', boundary='extrapolate')
-                _ds[var] = UV * SNV + _da * CSV
+                if 'mate' in _ds[var].attrs:
+                    mate = _ds[var].mate
+                    _ds = _ds.drop_vars([var])
+                    UV = grid.interp(grid.interp(_ds[mate], axis='X', boundary='extrapolate'), axis='Y', boundary='extrapolate')
+                    _ds[var] = UV * SNV + _da * CSV
     return _ds
 
 
