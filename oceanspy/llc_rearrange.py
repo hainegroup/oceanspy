@@ -503,7 +503,7 @@ def arct_connect(ds, varName, faces=None, masking=False, opt=False, ranges=None)
                         fac = -1
                 da_arg = {"face": arc_cap, dims.X: xslice, dims.Y: yslice}
                 mask_arg = {dims.X: xslice, dims.Y: yslice}
-                arct = fac * ds[_varName].isel(**da_arg)
+                arct = ds[_varName].isel(**da_arg)
                 Mask = mask5.isel(**mask_arg)
                 if opt:
                     [Yi_5, Yf_5] = [ranges[1][0], ranges[1][1]]
