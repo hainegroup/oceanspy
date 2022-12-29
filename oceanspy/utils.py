@@ -3,7 +3,6 @@ OceanSpy utilities that don't need OceanDataset objects.
 """
 
 import ast as _ast
-
 import copy as _copy
 
 import numpy as _np
@@ -51,8 +50,8 @@ def viewer_to_range(p):
     """
 
     if type(p) == str:
-        if p[0] == '[' and p[-1] == ']':
-            p = _ast.literal_eval(p) # turn string into list
+        if p[0] == "[" and p[-1] == "]":
+            p = _ast.literal_eval(p)  # turn string into list
         else:
             TypeError("not a type extracted by poseidon viewer")
     _check_instance({"p": p}, {"p": ["list"]})
@@ -70,7 +69,7 @@ def viewer_to_range(p):
 
     if p_type == "Polygon":
         coords = p[0]["coordinates"][0]
-    elif p_type == "Point": 
+    elif p_type == "Point":
         coords = p[0]["coordinates"]
     elif p_type == "LineString":
         coords = p[0]["coordinates"]
@@ -871,4 +870,3 @@ def get_combination(lst, select):
             #             print(sub_lst)
             the_lst += sub_lst
         return the_lst
-
