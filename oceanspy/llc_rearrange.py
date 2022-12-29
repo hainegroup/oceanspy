@@ -1152,11 +1152,12 @@ def llc_local_to_lat_lon(ds, co_list=metrics):
     SNU = grid.interp(SN, axis='X', boundary='extrapolate') # sin at u-point
     SNV = grid.interp(SN, axis='Y', boundary='extrapolate') # sin at v-point
 
+    data_vars = [var for var in _ds.data_vars if len(ds[var].dims) > 1]
 
-    for var in _ds.data_vars:
+    for var in data_vars:
         DIMS = [dim for dim in _ds[var].dims]
         dims = Dims(DIMS[::-1])
-        if len(dims.X) + len(dims.Y) == 4:  # vector field (or metric)
+        if len(dims.X) + len(dims.Y) == 4:  # vector field (metric)
             if len(dims.Y) == 1 and var not in co_list: # u vector
                 _da = _copy.deepcopy(_ds[var])
                 _ds = _ds.drop_vars([var])
