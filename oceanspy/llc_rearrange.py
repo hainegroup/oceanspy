@@ -1140,7 +1140,7 @@ def llc_local_to_lat_lon(ds, co_list=metrics):
                    "time": {'center':"time_midp", "left": "time"},
                    }
     # create grid object to interpolate
-    grid = Grid(_ds, grid=grid_coords, periodic=[])
+    grid = Grid(_ds, coords=grid_coords, periodic=[])
 
     CS = _ds['CS'] # cosine of angle between logical and geo axis. At tracer points
     SN = _ds['SN'] # sine of angle between logical and geo axis. At tracer points
