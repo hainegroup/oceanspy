@@ -154,6 +154,12 @@ class LLCtransformation:
 
         varList = list(varList)
 
+        # store original attributes
+        attrs = []
+        for var in varList:
+            attrs.append(ds[var].attrs)
+
+
         #
         if faces is None:
             faces = _np.arange(13)
@@ -409,6 +415,9 @@ class LLCtransformation:
             DS = DS.drop_vars(_var_)
 
         DS = llc_local_to_lat_lon(DS)
+
+        for i in range(len(varList)):
+            DS[varList[i]].attrs = attrs[i]
 
         return DS
 
