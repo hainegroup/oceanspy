@@ -844,7 +844,7 @@ def flip_v(_ds, co_list=metrics, dims=True, _len=3):
             if "mate" in _ds[_varName].attrs:
                 if _varName not in co_list and len(_dims.X) == _len:
                     _ds[_varName] = -_ds[_varName]
-                elif _varName  == 'CS':
+                elif _varName  == 'SN':  # might be SN
                     _ds[_varName] = -_ds[_varName]
     return _ds
 
