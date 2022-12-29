@@ -498,11 +498,11 @@ def arct_connect(ds, varName, faces=None, masking=False, opt=False, ranges=None)
                 if len(dims.X) + len(dims.Y) == 4:
                     if len(dims.Y) == 1 and _varName not in metrics:
                         fac = -1
-                if _varName == "SN":
+                elif _varName == "SN":
                     fac = -1
                 da_arg = {"face": arc_cap, dims.X: xslice, dims.Y: yslice}
                 mask_arg = {dims.X: xslice, dims.Y: yslice}
-                arct = ds[_varName].isel(**da_arg)
+                arct = fac * ds[_varName].isel(**da_arg)
                 Mask = mask5.isel(**mask_arg)
                 if opt:
                     [Yi_5, Yf_5] = [ranges[1][0], ranges[1][1]]
