@@ -1160,7 +1160,7 @@ def llc_local_to_lat_lon(ds, co_list=metrics):
             if len(dims.Y) == 1 and var not in co_list: # u vector
                 _da = copy.deepcopy(_ds[var])
                 _ds = _ds.drop_vars([var])
-                VU = grid.interp(grid.interp()da, axis='Y', boundary='extrapolate'), axis='X', boundary='extrapolate')
+                VU = grid.interp(grid.interp(_da, axis='Y', boundary='extrapolate'), axis='X', boundary='extrapolate')
                 _ds[var] = _ds[var] * CSU - varUV * SNU
             elif len(dims.Y) == 3 and var not in co_list: # v vector
                 _da = copy.deepcopy(_ds[var])
