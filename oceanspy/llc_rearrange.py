@@ -854,8 +854,8 @@ def flip_v(_ds, co_list=metrics, dims=True, _len=3):
                     _ds[_varName] = -_ds[_varName]
                 elif _varName == 'SN':
                     _ds[_varName] = -_ds[_varName]
-                elif _varName == "CS":
-                    _ds[_varName] = -_ds[_varName]
+                # elif _varName == "CS":
+                #     _ds[_varName] = -_ds[_varName]
     return _ds
 
 
