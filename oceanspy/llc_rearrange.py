@@ -621,6 +621,8 @@ def mates(ds):
         "HFacS",
         "rAw",
         "rAs",
+        "CS", 
+        "SN"
     ]
     for k in range(int(len(vars_mates) / 2)):
         nk = 2 * k
@@ -1138,6 +1140,7 @@ def llc_local_to_lat_lon(ds):
 
     SNU = grid.interp(SN, axis='X', boundary='extrapolate')
     SNV = grid.interp(SN, axis='Y', boundary='extrapolate')
+
 
 
 
