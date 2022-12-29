@@ -841,33 +841,6 @@ def to_180(x):
     return x + (-1) * (x // 180) * 360
 
 
-def local_to_latlon(u, v, cs, sn):
-    """
-    convert local vector to north-east
-
-    Parameters
-    ----------
-    u: float, numpy.array
-        the x component of the vector
-    v: float, numpy.array
-        the y component of the vector
-    cs: float, numpy.array
-        the cosine of the angle between grid and compass
-    sn: float, numpy.array
-        the sine of the angle between grid and compass
-
-    Returns
-    -------
-    uu: float, numpy.array
-        the eastward component of the vector
-    vv: float, numpy.array
-        the northward component of the vector
-    """
-    uu = u * cs - v * sn
-    vv = u * sn + v * cs
-    return uu, vv
-
-
 def get_combination(lst, select):
     """
     Iteratively find all the combination that
