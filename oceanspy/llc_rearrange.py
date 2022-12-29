@@ -1153,7 +1153,7 @@ def llc_local_to_lat_lon(ds, co_list=metrics):
     SNV = grid.interp(SN, axis='Y', boundary='extrapolate') # sin at v-point
 
 
-    for var in _ds.data_vars():
+    for var in _ds.data_vars:
         DIMS = [dim for dim in _ds[var].dims]
         dims = Dims(DIMS[::-1])
         if len(dims.X) + len(dims.Y) == 4:  # vector field (or metric)
