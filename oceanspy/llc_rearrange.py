@@ -6,10 +6,10 @@ OceanSpy functionality that transforms a dataset with LLC geometry characterized
 import copy as _copy
 import reprlib
 
-from xgcm import Grid
 import dask
 import numpy as _np
 import xarray as _xr
+from xgcm import Grid
 
 from .utils import _rel_lon, _reset_range, get_maskH
 
@@ -405,8 +405,6 @@ class LLCtransformation:
             # drop copy var = 'nYg' (line 101)
             DS = DS.drop_vars(_var_)
 
-        print(len(DS.X), len(DS.Xp1))
-
         DS = llc_local_to_lat_lon(DS)
 
         # restore original attrs if lost
@@ -633,7 +631,7 @@ def mates(ds):
         "rAw",
         "rAs",
         "CS",
-        "SN"
+        "SN",
     ]
     for k in range(int(len(vars_mates) / 2)):
         nk = 2 * k
@@ -855,7 +853,7 @@ def flip_v(_ds, co_list=metrics, dims=True, _len=3):
             if "mate" in _ds[_varName].attrs:
                 if _varName not in co_list and len(_dims.X) == _len:
                     _ds[_varName] = -_ds[_varName]
-                elif _varName == 'SN':
+                elif _varName == "SN":
                     _ds[_varName] = -_ds[_varName]
                 # elif _varName == "CS":
                 #     _ds[_varName] = -_ds[_varName]
@@ -1072,7 +1070,9 @@ def _LLC_check_sizes(_DS):
     YG = _DS["YG"].dropna("Yp1", "all")
     y0 = int(YG["Yp1"][0])
     y1 = int(YG["Yp1"][-1]) + 1
+
     _DS = _copy.deepcopy(_DS.isel(Yp1=slice(y0, y1)))
+    _DS = _copy.deepcopy(_DS.isel(Y=slice(y0, y1 - 1)))
 
     DIMS = [dim for dim in _DS["XC"].dims]
     dims_c = Dims(DIMS[::-1])
@@ -1138,24 +1138,24 @@ def llc_local_to_lat_lon(ds, co_list=metrics):
     """
     _ds = mates(_copy.deepcopy(ds))
 
-    grid_coords = {"Y": {"center": "Y", "outer": "Yp1"},
-                   "X": {"center": "X", "outer": "Xp1"},
-                   "Z": {"center": "Z", "outer": "Zp1", "right": "Zu", "left": "Zl"},
-                   "time": {'center':"time_midp", "left": "time"},
-                }
+    grid_coords = {
+        "Y": {"center": "Y", "outer": "Yp1"},
+        "X": {"center": "X", "outer": "Xp1"},
+        "Z": {"center": "Z", "outer": "Zp1", "right": "Zu", "left": "Zl"},
+        "time": {"center": "time_midp", "left": "time"},
+    }
 
     # create grid object to interpolate
     grid = Grid(_ds, coords=grid_coords, periodic=[])
 
-    CS = _ds['CS'] # cosine of angle between logical and geo axis. At tracer points
-    SN = _ds['SN'] # sine of angle between logical and geo axis. At tracer points
+    CS = _ds["CS"]  # cosine of angle between logical and geo axis. At tracer points
+    SN = _ds["SN"]  # sine of angle between logical and geo axis. At tracer points
 
+    CSU = grid.interp(CS, axis="X", boundary="extend")  # cos at u-point
+    CSV = grid.interp(CS, axis="Y", boundary="extend")  # cos at v-point
 
-    CSU = grid.interp(CS, axis='X', boundary='extrapolate') # cos at u-point
-    CSV = grid.interp(CS, axis='Y', boundary='extrapolate') # cos at v-point
-
-    SNU = grid.interp(SN, axis='X', boundary='extrapolate') # sin at u-point
-    SNV = grid.interp(SN, axis='Y', boundary='extrapolate') # sin at v-point
+    SNU = grid.interp(SN, axis="X", boundary="extend")  # sin at u-point
+    SNV = grid.interp(SN, axis="Y", boundary="extend")  # sin at v-point
 
     data_vars = [var for var in _ds.data_vars if len(ds[var].dims) > 1]
 
@@ -1163,20 +1163,29 @@ def llc_local_to_lat_lon(ds, co_list=metrics):
         DIMS = [dim for dim in _ds[var].dims]
         dims = Dims(DIMS[::-1])
         if len(dims.X) + len(dims.Y) == 4:  # vector field (metric)
-            if len(dims.Y) == 1 and var not in co_list: # u vector
+            if len(dims.Y) == 1 and var not in co_list:  # u vector
                 _da = _copy.deepcopy(_ds[var])
-                if 'mate' in _ds[var].attrs:
+                if "mate" in _ds[var].attrs:
                     mate = _ds[var].mate
                     _ds = _ds.drop_vars([var])
-                    VU = grid.interp(grid.interp(_ds[mate], axis='Y', boundary='extrapolate'), axis='X', boundary='extrapolate')
+                    VU = grid.interp(
+                        grid.interp(_ds[mate], axis="Y", boundary="extend"),
+                        axis="X",
+                        boundary="extend",
+                    )
                     _ds[var] = _da * CSU - VU * SNU
-            elif len(dims.Y) == 3 and var not in co_list: # v vector
+            elif len(dims.Y) == 3 and var not in co_list:  # v vector
                 _da = _copy.deepcopy(_ds[var])
-                if 'mate' in _ds[var].attrs:
+                if "mate" in _ds[var].attrs:
                     mate = _ds[var].mate
                     _ds = _ds.drop_vars([var])
-                    UV = grid.interp(grid.interp(_ds[mate], axis='X', boundary='extrapolate'), axis='Y', boundary='extrapolate')
+                    UV = grid.interp(
+                        grid.interp(_ds[mate], axis="X", boundary="extend"),
+                        axis="Y",
+                        boundary="extend",
+                    )
                     _ds[var] = UV * SNV + _da * CSV
+
     return _ds
 
 
