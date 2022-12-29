@@ -535,6 +535,8 @@ def arct_connect(ds, varName, faces=None, masking=False, opt=False, ranges=None)
                 Ny_ac_rot.append(0)
                 da_arg = {"face": arc_cap, dims.X: xslice, dims.Y: yslice}
                 mask_arg = {dims.X: xslice, dims.Y: yslice}
+                if _varName == 'CS':
+                    fac = -1
                 arct = fac * ds[_varName].isel(**da_arg)
                 Mask = mask7.isel(**mask_arg)
                 if opt:
