@@ -407,6 +407,9 @@ class LLCtransformation:
         if XRange is not None and YRange is not None:
             # drop copy var = 'nYg' (line 101)
             DS = DS.drop_vars(_var_)
+
+        DS = llc_local_to_lat_lon(DS)
+
         return DS
 
 
@@ -625,7 +628,7 @@ def mates(ds):
         "HFacS",
         "rAw",
         "rAs",
-        "CS", 
+        "CS",
         "SN"
     ]
     for k in range(int(len(vars_mates) / 2)):
@@ -1124,7 +1127,7 @@ def _reorder_ds(_ds, dims_c, dims_g):
     return _DS
 
 
-def llc_local_to_lat_lon(ds):
+def llc_local_to_lat_lon(ds, co_list=metrics):
     """
     Takes all vector fields and rotates them to orient them along geographical
     coordinates.
@@ -1139,16 +1142,31 @@ def llc_local_to_lat_lon(ds):
     # create grid object to interpolate
     grid = Grid(_ds, grid=grid_coords, periodic=[])
 
-    CS = _ds['CS'] # cosine of angle between logical and lon axis.
-    SN = _ds['SN'] # sine of angle between logical and lon axis.
+    CS = _ds['CS'] # cosine of angle between logical and geo axis. At tracer points
+    SN = _ds['SN'] # sine of angle between logical and geo axis. At tracer points
 
 
-    CSU = grid.interp(CS, axis='X', boundary='extrapolate')
-    CSV = grid.interp(CS, axis='Y', boundary='extrapolate')
+    CSU = grid.interp(CS, axis='X', boundary='extrapolate') # cos at u-point
+    CSV = grid.interp(CS, axis='Y', boundary='extrapolate') # cos at v-point
 
-    SNU = grid.interp(SN, axis='X', boundary='extrapolate')
-    SNV = grid.interp(SN, axis='Y', boundary='extrapolate')
+    SNU = grid.interp(SN, axis='X', boundary='extrapolate') # sin at u-point
+    SNV = grid.interp(SN, axis='Y', boundary='extrapolate') # sin at v-point
 
+
+    for var in _ds.data_vars():
+        DIMS = [dim for dim in _ds[var].dims]
+        dims = Dims(DIMS[::-1])
+        if len(dims.X) + len(dims.Y) == 4:  # vector field (or metric)
+            if len(dims.Y) == 1 and var not in co_list: # u vector
+                _da = copy.deepcopy(_ds[var])
+                _ds = _ds.drop_vars([var])
+                VU = grid.interp(grid.interp()da, axis='Y', boundary='extrapolate'), axis='X', boundary='extrapolate')
+                _ds[var] = _ds[var] * CSU - varUV * SNU
+            elif len(dims.Y) == 3 and var not in co_list: # v vector
+                _da = copy.deepcopy(_ds[var])
+                _ds = _ds.drop_vars([var])
+                UV = grid.interp(grid.interp(_da, axis='X', boundary='extrapolate'), axis='Y', boundary='extrapolate')
+                _ds[var] = UV * SNV + _da * CSV
     return _ds
 
 
