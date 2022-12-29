@@ -6,7 +6,7 @@ OceanSpy functionality that transforms a dataset with LLC geometry characterized
 import copy as _copy
 import reprlib
 
-import xgcm.Grid as Grid
+from xgcm import Grid
 import dask
 import numpy as _np
 import xarray as _xr
