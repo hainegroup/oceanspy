@@ -155,10 +155,9 @@ class LLCtransformation:
         varList = list(varList)
 
         # store original attributes
-        attrs = []
+        attrs = {}
         for var in varList:
-            attrs.append(ds[var].attrs)
-
+            attrs = {var: ds[var].attrs, **attrs}
 
         #
         if faces is None:
@@ -416,8 +415,10 @@ class LLCtransformation:
 
         DS = llc_local_to_lat_lon(DS)
 
-        for i in range(len(varList)):
-            DS[varList[i]].attrs = attrs[i]
+        # restore original attrs if lost
+        for var in varList:
+            if var in DS.reset_coords().data_vars:
+                DS[var].attrs = attrs[var]
 
         return DS
 
