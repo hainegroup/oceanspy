@@ -1132,7 +1132,7 @@ def llc_local_to_lat_lon(ds, co_list=metrics):
     Takes all vector fields and rotates them to orient them along geographical
     coordinates.
     """
-    _ds = copy.deepcopy(ds)
+    _ds = _copy.deepcopy(ds)
 
     grid_coords = {"Y": {"center": "Y", "outer": "Yp1"},
                    "X": {"center": "X", "outer": "Xp1"},
@@ -1158,12 +1158,12 @@ def llc_local_to_lat_lon(ds, co_list=metrics):
         dims = Dims(DIMS[::-1])
         if len(dims.X) + len(dims.Y) == 4:  # vector field (or metric)
             if len(dims.Y) == 1 and var not in co_list: # u vector
-                _da = copy.deepcopy(_ds[var])
+                _da = _copy.deepcopy(_ds[var])
                 _ds = _ds.drop_vars([var])
                 VU = grid.interp(grid.interp(_da, axis='Y', boundary='extrapolate'), axis='X', boundary='extrapolate')
                 _ds[var] = _ds[var] * CSU - varUV * SNU
             elif len(dims.Y) == 3 and var not in co_list: # v vector
-                _da = copy.deepcopy(_ds[var])
+                _da = _copy.deepcopy(_ds[var])
                 _ds = _ds.drop_vars([var])
                 UV = grid.interp(grid.interp(_da, axis='X', boundary='extrapolate'), axis='Y', boundary='extrapolate')
                 _ds[var] = UV * SNV + _da * CSV
