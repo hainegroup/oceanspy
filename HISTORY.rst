@@ -4,6 +4,11 @@
 History
 =======
 
+v0.3.2 (2022-12-29)
+-------------------
+The new grid of the transformed dataset always has inner and outer as grid_coordinates. Improved documentation (api) for llc_rearrange and associated functions and classes. Unpins xesmf (:issue:291), improve functionality to :py:func:`~oceanspy.ospy_utils.viewer_to_range` (:issue:285). Improve (and fix) how vector fields are rotated from logical to geographical (lat-lon) coordinates (:issue:299). By `Miguel Jimenez Urias`_ (see :pr:300).
+
+
 v0.3.1 (2022-12-14)
 -------------------
 Fix tarball and wheel for new release (PR 295 by `Filipe Fernandes`_).
