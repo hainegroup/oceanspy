@@ -11,7 +11,7 @@ dependencies:
 - cartopy
 - esmpy
 - geopy
-- xesmf >= 0.6.4
+- xesmf > 0.6.3
 - esmf
 - xgcm < 0.7
 - Ipython
