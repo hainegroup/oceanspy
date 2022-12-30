@@ -8,10 +8,10 @@ dependencies:
 - bottleneck
 - netCDF4
 - xarray
-- cartopy<0.20
+- cartopy
 - esmpy
 - geopy
-- xesmf
+- xesmf >= 0.6.4
 - esmf
 - xgcm < 0.7
 - Ipython

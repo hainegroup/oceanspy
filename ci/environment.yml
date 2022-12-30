@@ -10,7 +10,7 @@ dependencies:
 - cartopy
 - intake-xarray
 - geopy
-- xesmf
+- xesmf >= 0.6.4
 - esmf
 - xgcm < 0.7
 - Ipython
