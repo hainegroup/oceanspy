@@ -19,7 +19,7 @@ dependencies:
 - geopy
 - xesmf
 - esmf
-- xgcm < 0.7
+- xgcm
 - Ipython
 - xmitgcm
 - ffmpeg
