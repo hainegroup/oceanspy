@@ -18,6 +18,7 @@ def test_RNone():
 
 def test_error_viewer_to_range():
     with pytest.raises(TypeError):
+        viewer_to_range("does not eval to a list")
         viewer_to_range(0)
         viewer_to_range(["not from viewer"])
         viewer_to_range([{"type": "other"}])
@@ -41,6 +42,7 @@ def test_error_path():
 coords1 = [[[0, 0], [1, 1], [2, 2], [3, 3], [4, 4], [5, 5]]]
 coords2 = [[[5, 0], [4, 1], [3, 2], [2, 3], [1, 4], [0, 5]]]
 coords3 = [[[0, 6], [0, 7], [0, 8], [0, 9], [0, 10], [0, 11]]]
+coords4 = '[{"type":"Point","coordinates":[-169.23960833202577,22.865677261831266]}]'
 
 
 @pytest.mark.parametrize(
@@ -52,10 +54,14 @@ coords3 = [[[0, 6], [0, 7], [0, 8], [0, 9], [0, 10], [0, 11]]]
         (coords1, "LineString", [[0, 0]], [[1, 1]]),
         (coords2, "LineString", [[5, 0]], [[4, 1]]),
         (coords3, "LineString", [[0, 6]], [[0, 7]]),
+        (coords4, "Point", [-169.23960833202577], [22.865677261831266]),
     ],
 )
 def test_viewer_to_range(coords, types, lon, lat):
-    p = [{"type": types, "coordinates": list(coords)}]
+    if type(coords) == list:
+        p = [{"type": types, "coordinates": list(coords)}]
+    elif type(coords) == str:
+        p = coords
     x, y = viewer_to_range(p)
     assert x == lon
     assert y == lat

@@ -2,6 +2,7 @@
 OceanSpy utilities that don't need OceanDataset objects.
 """
 
+import ast as _ast
 import copy as _copy
 
 import numpy as _np
@@ -37,6 +38,7 @@ def viewer_to_range(p):
     Takes the output from the poseidon viewer `p` and returns the coordinate
     trajectories in X and Y in a way that is compatible with oceanspy.subsample
     functions.
+
     Parameters
     ----------
     p: list.
@@ -46,6 +48,12 @@ def viewer_to_range(p):
     lon: list.
     lat: list.
     """
+
+    if type(p) == str:
+        if p[0] == "[" and p[-1] == "]":
+            p = _ast.literal_eval(p)  # turn string into list
+        else:
+            TypeError("not a type extracted by poseidon viewer")
     _check_instance({"p": p}, {"p": ["list"]})
     _check_instance({"p[0]": p[0]}, {"p[0]": ["dict"]})
     _check_instance({"type": p[0]["type"]}, {"type": "str"})
@@ -61,15 +69,21 @@ def viewer_to_range(p):
 
     if p_type == "Polygon":
         coords = p[0]["coordinates"][0]
-    elif p_type in ["LineString", "Point"]:
+    elif p_type == "Point":
+        coords = p[0]["coordinates"]
+    elif p_type == "LineString":
         coords = p[0]["coordinates"]
 
     lon = []
     lat = []
 
-    for i in range(len(coords)):
-        lon.append(coords[i][0])
-        lat.append(coords[i][1])
+    if p_type == "Point":
+        lon.append(coords[0])
+        lat.append(coords[1])
+    else:
+        for i in range(len(coords)):
+            lon.append(coords[i][0])
+            lat.append(coords[i][1])
 
     return lon, lat
 
@@ -826,33 +840,6 @@ def to_180(x):
     return x + (-1) * (x // 180) * 360
 
 
-def local_to_latlon(u, v, cs, sn):
-    """
-    convert local vector to north-east
-
-    Parameters
-    ----------
-    u: float, numpy.array
-        the x component of the vector
-    v: float, numpy.array
-        the y component of the vector
-    cs: float, numpy.array
-        the cosine of the angle between grid and compass
-    sn: float, numpy.array
-        the sine of the angle between grid and compass
-
-    Returns
-    -------
-    uu: float, numpy.array
-        the eastward component of the vector
-    vv: float, numpy.array
-        the northward component of the vector
-    """
-    uu = u * cs - v * sn
-    vv = u * sn + v * cs
-    return uu, vv
-
-
 def get_combination(lst, select):
     """
     Iteratively find all the combination that
@@ -883,42 +870,3 @@ def get_combination(lst, select):
             #             print(sub_lst)
             the_lst += sub_lst
         return the_lst
-
-
-def find_cs_sn(thetaA, phiA, thetaB, phiB):
-    """
-    theta is the angle
-    between the meridian crossing point A
-    and the geodesic connecting A and B
-
-    this function return cos and sin of theta
-
-    Parameters
-    ----------
-    thetaA: float,numpy.array
-        the latitude of the vertex of the angle
-    phiA: float,numpy.array
-        the longitude of the vertex of the angle
-    thetaB: float,numpy.array
-        the latitude of the point B
-    phiB: float,numpy.array
-        the longitude of the point B
-
-    Returns
-    -------
-    CS: float,numpy.array
-        the cosine of the angle
-    SN: float, numpy.array
-        the sine of the angle
-    """
-    # O being north pole
-    AO = _np.pi / 2 - thetaA
-    BO = _np.pi / 2 - thetaB
-    dphi = phiB - phiA
-    # Spherical law of cosine on AOB
-    cos_AB = _np.cos(BO) * _np.cos(AO) + _np.sin(BO) * _np.sin(AO) * _np.cos(dphi)
-    sin_AB = _np.sqrt(1 - cos_AB**2)
-    # spherical law of sine on triangle AOB
-    SN = _np.sin(BO) * _np.sin(dphi) / sin_AB
-    CS = _np.sign(thetaB - thetaA) * _np.sqrt(1 - SN**2)
-    return CS, SN

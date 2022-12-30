@@ -89,7 +89,6 @@ _FUNC2VARS = _OrderedDict(
     geographical_aligned_velocities=["U_zonal", "V_merid"],
     survey_aligned_velocities=["rot_ang_Vel", "tan_Vel", "ort_Vel"],
     missing_horizontal_spacing=["dxF", "dxV", "dyF", "dyU"],
-    missing_cs_sn=["CS", "SN"],
 )
 
 
@@ -2832,36 +2831,6 @@ def salt_budget(od):
     ds["forcS"].attrs["OceanSpy_parameters"] = str(params2use)
 
     return _ospy.OceanDataset(ds).dataset
-
-
-def missing_cs_sn(od):
-    """
-    Compute missing grid orientaioon.
-
-    Parameters
-    ----------
-    od: OceanDataset
-        oceandataset used to compute
-
-    Returns
-    -------
-    od: OceanDataset
-        | CS: cosine of the orientation angle
-        | SN: sine of the orientation angle
-    """
-    xc = _np.deg2rad(_np.array(od._ds.XC))
-    yc = _np.deg2rad(_np.array(od._ds.YC))
-    cs = _np.zeros_like(xc)
-    sn = _np.zeros_like(xc)
-    cs[0], sn[0] = _utils.find_cs_sn(yc[0], xc[0], yc[1], xc[1])
-    cs[-1], sn[-1] = _utils.find_cs_sn(yc[-2], xc[-2], yc[-1], xc[-1])
-    cs[1:-1], sn[1:-1] = _utils.find_cs_sn(yc[:-2], xc[:-2], yc[2:], xc[2:])
-    od._ds["CS"] = od._ds["XC"]
-    od._ds["CS"].values = cs
-
-    od._ds["SN"] = od._ds["XC"]
-    od._ds["SN"].values = sn
-    return od
 
 
 def missing_horizontal_spacing(od):

@@ -353,7 +353,6 @@ def cutout(
             "XRange": XRange,
             "YRange": YRange,
             "centered": centered,
-            "drop": True,  # required to calculate U-V grid points
             "chunks": chunks,
         }
         dsnew = _llc_trans.arctic_crown(**arg)

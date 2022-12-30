@@ -1,9 +1,15 @@
+"""
+OceanSpy functionality that transforms a dataset with LLC geometry characterized by
+13 faces (or tiles), into one with simple geometry.
+"""
+
 import copy as _copy
 import reprlib
 
 import dask
 import numpy as _np
 import xarray as _xr
+from xgcm import Grid
 
 from .utils import _rel_lon, _reset_range, get_maskH
 
@@ -16,7 +22,7 @@ _dstype = _xr.core.dataset.Dataset
 
 
 class LLCtransformation:
-    """A class containing the transformation of LLCgrids"""
+    """A class containing the transformation types of LLCgrids."""
 
     def __init__(
         self,
@@ -28,15 +34,16 @@ class LLCtransformation:
         faces=None,
         centered=False,
         chunks=None,
-        drop=False,
     ):
         self._ds = ds  # xarray.DataSet
         self._varList = varList  # variables names to be transformed
+        self._add_Hbdr = add_Hbdr
         self._XRange = XRange  # lon range of data to retain
-        self.YRange = YRange  # lat range of data to retain.
+        self._YRange = YRange  # lat range of data to retain.
         self._chunks = chunks  # dict.
         self._faces = faces  # faces involved in transformation
-        self._centered = (centered,)
+        self._centered = centered
+        self._chunks = chunks
 
     @classmethod
     def arctic_crown(
@@ -49,12 +56,70 @@ class LLCtransformation:
         faces=None,
         centered=None,
         chunks=None,
-        drop=False,
     ):
-        """Transforms the dataset in which `face` appears as a dimension into
-        one without faces, with grids and variables sharing a common grid
-        orientation.
+        """This transformation splits the arctic cap (face=6) into four triangular
+        regions and combines all faces in a quasi lat-lon grid. The triangular
+        arctic regions form a crown atop faces {7, 10, 2, 5}. The final size of
+        the transformed dataset depends XRange, YRange or faces.
+
+        Parameters
+        ----------
+        dataset: xarray.Dataset
+            The multi-dimensional, in memory, array database. e.g., `oceandataset._ds`.
+        varList: 1D array_like, str, or None
+            List of variables (strings).
+        YRange: 1D array_like, scalar, or None
+            Y axis limits (e.g., latitudes).
+            If len(YRange)>2, max and min values are used.
+        XRange: 1D array_like, scalar, or None
+            X axis limits (e.g., longitudes). Can handle (periodic) discontinuity at
+            lon=180 deg E.
+        add_Hbdr: bool, scal
+            If scalar, add and subtract `add_Hbdr` to the the horizontal range.
+            of the horizontal ranges.
+            If True, automatically estimate add_Hbdr.
+            If False, add_Hbdr is set to zero.
+        faces: 1D array_like, scalar, or None
+            List of faces to be transformed.
+            If None, entire dataset is transformed.
+            When both [XRange, YRange] and faces are defined, [XRange, YRange] is used.
+        centered: str or bool.
+            If 'Atlantic' (default), the transformation creates a dataset in which the
+            Atlantic Ocean lies at the center of the domain.
+            If 'Pacific', the transformed data has a layout in which the Pacific Ocean
+            lies at the center of the domain.
+            This option is only relevant when transforming the entire dataset.
+        chunks: bool or dict.
+            If False (default) - chunking is automatic.
+            If dict, rechunks the dataset according to the spefications of the
+            dictionary. See xarray.chunk().
+
+        Returns
+        -------
+
+        ds: xarray.Dataset
+            face is no longer a dimension of the dataset.
+
+
+        Notes
+        -----
+        This functionality is very similar to, takes on similar arguments and is used
+        internally by subsample.cutout when extracting cutout regions of datasets with
+        face as a dimension.
+
+
+        References
+        ----------
+        https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html
+
+        https://docs.xarray.dev/en/stable/generated/xarray.Dataset.chunk.html
+
+
+        See Also
+        --------
+        subsample.cutout
         """
+
         print("Warning: This is an experimental feature")
         if "face" not in ds.dims:
             raise ValueError("face does not appear as a dimension of the dataset")
@@ -81,6 +146,11 @@ class LLCtransformation:
             varList = ds.data_vars
 
         varList = list(varList)
+
+        # store original attributes
+        attrs = {}
+        for var in varList:
+            attrs = {var: ds[var].attrs, **attrs}
 
         #
         if faces is None:
@@ -325,8 +395,7 @@ class LLCtransformation:
         if type(DSFacet34) == int:
             DS = _reorder_ds(DS, dims_c, dims_g).persist()
 
-        if drop:
-            DS = _LLC_check_sizes(DS)
+        DS = _LLC_check_sizes(DS)
 
         # rechunk data. In the ECCO data this is done automatically
         if chunks:
@@ -335,6 +404,14 @@ class LLCtransformation:
         if XRange is not None and YRange is not None:
             # drop copy var = 'nYg' (line 101)
             DS = DS.drop_vars(_var_)
+
+        DS = llc_local_to_lat_lon(DS)
+
+        # restore original attrs if lost
+        for var in varList:
+            if var in DS.reset_coords().data_vars:
+                DS[var].attrs = attrs[var]
+
         return DS
 
 
@@ -392,6 +469,8 @@ def arct_connect(ds, varName, faces=None, masking=False, opt=False, ranges=None)
                 if len(dims.X) + len(dims.Y) == 4:
                     if len(dims.Y) == 3 and _varName not in metrics:
                         fac = -1
+                elif _varName == "CS":
+                    fac = -1
                 arct = fac * ds[_varName].isel(**da_arg)
                 Mask = mask2.isel(**mask_arg)
                 if opt:
@@ -493,6 +572,8 @@ def arct_connect(ds, varName, faces=None, masking=False, opt=False, ranges=None)
                 if len(dims.X) + len(dims.Y) == 4:
                     if len(dims.Y) == 1 and _varName not in metrics:
                         fac = -1
+                elif _varName == "SN":
+                    fac = -1
                 da_arg = {"face": arc_cap, dims.X: xslice, dims.Y: yslice}
                 mask_arg = {dims.X: xslice, dims.Y: yslice}
                 arct = fac * ds[_varName].isel(**da_arg)
@@ -521,6 +602,9 @@ def arct_connect(ds, varName, faces=None, masking=False, opt=False, ranges=None)
 
 
 def mates(ds):
+    """Defines, when needed, the variable pair and stores the name of the pair (mate)
+    variable as an attribute. This is needed to accurately rotate a vector field.
+    """
     vars_mates = [
         "ADVx_SLT",
         "ADVy_SLT",
@@ -546,6 +630,8 @@ def mates(ds):
         "HFacS",
         "rAw",
         "rAs",
+        "CS",
+        "SN",
     ]
     for k in range(int(len(vars_mates) / 2)):
         nk = 2 * k
@@ -556,7 +642,7 @@ def mates(ds):
 
 
 def rotate_vars(_ds):
-    """using the attribures `mates`, when this function is called it swaps the
+    """Using the attribures `mates`, when this function is called it swaps the
     variables names. This issue is only applicable to llc grid in which the grid
     topology makes it so that u on a rotated face transforms to `+- v` on a lat lon
     grid.
@@ -575,7 +661,7 @@ def rotate_vars(_ds):
 
 
 def shift_dataset(_ds, dims_c, dims_g):
-    """shifts a dataset along a dimension, setting its first element to zero. Need
+    """Shifts a dataset along a dimension, setting its first element to zero. Need
     to provide the dimensions in the form of [center, corner] points. This rotation
     is only used in the horizontal, and so dims_c is either one of `i` or `j`, and
     dims_g is either one of `i_g` or `j_g`. The pair most correspond to the same
@@ -605,7 +691,7 @@ def shift_dataset(_ds, dims_c, dims_g):
 
 
 def reverse_dataset(_ds, dims_c, dims_g, transpose=False):
-    """reverses the dataset along a dimension. Need to provide the dimensions in the
+    """Reverses the dataset along a dimension. Need to provide the dimensions in the
     form of [center, corner] points. This rotation is only used in the horizontal, and
     so dims_c is either one of `i`  or `j`, and dims_g is either one of `i_g` or `j_g`.
     The pair most correspond to the same dimension."""
@@ -684,8 +770,9 @@ def rotate_dataset(
 
 
 def shift_list_ds(_DS, dims_c, dims_g, Ni, facet=1):
-    """given a list of n-datasets, each element of the list gets shifted along the
-    dimensions provided (dims_c and dims_g) so that there is no overlap between them.
+    """Given a list of n-datasets with matching dimensions, each element of the list
+    gets shifted along the dimensions provided (by dims_c and dims_g) so that there
+    is no overlap of values between them.
     """
     _DS = _copy.deepcopy(_DS)
     fac = 1
@@ -725,7 +812,10 @@ def shift_list_ds(_DS, dims_c, dims_g, Ni, facet=1):
 
 
 def combine_list_ds(_DSlist):
-    """combines a list of n-datasets"""
+    """Combines a list of N-xarray.datasets along a dimension. Datasets must have
+    matching dimensions. See `xr.combine_first()`
+
+    """
     if len(_DSlist) == 0:
         _DSFacet = 0  # No dataset to combine. Return empty
     elif len(_DSlist) == 1:  # a single face
@@ -750,7 +840,7 @@ def combine_list_ds(_DSlist):
 
 
 def flip_v(_ds, co_list=metrics, dims=True, _len=3):
-    """reverses the sign of the vector fields by default along the corner coordinate
+    """Reverses the sign of the vector fields by default along the corner coordinate
     (Xp1 or Yp1). If dims is True, for each variable we infer the dimensions. Otherwise,
     dims is given
 
@@ -763,6 +853,10 @@ def flip_v(_ds, co_list=metrics, dims=True, _len=3):
             if "mate" in _ds[_varName].attrs:
                 if _varName not in co_list and len(_dims.X) == _len:
                     _ds[_varName] = -_ds[_varName]
+                elif _varName == "SN":
+                    _ds[_varName] = -_ds[_varName]
+                # elif _varName == "CS":
+                #     _ds[_varName] = -_ds[_varName]
     return _ds
 
 
@@ -976,7 +1070,9 @@ def _LLC_check_sizes(_DS):
     YG = _DS["YG"].dropna("Yp1", "all")
     y0 = int(YG["Yp1"][0])
     y1 = int(YG["Yp1"][-1]) + 1
+
     _DS = _copy.deepcopy(_DS.isel(Yp1=slice(y0, y1)))
+    _DS = _copy.deepcopy(_DS.isel(Y=slice(y0, y1 - 1)))
 
     DIMS = [dim for dim in _DS["XC"].dims]
     dims_c = Dims(DIMS[::-1])
@@ -1012,7 +1108,7 @@ def _LLC_check_sizes(_DS):
 
 
 def _reorder_ds(_ds, dims_c, dims_g):
-    """Only needed when Pacific -centered data. Corrects the ordering
+    """Only needed when Pacific-centered data. Corrects the ordering
     of y-dim and transposes the data, all lazily."""
 
     _DS = _copy.deepcopy(_ds)
@@ -1035,7 +1131,68 @@ def _reorder_ds(_ds, dims_c, dims_g):
     return _DS
 
 
+def llc_local_to_lat_lon(ds, co_list=metrics):
+    """
+    Takes all vector fields and rotates them to orient them along geographical
+    coordinates.
+    """
+    _ds = mates(_copy.deepcopy(ds))
+
+    grid_coords = {
+        "Y": {"center": "Y", "outer": "Yp1"},
+        "X": {"center": "X", "outer": "Xp1"},
+        "Z": {"center": "Z", "outer": "Zp1", "right": "Zu", "left": "Zl"},
+        "time": {"center": "time_midp", "left": "time"},
+    }
+
+    # create grid object to interpolate
+    grid = Grid(_ds, coords=grid_coords, periodic=[])
+
+    CS = _ds["CS"]  # cosine of angle between logical and geo axis. At tracer points
+    SN = _ds["SN"]  # sine of angle between logical and geo axis. At tracer points
+
+    CSU = grid.interp(CS, axis="X", boundary="extend")  # cos at u-point
+    CSV = grid.interp(CS, axis="Y", boundary="extend")  # cos at v-point
+
+    SNU = grid.interp(SN, axis="X", boundary="extend")  # sin at u-point
+    SNV = grid.interp(SN, axis="Y", boundary="extend")  # sin at v-point
+
+    data_vars = [var for var in _ds.data_vars if len(ds[var].dims) > 1]
+
+    for var in data_vars:
+        DIMS = [dim for dim in _ds[var].dims]
+        dims = Dims(DIMS[::-1])
+        if len(dims.X) + len(dims.Y) == 4:  # vector field (metric)
+            if len(dims.Y) == 1 and var not in co_list:  # u vector
+                _da = _copy.deepcopy(_ds[var])
+                if "mate" in _ds[var].attrs:
+                    mate = _ds[var].mate
+                    _ds = _ds.drop_vars([var])
+                    VU = grid.interp(
+                        grid.interp(_ds[mate], axis="Y", boundary="extend"),
+                        axis="X",
+                        boundary="extend",
+                    )
+                    _ds[var] = _da * CSU - VU * SNU
+            elif len(dims.Y) == 3 and var not in co_list:  # v vector
+                _da = _copy.deepcopy(_ds[var])
+                if "mate" in _ds[var].attrs:
+                    mate = _ds[var].mate
+                    _ds = _ds.drop_vars([var])
+                    UV = grid.interp(
+                        grid.interp(_ds[mate], axis="X", boundary="extend"),
+                        axis="Y",
+                        boundary="extend",
+                    )
+                    _ds[var] = UV * SNV + _da * CSV
+
+    return _ds
+
+
 class Dims:
+    """Creates a shortcut for dimension`s names associated with an arbitrary
+    variable."""
+
     axes = "XYZT"  # shortcut axis names
 
     def __init__(self, vars):
