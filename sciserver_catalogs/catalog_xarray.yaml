@@ -712,6 +712,41 @@ sources:
       original_output: snapshot
 
 
+  LLC4320_forcing:
+    description: 10 day sample of hourly data from the LLC4320 simulation
+    driver: zarr
+    args:
+      urlpath: '/home/idies/workspace/poseidon/data*/llc4320_tests/10dayhourly/forcing'
+      engine: zarr
+      parallel: true
+    metadata:
+      swap_dims:
+        k: Z
+        k_p1: Zp1
+        k_u: Zu
+        k_l: Zl
+      rename:
+        i: X
+        i_g: Xp1
+        j: Y
+        j_g: Yp1
+      parameters:
+        rSphere: 6.371e+03
+        eq_state: jmd95
+        rho0: 1027
+        g: 9.81
+        eps_nh: 0
+        omega: 7.292123516990373e-05
+        c_p: 3.986e+03
+        tempFrz0: 9.01e-02
+        dTempFrz_dS: -5.75e-02
+      name: LLC4320
+      description: |
+        10 day hourly data from the LLC4320 simulations computed using the MITGCM, a general, curvilinear ocean simulation on the cube-sphere.
+      projection:
+      original_output: snapshot
+
+
   LLC4320_grid:
     description: 10 day sample of hourly data from the LLC4320 simulation
     driver: zarr
