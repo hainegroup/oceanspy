@@ -467,7 +467,7 @@ def _find_entries(name, catalog_url):
     except ValidationError:
         if catalog_url is None:
             url = (
-                "https://raw.githubusercontent.com/Mikejmnez/oceanspy/"
+                "https://raw.githubusercontent.com/hainegroup/oceanspy/"
                 "main/sciserver_catalogs/catalog_xmitgcm.yaml"
             )
         else:
