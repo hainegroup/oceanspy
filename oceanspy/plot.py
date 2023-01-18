@@ -757,8 +757,8 @@ def horizontal_section(
             if add_labels is not False:
                 try:
                     gl = ax.gridlines(crs=transform, draw_labels=True)
-                    gl.xlabels_top = False
-                    gl.ylabels_right = False
+                    gl.top_labels = False
+                    gl.right_labels = False
                 except TypeError:
                     # Gridlines don't work with all projections
                     pass
