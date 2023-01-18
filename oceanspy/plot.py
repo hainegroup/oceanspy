@@ -750,7 +750,7 @@ def horizontal_section(
     # Labels and return
     add_labels = kwargs.pop("add_labels", False)
     if len(dims) == 0:
-        ax = _plt.gca()
+        ax = _plt.axes()
         if od.projection is None:
             _plt.tight_layout()
         else:
