@@ -2,27 +2,27 @@
 requires = ["setuptools>=45", "setuptools_scm[toml]>=6.2"]
 
 [project]
-name = "oceanspy"
-description = "A Python package to facilitate ocean model data analysis and visualization."
-readme = "README.rst"
-license = {file = "LICENSE"}
 classifiers = [
-    "Development Status :: 4 - Beta",
-    "Intended Audience :: Science/Research",
-    "License :: OSI Approved :: MIT License",
-    "Operating System :: OS Independent",
-    "Programming Language :: Python",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
-    "Topic :: Scientific/Engineering"
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Topic :: Scientific/Engineering"
 ]
-dynamic = ["version"]
 dependencies = [
-    "dask",
-    "xarray >= 0.14.1",
-    "xgcm >= 0.2.0"
-    ]
+  "dask",
+  "xarray >= 0.14.1",
+  "xgcm >= 0.2.0"
+]
+description = "A Python package to facilitate ocean model data analysis and visualization."
+dynamic = ["version"]
+license = {file = "LICENSE"}
+name = "oceanspy"
+readme = "README.rst"
 requires-python = ">=3.9"
 
 [tool.coverage.run]
@@ -32,8 +32,8 @@ branch = true
 profile = "black"
 
 [tool.pytest.ini_options]
-testpaths = ["oceanspy/tests"]
 addopts = "-v --cov"
+testpaths = ["oceanspy/tests"]
 
 [tool.setuptools]
 packages = ["oceanspy"]
