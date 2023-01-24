@@ -20,7 +20,6 @@ repos:
     args: [--autofix, --preserve-quotes]
   - id: pretty-format-toml
     args: [--autofix]
-    additional_dependencies: [toml-sort<0.22.0]
 - repo: https://github.com/pycqa/isort
   rev: 5.11.4
   hooks:
