@@ -114,7 +114,6 @@ class LLCtransformation:
 
         https://docs.xarray.dev/en/stable/generated/xarray.Dataset.chunk.html
 
-
         See Also
         --------
         subsample.cutout
