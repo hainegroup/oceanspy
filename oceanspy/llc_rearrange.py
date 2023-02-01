@@ -56,6 +56,7 @@ class LLCtransformation:
         faces=None,
         centered=None,
         chunks=None,
+        persist=False,
     ):
         """This transformation splits the arctic cap (face=6) into four triangular
         regions and combines all faces in a quasi lat-lon grid. The triangular
@@ -92,7 +93,10 @@ class LLCtransformation:
         chunks: bool or dict.
             If False (default) - chunking is automatic.
             If dict, rechunks the dataset according to the spefications of the
-            dictionary. See xarray.chunk().
+            dictionary. See `xarray.Dataset.chunk()`.
+        persist: bool.
+            If `False` (default), transformation of rotated and arctic data is not
+            persisted. See `xarray.Dataset.persist()`.
 
         Returns
         -------
@@ -113,6 +117,8 @@ class LLCtransformation:
         https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html
 
         https://docs.xarray.dev/en/stable/generated/xarray.Dataset.chunk.html
+
+        https://docs.xarray.dev/en/stable/generated/xarray.Dataset.persist.html
 
         See Also
         --------
@@ -370,7 +376,7 @@ class LLCtransformation:
                     if len(dims) > 1 and "nv" not in DIMS:
                         dtr = list(dims)[::-1]
                         dtr[-1], dtr[-2] = dtr[-2], dtr[-1]
-                        if YRange is not None and XRange is not None:
+                        if persist:
                             DSFacet12[_var] = DSFacet12[_var].transpose(*dtr).persist()
                         else:
                             DSFacet12[_var] = DSFacet12[_var].transpose(*dtr)
