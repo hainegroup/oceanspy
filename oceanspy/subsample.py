@@ -62,6 +62,7 @@ def cutout(
     dropAxes=False,
     centered=None,
     chunks=None,
+    persist=False,
 ):
     """
     Cutout the original dataset in space and time
@@ -112,6 +113,9 @@ def cutout(
         Only used when `face` is a dimension. When str, 'Atlantic' or 'Pacific'
         are the only possible choices. Default is `None` and centered is estimated
         during the cutout.
+    persist: bool.
+        Only used when `face` is a dimension. If `False` (default) the transformation
+        is not persisted.
 
     Returns
     -------
@@ -354,6 +358,7 @@ def cutout(
             "YRange": YRange,
             "centered": centered,
             "chunks": chunks,
+            "persist": persist,
         }
         dsnew = _llc_trans.arctic_crown(**arg)
         dsnew = dsnew.set_coords(co_list)
