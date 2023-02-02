@@ -3,7 +3,7 @@ ci:
   autofix_prs: false
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v4.4.0
+  rev: 5191f112dfd133e97acba8c2162c37d8613cf54b
   hooks:
   - id: trailing-whitespace
   - id: end-of-file-fixer
@@ -37,7 +37,5 @@ repos:
   hooks:
   - id: nbqa-black
     additional_dependencies: [black]
-    # args: [--nbqa-mutate]
   - id: nbqa-isort
     additional_dependencies: [isort]
-    # args: [--nbqa-mutate]
