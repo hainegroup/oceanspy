@@ -419,7 +419,6 @@ def test_merge_into_oceandataset(od, obj, overwrite):
 @pytest.mark.parametrize("od", [od])
 @pytest.mark.parametrize("compute", [True, False])
 def test_save_load(tmp_path, od, compute):
-
     nc_path = str(tmp_path / "test.nc")
     od.to_netcdf(path=nc_path, compute=compute)
     open_oceandataset.from_netcdf(nc_path)

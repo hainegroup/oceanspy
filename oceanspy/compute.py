@@ -234,7 +234,6 @@ def gradient(od, varNameList=None, axesList=None, aliased=True):
     # Loop through variables
     grad = {}
     for _, (varName, varNameOUT) in enumerate(zip(varNameListIN, varNameListOUT)):
-
         # Skip if variable doesn't have axis!
         for axis in axesList:
             S1 = set(od._ds[varName].dims)
@@ -269,7 +268,6 @@ def gradient(od, varNameList=None, axesList=None, aliased=True):
 
             # Vertical gradient
             if axis == "Z":
-
                 # Add missing variables
                 varList = ["HFacC", "HFacW", "HFacS"]
                 od = _add_missing_variables(od, varList)
@@ -317,7 +315,6 @@ def gradient(od, varNameList=None, axesList=None, aliased=True):
 
             # Time and vertical sections
             if axis in ["mooring", "station", "time"]:
-
                 if axis in ["mooring", "station"]:
                     convert_units = 1.0e-3
                     add_dist = "_dist"
@@ -423,7 +420,6 @@ def divergence(od, iName=None, jName=None, kName=None, aliased=True):
     div = {}
     pref = "d"
     if iName is not None:
-
         # Handle aliases
         NameIN, NameOUT = _handle_aliased(od, aliased, iName)
 
@@ -451,7 +447,6 @@ def divergence(od, iName=None, jName=None, kName=None, aliased=True):
             div[pref + NameOUT + suf].attrs["units"] = units
 
     if jName is not None:
-
         # Handle aliases
         NameIN, NameOUT = _handle_aliased(od, aliased, jName)
 
@@ -478,7 +473,6 @@ def divergence(od, iName=None, jName=None, kName=None, aliased=True):
             div[pref + NameOUT + suf].attrs["units"] = units
 
     if kName is not None:
-
         # Handle aliases
         NameIN, NameOUT = _handle_aliased(od, aliased, kName)
 
@@ -566,7 +560,6 @@ def curl(od, iName=None, jName=None, kName=None, aliased=True):
 
     crl = {}
     if iName is not None and jName is not None:
-
         # Handle aliases
         iNameIN, iNameOUT = _handle_aliased(od, aliased, iName)
         jNameIN, jNameOUT = _handle_aliased(od, aliased, jName)
@@ -596,7 +589,6 @@ def curl(od, iName=None, jName=None, kName=None, aliased=True):
             crl[Name].attrs["units"] = od._ds[iNameIN].attrs["units"] + " m^-1"
 
     if jName is not None and kName is not None:
-
         # Handle aliases
         jNameIN, jNameOUT = _handle_aliased(od, aliased, jName)
         kNameIN, kNameOUT = _handle_aliased(od, aliased, kName)
@@ -623,7 +615,6 @@ def curl(od, iName=None, jName=None, kName=None, aliased=True):
             crl[Name].attrs["units"] = od._ds[jNameIN].attrs["units"] + " m^-1"
 
     if kName is not None and iName is not None:
-
         # Handle aliases
         iNameIN, iNameOUT = _handle_aliased(od, aliased, iName)
         kNameIN, kNameOUT = _handle_aliased(od, aliased, kName)
@@ -707,7 +698,6 @@ def laplacian(od, varNameList=None, axesList=None, aliased=True):
     else:
         err_axes = [axis for axis in axesList if axis not in grid_axes]
         if len(err_axes) != 0:
-
             raise ValueError(
                 "These axes are not supported: {}."
                 "\nThe laplacian operator is"
@@ -740,7 +730,6 @@ def laplacian(od, varNameList=None, axesList=None, aliased=True):
     # Loop through variables
     lap = []
     for _, (varName, varNameOUT) in enumerate(zip(varNameListIN, varNameListOUT)):
-
         # Compute gradients
         grad = gradient(od, varNameList=varName, axesList=axesList, aliased=False)
 
@@ -875,7 +864,6 @@ def _integral_and_mean(
     aliased=True,
     storeWeights=True,
 ):
-
     # Check parameters
     _check_instance(
         {"od": od, "aliased": aliased, "storeWeights": storeWeights},
@@ -969,7 +957,6 @@ def _integral_and_mean(
         # ==========
         # Area
         if set(["X", "Y"]).issubset(axesList):
-
             # Add missing variables
             areaList = ["rA", "rAw", "rAs", "rAz"]
             od = _add_missing_variables(od, areaList)
@@ -988,7 +975,6 @@ def _integral_and_mean(
 
         # Y
         elif set(["Y"]).issubset(axesList):
-
             # Add missing variables
             yList = ["dyC", "dyF", "dyG", "dyU"]
             od = _add_missing_variables(od, yList)
@@ -1005,7 +991,6 @@ def _integral_and_mean(
 
         # X
         elif set(["X"]).issubset(axesList):
-
             # Add missing variables
             xList = ["dxC", "dxF", "dxG", "dxV"]
             od = _add_missing_variables(od, xList)
@@ -1024,7 +1009,6 @@ def _integral_and_mean(
         # VERTICAL
         # ========
         if set(["Z"]).issubset(axesList):
-
             # Add missing variables
             HFacList = ["HFacC", "HFacW", "HFacS"]
             od = _add_missing_variables(od, HFacList)
@@ -1623,7 +1607,6 @@ def eddy_kinetic_energy(od):
 
     # Non-hydrostatic case
     if eps_nh:
-
         # Add missing variables
         varList = ["W"]
         od = _add_missing_variables(od, varList)
@@ -2868,7 +2851,6 @@ def missing_horizontal_spacing(od):
     # Compute
     deltas = {}
     for var in [var for var in ["dxF", "dxV", "dyF", "dyU"] if var not in ds.variables]:
-
         # Pick dx
         if "x" in var:
             pref = "dx"

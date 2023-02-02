@@ -179,7 +179,6 @@ class LLCtransformation:
 
                 opt = True
         else:
-
             opt = False
             cuts = None
 

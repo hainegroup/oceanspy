@@ -53,7 +53,6 @@ od_bdg = open_oceandataset.from_netcdf("{}budgets.nc" "".format(Datadir))
 
 @pytest.mark.parametrize("od_in", [od])
 def test_missing_horizontal_spacing(od_in):
-
     # Compute
     od_in = od_in.subsample.cutout(varList=["dxC", "dxG", "dyC", "dyG"])
     ds = missing_horizontal_spacing(od_in)
@@ -72,7 +71,6 @@ def test_missing_horizontal_spacing(od_in):
 @pytest.mark.parametrize("od_in", [od, alias_od])
 @pytest.mark.parametrize("eq_state", AVAILABLE_PARAMETERS["eq_state"])
 def test_potential_density_anomaly(od_in, eq_state):
-
     od_in = od_in.set_parameters({"eq_state": eq_state})
 
     # Compute Sigma0
@@ -96,7 +94,6 @@ def test_potential_density_anomaly(od_in, eq_state):
 
 @pytest.mark.parametrize("od_in", [od, alias_od])
 def test_Brunt_Vaisala_frequency(od_in):
-
     # Compute N2
     ds_out = Brunt_Vaisala_frequency(od_in)
     assert ds_out["N2"].attrs["units"] == "s^-2"
@@ -118,7 +115,6 @@ def test_Brunt_Vaisala_frequency(od_in):
 
 @pytest.mark.parametrize("od_in", [od, alias_od])
 def test_velocity_magnitude(od_in):
-
     # Compute vel
     ds_out = velocity_magnitude(od_in)
     assert ds_out["vel"].attrs["units"] == "m/s"
@@ -138,7 +134,6 @@ def test_velocity_magnitude(od_in):
 
 @pytest.mark.parametrize("od_in", [od, alias_od])
 def test_horizontal_velocity_magnitude(od_in):
-
     # Compute hor_vel
     ds_out = horizontal_velocity_magnitude(od_in)
     assert ds_out["hor_vel"].attrs["units"] == "m/s"
@@ -157,7 +152,6 @@ def test_horizontal_velocity_magnitude(od_in):
 
 @pytest.mark.parametrize("od_in", [od, alias_od])
 def test_vertical_relative_vorticity(od_in):
-
     # Extract and remove zeta
     check = od_in._ds["momVort3"]
     aliases = od.aliases
@@ -190,7 +184,6 @@ def test_vertical_relative_vorticity(od_in):
 
 @pytest.mark.parametrize("od_in", [od, alias_od])
 def test_relative_vorticity(od_in):
-
     # Extract and remove zeta
     check = od_in._ds["momVort3"]
     aliases = od.aliases
@@ -234,7 +227,6 @@ def test_relative_vorticity(od_in):
 @pytest.mark.parametrize("od_in", [od, alias_od])
 @pytest.mark.parametrize("eps_nh", [1, 0])
 def test_kinetic_energy(od_in, eps_nh):
-
     od_in = od_in.set_parameters({"eps_nh": eps_nh})
 
     # Compute KE
@@ -262,7 +254,6 @@ def test_kinetic_energy(od_in, eps_nh):
 @pytest.mark.parametrize("od_in", [od, alias_od])
 @pytest.mark.parametrize("eps_nh", [1, 0])
 def test_eddy_kinetic_energy(od_in, eps_nh):
-
     od_in = od_in.set_parameters({"eps_nh": eps_nh})
 
     # Compute KE
@@ -291,7 +282,6 @@ def test_eddy_kinetic_energy(od_in, eps_nh):
 
 @pytest.mark.parametrize("od_in", [od, alias_od])
 def test_horizontal_divergence_velocity(od_in):
-
     # Compute hor_div_vel
     ds_out = horizontal_divergence_velocity(od_in)
     assert ds_out["hor_div_vel"].attrs["units"] == "m s^-2"
@@ -310,7 +300,6 @@ def test_horizontal_divergence_velocity(od_in):
 
 @pytest.mark.parametrize("od_in", [od, alias_od])
 def test_shear_strain(od_in):
-
     # Compute s_strain
     ds_out = shear_strain(od_in)
     assert ds_out["s_strain"].attrs["units"] == "s^-1"
@@ -327,7 +316,6 @@ def test_shear_strain(od_in):
 
 @pytest.mark.parametrize("od_in", [od, alias_od])
 def test_normal_strain(od_in):
-
     # Compute n_strain
     ds_out = normal_strain(od_in)
     assert ds_out["n_strain"].attrs["units"] == "s^-1"
@@ -345,7 +333,6 @@ def test_normal_strain(od_in):
 
 @pytest.mark.parametrize("od_in", [od, alias_od])
 def test_Okubo_Weiss_parameter(od_in):
-
     # Compute n_strain
     ds_out = Okubo_Weiss_parameter(od_in)
 
@@ -364,7 +351,6 @@ def test_Okubo_Weiss_parameter(od_in):
 @pytest.mark.parametrize("od_in", [od, alias_od])
 @pytest.mark.parametrize("full", [False, True])
 def test_Ertel_potential_vorticity(od_in, full):
-
     # Compute Ertel_PV
     ds_out = Ertel_potential_vorticity(od_in, full)
     assert ds_out["Ertel_PV"].attrs["units"] == "m^-1 s^-1"
@@ -385,7 +371,6 @@ def test_Ertel_potential_vorticity(od_in, full):
 @pytest.mark.parametrize("flippedX", [True, False])
 @pytest.mark.parametrize("flippedY", [True, False])
 def test_mooring_volume_transport(od_in, mooring, closed, flippedX, flippedY):
-
     if mooring is True:
         if not closed:
             X = [od_in.dataset["X"].min().values, od_in.dataset["X"].max().values]
@@ -449,7 +434,6 @@ def test_mooring_volume_transport(od_in, mooring, closed, flippedX, flippedY):
 @pytest.mark.parametrize("rotate", [True, False])
 @pytest.mark.parametrize("survey", [True, False])
 def test_survey_aligned_velocities(od_in, gridtype, rotate, survey):
-
     if rotate is True:
         if gridtype == "curv":
             od_in = od_in.compute.geographical_aligned_velocities()
@@ -486,7 +470,6 @@ def test_survey_aligned_velocities(od_in, gridtype, rotate, survey):
 
 @pytest.mark.parametrize("od_in", [od_bdg])
 def test_heat_budget(od_in):
-
     for i in range(2):
         if i == 1:
             od_in = od_in.subsample.cutout(ZRange=[-5, -20])
@@ -521,7 +504,6 @@ def test_heat_budget(od_in):
 
 @pytest.mark.parametrize("od_in", [od_bdg])
 def test_salt_budget(od_in):
-
     # Compute salt_budget
     ds_out = salt_budget(od_in)
     for var in ds_out.data_vars:
