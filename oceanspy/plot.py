@@ -57,9 +57,8 @@ def TS_diagram(
     contour_kwargs=None,
     clabel_kwargs=None,
     cutout_kwargs=None,
-    **kwargs
+    **kwargs,
 ):
-
     """
     Plot temperature-salinity diagram.
 
@@ -200,7 +199,6 @@ def TS_diagram(
 
     # Extract color field, and interpolate if needed
     if colorName is not None:
-
         # Add missing variables (use private)
         _colorName = _rename_aliased(od, colorName)
         od = _add_missing_variables(od, _colorName)
@@ -364,7 +362,6 @@ def TS_diagram(
 def time_series(
     od, varName, meanAxes=False, intAxes=False, cutout_kwargs=None, **kwargs
 ):
-
     """
     Plot time series.
 
@@ -467,7 +464,7 @@ def horizontal_section(
     contour_kwargs=None,
     clabel_kwargs=None,
     cutout_kwargs=None,
-    **kwargs
+    **kwargs,
 ):
     """
     Plot horizontal section.
@@ -780,7 +777,7 @@ def vertical_section(
     clabel_kwargs=None,
     subsamp_kwargs=None,
     cutout_kwargs=None,
-    **kwargs
+    **kwargs,
 ):
     """
     Plot vertical section.
@@ -942,7 +939,6 @@ def vertical_section(
 
     # CONTOURNAME
     if contourName is not None:
-
         # Apply mean and sum
         da_contour = od.dataset[contourName]
         da_contour, contourName = _compute_mean_and_int(
@@ -1035,7 +1031,6 @@ def vertical_section(
 
 
 def _compute_mean_and_int(od, varName, meanAxes, intAxes):
-
     # Mean and sum
     if meanAxes is not False:
         ds = _weighted_mean(
@@ -1057,7 +1052,6 @@ def _compute_mean_and_int(od, varName, meanAxes, intAxes):
 
 
 def _Vsection_regrid(od, da, varName):
-
     if "mooring" in od.grid_coords:
         # Time coordinates
         if "time" in od.grid_coords.keys():

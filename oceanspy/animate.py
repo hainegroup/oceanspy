@@ -219,7 +219,7 @@ def vertical_section(od, display=True, FuncAnimation_kwargs=None, **kwargs):
         plot_func=plot_func,
         func_kwargs=kwargs,
         display=display,
-        **FuncAnimation_kwargs
+        **FuncAnimation_kwargs,
     )
     return anim
 
@@ -311,7 +311,7 @@ def horizontal_section(od, display=True, FuncAnimation_kwargs=None, **kwargs):
         plot_func=plot_func,
         func_kwargs=kwargs,
         display=display,
-        **FuncAnimation_kwargs
+        **FuncAnimation_kwargs,
     )
     return anim
 
@@ -410,7 +410,6 @@ def TS_diagram(od, display=True, FuncAnimation_kwargs=None, **kwargs):
     # Fix colorbar
     colorName = kwargs.pop("colorName", None)
     if colorName is not None:
-
         # Add missing variables (use private)
         _colorName = _rename_aliased(od, colorName)
         od = _compute._add_missing_variables(od, _colorName)
@@ -437,7 +436,7 @@ def TS_diagram(od, display=True, FuncAnimation_kwargs=None, **kwargs):
         plot_func=plot_func,
         func_kwargs=kwargs,
         display=display,
-        **FuncAnimation_kwargs
+        **FuncAnimation_kwargs,
     )
     return anim
 

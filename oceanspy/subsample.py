@@ -62,6 +62,7 @@ def cutout(
     dropAxes=False,
     centered=None,
     chunks=None,
+    persist=False,
 ):
     """
     Cutout the original dataset in space and time
@@ -112,6 +113,9 @@ def cutout(
         Only used when `face` is a dimension. When str, 'Atlantic' or 'Pacific'
         are the only possible choices. Default is `None` and centered is estimated
         during the cutout.
+    persist: bool.
+        Only used when `face` is a dimension. If `False` (default) the transformation
+        is not persisted.
 
     Returns
     -------
@@ -223,7 +227,6 @@ def cutout(
     maskT = _xr.ones_like(ds["time"]).astype("int")
 
     if timeRange is not None:
-
         # Use arrays
         timeRange = _np.asarray([_np.min(timeRange), _np.max(timeRange)]).astype(
             ds["time"].dtype
@@ -345,7 +348,6 @@ def cutout(
         add_Vbdr = 0
 
     if "face" in ds.dims:
-
         arg = {
             "ds": ds,
             "varList": varList,  # vars and grid coords to transform
@@ -354,6 +356,7 @@ def cutout(
             "YRange": YRange,
             "centered": centered,
             "chunks": chunks,
+            "persist": persist,
         }
         dsnew = _llc_trans.arctic_crown(**arg)
         dsnew = dsnew.set_coords(co_list)
@@ -530,7 +533,6 @@ def cutout(
     # ---------------------------
     # Resample in time
     if timeFreq:
-
         # Infer original frequency
         inFreq = _pd.infer_freq(ds.time.values)
         if timeFreq[0].isdigit() and not inFreq[0].isdigit():
@@ -547,7 +549,6 @@ def cutout(
             )
 
         else:
-
             # Remove time_midp and warn
             vars2drop = [var for var in ds.variables if "time_midp" in ds[var].dims]
             if vars2drop:
@@ -730,7 +731,6 @@ def mooring_array(od, Ymoor, Xmoor, **kwargs):
 
     # Loop until all steps are 1
     while any(diff_iY + diff_iX != 1):
-
         # Find where need to add grid points
         k = _np.argwhere(diff_iY + diff_iX != 1)[0][0]
         lat0 = near_Y[k]
@@ -949,7 +949,7 @@ def survey_stations(
     Xsurv,
     delta=None,
     xesmf_regridder_kwargs={"method": "bilinear"},
-    **kwargs
+    **kwargs,
 ):
     """
     Extract survey stations.
@@ -1291,7 +1291,6 @@ def particle_properties(od, times, Ypart, Xpart, Zpart, **kwargs):
     # Find horizontal indexes
     all_vars = {}
     for grid_pos in ["C", "U", "V", "G"]:
-
         # Don't create tree if no variables
         var_grid_pos = [
             var

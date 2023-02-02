@@ -7,7 +7,6 @@ from pooch import Untar
 
 # Download data if necessary
 def pytest_configure():
-
     fnames = pooch.retrieve(
         url="https://zenodo.org/record/5832607/files/Data.tar.gz?download=1",
         processor=Untar(),

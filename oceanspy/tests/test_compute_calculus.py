@@ -118,7 +118,6 @@ od4calc = od4calc.merge_into_oceandataset(sin_ds)
 @pytest.mark.parametrize("od", [od4calc])
 @pytest.mark.parametrize("axesList", [None, "X", "wrong"])
 def test_gradient(od, axesList):
-
     varNameList = ["sinZ", "sinY", "sinX", "sintime"]
     if axesList == "wrong":
         with pytest.raises(ValueError):
@@ -203,7 +202,6 @@ def test_div_errors(od, iName, jName, kName):
     ],
 )
 def test_divergence(od, varNameList):
-
     # Add units
     if None not in varNameList:
         for varName in varNameList:
@@ -251,7 +249,6 @@ def test_curl_errors(od, iName, jName, kName):
 
 @pytest.mark.parametrize("od", [od4calc])
 def test_curl(od):
-
     velocities = [
         [None, "sinVZ", "sinWY"],
         ["sinUZ", None, "sinWX"],
@@ -384,7 +381,6 @@ def test_int_mean_options(od, varNameList, axesList, storeWeights):
 # Test shortcuts
 @pytest.mark.parametrize("od_in", [od4calc])
 def test_shortcuts(od_in):
-
     # Only use some variables
     list_calc = [
         "Temp",

@@ -94,7 +94,6 @@ def test_cutout_value_errors(od, varList, sampMethod):
 @pytest.mark.parametrize("dropAxes", [True, False])
 @pytest.mark.parametrize("add_Hbdr", [True, False, 1])
 def test_horizontal_cutout(od, dropAxes, add_Hbdr):
-
     # Cover both case first inde and any index
     for i in range(2):
         if i == 0:
@@ -331,7 +330,6 @@ def test_cutout_faces(
     "kwargs", [{}, {"YRange": None, "XRange": None, "add_Hbdr": True}]
 )
 def test_mooring(od, cartesian, kwargs):
-
     this_od = od
     if cartesian:
         this_od = this_od.set_parameters({"rSphere": None})
@@ -367,7 +365,6 @@ def test_mooring(od, cartesian, kwargs):
     "kwargs", [{}, {"YRange": None, "XRange": None, "add_Hbdr": True}]
 )
 def test_survey(od, cartesian, delta, kwargs):
-
     this_od = od
     if cartesian:
         this_od = this_od.set_parameters({"rSphere": None})
@@ -468,7 +465,6 @@ def test_particle_errors(od, Ypart, Xpart, Zpart, times):
     ],
 )
 def test_particles(od, cartesian, varList, kwargs):
-
     this_od = od
     if cartesian:
         this_od = this_od.set_parameters({"rSphere": None})
@@ -492,7 +488,7 @@ def test_particles(od, cartesian, varList, kwargs):
             Xpart=Xpart,
             Zpart=Zpart,
             varList=varList,
-            **kwargs
+            **kwargs,
         )
 
     assert_array_equal(np.float32(new_od.dataset["XC"].values), np.float32(Xpart))

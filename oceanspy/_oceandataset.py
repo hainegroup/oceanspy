@@ -105,7 +105,6 @@ class OceanDataset:
         return OceanDataset(dataset=self.dataset.copy())
 
     def __repr__(self):
-
         main_info = ["<oceanspy.OceanDataset>"]
         main_info.append("\nMain attributes:")
         main_info.append(
@@ -506,7 +505,6 @@ class OceanDataset:
                 check1 = len(self.grid_coords[axis]) == 1
                 check2 = list(self.grid_coords[axis].values())[0] is not None
                 if check1 and check2:
-
                     # Deal with aliases
                     dim = list(self.grid_coords[axis].keys())[0]
                     if self._aliases_flipped and dim in self._aliases_flipped:
@@ -628,7 +626,6 @@ class OceanDataset:
         _check_instance({"face_connections": face_connections}, "dict")
 
         if list(face_connections)[0] == "face":
-
             for k in face_connections["face"].keys():
                 for axis in face_connections["face"][k].keys():
                     if type(face_connections["face"][k][axis]) == tuple:
@@ -681,7 +678,6 @@ class OceanDataset:
         coords = self.grid_coords
 
         if aliases and coords:
-
             # Flip aliases
             aliases = {custom: ospy for ospy, custom in aliases.items()}
 
@@ -1054,7 +1050,6 @@ class OceanDataset:
 
         # Get U and V by rolling G
         if coordsUVfromG:
-
             for i, (point_pos, dim2roll) in enumerate(zip(["U", "V"], ["Yp1", "Xp1"])):
                 for dim in ["Y", "X"]:
                     coord = self._ds[dim + "G"].rolling(**{dim2roll: 2})

@@ -56,6 +56,7 @@ class LLCtransformation:
         faces=None,
         centered=None,
         chunks=None,
+        persist=False,
     ):
         """This transformation splits the arctic cap (face=6) into four triangular
         regions and combines all faces in a quasi lat-lon grid. The triangular
@@ -92,7 +93,10 @@ class LLCtransformation:
         chunks: bool or dict.
             If False (default) - chunking is automatic.
             If dict, rechunks the dataset according to the spefications of the
-            dictionary. See xarray.chunk().
+            dictionary. See `xarray.Dataset.chunk()`.
+        persist: bool.
+            If `False` (default), transformation of rotated and arctic data is not
+            persisted. See `xarray.Dataset.persist()`.
 
         Returns
         -------
@@ -113,6 +117,8 @@ class LLCtransformation:
         https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html
 
         https://docs.xarray.dev/en/stable/generated/xarray.Dataset.chunk.html
+
+        https://docs.xarray.dev/en/stable/generated/xarray.Dataset.persist.html
 
         See Also
         --------
@@ -173,7 +179,6 @@ class LLCtransformation:
 
                 opt = True
         else:
-
             opt = False
             cuts = None
 
@@ -189,7 +194,13 @@ class LLCtransformation:
         for var_name in varList:
             if "face" in ds[var_name].dims:
                 arc_faces, *nnn, DS = arct_connect(
-                    ds, var_name, faces=faces, masking=False, opt=opt, ranges=cuts
+                    ds,
+                    var_name,
+                    faces=faces,
+                    masking=False,
+                    opt=opt,
+                    ranges=cuts,
+                    persist=persist,
                 )
                 ARCT[0].append(DS[0])
                 ARCT[1].append(DS[1])
@@ -370,10 +381,9 @@ class LLCtransformation:
                     if len(dims) > 1 and "nv" not in DIMS:
                         dtr = list(dims)[::-1]
                         dtr[-1], dtr[-2] = dtr[-2], dtr[-1]
-                        if YRange is not None and XRange is not None:
-                            DSFacet12[_var] = DSFacet12[_var].transpose(*dtr).persist()
-                        else:
-                            DSFacet12[_var] = DSFacet12[_var].transpose(*dtr)
+                        DSFacet12[_var] = DSFacet12[_var].transpose(*dtr)
+                if persist:
+                    DSFacet12 = DSFacet12.persist()
 
         if centered == "Pacific":
             FACETS = [DSFacet34, DSFacet12]  # centered on Pacific ocean
@@ -414,7 +424,9 @@ class LLCtransformation:
         return DS
 
 
-def arct_connect(ds, varName, faces=None, masking=False, opt=False, ranges=None):
+def arct_connect(
+    ds, varName, faces=None, masking=False, opt=False, ranges=None, persist=False
+):
     """
     Splits the arctic into four triangular regions.
     if `masking = True`: does not transpose data. Only use when masking for data not
@@ -475,7 +487,9 @@ def arct_connect(ds, varName, faces=None, masking=False, opt=False, ranges=None)
                 if opt:
                     [Xi_2, Xf_2] = [ranges[0][0], ranges[0][1]]
                     cu_arg = {dims.X: slice(Xi_2, Xf_2)}
-                    arct = (arct.sel(**cu_arg) * Mask.sel(**cu_arg)).persist()
+                    arct = arct.sel(**cu_arg) * Mask.sel(**cu_arg)
+                    if persist:
+                        arct = arct.persist()
                 else:
                     arct = arct * Mask
                 ARCT[0] = arct
@@ -509,7 +523,9 @@ def arct_connect(ds, varName, faces=None, masking=False, opt=False, ranges=None)
                 if opt:
                     [Yi_5, Yf_5] = [ranges[1][0], ranges[1][1]]
                     cu_arg = {dims.Y: slice(Yi_5, Yf_5)}
-                    arct = (arct.sel(**cu_arg) * Mask.sel(**cu_arg)).persist()
+                    arct = arct.sel(**cu_arg) * Mask.sel(**cu_arg)
+                    if persist:
+                        arct = arct.persist()
                 else:
                     arct = arct * Mask
                 ARCT[1] = arct
@@ -542,7 +558,9 @@ def arct_connect(ds, varName, faces=None, masking=False, opt=False, ranges=None)
                 if opt:
                     [Xi_7, Xf_7] = [ranges[2][0], ranges[2][1]]
                     cu_arg = {dims.X: slice(Xi_7, Xf_7)}
-                    arct = (arct.sel(**cu_arg) * Mask.sel(**cu_arg)).persist()
+                    arct = arct.sel(**cu_arg) * Mask.sel(**cu_arg)
+                    if persist:
+                        arct = arct.persist()
                 else:
                     arct = arct * Mask
                 ARCT[2] = arct
@@ -588,11 +606,9 @@ def arct_connect(ds, varName, faces=None, masking=False, opt=False, ranges=None)
                     if opt:
                         [Yi_10, Yf_10] = [ranges[-1][0], ranges[-1][1]]
                         cu_arg = {dims.Y: slice(Yi_10, Yf_10)}
-                        arct = (
-                            (arct.sel(**cu_arg) * Mask.sel(**cu_arg))
-                            .transpose(*dtr)
-                            .persist()
-                        )
+                        arct = (arct.sel(**cu_arg) * Mask.sel(**cu_arg)).transpose(*dtr)
+                        if persist:
+                            arct = arct.persist()
                     else:
                         arct = (arct * Mask).transpose(*dtr)
                 ARCT[3] = arct
