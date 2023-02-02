@@ -37,7 +37,7 @@ repos:
   hooks:
   - id: nbqa-black
     additional_dependencies: [black]
-    args: [--nbqa-mutate]
+    # args: [--nbqa-mutate]
   - id: nbqa-isort
     additional_dependencies: [isort]
-    args: [--nbqa-mutate]
+    # args: [--nbqa-mutate]
