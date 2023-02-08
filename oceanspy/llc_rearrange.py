@@ -631,8 +631,8 @@ def mates(ds):
         "DFyE_SLT",
         "maskW",
         "maskS",
-        "TAUX",
-        "TAUY",
+        "oceTAUX",
+        "oceTAUY",
         "U",
         "V",
         "UVELMASS",
@@ -647,6 +647,8 @@ def mates(ds):
         "rAs",
         "CS",
         "SN",
+        "SIuice",
+        "SIvice",
     ]
     for k in range(int(len(vars_mates) / 2)):
         nk = 2 * k
