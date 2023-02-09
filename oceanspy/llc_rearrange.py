@@ -57,6 +57,7 @@ class LLCtransformation:
         centered=None,
         chunks=None,
         persist=False,
+        geo_true=False,
     ):
         """This transformation splits the arctic cap (face=6) into four triangular
         regions and combines all faces in a quasi lat-lon grid. The triangular
@@ -97,6 +98,9 @@ class LLCtransformation:
         persist: bool.
             If `False` (default), transformation of rotated and arctic data is not
             persisted. See `xarray.Dataset.persist()`.
+        geo_true: bool.
+            If `True` the U and V velocities are corrected and aligned to geographical
+            coordinates. If `False` (default) these are not.
 
         Returns
         -------
@@ -414,7 +418,8 @@ class LLCtransformation:
             # drop copy var = 'nYg' (line 101)
             DS = DS.drop_vars(_var_)
 
-        DS = llc_local_to_lat_lon(DS)
+        if geo_true:
+            DS = llc_local_to_lat_lon(DS)
 
         # restore original attrs if lost
         for var in varList:
