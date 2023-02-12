@@ -386,6 +386,8 @@ class LLCtransformation:
                         dtr = list(dims)[::-1]
                         dtr[-1], dtr[-2] = dtr[-2], dtr[-1]
                         DSFacet12[_var] = DSFacet12[_var].transpose(*dtr)
+                        if _var in ["XG", "YG"]:
+                            DSFacet12 = DSFacet12.persist()
                 if persist:
                     DSFacet12 = DSFacet12.persist()
 
@@ -497,6 +499,8 @@ def arct_connect(
                         arct = arct.persist()
                 else:
                     arct = arct * Mask
+                    if _varName in ["XG", "YG"]:
+                        arct = arct.persist()
                 ARCT[0] = arct
 
             elif k == 5:
@@ -533,6 +537,8 @@ def arct_connect(
                         arct = arct.persist()
                 else:
                     arct = arct * Mask
+                    if _varName in ["XG", "YG"]:
+                        arct = arct.persist()
                 ARCT[1] = arct
 
             elif k == 7:
@@ -568,6 +574,8 @@ def arct_connect(
                         arct = arct.persist()
                 else:
                     arct = arct * Mask
+                    if _varName in ["XG", "YG"]:
+                        arct = arct.persist()
                 ARCT[2] = arct
 
             elif k == 10:
@@ -616,6 +624,8 @@ def arct_connect(
                             arct = arct.persist()
                     else:
                         arct = (arct * Mask).transpose(*dtr)
+                        if _varName in ["XG", "YG"]:
+                            arct = arct.persist()
                 ARCT[3] = arct
 
     return arc_faces, Nx_ac_nrot, Ny_ac_nrot, Nx_ac_rot, Ny_ac_rot, ARCT
