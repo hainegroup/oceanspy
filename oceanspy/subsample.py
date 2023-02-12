@@ -278,6 +278,11 @@ def cutout(
     # Initialize vertical mask
     maskV = _xr.ones_like(ds["Zp1"])
 
+    if add_Vbdr is True:
+        add_Vbdr = _np.fabs(od._ds["Zp1"].diff("Zp1")).max().values
+    elif add_Vbdr is False:
+        add_Vbdr = 0
+
     if ZRange is not None:
         # Use arrays
         ZRange = _np.asarray([_np.min(ZRange) - add_Vbdr, _np.max(ZRange) + add_Vbdr])
@@ -342,11 +347,6 @@ def cutout(
         add_Hbdr = 1.5 * add_Hbdr / _np.mean([len(od._ds["X"]), len(od._ds["Y"])])
     elif add_Hbdr is False:
         add_Hbdr = 0
-
-    if add_Vbdr is True:
-        add_Vbdr = _np.fabs(od._ds["Zp1"].diff("Zp1")).max().values
-    elif add_Vbdr is False:
-        add_Vbdr = 0
 
     if "face" in ds.dims:
         arg = {
