@@ -349,6 +349,7 @@ def cutout(
         add_Hbdr = 0
 
     if "face" in ds.dims:
+        Np = ds.dims["X"]  # 90 if ECCO
         arg = {
             "ds": ds,
             "varList": varList,  # vars and grid coords to transform
@@ -369,11 +370,12 @@ def cutout(
             "Z": {"Z": None, "Zp1": 0.5, "Zu": 0.5, "Zl": -0.5},
             "time": {"time": -0.5},
         }
-        # if len(grid_coords["time"]) > 1:
-        # grid_coords["time"].pop("time_midp", None)
         grid_coords = {"add_midp": True, "overwrite": True, "grid_coords": grid_coords}
         od._ds = dsnew
-        manipulate_coords = {"coordsUVfromG": True}
+        if Np == 90:
+            manipulate_coords = {"coordsUVfromG": True}
+        else:
+            manipulate_coords = {"coordsUVfromG": False}
         new_face_connections = {"face_connections": {None: {None, None}}}
         od = od.set_face_connections(**new_face_connections)
         od = od.manipulate_coords(**manipulate_coords)
