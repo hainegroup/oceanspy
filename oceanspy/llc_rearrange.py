@@ -57,6 +57,7 @@ class LLCtransformation:
         centered=None,
         chunks=None,
         persist=False,
+        geo_true=False,
     ):
         """This transformation splits the arctic cap (face=6) into four triangular
         regions and combines all faces in a quasi lat-lon grid. The triangular
@@ -97,6 +98,9 @@ class LLCtransformation:
         persist: bool.
             If `False` (default), transformation of rotated and arctic data is not
             persisted. See `xarray.Dataset.persist()`.
+        geo_true: bool.
+            If `True` the U and V velocities are corrected and aligned to geographical
+            coordinates. If `False` (default) these are not.
 
         Returns
         -------
@@ -414,7 +418,8 @@ class LLCtransformation:
             # drop copy var = 'nYg' (line 101)
             DS = DS.drop_vars(_var_)
 
-        DS = llc_local_to_lat_lon(DS)
+        if geo_true:
+            DS = llc_local_to_lat_lon(DS)
 
         # restore original attrs if lost
         for var in varList:
@@ -631,8 +636,8 @@ def mates(ds):
         "DFyE_SLT",
         "maskW",
         "maskS",
-        "TAUX",
-        "TAUY",
+        "oceTAUX",
+        "oceTAUY",
         "U",
         "V",
         "UVELMASS",
@@ -647,6 +652,8 @@ def mates(ds):
         "rAs",
         "CS",
         "SN",
+        "SIuice",
+        "SIvice",
     ]
     for k in range(int(len(vars_mates) / 2)):
         nk = 2 * k
@@ -1153,53 +1160,59 @@ def llc_local_to_lat_lon(ds, co_list=metrics):
     """
     _ds = mates(_copy.deepcopy(ds))
 
-    grid_coords = {
-        "Y": {"center": "Y", "outer": "Yp1"},
-        "X": {"center": "X", "outer": "Xp1"},
-        "Z": {"center": "Z", "outer": "Zp1", "right": "Zu", "left": "Zl"},
-        "time": {"center": "time_midp", "left": "time"},
-    }
+    if ["CS", "SN"] not in _ds.data_vars():
+        print(
+            "CS and SN are not defined in dataset. We assume then that velocities are"
+            "geographically correct"
+        )
+    else:
+        grid_coords = {
+            "Y": {"center": "Y", "outer": "Yp1"},
+            "X": {"center": "X", "outer": "Xp1"},
+            "Z": {"center": "Z", "outer": "Zp1", "right": "Zu", "left": "Zl"},
+            "time": {"center": "time_midp", "left": "time"},
+        }
 
-    # create grid object to interpolate
-    grid = Grid(_ds, coords=grid_coords, periodic=[])
+        # create grid object to interpolate
+        grid = Grid(_ds, coords=grid_coords, periodic=[])
 
-    CS = _ds["CS"]  # cosine of angle between logical and geo axis. At tracer points
-    SN = _ds["SN"]  # sine of angle between logical and geo axis. At tracer points
+        CS = _ds["CS"]  # cosine of angle between logical and geo axis. At tracer points
+        SN = _ds["SN"]  # sine of angle between logical and geo axis. At tracer points
 
-    CSU = grid.interp(CS, axis="X", boundary="extend")  # cos at u-point
-    CSV = grid.interp(CS, axis="Y", boundary="extend")  # cos at v-point
+        CSU = grid.interp(CS, axis="X", boundary="extend")  # cos at u-point
+        CSV = grid.interp(CS, axis="Y", boundary="extend")  # cos at v-point
 
-    SNU = grid.interp(SN, axis="X", boundary="extend")  # sin at u-point
-    SNV = grid.interp(SN, axis="Y", boundary="extend")  # sin at v-point
+        SNU = grid.interp(SN, axis="X", boundary="extend")  # sin at u-point
+        SNV = grid.interp(SN, axis="Y", boundary="extend")  # sin at v-point
 
-    data_vars = [var for var in _ds.data_vars if len(ds[var].dims) > 1]
+        data_vars = [var for var in _ds.data_vars if len(ds[var].dims) > 1]
 
-    for var in data_vars:
-        DIMS = [dim for dim in _ds[var].dims]
-        dims = Dims(DIMS[::-1])
-        if len(dims.X) + len(dims.Y) == 4:  # vector field (metric)
-            if len(dims.Y) == 1 and var not in co_list:  # u vector
-                _da = _copy.deepcopy(_ds[var])
-                if "mate" in _ds[var].attrs:
-                    mate = _ds[var].mate
-                    _ds = _ds.drop_vars([var])
-                    VU = grid.interp(
-                        grid.interp(_ds[mate], axis="Y", boundary="extend"),
-                        axis="X",
-                        boundary="extend",
-                    )
-                    _ds[var] = _da * CSU - VU * SNU
-            elif len(dims.Y) == 3 and var not in co_list:  # v vector
-                _da = _copy.deepcopy(_ds[var])
-                if "mate" in _ds[var].attrs:
-                    mate = _ds[var].mate
-                    _ds = _ds.drop_vars([var])
-                    UV = grid.interp(
-                        grid.interp(_ds[mate], axis="X", boundary="extend"),
-                        axis="Y",
-                        boundary="extend",
-                    )
-                    _ds[var] = UV * SNV + _da * CSV
+        for var in data_vars:
+            DIMS = [dim for dim in _ds[var].dims]
+            dims = Dims(DIMS[::-1])
+            if len(dims.X) + len(dims.Y) == 4:  # vector field (metric)
+                if len(dims.Y) == 1 and var not in co_list:  # u vector
+                    _da = _copy.deepcopy(_ds[var])
+                    if "mate" in _ds[var].attrs:
+                        mate = _ds[var].mate
+                        _ds = _ds.drop_vars([var])
+                        VU = grid.interp(
+                            grid.interp(_ds[mate], axis="Y", boundary="extend"),
+                            axis="X",
+                            boundary="extend",
+                        )
+                        _ds[var] = _da * CSU - VU * SNU
+                elif len(dims.Y) == 3 and var not in co_list:  # v vector
+                    _da = _copy.deepcopy(_ds[var])
+                    if "mate" in _ds[var].attrs:
+                        mate = _ds[var].mate
+                        _ds = _ds.drop_vars([var])
+                        UV = grid.interp(
+                            grid.interp(_ds[mate], axis="X", boundary="extend"),
+                            axis="Y",
+                            boundary="extend",
+                        )
+                        _ds[var] = UV * SNV + _da * CSV
 
     return _ds
 
