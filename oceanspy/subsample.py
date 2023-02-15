@@ -349,7 +349,6 @@ def cutout(
         add_Hbdr = 0
 
     if "face" in ds.dims:
-        Np = ds.dims["X"]  # 90 if ECCO
         arg = {
             "ds": ds,
             "varList": varList,  # vars and grid coords to transform
@@ -363,7 +362,7 @@ def cutout(
         }
         dsnew = _llc_trans.arctic_crown(**arg)
         dsnew = dsnew.set_coords(co_list)
-        # grid_coords = od.grid_coords
+
         grid_coords = {
             "Y": {"Y": None, "Yp1": 0.5},
             "X": {"X": None, "Xp1": 0.5},
@@ -372,10 +371,16 @@ def cutout(
         }
         grid_coords = {"add_midp": True, "overwrite": True, "grid_coords": grid_coords}
         od._ds = dsnew
-        if Np == 90:
-            manipulate_coords = {"coordsUVfromG": True}
-        else:
+
+        # check if XU, YU, XV and YV need to be calculated:
+        vel_grid = ["XU", "YU", "XV", "YV"]
+        da_list = [var for var in dsnew.reset_coords().data_vars]
+        check = all([item in da_list for item in vel_grid])
+        if check:
             manipulate_coords = {"coordsUVfromG": False}
+        else:
+            manipulate_coords = {"coordsUVfromG": True}
+
         new_face_connections = {"face_connections": {None: {None, None}}}
         od = od.set_face_connections(**new_face_connections)
         od = od.manipulate_coords(**manipulate_coords)
