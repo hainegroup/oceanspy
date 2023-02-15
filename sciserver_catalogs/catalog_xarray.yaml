@@ -868,7 +868,7 @@ sources:
       description: ECCO v4r4 3D dataset, ocean simulations on LLC90 grid
       citation:
       projection:
-      original_output: snapshot
+      original_output: monthly mean
 
 
 # ======================================================================
