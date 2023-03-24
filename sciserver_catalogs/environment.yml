@@ -6,7 +6,8 @@ dependencies:
 - dask
 - distributed
 - bottleneck
-- netCDF4 < 1.6.1
+- netCDF4
+- libnetcdf=4.8.1
 - xarray < 2023.3
 - cartopy
 - esmpy
@@ -54,8 +55,8 @@ dependencies:
 - imageio
 - pre-commit
 - xmitgcm
+- intake-xarray
 - pip:
   - black-nb
   - numbagg
-  - git+https://github.com/intake/intake-xarray.git
   - git+https://github.com/hainegroup/oceanspy.git
