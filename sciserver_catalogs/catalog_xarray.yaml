@@ -869,7 +869,7 @@ sources:
       citation:
       projection:
       original_output: monthly mean
-      
+
 # ECCOv4r4 data
   daily_ecco_grid:
     description: ECCO version 4 release 4 grid
@@ -916,9 +916,9 @@ sources:
     model: MITGCM
     args:
       urlpath: '/home/idies/workspace/poseidon/data0*_02/daily_mean_ecco/zarr/snap*'
-      drop_variables: ['XC','YC']
+      drop_variables: ['XC', 'YC']
     xarray_kwargs:
-      engine: zarr        
+      engine: zarr
       parallel: true
     metadata:
       name: ECCO_v4r4
@@ -934,9 +934,9 @@ sources:
     model: MITGCM
     args:
       urlpath: '/home/idies/workspace/poseidon/data0*_02/daily_mean_ecco/zarr/mean*'
-      drop_variables: ['XC', 'YC', 'XG','YG','time_midp']
+      drop_variables: ['XC', 'YC', 'XG', 'YG', 'time_midp']
     xarray_kwargs:
-      engine: zarr        
+      engine: zarr
       parallel: true
     metadata:
       grid_coords:
