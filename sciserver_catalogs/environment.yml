@@ -7,7 +7,7 @@ dependencies:
 - distributed
 - bottleneck
 - netCDF4
-- libnetcdf=4.8.1
+- libnetcdf <= 4.8.1
 - xarray < 2023.3
 - cartopy
 - esmpy
