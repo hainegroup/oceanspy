@@ -6,7 +6,7 @@ dependencies:
 - distributed
 - bottleneck
 - netCDF4
-- xarray
+- xarray < 2023.3
 - cartopy
 - intake-xarray
 - geopy
