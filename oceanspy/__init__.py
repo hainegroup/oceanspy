@@ -91,7 +91,5 @@ SCISERVER_DATASETS = [
     "KangerFjord",
     "LLC4320",
     "ECCO",
-    "CORE",
-    "HYBRID",
-    "HYCOM",
+    "daily_ecco",
 ]

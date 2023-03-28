@@ -972,7 +972,7 @@ def mask_var(_ds, XRange=None, YRange=None, ref_lon=180):
         0,
     ).persist()
 
-    _ds["nYG"] = _ds["nYG"].where(maskG, drop=True)
+    _ds["nYG"] = _ds["nYG"].where(maskG.compute(), drop=True)
     return _ds
 
 
