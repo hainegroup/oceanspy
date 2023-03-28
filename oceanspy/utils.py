@@ -783,7 +783,7 @@ def get_maskH(ds, add_Hbdr, XRange, YRange, ref_lon=0):
     maskH = maskH.assign_coords(
         Yp1=_np.arange(len(maskH["Yp1"])), Xp1=_np.arange(len(maskH["Xp1"]))
     )
-    dmaskH = maskH.where(maskH, drop=True)
+    dmaskH = maskH.where(maskH.compute(), drop=True)
     return maskH, dmaskH, XRange, YRange
 
 
