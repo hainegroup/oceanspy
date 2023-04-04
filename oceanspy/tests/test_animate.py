@@ -96,7 +96,7 @@ def test_anim_Hsection(od_in, varName, meanAxes, FuncAnimation_kwargs, cutout_kw
         varName=varName,
         meanAxes=meanAxes,
         FuncAnimation_kwargs=FuncAnimation_kwargs,
-        kwargs=cutout_kwargs,
+        cutout_kwargs=cutout_kwargs,
         add_labels=False,
     )
     assert isinstance(anim, FuncAnimation)
