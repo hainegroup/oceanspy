@@ -83,7 +83,7 @@ def test_anim_TSdiagram_warn(od_in):
 # Horizontal section
 # ==================
 @pytest.mark.parametrize(
-    "od_in, varName, meanAxes," " FuncAnimation_kwargs, cutout_kwargs",
+    "od_in, varName, meanAxes, FuncAnimation_kwargs, cutout_kwargs",
     [
         (od, "Temp", True, None, None),
         (od, "Temp", True, {"repeat": False}, {"ZRange": 0}),
@@ -97,6 +97,7 @@ def test_anim_Hsection(od_in, varName, meanAxes, FuncAnimation_kwargs, cutout_kw
         meanAxes=meanAxes,
         FuncAnimation_kwargs=FuncAnimation_kwargs,
         cutout_kwargs=cutout_kwargs,
+        add_labels=False,
     )
     assert isinstance(anim, FuncAnimation)
 
