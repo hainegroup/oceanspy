@@ -4,6 +4,13 @@
 History
 =======
 
+v0.3.3 (2022-02-07)
+-------------------
+Update binder environment, add llc4320 forcing files to catalog, fixed issue243, replace
+deprecated cartopy property on notebook, Rename to Temp and S by, set persist as option via
+argument, all by`Miguel Jimenez Urias`_. Fix toml prettifier by `Mattia Almansi`_.
+
+
 v0.3.2 (2022-12-29)
 -------------------
 The new grid of the transformed dataset always has inner and outer as grid_coordinates. Improved documentation (api) for llc_rearrange and associated functions and classes. Unpins xesmf, improve functionality to :py:func:`~oceanspy.ospy_utils.viewer_to_range`. Improved (and fix) how vector fields are rotated from logical to geographical (lat-lon) coordinates. By `Miguel Jimenez Urias`_.
