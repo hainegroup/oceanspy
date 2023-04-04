@@ -3,6 +3,20 @@
 =======
 History
 =======
+v0.3.4 (2022-04-03)
+-------------------
+Fixed issues 322 (PR 325), 324 (PR 328), 332 (PR 324), and 312 (PR 337). Additional
+grid files and removing (for the day) access to velocity LLC4320 data (PR 326) and update
+environment (PR 335). All by `Miguel Jimenez Urias`_. Add daily mean ecco dataset to
+catalog (PR 333) by `Wenrui Jiang`_.
+
+
+v0.3.3 (2022-02-07)
+-------------------
+Update binder environment, add llc4320 forcing files to catalog, fixed issue243, replace
+deprecated cartopy property on notebook, Rename to Temp and S by, set persist as option via
+argument, all by `Miguel Jimenez Urias`_. Fix toml prettifier by `Mattia Almansi`_.
+
 
 v0.3.2 (2022-12-29)
 -------------------
