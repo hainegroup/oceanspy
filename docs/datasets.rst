@@ -323,31 +323,13 @@ Run the following code to open the dataset:
     import oceanspy as ospy
     od = ospy.open_oceandataset.from_catalog('KangerFjord')
 
-
-.. _ECCO:
-
-----
-ECCO
-----
-
-A 3D dataset of monthly-averaged ocean model output from ECCO_v4r4, defined
-on LLC90 grid.
-
-Run the following code to open the dataset:
-
-.. code-block:: ipython
-    :class: no-execute
-
-    import oceanspy as ospy
-    od = ospy.open_oceandataset.from_catalog('ECCO')
-
 .. _daily_ecco:
 
 ----------
 daily_ecco
 ----------
 
-ECCO_v4r4 3D dataset, ocean simulations on LLC90 grid
+ECCO_ v4r4 3D dataset, ocean simulations on LLC90 grid
 
 Run the following code to open the dataset:
 
@@ -356,8 +338,6 @@ Run the following code to open the dataset:
 
     import oceanspy as ospy
     od = ospy.open_oceandataset.from_catalog('daily_ecco')
-
-
 
 .. _`Almansi et al., 2017 - JPO.`: https://journals.ametsoc.org/doi/full/10.1175/JPO-D-17-0129.1
 .. _`Magaldi and Haine, 2015 - DSR.`: https://www.sciencedirect.com/science/article/pii/S0967063714001915
