@@ -865,7 +865,7 @@ sources:
         tempFrz0: 9.01e-02
         dTempFrz_dS: -5.75e-02
       name: ECCO_v4r4
-      description: ECCO v4r4 3D dataset, ocean simulations on LLC90 grid
+      description: ECCO v4r4 3D dataset, ocean simulations on LLC90 grid (monthly mean output)
       citation:
       projection:
       original_output: monthly mean
@@ -904,10 +904,10 @@ sources:
         tempFrz0: 9.01e-02
         dTempFrz_dS: -5.75e-02
       name: ECCO_v4r4
-      description: ECCO v4r4 3D dataset, ocean simulations on LLC90 grid
+      description: ECCO v4r4 3D dataset, ocean simulations on LLC90 grid (daily output)
       citation:
       projection:
-      original_output: monthly mean
+      original_output: daily output
 
 # ECCOv4r4 data daily
   daily_ecco_snap:
@@ -922,10 +922,10 @@ sources:
       parallel: true
     metadata:
       name: ECCO_v4r4
-      description: ECCO v4r4 3D dataset, ocean simulations on LLC90 grid
+      description: ECCO v4r4 3D dataset, ocean simulations on LLC90 grid (daily mean)
       citation:
       projection:
-      original_output: daily snapshot
+      original_output: daily mean
 
 # ECCOv4r4 data daily
   daily_ecco_mean:
