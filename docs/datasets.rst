@@ -323,6 +323,22 @@ Run the following code to open the dataset:
     import oceanspy as ospy
     od = ospy.open_oceandataset.from_catalog('KangerFjord')
 
+.. _ECCO:
+
+----
+ECCO
+----
+
+ECCO_ v4r4 3D dataset, ocean simulations on LLC90 grid
+
+Run the following code to open the dataset:
+
+.. code-block:: ipython
+    :class: no-execute
+
+    import oceanspy as ospy
+    od = ospy.open_oceandataset.from_catalog('ECCO')
+
 .. _daily_ecco:
 
 ----------
