@@ -246,7 +246,7 @@ def cutout(
 
         # Find time indexes
         maskT = maskT.assign_coords(time=_np.arange(len(maskT["time"])))
-        dmaskT = maskT.where(maskT, drop=True)
+        dmaskT = maskT.where(maskT.compute(), drop=True)
         dtime = dmaskT["time"].values
         iT = [min(dtime), max(dtime)]
         maskT["time"] = ds["time"]
@@ -298,7 +298,7 @@ def cutout(
 
         # Find vertical indexes
         maskV = maskV.assign_coords(Zp1=_np.arange(len(maskV["Zp1"])))
-        dmaskV = maskV.where(maskV, drop=True)
+        dmaskV = maskV.where(maskV.compute(), drop=True)
         dZp1 = dmaskV["Zp1"].values
         iZ = [_np.min(dZp1), _np.max(dZp1)]
         maskV["Zp1"] = ds["Zp1"]
@@ -529,13 +529,13 @@ def cutout(
 
         for var in ds.data_vars:
             if set(["X", "Y"]).issubset(ds[var].dims):
-                ds[var] = ds[var].where(maskC, drop=True)
+                ds[var] = ds[var].where(maskC.compute(), drop=True)
             elif set(["Xp1", "Yp1"]).issubset(ds[var].dims):
-                ds[var] = ds[var].where(maskG, drop=True)
+                ds[var] = ds[var].where(maskG.compute(), drop=True)
             elif set(["Xp1", "Y"]).issubset(ds[var].dims):
-                ds[var] = ds[var].where(maskU, drop=True)
+                ds[var] = ds[var].where(maskU.compute(), drop=True)
             elif set(["X", "Yp1"]).issubset(ds[var].dims):
-                ds[var] = ds[var].where(maskV, drop=True)
+                ds[var] = ds[var].where(maskV.compute(), drop=True)
 
     # ---------------------------
     # TIME RESAMPLING
