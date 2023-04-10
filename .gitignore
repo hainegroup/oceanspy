@@ -5,7 +5,7 @@ oceanspy/tests/Data
 version.py
 
 # dynamic docs
-# docs/datasets.rst
+docs/datasets.rst
 docs/generated/
 
 # Created by https://www.toptal.com/developers/gitignore/api/python,jupyternotebooks,vim,visualstudiocode,pycharm
