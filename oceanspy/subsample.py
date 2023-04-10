@@ -492,7 +492,7 @@ def cutout(
             ),
             1,
             0,
-        ).compute()
+        ).persist()
         maskG = _xr.where(
             _np.logical_and(
                 _np.logical_and(ds["YG"] >= minY, ds["YG"] <= maxY),
@@ -503,7 +503,7 @@ def cutout(
             ),
             1,
             0,
-        ).compute()
+        ).persist()
         maskU = _xr.where(
             _np.logical_and(
                 _np.logical_and(ds["YU"] >= minY, ds["YU"] <= maxY),
@@ -514,7 +514,7 @@ def cutout(
             ),
             1,
             0,
-        ).compute()
+        ).persist()
         maskV = _xr.where(
             _np.logical_and(
                 _np.logical_and(ds["YV"] >= minY, ds["YV"] <= maxY),
@@ -525,17 +525,17 @@ def cutout(
             ),
             1,
             0,
-        ).compute()
+        ).persist()
 
         for var in ds.data_vars:
             if set(["X", "Y"]).issubset(ds[var].dims):
-                ds[var] = ds[var].where(maskC, drop=True)
+                ds[var] = ds[var].where(maskC.compute(), drop=True)
             elif set(["Xp1", "Yp1"]).issubset(ds[var].dims):
-                ds[var] = ds[var].where(maskG, drop=True)
+                ds[var] = ds[var].where(maskG.compute(), drop=True)
             elif set(["Xp1", "Y"]).issubset(ds[var].dims):
-                ds[var] = ds[var].where(maskU, drop=True)
+                ds[var] = ds[var].where(maskU.compute(), drop=True)
             elif set(["X", "Yp1"]).issubset(ds[var].dims):
-                ds[var] = ds[var].where(maskV, drop=True)
+                ds[var] = ds[var].where(maskV.compute(), drop=True)
 
     # ---------------------------
     # TIME RESAMPLING
