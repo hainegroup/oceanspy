@@ -105,6 +105,8 @@ def cutout(
         http://pandas.pydata.org/pandas-docs/stable/timeseries.html#offset-aliases
     sampMethod: {'snapshot', 'mean'}
         Downsampling method (only if timeFreq is not None).
+        "snapshot" means just throw away everything in between.
+        "mean" means take a running average with the time freq.
     dropAxes: 1D array_like, str, or bool
         List of axes to remove from Grid object.
         if one point only is in the range.
@@ -585,10 +587,25 @@ def cutout(
                     ds = ds.isel(time=slice(inds[0], inds[-1] + 1, inds_diff[0]))
                 else:
                     attrs = ds.attrs
-                    ds = _xr.concat(
-                        [ds.sel(time=time) for i, time in enumerate(newtime)],
+                    ds_dims = ds.drop_vars(
+                        [var for var in ds.variables if var not in ds.dims]
+                    )
+                    ds_time = ds.drop_vars(
+                        [var for var in ds.variables if "time" not in ds[var].dims]
+                    )
+                    ds_timeless = ds.drop_vars(
+                        [var for var in ds.variables if "time" in ds[var].dims]
+                    )
+                    ds_time = _xr.concat(
+                        [ds_time.sel(time=time) for i, time in enumerate(newtime)],
                         dim="time",
                     )
+                    for dim in ds_time.dims:
+                        if dim == "time":
+                            ds_time[dim].attrs = ds_dims[dim].attrs
+                        else:
+                            ds_time[dim] = ds_dims[dim]
+                    ds = _xr.merge([ds_time, ds_timeless])
                     ds.attrs = attrs
 
             else:
