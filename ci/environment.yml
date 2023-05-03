@@ -22,7 +22,7 @@ dependencies:
 - ffmpeg
 - aiohttp
 - pandas
-- matplotlib < 3.5.3
+- matplotlib
 - fsspec!=0.9.0
 - pooch
 - pip
