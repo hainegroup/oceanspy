@@ -13,6 +13,7 @@ dependencies:
 - bottleneck
 - netCDF4
 - xarray
+- xoak
 - cartopy
 - esmpy
 - intake-xarray

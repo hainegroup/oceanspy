@@ -8,6 +8,7 @@ dependencies:
 - bottleneck
 - netCDF4 < 1.6.2
 - xarray
+- xoak
 - cartopy
 - esmpy
 - geopy
