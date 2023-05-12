@@ -354,6 +354,50 @@ def great_circle_path(lat1, lon1, lat2, lon2, delta_km=None, R=None):
     return lats, lons, dists
 
 
+def circle_path_array(_Y, _X, R, _res=25):
+    """
+    Given a list of prescribed coordinate points of len(N), returns an array of
+    increased (or equal) length, wherein the added values are computed following
+    a great circle path. The spatial resolution is set by _res=25 (by default) in
+    km=25.
+    """
+    dists = []
+    for i in range(len(_Y) - 1):
+        dists.append(_great_circle((_Y[i], _X[i]), (_Y[i + 1], _X[i + 1]), radius=R).km)
+    k = _np.argwhere(_np.array(dists) > _res).squeeze()
+    nY = [[] * k.size for i in range(k.size)]
+    nX = [[] * k.size for i in range(k.size)]
+    ndists = []
+    if k.size:
+        if k.size == 1:  # only one element
+            nY, nX, ndists = great_circle_path(_Y[k], _X[k], _Y[k + 1], _X[k + 1], _res)
+            if len(nY) == 2:
+                nY, nX, ndists = great_circle_path(
+                    _Y[k], _X[k], _Y[k + 1], _X[k + 1], _res / 2
+                )
+        else:
+            for ii in range(k.size):
+                ny, nx, dists = great_circle_path(
+                    _Y[k[ii]], _X[k[ii]], _Y[k[ii] + 1], _X[k[ii] + 1], _res
+                )
+                if len(ny) == 2:
+                    ny, nx, dists = great_circle_path(
+                        _Y[k[ii]], _X[k[ii]], _Y[k[ii] + 1], _X[k[ii] + 1], _res / 2
+                    )
+                nY[ii] = list(ny)
+                nX[ii] = list(nx)
+            Nn = [len(nY[i]) for i in range(len(nY))]
+            nk = 0 * k
+            for ii in range(len(k)):
+                nk[ii] = k[ii] + sum(Nn[:ii])
+                _Y = list(_Y[: nk[ii] + 1]) + list(nY[ii]) + list(_Y[nk[ii] + 1 :])
+                _X = list(_X[: nk[ii] + 1]) + list(nX[ii]) + list(_X[nk[ii] + 1 :])
+            nY, nX = _Y, _X  # update
+    else:
+        nY, nX = _Y, _X
+    return nY, nX
+
+
 def cartesian_path(x1, y1, x2, y2, delta=None):
     """
     Generate a trajectory specifying the distance resolution.
