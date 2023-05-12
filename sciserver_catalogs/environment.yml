@@ -6,7 +6,7 @@ dependencies:
 - dask
 - distributed
 - bottleneck
-- netCDF4 < 1.6.2
+- netCDF4
 - xarray
 - xoak
 - cartopy
