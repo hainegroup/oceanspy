@@ -713,7 +713,7 @@ def mooring_array(od, Ymoor, Xmoor, **kwargs):
     ds_grid = ds[["XC", "YC"]]  # by convention center point
 
     for key, value in ds_grid.sizes.items():
-        ds_grid["i" + f"{key}"] = DataArray(range(value), dims=key)
+        ds_grid[f"{key}ind"] = DataArray(range(value), dims=key)
 
     if R is not None:  # spherical coordinates
         # make sure that the array defines a great circle path of resolution 100km
@@ -735,7 +735,7 @@ def mooring_array(od, Ymoor, Xmoor, **kwargs):
         inds = _np.argwhere(_np.abs(dx) + _np.abs(dy) > 1).squeeze()
         return dx, dy, inds
 
-    ix, iy = (nds["i" + f"{i}"].data for i in ("X", "Y"))
+    ix, iy = (nds[f"{i}ind"].data for i in ("X", "Y"))
 
     # Remove duplicates
     mask = _np.abs(_np.diff(ix)) + _np.abs(_np.diff(iy)) == 0
