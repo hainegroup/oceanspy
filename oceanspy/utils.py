@@ -361,6 +361,9 @@ def circle_path_array(_Y, _X, R, _res=25):
     a great circle path. The spatial resolution is set by _res=25 (by default) in
     km=25.
     """
+    _Y = _np.asarray(_Y, dtype=_np.float64)
+    _X = _np.asarray(_X, dtype=_np.float64)
+
     dists = []
     for i in range(len(_Y) - 1):
         dists.append(_great_circle((_Y[i], _X[i]), (_Y[i + 1], _X[i + 1]), radius=R).km)
