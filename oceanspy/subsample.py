@@ -687,6 +687,13 @@ def mooring_array(od, Ymoor, Xmoor, **kwargs):
     # Check
     _check_native_grid(od, "mooring_array")
 
+    # Useful variable
+    R = od.parameters["rSphere"]
+
+    if R is not None:
+        # array defines a great circle path.
+        Ymoor, Xmoor = circle_path_array(Ymoor, Xmoor, R)
+
     # Convert variables to numpy arrays and make some check
     Ymoor = _check_range(od, Ymoor, "Ymoor")
     Xmoor = _check_range(od, Xmoor, "Xmoor")
@@ -711,10 +718,6 @@ def mooring_array(od, Ymoor, Xmoor, **kwargs):
 
     # Unpack ds
     ds = od._ds
-
-    # Useful variables
-
-    R = od.parameters["rSphere"]
 
     ds_grid = ds[["XC", "YC"]]  # by convention center point
 
