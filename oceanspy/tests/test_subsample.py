@@ -334,8 +334,12 @@ def test_mooring(od, cartesian, kwargs):
     if cartesian:
         this_od = this_od.set_parameters({"rSphere": None})
 
-    Xmoor = [this_od.dataset["XC"].min().values, this_od.dataset["XC"].max().values]
-    Ymoor = [this_od.dataset["YC"].min().values, this_od.dataset["YC"].max().values]
+    if "face" not in od.dataset.dims:
+        Xmoor = [this_od.dataset["XC"].min().values, this_od.dataset["XC"].max().values]
+        Ymoor = [this_od.dataset["YC"].min().values, this_od.dataset["YC"].max().values]
+    else:
+        Xmoor = [-80, 80]
+        Ymoor = [35, 35]
     new_od = this_od.subsample.mooring_array(Xmoor=Xmoor, Ymoor=Ymoor, **kwargs)
 
     with pytest.raises(ValueError):
