@@ -20,7 +20,7 @@ import pandas as _pd
 
 # Required dependencies (private)
 import xarray as _xr
-import xoak  # noqa: F401
+import xoak
 from packaging.version import parse as _parse_version
 from xarray import DataArray
 
@@ -662,7 +662,7 @@ def cutout(
     return od
 
 
-def mooring_array(od, Ymoor, Xmoor, **kwargs):
+def mooring_array(od, Ymoor, Xmoor, xoak_index="scipy_kdtree", **kwargs):
     """
     Extract a mooring array section following the grid.
     Trajectories are great circle paths if coordinates are spherical.
@@ -731,7 +731,14 @@ def mooring_array(od, Ymoor, Xmoor, **kwargs):
         )  # make sure Xmoor and Ymoor define a c
 
     if not ds_grid.xoak.index:
-        ds_grid.xoak.set_index(["XC", "YC"], "scipy_kdtree")
+        if xoak_index not in xoak.IndexRegistry():
+            raise ValueError(
+                "`sampMethod` [{}] is not supported."
+                "\nAvailable options: {}"
+                "".format(xoak_index, xoak.IndexRegistry())
+            )
+
+        ds_grid.xoak.set_index(["XC", "YC"], xoak_index)
 
     coords = {"XC": ("mooring", Xmoor), "YC": ("mooring", Ymoor)}
     ds_data = _xr.Dataset(coords)  # mooring data
