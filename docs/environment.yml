@@ -13,6 +13,7 @@ dependencies:
   - xarray
   - intake
   - intake-xarray
+  - xoak
   - ipython
   - xgcm
   - aiohttp
