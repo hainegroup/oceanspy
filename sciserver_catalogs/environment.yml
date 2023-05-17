@@ -2,12 +2,13 @@ name: Oceanography
 channels:
 - conda-forge
 dependencies:
-- python=3.9
+- python=3.10
 - dask
 - distributed
 - bottleneck
-- netCDF4 < 1.6.2
+- netCDF4
 - xarray
+- xoak
 - cartopy
 - esmpy
 - geopy
@@ -43,7 +44,7 @@ dependencies:
 - cftime
 - rasterio
 - cfgrib
-- matplotlib < 3.5.3
+- matplotlib <= 3.6.0
 - cf_xarray
 - ipykernel
 - numba

@@ -21,6 +21,7 @@ import pandas as _pd
 # Required dependencies (private)
 import xarray as _xr
 from packaging.version import parse as _parse_version
+from xarray import DataArray
 
 # From OceanSpy (private)
 from . import compute as _compute
@@ -34,7 +35,7 @@ from ._ospy_utils import (
     _rename_aliased,
 )
 from .llc_rearrange import LLCtransformation as _llc_trans
-from .utils import _rel_lon, _reset_range, get_maskH
+from .utils import _rel_lon, _reset_range, circle_path_array, get_maskH
 
 # Recommended dependencies (private)
 try:
@@ -43,6 +44,10 @@ except ImportError:  # pragma: no cover
     pass
 try:
     import xesmf as _xe
+except ImportError:  # pragma: no cover
+    pass
+try:
+    import xoak as _xoak
 except ImportError:  # pragma: no cover
     pass
 
@@ -584,31 +589,6 @@ def cutout(
                 ]
                 inds = _xr.DataArray(inds, dims="time")
                 ds = ds.isel(time=inds)
-                # inds_diff = _np.diff(inds)
-                # if all(inds_diff == inds_diff[0]):
-                #     ds = ds.isel(time=slice(inds[0], inds[-1] + 1, inds_diff[0]))
-                # else:
-                #     attrs = ds.attrs
-                #     ds_dims = ds.drop_vars(
-                #         [var for var in ds.variables if var not in ds.dims]
-                #     )
-                #     ds_time = ds.drop_vars(
-                #         [var for var in ds.variables if "time" not in ds[var].dims]
-                #     )
-                #     ds_timeless = ds.drop_vars(
-                #         [var for var in ds.variables if "time" in ds[var].dims]
-                #     )
-                #     ds_time = _xr.concat(
-                #         [ds_time.sel(time=time) for i, time in enumerate(newtime)],
-                #         dim="time",
-                #     )
-                #     for dim in ds_time.dims:
-                #         if dim == "time":
-                #             ds_time[dim].attrs = ds_dims[dim].attrs
-                #         else:
-                #             ds_time[dim] = ds_dims[dim]
-                #     ds = _xr.merge([ds_time, ds_timeless])
-                #     ds.attrs = attrs
 
             else:
                 # Mean
@@ -660,7 +640,7 @@ def cutout(
     return od
 
 
-def mooring_array(od, Ymoor, Xmoor, **kwargs):
+def mooring_array(od, Ymoor, Xmoor, xoak_index="scipy_kdtree", **kwargs):
     """
     Extract a mooring array section following the grid.
     Trajectories are great circle paths if coordinates are spherical.
@@ -682,14 +662,15 @@ def mooring_array(od, Ymoor, Xmoor, **kwargs):
         Subsampled oceandataset.
     """
 
-    # Add indexes needed for transports
-    Yind, Xind = _xr.broadcast(od._ds["Y"], od._ds["X"])
-    od._ds["Xind"] = Xind.transpose(*od._ds["XC"].dims)
-    od._ds["Yind"] = Yind.transpose(*od._ds["YC"].dims)
-    od._ds = od._ds.set_coords(["Xind", "Yind"])
-
     # Check
     _check_native_grid(od, "mooring_array")
+
+    # Useful variable
+    R = od.parameters["rSphere"]
+
+    if R is not None:
+        # array defines a great circle path.
+        Ymoor, Xmoor = circle_path_array(Ymoor, Xmoor, R)
 
     # Convert variables to numpy arrays and make some check
     Ymoor = _check_range(od, Ymoor, "Ymoor")
@@ -704,248 +685,158 @@ def mooring_array(od, Ymoor, Xmoor, **kwargs):
         kwargs["add_Hbdr"] = True
     od = od.subsample.cutout(**kwargs)
 
+    # Add indexes needed for transports
+    Yind, Xind = _xr.broadcast(od._ds["Y"], od._ds["X"])
+    od._ds["Xind"] = Xind.transpose(*od._ds["XC"].dims)
+    od._ds["Yind"] = Yind.transpose(*od._ds["YC"].dims)
+    od._ds = od._ds.set_coords(["Xind", "Yind"])
+
     # Message
     print("Extracting mooring array.")
 
     # Unpack ds
     ds = od._ds
 
-    # Useful variables
-    YC = od._ds["YC"]
-    XC = od._ds["XC"]
-    R = od.parameters["rSphere"]
-    shape = XC.shape
-    Yindex = XC.dims.index("Y")
-    Xindex = XC.dims.index("X")
+    ds_grid = ds[["XC", "YC"]]  # by convention center point
 
-    # Convert to cartesian if spherical
-    if R is not None:
-        x, y, z = _utils.spherical2cartesian(Y=Ymoor, X=Xmoor, R=R)
-    else:
-        x = Xmoor
-        y = Ymoor
-        z = _np.zeros(Ymoor.shape)
+    for key, value in ds_grid.sizes.items():
+        ds_grid["i" + f"{key}"] = DataArray(range(value), dims=key)
 
-    # Create tree
-    tree = od.create_tree(grid_pos="C")
+    if R is not None:  # spherical coordinates
+        # make sure that the array defines a great circle path of resolution 100km
+        Ymoor, Xmoor = circle_path_array(
+            Ymoor, Xmoor, R
+        )  # make sure Xmoor and Ymoor define a c
 
-    # Indexes of nearest grid points
-    _, indexes = tree.query(_np.column_stack((x, y, z)))
-    indexes = _np.unravel_index(indexes, shape)
-    iY = _np.ndarray.tolist(indexes[Yindex])
-    iX = _np.ndarray.tolist(indexes[Xindex])
-
-    # Remove duplicates
-    diff_iY = _np.diff(iY)
-    diff_iX = _np.diff(iX)
-    to_rem = []
-    for k, (diY, diX) in enumerate(zip(diff_iY, diff_iX)):
-        if diY == 0 and diX == 0:
-            to_rem = to_rem + [k]
-    iY = _np.asarray([i for j, i in enumerate(iY) if j not in to_rem])
-    iX = _np.asarray([i for j, i in enumerate(iX) if j not in to_rem])
-
-    # Nearest coordinates
-    near_Y = YC.isel(
-        Y=_xr.DataArray(iY, dims=("tmp")), X=_xr.DataArray(iX, dims=("tmp"))
-    ).values
-    near_X = XC.isel(
-        Y=_xr.DataArray(iY, dims=("tmp")), X=_xr.DataArray(iX, dims=("tmp"))
-    ).values
-
-    # Steps
-    diff_iY = _np.fabs(_np.diff(iY))
-    diff_iX = _np.fabs(_np.diff(iX))
-
-    # Loop until all steps are 1
-    while any(diff_iY + diff_iX != 1):
-        # Find where need to add grid points
-        k = _np.argwhere(diff_iY + diff_iX != 1)[0][0]
-        lat0 = near_Y[k]
-        lon0 = near_X[k]
-        lat1 = near_Y[k + 1]
-        lon1 = near_X[k + 1]
-
-        # Find grid point in the middle
-        if R is not None:
-            # SPHERICAL: follow great circle path
-            dist = _great_circle((lat0, lon0), (lat1, lon1), radius=R).km
-
-            # Divide dist by 2.1 to make sure that returns 3 points
-            dist = dist / 2.1
-            this_Y, this_X, this_dists = _utils.great_circle_path(
-                lat0, lon0, lat1, lon1, dist
+    if not ds_grid.xoak.index:
+        if xoak_index not in _xoak.IndexRegistry():
+            raise ValueError(
+                "`sampMethod` [{}] is not supported."
+                "\nAvailable options: {}"
+                "".format(xoak_index, _xoak.IndexRegistry())
             )
 
-            # Cartesian coordinate of point in the middle
-            x, y, z = _utils.spherical2cartesian(this_Y[1], this_X[1], R)
-        else:
-            # CARTESIAN: take the average
-            x = (lon0 + lon1) / 2
-            y = (lat0 + lat1) / 2
-            z = 0
+        ds_grid.xoak.set_index(["XC", "YC"], xoak_index)
 
-        # Indexes of 3 nearest grid point
-        _, indexes = tree.query(_np.column_stack((x, y, z)), k=3)
-        indexes = _np.unravel_index(indexes, shape)
-        new_iY = _np.ndarray.tolist(indexes[Yindex])[0]
-        new_iX = _np.ndarray.tolist(indexes[Xindex])[0]
+    coords = {"XC": ("mooring", Xmoor), "YC": ("mooring", Ymoor)}
+    ds_data = _xr.Dataset(coords)  # mooring data
 
-        # Extract just one point
-        to_rem = []
-        for i, (this_iY, this_iX) in enumerate(zip(new_iY, new_iX)):
-            check1 = this_iY == iY[k] and this_iX == iX[k]
-            check2 = this_iY == iY[k + 1] and this_iX == iX[k + 1]
-            if check1 or check2:
-                to_rem = to_rem + [i]
-        new_iY = _np.asarray([i for j, i in enumerate(new_iY) if j not in to_rem])[0]
-        new_iX = _np.asarray([i for j, i in enumerate(new_iX) if j not in to_rem])[0]
+    # find nearest points to given data.
+    nds = ds_grid.xoak.sel(XC=ds_data["XC"], YC=ds_data["YC"])
 
-        # Extract new lat and lon
-        new_lat = YC.isel(Y=new_iY, X=new_iX).values
-        new_lon = XC.isel(Y=new_iY, X=new_iX).values
+    def diff_and_inds_where_insert(ix, iy):
+        dx, dy = (_np.diff(ii) for ii in (ix, iy))
+        inds = _np.argwhere(_np.abs(dx) + _np.abs(dy) > 1).squeeze()
+        return dx, dy, inds
 
-        # Insert
-        near_Y = _np.insert(near_Y, k + 1, new_lat)
-        near_X = _np.insert(near_X, k + 1, new_lon)
-        iY = _np.insert(iY, k + 1, new_iY)
-        iX = _np.insert(iX, k + 1, new_iX)
+    ix, iy = (nds["i" + f"{i}"].data for i in ("X", "Y"))
 
-        # Steps
-        diff_iY = _np.fabs(_np.diff(iY))
-        diff_iX = _np.fabs(_np.diff(iX))
+    # Remove duplicates
+    mask = _np.abs(_np.diff(ix)) + _np.abs(_np.diff(iy)) == 0
+    ix, iy = (_np.delete(ii, _np.argwhere(mask)) for ii in (ix, iy))
 
-    # New dimensions
-    mooring = _xr.DataArray(
-        _np.arange(len(iX)),
+    # Initialize variables
+    dx, dy, inds = diff_and_inds_where_insert(ix, iy)
+    while inds.size:
+        dx, dy = (di[inds] for di in (dx, dy))
+        mask = _np.abs(dx * dy) == 1
+        ix = _np.insert(ix, inds + 1, ix[inds] + (dx / 2).astype(int))
+        iy = _np.insert(
+            iy, inds + 1, iy[inds] + _np.where(mask, dy, (dy / 2).astype(int))
+        )
+        # Prepare for next iteration
+        dx, dy, inds = diff_and_inds_where_insert(ix, iy)
+
+    mooring = DataArray(
+        _np.arange(len(ix)),
         dims=("mooring"),
         attrs={"long_name": "index of mooring", "units": "none"},
     )
-    y = _xr.DataArray(
+    y = DataArray(
         _np.arange(1),
         dims=("y"),
         attrs={"long_name": "j-index of cell center", "units": "none"},
     )
-    x = _xr.DataArray(
+    x = DataArray(
         _np.arange(1),
         dims=("x"),
         attrs={"long_name": "i-index of cell corner", "units": "none"},
     )
-    yp1 = _xr.DataArray(
+    yp1 = DataArray(
         _np.arange(2),
         dims=("yp1"),
         attrs={"long_name": "j-index of cell center", "units": "none"},
     )
-    xp1 = _xr.DataArray(
+    xp1 = DataArray(
         _np.arange(2),
         dims=("xp1"),
         attrs={"long_name": "i-index of cell corner", "units": "none"},
     )
 
     # Transform indexes in DataArray
-    iy = _xr.DataArray(
-        _np.reshape(iY, (len(mooring), len(y))),
+    iY = DataArray(
+        _np.reshape(iy, (len(mooring), len(y))),
         coords={"mooring": mooring, "y": y},
         dims=("mooring", "y"),
     )
-    ix = _xr.DataArray(
-        _np.reshape(iX, (len(mooring), len(x))),
+    iX = DataArray(
+        _np.reshape(ix, (len(mooring), len(x))),
         coords={"mooring": mooring, "x": x},
         dims=("mooring", "x"),
     )
-    iyp1 = _xr.DataArray(
-        _np.stack((iY, iY + 1), 1),
+    iYp1 = DataArray(
+        _np.stack((iy, iy + 1), 1),
         coords={"mooring": mooring, "yp1": yp1},
         dims=("mooring", "yp1"),
     )
-    ixp1 = _xr.DataArray(
-        _np.stack((iX, iX + 1), 1),
+    iXp1 = DataArray(
+        _np.stack((ix, ix + 1), 1),
         coords={"mooring": mooring, "xp1": xp1},
         dims=("mooring", "xp1"),
     )
 
-    # Initialize new dataset
-    new_ds = _xr.Dataset(
-        {
-            "mooring": mooring,
-            "Y": y.rename(y="Y"),
-            "Yp1": yp1.rename(yp1="Yp1"),
-            "X": x.rename(x="X"),
-            "Xp1": xp1.rename(xp1="Xp1"),
-        },
-        attrs=ds.attrs,
-    )
+    args = {
+        "X": iX,
+        "Y": iY,
+        "Xp1": iXp1,
+        "Yp1": iYp1,
+    }
 
-    # Loop and take out (looping is faster than apply to the whole dataset)
-    all_vars = {var: new_ds[var] for var in new_ds}
-    for var in ds.variables:
-        if var in ["X", "Y", "Xp1", "Yp1"]:
-            da = new_ds[var]
-            da.attrs.update(
-                {
-                    attr: ds[var].attrs[attr]
-                    for attr in ds[var].attrs
-                    if attr not in ["units", "long_name"]
-                }
-            )
-            continue
-        elif not any(dim in ds[var].dims for dim in ["X", "Y", "Xp1", "Yp1"]):
-            da = ds[var]
-        else:
-            for this_dims in [["Y", "X"], ["Yp1", "Xp1"], ["Y", "Xp1"], ["Yp1", "X"]]:
-                if set(this_dims).issubset(ds[var].dims):
-                    da = ds[var].isel(
-                        {
-                            dim: eval(
-                                "i" + dim.lower(),
-                                {},
-                                {"iy": iy, "ix": ix, "iyp1": iyp1, "ixp1": ixp1},
-                            )
-                            for dim in this_dims
-                        }
-                    )
-                    da = da.drop_vars(this_dims).rename(
-                        {dim.lower(): dim for dim in this_dims}
-                    )
+    rename = {"x": "X", "y": "Y", "yp1": "Yp1", "xp1": "Xp1"}
+    new_ds = ds.isel(**args).drop_vars(["X", "Y", "Xp1", "Yp1"])
+    new_ds = new_ds.rename_dims(rename).rename_vars(rename)
 
-        # Add to dictionary
-        all_vars = {**all_vars, **{var: da}}
+    near_Y = new_ds["XC"].compute().data.squeeze()
+    near_X = new_ds["YC"].compute().data.squeeze()
 
-    new_ds = _xr.Dataset(all_vars)
-
-    # Merge removes the attributes: put them back!
-    new_ds.attrs = ds.attrs
-
-    # Add distance
-    dists = _np.zeros(near_Y.shape)
-    for i in range(1, len(dists)):
-        coord1 = (near_Y[i - 1], near_X[i - 1])
-        coord2 = (near_Y[i], near_X[i])
-
-        if R is not None:
-            # SPHERICAL
-            dists[i] = _great_circle(coord1, coord2, radius=R).km
-        else:
-            # CARTESIAN
-            dists[i] = _np.sqrt(
-                (coord2[0] - coord1[0]) ** 2 + (coord2[1] - coord1[1]) ** 2
-            )
+    # Add distance (0 always first element)
+    if R is not None:
+        dists = _np.array(
+            [0]
+            + [
+                _great_circle(
+                    (near_Y[i + 1], near_X[i + 1]), (near_Y[i], near_X[i]), radius=R
+                ).km
+                for i in range(len(near_Y) - 1)
+            ]
+        )
+        unit = "km"
+    else:
+        dists = _np.sqrt(
+            (near_Y[1:] - near_Y[:-1]) ** 2 + (near_X[1:] - near_X[:-1]) ** 2
+        )
+        dists = _np.insert(dists, 0, 0)  # add zero as 1st element
+        if "units" in new_ds["XC"].attrs:
+            unit = new_ds["XC"].attrs["units"]
 
     dists = _np.cumsum(dists)
-    distance = _xr.DataArray(
+    distance = DataArray(
         dists,
         coords={"mooring": mooring},
         dims=("mooring"),
-        attrs={"long_name": "Distance from first mooring"},
+        attrs={"long_name": "Distance from first mooring", "units": unit},
     )
 
-    if R is not None:
-        # SPHERICAL
-        distance.attrs["units"] = "km"
-    else:
-        # CARTESIAN
-        if "units" in XC.attrs:
-            distance.attrs["units"] = XC.attrs["units"]
     new_ds["mooring_dist"] = distance
 
     # Reset coordinates
