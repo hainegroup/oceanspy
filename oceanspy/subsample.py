@@ -589,31 +589,6 @@ def cutout(
                 ]
                 inds = _xr.DataArray(inds, dims="time")
                 ds = ds.isel(time=inds)
-                # inds_diff = _np.diff(inds)
-                # if all(inds_diff == inds_diff[0]):
-                #     ds = ds.isel(time=slice(inds[0], inds[-1] + 1, inds_diff[0]))
-                # else:
-                #     attrs = ds.attrs
-                #     ds_dims = ds.drop_vars(
-                #         [var for var in ds.variables if var not in ds.dims]
-                #     )
-                #     ds_time = ds.drop_vars(
-                #         [var for var in ds.variables if "time" not in ds[var].dims]
-                #     )
-                #     ds_timeless = ds.drop_vars(
-                #         [var for var in ds.variables if "time" in ds[var].dims]
-                #     )
-                #     ds_time = _xr.concat(
-                #         [ds_time.sel(time=time) for i, time in enumerate(newtime)],
-                #         dim="time",
-                #     )
-                #     for dim in ds_time.dims:
-                #         if dim == "time":
-                #             ds_time[dim].attrs = ds_dims[dim].attrs
-                #         else:
-                #             ds_time[dim] = ds_dims[dim]
-                #     ds = _xr.merge([ds_time, ds_timeless])
-                #     ds.attrs = attrs
 
             else:
                 # Mean
