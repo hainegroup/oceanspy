@@ -47,7 +47,7 @@ try:
 except ImportError:  # pragma: no cover
     pass
 try:
-    import xoak
+    import xoak as _xoak
 except ImportError:  # pragma: no cover
     pass
 
@@ -734,11 +734,11 @@ def mooring_array(od, Ymoor, Xmoor, xoak_index="scipy_kdtree", **kwargs):
         )  # make sure Xmoor and Ymoor define a c
 
     if not ds_grid.xoak.index:
-        if xoak_index not in xoak.IndexRegistry():
+        if xoak_index not in _xoak.IndexRegistry():
             raise ValueError(
                 "`sampMethod` [{}] is not supported."
                 "\nAvailable options: {}"
-                "".format(xoak_index, xoak.IndexRegistry())
+                "".format(xoak_index, _xoak.IndexRegistry())
             )
 
         ds_grid.xoak.set_index(["XC", "YC"], xoak_index)
