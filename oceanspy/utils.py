@@ -361,8 +361,32 @@ def circle_path_array(_Y, _X, R, _res=25):
     a great circle path. The spatial resolution is set by _res=25 (by default) in
     km=25.
     """
+
+    # Check parameters
+    _check_instance(
+        {
+            "lats": _Y,
+            "lons": _X,
+            "res": _res,
+            "R": R,
+        },
+        {
+            "lats": ["list", "numpy.ndarray"],
+            "lons": ["list", "numpy.ndarray"],
+            "res": "numpy.ScalarType",
+            "R": "numpy.ScalarType",
+        },
+    )
+
     _Y = _np.asarray(_Y, dtype=_np.float64)
     _X = _np.asarray(_X, dtype=_np.float64)
+
+    if len(_Y) != len(_X):
+        raise ValueError("_Y and _X arrays must have same number of entries")
+
+    diffsum = abs(_X[1:] - _X[:-1]) + abs(_Y[1:] - _Y[:-1])
+    if _np.sum(diffsum) == 0:
+        raise ValueError("There must be at least two different coordinates points")
 
     dists = []
     for i in range(len(_Y) - 1):
