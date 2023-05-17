@@ -20,7 +20,6 @@ import pandas as _pd
 
 # Required dependencies (private)
 import xarray as _xr
-import xoak
 from packaging.version import parse as _parse_version
 from xarray import DataArray
 
@@ -45,6 +44,10 @@ except ImportError:  # pragma: no cover
     pass
 try:
     import xesmf as _xe
+except ImportError:  # pragma: no cover
+    pass
+try:
+    import xoak
 except ImportError:  # pragma: no cover
     pass
 
