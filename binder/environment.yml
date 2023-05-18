@@ -4,7 +4,7 @@ channels:
 dependencies:
 - python
 - numpy
-- matplotlib<3.5.3
+- matplotlib<=3.6.0
 - pandas
 - bokeh
 - rise
@@ -13,6 +13,7 @@ dependencies:
 - bottleneck
 - netCDF4
 - xarray
+- xoak
 - cartopy
 - esmpy
 - intake-xarray

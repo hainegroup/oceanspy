@@ -41,6 +41,9 @@ od = open_oceandataset.from_netcdf("{}MITgcm_rect_nc.nc" "".format(Datadir))
 # Create an oceandataset for testing calculus functions
 od_curv = open_oceandataset.from_netcdf("{}MITgcm_curv_nc.nc" "".format(Datadir))
 
+ECCO_url = "{}catalog_ECCO.yaml".format(Datadir)
+ECCOod = open_oceandataset.from_catalog("LLC", ECCO_url)
+
 # Aliased od
 ds = od.dataset
 aliases = {var: var + "_alias" for var in ds.data_vars}
@@ -365,44 +368,88 @@ def test_Ertel_potential_vorticity(od_in, full):
     ds_out_IN_od_out(ds_out, od_out)
 
 
-@pytest.mark.parametrize("od_in", [od, alias_od])
+@pytest.mark.parametrize("od_in", [od, alias_od, ECCOod])
 @pytest.mark.parametrize("mooring", [True, False])
 @pytest.mark.parametrize("closed", [True, False])
 @pytest.mark.parametrize("flippedX", [True, False])
 @pytest.mark.parametrize("flippedY", [True, False])
 def test_mooring_volume_transport(od_in, mooring, closed, flippedX, flippedY):
+    if "face" not in od_in.dataset.dims:
+        Xmax = od_in.dataset["X"].max().values
+        Xmin = od_in.dataset["X"].min().values
+        Ymin = od_in.dataset["Y"].min().values
+        Ymax = od_in.dataset["Y"].max().values
+    else:
+        Xmin, Xmax = -80, 0
+        Ymin, Ymax = 35, 35
+
+        # compute missing (for testing purposes assume uniform)
+
+        Scoords = {
+            "Z": od_in._ds.Z.values,
+            "face": od_in._ds.face.values,
+            "Yp1": od_in._ds.Yp1.values,
+            "X": od_in._ds.X.values,
+        }
+        Wcoords = {
+            "Z": od_in._ds.Z.values,
+            "face": od_in._ds.face.values,
+            "Y": od_in._ds.Yp1.values,
+            "Xp1": od_in._ds.X.values,
+        }
+
+        Stmp = xr.DataArray(1, coords=Scoords, dims={"Z", "face", "Yp1", "X"})
+        Wtmp = xr.DataArray(1, coords=Wcoords, dims={"Z", "face", "Y", "Xp1"})
+
+        od_in._ds["HFacS"] = Stmp
+        od_in._ds["HFacW"] = Wtmp
+
     if mooring is True:
         if not closed:
-            X = [od_in.dataset["X"].min().values, od_in.dataset["X"].max().values]
-            Y = [od_in.dataset["Y"].min().values, od_in.dataset["Y"].max().values]
+            X = [Xmin, Xmax]
+            Y = [Ymin, Ymax]
             od_moor = od_in.subsample.mooring_array(Xmoor=X, Ymoor=Y)
             if flippedX and not flippedY:
-                X = [od_in.dataset["X"].max().values, od_in.dataset["X"].min().values]
-                Y = [od_in.dataset["Y"].min().values, od_in.dataset["Y"].max().values]
+                X = [Xmax, Xmin]
+                Y = [Ymin, Ymax]
                 od_moor = od_in.subsample.mooring_array(Xmoor=X, Ymoor=Y)
             elif flippedX and flippedY:
-                X = [od_in.dataset["X"].max().values, od_in.dataset["X"].min().values]
-                Y = [od_in.dataset["Y"].max().values, od_in.dataset["Y"].min().values]
+                X = [Xmax, Xmin]
+                Y = [Ymax, Ymin]
                 od_moor = od_in.subsample.mooring_array(Xmoor=X, Ymoor=Y)
             elif flippedY:
-                X = [od_in.dataset["X"].min().values, od_in.dataset["X"].max().values]
-                Y = [od_in.dataset["Y"].max().values, od_in.dataset["Y"].min().values]
+                X = [Xmin, Xmax]
+                Y = [Ymax, Ymin]
                 od_moor = od_in.subsample.mooring_array(Xmoor=X, Ymoor=Y)
         else:
-            X = [
-                od_in.dataset["X"].min().values,
-                od_in.dataset["X"].max().values,
-                od_in.dataset["X"].max().values,
-                od_in.dataset["X"].min().values,
-                od_in.dataset["X"].min().values,
-            ]
-            Y = [
-                od_in.dataset["Y"].min().values,
-                od_in.dataset["Y"].min().values,
-                od_in.dataset["Y"].max().values,
-                od_in.dataset["Y"].max().values,
-                od_in.dataset["Y"].min().values,
-            ]
+            if "face" not in od_in.dataset.dims:
+                X = [
+                    Xmin,
+                    Xmax,
+                    Xmax,
+                    Xmin,
+                    Xmin,
+                ]
+                Y = [
+                    Ymin,
+                    Ymin,
+                    Ymax,
+                    Ymax,
+                    Ymin,
+                ]
+            else:
+                X = (
+                    list(np.arange(-80, 0))
+                    + list(0.5 * np.ones(np.shape(np.arange(35, 39))))
+                    + list(np.arange(0, -80, -1))
+                    + list(-80 * np.ones(np.shape(np.arange(39, 34, -1))))
+                )
+                Y = (
+                    list(35 * np.ones(np.shape(np.arange(-80, 0))))
+                    + list(np.arange(35, 39))
+                    + list(39 * np.ones(np.shape(np.arange(0, -80, -1))))
+                    + list(np.arange(39, 34, -1))
+                )
             od_moor = od_in.subsample.mooring_array(Xmoor=X, Ymoor=Y)
 
         # Compute transport

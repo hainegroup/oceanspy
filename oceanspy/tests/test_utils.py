@@ -6,6 +6,7 @@ import pytest
 from oceanspy.utils import (
     _reset_range,
     cartesian_path,
+    circle_path_array,
     great_circle_path,
     spherical2cartesian,
     viewer_to_range,
@@ -37,6 +38,33 @@ def test_error_path():
 
     with pytest.raises(ValueError):
         cartesian_path(1, 2, 3, 4, delta=-1)
+
+
+def test_error_circle_array():
+    with pytest.raises(ValueError):
+        circle_path_array([1, 1], [1, 1], R=6371.0)
+    with pytest.raises(ValueError):
+        circle_path_array([0], [0, 0, 0], R=6371.0)
+    with pytest.raises(TypeError):
+        circle_path_array([1, 0], [0, 0], R=None)
+
+
+@pytest.mark.parametrize(
+    "lats, lons, symmetry, resolution",
+    [
+        ([0, 0.5], [0, 0], "latitude", 25),
+        ([0, 0], [0, 0.5], "longitude", 25),
+        ([0, 0], [0, 0.125], False, 25),
+    ],
+)
+def test_circle_path_array(lats, lons, symmetry, resolution):
+    nY, nX = circle_path_array(lats, lons, R=6371.0, _res=resolution)
+    if symmetry == "latitude":
+        assert (nX == _np.zeros(len(nX))).all()
+    elif symmetry == "longitude":
+        assert (nY == _np.zeros(len(nY))).all()
+    else:
+        assert len(nY) == len(lats)
 
 
 coords1 = [[[0, 0], [1, 1], [2, 2], [3, 3], [4, 4], [5, 5]]]
