@@ -44,7 +44,7 @@ Xmax = od.dataset["XC"].max().values
 
 
 @pytest.mark.parametrize(
-    "od_in," " cutout_kwargs, colorName, Tlim, Slim, cmap_kwargs",
+    "od_in, cutout_kwargs, colorName, Tlim, Slim, cmap_kwargs",
     [
         (od, None, None, None, None, None),
         (od, {"XRange": [Xmin, Xmax]}, "Temp", [0, 1], [0, 1], {"robust": True}),
