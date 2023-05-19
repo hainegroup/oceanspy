@@ -44,7 +44,7 @@ dependencies:
 - cftime
 - rasterio
 - cfgrib
-- matplotlib <= 3.6.0
+- matplotlib
 - cf_xarray
 - ipykernel
 - numba

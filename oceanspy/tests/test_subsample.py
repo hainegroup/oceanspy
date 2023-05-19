@@ -324,7 +324,7 @@ def test_cutout_faces(
 # =======
 # MOORING
 # =======
-@pytest.mark.parametrize("od", [MITgcm_rect_nc])
+@pytest.mark.parametrize("od", [MITgcm_rect_nc, ECCOod])
 @pytest.mark.parametrize("cartesian", [True, False])
 @pytest.mark.parametrize(
     "kwargs", [{}, {"YRange": None, "XRange": None, "add_Hbdr": True}]
@@ -338,7 +338,7 @@ def test_mooring(od, cartesian, kwargs):
         Xmoor = [this_od.dataset["XC"].min().values, this_od.dataset["XC"].max().values]
         Ymoor = [this_od.dataset["YC"].min().values, this_od.dataset["YC"].max().values]
     else:
-        Xmoor = [-80, 80]
+        Xmoor = [-80, 0]
         Ymoor = [35, 35]
     new_od = this_od.subsample.mooring_array(Xmoor=Xmoor, Ymoor=Ymoor, **kwargs)
 
@@ -346,8 +346,12 @@ def test_mooring(od, cartesian, kwargs):
         new_od.subsample.mooring_array(Xmoor=Xmoor, Ymoor=Ymoor)
 
     for index in [0, -1]:
-        assert new_od.dataset["XC"].isel(mooring=index).values == Xmoor[index]
-        assert new_od.dataset["YC"].isel(mooring=index).values == Ymoor[index]
+        if "face" not in od.dataset.dims:
+            assert new_od.dataset["XC"].isel(mooring=index).values == Xmoor[index]
+            assert new_od.dataset["YC"].isel(mooring=index).values == Ymoor[index]
+        else:
+            assert new_od.dataset["XC"].isel(mooring=index).values - Xmoor[index] < 1
+            assert new_od.dataset["YC"].isel(mooring=index).values - Ymoor[index] < 1
 
     checkX = new_od.grid.diff(new_od.dataset["XC"], "mooring")
     checkY = new_od.grid.diff(new_od.dataset["YC"], "mooring")
