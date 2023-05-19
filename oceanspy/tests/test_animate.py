@@ -39,11 +39,15 @@ od_surv = od.subsample.survey_stations(Xsurv=Xsurv, Ysurv=Ysurv)
 # ==========
 # TS diagram
 # ==========
+Xmin = od.dataset["XC"].min().values
+Xmax = od.dataset["XC"].max().values
+
+
 @pytest.mark.parametrize(
     "od_in," " cutout_kwargs, colorName, Tlim, Slim, cmap_kwargs",
     [
         (od, None, None, None, None, None),
-        (od, {"ZRange": 0}, "Temp", [0, 1], [0, 1], {"robust": True}),
+        (od, {"XRange": [Xmin, Xmax]}, "Temp", [0, 1], [0, 1], {"robust": True}),
     ],
 )
 def test_anim_TSdiagram(od_in, cutout_kwargs, colorName, Tlim, Slim, cmap_kwargs):
