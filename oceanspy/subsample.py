@@ -704,12 +704,6 @@ def mooring_array(od, Ymoor, Xmoor, xoak_index="scipy_kdtree", **kwargs):
     for key, value in ds_grid.sizes.items():
         ds_grid["i" + f"{key}"] = DataArray(range(value), dims=key)
 
-    if R is not None:  # spherical coordinates
-        # make sure that the array defines a great circle path of resolution 100km
-        Ymoor, Xmoor = circle_path_array(
-            Ymoor, Xmoor, R
-        )  # make sure Xmoor and Ymoor define a c
-
     if not ds_grid.xoak.index:
         if xoak_index not in _xoak.IndexRegistry():
             raise ValueError(
