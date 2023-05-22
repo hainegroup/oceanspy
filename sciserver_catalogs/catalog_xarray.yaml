@@ -1040,3 +1040,20 @@ sources:
         Sample (test) files
       projection: Mercator
       original_output: snapshot
+
+# ETOPO 2022
+  ETOPO:
+    description: ETOPO - Integrated topography, bathymetry, and shoreline data from regional and global datasets
+    driver: zarr
+    model: NA
+    args:
+      urlpath: '/home/idies/workspace/poseidon/data12_01/ETOPO'
+    xarray_kwargs:
+      engine: zarr
+      parallel: true
+    metadata:
+      name: ETOPO
+      description: The ice surface version of ETOPO
+      citation: 10.25921/fd45-gt74.
+      projection: rectilinear
+      original_output: snapshot
