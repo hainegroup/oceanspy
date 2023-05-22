@@ -707,7 +707,7 @@ def mooring_array(od, Ymoor, Xmoor, xoak_index="scipy_kdtree", **kwargs):
     if not ds_grid.xoak.index:
         if xoak_index not in _xoak.IndexRegistry():
             raise ValueError(
-                "`sampMethod` [{}] is not supported."
+                "`xoak_index` [{}] is not supported."
                 "\nAvailable options: {}"
                 "".format(xoak_index, _xoak.IndexRegistry())
             )
