@@ -653,6 +653,8 @@ def mooring_array(od, Ymoor, Xmoor, xoak_index="scipy_kdtree", **kwargs):
         Y coordinates of moorings.
     Xmoor: 1D array_like, scalar
         X coordinates of moorings.
+    xoak_index: str
+        xoak index to be used. `scipy_kdtree` by default.
     **kwargs:
         Keyword arguments for :py:func:`oceanspy.subsample.cutout`.
 
