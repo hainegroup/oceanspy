@@ -1055,5 +1055,5 @@ sources:
       name: ETOPO
       description: The ice surface version of ETOPO
       citation: 10.25921/fd45-gt74.
-      projection: rectilinear
+      projection: PlateCarree
       original_output: snapshot
