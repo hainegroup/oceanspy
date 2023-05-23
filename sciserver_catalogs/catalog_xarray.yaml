@@ -1050,7 +1050,6 @@ sources:
       urlpath: '/home/idies/workspace/poseidon/data12_01/ETOPO'
     xarray_kwargs:
       engine: zarr
-      parallel: true
     metadata:
       name: ETOPO
       description: The ice surface version of ETOPO
