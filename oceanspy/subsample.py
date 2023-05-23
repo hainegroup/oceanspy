@@ -698,6 +698,8 @@ def mooring_array(od, Ymoor, Xmoor, xoak_index="scipy_kdtree", **kwargs):
 
     # Unpack ds
     ds = od._ds
+    # create list of coordinates.
+    coords = [var for var in ds if "time" not in ds[var].dims]
 
     ds_grid = ds[["XC", "YC"]]  # by convention center point
 
@@ -714,8 +716,8 @@ def mooring_array(od, Ymoor, Xmoor, xoak_index="scipy_kdtree", **kwargs):
 
         ds_grid.xoak.set_index(["XC", "YC"], xoak_index)
 
-    coords = {"XC": ("mooring", Xmoor), "YC": ("mooring", Ymoor)}
-    ds_data = _xr.Dataset(coords)  # mooring data
+    cdata = {"XC": ("mooring", Xmoor), "YC": ("mooring", Ymoor)}
+    ds_data = _xr.Dataset(cdata)  # mooring data
 
     # find nearest points to given data.
     nds = ds_grid.xoak.sel(XC=ds_data["XC"], YC=ds_data["YC"])
@@ -836,7 +838,7 @@ def mooring_array(od, Ymoor, Xmoor, xoak_index="scipy_kdtree", **kwargs):
     new_ds["mooring_dist"] = distance
 
     # Reset coordinates
-    new_ds = new_ds.set_coords([coord for coord in ds.coords] + ["mooring_dist"])
+    new_ds = new_ds.set_coords(coords + ["mooring_dist"])
 
     # Recreate od
     od._ds = new_ds
