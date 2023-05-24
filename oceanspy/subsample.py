@@ -212,9 +212,7 @@ def cutout(
     # Drop variables
     if varList is not None:
         # Make sure it's a list
-        varList = list(varList)
-        varList = varList + co_list
-        varList = _rename_aliased(od, varList)
+        varList = _rename_aliased(od, list(varList) + co_list)
 
         # Compute missing variables
         od = _compute._add_missing_variables(od, varList)
