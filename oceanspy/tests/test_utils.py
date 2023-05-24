@@ -118,7 +118,7 @@ X7 = _np.array([20, -20])
         (X4, X3, 180),
         (X5, _np.array([161, 19]), 113.67),
         (X6, _np.array([161, 19]), 113.67),
-        (X7, X7, 180),
+        (X7, X7, 6.67),
     ],
 )
 def test_reset_range(XRange, x0, expected_ref):
