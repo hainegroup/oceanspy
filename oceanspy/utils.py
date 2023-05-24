@@ -129,7 +129,7 @@ def _reset_range(x):
     """
 
     ref_lon = 180
-    if x.size:
+    if x is not None:
         if (_np.sign(x) == _np.sign(x[0])).all():  # no sign change
             _ref_lon = ref_lon
             X0, X1 = _np.min(x), _np.max(x)
