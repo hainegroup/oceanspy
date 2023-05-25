@@ -400,7 +400,10 @@ def cutout(
     # ---------------------------
     # Initialize horizontal mask
     if XRange is not None or YRange is not None:
-        XRange, ref_lon = _reset_range(XRange)
+        if XRange is not None:
+            XRange, ref_lon = _reset_range(XRange)
+        else:
+            ref_lon = 180
         maskH, dmaskH, XRange, YRange = get_maskH(
             ds, add_Hbdr, XRange, YRange, ref_lon=ref_lon
         )
