@@ -172,8 +172,6 @@ def _check_range(od, obj, objName):
             raise TypeError("Invalid `{}`".format(objName))
         maxcheck = valchek.max().values
         mincheck = valchek.min().values
-        if maxcheck == 180 and round(mincheck, 1) <= -179.0:
-            mincheck = -maxcheck  # periodic
         if any(obj < mincheck) or any(obj > maxcheck):
             warnings.warn(
                 "\n{}Range of the oceandataset is: {}"
