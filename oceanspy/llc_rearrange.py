@@ -426,8 +426,7 @@ class LLCtransformation:
         if chunks:
             DS = DS.chunk(chunks)
 
-        if XRange is not None and YRange is not None:
-            # drop copy var = 'nYg' (line 101)
+        if "nYG" in DS.reset_coords().data_vars:
             DS = DS.drop_vars(_var_)
 
         if geo_true:
