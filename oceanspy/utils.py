@@ -85,15 +85,16 @@ def viewer_to_range(p):
             lon.append(coords[i][0])
             lat.append(coords[i][1])
 
-    # # check that there are no lon values greater than 180 (abs)
-    # lon = _np.array(lon)
-    # ll = _np.where(abs(lon) > 180)[0]
-    # sign = _np.sign(lon[ll])
-    # fac = _np.round(abs(lon)[ll] / 360)
-    # nlon = lon[ll] - 360*sign*fac
-    # lon[ll] = nlon
+    # check that there are no lon values greater than 180 (abs)
+    ll = _np.where(abs(_np.array(lon)) > 180)[0]
+    if ll.size:
+        lon = _np.array(lon)
+        sign = _np.sign(lon[ll])
+        fac = _np.round(abs(lon)[ll] / 360)
+        nlon = lon[ll] - 360 * sign * fac
+        lon[ll] = nlon
 
-    return lon, lat
+    return list(lon), lat
 
 
 def _rel_lon(x, ref_lon):
@@ -173,7 +174,9 @@ def _reset_range(xn):
                 _ref_lon = X[0] - (X[0] - X[1]) / 3
         else:
             X = _np.min(xn), _np.max(xn)
-    return _np.array(X), _np.round(_ref_lon, 2)
+    if X is not None:
+        X = _np.array(X)
+    return X, _np.round(_ref_lon, 2)
 
 
 def spherical2cartesian(Y, X, R=None):
