@@ -116,14 +116,17 @@ X7 = _np.array([20, -20])
         (X2, X0, 53.67),
         (X3, X3, 180),
         (X4, X3, 180),
-        (X5, _np.array([161, 19]), 113.67),
-        (X6, _np.array([161, 19]), 113.67),
+        (X5, None, 180),
+        (X6, None, 180),
         (X7, X7, 6.67),
     ],
 )
 def test_reset_range(XRange, x0, expected_ref):
     """test the function rel_lon which redefines the reference long."""
     x_range, ref_lon = _reset_range(XRange)
-    assert len(x_range) == 2
-    assert x_range.all() == x0.all()
+    if x0 is not None:
+        assert len(x_range) == 2
+        assert x_range.all() == x0.all()
+    else:
+        assert x_range is None
     assert _np.round(ref_lon, 2) == expected_ref
