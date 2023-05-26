@@ -70,7 +70,11 @@ def test_circle_path_array(lats, lons, symmetry, resolution):
 coords1 = [[[0, 0], [1, 1], [2, 2], [3, 3], [4, 4], [5, 5]]]
 coords2 = [[[5, 0], [4, 1], [3, 2], [2, 3], [1, 4], [0, 5]]]
 coords3 = [[[0, 6], [0, 7], [0, 8], [0, 9], [0, 10], [0, 11]]]
+lons = []
 coords4 = '[{"type":"Point","coordinates":[-169.23960833202577,22.865677261831266]}]'
+coords5 = '[{"type":"Point","coordinates":[636.7225446274502, -56.11128546740994]}]'
+coords6 = '[{"type":"Point","coordinates":[754.2277421326479, -57.34299561290217]}]'
+coords7 = '[{"type":"Point","coordinates":[-424.42989807993234, 37.87263032287052]}]'
 
 
 @pytest.mark.parametrize(
@@ -83,6 +87,9 @@ coords4 = '[{"type":"Point","coordinates":[-169.23960833202577,22.86567726183126
         (coords2, "LineString", [[5, 0]], [[4, 1]]),
         (coords3, "LineString", [[0, 6]], [[0, 7]]),
         (coords4, "Point", [-169.23960833202577], [22.865677261831266]),
+        (coords5, "Point", [-83.27745537254975], [-56.11128546740994]),
+        (coords6, "Point", [34.227742132647904], [-57.34299561290217]),
+        (coords7, "Point", [-64.42989807993234], [37.87263032287052]),
     ],
 )
 def test_viewer_to_range(coords, types, lon, lat):
