@@ -85,7 +85,16 @@ def viewer_to_range(p):
             lon.append(coords[i][0])
             lat.append(coords[i][1])
 
-    return lon, lat
+    # check that there are no lon values greater than 180 (abs)
+    ll = _np.where(abs(_np.array(lon)) > 180)[0]
+    if ll.size:
+        lon = _np.array(lon)
+        sign = _np.sign(lon[ll])
+        fac = _np.round(abs(lon)[ll] / 360)
+        nlon = lon[ll] - 360 * sign * fac
+        lon[ll] = nlon
+
+    return list(lon), lat
 
 
 def _rel_lon(x, ref_lon):
@@ -108,7 +117,7 @@ def _rel_lon(x, ref_lon):
     return (x - ref_lon) % 360
 
 
-def _reset_range(x):
+def _reset_range(xn):
     """Resets the definition of XRange, by default the discontinuity at 180 long.
     Checks that there is no sign change in x and if there is, the only change that
     is allowed is when crossing zero. Otherwise resets ref_lon.
@@ -127,41 +136,47 @@ def _reset_range(x):
     redefined_x: numpy.array.
         converted longitude.
     """
-
-    ref_lon = 180
-    if x is not None:
-        if (_np.sign(x) == _np.sign(x[0])).all():  # no sign change
-            _ref_lon = ref_lon
-            X0, X1 = _np.min(x), _np.max(x)
-        else:  # change in sign
-            if len(x) == 2:  # list of end points
-                X0, X1 = x
-                if x[0] > x[1]:  # across discontinuity
-                    if abs(x[1] - x[0]) > 300:  # across a discontinuity (Delta X =360)
-                        _ref_lon = x[0] - (x[0] - x[1]) / 3
-                    else:  # XRange decreases, but not necessarity a dicont.
-                        _ref_lon = ref_lon
-                else:
-                    _ref_lon = ref_lon
-            else:  # array of values.
-                _del = abs(x[1:] - x[:-1])  # only works with one crossing
-                if len(_np.where(abs(_del) > 300)[0]) > 0:  # there's discontinuity
-                    ll = _np.where(_del == max(_del))[0][0]
-                    if x[ll] > x[ll + 1]:  # track starts west of jump
-                        X0 = _np.min(x[: ll + 1])
-                        X1 = _np.max(x[ll + 1 :])
-                    else:
-                        X0 = _np.min(x[ll + 1 :])
-                        X1 = _np.max(x[: ll + 1])
-                    _ref_lon = X0 - (X0 - X1) / 3
-                else:  # no discontinuity
-                    X0 = _np.min(x)
-                    X1 = _np.max(x)
-                    _ref_lon = ref_lon
-        x = _np.array([X0, X1])
-    else:
-        _ref_lon = ref_lon
-    return x, _np.round(_ref_lon, 2)
+    _ref_lon = 180
+    xn = _np.array(xn)
+    cross = _np.where(_np.diff(_np.sign(xn)))[0]
+    if cross.size and xn.size != 2:
+        ref = 180, 0
+        if cross.size == 1:  # one sign change
+            d1 = [abs(abs(xn[cross[0]]) - i) for i in ref]
+            i0 = _np.argwhere(_np.array(d1) == min(d1))[0][0]
+            if i0 == 0:  # Pacific
+                ll = _np.where(xn > 0)[0]
+                nxn = _copy.deepcopy(xn)
+                nxn[ll] = nxn[ll] - 360
+                X = _np.min(nxn) + 360, _np.max(nxn)
+                _ref_lon = X[0] - (X[0] - X[1]) / 3
+            else:  # Atlantic
+                X = _np.min(xn), _np.max(xn)
+        if cross.size > 1:  # 2 or more sign changes
+            da = [abs(abs(xn[i]) - 180) for i in cross]
+            db = [abs(abs(xn[i]) - 0) for i in cross]
+            d = _np.array([[da[i], db[i]] for i in range(len(da))])
+            ind = [_np.argwhere(d[i] == min(d[i]))[0][0] for i in range(len(d))]
+            if all(ind[0] == i for i in ind) and ind[0] == 0:  # Pacific
+                ll = _np.where(xn > 0)[0]
+                nxn = _copy.deepcopy(xn)
+                nxn[ll] = nxn[ll] - 360
+                X = _np.min(nxn) + 360, _np.max(nxn)
+                _ref_lon = X[0] - (X[0] - X[1]) / 3
+            elif all(ind[0] == i for i in ind) and ind[0] == 1:  # Atlantic
+                X = _np.min(xn), _np.max(xn)
+            else:
+                X = None
+    elif cross.size == 0 or xn.size == 2:
+        if xn.size == 2:
+            X = xn[0], xn[1]
+            if xn[0] > xn[1]:
+                _ref_lon = X[0] - (X[0] - X[1]) / 3
+        else:
+            X = _np.min(xn), _np.max(xn)
+    if X is not None:
+        X = _np.array(X)
+    return X, _np.round(_ref_lon, 2)
 
 
 def spherical2cartesian(Y, X, R=None):

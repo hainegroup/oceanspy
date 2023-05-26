@@ -70,7 +70,11 @@ def test_circle_path_array(lats, lons, symmetry, resolution):
 coords1 = [[[0, 0], [1, 1], [2, 2], [3, 3], [4, 4], [5, 5]]]
 coords2 = [[[5, 0], [4, 1], [3, 2], [2, 3], [1, 4], [0, 5]]]
 coords3 = [[[0, 6], [0, 7], [0, 8], [0, 9], [0, 10], [0, 11]]]
+lons = []
 coords4 = '[{"type":"Point","coordinates":[-169.23960833202577,22.865677261831266]}]'
+coords5 = '[{"type":"Point","coordinates":[636.7225446274502, -56.11128546740994]}]'
+coords6 = '[{"type":"Point","coordinates":[754.2277421326479, -57.34299561290217]}]'
+coords7 = '[{"type":"Point","coordinates":[-424.42989807993234, 37.87263032287052]}]'
 
 
 @pytest.mark.parametrize(
@@ -83,6 +87,9 @@ coords4 = '[{"type":"Point","coordinates":[-169.23960833202577,22.86567726183126
         (coords2, "LineString", [[5, 0]], [[4, 1]]),
         (coords3, "LineString", [[0, 6]], [[0, 7]]),
         (coords4, "Point", [-169.23960833202577], [22.865677261831266]),
+        (coords5, "Point", [-83.27745537254975], [-56.11128546740994]),
+        (coords6, "Point", [34.227742132647904], [-57.34299561290217]),
+        (coords7, "Point", [-64.42989807993234], [37.87263032287052]),
     ],
 )
 def test_viewer_to_range(coords, types, lon, lat):
@@ -116,14 +123,17 @@ X7 = _np.array([20, -20])
         (X2, X0, 53.67),
         (X3, X3, 180),
         (X4, X3, 180),
-        (X5, _np.array([161, 19]), 113.67),
-        (X6, _np.array([161, 19]), 113.67),
-        (X7, X7, 180),
+        (X5, None, 180),
+        (X6, None, 180),
+        (X7, X7, 6.67),
     ],
 )
 def test_reset_range(XRange, x0, expected_ref):
     """test the function rel_lon which redefines the reference long."""
     x_range, ref_lon = _reset_range(XRange)
-    assert len(x_range) == 2
-    assert x_range.all() == x0.all()
+    if x0 is not None:
+        assert len(x_range) == 2
+        assert x_range.all() == x0.all()
+    else:
+        assert x_range is None
     assert _np.round(ref_lon, 2) == expected_ref
