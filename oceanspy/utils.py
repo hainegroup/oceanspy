@@ -70,20 +70,18 @@ def viewer_to_range(p):
     if p_type == "Polygon":
         coords = p[0]["coordinates"][0]
     elif p_type == "Point":
-        coords = p[0]["coordinates"]
+        coords = []
+        for i in range(len(p)):
+            coords.append(p[0]["coordinates"])
     elif p_type == "LineString":
         coords = p[0]["coordinates"]
 
     lon = []
     lat = []
 
-    if p_type == "Point":
-        lon.append(coords[0])
-        lat.append(coords[1])
-    else:
-        for i in range(len(coords)):
-            lon.append(coords[i][0])
-            lat.append(coords[i][1])
+    for i in range(len(coords)):
+        lon.append(coords[i][0])
+        lat.append(coords[i][1])
 
     # check that there are no lon values greater than 180 (abs)
     ll = _np.where(abs(_np.array(lon)) > 180)[0]
