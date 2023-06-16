@@ -1184,7 +1184,7 @@ def stations(od, Ycoords, Xcoords, xoak_index="scipy_kdtree"):
     ds_data = _xr.Dataset(cdata)
 
     # find nearest points to given data.
-    nds = ds.xoak.sel(XC=ds_data["XC"], YC=ds_data["YC"]).persist()
+    nds = ds.xoak.sel(XC=ds_data["XC"], YC=ds_data["YC"])
 
     nds.xoak.set_index(["XG", "YG"], xoak_index)
 
@@ -1192,7 +1192,7 @@ def stations(od, Ycoords, Xcoords, xoak_index="scipy_kdtree"):
     ds_data = _xr.Dataset(gdata)
 
     # find nearest points to given data.
-    nds = nds.xoak.sel(XG=ds_data["XG"], YG=ds_data["YG"]).compute()
+    nds = nds.xoak.sel(XG=ds_data["XG"], YG=ds_data["YG"])
 
     # # Add attributes to station dimension
     nds["station"] = _xr.DataArray(
