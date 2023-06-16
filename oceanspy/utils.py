@@ -72,7 +72,7 @@ def viewer_to_range(p):
     elif p_type == "Point":
         coords = []
         for i in range(len(p)):
-            coords.append(p[0]["coordinates"])
+            coords.append(p[i]["coordinates"])
     elif p_type == "LineString":
         coords = p[0]["coordinates"]
 
