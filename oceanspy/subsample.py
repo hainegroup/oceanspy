@@ -1130,6 +1130,34 @@ def survey_stations(
     return od
 
 
+def stations(od, Ycoords, Xcoords, xoak_index="scipy_kdtree"):
+    """
+    Extract stations using nearest-neighbor lookup.
+
+    Parameters
+    ----------
+    od: OceanDataset
+        od that will be subsampled.
+    Ycoords: 2D array_like or 1D array_like if times is scalar
+        Y coordinates of particles. Dimensions order: (time, particle).
+    Xcoords: 2D array_like or 1D array_like if times is scalar
+        lon coordinates of stations. Dimensions order: (time, particle).
+    xoak_index: str
+        xoak index to be used. `scipy_kdtree` by default.
+
+    Returns
+    -------
+    od: OceanDataset
+        Subsampled oceandataset.
+
+    See Also
+    --------
+    oceanspy.OceanDataset.mooring
+
+    """
+    pass
+
+
 def particle_properties(od, times, Ypart, Xpart, Zpart, **kwargs):
     """
     Extract Eulerian properties of particles
@@ -1326,6 +1354,10 @@ class _subsampleMethods(object):
     @_functools.wraps(survey_stations)
     def survey_stations(self, **kwargs):
         return survey_stations(self._od, **kwargs)
+
+    @_functools.wraps(stations)
+    def stations(self, **kwargs):
+        return stations(self._od, **kwargs)
 
     @_functools.wraps(particle_properties)
     def particle_properties(self, **kwargs):
