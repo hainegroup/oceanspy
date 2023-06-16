@@ -1155,7 +1155,66 @@ def stations(od, Ycoords, Xcoords, xoak_index="scipy_kdtree"):
     oceanspy.OceanDataset.mooring
 
     """
-    pass
+    _check_native_grid(od, "stations")
+
+    # Convert variables to numpy arrays and make some check
+    Ycoords = _check_range(od, Ycoords, "Ycoords")
+    Xcoords = _check_range(od, Xcoords, "Xcoords")
+
+    # Message
+    print("Extracting stations.")
+
+    # Unpack ds
+    od = _copy.copy(od)
+    ds = od._ds
+    # create list of coordinates.
+    co_list = [var for var in ds.coords]
+
+    if not ds.xoak.index:
+        if xoak_index not in _xoak.IndexRegistry():
+            raise ValueError(
+                "`xoak_index` [{}] is not supported."
+                "\nAvailable options: {}"
+                "".format(xoak_index, _xoak.IndexRegistry())
+            )
+
+        ds.xoak.set_index(["XC", "YC"], xoak_index)
+
+    cdata = {"XC": ("station", Xcoords), "YC": ("station", Ycoords)}
+    ds_data = _xr.Dataset(cdata)
+
+    # find nearest points to given data.
+    nds = ds.xoak.sel(XC=ds_data["XC"], YC=ds_data["YC"])
+
+    nds.xoak.set_index(["XG", "YG"], xoak_index)
+
+    gdata = {"XG": ("station", Xcoords), "YG": ("station", Ycoords)}
+    ds_data = _xr.Dataset(gdata)
+
+    # find nearest points to given data.
+    nds = nds.xoak.sel(XG=ds_data["XG"], YG=ds_data["YG"])
+
+    # # Add attributes to station dimension
+    nds["station"] = _xr.DataArray(
+        _np.arange(len(nds.station)),
+        dims=("station"),
+        attrs={"long_name": "index of survey station", "units": "none"},
+    )
+
+    od._ds = nds.reset_coords()
+
+    if od.face_connections is not None:
+        new_face_connections = {"face_connections": {None: {None, None}}}
+        od = od.set_face_connections(**new_face_connections)
+
+    grid_coords = od.grid_coords
+    grid_coords.pop("X", None)
+    grid_coords.pop("Y", None)
+    od = od.set_grid_coords(grid_coords, overwrite=True)
+
+    od._ds = od._ds.set_coords(co_list)
+
+    return od
 
 
 def particle_properties(od, times, Ypart, Xpart, Zpart, **kwargs):
