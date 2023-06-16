@@ -651,6 +651,8 @@ def horizontal_section(
     col_wrap = kwargs.pop("col_wrap", None)
     subplot_kws = kwargs.pop("subplot_kws", None)
     transform = kwargs.pop("transform", None)
+    xsl, ysl = kwargs.pop("xslice", None), kwargs.pop("yslice", None)
+    da = da[:: int(ysl), :: int(xsl)]
 
     # Projection
     if ax is None:
