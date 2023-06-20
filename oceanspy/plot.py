@@ -652,7 +652,13 @@ def horizontal_section(
     subplot_kws = kwargs.pop("subplot_kws", None)
     transform = kwargs.pop("transform", None)
     xsl, ysl = kwargs.pop("xslice", None), kwargs.pop("yslice", None)
-    da = da[:: int(ysl), :: int(xsl)]
+    if xsl is not None and ysl is not None:
+        xslice = (0, xsl, len(da.X))
+        yslice = (0, ysl, len(da.Y))
+    else:
+        xslice = (0, len(da.X))
+        yslice = (0, len(da.Y))
+    da = da.isel(X=xslice, Y=yslice)
 
     # Projection
     if ax is None:
