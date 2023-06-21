@@ -653,8 +653,8 @@ def horizontal_section(
     transform = kwargs.pop("transform", None)
     xsl, ysl = kwargs.pop("xslice", None), kwargs.pop("yslice", None)
     if xsl is not None and ysl is not None:
-        xslice = slice(0, xsl, len(da.X))
-        yslice = slice(0, ysl, len(da.Y))
+        xslice = slice(0, len(da.X), xsl)
+        yslice = slice(0, len(da.Y), ysl)
     else:
         xslice = slice(0, len(da.X))
         yslice = slice(0, len(da.Y))
