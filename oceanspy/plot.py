@@ -651,10 +651,10 @@ def horizontal_section(
     col_wrap = kwargs.pop("col_wrap", None)
     subplot_kws = kwargs.pop("subplot_kws", None)
     transform = kwargs.pop("transform", None)
-    xsl, ysl = kwargs.pop("xslice", None), kwargs.pop("yslice", None)
-    if xsl is not None and ysl is not None:
-        xslice = slice(0, len(da.X), xsl)
-        yslice = slice(0, len(da.Y), ysl)
+    xstep, ystep = kwargs.pop("xstep", None), kwargs.pop("ystep", None)
+    if xstep is not None and ystep is not None:
+        xslice = slice(0, len(da.X), xstep)
+        yslice = slice(0, len(da.Y), ystep)
     else:
         xslice = slice(0, len(da.X))
         yslice = slice(0, len(da.Y))
