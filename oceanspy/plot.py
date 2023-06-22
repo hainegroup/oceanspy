@@ -952,6 +952,18 @@ def vertical_section(
     ver_name = [dim for dim in od.grid_coords["Z"] if dim in da.dims][0]
     da = da.squeeze()
 
+    # slicing along section
+    step = kwargs.pop("step", None)
+    DIMS = [dim for dim in da.dims]
+    dims_var = Dims(DIMS[::-1])
+    if step is not None and dims_var.X in ["mooring", "station"]:
+        xslice = slice(0, len(da[dims_var.X]), step)
+    else:
+        xslice = slice(0, len(da[dims_var.X]))
+
+    sargs = {dims_var.X: xslice}
+    da = da.isel(**sargs)
+
     # CONTOURNAME
     if contourName is not None:
         # Apply mean and sum

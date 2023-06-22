@@ -331,7 +331,8 @@ def test_ver_sec_subsamp(od_in, subsampMethod):
 @pytest.mark.parametrize("od_in", [od_moor, od_surv])
 @pytest.mark.parametrize("varName", ["Temp", "U", "V", "W", "momVort3"])
 @pytest.mark.parametrize("contourName", ["Temp", "U", "V", "W", "momVort3"])
-def test_ver_sec(od_in, varName, contourName):
+@pytest.mark.parametrize("step", [None, 2])
+def test_ver_sec(od_in, varName, contourName, step):
     plt.close()
     if "mooring_dist" in od_in.dataset.variables:
         ds = od_in.dataset.drop_vars("mooring_dist")
@@ -354,6 +355,7 @@ def test_ver_sec(od_in, varName, contourName):
         intAxes=intAxes,
         contour_kwargs=contour_kwargs,
         clabel_kwargs=clabel_kwargs,
+        step=step,
     )
     assert isinstance(ax, plt.Axes)
 
