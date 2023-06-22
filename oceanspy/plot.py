@@ -32,6 +32,7 @@ from ._ospy_utils import (
 from .compute import _add_missing_variables
 from .compute import integral as _integral
 from .compute import weighted_mean as _weighted_mean
+from .llc_rearrange import Dims
 
 # Additional dependencies (private)
 try:
@@ -652,13 +653,19 @@ def horizontal_section(
     subplot_kws = kwargs.pop("subplot_kws", None)
     transform = kwargs.pop("transform", None)
     xstep, ystep = kwargs.pop("xstep", None), kwargs.pop("ystep", None)
+
+    DIMS = [dim for dim in da.dims if dim[0] in ["X", "Y"]]
+    dims_var = Dims(DIMS[::-1])
+
     if xstep is not None and ystep is not None:
-        xslice = slice(0, len(da.X), xstep)
-        yslice = slice(0, len(da.Y), ystep)
+        xslice = slice(0, len(da[dims_var.X]), xstep)
+        yslice = slice(0, len(da[dims_var.Y]), ystep)
     else:
-        xslice = slice(0, len(da.X))
-        yslice = slice(0, len(da.Y))
-    da = da.isel(X=xslice, Y=yslice)
+        xslice = slice(0, len(da[dims_var.X]))
+        yslice = slice(0, len(da[dims_var.Y]))
+
+    sargs = {dims_var.X: xslice, dims_var.Y: yslice}
+    da = da.isel(**sargs)
 
     # Projection
     if ax is None:
