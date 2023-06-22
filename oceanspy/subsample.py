@@ -1130,7 +1130,14 @@ def survey_stations(
     return od
 
 
-def stations(od, Ycoords, Xcoords, xoak_index="scipy_kdtree"):
+def stations(
+    od,
+    tcoords=None,
+    Zcoords=None,
+    Ycoords=None,
+    Xcoords=None,
+    xoak_index="scipy_kdtree",
+):
     """
     Extract stations using nearest-neighbor lookup.
 
@@ -1138,10 +1145,14 @@ def stations(od, Ycoords, Xcoords, xoak_index="scipy_kdtree"):
     ----------
     od: OceanDataset
         od that will be subsampled.
-    Ycoords: 2D array_like or 1D array_like if times is scalar
-        Y coordinates of particles. Dimensions order: (time, particle).
-    Xcoords: 2D array_like or 1D array_like if times is scalar
-        lon coordinates of stations. Dimensions order: (time, particle).
+    tcoords: 1D array_like, NoneType
+        time-coordinates (datetime).
+    Zcoords: 1D array_like, NoneType
+        Z coordinates at center point
+    Ycoords: 1D array_like, NoneType
+        Latitude coordinates of locations at center point.
+    Xcoords: 1D array_like, NoneType
+        lon coordinates of locations at center point.
     xoak_index: str
         xoak index to be used. `scipy_kdtree` by default.
 
@@ -1158,6 +1169,8 @@ def stations(od, Ycoords, Xcoords, xoak_index="scipy_kdtree"):
     _check_native_grid(od, "stations")
 
     # Convert variables to numpy arrays and make some check
+    tcoords = _check_range(od, tcoords, "timeRange")
+    Zcoords = _check_range(od, Zcoords, "Zcoords")
     Ycoords = _check_range(od, Ycoords, "Ycoords")
     Xcoords = _check_range(od, Xcoords, "Xcoords")
 
