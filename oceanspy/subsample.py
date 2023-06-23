@@ -1132,11 +1132,13 @@ def survey_stations(
 
 def stations(
     od,
+    varList=None,
     tcoords=None,
     Zcoords=None,
     Ycoords=None,
     Xcoords=None,
     xoak_index="scipy_kdtree",
+    method="nearest",
 ):
     """
     Extract stations using nearest-neighbor lookup.
@@ -1180,6 +1182,30 @@ def stations(
     # Unpack ds
     od = _copy.copy(od)
     ds = od._ds
+
+    if varList is not None:
+        nvarlist = [var for var in ds.variables if var not in varList]
+        ds = ds.drop_vars(nvarlist)
+
+    # look up nearest neighbors in Z and time dims
+    Zlist = ["Zl", "Z", "Zp1", "Zu"]
+    tlist = ["time", "time_midp"]
+    dimlist, Coords = [], []
+    if Zcoords is not None:
+        dimlist.append(Zlist)
+        Coords.append(Zcoords)
+    if tcoords is not None:
+        dimlist.append(tlist)
+        Coords.append(tcoords)
+
+    for i in range(len(dimlist)):
+        List = [k for k in dimlist[i] if k in ds.dims]
+        args = {}
+        for item in List:
+            if len(ds[item]) > 0:
+                args[item] = Coords[i]
+        ds = ds.sel(**args, method="nearest")
+
     # create list of coordinates.
     co_list = [var for var in ds.coords]
 
