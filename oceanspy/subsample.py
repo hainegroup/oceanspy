@@ -35,6 +35,7 @@ from ._ospy_utils import (
     _rename_aliased,
 )
 from .llc_rearrange import LLCtransformation as _llc_trans
+from .llc_rearrange import rotate_vars
 from .utils import _rel_lon, _reset_range, circle_path_array, get_maskH
 
 # Recommended dependencies (private)
@@ -782,64 +783,9 @@ def mooring_array(od, Ymoor, Xmoor, xoak_index="scipy_kdtree", **kwargs):
     # attempt to remove repeated (but not adjacent) coord values
     ix, iy = remove_repeated(ix, iy)
 
-    mooring = DataArray(
-        _np.arange(len(ix)),
-        dims=("mooring"),
-        attrs={"long_name": "index of mooring", "units": "none"},
-    )
-    y = DataArray(
-        _np.arange(1),
-        dims=("y"),
-        attrs={"long_name": "j-index of cell center", "units": "none"},
-    )
-    x = DataArray(
-        _np.arange(1),
-        dims=("x"),
-        attrs={"long_name": "i-index of cell corner", "units": "none"},
-    )
-    yp1 = DataArray(
-        _np.arange(2),
-        dims=("yp1"),
-        attrs={"long_name": "j-index of cell center", "units": "none"},
-    )
-    xp1 = DataArray(
-        _np.arange(2),
-        dims=("xp1"),
-        attrs={"long_name": "i-index of cell corner", "units": "none"},
-    )
+    new_ds = eval_dataset(ds, ix, iy)
 
-    # Transform indexes in DataArray
-    iY = DataArray(
-        _np.reshape(iy, (len(mooring), len(y))),
-        coords={"mooring": mooring, "y": y},
-        dims=("mooring", "y"),
-    )
-    iX = DataArray(
-        _np.reshape(ix, (len(mooring), len(x))),
-        coords={"mooring": mooring, "x": x},
-        dims=("mooring", "x"),
-    )
-    iYp1 = DataArray(
-        _np.stack((iy, iy + 1), 1),
-        coords={"mooring": mooring, "yp1": yp1},
-        dims=("mooring", "yp1"),
-    )
-    iXp1 = DataArray(
-        _np.stack((ix, ix + 1), 1),
-        coords={"mooring": mooring, "xp1": xp1},
-        dims=("mooring", "xp1"),
-    )
-
-    args = {
-        "X": iX,
-        "Y": iY,
-        "Xp1": iXp1,
-        "Yp1": iYp1,
-    }
-
-    rename = {"x": "X", "y": "Y", "yp1": "Yp1", "xp1": "Xp1"}
-    new_ds = ds.isel(**args).drop_vars(["X", "Y", "Xp1", "Yp1"])
-    new_ds = new_ds.rename_dims(rename).rename_vars(rename)
+    mooring = new_ds.mooring
 
     near_Y = new_ds["YC"].compute().data.squeeze()
     near_X = new_ds["XC"].compute().data.squeeze()
@@ -1225,14 +1171,6 @@ def stations(
     # find nearest points to given data.
     nds = ds.xoak.sel(XC=ds_data["XC"], YC=ds_data["YC"])
 
-    # nds.xoak.set_index(["XG", "YG"], xoak_index)
-
-    # gdata = {"XG": ("stationg", Xcoords), "YG": ("stationg", Ycoords)}
-    # ds_data = _xr.Dataset(gdata)
-
-    # # find nearest points to given data.
-    # nds = nds.xoak.sel(XG=ds_data["XG"], YG=ds_data["YG"])
-
     # # Add attributes to station dimension
     nds["station"] = _xr.DataArray(
         _np.arange(len(nds.station)),
@@ -1431,6 +1369,80 @@ def particle_properties(od, times, Ypart, Xpart, Zpart, **kwargs):
     od._ds = od._ds.reset_coords()
 
     return od
+
+
+def eval_dataset(_ds, _ix, _iy, _iface, _dim_name="mooring"):
+    new_dim = DataArray(
+        _np.arange(len(_ix)),
+        dims=(_dim_name),
+        attrs={"long_name": "index of " + _dim_name, "units": "none"},
+    )
+    y = DataArray(
+        _np.arange(1),
+        dims=("y"),
+        attrs={"long_name": "j-index of cell center", "units": "none"},
+    )
+    x = DataArray(
+        _np.arange(1),
+        dims=("x"),
+        attrs={"long_name": "i-index of cell center", "units": "none"},
+    )
+    yp1 = DataArray(
+        _np.arange(2),
+        dims=("yp1"),
+        attrs={"long_name": "j-index of cell corner", "units": "none"},
+    )
+    xp1 = DataArray(
+        _np.arange(2),
+        dims=("xp1"),
+        attrs={"long_name": "i-index of cell corner", "units": "none"},
+    )
+
+    # Transform indexes in DataArray
+    iY = DataArray(
+        _np.reshape(_iy, (len(new_dim), len(y))),
+        coords={_dim_name: new_dim, "y": y},
+        dims=(_dim_name, "y"),
+    )
+    iX = DataArray(
+        _np.reshape(_ix, (len(new_dim), len(x))),
+        coords={_dim_name: new_dim, "x": x},
+        dims=(_dim_name, "x"),
+    )
+
+    iYp1 = DataArray(
+        _np.stack((_iy, _iy + 1), 1),
+        coords={_dim_name: new_dim, "yp1": yp1},
+        dims=(_dim_name, "yp1"),
+    )
+
+    if _iface is not None and _iface not in _np.arange(6):
+        iXp1 = DataArray(
+            _np.stack((_ix + 1, _ix), 1),
+            coords={_dim_name: new_dim, "xp1": xp1},
+            dims=(_dim_name, "xp1"),
+        )
+
+    args = {
+        "X": iX,
+        "Y": iY,
+        "Xp1": iXp1,
+        "Yp1": iYp1,
+    }
+
+    rename = {"yp1": "Yp1", "xp1": "Xp1", "x": "X", "y": "Y"}
+
+    if _iface is not None:
+        args = {"face": _iface, **args}
+        if _iface not in _np.arange(6):
+            rename = {"yp1": "Xp1", "xp1": "Yp1", "x": "Y", "y": "X"}
+
+    new_ds = _ds.isel(**args).drop_vars(["Xp1", "Yp1", "X", "Y"])
+    new_ds = new_ds.rename_dims(rename).rename_vars(rename)
+    if _iface is not None and _iface not in _np.arange(6):
+        new_ds = rotate_vars(new_ds)
+
+    return new_ds
 
 
 class _subsampleMethods(object):
