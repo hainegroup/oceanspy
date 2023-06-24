@@ -1184,7 +1184,7 @@ def stations(
     ds = od._ds
 
     if varList is not None:
-        nvarlist = [var for var in ds.variables if var not in varList]
+        nvarlist = [var for var in ds.data_vars if var not in varList]
         ds = ds.drop_vars(nvarlist)
 
     # look up nearest neighbors in Z and time dims
@@ -1225,13 +1225,13 @@ def stations(
     # find nearest points to given data.
     nds = ds.xoak.sel(XC=ds_data["XC"], YC=ds_data["YC"])
 
-    nds.xoak.set_index(["XG", "YG"], xoak_index)
+    # nds.xoak.set_index(["XG", "YG"], xoak_index)
 
-    gdata = {"XG": ("station", Xcoords), "YG": ("station", Ycoords)}
-    ds_data = _xr.Dataset(gdata)
+    # gdata = {"XG": ("stationg", Xcoords), "YG": ("stationg", Ycoords)}
+    # ds_data = _xr.Dataset(gdata)
 
-    # find nearest points to given data.
-    nds = nds.xoak.sel(XG=ds_data["XG"], YG=ds_data["YG"])
+    # # find nearest points to given data.
+    # nds = nds.xoak.sel(XG=ds_data["XG"], YG=ds_data["YG"])
 
     # # Add attributes to station dimension
     nds["station"] = _xr.DataArray(
