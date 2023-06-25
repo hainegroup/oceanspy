@@ -1171,14 +1171,44 @@ def stations(
     # find nearest points to given data.
     nds = ds.xoak.sel(XC=ds_data["XC"], YC=ds_data["YC"])
 
-    # # Add attributes to station dimension
-    nds["station"] = _xr.DataArray(
-        _np.arange(len(nds.station)),
-        dims=("station"),
-        attrs={"long_name": "index of survey station", "units": "none"},
-    )
+    iX, iY, iface = (nds[f"{i}"].data for i in ("X", "Y", "face"))
 
-    od._ds = nds.reset_coords()
+    _dat = nds.face.values
+    ll = _np.where(abs(_np.diff(_dat)))[0]
+    order_iface = [_dat[i] for i in ll] + [_dat[-1]]
+    Niter = len(order_iface)
+
+    # split indexes along each face
+    X0, Y0 = [], []
+    for ii in range(len(ll) + 1):
+        if ii == 0:
+            x0, y0 = iX[: ll[ii] + 1], iY[: ll[ii] + 1]
+        elif ii > 0 and ii < len(ll):
+            x0, y0 = iX[ll[ii - 1] + 1 : ll[ii] + 1], iY[ll[ii - 1] + 1 : ll[ii] + 1]
+        elif ii == len(ll):
+            x0, y0 = iX[ll[ii - 1] + 1 :], iY[ll[ii - 1] + 1 :]
+        X0.append(x0)
+        Y0.append(y0)
+
+    DS = []
+    for i in range(Niter):
+        DS.append(eval_dataset(ds, X0[i], Y0[i], order_iface[i], "station"))
+
+    _dim = "station"
+    nDS = [DS[0].reset_coords()]
+    for i in range(1, len(DS)):
+        Nend = nDS[i - 1][_dim].values[-1]
+        nDS.append(reset_dim(DS[i], Nend + 1, dim=_dim).reset_coords())
+
+    DS = nDS[0]
+    for i in range(1, len(nDS)):
+        DS = DS.combine_first(nDS[i])
+    DS = DS.set_coords(co_list)
+
+    if "face" in DS.variables:
+        DS = DS.drop_vars(["face"])
+
+    od._ds = DS
 
     if od.face_connections is not None:
         new_face_connections = {"face_connections": {None: {None, None}}}
@@ -1188,8 +1218,6 @@ def stations(
     grid_coords.pop("X", None)
     grid_coords.pop("Y", None)
     od = od.set_grid_coords(grid_coords, overwrite=True)
-
-    od._ds = od._ds.set_coords(co_list)
 
     return od
 
@@ -1443,6 +1471,14 @@ def eval_dataset(_ds, _ix, _iy, _iface, _dim_name="mooring"):
         new_ds = rotate_vars(new_ds)
 
     return new_ds
+
+
+def reset_dim(_ds, N, dim="mooring"):
+    """resets the dimension mooring by shifting it by a value set by N"""
+    _ds["n" + dim] = N + _ds[dim]
+    _ds = _ds.swap_dims({dim: "n" + dim}).drop_vars(dim).rename({"n" + dim: dim})
+
+    return _ds
 
 
 class _subsampleMethods(object):
