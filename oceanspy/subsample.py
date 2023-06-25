@@ -1444,6 +1444,12 @@ def eval_dataset(_ds, _ix, _iy, _iface, _dim_name="mooring"):
         dims=(_dim_name, "yp1"),
     )
 
+    iXp1 = DataArray(
+        _np.stack((_ix, _ix + 1), 1),
+        coords={_dim_name: new_dim, "xp1": xp1},
+        dims=(_dim_name, "xp1"),
+    )
+
     if _iface is not None and _iface not in _np.arange(6):
         iXp1 = DataArray(
             _np.stack((_ix + 1, _ix), 1),
