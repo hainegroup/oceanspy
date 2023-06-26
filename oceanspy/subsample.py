@@ -1408,7 +1408,7 @@ def particle_properties(od, times, Ypart, Xpart, Zpart, **kwargs):
     return od
 
 
-def eval_dataset(_ds, _ix, _iy, _iface, _dim_name="mooring"):
+def eval_dataset(_ds, _ix, _iy, _iface=None, _dim_name="mooring"):
     new_dim = DataArray(
         _np.arange(len(_ix)),
         dims=(_dim_name),
