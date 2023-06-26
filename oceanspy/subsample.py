@@ -1181,6 +1181,7 @@ def stations(
     if Niter == 1:
         X0, Y0 = iX, iY
         DS = eval_dataset(ds, X0, Y0, order_iface, "station")
+        DS = DS.squeeze()
 
     else:
         # split indexes along each face
