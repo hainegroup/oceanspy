@@ -1153,7 +1153,7 @@ def stations(
         ds = ds.sel(**args, method="nearest")
 
     # create list of coordinates.
-    co_list = [var for var in ds.coords]
+    co_list = [var for var in ds.coords if var not in ["face"]]
 
     if not ds.xoak.index:
         if xoak_index not in _xoak.IndexRegistry():
@@ -1178,31 +1178,40 @@ def stations(
     order_iface = [_dat[i] for i in ll] + [_dat[-1]]
     Niter = len(order_iface)
 
-    # split indexes along each face
-    X0, Y0 = [], []
-    for ii in range(len(ll) + 1):
-        if ii == 0:
-            x0, y0 = iX[: ll[ii] + 1], iY[: ll[ii] + 1]
-        elif ii > 0 and ii < len(ll):
-            x0, y0 = iX[ll[ii - 1] + 1 : ll[ii] + 1], iY[ll[ii - 1] + 1 : ll[ii] + 1]
-        elif ii == len(ll):
-            x0, y0 = iX[ll[ii - 1] + 1 :], iY[ll[ii - 1] + 1 :]
-        X0.append(x0)
-        Y0.append(y0)
+    if Niter == 1:
+        X0, Y0 = iX, iY
+        DS = eval_dataset(ds, X0, Y0, order_iface, "station")
 
-    DS = []
-    for i in range(Niter):
-        DS.append(eval_dataset(ds, X0[i], Y0[i], order_iface[i], "station"))
+    else:
+        # split indexes along each face
+        X0, Y0 = [], []
+        for ii in range(len(ll) + 1):
+            if ii == 0:
+                x0, y0 = iX[: ll[ii] + 1], iY[: ll[ii] + 1]
+            elif ii > 0 and ii < len(ll):
+                x0, y0 = (
+                    iX[ll[ii - 1] + 1 : ll[ii] + 1],
+                    iY[ll[ii - 1] + 1 : ll[ii] + 1],
+                )
+            elif ii == len(ll):
+                x0, y0 = iX[ll[ii - 1] + 1 :], iY[ll[ii - 1] + 1 :]
+            X0.append(x0)
+            Y0.append(y0)
 
-    _dim = "station"
-    nDS = [DS[0].reset_coords()]
-    for i in range(1, len(DS)):
-        Nend = nDS[i - 1][_dim].values[-1]
-        nDS.append(reset_dim(DS[i], Nend + 1, dim=_dim).reset_coords())
+        DS = []
+        for i in range(Niter):
+            DS.append(eval_dataset(ds, X0[i], Y0[i], order_iface[i], "station"))
 
-    DS = nDS[0]
-    for i in range(1, len(nDS)):
-        DS = DS.combine_first(nDS[i])
+        _dim = "station"
+        nDS = [DS[0].reset_coords()]
+        for i in range(1, len(DS)):
+            Nend = nDS[i - 1][_dim].values[-1]
+            nDS.append(reset_dim(DS[i], Nend + 1, dim=_dim).reset_coords())
+
+        DS = nDS[0]
+        for i in range(1, len(nDS)):
+            DS = DS.combine_first(nDS[i])
+
     DS = DS.set_coords(co_list)
 
     if "face" in DS.variables:
