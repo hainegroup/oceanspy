@@ -1460,7 +1460,7 @@ def eval_dataset(_ds, _ix, _iy, _iface=None, _dim_name="mooring"):
         dims=(_dim_name, "xp1"),
     )
 
-    if _iface is not None and _iface not in _np.arange(6):
+    if _iface is not None and _iface in _np.arange(7, 13):
         iXp1 = DataArray(
             _np.stack((_ix + 1, _ix), 1),
             coords={_dim_name: new_dim, "xp1": xp1},
@@ -1483,7 +1483,7 @@ def eval_dataset(_ds, _ix, _iy, _iface=None, _dim_name="mooring"):
 
     new_ds = _ds.isel(**args).drop_vars(["Xp1", "Yp1", "X", "Y"])
     new_ds = new_ds.rename_dims(rename).rename_vars(rename)
-    if _iface is not None and _iface not in _np.arange(6):
+    if _iface is not None and _iface in _np.arange(7, 13):
         new_ds = rotate_vars(new_ds)
 
     return new_ds
