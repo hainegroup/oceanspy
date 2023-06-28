@@ -35,7 +35,7 @@ from ._ospy_utils import (
     _rename_aliased,
 )
 from .llc_rearrange import LLCtransformation as _llc_trans
-from .llc_rearrange import rotate_vars
+from .llc_rearrange import arctic_eval, reset_dim, rotate_vars
 from .utils import _rel_lon, _reset_range, circle_path_array, get_maskH
 
 # Recommended dependencies (private)
@@ -1460,12 +1460,15 @@ def eval_dataset(_ds, _ix, _iy, _iface=None, _dim_name="mooring"):
         dims=(_dim_name, "xp1"),
     )
 
-    if _iface is not None and _iface in _np.arange(7, 13):
-        iXp1 = DataArray(
-            _np.stack((_ix + 1, _ix), 1),
-            coords={_dim_name: new_dim, "xp1": xp1},
-            dims=(_dim_name, "xp1"),
-        )
+    if _iface is not None:
+        if _iface == 6:
+            return arctic_eval(_ds, _ix, _iy, new_dim, _dim_name)
+        elif _iface in _np.arange(7, 13):
+            iXp1 = DataArray(
+                _np.stack((_ix + 1, _ix), 1),
+                coords={_dim_name: new_dim, "xp1": xp1},
+                dims=(_dim_name, "xp1"),
+            )
 
     args = {
         "X": iX,
@@ -1478,7 +1481,7 @@ def eval_dataset(_ds, _ix, _iy, _iface=None, _dim_name="mooring"):
 
     if _iface is not None:
         args = {"face": _iface, **args}
-        if _iface not in _np.arange(6):
+        if _iface in _np.arange(7, 13):
             rename = {"yp1": "Xp1", "xp1": "Yp1", "x": "Y", "y": "X"}
 
     new_ds = _ds.isel(**args).drop_vars(["Xp1", "Yp1", "X", "Y"])
@@ -1487,14 +1490,6 @@ def eval_dataset(_ds, _ix, _iy, _iface=None, _dim_name="mooring"):
         new_ds = rotate_vars(new_ds)
 
     return new_ds
-
-
-def reset_dim(_ds, N, dim="mooring"):
-    """resets the dimension mooring by shifting it by a value set by N"""
-    _ds["n" + dim] = N + _ds[dim]
-    _ds = _ds.swap_dims({dim: "n" + dim}).drop_vars(dim).rename({"n" + dim: dim})
-
-    return _ds
 
 
 class _subsampleMethods(object):
