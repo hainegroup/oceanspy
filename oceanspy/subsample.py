@@ -1410,6 +1410,30 @@ def particle_properties(od, times, Ypart, Xpart, Zpart, **kwargs):
 
 
 def eval_dataset(_ds, _ix, _iy, _iface=None, _dim_name="mooring"):
+    """
+    Evaluates a dataset along (spatial) trajectory in the plane as defined by the
+    indexes in the plane. As a result, there is a new dimension/coordinate, hence
+    reducing the dimension of the original dataset.
+
+    Parameters:
+    ----------
+        _ds: xarray.Dataset
+            contains all x, y coordinates (but may be subsampled in Z or time)
+        _ix, _iy: 1D array, int
+            index values identifying the location in X Y (lat, lon) space
+        _iface: int, None (bool)
+            None (default) implies no complex topology in the dataset. Otherwise,
+            _iface indicates the face index which, along which the provided ix, iy,
+            identify the spatial (geo) coordinate location in lat/lon space.
+        _dim_name: str
+            names the new dimension along the pathway. By default this is 'mooring',
+            but can also be 'station' (when discrete, argo-like isolated coordinates).
+
+    Returns:
+        xarray.Dataset
+
+    """
+
     new_dim = DataArray(
         _np.arange(len(_ix)),
         dims=(_dim_name),
@@ -1462,7 +1486,7 @@ def eval_dataset(_ds, _ix, _iy, _iface=None, _dim_name="mooring"):
 
     if _iface is not None:
         if _iface == 6:
-            return arctic_eval(_ds, _ix, _iy, new_dim, _dim_name)
+            return arctic_eval(_ds, _ix, _iy, _dim_name)
         elif _iface in _np.arange(7, 13):
             iXp1 = DataArray(
                 _np.stack((_ix + 1, _ix), 1),

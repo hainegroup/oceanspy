@@ -1234,7 +1234,8 @@ def llc_local_to_lat_lon(ds, co_list=metrics):
 
 def arctic_eval(_ds, _ix, _iy, _dim_name="mooring"):
     """
-    eval at arctic face. _ix and _iy are vectors of index points, associated with
+    Evaluates a dataset
+    at arctic face. _ix and _iy are vectors of index points, associated with
     different locations around the face=6.
     """
     y = DataArray(
@@ -1388,7 +1389,7 @@ def arctic_eval(_ds, _ix, _iy, _dim_name="mooring"):
                 "Yp1": iYp1,
                 "face": 6,
             }
-            rename = {"yp1": "Xp1", "xp1": "Yp1", "x": "X", "y": "Y"}
+            rename = {"yp1": "Xp1", "xp1": "Yp1", "x": "Y", "y": "X"}
             new_ds = _ds.isel(**args).drop_vars(["Xp1", "Yp1", "X", "Y"])
             new_ds = new_ds.rename_dims(rename).rename_vars(rename)
             new_ds = rotate_vars(new_ds)
