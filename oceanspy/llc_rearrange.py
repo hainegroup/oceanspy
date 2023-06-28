@@ -1232,6 +1232,226 @@ def llc_local_to_lat_lon(ds, co_list=metrics):
     return _ds
 
 
+def arctic_eval(_ds, _ix, _iy, _dim_name="mooring"):
+    """
+    eval at arctic face. _ix and _iy are vectors of index points, associated with
+    different locations around the face=6.
+    """
+    y = DataArray(
+        _np.arange(1),
+        dims=("y"),
+        attrs={"long_name": "j-index of cell center", "units": "none"},
+    )
+    x = DataArray(
+        _np.arange(1),
+        dims=("x"),
+        attrs={"long_name": "i-index of cell center", "units": "none"},
+    )
+    yp1 = DataArray(
+        _np.arange(2),
+        dims=("yp1"),
+        attrs={"long_name": "j-index of cell corner", "units": "none"},
+    )
+    xp1 = DataArray(
+        _np.arange(2),
+        dims=("xp1"),
+        attrs={"long_name": "i-index of cell corner", "units": "none"},
+    )
+
+    _XC = _ds["XC"].isel(face=6)
+    XR5 = _np.min(_XC.isel(Y=0, X=0).values), _np.max(_XC.isel(Y=0, X=-1).values)
+    XR2 = _np.min(_XC.isel(X=0, Y=-1).values), _np.max(_XC.isel(X=0, Y=0).values)
+    XR7 = _np.min(_XC.isel(X=-1, Y=0).values), _np.max(_XC.isel(X=-1, Y=-1).values)
+    XR10 = _np.min(_XC.isel(X=-1, Y=-1).values), _np.max(_XC.isel(X=0, Y=-1).values)
+    DS = []
+    co_list = [var for var in _ds.coords]
+
+    for i in range(len(_ix)):
+        _ix0, _iy0 = _np.array([_ix[i]]), _np.array([_iy[i]])
+        p = _XC.isel(X=_ix[i], Y=_iy[i]).values
+        if p > XR2[0] and p < XR2[-1]:
+            new_dim = DataArray(
+                _np.arange(len(_ix0)),
+                dims=(_dim_name),
+                attrs={"long_name": "index of " + _dim_name, "units": "none"},
+            )
+
+            # Transform indexes in DataArray
+            iY = DataArray(
+                _np.reshape(_iy0, (len(new_dim), len(y))),
+                coords={_dim_name: new_dim, "y": y},
+                dims=(_dim_name, "y"),
+            )
+            iX = DataArray(
+                _np.reshape(_ix0, (len(new_dim), len(x))),
+                coords={_dim_name: new_dim, "x": x},
+                dims=(_dim_name, "x"),
+            )
+
+            iYp1 = DataArray(
+                _np.stack((_iy0, _iy0 + 1)[::-1], 1),
+                coords={_dim_name: new_dim, "yp1": yp1},
+                dims=(_dim_name, "yp1"),
+            )
+            iXp1 = DataArray(
+                _np.stack((_ix0, _ix0 + 1), 1),
+                coords={_dim_name: new_dim, "xp1": xp1},
+                dims=(_dim_name, "xp1"),
+            )
+            args = {
+                "X": iX,
+                "Y": iY,
+                "Xp1": iXp1,
+                "Yp1": iYp1,
+                "face": 6,
+            }
+            rename = {"yp1": "Xp1", "xp1": "Yp1", "x": "Y", "y": "X"}
+            new_ds = _ds.isel(**args).drop_vars(["Xp1", "Yp1", "X", "Y"])
+            new_ds = new_ds.rename_dims(rename).rename_vars(rename)
+            new_ds = rotate_vars(new_ds)
+
+        elif p > XR5[0] and p < XR5[-1]:
+            new_dim = DataArray(
+                _np.arange(len(_ix0)),
+                dims=(_dim_name),
+                attrs={"long_name": "index of " + _dim_name, "units": "none"},
+            )
+
+            # Transform indexes in DataArray
+            iY = DataArray(
+                _np.reshape(_iy0, (len(new_dim), len(y))),
+                coords={_dim_name: new_dim, "y": y},
+                dims=(_dim_name, "y"),
+            )
+            iX = DataArray(
+                _np.reshape(_ix0, (len(new_dim), len(x))),
+                coords={_dim_name: new_dim, "x": x},
+                dims=(_dim_name, "x"),
+            )
+
+            iYp1 = DataArray(
+                _np.stack((_iy0, _iy0 + 1), 1),
+                coords={_dim_name: new_dim, "yp1": yp1},
+                dims=(_dim_name, "yp1"),
+            )
+            iXp1 = DataArray(
+                _np.stack((_ix0, _ix0 + 1), 1),
+                coords={_dim_name: new_dim, "xp1": xp1},
+                dims=(_dim_name, "xp1"),
+            )
+            args = {
+                "X": iX,
+                "Y": iY,
+                "Xp1": iXp1,
+                "Yp1": iYp1,
+                "face": 6,
+            }
+            rename = {"yp1": "Yp1", "xp1": "Xp1", "x": "X", "y": "Y"}
+
+            new_ds = _ds.isel(**args).drop_vars(["Xp1", "Yp1", "X", "Y"])
+            new_ds = new_ds.rename_dims(rename).rename_vars(rename)
+
+        elif p > XR7[0] or p < XR7[-1]:
+            new_dim = DataArray(
+                _np.arange(len(_ix0)),
+                dims=(_dim_name),
+                attrs={"long_name": "index of " + _dim_name, "units": "none"},
+            )
+
+            # Transform indexes in DataArray
+            iY = DataArray(
+                _np.reshape(_iy0, (len(new_dim), len(y))),
+                coords={_dim_name: new_dim, "y": y},
+                dims=(_dim_name, "y"),
+            )
+            iX = DataArray(
+                _np.reshape(_ix0, (len(new_dim), len(x))),
+                coords={_dim_name: new_dim, "x": x},
+                dims=(_dim_name, "x"),
+            )
+
+            iYp1 = DataArray(
+                _np.stack((_iy0, _iy0 + 1), 1),
+                coords={_dim_name: new_dim, "yp1": yp1},
+                dims=(_dim_name, "yp1"),
+            )
+
+            iXp1 = DataArray(
+                _np.stack((_ix0, _ix0 + 1)[::-1], 1),
+                coords={_dim_name: new_dim, "xp1": xp1},
+                dims=(_dim_name, "xp1"),
+            )
+            args = {
+                "X": iX,
+                "Y": iY,
+                "Xp1": iXp1,
+                "Yp1": iYp1,
+                "face": 6,
+            }
+            rename = {"yp1": "Xp1", "xp1": "Yp1", "x": "X", "y": "Y"}
+            new_ds = _ds.isel(**args).drop_vars(["Xp1", "Yp1", "X", "Y"])
+            new_ds = new_ds.rename_dims(rename).rename_vars(rename)
+            new_ds = rotate_vars(new_ds)
+
+        elif p > XR10[0] and p < XR10[-1]:
+            new_dim = DataArray(
+                _np.arange(len(_ix0)),
+                dims=(_dim_name),
+                attrs={"long_name": "index of " + _dim_name, "units": "none"},
+            )
+
+            # Transform indexes in DataArray
+            iY = DataArray(
+                _np.reshape(_iy0, (len(new_dim), len(y))),
+                coords={_dim_name: new_dim, "y": y},
+                dims=(_dim_name, "y"),
+            )
+            iX = DataArray(
+                _np.reshape(_ix0, (len(new_dim), len(x))),
+                coords={_dim_name: new_dim, "x": x},
+                dims=(_dim_name, "x"),
+            )
+
+            iYp1 = DataArray(
+                _np.stack((_iy0, _iy0 + 1)[::-1], 1),
+                coords={_dim_name: new_dim, "yp1": yp1},
+                dims=(_dim_name, "yp1"),
+            )
+
+            iXp1 = DataArray(
+                _np.stack((_ix0, _ix0 + 1)[::-1], 1),
+                coords={_dim_name: new_dim, "xp1": xp1},
+                dims=(_dim_name, "xp1"),
+            )
+            args = {
+                "X": iX,
+                "Y": iY,
+                "Xp1": iXp1,
+                "Yp1": iYp1,
+                "face": 6,
+            }
+            rename = {"yp1": "Yp1", "xp1": "Xp1", "x": "X", "y": "Y"}
+
+            new_ds = _ds.isel(**args).drop_vars(["Xp1", "Yp1", "X", "Y"])
+            new_ds = new_ds.rename_dims(rename).rename_vars(rename)
+
+        DS.append(new_ds)
+        dsf = DS[0].reset_coords()
+        if len(DS) > 1:
+            for i in range(1, len(DS)):
+                nmds = reset_dim(DS[i], i, dim="station")
+                dsf = dsf.combine_first(nmds.reset_coords())
+    return dsf.set_coords(co_list)
+
+
+def reset_dim(_ds, N, dim="mooring"):
+    """resets the dimension mooring by shifting it by a value set by N"""
+    _ds["n" + dim] = N + _ds[dim]
+    _ds = _ds.swap_dims({dim: "n" + dim}).drop_vars(dim).rename({"n" + dim: dim})
+
+    return _ds
+
+
 class Dims:
     """Creates a shortcut for dimension`s names associated with an arbitrary
     variable."""
