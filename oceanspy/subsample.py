@@ -1485,7 +1485,7 @@ def eval_dataset(_ds, _ix, _iy, _iface=None, _dim_name="mooring"):
     )
 
     if _iface is not None:
-        if _iface == 6:
+        if _iface == [6]:
             return arctic_eval(_ds, _ix, _iy, _dim_name)
         elif _iface in _np.arange(7, 13):
             iXp1 = DataArray(

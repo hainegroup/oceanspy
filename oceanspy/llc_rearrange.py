@@ -892,8 +892,6 @@ def flip_v(_ds, co_list=metrics, dims=True, _len=3):
                     _ds[_varName] = -_ds[_varName]
                 elif _varName == "SN":
                     _ds[_varName] = -_ds[_varName]
-                # elif _varName == "CS":
-                #     _ds[_varName] = -_ds[_varName]
     return _ds
 
 
@@ -1238,6 +1236,9 @@ def arctic_eval(_ds, _ix, _iy, _dim_name="mooring"):
     at arctic face. _ix and _iy are vectors of index points, associated with
     different locations around the face=6.
     """
+
+    _ds = mates(_ds)
+
     y = DataArray(
         _np.arange(1),
         dims=("y"),
@@ -1310,6 +1311,14 @@ def arctic_eval(_ds, _ix, _iy, _dim_name="mooring"):
             new_ds = _ds.isel(**args).drop_vars(["Xp1", "Yp1", "X", "Y"])
             new_ds = new_ds.rename_dims(rename).rename_vars(rename)
             new_ds = rotate_vars(new_ds)
+
+            for _varName in new_ds.variables:
+                if "mate" in new_ds[_varName].attrs:
+                    _dims = new_ds[_varName].dims
+                    if _varName not in co_list and "Xp1" in _dims:
+                        new_ds[_varName] = -new_ds[_varName]
+                if _varName == "SN":
+                    new_ds[_varName] = -new_ds[_varName]
 
         elif p > XR5[0] and p < XR5[-1]:
             new_dim = DataArray(
@@ -1394,6 +1403,14 @@ def arctic_eval(_ds, _ix, _iy, _dim_name="mooring"):
             new_ds = new_ds.rename_dims(rename).rename_vars(rename)
             new_ds = rotate_vars(new_ds)
 
+            for _varName in new_ds.variables:
+                if "mate" in new_ds[_varName].attrs:
+                    _dims = new_ds[_varName].dims
+                    if _varName not in co_list and "Yp1" in _dims:
+                        new_ds[_varName] = -new_ds[_varName]
+                if _varName == "CS":
+                    new_ds[_varName] = -new_ds[_varName]
+
         elif p > XR10[0] and p < XR10[-1]:
             new_dim = DataArray(
                 _np.arange(len(_ix0)),
@@ -1435,6 +1452,16 @@ def arctic_eval(_ds, _ix, _iy, _dim_name="mooring"):
 
             new_ds = _ds.isel(**args).drop_vars(["Xp1", "Yp1", "X", "Y"])
             new_ds = new_ds.rename_dims(rename).rename_vars(rename)
+
+            for _varName in new_ds.variables:
+                if "mate" in new_ds[_varName].attrs:
+                    _dims = new_ds[_varName].dims
+                    if _varName not in co_list and ("Yp1" in _dims or "Xp1" in _dims):
+                        new_ds[_varName] = -new_ds[_varName]
+                if _varName == "SN":
+                    new_ds[_varName] = -new_ds[_varName]
+                if _varName == "CS":
+                    new_ds[_varName] = -new_ds[_varName]
 
         DS.append(new_ds)
         dsf = DS[0].reset_coords()
