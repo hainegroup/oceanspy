@@ -1155,79 +1155,93 @@ def stations(
     # create list of coordinates.
     co_list = [var for var in ds.coords if var not in ["face"]]
 
-    if not ds.xoak.index:
-        if xoak_index not in _xoak.IndexRegistry():
-            raise ValueError(
-                "`xoak_index` [{}] is not supported."
-                "\nAvailable options: {}"
-                "".format(xoak_index, _xoak.IndexRegistry())
-            )
+    if Xcoords is None and Ycoords is None:
+        DS = ds
 
-        ds.xoak.set_index(["XC", "YC"], xoak_index)
-
-    cdata = {"XC": ("station", Xcoords), "YC": ("station", Ycoords)}
-    ds_data = _xr.Dataset(cdata)
-
-    # find nearest points to given data.
-    nds = ds.xoak.sel(XC=ds_data["XC"], YC=ds_data["YC"])
-
-    iX, iY, iface = (nds[f"{i}"].data for i in ("X", "Y", "face"))
-
-    _dat = nds.face.values
-    ll = _np.where(abs(_np.diff(_dat)))[0]
-    order_iface = [_dat[i] for i in ll] + [_dat[-1]]
-    Niter = len(order_iface)
-
-    if Niter == 1:
-        X0, Y0 = iX, iY
-        DS = eval_dataset(ds, X0, Y0, order_iface, "station")
-        DS = DS.squeeze()
-
-    else:
-        # split indexes along each face
-        X0, Y0 = [], []
-        for ii in range(len(ll) + 1):
-            if ii == 0:
-                x0, y0 = iX[: ll[ii] + 1], iY[: ll[ii] + 1]
-            elif ii > 0 and ii < len(ll):
-                x0, y0 = (
-                    iX[ll[ii - 1] + 1 : ll[ii] + 1],
-                    iY[ll[ii - 1] + 1 : ll[ii] + 1],
+    if Xcoords is not None and Ycoords is not None:
+        if not ds.xoak.index:
+            if xoak_index not in _xoak.IndexRegistry():
+                raise ValueError(
+                    "`xoak_index` [{}] is not supported."
+                    "\nAvailable options: {}"
+                    "".format(xoak_index, _xoak.IndexRegistry())
                 )
-            elif ii == len(ll):
-                x0, y0 = iX[ll[ii - 1] + 1 :], iY[ll[ii - 1] + 1 :]
-            X0.append(x0)
-            Y0.append(y0)
 
-        DS = []
-        for i in range(Niter):
-            DS.append(eval_dataset(ds, X0[i], Y0[i], order_iface[i], "station"))
+            ds.xoak.set_index(["XC", "YC"], xoak_index)
 
-        _dim = "station"
-        nDS = [DS[0].reset_coords()]
-        for i in range(1, len(DS)):
-            Nend = nDS[i - 1][_dim].values[-1]
-            nDS.append(reset_dim(DS[i], Nend + 1, dim=_dim).reset_coords())
+        cdata = {"XC": ("station", Xcoords), "YC": ("station", Ycoords)}
+        ds_data = _xr.Dataset(cdata)
 
-        DS = nDS[0]
-        for i in range(1, len(nDS)):
-            DS = DS.combine_first(nDS[i])
+        # find nearest points to given data.
+        nds = ds.xoak.sel(XC=ds_data["XC"], YC=ds_data["YC"])
+
+        if "face" not in ds.dims:
+            iX, iY = (nds[f"{i}"].data for i in ("X", "Y"))
+            DS = eval_dataset(ds, iX, iY, _dim_name="station")
+            DS = DS.squeeze()
+
+        if "face" in ds.dims:
+            iX, iY, iface = (nds[f"{i}"].data for i in ("X", "Y", "face"))
+
+            _dat = nds.face.values
+            ll = _np.where(abs(_np.diff(_dat)))[0]
+            order_iface = [_dat[i] for i in ll] + [_dat[-1]]
+            Niter = len(order_iface)
+
+            if Niter == 1:
+                X0, Y0 = iX, iY
+                DS = eval_dataset(ds, X0, Y0, order_iface, "station")
+                DS = DS.squeeze()
+
+            else:
+                # split indexes along each face
+                X0, Y0 = [], []
+                for ii in range(len(ll) + 1):
+                    if ii == 0:
+                        x0, y0 = iX[: ll[ii] + 1], iY[: ll[ii] + 1]
+                    elif ii > 0 and ii < len(ll):
+                        x0, y0 = (
+                            iX[ll[ii - 1] + 1 : ll[ii] + 1],
+                            iY[ll[ii - 1] + 1 : ll[ii] + 1],
+                        )
+                    elif ii == len(ll):
+                        x0, y0 = iX[ll[ii - 1] + 1 :], iY[ll[ii - 1] + 1 :]
+                    X0.append(x0)
+                    Y0.append(y0)
+
+                DS = []
+                for i in range(Niter):
+                    DS.append(eval_dataset(ds, X0[i], Y0[i], order_iface[i], "station"))
+
+                _dim = "station"
+                nDS = [DS[0].reset_coords()]
+                for i in range(1, len(DS)):
+                    Nend = nDS[i - 1][_dim].values[-1]
+                    nDS.append(reset_dim(DS[i], Nend + 1, dim=_dim).reset_coords())
+
+                DS = nDS[0]
+                for i in range(1, len(nDS)):
+                    DS = DS.combine_first(nDS[i])
 
     DS = DS.set_coords(co_list)
 
-    if "face" in DS.variables:
-        DS = DS.drop_vars(["face"])
+    if Xcoords is None and Ycoords is None:
+        od._ds = DS
 
-    od._ds = DS
+    if Xcoords is not None and Ycoords is not None:
+        if "face" in DS.variables:
+            DS = DS.drop_vars(["face"])
 
-    if od.face_connections is not None:
-        new_face_connections = {"face_connections": {None: {None, None}}}
-        od = od.set_face_connections(**new_face_connections)
+        od._ds = DS
 
-    grid_coords = od.grid_coords
-    grid_coords.pop("X", None)
-    grid_coords.pop("Y", None)
-    od = od.set_grid_coords(grid_coords, overwrite=True)
+        if od.face_connections is not None:
+            new_face_connections = {"face_connections": {None: {None, None}}}
+            od = od.set_face_connections(**new_face_connections)
+
+        grid_coords = od.grid_coords
+        grid_coords.pop("X", None)
+        grid_coords.pop("Y", None)
+        od = od.set_grid_coords(grid_coords, overwrite=True)
 
     return od
 
