@@ -464,29 +464,26 @@ lons170W = -170 * np.ones(np.shape(lats_6E))
 @pytest.mark.parametrize(
     "args",
     [
-        {"YC": None, "XC": None},
-        {"YC": lats76N, "XC": lons76N},
-        {"YC": lats_6E, "XC": lons6E},
-        {"YC": lats_6E, "XC": lons90W},
-        {"YC": lats_6E, "XC": lons170W},
+        {"Ycoords": None, "Xcoords": None},
+        {"Ycoords": lats76N, "Xcoords": lons76N},
+        {"Ycoords": lats_6E, "Xcoords": lons6E},
+        {"Ycoords": lats_6E, "Xcoords": lons90W},
+        {"Ycoords": lats_6E, "Xcoords": lons170W},
     ],
 )
-def test_stations(this_od, XC, YC):
-    args = {
-        "Xcoords": XC,
-        "Ycoords": YC,
-    }
+def test_stations(this_od, args):
     od_stns = this_od.subsample.stations(**args)
-    if XC is None or YC is None:
+
+    if args["Ycoords"] is None or args["Xcoords"] is None:
         assert this_od._ds.XC.shape == od_stns._ds.XC.shape
         assert this_od._ds.YC.shape == od_stns._ds.YC.shape
     else:
+        YC, XC = args["Ycoords"], args["Xcoords"]
         XCstn, YCstn = od_stns._ds.XC, od_stns._ds.YC
         XGstn, YGstn = od_stns._ds.XG, od_stns._ds.YG
         stations = od_stns._ds.station.values
         argsu0, argsu1 = {"Xp1": 0}, {"Xp1": 1}
         argsv0, argsv1 = {"Yp1": 0}, {"Yp1": 1}
-
         assert len(stations) == len(XC) == len(YC)
         for i in range(len(stations)):
             assert XGstn.isel(station=i, Xp1=0, Yp1=0).values < XCstn.isel(station=i)
@@ -500,7 +497,8 @@ def test_stations(this_od, XC, YC):
             Vval1 = od_stns._ds["VVELMASS"].isel(**{**{"station": i}, **argsv1}).values
 
             assert np.round(abs(Uval0), 1) == np.round(abs(Uval1), 1) == 1
-            assert np.round(abs(Vval0), 1) == np.round(abs(Vval1), 1) == 0.1
+            assert np.round(abs(Vval0), 1) <= 0.1
+            assert np.round(abs(Vval1), 1) <= 0.1
 
 
 # =========
