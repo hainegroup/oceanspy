@@ -12,7 +12,7 @@ import xarray as _xr
 from xarray import DataArray, Dataset
 from xgcm import Grid
 
-from .utils import _rel_lon, _reset_range, get_maskH
+from .utils import _rel_lon, _reset_range, get_maskH, reset_dim
 
 # metric variables defined at vector points, defined as global within this file
 metrics = [
@@ -1470,14 +1470,6 @@ def arctic_eval(_ds, _ix, _iy, _dim_name="mooring"):
                 nmds = reset_dim(DS[i], i, dim="station")
                 dsf = dsf.combine_first(nmds.reset_coords())
     return dsf.set_coords(co_list)
-
-
-def reset_dim(_ds, N, dim="mooring"):
-    """resets the dimension mooring by shifting it by a value set by N"""
-    _ds["n" + dim] = N + _ds[dim]
-    _ds = _ds.swap_dims({dim: "n" + dim}).drop_vars(dim).rename({"n" + dim: dim})
-
-    return _ds
 
 
 class Dims:

@@ -10,7 +10,6 @@ import numpy as _np
 # Required dependencies (private)
 import xarray as _xr
 
-# From oceanspy (private)
 from ._ospy_utils import _check_instance
 
 # Recommended dependencies (private)
@@ -954,3 +953,57 @@ def get_combination(lst, select):
             #             print(sub_lst)
             the_lst += sub_lst
         return the_lst
+
+
+def reset_dim(_ds, N, dim="mooring"):
+    """resets the dimension mooring by shifting it by a value set by N"""
+    _ds["n" + dim] = N + _ds[dim]
+    _ds = _ds.swap_dims({dim: "n" + dim}).drop_vars(dim).rename({"n" + dim: dim})
+
+    return _ds
+
+
+def create_list(data, datas):
+    """
+    Creates a single list of datasets, taking elements of two distinct lists, each
+    element a dataset with matching variables and dimensions. The input lists
+    satisfy:
+                        len(data) == len(datas)+1.
+    The final output has the dimension mooring monotonically increasing within each
+    element of the list.
+    """
+    new_list = []
+    n1 = 0
+    for ii in range(len(data) - 1):
+        assert (
+            data[ii].XC.isel(mooring=-1).values == datas[ii].XC.isel(mooring=0).values
+        )
+        assert (
+            data[ii + 1]["XC"].isel(mooring=0).values
+            == datas[ii].XC.isel(mooring=-1).values
+        )
+
+        assert (
+            data[ii].YC.isel(mooring=-1).values == datas[ii].YC.isel(mooring=0).values
+        )
+        assert (
+            data[ii + 1].YC.isel(mooring=0).values
+            == datas[ii].YC.isel(mooring=-1).values
+        )
+
+        if ii == 0:
+            ndat = data[ii]
+        else:
+            n1 = new_list[ii - 1].mooring.values[-1]
+            ndat = reset_dim(data[ii], n1 + 1)
+
+        new_list.append(ndat)  # long array
+        m1 = ndat.mooring.values[-1]
+        dat = reset_dim(datas[ii].isel(mooring=slice(1, -1)), m1)
+        new_list.append(dat)
+
+    n1 = dat.mooring.values[-1]
+    ndat = reset_dim(data[-1], n1 + 1)
+    new_list.append(ndat)
+
+    return new_list
