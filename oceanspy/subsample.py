@@ -35,6 +35,7 @@ from ._ospy_utils import (
     _rename_aliased,
 )
 from .llc_rearrange import LLCtransformation as _llc_trans
+from .llc_rearrange import arctic_eval, reset_dim, rotate_vars
 from .utils import _rel_lon, _reset_range, circle_path_array, get_maskH
 
 # Recommended dependencies (private)
@@ -782,64 +783,9 @@ def mooring_array(od, Ymoor, Xmoor, xoak_index="scipy_kdtree", **kwargs):
     # attempt to remove repeated (but not adjacent) coord values
     ix, iy = remove_repeated(ix, iy)
 
-    mooring = DataArray(
-        _np.arange(len(ix)),
-        dims=("mooring"),
-        attrs={"long_name": "index of mooring", "units": "none"},
-    )
-    y = DataArray(
-        _np.arange(1),
-        dims=("y"),
-        attrs={"long_name": "j-index of cell center", "units": "none"},
-    )
-    x = DataArray(
-        _np.arange(1),
-        dims=("x"),
-        attrs={"long_name": "i-index of cell corner", "units": "none"},
-    )
-    yp1 = DataArray(
-        _np.arange(2),
-        dims=("yp1"),
-        attrs={"long_name": "j-index of cell center", "units": "none"},
-    )
-    xp1 = DataArray(
-        _np.arange(2),
-        dims=("xp1"),
-        attrs={"long_name": "i-index of cell corner", "units": "none"},
-    )
+    new_ds = eval_dataset(ds, ix, iy)
 
-    # Transform indexes in DataArray
-    iY = DataArray(
-        _np.reshape(iy, (len(mooring), len(y))),
-        coords={"mooring": mooring, "y": y},
-        dims=("mooring", "y"),
-    )
-    iX = DataArray(
-        _np.reshape(ix, (len(mooring), len(x))),
-        coords={"mooring": mooring, "x": x},
-        dims=("mooring", "x"),
-    )
-    iYp1 = DataArray(
-        _np.stack((iy, iy + 1), 1),
-        coords={"mooring": mooring, "yp1": yp1},
-        dims=("mooring", "yp1"),
-    )
-    iXp1 = DataArray(
-        _np.stack((ix, ix + 1), 1),
-        coords={"mooring": mooring, "xp1": xp1},
-        dims=("mooring", "xp1"),
-    )
-
-    args = {
-        "X": iX,
-        "Y": iY,
-        "Xp1": iXp1,
-        "Yp1": iYp1,
-    }
-
-    rename = {"x": "X", "y": "Y", "yp1": "Yp1", "xp1": "Xp1"}
-    new_ds = ds.isel(**args).drop_vars(["X", "Y", "Xp1", "Yp1"])
-    new_ds = new_ds.rename_dims(rename).rename_vars(rename)
+    mooring = new_ds.mooring
 
     near_Y = new_ds["YC"].compute().data.squeeze()
     near_X = new_ds["XC"].compute().data.squeeze()
@@ -1130,6 +1076,176 @@ def survey_stations(
     return od
 
 
+def stations(
+    od,
+    varList=None,
+    tcoords=None,
+    Zcoords=None,
+    Ycoords=None,
+    Xcoords=None,
+    xoak_index="scipy_kdtree",
+    method="nearest",
+):
+    """
+    Extract stations using nearest-neighbor lookup.
+
+    Parameters
+    ----------
+    od: OceanDataset
+        od that will be subsampled.
+    tcoords: 1D array_like, NoneType
+        time-coordinates (datetime).
+    Zcoords: 1D array_like, NoneType
+        Z coordinates at center point
+    Ycoords: 1D array_like, NoneType
+        Latitude coordinates of locations at center point.
+    Xcoords: 1D array_like, NoneType
+        lon coordinates of locations at center point.
+    xoak_index: str
+        xoak index to be used. `scipy_kdtree` by default.
+
+    Returns
+    -------
+    od: OceanDataset
+        Subsampled oceandataset.
+
+    See Also
+    --------
+    oceanspy.OceanDataset.mooring
+
+    """
+    _check_native_grid(od, "stations")
+
+    # Convert variables to numpy arrays and make some check
+    tcoords = _check_range(od, tcoords, "timeRange")
+    Zcoords = _check_range(od, Zcoords, "Zcoords")
+    Ycoords = _check_range(od, Ycoords, "Ycoords")
+    Xcoords = _check_range(od, Xcoords, "Xcoords")
+
+    # Message
+    print("Extracting stations.")
+
+    # Unpack ds
+    od = _copy.copy(od)
+    ds = od._ds
+
+    if varList is not None:
+        nvarlist = [var for var in ds.data_vars if var not in varList]
+        ds = ds.drop_vars(nvarlist)
+
+    # look up nearest neighbors in Z and time dims
+    Zlist = ["Zl", "Z", "Zp1", "Zu"]
+    tlist = ["time", "time_midp"]
+    dimlist, Coords = [], []
+    if Zcoords is not None:
+        dimlist.append(Zlist)
+        Coords.append(Zcoords)
+    if tcoords is not None:
+        dimlist.append(tlist)
+        Coords.append(tcoords)
+
+    for i in range(len(dimlist)):
+        List = [k for k in dimlist[i] if k in ds.dims]
+        args = {}
+        for item in List:
+            if len(ds[item]) > 0:
+                args[item] = Coords[i]
+        ds = ds.sel(**args, method="nearest")
+
+    # create list of coordinates.
+    co_list = [var for var in ds.coords if var not in ["face"]]
+
+    if Xcoords is None and Ycoords is None:
+        DS = ds
+
+    if Xcoords is not None and Ycoords is not None:
+        if not ds.xoak.index:
+            if xoak_index not in _xoak.IndexRegistry():
+                raise ValueError(
+                    "`xoak_index` [{}] is not supported."
+                    "\nAvailable options: {}"
+                    "".format(xoak_index, _xoak.IndexRegistry())
+                )
+
+            ds.xoak.set_index(["XC", "YC"], xoak_index)
+
+        cdata = {"XC": ("station", Xcoords), "YC": ("station", Ycoords)}
+        ds_data = _xr.Dataset(cdata)
+
+        # find nearest points to given data.
+        nds = ds.xoak.sel(XC=ds_data["XC"], YC=ds_data["YC"])
+
+        if "face" not in ds.dims:
+            iX, iY = (nds[f"{i}"].data for i in ("X", "Y"))
+            DS = eval_dataset(ds, iX, iY, _dim_name="station")
+            DS = DS.squeeze()
+
+        if "face" in ds.dims:
+            iX, iY, iface = (nds[f"{i}"].data for i in ("X", "Y", "face"))
+
+            _dat = nds.face.values
+            ll = _np.where(abs(_np.diff(_dat)))[0]
+            order_iface = [_dat[i] for i in ll] + [_dat[-1]]
+            Niter = len(order_iface)
+
+            if Niter == 1:
+                X0, Y0 = iX, iY
+                DS = eval_dataset(ds, X0, Y0, order_iface, "station")
+                DS = DS.squeeze()
+
+            else:
+                # split indexes along each face
+                X0, Y0 = [], []
+                for ii in range(len(ll) + 1):
+                    if ii == 0:
+                        x0, y0 = iX[: ll[ii] + 1], iY[: ll[ii] + 1]
+                    elif ii > 0 and ii < len(ll):
+                        x0, y0 = (
+                            iX[ll[ii - 1] + 1 : ll[ii] + 1],
+                            iY[ll[ii - 1] + 1 : ll[ii] + 1],
+                        )
+                    elif ii == len(ll):
+                        x0, y0 = iX[ll[ii - 1] + 1 :], iY[ll[ii - 1] + 1 :]
+                    X0.append(x0)
+                    Y0.append(y0)
+
+                DS = []
+                for i in range(Niter):
+                    DS.append(eval_dataset(ds, X0[i], Y0[i], order_iface[i], "station"))
+
+                _dim = "station"
+                nDS = [DS[0].reset_coords()]
+                for i in range(1, len(DS)):
+                    Nend = nDS[i - 1][_dim].values[-1]
+                    nDS.append(reset_dim(DS[i], Nend + 1, dim=_dim).reset_coords())
+
+                DS = nDS[0]
+                for i in range(1, len(nDS)):
+                    DS = DS.combine_first(nDS[i])
+
+    DS = DS.set_coords(co_list)
+
+    if Xcoords is None and Ycoords is None:
+        od._ds = DS
+
+    if Xcoords is not None and Ycoords is not None:
+        if "face" in DS.variables:
+            DS = DS.drop_vars(["face"])
+
+        od._ds = DS
+
+        if od.face_connections is not None:
+            new_face_connections = {"face_connections": {None: {None, None}}}
+            od = od.set_face_connections(**new_face_connections)
+
+        grid_coords = od.grid_coords
+        grid_coords.pop("X", None)
+        grid_coords.pop("Y", None)
+        od = od.set_grid_coords(grid_coords, overwrite=True)
+
+    return od
+
+
 def particle_properties(od, times, Ypart, Xpart, Zpart, **kwargs):
     """
     Extract Eulerian properties of particles
@@ -1307,6 +1423,113 @@ def particle_properties(od, times, Ypart, Xpart, Zpart, **kwargs):
     return od
 
 
+def eval_dataset(_ds, _ix, _iy, _iface=None, _dim_name="mooring"):
+    """
+    Evaluates a dataset along (spatial) trajectory in the plane as defined by the
+    indexes in the plane. As a result, there is a new dimension/coordinate, hence
+    reducing the dimension of the original dataset.
+
+    Parameters:
+    ----------
+        _ds: xarray.Dataset
+            contains all x, y coordinates (but may be subsampled in Z or time)
+        _ix, _iy: 1D array, int
+            index values identifying the location in X Y (lat, lon) space
+        _iface: int, None (bool)
+            None (default) implies no complex topology in the dataset. Otherwise,
+            _iface indicates the face index which, along which the provided ix, iy,
+            identify the spatial (geo) coordinate location in lat/lon space.
+        _dim_name: str
+            names the new dimension along the pathway. By default this is 'mooring',
+            but can also be 'station' (when discrete, argo-like isolated coordinates).
+
+    Returns:
+        xarray.Dataset
+
+    """
+
+    new_dim = DataArray(
+        _np.arange(len(_ix)),
+        dims=(_dim_name),
+        attrs={"long_name": "index of " + _dim_name, "units": "none"},
+    )
+    y = DataArray(
+        _np.arange(1),
+        dims=("y"),
+        attrs={"long_name": "j-index of cell center", "units": "none"},
+    )
+    x = DataArray(
+        _np.arange(1),
+        dims=("x"),
+        attrs={"long_name": "i-index of cell center", "units": "none"},
+    )
+    yp1 = DataArray(
+        _np.arange(2),
+        dims=("yp1"),
+        attrs={"long_name": "j-index of cell corner", "units": "none"},
+    )
+    xp1 = DataArray(
+        _np.arange(2),
+        dims=("xp1"),
+        attrs={"long_name": "i-index of cell corner", "units": "none"},
+    )
+
+    # Transform indexes in DataArray
+    iY = DataArray(
+        _np.reshape(_iy, (len(new_dim), len(y))),
+        coords={_dim_name: new_dim, "y": y},
+        dims=(_dim_name, "y"),
+    )
+    iX = DataArray(
+        _np.reshape(_ix, (len(new_dim), len(x))),
+        coords={_dim_name: new_dim, "x": x},
+        dims=(_dim_name, "x"),
+    )
+
+    iYp1 = DataArray(
+        _np.stack((_iy, _iy + 1), 1),
+        coords={_dim_name: new_dim, "yp1": yp1},
+        dims=(_dim_name, "yp1"),
+    )
+
+    iXp1 = DataArray(
+        _np.stack((_ix, _ix + 1), 1),
+        coords={_dim_name: new_dim, "xp1": xp1},
+        dims=(_dim_name, "xp1"),
+    )
+
+    if _iface is not None:
+        if _iface == [6]:
+            return arctic_eval(_ds, _ix, _iy, _dim_name)
+        elif _iface in _np.arange(7, 13):
+            iXp1 = DataArray(
+                _np.stack((_ix + 1, _ix), 1),
+                coords={_dim_name: new_dim, "xp1": xp1},
+                dims=(_dim_name, "xp1"),
+            )
+
+    args = {
+        "X": iX,
+        "Y": iY,
+        "Xp1": iXp1,
+        "Yp1": iYp1,
+    }
+
+    rename = {"yp1": "Yp1", "xp1": "Xp1", "x": "X", "y": "Y"}
+
+    if _iface is not None:
+        args = {"face": _iface, **args}
+        if _iface in _np.arange(7, 13):
+            rename = {"yp1": "Xp1", "xp1": "Yp1", "x": "Y", "y": "X"}
+
+    new_ds = _ds.isel(**args).drop_vars(["Xp1", "Yp1", "X", "Y"])
+    new_ds = new_ds.rename_dims(rename).rename_vars(rename)
+    if _iface is not None and _iface in _np.arange(7, 13):
+        new_ds = rotate_vars(new_ds)
+
+    return new_ds
+
+
 class _subsampleMethods(object):
     """
     Enables use of functions as OceanDataset attributes.
@@ -1326,6 +1549,10 @@ class _subsampleMethods(object):
     @_functools.wraps(survey_stations)
     def survey_stations(self, **kwargs):
         return survey_stations(self._od, **kwargs)
+
+    @_functools.wraps(stations)
+    def stations(self, **kwargs):
+        return stations(self._od, **kwargs)
 
     @_functools.wraps(particle_properties)
     def particle_properties(self, **kwargs):

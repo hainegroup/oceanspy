@@ -32,6 +32,7 @@ from ._ospy_utils import (
 from .compute import _add_missing_variables
 from .compute import integral as _integral
 from .compute import weighted_mean as _weighted_mean
+from .llc_rearrange import Dims
 
 # Additional dependencies (private)
 try:
@@ -651,6 +652,20 @@ def horizontal_section(
     col_wrap = kwargs.pop("col_wrap", None)
     subplot_kws = kwargs.pop("subplot_kws", None)
     transform = kwargs.pop("transform", None)
+    xstep, ystep = kwargs.pop("xstep", None), kwargs.pop("ystep", None)
+
+    DIMS = [dim for dim in da.dims if dim[0] in ["X", "Y"]]
+    dims_var = Dims(DIMS[::-1])
+
+    if xstep is not None and ystep is not None:
+        xslice = slice(0, len(da[dims_var.X]), xstep)
+        yslice = slice(0, len(da[dims_var.Y]), ystep)
+    else:
+        xslice = slice(0, len(da[dims_var.X]))
+        yslice = slice(0, len(da[dims_var.Y]))
+
+    sargs = {dims_var.X: xslice, dims_var.Y: yslice}
+    da = da.isel(**sargs)
 
     # Projection
     if ax is None:
@@ -936,6 +951,18 @@ def vertical_section(
     da, hor_name = _Vsection_regrid(od, da, varName)
     ver_name = [dim for dim in od.grid_coords["Z"] if dim in da.dims][0]
     da = da.squeeze()
+
+    # slicing along section
+    step = kwargs.pop("step", None)
+    DIMS = [dim for dim in da.dims]
+    dims_var = Dims(DIMS[::-1])
+    if step is not None and dims_var.X in ["mooring", "station"]:
+        xslice = slice(0, len(da[dims_var.X]), step)
+    else:
+        xslice = slice(0, len(da[dims_var.X]))
+
+    sargs = {dims_var.X: xslice}
+    da = da.isel(**sargs)
 
     # CONTOURNAME
     if contourName is not None:
