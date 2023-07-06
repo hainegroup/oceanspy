@@ -972,8 +972,8 @@ def create_list(data, datas):
     The final output has the dimension mooring monotonically increasing within each
     element of the list.
     """
-    new_list = []
-    n1 = 0
+    dat, n1, new_list = 0, 0, []
+
     for ii in range(len(data) - 1):
         assert (
             data[ii].XC.isel(mooring=-1).values == datas[ii].XC.isel(mooring=0).values
@@ -994,7 +994,7 @@ def create_list(data, datas):
         if ii == 0:
             ndat = data[ii]
         else:
-            n1 = new_list[ii - 1].mooring.values[-1]
+            n1 = dat.mooring.values[-1]
             ndat = reset_dim(data[ii], n1 + 1)
 
         new_list.append(ndat)  # long array
