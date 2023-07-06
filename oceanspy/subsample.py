@@ -35,8 +35,8 @@ from ._ospy_utils import (
     _rename_aliased,
 )
 from .llc_rearrange import LLCtransformation as _llc_trans
-from .llc_rearrange import arctic_eval, reset_dim, rotate_vars
-from .utils import _rel_lon, _reset_range, circle_path_array, get_maskH
+from .llc_rearrange import arctic_eval, rotate_vars
+from .utils import _rel_lon, _reset_range, circle_path_array, get_maskH, reset_dim
 
 # Recommended dependencies (private)
 try:
@@ -732,8 +732,8 @@ def mooring_array(od, Ymoor, Xmoor, xoak_index="scipy_kdtree", **kwargs):
     ix, iy = (nds["i" + f"{i}"].data for i in ("X", "Y"))
 
     # Remove duplicates that are next to each other.
-    mask = _np.abs(_np.diff(ix)) + _np.abs(_np.diff(iy)) == 0
-    ix, iy = (_np.delete(ii, _np.argwhere(mask)) for ii in (ix, iy))
+    mask = _np.argwhere(_np.abs(_np.diff(ix)) + _np.abs(_np.diff(iy)) == 0)
+    ix, iy = (_np.delete(ii, mask) for ii in (ix, iy))
 
     # Initialize variables
     dx, dy, inds = diff_and_inds_where_insert(ix, iy)
@@ -1180,7 +1180,7 @@ def stations(
             DS = eval_dataset(ds, iX, iY, _dim_name="station")
             DS = DS.squeeze()
 
-        if "face" in ds.dims:
+        else:
             iX, iY, iface = (nds[f"{i}"].data for i in ("X", "Y", "face"))
 
             _dat = nds.face.values
