@@ -690,72 +690,88 @@ def mooring_array(od, Ymoor, Xmoor, xoak_index="scipy_kdtree", **kwargs):
     Ymoor = _check_range(od, Ymoor, "Ymoor")
     Xmoor = _check_range(od, Xmoor, "Xmoor")
 
-    # Cutout
-    if "YRange" not in kwargs:
-        kwargs["YRange"] = Ymoor
-    if "XRange" not in kwargs:
-        kwargs["XRange"] = Xmoor
-    if "add_Hbdr" not in kwargs:
-        kwargs["add_Hbdr"] = True
-    od = od.subsample.cutout(**kwargs)
+    serial = kwargs.pop("serial", None)
 
-    # Add indexes needed for transports
-    Yind, Xind = _xr.broadcast(od._ds["Y"], od._ds["X"])
-    od._ds["Xind"] = Xind.transpose(*od._ds["XC"].dims)
-    od._ds["Yind"] = Yind.transpose(*od._ds["YC"].dims)
-    od._ds = od._ds.set_coords(["Xind", "Yind"])
+    if serial:
+        varList = kwargs.pop("varList", None)
+        args = {
+            "varList": varList,
+            "Xcoords": Xmoor,
+            "Ycoords": Ymoor,
+            "_dim": "mooring",
+        }
+        new_ds = od.subsample.stations(**args)
 
-    # Message
-    print("Extracting mooring array.")
+        # TODO: need to add Xind, Yind
+        # needed for transports (via cutout)
 
-    # Unpack ds
-    ds = od._ds
-    # create list of coordinates.
-    coords = [var for var in ds if "time" not in ds[var].dims]
+    else:
+        # Cutout
+        if "YRange" not in kwargs:
+            kwargs["YRange"] = Ymoor
+        if "XRange" not in kwargs:
+            kwargs["XRange"] = Xmoor
+        if "add_Hbdr" not in kwargs:
+            kwargs["add_Hbdr"] = True
+        od = od.subsample.cutout(**kwargs)
 
-    ds_grid = ds[["XC", "YC"]]  # by convention center point
+        # Add indexes needed for transports
+        Yind, Xind = _xr.broadcast(od._ds["Y"], od._ds["X"])
+        od._ds["Xind"] = Xind.transpose(*od._ds["XC"].dims)
+        od._ds["Yind"] = Yind.transpose(*od._ds["YC"].dims)
+        od._ds = od._ds.set_coords(["Xind", "Yind"])
 
-    for key, value in ds_grid.sizes.items():
-        ds_grid["i" + f"{key}"] = DataArray(range(value), dims=key)
+        # Message
+        print("Extracting mooring array.")
 
-    if not ds_grid.xoak.index:
-        if xoak_index not in _xoak.IndexRegistry():
-            raise ValueError(
-                "`xoak_index` [{}] is not supported."
-                "\nAvailable options: {}"
-                "".format(xoak_index, _xoak.IndexRegistry())
-            )
+        # Unpack ds
+        ds = od._ds
+        # create list of coordinates.
+        coords = [var for var in ds if "time" not in ds[var].dims]
 
-        ds_grid.xoak.set_index(["XC", "YC"], xoak_index)
+        ds_grid = ds[["XC", "YC"]]  # by convention center point
 
-    cdata = {"XC": ("mooring", Xmoor), "YC": ("mooring", Ymoor)}
-    ds_data = _xr.Dataset(cdata)  # mooring data
+        for key, value in ds_grid.sizes.items():
+            ds_grid["i" + f"{key}"] = DataArray(range(value), dims=key)
 
-    # find nearest points to given data.
-    nds = ds_grid.xoak.sel(XC=ds_data["XC"], YC=ds_data["YC"])
+        if not ds_grid.xoak.index:
+            if xoak_index not in _xoak.IndexRegistry():
+                raise ValueError(
+                    "`xoak_index` [{}] is not supported."
+                    "\nAvailable options: {}"
+                    "".format(xoak_index, _xoak.IndexRegistry())
+                )
 
-    ix, iy = (nds["i" + f"{i}"].data for i in ("X", "Y"))
+            ds_grid.xoak.set_index(["XC", "YC"], xoak_index)
 
-    # Remove duplicates that are next to each other.
-    mask = _np.argwhere(_np.abs(_np.diff(ix)) + _np.abs(_np.diff(iy)) == 0)
-    ix, iy = (_np.delete(ii, mask) for ii in (ix, iy))
+        cdata = {"XC": ("mooring", Xmoor), "YC": ("mooring", Ymoor)}
+        ds_data = _xr.Dataset(cdata)  # mooring data
 
-    # Initialize variables
-    dx, dy, inds = diff_and_inds_where_insert(ix, iy)
-    while inds.size:
-        dx, dy = (di[inds] for di in (dx, dy))
-        mask = _np.abs(dx * dy) == 1
-        ix = _np.insert(ix, inds + 1, ix[inds] + (dx / 2).astype(int))
-        iy = _np.insert(
-            iy, inds + 1, iy[inds] + _np.where(mask, dy, (dy / 2).astype(int))
-        )
-        # Prepare for next iteration
+        # find nearest points to given data.
+        nds = ds_grid.xoak.sel(XC=ds_data["XC"], YC=ds_data["YC"])
+
+        ix, iy = (nds["i" + f"{i}"].data for i in ("X", "Y"))
+
+        # Remove duplicates that are next to each other.
+        mask = _np.argwhere(_np.abs(_np.diff(ix)) + _np.abs(_np.diff(iy)) == 0)
+        ix, iy = (_np.delete(ii, mask) for ii in (ix, iy))
+
+        # Initialize variables
         dx, dy, inds = diff_and_inds_where_insert(ix, iy)
+        while inds.size:
+            dx, dy = (di[inds] for di in (dx, dy))
+            mask = _np.abs(dx * dy) == 1
+            ix = _np.insert(ix, inds + 1, ix[inds] + (dx / 2).astype(int))
+            iy = _np.insert(
+                iy, inds + 1, iy[inds] + _np.where(mask, dy, (dy / 2).astype(int))
+            )
+            # Prepare for next iteration
+            dx, dy, inds = diff_and_inds_where_insert(ix, iy)
 
-    # attempt to remove repeated (but not adjacent) coord values
-    ix, iy = remove_repeated(ix, iy)
+        # attempt to remove repeated (but not adjacent) coord values
+        ix, iy = remove_repeated(ix, iy)
 
-    new_ds = eval_dataset(ds, ix, iy)
+        new_ds = eval_dataset(ds, ix, iy)
 
     mooring = new_ds.mooring
 
