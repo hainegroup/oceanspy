@@ -1165,7 +1165,13 @@ def stations(
         DS = ds
 
     if Xcoords is not None and Ycoords is not None:
-        if not ds.xoak.index:
+        ds_grid = ds[["XC", "YC"]]
+
+        if _dim == "mooring":  # needed for transport
+            for key, value in ds_grid.sizes.items():
+                ds_grid["i" + f"{key}"] = DataArray(range(value), dims=key)
+
+        if not ds_grid.xoak.index:
             if xoak_index not in _xoak.IndexRegistry():
                 raise ValueError(
                     "`xoak_index` [{}] is not supported."
@@ -1173,13 +1179,13 @@ def stations(
                     "".format(xoak_index, _xoak.IndexRegistry())
                 )
 
-            ds.xoak.set_index(["XC", "YC"], xoak_index)
+            ds_grid.xoak.set_index(["XC", "YC"], xoak_index)
 
         cdata = {"XC": (_dim, Xcoords), "YC": (_dim, Ycoords)}
         ds_data = _xr.Dataset(cdata)
 
         # find nearest points to given data.
-        nds = ds.xoak.sel(XC=ds_data["XC"], YC=ds_data["YC"])
+        nds = ds_grid.xoak.sel(XC=ds_data["XC"], YC=ds_data["YC"])
 
         if "face" not in ds.dims:
             iX, iY = (nds[f"{i}"].data for i in ("X", "Y"))
@@ -1189,7 +1195,7 @@ def stations(
         else:
             iX, iY, iface = (nds[f"{i}"].data for i in ("X", "Y", "face"))
             _dat = nds.face.values
-            if _dim == "mooring":
+            if _dim == "mooring":  # need to remove points at face boundaries
                 Nx = len(ds["X"].values)
                 mask = _np.array(
                     list(_np.argwhere(iX == Nx)) + list(_np.argwhere(iY == Nx))
@@ -1204,7 +1210,6 @@ def stations(
                 X0, Y0 = iX, iY
                 DS = eval_dataset(ds, X0, Y0, order_iface, _dim)
                 DS = DS.squeeze()
-
             else:
                 # split indexes along each face
                 X0, Y0 = [], []
@@ -1221,18 +1226,21 @@ def stations(
                     X0.append(x0)
                     Y0.append(y0)
 
-                DS = []
-                for i in range(Niter):
-                    DS.append(eval_dataset(ds, X0[i], Y0[i], order_iface[i], _dim))
+                if _dim == "mooring":
+                    pass  # return DS here
+                elif _dim == "station":
+                    DS = []
+                    for i in range(Niter):
+                        DS.append(eval_dataset(ds, X0[i], Y0[i], order_iface[i], _dim))
 
-                nDS = [DS[0].reset_coords()]
-                for i in range(1, len(DS)):
-                    Nend = nDS[i - 1][_dim].values[-1]
-                    nDS.append(reset_dim(DS[i], Nend + 1, dim=_dim).reset_coords())
+                    nDS = [DS[0].reset_coords()]
+                    for i in range(1, len(DS)):
+                        Nend = nDS[i - 1][_dim].values[-1]
+                        nDS.append(reset_dim(DS[i], Nend + 1, dim=_dim).reset_coords())
 
-                DS = nDS[0]
-                for i in range(1, len(nDS)):
-                    DS = DS.combine_first(nDS[i])
+                    DS = nDS[0]
+                    for i in range(1, len(nDS)):
+                        DS = DS.combine_first(nDS[i])
 
     DS = DS.set_coords(co_list)
 
