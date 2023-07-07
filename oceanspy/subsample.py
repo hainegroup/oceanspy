@@ -1211,7 +1211,8 @@ def stations(
                 mask = _np.array(
                     list(_np.argwhere(iX == Nx)) + list(_np.argwhere(iY == Nx))
                 )
-                iX, iY, _dat = (_np.delete(ii, mask) for ii in (iX, iY, _dat))
+                if len(mask):
+                    iX, iY, _dat = (_np.delete(ii, mask) for ii in (iX, iY, _dat))
 
             ll = _np.where(abs(_np.diff(_dat)))[0]
             order_iface = [_dat[i] for i in ll] + [_dat[-1]]
@@ -1220,7 +1221,6 @@ def stations(
             if Niter == 1:
                 X0, Y0 = iX, iY
                 DS = eval_dataset(ds, X0, Y0, order_iface, _dim)
-                DS = DS.squeeze()
             else:
                 # split indexes along each face
                 X0, Y0 = [], []
@@ -1287,9 +1287,8 @@ def stations(
                             y1 = DATA[ii].YC.isel(mooring=0).values.squeeze()
                             dr = 10 * _np.max([abs(x1 - x0), abs(y1 - y0)])
                             Ym1, Xm1 = circle_path_array([y0, y1], [x0, x1], R, _res=dr)
-                            od_moor = dask.delayed(od.subsample.mooring_array)(
-                                Xmoor=Xm1, Ymoor=Ym1
-                            )
+                            nargs = {"Xmoor": Xm1, "Ymoor": Ym1, "varList": varList}
+                            od_moor = dask.delayed(od.subsample.mooring_array)(**nargs)
                             DATAs.append(
                                 od_moor.dataset.drop_dims(dims).drop_vars(_vars)
                             )
