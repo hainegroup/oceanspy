@@ -334,24 +334,26 @@ def test_cutout_faces(
 )
 def test_mooring(od, cartesian, kwargs):
     this_od = od
-    if cartesian:
-        this_od = this_od.set_parameters({"rSphere": None})
-
+    serial = False
     if "face" not in od.dataset.dims:
         Xmoor = [this_od.dataset["XC"].min().values, this_od.dataset["XC"].max().values]
         Ymoor = [this_od.dataset["YC"].min().values, this_od.dataset["YC"].max().values]
     else:
         Xmoor = [-80, 0]
         Ymoor = [35, 35]
-        if cartesian is not True:  # samples the arctic
-            kwargs["serial"] = True
+        serial = True
+    if cartesian:
+        this_od = this_od.set_parameters({"rSphere": None})
+
+    kwargs["serial"] = serial
+
     new_od = this_od.subsample.mooring_array(Xmoor=Xmoor, Ymoor=Ymoor, **kwargs)
 
     with pytest.raises(ValueError):
         new_od.subsample.mooring_array(Xmoor=Xmoor, Ymoor=Ymoor)
 
     for index in [0, -1]:
-        if "face" not in od.dataset.dims:
+        if "face" not in this_od.dataset.dims:
             assert new_od.dataset["XC"].isel(mooring=index).values == Xmoor[index]
             assert new_od.dataset["YC"].isel(mooring=index).values == Ymoor[index]
         else:
