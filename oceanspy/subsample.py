@@ -1286,7 +1286,12 @@ def stations(
                             y0 = DATA[ii - 1].YC.isel(mooring=-1).values.squeeze()
                             y1 = DATA[ii].YC.isel(mooring=0).values.squeeze()
                             dr = 10 * _np.max([abs(x1 - x0), abs(y1 - y0)])
-                            Ym1, Xm1 = circle_path_array([y0, y1], [x0, x1], R, _res=dr)
+                            if R is not None:
+                                Ym1, Xm1 = circle_path_array(
+                                    [y0, y1], [x0, x1], R, _res=dr
+                                )
+                            else:
+                                Ym1, Xm1 = [y0, y1], [x0, x1]
                             nargs = {"Xmoor": Xm1, "Ymoor": Ym1, "varList": varList}
                             od_moor = dask.delayed(od.subsample.mooring_array)(**nargs)
                             DATAs.append(
