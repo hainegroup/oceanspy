@@ -1188,8 +1188,14 @@ def stations(
 
         else:
             iX, iY, iface = (nds[f"{i}"].data for i in ("X", "Y", "face"))
-
             _dat = nds.face.values
+            if _dim == "mooring":
+                Nx = len(ds["X"].values)
+                mask = _np.array(
+                    list(_np.argwhere(iX == Nx)) + list(_np.argwhere(iY == Nx))
+                )
+                iX, iY, _dat = (_np.delete(ii, mask) for ii in (iX, iY, _dat))
+
             ll = _np.where(abs(_np.diff(_dat)))[0]
             order_iface = [_dat[i] for i in ll] + [_dat[-1]]
             Niter = len(order_iface)
