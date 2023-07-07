@@ -2837,3 +2837,38 @@ def test_edge_arc_data(od, XRange, YRange, F_indx, Nx):
     Xf = _edge_arc_data(DSa[_var_], F_indx, dims_g)
 
     assert Xf == Nx
+
+
+nU = _copy.deepcopy(od._ds["CS"].values)
+nV = -_copy.deepcopy(od._ds["SN"].values)
+Ucoords = {
+    "face": od._ds.face.values,
+    "Y": od._ds.Y.values,
+    "Xp1": od._ds.Xp1.values,
+}
+
+Vcoords = {
+    "face": od._ds.face.values,
+    "Yp1": od._ds.Yp1.values,
+    "X": od._ds.X.values,
+}
+
+_ds = od._ds
+_ds["Ucycl"] = _xr.DataArray(nU, coords=Ucoords, dims=["face", "Y", "Xp1"])
+_ds["Vcycl"] = _xr.DataArray(nV, coords=Vcoords, dims=["face", "Yp1", "X"])
+
+
+@pytest.mark.parametrize("ds", [_ds])
+@pytest.mark.parameterize(
+    "pairs", [[], ["a", "b"], ["Ucycl", "Vcycl"], ["Ucycl", "Vcycl", "a"]]
+)
+def test_mates(ds, pairs):
+    nvar = [var for var in pairs if var not in ds.variables]
+    if len(nvar) % 2 == 0:
+        with pytest.raises(ValueError):
+            mates(ds, pairs)
+    elif len(pairs) % 2 != 0:
+        ds = mates(ds, pairs)
+        _vars = [var for var in pairs if var not in nvar]
+        for n in range(len(_vars[::2])):
+            assert ds[_vars[n]].attrs["mate"] == _vars[n + 1]
