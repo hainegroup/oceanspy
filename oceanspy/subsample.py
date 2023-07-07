@@ -700,20 +700,10 @@ def mooring_array(od, Ymoor, Xmoor, xoak_index="scipy_kdtree", **kwargs):
             "Ycoords": Ymoor,
             "_dim": "mooring",
         }
+        od = _copy.deepcopy(od)
         new_ds = od.subsample.stations(**args)
         coords = [var for var in new_ds if "time" not in new_ds[var].dims]
         new_ds = new_ds.set_coords(coords)
-
-        # update dataset
-        od._ds = new_ds
-
-        # remove complex topology from grid
-        new_face_connections = {"face_connections": {None: {None, None}}}
-        od = od.set_face_connections(**new_face_connections)
-        grid_coords = od.grid_coords
-        # remove face from grid coord
-        grid_coords.pop("face", None)
-        od = od.set_grid_coords(grid_coords, overwrite=True)
 
         # TODO: need to add Xind, Yind
         # needed for transports (via cutout)
@@ -826,6 +816,16 @@ def mooring_array(od, Ymoor, Xmoor, xoak_index="scipy_kdtree", **kwargs):
 
     # Recreate od
     od._ds = new_ds
+
+    # remove complex topology from grid
+    if od.face_connections is not None:
+        new_face_connections = {"face_connections": {None: {None, None}}}
+        od = od.set_face_connections(**new_face_connections)
+        grid_coords = od.grid_coords
+        # remove face from grid coord
+        grid_coords.pop("face", None)
+        od = od.set_grid_coords(grid_coords, overwrite=True)
+
     od = od.set_grid_coords(
         {"mooring": {"mooring": -0.5}}, add_midp=True, overwrite=False
     )
@@ -1130,10 +1130,15 @@ def stations(
     Xcoords = _check_range(od, Xcoords, "Xcoords")
 
     # Message
-    print("Extracting " + _dim)
+    message = "Extracting " + _dim
+    if _dim == "mooring":
+        message = message + " array"
+    else:
+        message = message + "s"
+    print(message)
 
     # Unpack ds
-    od = _copy.copy(od)
+    od = _copy.deepcopy(od)
     R = od.parameters["rSphere"]
     ds = od._ds
 
