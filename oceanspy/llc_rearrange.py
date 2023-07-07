@@ -632,7 +632,7 @@ def arct_connect(
     return arc_faces, Nx_ac_nrot, Ny_ac_nrot, Nx_ac_rot, Ny_ac_rot, ARCT
 
 
-def mates(ds):
+def mates(ds, pair=[]):
     """Defines, when needed, the variable pair and stores the name of the pair (mate)
     variable as an attribute. This is needed to accurately rotate a vector field.
     """
@@ -670,6 +670,10 @@ def mates(ds):
         "SIuice",
         "SIvice",
     ]
+
+    if len(pair) > 0 and len(pair) % 2 == 0:
+        vars_mates += pair
+
     for k in range(int(len(vars_mates) / 2)):
         nk = 2 * k
         if vars_mates[nk] in ds.variables:
