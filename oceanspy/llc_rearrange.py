@@ -1476,7 +1476,7 @@ def arctic_eval(_ds, _ix, _iy, _dim_name="mooring"):
         dsf = DS[0].reset_coords()
         if len(DS) > 1:
             for i in range(1, len(DS)):
-                nmds = reset_dim(DS[i], i, dim="station")
+                nmds = reset_dim(DS[i], i, dim=_dim_name)
                 dsf = dsf.combine_first(nmds.reset_coords())
     return dsf.set_coords(co_list)
 
