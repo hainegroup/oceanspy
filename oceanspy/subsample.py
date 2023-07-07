@@ -1055,9 +1055,9 @@ def stations(
     Zcoords=None,
     Ycoords=None,
     Xcoords=None,
-    _dim="station",
     xoak_index="scipy_kdtree",
     method="nearest",
+    _dim="station",
 ):
     """
     Extract stations using nearest-neighbor lookup.
@@ -1076,11 +1076,11 @@ def stations(
         Latitude coordinates of locations at center point.
     Xcoords: 1D array_like, NoneType
         lon coordinates of locations at center point.
-    _dim: str, `station` (default) or `mooring`.
     xoak_index: str
         xoak index to be used. `scipy_kdtree` by default.
     method: str, `nearest` (default).
         see .sel via xarray.dataSet.sel method
+    _dim: str, `station` (default) or `mooring`.
 
     Returns
     -------
@@ -1270,7 +1270,7 @@ def stations(
                     DS = DS.drop_vars(
                         [
                             var
-                            for var in ["Xind", "Yind", "mooring_dist"]
+                            for var in ["Xind", "Yind", "mooring_dist", "face"]
                             if var in DS.data_vars
                         ]
                     )
