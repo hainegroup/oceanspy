@@ -15,6 +15,7 @@ import copy as _copy
 import functools as _functools
 import warnings as _warnings
 
+import dask
 import numpy as _np
 import pandas as _pd
 
@@ -36,7 +37,16 @@ from ._ospy_utils import (
 )
 from .llc_rearrange import LLCtransformation as _llc_trans
 from .llc_rearrange import arctic_eval, rotate_vars
-from .utils import _rel_lon, _reset_range, circle_path_array, get_maskH, reset_dim
+from .utils import (
+    _rel_lon,
+    _reset_range,
+    circle_path_array,
+    create_list,
+    diff_and_inds_where_insert,
+    get_maskH,
+    remove_repeated,
+    reset_dim,
+)
 
 # Recommended dependencies (private)
 try:
@@ -724,11 +734,6 @@ def mooring_array(od, Ymoor, Xmoor, xoak_index="scipy_kdtree", **kwargs):
     # find nearest points to given data.
     nds = ds_grid.xoak.sel(XC=ds_data["XC"], YC=ds_data["YC"])
 
-    def diff_and_inds_where_insert(ix, iy):
-        dx, dy = (_np.diff(ii) for ii in (ix, iy))
-        inds = _np.argwhere(_np.abs(dx) + _np.abs(dy) > 1).squeeze()
-        return dx, dy, inds
-
     ix, iy = (nds["i" + f"{i}"].data for i in ("X", "Y"))
 
     # Remove duplicates that are next to each other.
@@ -746,39 +751,6 @@ def mooring_array(od, Ymoor, Xmoor, xoak_index="scipy_kdtree", **kwargs):
         )
         # Prepare for next iteration
         dx, dy, inds = diff_and_inds_where_insert(ix, iy)
-
-    def remove_repeated(_iX, _iY):
-        """Attemps to remove repeated coords not adjascent to each other,
-        while retaining the trajectory property of being simply connected
-        (i.e. the distance between each index point is one). If it cannot
-        remove repeated coordinate values, returns the original array.
-        """
-        _ix, _iy = _iX, _iY
-        nn = []
-        for n in range(len(_ix)):
-            val = _np.where(abs(_ix - _ix[n]) + abs(_iy - _iy[n]) == 0)[0]
-            # select only repeated values with deg of multiplicity = 2
-            if len(val) == 2:
-                if len(nn) == 0:
-                    nn.append(list(val))
-                elif len(nn) > 0 and (val != nn).all():
-                    nn.append(list(val))
-        if _np.array(nn).size:
-            dn = [nn[i][1] - nn[i][0] for i in range(len(nn))]
-            # remove if the distance between repeated coords is 2
-            mask = _np.where(_np.array(dn) == 2)[0]
-            remove = [nn[i][1] for i in mask]
-            _ix, _iy = (_np.delete(ii, remove) for ii in (_ix, _iy))
-            # find the hole left
-            mask = _np.abs(_np.diff(_ix)) + _np.abs(_np.diff(_iy)) == 2
-            # delete hole left behind
-            _ix, _iy = (_np.delete(ii, _np.argwhere(mask)) for ii in (_ix, _iy))
-            # verify path is simply connected
-            dx, dy, inds = diff_and_inds_where_insert(_ix, _iy)
-            if inds.size:
-                _ix = _iX
-                _iY = _iY
-        return _ix, _iy
 
     # attempt to remove repeated (but not adjacent) coord values
     ix, iy = remove_repeated(ix, iy)
@@ -1133,6 +1105,7 @@ def stations(
 
     # Unpack ds
     od = _copy.copy(od)
+    R = od.parameters["rSphere"]
     ds = od._ds
 
     if varList is not None:
@@ -1168,6 +1141,9 @@ def stations(
         ds_grid = ds[["XC", "YC"]]
 
         if _dim == "mooring":  # needed for transport
+            DATA, DATAs = [], []
+            dims = "mooring_midp"
+            _vars = ["XU", "XV", "YU", "YV"]
             for key, value in ds_grid.sizes.items():
                 ds_grid["i" + f"{key}"] = DataArray(range(value), dims=key)
 
@@ -1226,9 +1202,7 @@ def stations(
                     X0.append(x0)
                     Y0.append(y0)
 
-                if _dim == "mooring":
-                    pass  # return DS here
-                elif _dim == "station":
+                if _dim == "station":
                     DS = []
                     for i in range(Niter):
                         DS.append(eval_dataset(ds, X0[i], Y0[i], order_iface[i], _dim))
@@ -1241,6 +1215,66 @@ def stations(
                     DS = nDS[0]
                     for i in range(1, len(nDS)):
                         DS = DS.combine_first(nDS[i])
+                elif _dim == "mooring":
+                    for ii in range(Niter):
+                        evals = {
+                            "face": order_iface[ii],
+                            "X": X0[ii],
+                            "Y": Y0[ii],
+                        }
+                        data = ds_grid.isel(**evals)
+                        ix, iy = (data["i" + f"{i}"].data for i in ("X", "Y"))
+                        # Remove duplicates that are next to each other.
+                        mask = _np.abs(_np.diff(ix)) + _np.abs(_np.diff(iy)) == 0
+                        ix, iy = (_np.delete(ii, _np.argwhere(mask)) for ii in (ix, iy))
+
+                        # Initialize variables
+                        dx, dy, inds = diff_and_inds_where_insert(ix, iy)
+                        while inds.size:
+                            dx, dy = (di[inds] for di in (dx, dy))
+                            mask = _np.abs(dx * dy) == 1
+                            ix = _np.insert(
+                                ix, inds + 1, ix[inds] + (dx / 2).astype(int)
+                            )
+                            iy = _np.insert(
+                                iy,
+                                inds + 1,
+                                iy[inds] + _np.where(mask, dy, (dy / 2).astype(int)),
+                            )
+                            # Prepare for next iteration
+                            dx, dy, inds = diff_and_inds_where_insert(ix, iy)
+                        ix, iy = remove_repeated(ix, iy)
+                        DATA.append(eval_dataset(ds, ix, iy, order_iface[ii]))
+                        if ii > 0:
+                            x0 = DATA[ii - 1].XC.isel(mooring=-1).values.squeeze()
+                            x1 = DATA[ii].XC.isel(mooring=0).values.squeeze()
+                            y0 = DATA[ii - 1].YC.isel(mooring=-1).values.squeeze()
+                            y1 = DATA[ii].YC.isel(mooring=0).values.squeeze()
+                            dr = 10 * _np.max([abs(x1 - x0), abs(y1 - y0)])
+                            Ym1, Xm1 = circle_path_array([y0, y1], [x0, x1], R, _res=dr)
+                            od_moor = dask.delayed(od.subsample.mooring_array)(
+                                Xmoor=Xm1, Ymoor=Ym1
+                            )
+                            DATAs.append(
+                                od_moor.dataset.drop_dims(dims).drop_vars(_vars)
+                            )
+                    futures = dask.persist(*DATAs)
+                    DATAs = dask.compute(*futures)
+                    new_Data = create_list(DATA, DATAs)
+
+                    DS = new_Data[0].reset_coords()
+                    for i in range(1, len(new_Data)):
+                        DS = DS.combine_first(new_Data[i].reset_coords())
+                    DS = DS.set_coords(co_list)
+                    DS = DS.drop_vars(
+                        [
+                            var
+                            for var in ["Xind", "Yind", "mooring_dist"]
+                            if var in DS.data_vars
+                        ]
+                    )
+
+                    return DS
 
     DS = DS.set_coords(co_list)
 

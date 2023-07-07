@@ -1007,3 +1007,41 @@ def create_list(data, datas):
     new_list.append(ndat)
 
     return new_list
+
+    def diff_and_inds_where_insert(ix, iy):
+        dx, dy = (_np.diff(ii) for ii in (ix, iy))
+        inds = _np.argwhere(_np.abs(dx) + _np.abs(dy) > 1).squeeze()
+        return dx, dy, inds
+
+    def remove_repeated(_iX, _iY):
+        """Attemps to remove repeated coords not adjascent to each other,
+        while retaining the trajectory property of being simply connected
+        (i.e. the distance between each index point is one). If it cannot
+        remove repeated coordinate values, returns the original array.
+        """
+        _ix, _iy = _iX, _iY
+        nn = []
+        for n in range(len(_ix)):
+            val = _np.where(abs(_ix - _ix[n]) + abs(_iy - _iy[n]) == 0)[0]
+            # select only repeated values with deg of multiplicity = 2
+            if len(val) == 2:
+                if len(nn) == 0:
+                    nn.append(list(val))
+                elif len(nn) > 0 and (val != nn).all():
+                    nn.append(list(val))
+        if _np.array(nn).size:
+            dn = [nn[i][1] - nn[i][0] for i in range(len(nn))]
+            # remove if the distance between repeated coords is 2
+            mask = _np.where(_np.array(dn) == 2)[0]
+            remove = [nn[i][1] for i in mask]
+            _ix, _iy = (_np.delete(ii, remove) for ii in (_ix, _iy))
+            # find the hole left
+            mask = _np.abs(_np.diff(_ix)) + _np.abs(_np.diff(_iy)) == 2
+            # delete hole left behind
+            _ix, _iy = (_np.delete(ii, _np.argwhere(mask)) for ii in (_ix, _iy))
+            # verify path is simply connected
+            dx, dy, inds = diff_and_inds_where_insert(_ix, _iy)
+            if inds.size:
+                _ix = _iX
+                _iY = _iY
+        return _ix, _iy
