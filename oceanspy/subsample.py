@@ -1310,8 +1310,8 @@ def stations(
             od = od.set_face_connections(**new_face_connections)
 
         grid_coords = od.grid_coords
-        grid_coords.pop("X", None)
-        grid_coords.pop("Y", None)
+        # grid_coords.pop("X", None)
+        # grid_coords.pop("Y", None)
         od = od.set_grid_coords(grid_coords, overwrite=True)
 
     return od
