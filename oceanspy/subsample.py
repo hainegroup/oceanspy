@@ -1196,7 +1196,7 @@ def stations(
             iX, iY, iface = (nds[f"{i}"].data for i in ("X", "Y", "face"))
             _dat = nds.face.values
             if _dim == "mooring":  # need to remove points at face boundaries
-                Nx = len(ds["X"].values)
+                Nx = len(ds["X"].values) - 1
                 mask = _np.array(
                     list(_np.argwhere(iX == Nx)) + list(_np.argwhere(iY == Nx))
                 )
