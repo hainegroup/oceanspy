@@ -2859,7 +2859,7 @@ _ds["Vcycl"] = _xr.DataArray(nV, coords=Vcoords, dims=["face", "Yp1", "X"])
 
 
 @pytest.mark.parametrize("ds", [_ds])
-@pytest.mark.parameterize(
+@pytest.mark.parametrize(
     "pairs", [[], ["a", "b"], ["Ucycl", "Vcycl"], ["Ucycl", "Vcycl", "a"]]
 )
 def test_mates(ds, pairs):
