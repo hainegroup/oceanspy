@@ -703,6 +703,13 @@ def mooring_array(od, Ymoor, Xmoor, xoak_index="scipy_kdtree", **kwargs):
         new_ds = od.subsample.stations(**args)
         coords = [var for var in new_ds if "time" not in new_ds[var].dims]
 
+        # update dataset
+        od._ds = new_ds.set_coords(coords)
+
+        # remove complex topology from grid
+        new_face_connections = {"face_connections": {None: {None, None}}}
+        od = od.set_face_connections(**new_face_connections)
+
         # TODO: need to add Xind, Yind
         # needed for transports (via cutout)
 
