@@ -36,7 +36,7 @@ from ._ospy_utils import (
     _rename_aliased,
 )
 from .llc_rearrange import LLCtransformation as _llc_trans
-from .llc_rearrange import arctic_eval, rotate_vars
+from .llc_rearrange import arctic_eval, mates, rotate_vars
 from .utils import (
     _rel_lon,
     _reset_range,
@@ -1169,6 +1169,7 @@ def stations(
             DS = DS.squeeze()
 
         else:
+            ds = mates(ds)
             iX, iY, iface = (nds[f"{i}"].data for i in ("X", "Y", "face"))
             _dat = nds.face.values
             if _dim == "mooring":  # need to remove points at face boundaries
