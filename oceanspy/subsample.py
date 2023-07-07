@@ -710,6 +710,10 @@ def mooring_array(od, Ymoor, Xmoor, xoak_index="scipy_kdtree", **kwargs):
         # remove complex topology from grid
         new_face_connections = {"face_connections": {None: {None, None}}}
         od = od.set_face_connections(**new_face_connections)
+        grid_coords = od.grid_coords
+        # remove face from grid coord
+        grid_coords.pop("face", None)
+        od = od.set_grid_coords(grid_coords, overwrite=True)
 
         # TODO: need to add Xind, Yind
         # needed for transports (via cutout)
