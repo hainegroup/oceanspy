@@ -1083,6 +1083,7 @@ def stations(
     Zcoords=None,
     Ycoords=None,
     Xcoords=None,
+    _dim="station",
     xoak_index="scipy_kdtree",
     method="nearest",
 ):
@@ -1093,6 +1094,8 @@ def stations(
     ----------
     od: OceanDataset
         od that will be subsampled.
+    varList: 1D array_lie, NoneType
+        variable names to sample.
     tcoords: 1D array_like, NoneType
         time-coordinates (datetime).
     Zcoords: 1D array_like, NoneType
@@ -1101,8 +1104,11 @@ def stations(
         Latitude coordinates of locations at center point.
     Xcoords: 1D array_like, NoneType
         lon coordinates of locations at center point.
+    _dim: str, `station` (default) or `mooring`.
     xoak_index: str
         xoak index to be used. `scipy_kdtree` by default.
+    method: str, `nearest` (default).
+        see .sel via xarray.dataSet.sel method
 
     Returns
     -------
@@ -1114,7 +1120,7 @@ def stations(
     oceanspy.OceanDataset.mooring
 
     """
-    _check_native_grid(od, "stations")
+    _check_native_grid(od, _dim)
 
     # Convert variables to numpy arrays and make some check
     tcoords = _check_range(od, tcoords, "timeRange")
@@ -1123,7 +1129,7 @@ def stations(
     Xcoords = _check_range(od, Xcoords, "Xcoords")
 
     # Message
-    print("Extracting stations.")
+    print("Extracting " + _dim)
 
     # Unpack ds
     od = _copy.copy(od)
@@ -1169,7 +1175,7 @@ def stations(
 
             ds.xoak.set_index(["XC", "YC"], xoak_index)
 
-        cdata = {"XC": ("station", Xcoords), "YC": ("station", Ycoords)}
+        cdata = {"XC": (_dim, Xcoords), "YC": (_dim, Ycoords)}
         ds_data = _xr.Dataset(cdata)
 
         # find nearest points to given data.
@@ -1177,7 +1183,7 @@ def stations(
 
         if "face" not in ds.dims:
             iX, iY = (nds[f"{i}"].data for i in ("X", "Y"))
-            DS = eval_dataset(ds, iX, iY, _dim_name="station")
+            DS = eval_dataset(ds, iX, iY, _dim_name=_dim)
             DS = DS.squeeze()
 
         else:
@@ -1190,7 +1196,7 @@ def stations(
 
             if Niter == 1:
                 X0, Y0 = iX, iY
-                DS = eval_dataset(ds, X0, Y0, order_iface, "station")
+                DS = eval_dataset(ds, X0, Y0, order_iface, _dim)
                 DS = DS.squeeze()
 
             else:
@@ -1211,9 +1217,8 @@ def stations(
 
                 DS = []
                 for i in range(Niter):
-                    DS.append(eval_dataset(ds, X0[i], Y0[i], order_iface[i], "station"))
+                    DS.append(eval_dataset(ds, X0[i], Y0[i], order_iface[i], _dim))
 
-                _dim = "station"
                 nDS = [DS[0].reset_coords()]
                 for i in range(1, len(DS)):
                     Nend = nDS[i - 1][_dim].values[-1]
