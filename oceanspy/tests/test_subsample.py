@@ -345,6 +345,9 @@ def test_mooring(od, cartesian, kwargs):
         Ymoor = [35, 35]
         if cartesian is not True:  # samples the arctic
             kwargs["serial"] = True
+        else:
+            kwargs["XRange"] = Xmoor
+            kwargs["YRange"] = Ymoor
     new_od = this_od.subsample.mooring_array(Xmoor=Xmoor, Ymoor=Ymoor, **kwargs)
 
     with pytest.raises(ValueError):
