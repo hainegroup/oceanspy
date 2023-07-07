@@ -679,6 +679,11 @@ def mates(ds, pair=[]):
         if vars_mates[nk] in ds.variables:
             ds[vars_mates[nk]].attrs["mate"] = vars_mates[nk + 1]
             ds[vars_mates[nk + 1]].attrs["mate"] = vars_mates[nk]
+        elif vars_mates[nk] in pair and vars_mates[nk] not in ds.variables:
+            raise ValueError(
+                "Variable pair `vars` [{}, {}] not present in dataset."
+                "".format(vars_mates[nk], vars_mates[nk + 1])
+            )
     return ds
 
 
