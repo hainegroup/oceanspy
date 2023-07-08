@@ -1240,11 +1240,6 @@ def llc_local_to_lat_lon(ds, co_list=metrics):
 
 
 def arctic_eval(_ds, _ix, _iy, _dim_name="mooring"):
-    """
-    Evaluates a dataset
-    at arctic face. _ix and _iy are vectors of index points, associated with
-    different locations around the face=6.
-    """
     _ds = mates(_ds)
 
     _XC = _ds["XC"].isel(face=6)
@@ -1283,13 +1278,14 @@ def arctic_eval(_ds, _ix, _iy, _dim_name="mooring"):
     p5 = _np.argwhere(_np.logical_and(p > XR5[0], p <= XR5[-1])).flatten()
     p7 = _np.argwhere(_np.logical_or(p > XR7[0], p <= XR7[-1])).flatten()
     p10 = _np.argwhere(_np.logical_and(p > XR10[0], p <= XR10[-1])).flatten()
-
     Ps = [p2, p5, p7, p10]
+
     Regs = [2, 5, 7, 10]  # these are face connections
 
     attrs = {"long_name": "index of " + _dim_name, "units": "none"}
 
     DS = []
+
     for i in range(len(Ps)):
         if len(Ps[i]) > 0 and Regs[i] == 2:  # XR2
             new_dim = DataArray(
@@ -1477,9 +1473,12 @@ def arctic_eval(_ds, _ix, _iy, _dim_name="mooring"):
                     new_ds[_varName] = -new_ds[_varName]
                 if _varName == "CS":
                     new_ds[_varName] = -new_ds[_varName]
-        DS.append(new_ds)
-    new_ds = _xr.concat(DS, dim="mooring")
-
+        if len(Ps[i]) > 0:
+            DS.append(new_ds)
+    if len(DS) > 1:
+        new_ds = _xr.concat(DS, dim="mooring")
+    elif len(DS) == 1:
+        new_ds = DS[0]
     return new_ds
 
 
