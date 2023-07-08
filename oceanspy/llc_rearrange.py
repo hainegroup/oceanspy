@@ -12,7 +12,7 @@ import xarray as _xr
 from xarray import DataArray, Dataset
 from xgcm import Grid
 
-from .utils import _rel_lon, _reset_range, get_maskH, reset_dim
+from .utils import _rel_lon, _reset_range, get_maskH
 
 # metric variables defined at vector points, defined as global within this file
 metrics = [
@@ -1239,14 +1239,20 @@ def llc_local_to_lat_lon(ds, co_list=metrics):
     return _ds
 
 
-def arctic_dataset(_ds, _ix, _iy, _dim_name="mooring"):
+def arctic_eval(_ds, _ix, _iy, _dim_name="mooring"):
     """
     Evaluates a dataset
     at arctic face. _ix and _iy are vectors of index points, associated with
     different locations around the face=6.
     """
-
     _ds = mates(_ds)
+
+    _XC = _ds["XC"].isel(face=6)
+    XR5 = _np.min(_XC.isel(Y=0, X=0).values), _np.max(_XC.isel(Y=0, X=-1).values)
+    XR2 = _np.min(_XC.isel(X=0, Y=-1).values), _np.max(_XC.isel(X=0, Y=0).values)
+    XR7 = _np.min(_XC.isel(X=-1, Y=0).values), _np.max(_XC.isel(X=-1, Y=-1).values)
+    XR10 = _np.min(_XC.isel(X=-1, Y=-1).values), _np.max(_XC.isel(X=0, Y=-1).values)
+    co_list = [var for var in _ds.coords]
 
     y = DataArray(
         _np.arange(1),
@@ -1269,43 +1275,46 @@ def arctic_dataset(_ds, _ix, _iy, _dim_name="mooring"):
         attrs={"long_name": "i-index of cell corner", "units": "none"},
     )
 
-    _XC = _ds["XC"].isel(face=6)
-    XR5 = _np.min(_XC.isel(Y=0, X=0).values), _np.max(_XC.isel(Y=0, X=-1).values)
-    XR2 = _np.min(_XC.isel(X=0, Y=-1).values), _np.max(_XC.isel(X=0, Y=0).values)
-    XR7 = _np.min(_XC.isel(X=-1, Y=0).values), _np.max(_XC.isel(X=-1, Y=-1).values)
-    XR10 = _np.min(_XC.isel(X=-1, Y=-1).values), _np.max(_XC.isel(X=0, Y=-1).values)
+    # get all lons values
+    p = [_XC.isel(X=_ix[i], Y=_iy[i]).values for i in range(len(_ix))]
+
+    # cluster points by lon ranges
+    p2 = _np.argwhere(_np.logical_and(p > XR2[0], p <= XR2[-1])).flatten()
+    p5 = _np.argwhere(_np.logical_and(p > XR5[0], p <= XR5[-1])).flatten()
+    p7 = _np.argwhere(_np.logical_or(p > XR7[0], p <= XR7[-1])).flatten()
+    p10 = _np.argwhere(_np.logical_and(p > XR10[0], p <= XR10[-1])).flatten()
+
+    Ps = [p2, p5, p7, p10]
+    Regs = [2, 5, 7, 10]  # these are face connections
+
+    attrs = {"long_name": "index of " + _dim_name, "units": "none"}
+
     DS = []
-    co_list = [var for var in _ds.coords]
-
-    for i in range(len(_ix)):
-        _ix0, _iy0 = _np.array([_ix[i]]), _np.array([_iy[i]])
-        p = _XC.isel(X=_ix[i], Y=_iy[i]).values
-        if p > XR2[0] and p < XR2[-1]:
+    for i in range(len(Ps)):
+        if len(Ps[i]) > 0 and Regs[i] == 2:  # XR2
             new_dim = DataArray(
-                _np.arange(len(_ix0)),
+                Ps[i],
                 dims=(_dim_name),
-                attrs={"long_name": "index of " + _dim_name, "units": "none"},
+                attrs=attrs,
             )
-
-            # Transform indexes in DataArray
             iY = DataArray(
-                _np.reshape(_iy0, (len(new_dim), len(y))),
+                _np.reshape(_iy[Ps[i]], (len(new_dim), len(y))),
                 coords={_dim_name: new_dim, "y": y},
                 dims=(_dim_name, "y"),
             )
             iX = DataArray(
-                _np.reshape(_ix0, (len(new_dim), len(x))),
+                _np.reshape(_ix[Ps[i]], (len(new_dim), len(x))),
                 coords={_dim_name: new_dim, "x": x},
                 dims=(_dim_name, "x"),
             )
 
             iYp1 = DataArray(
-                _np.stack((_iy0, _iy0 + 1)[::-1], 1),
+                _np.stack((_iy[Ps[i]], _iy[Ps[i]] + 1)[::-1], 1),
                 coords={_dim_name: new_dim, "yp1": yp1},
                 dims=(_dim_name, "yp1"),
             )
             iXp1 = DataArray(
-                _np.stack((_ix0, _ix0 + 1), 1),
+                _np.stack((_ix[Ps[i]], _ix[Ps[i]] + 1), 1),
                 coords={_dim_name: new_dim, "xp1": xp1},
                 dims=(_dim_name, "xp1"),
             )
@@ -1329,32 +1338,31 @@ def arctic_dataset(_ds, _ix, _iy, _dim_name="mooring"):
                 if _varName == "SN":
                     new_ds[_varName] = -new_ds[_varName]
 
-        elif p > XR5[0] and p < XR5[-1]:
+        if len(Ps[i]) > 0 and Regs[i] == 5:  # XR5
             new_dim = DataArray(
-                _np.arange(len(_ix0)),
+                Ps[i],
                 dims=(_dim_name),
-                attrs={"long_name": "index of " + _dim_name, "units": "none"},
+                attrs=attrs,
             )
 
-            # Transform indexes in DataArray
             iY = DataArray(
-                _np.reshape(_iy0, (len(new_dim), len(y))),
+                _np.reshape(_iy[Ps[i]], (len(new_dim), len(y))),
                 coords={_dim_name: new_dim, "y": y},
                 dims=(_dim_name, "y"),
             )
             iX = DataArray(
-                _np.reshape(_ix0, (len(new_dim), len(x))),
+                _np.reshape(_ix[Ps[i]], (len(new_dim), len(x))),
                 coords={_dim_name: new_dim, "x": x},
                 dims=(_dim_name, "x"),
             )
 
             iYp1 = DataArray(
-                _np.stack((_iy0, _iy0 + 1), 1),
+                _np.stack((_iy[Ps[i]], _iy[Ps[i]] + 1), 1),
                 coords={_dim_name: new_dim, "yp1": yp1},
                 dims=(_dim_name, "yp1"),
             )
             iXp1 = DataArray(
-                _np.stack((_ix0, _ix0 + 1), 1),
+                _np.stack((_ix[Ps[i]], _ix[Ps[i]] + 1), 1),
                 coords={_dim_name: new_dim, "xp1": xp1},
                 dims=(_dim_name, "xp1"),
             )
@@ -1370,33 +1378,31 @@ def arctic_dataset(_ds, _ix, _iy, _dim_name="mooring"):
             new_ds = _ds.isel(**args).drop_vars(["Xp1", "Yp1", "X", "Y"])
             new_ds = new_ds.rename_dims(rename).rename_vars(rename)
 
-        elif p > XR7[0] or p < XR7[-1]:
+        if len(Ps[i]) > 0 and Regs[i] == 7:  # XR7
             new_dim = DataArray(
-                _np.arange(len(_ix0)),
+                Ps[i],
                 dims=(_dim_name),
-                attrs={"long_name": "index of " + _dim_name, "units": "none"},
+                attrs=attrs,
             )
 
-            # Transform indexes in DataArray
             iY = DataArray(
-                _np.reshape(_iy0, (len(new_dim), len(y))),
+                _np.reshape(_iy[Ps[i]], (len(new_dim), len(y))),
                 coords={_dim_name: new_dim, "y": y},
                 dims=(_dim_name, "y"),
             )
             iX = DataArray(
-                _np.reshape(_ix0, (len(new_dim), len(x))),
+                _np.reshape(_ix[Ps[i]], (len(new_dim), len(x))),
                 coords={_dim_name: new_dim, "x": x},
                 dims=(_dim_name, "x"),
             )
 
             iYp1 = DataArray(
-                _np.stack((_iy0, _iy0 + 1), 1),
+                _np.stack((_iy[Ps[i]], _iy[Ps[i]] + 1), 1),
                 coords={_dim_name: new_dim, "yp1": yp1},
                 dims=(_dim_name, "yp1"),
             )
-
             iXp1 = DataArray(
-                _np.stack((_ix0, _ix0 + 1)[::-1], 1),
+                _np.stack((_ix[Ps[i]], _ix[Ps[i]] + 1)[::-1], 1),
                 coords={_dim_name: new_dim, "xp1": xp1},
                 dims=(_dim_name, "xp1"),
             )
@@ -1420,33 +1426,33 @@ def arctic_dataset(_ds, _ix, _iy, _dim_name="mooring"):
                 if _varName == "CS":
                     new_ds[_varName] = -new_ds[_varName]
 
-        elif p > XR10[0] and p < XR10[-1]:
+        if len(Ps[i]) > 0 and Regs[i] == 10:  # XR10
+            # elif p > XR10[0] and p < XR10[-1]:
             new_dim = DataArray(
-                _np.arange(len(_ix0)),
+                Ps[i],
                 dims=(_dim_name),
-                attrs={"long_name": "index of " + _dim_name, "units": "none"},
+                attrs=attrs,
             )
 
-            # Transform indexes in DataArray
             iY = DataArray(
-                _np.reshape(_iy0, (len(new_dim), len(y))),
+                _np.reshape(_iy[Ps[i]], (len(new_dim), len(y))),
                 coords={_dim_name: new_dim, "y": y},
                 dims=(_dim_name, "y"),
             )
             iX = DataArray(
-                _np.reshape(_ix0, (len(new_dim), len(x))),
+                _np.reshape(_ix[Ps[i]], (len(new_dim), len(x))),
                 coords={_dim_name: new_dim, "x": x},
                 dims=(_dim_name, "x"),
             )
 
             iYp1 = DataArray(
-                _np.stack((_iy0, _iy0 + 1)[::-1], 1),
+                _np.stack((_iy[Ps[i]], _iy[Ps[i]] + 1)[::-1], 1),
                 coords={_dim_name: new_dim, "yp1": yp1},
                 dims=(_dim_name, "yp1"),
             )
 
             iXp1 = DataArray(
-                _np.stack((_ix0, _ix0 + 1)[::-1], 1),
+                _np.stack((_ix[Ps[i]], _ix[Ps[i]] + 1)[::-1], 1),
                 coords={_dim_name: new_dim, "xp1": xp1},
                 dims=(_dim_name, "xp1"),
             )
@@ -1471,14 +1477,10 @@ def arctic_dataset(_ds, _ix, _iy, _dim_name="mooring"):
                     new_ds[_varName] = -new_ds[_varName]
                 if _varName == "CS":
                     new_ds[_varName] = -new_ds[_varName]
-
         DS.append(new_ds)
-        dsf = DS[0].reset_coords()
-        if len(DS) > 1:
-            for i in range(1, len(DS)):
-                nmds = reset_dim(DS[i], i, dim=_dim_name)
-                dsf = dsf.combine_first(nmds.reset_coords())
-    return dsf.set_coords(co_list)
+    new_ds = _xr.concat(DS, dim="mooring")
+
+    return new_ds
 
 
 class Dims:
