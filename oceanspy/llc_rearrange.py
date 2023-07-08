@@ -1239,7 +1239,7 @@ def llc_local_to_lat_lon(ds, co_list=metrics):
     return _ds
 
 
-def arctic_eval(_ds, _ix, _iy, _dim_name="mooring"):
+def arctic_dataset(_ds, _ix, _iy, _dim_name="mooring"):
     """
     Evaluates a dataset
     at arctic face. _ix and _iy are vectors of index points, associated with

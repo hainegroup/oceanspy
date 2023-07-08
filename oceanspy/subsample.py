@@ -36,7 +36,7 @@ from ._ospy_utils import (
     _rename_aliased,
 )
 from .llc_rearrange import LLCtransformation as _llc_trans
-from .llc_rearrange import arctic_eval, mates, rotate_vars
+from .llc_rearrange import arctic_dataset, mates, rotate_vars
 from .utils import (
     _rel_lon,
     _reset_range,
@@ -1592,7 +1592,7 @@ def eval_dataset(_ds, _ix, _iy, _iface=None, _dim_name="mooring"):
 
     if _iface is not None:
         if _iface == [6]:
-            return arctic_eval(_ds, _ix, _iy, _dim_name)
+            return arctic_dataset(_ds, _ix, _iy, _dim_name)
         elif _iface in _np.arange(7, 13):
             iXp1 = DataArray(
                 _np.stack((_ix + 1, _ix), 1),
