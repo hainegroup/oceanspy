@@ -694,6 +694,7 @@ def mooring_array(od, Ymoor, Xmoor, xoak_index="scipy_kdtree", **kwargs):
 
     if serial:
         varList = kwargs.pop("varList", None)
+
         args = {
             "varList": varList,
             "Xcoords": Xmoor,
@@ -701,6 +702,15 @@ def mooring_array(od, Ymoor, Xmoor, xoak_index="scipy_kdtree", **kwargs):
             "_dim": "mooring",
         }
         od = _copy.deepcopy(od)
+
+        # indexes needed for transport
+        Yind, Xind = _xr.broadcast(od._ds["Y"], od._ds["X"])
+        Yind = Yind.expand_dims({"face": od._ds["face"]})
+        Xind = Xind.expand_dims({"face": od._ds["face"]})
+        od._ds["Xind"] = Xind.transpose(*od._ds["XC"].dims)
+        od._ds["Yind"] = Yind.transpose(*od._ds["YC"].dims)
+        od._ds = od._ds.set_coords(["Yind", "Xind"])
+
         # when passed, od.subsample.statins returns dataset
         new_ds = od.subsample.stations(**args)
         coords = [var for var in new_ds.coords]
@@ -1219,8 +1229,36 @@ def stations(
             Niter = len(order_iface)
 
             if Niter == 1:
-                X0, Y0 = iX, iY
-                DS = eval_dataset(ds, X0, Y0, order_iface, _dim)
+                if _dim == "mooring":
+                    evals = {
+                        "face": order_iface[0],
+                        "X": iX,
+                        "Y": iY,
+                    }
+                    data = ds_grid.isel(**evals)
+                    ix, iy = (data["i" + f"{i}"].data for i in ("X", "Y"))
+                    # Remove duplicates that are next to each other.
+                    mask = _np.abs(_np.diff(ix)) + _np.abs(_np.diff(iy)) == 0
+                    ix, iy = (_np.delete(ii, _np.argwhere(mask)) for ii in (ix, iy))
+
+                    # Initialize variables
+                    dx, dy, inds = diff_and_inds_where_insert(ix, iy)
+                    while inds.size:
+                        dx, dy = (di[inds] for di in (dx, dy))
+                        mask = _np.abs(dx * dy) == 1
+                        ix = _np.insert(ix, inds + 1, ix[inds] + (dx / 2).astype(int))
+                        iy = _np.insert(
+                            iy,
+                            inds + 1,
+                            iy[inds] + _np.where(mask, dy, (dy / 2).astype(int)),
+                        )
+                        # Prepare for next iteration
+                        dx, dy, inds = diff_and_inds_where_insert(ix, iy)
+                    iX, iY = remove_repeated(ix, iy)
+                    DS = eval_dataset(ds, iX, iY, order_iface, _dim)
+                    return DS
+                elif _dim == "station":
+                    DS = eval_dataset(ds, iX, iY, order_iface, _dim)
             else:
                 # split indexes along each face
                 X0, Y0 = [], []
@@ -1306,11 +1344,7 @@ def stations(
                         DS = DS.combine_first(new_Data[i].reset_coords())
                     DS = DS.set_coords(co_list)
                     DS = DS.drop_vars(
-                        [
-                            var
-                            for var in ["Xind", "Yind", "mooring_dist", "face"]
-                            if var in DS.data_vars
-                        ]
+                        [var for var in ["mooring_dist", "face"] if var in DS.data_vars]
                     )
 
                     return DS
