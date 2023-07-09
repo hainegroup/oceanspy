@@ -701,9 +701,9 @@ def mooring_array(od, Ymoor, Xmoor, xoak_index="scipy_kdtree", **kwargs):
             "_dim": "mooring",
         }
         od = _copy.deepcopy(od)
+        # when passed, od.subsample.statins returns dataset
         new_ds = od.subsample.stations(**args)
-        coords = [var for var in new_ds if "time" not in new_ds[var].dims]
-        new_ds = new_ds.set_coords(coords)
+        coords = [var for var in new_ds.coords]
 
         # TODO: need to add Xind, Yind
         # needed for transports (via cutout)
