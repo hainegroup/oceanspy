@@ -439,13 +439,13 @@ nU = _copy.deepcopy(ECCOod._ds["CS"].values)
 nV = -_copy.deepcopy(ECCOod._ds["SN"].values)
 Ucoords = {
     "face": ECCOod._ds.face.values,
-    "Y": ECCOod._ds.Y.values,
-    "Xp1": ECCOod._ds.Xp1.values,
+    "Y": _copy.deepcopy(ECCOod._ds.Y.values),
+    "Xp1": _copy.deepcopy(ECCOod._ds.Xp1.values),
 }
 Vcoords = {
     "face": ECCOod._ds.face.values,
-    "Yp1": ECCOod._ds.Yp1.values,
-    "X": ECCOod._ds.X.values,
+    "Yp1": _copy.deepcopy(ECCOod._ds.Yp1.values),
+    "X": _copy.deepcopy(ECCOod._ds.X.values),
 }
 ECCOod._ds["UVELMASS"] = xr.DataArray(nU, coords=Ucoords, dims=["face", "Y", "Xp1"])
 ECCOod._ds["VVELMASS"] = xr.DataArray(nV, coords=Vcoords, dims=["face", "Yp1", "X"])
@@ -464,7 +464,7 @@ lons90W = -87.5 * np.ones(np.shape(lats_6E))
 lons170W = -170 * np.ones(np.shape(lats_6E))
 
 
-@pytest.mark.parametrize("this_od", [ECCOod])
+@pytest.mark.parametrize("od", [ECCOod])
 @pytest.mark.parametrize(
     "args",
     [
@@ -475,7 +475,8 @@ lons170W = -170 * np.ones(np.shape(lats_6E))
         {"Ycoords": lats_6E, "Xcoords": lons170W},
     ],
 )
-def test_stations(this_od, args):
+def test_stations(od, args):
+    this_od = _copy.deepcopy(od)
     od_stns = this_od.subsample.stations(**args)
 
     if args["Ycoords"] is None or args["Xcoords"] is None:
@@ -483,7 +484,7 @@ def test_stations(this_od, args):
         assert this_od._ds.YC.shape == od_stns._ds.YC.shape
     else:
         YC, XC = args["Ycoords"], args["Xcoords"]
-        XCstn, YCstn = od_stns._ds.XC, od_stns._ds.YC
+        XCstn, YCstn = od_stns._ds.XC.squeeze(), od_stns._ds.YC.squeeze()
         XGstn, YGstn = od_stns._ds.XG, od_stns._ds.YG
         stations = od_stns._ds.station.values
         argsu0, argsu1 = {"Xp1": 0}, {"Xp1": 1}
