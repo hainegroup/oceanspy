@@ -330,7 +330,12 @@ def test_cutout_faces(
 @pytest.mark.parametrize("od", [MITgcm_rect_nc, ECCOod])
 @pytest.mark.parametrize("cartesian", [True, False])
 @pytest.mark.parametrize(
-    "kwargs", [{}, {"YRange": None, "XRange": None, "add_Hbdr": True}]
+    "kwargs",
+    [
+        {},
+        {"YRange": None, "XRange": None, "add_Hbdr": True},
+        {"YRange": [74, 78], "XRange": None},
+    ],
 )
 def test_mooring(od, cartesian, kwargs):
     this_od = od
@@ -338,9 +343,15 @@ def test_mooring(od, cartesian, kwargs):
     if "face" not in od.dataset.dims:
         Xmoor = [this_od.dataset["XC"].min().values, this_od.dataset["XC"].max().values]
         Ymoor = [this_od.dataset["YC"].min().values, this_od.dataset["YC"].max().values]
+        kwargs.pop("XRange", None)
+        kwargs.pop("YRange", None)
     else:
-        Xmoor = [-80, 0]
-        Ymoor = [35, 35]
+        if kwargs.pop("XRange", None) is None and kwargs.pop("YRange", None) is None:
+            Xmoor = [-80, 0]
+            Ymoor = [35, 35]
+        else:
+            Xmoor = np.arange(-179.5, 179.5)
+            Ymoor = 76 * np.ones(np.shape(Xmoor))
         serial = True
     if cartesian:
         this_od = this_od.set_parameters({"rSphere": None})
