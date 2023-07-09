@@ -1476,7 +1476,7 @@ def arctic_eval(_ds, _ix, _iy, _dim_name="mooring"):
         if len(Ps[i]) > 0:
             DS.append(new_ds)
     if len(DS) > 1:
-        new_ds = _xr.concat(DS, dim="mooring")
+        new_ds = _xr.concat(DS, dim=_dim_name)
     elif len(DS) == 1:
         new_ds = DS[0]
     return new_ds
