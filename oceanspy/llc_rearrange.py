@@ -1240,9 +1240,19 @@ def llc_local_to_lat_lon(ds, co_list=metrics):
 
 
 def arctic_eval(_ds, _ix, _iy, _dim_name="mooring"):
-    _ds = mates(_ds)
+    _ds = mates(_ds.isel(face=6))
 
-    _XC = _ds.reset_coords()["XC"].isel(face=6)
+    nt = len(_ds.time)
+    nz = len(_ds.Z)
+    nzu = len(_ds.Zu)
+    nzp1 = len(_ds.Zp1)
+    nzl = len(_ds.Zl)
+
+    # rechunk in time and z
+    chunks = {"time": nt, "Z": nz, "Zu": nzu, "Zp1": nzp1, "Zl": nzl}
+    _ds = _ds.chunk(chunks)
+
+    _XC = _ds.reset_coords()["XC"]
     XR5 = _np.min(_XC.isel(Y=0, X=0).values), _np.max(_XC.isel(Y=0, X=-1).values)
     XR2 = _np.min(_XC.isel(X=0, Y=-1).values), _np.max(_XC.isel(X=0, Y=0).values)
     XR7 = _np.min(_XC.isel(X=-1, Y=0).values), _np.max(_XC.isel(X=-1, Y=-1).values)
@@ -1323,7 +1333,6 @@ def arctic_eval(_ds, _ix, _iy, _dim_name="mooring"):
                 "Y": iY,
                 "Xp1": iXp1,
                 "Yp1": iYp1,
-                "face": 6,
             }
             rename = {"yp1": "Xp1", "xp1": "Yp1", "x": "Y", "y": "X"}
             new_ds = _ds.isel(**args).drop_vars(["Xp1", "Yp1", "X", "Y"])
@@ -1371,7 +1380,6 @@ def arctic_eval(_ds, _ix, _iy, _dim_name="mooring"):
                 "Y": iY,
                 "Xp1": iXp1,
                 "Yp1": iYp1,
-                "face": 6,
             }
             rename = {"yp1": "Yp1", "xp1": "Xp1", "x": "X", "y": "Y"}
 
@@ -1411,7 +1419,6 @@ def arctic_eval(_ds, _ix, _iy, _dim_name="mooring"):
                 "Y": iY,
                 "Xp1": iXp1,
                 "Yp1": iYp1,
-                "face": 6,
             }
             rename = {"yp1": "Xp1", "xp1": "Yp1", "x": "Y", "y": "X"}
             new_ds = _ds.isel(**args).drop_vars(["Xp1", "Yp1", "X", "Y"])
@@ -1461,7 +1468,6 @@ def arctic_eval(_ds, _ix, _iy, _dim_name="mooring"):
                 "Y": iY,
                 "Xp1": iXp1,
                 "Yp1": iYp1,
-                "face": 6,
             }
             rename = {"yp1": "Yp1", "xp1": "Xp1", "x": "X", "y": "Y"}
 
