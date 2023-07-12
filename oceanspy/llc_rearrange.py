@@ -1242,14 +1242,13 @@ def llc_local_to_lat_lon(ds, co_list=metrics):
 def arctic_eval(_ds, _ix, _iy, _dim_name="mooring"):
     _ds = mates(_ds.isel(face=6))
 
-    nt = len(_ds.time)
     nz = len(_ds.Z)
     nzu = len(_ds.Zu)
     nzp1 = len(_ds.Zp1)
     nzl = len(_ds.Zl)
 
     # rechunk in time and z
-    chunks = {"time": nt, "Z": nz, "Zu": nzu, "Zp1": nzp1, "Zl": nzl}
+    chunks = {"Z": nz, "Zu": nzu, "Zp1": nzp1, "Zl": nzl}
     _ds = _ds.chunk(chunks)
 
     _XC = _ds.reset_coords()["XC"]
