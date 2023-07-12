@@ -15,7 +15,7 @@ import copy as _copy
 import functools as _functools
 import warnings as _warnings
 
-import dask
+# import dask
 import numpy as _np
 import pandas as _pd
 
@@ -1331,12 +1331,12 @@ def stations(
                             else:
                                 Ym1, Xm1 = [y0, y1], [x0, x1]
                             nargs = {"Xmoor": Xm1, "Ymoor": Ym1, "varList": varList}
-                            od_moor = dask.delayed(od.subsample.mooring_array)(**nargs)
+                            od_moor = od.subsample.mooring_array(**nargs)
                             DATAs.append(
                                 od_moor.dataset.drop_dims(dims).drop_vars(_vars)
                             )
-                    futures = dask.persist(*DATAs)
-                    DATAs = dask.compute(*futures)
+                    # futures = dask.persist(*DATAs)
+                    # DATAs = dask.compute(*futures)
                     new_Data = create_list(DATA, DATAs)
 
                     DS = new_Data[0].reset_coords()
