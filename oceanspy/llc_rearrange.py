@@ -1242,7 +1242,7 @@ def llc_local_to_lat_lon(ds, co_list=metrics):
 def arctic_eval(_ds, _ix, _iy, _dim_name="mooring"):
     _ds = mates(_ds)
 
-    _XC = _ds["XC"].isel(face=6)
+    _XC = _ds.reset_coords()["XC"].isel(face=6)
     XR5 = _np.min(_XC.isel(Y=0, X=0).values), _np.max(_XC.isel(Y=0, X=-1).values)
     XR2 = _np.min(_XC.isel(X=0, Y=-1).values), _np.max(_XC.isel(X=0, Y=0).values)
     XR7 = _np.min(_XC.isel(X=-1, Y=0).values), _np.max(_XC.isel(X=-1, Y=-1).values)
@@ -1271,13 +1271,17 @@ def arctic_eval(_ds, _ix, _iy, _dim_name="mooring"):
     )
 
     # get all lons values
-    p = [_XC.isel(X=_ix[i], Y=_iy[i]).values for i in range(len(_ix))]
+    nY = DataArray(_iy, coords={"temp_dim": _np.arange(len(_iy))}, dims=("temp_dim",))
+    nX = DataArray(_ix, coords={"temp_dim": _np.arange(len(_iy))}, dims=("temp_dim",))
+
+    p = _XC.isel(X=nX, Y=nY).compute().data
 
     # cluster points by lon ranges
     p2 = _np.argwhere(_np.logical_and(p > XR2[0], p <= XR2[-1])).flatten()
     p5 = _np.argwhere(_np.logical_and(p > XR5[0], p <= XR5[-1])).flatten()
     p7 = _np.argwhere(_np.logical_or(p > XR7[0], p <= XR7[-1])).flatten()
     p10 = _np.argwhere(_np.logical_and(p > XR10[0], p <= XR10[-1])).flatten()
+
     Ps = [p2, p5, p7, p10]
 
     Regs = [2, 5, 7, 10]  # these are face connections
