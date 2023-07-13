@@ -1572,6 +1572,15 @@ def eval_dataset(_ds, _ix, _iy, _iface=None, _dim_name="mooring"):
 
     """
 
+    nz = len(_ds.Z)
+    nzu = len(_ds.Zu)
+    nzp1 = len(_ds.Zp1)
+    nzl = len(_ds.Zl)
+
+    # rechunk in time and z
+    chunks = {"Z": nz, "Zu": nzu, "Zp1": nzp1, "Zl": nzl}
+    _ds = _ds.chunk(chunks)
+
     new_dim = DataArray(
         _np.arange(len(_ix)),
         dims=(_dim_name),
