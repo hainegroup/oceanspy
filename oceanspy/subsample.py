@@ -788,8 +788,8 @@ def mooring_array(od, Ymoor, Xmoor, xoak_index="scipy_kdtree", **kwargs):
 
     mooring = new_ds.mooring
 
-    near_Y = new_ds["YC"].compute().data.squeeze()
-    near_X = new_ds["XC"].compute().data.squeeze()
+    near_Y = new_ds["YC"].load().squeeze().data
+    near_X = new_ds["XC"].load().squeeze().data
 
     # Add distance (0 always first element)
     if R is not None:
