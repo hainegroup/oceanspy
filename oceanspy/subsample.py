@@ -1256,6 +1256,8 @@ def stations(
                         dx, dy, inds = diff_and_inds_where_insert(ix, iy)
                     iX, iY = remove_repeated(ix, iy)
                     DS = eval_dataset(ds, iX, iY, order_iface, _dim)
+                    DS = DS.chunk({_dim: len(iX)})
+
                     return DS
                 elif _dim == "station":
                     DS = eval_dataset(ds, iX, iY, order_iface, _dim)
