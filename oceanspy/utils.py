@@ -1047,3 +1047,89 @@ def remove_repeated(_iX, _iY):
             _ix = _iX
             _iY = _iY
     return _ix, _iy
+
+
+def connector(_ix, _iy):
+    mask = _np.abs(_np.diff(_ix)) + _np.abs(_np.diff(_iy)) == 0
+    _ix, _iy = (_np.delete(ii, _np.argwhere(mask)) for ii in (_ix, _iy))
+
+    # Initialize variables"
+    dx, dy, inds = diff_and_inds_where_insert(_ix, _iy)
+    while inds.size:
+        dx, dy = (di[inds] for di in (dx, dy))
+        mask = _np.abs(dx * dy) == 1
+        _ix = _np.insert(_ix, inds + 1, _ix[inds] + (dx / 2).astype(int))
+        _iy = _np.insert(
+            _iy, inds + 1, _iy[inds] + _np.where(mask, dy, (dy / 2).astype(int))
+        )
+        # Prepare for next iteration
+        dx, dy, inds = diff_and_inds_where_insert(_ix, _iy)
+    _iX, _iY = remove_repeated(_ix, _iy)
+    return _iX, _iY
+
+
+def splitter(_ix, _iy, _ifaces):
+    # where there is a change in face
+    ll = _np.where(abs(_np.diff(_ifaces)))[0]
+
+    X0, Y0 = [], []
+    for ii in range(len(ll) + 1):
+        if ii == 0:
+            x0, y0 = _ix[: ll[ii] + 1], _iy[: ll[ii] + 1]
+        elif ii > 0 and ii < len(ll):
+            x0, y0 = (
+                _ix[ll[ii - 1] + 1 : ll[ii] + 1],
+                _iy[ll[ii - 1] + 1 : ll[ii] + 1],
+            )
+        elif ii == len(ll):
+            x0, y0 = _ix[ll[ii - 1] + 1 :], _iy[ll[ii - 1] + 1 :]
+        X0.append(x0)
+        Y0.append(y0)
+    return X0, Y0
+
+
+def edge_completer(_x, _y, _N=89):
+    """verifies that an array begins and ends at the edge of a face"""
+
+    ind0 = None  # 1st element of array
+    ind1 = None  # last element of array
+
+    if _x[0] > 0 and _x[0] < _N:
+        if _y[0] > 0 and _y[0] < _N:
+            ind0 = 1
+
+    if _x[-1] > 0 and _x[-1] < _N:
+        if _y[-1] > 0 and _y[-1] < _N:
+            ind1 = 1
+
+    if ind0:  # element missing at left. add missing value
+        _x0, _y0 = _x[0], _y[0]
+        _nx, _ny = edge_find(_x0, _y0, _N)
+        _mx, _my = connector([_nx, _x0], [_ny, _y0])
+        _x, _y = _np.append(_mx, _x), _np.append(_my, _y)
+    if ind1:  # element missing at right. add missing value
+        _x0, _y0 = _x[-1], _y[-1]
+        _nx, _ny = edge_find(_x0, _y0, _N)
+        _mx, _my = connector([_x0, _nx], [_y0, _ny])
+        _x, _y = _np.append(_x, _mx), _np.append(_y, _my)
+
+    # complete at one or two edges
+    return _x, _y
+
+
+def edge_find(_x0, _y0, _N):
+    """given coords x0 and y0, figures out if it is
+    closer to left edge (0) or right rdge (N) of face
+    """
+    A = abs(_x0 - _N), abs(_y0 - _N)
+    B = _x0, _y0
+    mi = min(min(A), min(B))
+    if mi in B:  # close to left edge
+        i = B.index(mi)
+        P = list(B)
+        P[i] = 0
+    else:
+        i = A.index(mi)
+        P = [_x0, _y0]
+        P[i] = _N
+    return P
