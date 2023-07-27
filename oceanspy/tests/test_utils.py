@@ -10,6 +10,7 @@ from oceanspy.utils import (
     connector,
     edge_completer,
     edge_find,
+    edge_slider,
     great_circle_path,
     spherical2cartesian,
     splitter,
@@ -215,3 +216,15 @@ def test_splitter(X, Y, Fs):
     assert nX[1] == X[1]
     assert nY[0] == Y[0]
     assert nY[1] == Y[1]
+
+
+@pytest.mark.parametrize(
+    "X, Y, Fs, exp",
+    [
+        ([45, 46], [89, 0], [1, 2], [46, 89]),
+        ([89, 0], [45, 44], [1, 4], [89, 44]),
+    ],
+)
+def test_edge_slider(X, Y, Fs, exp):
+    newP = edge_slider(X[0], Y[0], Fs[0], X[1], Y[1], Fs[1])
+    assert newP == exp
