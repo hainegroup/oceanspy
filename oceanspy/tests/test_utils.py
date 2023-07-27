@@ -148,7 +148,7 @@ def test_reset_range(XRange, x0, expected_ref):
     [(1, 2, [0, 2]), (20, 80, [20, 89]), (85, 80, [89, 80]), (85, 1, [85, 0])],
 )
 def test_edge_find(x, y, expected):
-    point = edge_find(x, y)
+    point = edge_find(x, y, 89)
     assert point == expected
 
 
@@ -178,8 +178,8 @@ y1 = [int(k) for k in _np.linspace(20, 40, len(x1))]
 @pytest.mark.parametrize(
     "x, y", [(x1, y1), (x1[::-1], y1), (x1[::-1], y1[::-1]), (x1, y1[::-1])]
 )
-def test_connector(x, y, N):
-    xn, yn = connector(x, y, N)
+def test_connector(x, y):
+    xn, yn = connector(x, y, 89)
     diffs = abs(_np.diff(xn)) + abs(_np.diff(yn))
     assert len(xn) == len(yn)
     assert _np.max(diffs) == _np.min(diffs) == 1
@@ -199,19 +199,19 @@ y3 = [k for k in range(0, 89, 1)]
 x3 = len(y3) * [2]
 fs3 = len(y3) * [1]
 
+X1, Y1, Fs1 = [x1, x2], [y1, y2], [fs1, fs2]
 
-@pytest.mark.parametrize(
-    "X, Y, Fs", [([x1, x2], [y1, y2], [fs1, fs2]), ([x1, x3], [y1, y3], [fs1, fs3])]
-)
+X2, Y2, Fs2 = [x1, x3], [y1, y3], [fs1, fs3]
+
+
+@pytest.mark.parametrize("X, Y, Fs", [(X1, Y1, Fs1), (X2, Y2, Fs2)])
 def test_splitter(X, Y, Fs):
     xs = X[0] + X[1]
     ys = Y[0] + Y[1]
     fs = Fs[0] + Fs[1]
-
     nX, nY = splitter(xs, ys, fs)
-
     assert len(nX) == len(nY)
     assert nX[0] == X[0]
-    assert nY[1] == X[1]
+    assert nX[1] == X[1]
     assert nY[0] == Y[0]
     assert nY[1] == Y[1]
