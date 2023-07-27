@@ -1133,3 +1133,46 @@ def edge_find(_x0, _y0, _N):
         P = [_x0, _y0]
         P[i] = _N
     return P
+
+
+def edge_slider(x1, y1, f1, x2, y2, f2, _N=89):
+    """
+    Looks at the edge points betwee faces f1 (present)
+    and f2 (next).
+
+    [x1, y1, f1] represents the present face
+    [x2, y2, f2] : next face
+
+    TODO: according to phase topology figure out
+    which element connect to which
+
+    - change of topo? no change?
+    - then assert that the other axis index are equal
+    - change the present point and make sure diffs==1.
+    """
+    # step 1 assess if there is a vhange in face topo:
+    crns = []
+    for p in [[0, 0], [0, _N], [_N, 0], [_N, _N]]:
+        crns.append(p == [x1, y1])
+    if crns.count(True):
+        # TODO:  check if this is an actual problem
+        raise ValueError("`[x1, y1]` can not be on a face corner")
+
+    rotS = _np.arange(7, 13)
+    nrotS = _np.arange(6)
+
+    set0 = set([x1, y1])
+    ind0, ind1 = set([0]).issubset(set0), set([_N]).issubset(set0)
+    if ind0:
+        i = (x1, y1).index(0)
+    elif ind1:
+        i = (x1, y1).index(_N)
+
+    if set([f1, f2]).issubset(rotS) or set([f1, f2]).issubset(nrotS):
+        new_P = [x2, y2]
+        new_P[i] = [x1, y1][i]
+    else:
+        new_P = [a - b for a, b in zip(2 * [_N], [x2, y2][::-1])]
+        new_P[i] = [x1, y1][i]
+
+    return new_P
