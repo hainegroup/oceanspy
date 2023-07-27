@@ -1106,12 +1106,12 @@ def edge_completer(_x, _y, _N=89):
         _x0, _y0 = _x[0], _y[0]
         _nx, _ny = edge_find(_x0, _y0, _N)
         _mx, _my = connector([_nx, _x0], [_ny, _y0])
-        _x, _y = _np.append(_mx, _x), _np.append(_my, _y)
+        _x, _y = _np.append(_mx[:-1], _x), _np.append(_my[:-1], _y)
     if ind1:  # element missing at right. add missing value
         _x0, _y0 = _x[-1], _y[-1]
         _nx, _ny = edge_find(_x0, _y0, _N)
         _mx, _my = connector([_x0, _nx], [_y0, _ny])
-        _x, _y = _np.append(_x, _mx), _np.append(_y, _my)
+        _x, _y = _np.append(_x, _mx[1:]), _np.append(_y, _my[1:])
 
     # complete at one or two edges
     return _x, _y
