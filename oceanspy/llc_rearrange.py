@@ -1491,6 +1491,25 @@ def arctic_eval(_ds, _ix, _iy, _dim_name="mooring"):
     return new_ds
 
 
+def face_direction(face1, face2, face_connections):
+    """
+    from the topology `face_connections`, infers the direction
+    of the array `left`, `right`, `bottom`, `top`.
+    """
+    left = face_connections[face1]["X"][0][0]
+    right = face_connections[face1]["X"][1][0]
+    bot = face_connections[face1]["Y"][0][0]
+    top = face_connections[face1]["Y"][1][0]
+
+    if set([face2]).issubset([left, right, bot, top]):
+        return [left, right, bot, top].index(face2)
+    else:
+        if face1 == face2:
+            raise ValueError("faces {} and {} must be different.".format(face1, face2))
+        else:
+            raise ValueError("faces {} and {} are not contiguous.".format(face1, face2))
+
+
 class Dims:
     """Creates a shortcut for dimension`s names associated with an arbitrary
     variable."""
