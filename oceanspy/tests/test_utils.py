@@ -161,12 +161,13 @@ x3 = _np.array([k for k in range(5, 85)])
 y3 = 10 * _np.ones(_np.shape(x3))
 
 
+@pytest.mark.parametrize("left, right", [[True, True], [False, True], [False, False]])
 @pytest.mark.parametrize(
     "x, y, exp",
     [(x1, y1, [0, 89]), (x2, y2, [0, 89]), (x3, y3, [0, 89]), (x3[::-1], y3, [89, 0])],
 )
-def test_edge_completer(x, y, exp):
-    xn, yn = edge_completer(x, y, 89)
+def test_edge_completer(x, y, exp, left, right):
+    xn, yn = edge_completer(x, y, 89, left, right)
     diffs = abs(_np.diff(xn)) + abs(_np.diff(yn))
     assert [xn[0], xn[-1]] == exp
     assert _np.max(diffs) == _np.min(diffs) == 1

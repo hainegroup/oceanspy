@@ -1088,7 +1088,7 @@ def splitter(_ix, _iy, _ifaces):
     return X0, Y0
 
 
-def edge_completer(_x, _y, _N=89):
+def edge_completer(_x, _y, _N=89, left=True, right=True):
     """verifies that an array begins and ends at the edge of a face"""
 
     ind0 = None  # 1st element of array
@@ -1102,12 +1102,12 @@ def edge_completer(_x, _y, _N=89):
         if _y[-1] > 0 and _y[-1] < _N:
             ind1 = 1
 
-    if ind0:  # element missing at left. add missing value
+    if ind0 and left:  # element missing at left. add missing value
         _x0, _y0 = _x[0], _y[0]
         _nx, _ny = edge_find(_x0, _y0, _N)
         _mx, _my = connector([_nx, _x0], [_ny, _y0])
         _x, _y = _np.append(_mx[:-1], _x), _np.append(_my[:-1], _y)
-    if ind1:  # element missing at right. add missing value
+    if ind1 and right:  # element missing at right. add missing value
         _x0, _y0 = _x[-1], _y[-1]
         _nx, _ny = edge_find(_x0, _y0, _N)
         _mx, _my = connector([_x0, _nx], [_y0, _ny])
@@ -1174,3 +1174,36 @@ def edge_slider(x1, y1, f1, x2, y2, f2, _N=89):
         new_P[i] = [x1, y1][i]
 
     return new_P
+
+
+def fill_path(X, Y, face, k, _N=89):
+    """
+    Given a sequence of index arrays (each within a face)
+    makes sure that it always begins and ends at the face edge, expend
+    the end faced-data which can either end or begin at the face edge
+
+    Parameters:
+    ----------
+        X, Y: each 1d array-like of ints
+            len(X) == len(Y) >= 1
+        face: 1d array-like
+            len(face)==len(X). Identifies which face the array is sampling from
+        k: int
+            identifies the kth-array pair (X, Y) with kth-face.
+        _N: int
+            Length of x- or y- dimension. Default is 89, associated with
+
+
+
+
+    """
+    Ntot = len(face)
+    x, y = connector(X[k], Y[k])
+    if k > 0 and k < Ntot - 1:
+        x, y = edge_completer(x, y, _N)
+    if k < Ntot - 1:
+        x1, y1 = connector(X[k + 1], Y[k + 1])
+        x1, y1 = edge_completer(x1, y1, _N)
+        P = edge_slider(x[-1], y[-1], face[k], x1[0], y1[0], face[k + 1], _N)
+        x, y = connector(_np.append(x, P[0]), _np.append(y, P[1]))
+    return x, y
