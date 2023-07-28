@@ -161,17 +161,22 @@ x3 = _np.array([k for k in range(5, 85)])
 y3 = 10 * _np.ones(_np.shape(x3))
 
 
-@pytest.mark.parametrize("left, right", [[True, True], [False, True], [False, False]])
 @pytest.mark.parametrize(
-    "exp",
-    [[0, 89], [0, 89], [0, 84]],
-    [[0, 89], [5, 89], [5, 88]],
-    [[0, 89], [5, 89], [5, 84]],
-    [[89, 0], [84, 0], [84, 5]],
-)
-@pytest.mark.parametrize(
-    "x, y",
-    [(x1, y1), (x2, y2), (x3, y3), (x3[::-1], y3)],
+    "x, y, left, right, exp",
+    [
+        (x1, y1, True, True, [0, 89]),
+        (x1, y1, False, True, [0, 89]),
+        (x1, y1, False, False, [0, 84]),
+        (x2, y2, True, True, [0, 89]),
+        (x2, y2, False, True, [5, 89]),
+        (x2, y2, False, False, [5, 88]),
+        (x3, y3, True, True, [0, 89]),
+        (x3, y3, False, True, [5, 89]),
+        (x3, y3, False, False, [5, 84]),
+        (x3[::-1], y3, True, True, [89, 0]),
+        (x3[::-1], y3, False, True, [84, 0]),
+        (x3[::-1], y3, False, False, [84, 5]),
+    ],
 )
 def test_edge_completer(x, y, exp, left, right):
     xn, yn = edge_completer(x, y, 89, left, right)
