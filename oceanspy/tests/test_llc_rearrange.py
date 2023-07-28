@@ -2891,7 +2891,7 @@ def test_mates(dataset, pairs):
     ],
 )
 def test_face_direction(od, face1, face2, value):
-    conxs = od.face_connections
+    conxs = od.face_connections["face"]
     if value is None:
         with pytest.raises(ValueError):
             face_direction(face1, face2, conxs)
