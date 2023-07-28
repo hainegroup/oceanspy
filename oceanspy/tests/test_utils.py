@@ -178,7 +178,7 @@ y3 = 10 * _np.ones(_np.shape(x3))
         (x3[::-1], y3, False, False, [84, 5]),
     ],
 )
-def test_edge_completer(x, y, exp, left, right):
+def test_edge_completer(x, y, left, right, exp):
     xn, yn = edge_completer(x, y, 89, left, right)
     diffs = abs(_np.diff(xn)) + abs(_np.diff(yn))
     assert [xn[0], xn[-1]] == exp
