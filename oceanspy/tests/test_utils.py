@@ -239,4 +239,4 @@ def test_edge_slider(X, Y, Fs, exp):
             edge_slider(X[0], Y[0], Fs[0], X[1], Y[1], Fs[1])
     else:
         newP = edge_slider(X[0], Y[0], Fs[0], X[1], Y[1], Fs[1])
-    assert newP == exp
+        assert newP == exp

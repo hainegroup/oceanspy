@@ -1137,8 +1137,9 @@ def edge_find(_x0, _y0, _N):
 
 def edge_slider(x1, y1, f1, x2, y2, f2, _N=89):
     """
-    Looks at the edge points betwee faces f1 (present)
-    and f2 (next).
+    Looks at the edge points between faces f1 (present)
+    and f2 (next). Returns a point in f1 that is aligned
+    with the first element in f2.
 
     [x1, y1, f1] represents the present face
     [x2, y2, f2] : next face
@@ -1146,9 +1147,6 @@ def edge_slider(x1, y1, f1, x2, y2, f2, _N=89):
     TODO: according to phase topology figure out
     which element connect to which
 
-    - change of topo? no change?
-    - then assert that the other axis index are equal
-    - change the present point and make sure diffs==1.
     """
     # step 1 assess if there is a vhange in face topo:
     crns = []

@@ -14,6 +14,7 @@ from oceanspy.llc_rearrange import (
     arc_limits_mask,
     arct_connect,
     combine_list_ds,
+    face_direction,
     mask_var,
     mates,
     rotate_dataset,
@@ -2872,3 +2873,27 @@ def test_mates(dataset, pairs):
         _vars = [var for var in pairs if var not in nvar]
         for n in range(len(_vars[::2])):
             assert dataset[_vars[n]].attrs["mate"] == _vars[n + 1]
+
+
+@pytest.mark.parametrize("od", [od])
+@pytest.mark.parametrize(
+    "face1, face2, value",
+    [
+        (5, 2, 0),
+        (2, 2, None),
+        (5, 7, 1),
+        (5, 6, 3),
+        (5, 4, 2),
+        (10, 6, 0),
+        (10, 11, 1),
+        (10, 7, 2),
+        (10, 2, 3),
+    ],
+)
+def test_face_direction(od, face1, face2, value):
+    conxs = od.face_connections
+    if value is None:
+        with pytest.raises(ValueError):
+            face_direction(face1, face2, conxs)
+    else:
+        assert value == face_direction(face1, face2, conxs)
