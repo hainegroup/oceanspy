@@ -628,7 +628,7 @@ class OceanDataset:
         if list(face_connections)[0] == "face":
             for k in face_connections["face"].keys():
                 for axis in face_connections["face"][k].keys():
-                    if type(face_connections["face"][k][axis]) == tuple:
+                    if isinstance(face_connections["face"][k][axis], tuple):
                         face_connections["face"][k][axis] = face_connections["face"][k][
                             axis
                         ]

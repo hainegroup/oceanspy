@@ -2239,12 +2239,12 @@ def test_arc_connect(
             ds, "YG", faces=faces, masking=masking, opt=opt, ranges=cuts
         )
         for i in range(len(DS)):
-            if type(DS[i]) == _datype:
+            if isinstance(DS[i], _datype):
                 assert _np.shape(DS[i]) == size
     else:
         arc_faces, *a, DS = arct_connect(ds, "YG", faces)
     assert arc_faces == expected
-    assert type(DS[0]) == atype
+    assert isinstance(DS[0], atype)
 
 
 varList = ["T", "U", "V", "XG", "YG", "XC", "YC"]
@@ -2370,7 +2370,7 @@ for var_name in varList:
     ARCT[2].append(DS[2])
     ARCT[3].append(DS[3])
 for i in range(len(ARCT)):  # Not all faces survive the cutout
-    if type(ARCT[i][0]) == _datype:
+    if isinstance(ARCT[i][0], _datype):
         ARCT[i] = _xr.merge(ARCT[i])
 
 ds2, ds5, ds7, ds10 = ARCT
@@ -2406,7 +2406,7 @@ def test_shift_dataset(ds, dimc, dimg, init_c, final_c, init_g, final_g):
 )
 def test_rotate_dataset(ds, var, dimc, dimg, rot_dims):
     nds = rotate_dataset(ds, dimc, dimg)
-    if type(ds) == _dstype:
+    if isinstance(ds, _dstype):
         nvar = nds[var]
         assert nvar.dims == rot_dims
 
@@ -2437,7 +2437,7 @@ def test_rotate_dataset(ds, var, dimc, dimg, rot_dims):
 )
 def test_rotate_vars(ds, var, dims0, rot_dims):
     nds = rotate_vars(ds)
-    if type(ds) == _dstype:
+    if isinstance(ds, _dstype):
         nvar = nds[var]
         assert nvar.dims == rot_dims
 
@@ -2523,7 +2523,7 @@ def test_shift_list_ds(DSlist, dimsc, dimsg, Np, facet, expX):
             int(nDSlist[0][dimsc][-1].values),
         ] == expX[0]
     else:
-        assert type(nDSlist) == list
+        assert isinstance(nDSlist, list)
 
 
 list1 = [od.dataset.isel(face=0), od.dataset.isel(face=1), od.dataset.isel(face=2)]
@@ -2826,7 +2826,7 @@ def test_edge_arc_data(od, XRange, YRange, F_indx, Nx):
     ARCT[3].append(DS[3])
 
     for i in range(len(ARCT)):  # Not all faces survive the cutout
-        if type(ARCT[i][0]) == _datype:
+        if isinstance(ARCT[i][0], _datype):
             ARCT[i] = _xr.merge(ARCT[i])
 
     face_order = _np.array([2, 5, 7, 10])

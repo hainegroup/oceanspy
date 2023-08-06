@@ -76,7 +76,7 @@ def test_opening_and_saving(name, catalog_url):
             )
 
         if name == "LLC":
-            assert type(od1.face_connections["face"]) == dict
+            assert isinstance(od1.face_connections["face"], dict)
             assert set(["face"]).issubset(set(od1.dataset.dims))
 
         # Check shift

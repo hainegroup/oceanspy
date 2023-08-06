@@ -229,17 +229,17 @@ class LLCtransformation:
                 ARCT[3].append(ds[var_name])
 
         for i in range(len(ARCT)):
-            if all(type(item) != int for item in ARCT[i]):
+            if all(not isinstance(item, int) for item in ARCT[i]):
                 ARCT[i] = _xr.merge(ARCT[i])
 
         DSa2, DSa5, DSa7, DSa10 = ARCT
-        if type(DSa2) != Dataset:
+        if not isinstance(DSa2, Dataset):
             DSa2 = 0
-        if type(DSa5) != Dataset:
+        if not isinstance(DSa5, Dataset):
             DSa5 = 0
-        if type(DSa7) != Dataset:
+        if not isinstance(DSa7, Dataset):
             DSa7 = 0
-        if type(DSa10) != Dataset:
+        if not isinstance(DSa10, Dataset):
             DSa10 = 0
 
         DSa7 = shift_dataset(DSa7, dims_c.X, dims_g.X)
@@ -308,11 +308,11 @@ class LLCtransformation:
 
             # Here, address shifts in Arctic
             # arctic exchange with face 10
-            if type(faces2[0]) == Dataset:
+            if isinstance(faces2[0], Dataset):
                 faces2[0]["Yp1"] = faces2[0]["Yp1"] + 1
 
             # Arctic exchange with face 2
-            if type(faces3[3]) == Dataset:
+            if isinstance(faces3[3], Dataset):
                 faces3[3]["Xp1"] = faces3[3]["Xp1"] + 1
 
         # =====
@@ -370,7 +370,7 @@ class LLCtransformation:
 
         if centered is None:  # estimates the centering based on cutout
             centered = "Atlantic"  # default, below scenarios to change this
-        if type(DSFacet3) == int:
+        if isinstance(DSFacet3, int):
             centered = "Pacific"
 
         # =====
@@ -380,8 +380,8 @@ class LLCtransformation:
         # First, check if there is data in both DSFacet12 and DSFacet34.
         # If not, then there is no need to transpose data in DSFacet12.
 
-        if type(DSFacet12) == Dataset:
-            if type(DSFacet34) == Dataset:
+        if isinstance(DSFacet12, Dataset):
+            if isinstance(DSFacet34, Dataset):
                 # two lines below asserts correct
                 # staggering of center and corner points
                 # in latitude (otherwise, lat has a jump)
@@ -417,7 +417,7 @@ class LLCtransformation:
         DS = shift_dataset(DS, dims_c.X, dims_g.X)
         DS = shift_dataset(DS, dims_c.Y, dims_g.Y)
 
-        if type(DSFacet34) == int:
+        if isinstance(DSFacet34, int):
             DS = _reorder_ds(DS, dims_c, dims_g).persist()
 
         DS = _LLC_check_sizes(DS)
@@ -684,7 +684,7 @@ def rotate_vars(_ds):
     topology makes it so that u on a rotated face transforms to `+- v` on a lat lon
     grid.
     """
-    if type(_ds) == Dataset:  # if a dataset transform otherwise pass
+    if isinstance(_ds, Dataset):  # if a dataset transform otherwise pass
         _ds = _copy.deepcopy(_ds)
         _vars = [var for var in _ds.variables]
         rot_names = {}
@@ -712,7 +712,7 @@ def shift_dataset(_ds, dims_c, dims_g):
         dims_c.
 
     """
-    if type(_ds) == Dataset:  # if a dataset transform otherwise pass
+    if isinstance(_ds, Dataset):  # if a dataset transform otherwise pass
         _ds = _copy.deepcopy(_ds)
         for _dim in [dims_c, dims_g]:
             if int(_ds[_dim][0].data) < int(_ds[_dim][1].data):
@@ -733,7 +733,7 @@ def reverse_dataset(_ds, dims_c, dims_g, transpose=False):
     so dims_c is either one of `i`  or `j`, and dims_g is either one of `i_g` or `j_g`.
     The pair most correspond to the same dimension."""
 
-    if type(_ds) == Dataset:  # if a dataset transform otherwise pass
+    if isinstance(_ds, Dataset):  # if a dataset transform otherwise pass
         _ds = _copy.deepcopy(_ds)
 
         for _dim in [dims_c, dims_g]:  # This part should be different for j_g points?
@@ -767,7 +767,7 @@ def rotate_dataset(
     nface=int: correct number to use. This is the case a merger/concatenated dataset is
     being manipulated. Nij is no longer the size of the face.
     """
-    if type(_ds) == Dataset:  # if a dataset transform otherwise pass
+    if isinstance(_ds, Dataset):  # if a dataset transform otherwise pass
         _ds = _copy.deepcopy(_ds)
         Nij = max(len(_ds[dims_c.X]), len(_ds[dims_c.Y]))
 
@@ -823,12 +823,12 @@ def shift_list_ds(_DS, dims_c, dims_g, Ni, facet=1):
     if len(_DS) > 1:
         dim0 = 0
         for ii in range(1, len(_DS)):
-            if type(_DS[ii - 1]) == int:
+            if isinstance(_DS[ii - 1], int):
                 dim0 = int(Ni * sum(facs[:ii]))
             else:
                 for _dim in [dims_c, dims_g]:
                     dim0 = int(_DS[ii - 1][_dim][-1].data + 1)
-            if type(_DS[ii]) == Dataset:
+            if isinstance(_DS[ii], Dataset):
                 for _dim in [dims_c, dims_g]:
                     _DS[ii]["n" + _dim] = (
                         _DS[ii][_dim] - (fac * int(_DS[ii][_dim][0].data)) + dim0
@@ -841,7 +841,7 @@ def shift_list_ds(_DS, dims_c, dims_g, Ni, facet=1):
                     )
         DS = []
         for lll in range(len(_DS)):
-            if type(_DS[lll]) == Dataset:
+            if isinstance(_DS[lll], Dataset):
                 DS.append(_DS[lll])
     else:
         DS = _DS
@@ -858,9 +858,9 @@ def combine_list_ds(_DSlist):
     elif len(_DSlist) == 1:  # a single face
         _DSFacet = _DSlist[0]
     elif len(_DSlist) == 2:
-        if type(_DSlist[0]) == int:  # one is empty, pass directly
+        if isinstance(_DSlist[0], int):  # one is empty, pass directly
             _DSFacet = _DSlist[1]
-        elif type(_DSlist[1]) == int:  # the other is empty pass directly
+        elif isinstance(_DSlist[1], int):  # the other is empty pass directly
             _DSFacet = _DSlist[0]
         else:  # if there are two datasets then combine
             with dask.config.set(**{"array.slicing.split_large_chunks": False}):
@@ -882,7 +882,7 @@ def flip_v(_ds, co_list=metrics, dims=True, _len=3):
     dims is given
 
     """
-    if type(_ds) == Dataset:
+    if isinstance(_ds, Dataset):
         for _varName in _ds.variables:
             if dims:
                 DIMS = [dim for dim in _ds[_varName].dims if dim != "face"]
@@ -987,12 +987,12 @@ def arc_limits_mask(_ds, _var, _faces, _dims, XRange, YRange):
     ARCT[3].append(DS[3])
 
     for i in range(len(ARCT)):  # Not all faces survive the cutout
-        if type(ARCT[i][0]) == DataArray:
+        if isinstance(ARCT[i][0], DataArray):
             ARCT[i] = _xr.merge(ARCT[i])
 
     DSa2, DSa5, DSa7, DSa10 = ARCT
 
-    if type(DSa2) != Dataset:
+    if not isinstance(DSa2, Dataset):
         DSa2 = 0
         [Xi_2, Xf_2] = [0, 0]
     else:
@@ -1001,7 +1001,7 @@ def arc_limits_mask(_ds, _var, _faces, _dims, XRange, YRange):
         else:
             Xf_2 = _edge_arc_data(DSa2[_var], 2, _dims)
         Xi_2 = int(DSa2[_var][_dims.X][0])
-    if type(DSa5) != Dataset:
+    if not isinstance(DSa5, Dataset):
         DSa5 = 0
         [Yi_5, Yf_5] = [0, 0]
     else:
@@ -1010,7 +1010,7 @@ def arc_limits_mask(_ds, _var, _faces, _dims, XRange, YRange):
         else:
             Yf_5 = _edge_arc_data(DSa5[_var], 5, _dims)
         Yi_5 = int(DSa5[_var][_dims.Y][0])
-    if type(DSa7) != Dataset:
+    if not isinstance(DSa7, Dataset):
         DSa7 = 0
         [Xi_7, Xf_7] = [0, 0]
     else:
@@ -1020,7 +1020,7 @@ def arc_limits_mask(_ds, _var, _faces, _dims, XRange, YRange):
             Xi_7 = _edge_arc_data(DSa7[_var], 7, _dims)
         Xf_7 = int(DSa7[_var][_dims.X][-1])
 
-    if type(DSa10) != Dataset:
+    if not isinstance(DSa10, Dataset):
         DSa10 = 0
         [Yi_10, Yf_10] = [0, 0]
     else:
@@ -1050,7 +1050,7 @@ def _edge_facet_data(_Facet_list, _var, _dims, _axis):
 
     XRange = []
     for i in range(len(_Facet_list)):
-        if type(_Facet_list[i]) == Dataset:
+        if isinstance(_Facet_list[i], Dataset):
             # there is data
             _da = _Facet_list[i][_var].load()  # load into memory 2d data.
             X0 = []
@@ -1085,7 +1085,7 @@ def slice_datasets(_DSfacet, dims_c, dims_g, _edges, _axis):
     _DSFacet = _copy.deepcopy(_DSfacet)
     for i in range(len(_DSFacet)):
         # print(i)
-        if type(_DSFacet[i]) == Dataset:
+        if isinstance(_DSFacet[i], Dataset):
             for _dim in [_dim_c, _dim_g]:
                 if len(_edges) == 1:
                     ii_0 = int(_edges[0])
