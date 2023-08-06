@@ -229,17 +229,17 @@ class LLCtransformation:
                 ARCT[3].append(ds[var_name])
 
         for i in range(len(ARCT)):
-            if all(isinstance(item, int) for item in ARCT[i]):
+            if all(not isinstance(item, int) for item in ARCT[i]):
                 ARCT[i] = _xr.merge(ARCT[i])
 
         DSa2, DSa5, DSa7, DSa10 = ARCT
-        if isinstance(DSa2, Dataset):
+        if not isinstance(DSa2, Dataset):
             DSa2 = 0
-        if isinstance(DSa5, Dataset):
+        if not isinstance(DSa5, Dataset):
             DSa5 = 0
-        if isinstance(DSa7, Dataset):
+        if not isinstance(DSa7, Dataset):
             DSa7 = 0
-        if isinstance(DSa10, Dataset):
+        if not isinstance(DSa10, Dataset):
             DSa10 = 0
 
         DSa7 = shift_dataset(DSa7, dims_c.X, dims_g.X)
