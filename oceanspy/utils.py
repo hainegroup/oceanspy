@@ -49,7 +49,7 @@ def viewer_to_range(p):
     lat: list.
     """
 
-    if type(p) == str:
+    if isinstance(p, str):
         if p[0] == "[" and p[-1] == "]":
             p = _ast.literal_eval(p)  # turn string into list
         else:

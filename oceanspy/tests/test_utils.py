@@ -94,9 +94,9 @@ coords7 = '[{"type":"Point","coordinates":[-424.42989807993234, 37.8726303228705
     ],
 )
 def test_viewer_to_range(coords, types, lon, lat):
-    if type(coords) == list:
+    if isinstance(coords, list):
         p = [{"type": types, "coordinates": list(coords)}]
-    elif type(coords) == str:
+    elif isinstance(coords, str):
         p = coords
     x, y = viewer_to_range(p)
     assert x == lon
