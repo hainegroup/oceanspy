@@ -11,6 +11,7 @@ from oceanspy.utils import (
     edge_completer,
     edge_find,
     edge_slider,
+    fill_path,
     great_circle_path,
     spherical2cartesian,
     splitter,
@@ -253,3 +254,51 @@ def test_edge_slider(X, Y, Fs, exp):
     else:
         newP = edge_slider(X[0], Y[0], Fs[0], X[1], Y[1], Fs[1])
         assert newP == exp
+
+
+# face 0
+y0 = [k for k in range(45, 90)]
+x0 = len(y0) * [40]
+
+# face 1
+y11 = [k for k in range(45)]
+x11 = len(y11) * [45]
+x12 = [k for k in range(45, 90)]
+y12 = len(x12) * [45]
+x1 = x11 + x12
+y1 = y11 + y12
+
+# face 4
+x41 = [k for k in range(46)]
+y41 = len(x41) * [60]
+y42 = [k for k in range(59, -1, -1)]
+x42 = len(y42) * [45]
+x4 = x41 + x42
+y4 = y41 + y42
+
+# face 3
+y31 = [k for k in range(89, 40, -1)]
+x31 = len(y31) * [60]
+x32 = [k for k in range(60, -1, -1)]
+y32 = len(x32) * [40]
+x3 = x31 + x32
+y3 = y31 + y32
+
+# face 0 again!
+x01 = [k for k in range(89, 45, -1)]
+y01 = len(x01) * [45]
+
+# get them all together
+X, Y = [x0, x1, x4, x3, x01], [y0, y1, y4, y3, y01]
+# faces
+faces = [0, 1, 4, 3, 0]
+
+
+@pytest.mark.parametrize("X, Y, faces", [(X, Y, faces)])
+def test_fill_path(X, Y, faces):
+    for k in range(len(faces) - 1):
+        nx, ny = fill_path(X, Y, faces, k)
+        if faces[k] in [0, 4]:
+            assert nx[-1] == X[k + 1][0]
+        if faces[k] in [1, 3]:
+            assert ny[-1] == Y[k + 1][0]

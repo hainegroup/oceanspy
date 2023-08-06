@@ -1193,9 +1193,6 @@ def fill_path(X, Y, face, k, _N=89):
         _N: int
             Length of x- or y- dimension. Default is 89, associated with
 
-
-
-
     """
     Ntot = len(face)
     x, y = connector(X[k], Y[k])
