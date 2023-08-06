@@ -48,7 +48,6 @@ dependencies:
 - cf_xarray
 - ipykernel
 - numba
-- xoak
 - scikit-learn
 - pys2index
 - cmasher
