@@ -413,8 +413,6 @@ class LLCtransformation:
 
         DS = _LLC_check_sizes(DS)
 
-        # rechunk data. In the ECCO data this is done automatically
-
         if "nYG" in DS.reset_coords().data_vars:
             DS = DS.drop_vars(_var_)
 

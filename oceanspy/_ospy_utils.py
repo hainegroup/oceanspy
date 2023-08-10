@@ -6,6 +6,7 @@ import warnings
 
 # Import modules (can be public here)
 import numpy
+import xarray as _xr
 import xgcm
 
 
@@ -158,12 +159,25 @@ def _check_range(od, obj, objName):
     -------
     obj: Range object
     """
+
+    if "face" in od._ds.dims and od._ds.dims["face"] == 13:
+        cdata = {
+            "XG": ("XG", numpy.asarray([-180, 180], dtype=od._ds["XG"].dtype)),
+            "YG": ("YG", numpy.asarray([-90, 90], dtype=od._ds["YG"].dtype)),
+            "Zp1": od._ds["Zp1"],
+            "time": od._ds["time"],
+        }
+        data = _xr.Dataset(cdata)
+    else:
+        data = od._ds
+
+    # main loop
     if obj is not None:
         prefs = ["Y", "X", "Z", "time"]
         coords = ["YG", "XG", "Zp1", "time"]
         for _, (pref, coord) in enumerate(zip(prefs, coords)):
             if pref in objName:
-                valchek = od._ds[coord]
+                valchek = data[coord]
                 break
         obj = numpy.asarray(obj, dtype=valchek.dtype)
         if obj.ndim == 0:
