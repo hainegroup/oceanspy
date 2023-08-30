@@ -85,9 +85,7 @@ def cutout(
     sampMethod="snapshot",
     dropAxes=False,
     centered=None,
-    chunks=None,
     persist=False,
-    geo_true=False,
 ):
     """
     Cutout the original dataset in space and time
@@ -380,9 +378,7 @@ def cutout(
             "XRange": XRange,
             "YRange": YRange,
             "centered": centered,
-            "chunks": chunks,
             "persist": persist,
-            "geo_true": geo_true,
         }
         dsnew = _llc_trans.arctic_crown(**arg)
         dsnew = dsnew.set_coords(co_list)

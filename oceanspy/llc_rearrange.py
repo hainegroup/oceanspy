@@ -68,9 +68,7 @@ class LLCtransformation:
         YRange=None,
         faces=None,
         centered=None,
-        chunks=None,
         persist=False,
-        geo_true=False,
     ):
         """This transformation splits the arctic cap (face=6) into four triangular
         regions and combines all faces in a quasi lat-lon grid. The triangular
@@ -104,16 +102,9 @@ class LLCtransformation:
             If 'Pacific', the transformed data has a layout in which the Pacific Ocean
             lies at the center of the domain.
             This option is only relevant when transforming the entire dataset.
-        chunks: bool or dict.
-            If False (default) - chunking is automatic.
-            If dict, rechunks the dataset according to the spefications of the
-            dictionary. See `xarray.Dataset.chunk()`.
         persist: bool.
             If `False` (default), transformation of rotated and arctic data is not
             persisted. See `xarray.Dataset.persist()`.
-        geo_true: bool.
-            If `True` the U and V velocities are corrected and aligned to geographical
-            coordinates. If `False` (default) these are not.
 
         Returns
         -------
@@ -423,15 +414,8 @@ class LLCtransformation:
 
         DS = _LLC_check_sizes(DS)
 
-        # rechunk data. In the ECCO data this is done automatically
-        if chunks:
-            DS = DS.chunk(chunks)
-
         if "nYG" in DS.reset_coords().data_vars:
             DS = DS.drop_vars(_var_)
-
-        if geo_true:
-            DS = llc_local_to_lat_lon(DS)
 
         # restore original attrs if lost
         for var in varList:
@@ -1134,6 +1118,7 @@ def _LLC_check_sizes(_DS):
     if Nx_c == Nx_g:
         arg = {dims_c.X: slice(0, -1)}
         _DS = _copy.deepcopy(_DS.isel(**arg))
+        Nx_c = len(_DS[dims_c.X])
     else:
         delta = Nx_g - Nx_c
         if delta < 0:
@@ -1143,13 +1128,20 @@ def _LLC_check_sizes(_DS):
             )
         else:
             if delta == 2:  # len(_g) = len(_c)+2. Can but shouldn't happen.
-                arg = {dims_g: slice(0, -1)}
+                arg = {dims_g.X: slice(0, -1)}
                 _DS = _copy.deepcopy(_DS.isel(**arg))
+                Nx_g = len(_DS[dims_g.X])
+
     if Ny_c == Ny_g:
         arg = {dims_c.Y: slice(0, -1)}
         _DS = _copy.deepcopy(_DS.isel(**arg))
+        Ny_c = len(_DS[dims_c.Y])
 
-    return _DS
+    # lastly, make sure that core dimensions are chunked consistently
+
+    chunks = {"X": Nx_c, "Xp1": Nx_g, "Y": Ny_c, "Yp1": Ny_g}
+
+    return _DS.chunk(**chunks)
 
 
 def _reorder_ds(_ds, dims_c, dims_g):
