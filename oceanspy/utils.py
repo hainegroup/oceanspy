@@ -1051,8 +1051,8 @@ def remove_repeated(_iX, _iY):
 
 def connector(_ix, _iy):
     """
-    Takes a collection of points define in logical space (ix, iy), each of
-    equal length arrays, and returns a new continous correction (_ix, _iy) that
+    Takes a collection of points defined in logical space (ix, iy), each of
+    equal length arrays, and returns a new continous array (_ix, _iy) that
     contains the original elements but the spacing between them in logical
     space is always unity.
 
@@ -1076,7 +1076,15 @@ def connector(_ix, _iy):
 
 
 def splitter(_ix, _iy, _ifaces):
-    # where there is a change in face
+    """
+    Takes the output from `connector(_ix, _iy)` as input, and splits it into
+    the many faces the array grows through. The numner of faces is determine
+    by the array `_ifaces`, or equal length as each element of `connector()`.
+    Then `ifaces` has the same element, there is only one face (or simple
+    topology), and the output is a list of len == 1.
+    """
+
+    # identify if and where there is a change in face
     ll = _np.where(abs(_np.diff(_ifaces)))[0]
 
     X0, Y0 = [], []
