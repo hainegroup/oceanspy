@@ -1050,6 +1050,13 @@ def remove_repeated(_iX, _iY):
 
 
 def connector(_ix, _iy):
+    """
+    Takes a collection of points define in logical space (ix, iy), each of
+    equal length arrays, and returns a new continous correction (_ix, _iy) that
+    contains the original elements but the spacing between them in logical
+    space is always unity.
+
+    """
     mask = _np.abs(_np.diff(_ix)) + _np.abs(_np.diff(_iy)) == 0
     _ix, _iy = (_np.delete(ii, _np.argwhere(mask)) for ii in (_ix, _iy))
 
