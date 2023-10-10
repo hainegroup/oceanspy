@@ -1104,9 +1104,17 @@ def splitter(_ix, _iy, _ifaces):
 
 
 def edge_completer(_x, _y, _N=89, left=True, right=True):
-    """verifies that an array begins and ends at the edge of a face"""
+    """verifies that an array begins and ends at the edge of a face.
 
-    ind0 = None  # 1st element of array
+    if left=True: reach edge on the left of array. Reaches closest face edge.
+    if left=False: leave unchanged.
+
+    if right=True: read edge on the right. Picks closest face edge.
+    if right=False: leave unchanged
+
+    """
+
+    ind0 = None  # 1st element of array`
     ind1 = None  # last element of array
 
     if _x[0] > 0 and _x[0] < _N:
@@ -1134,7 +1142,7 @@ def edge_completer(_x, _y, _N=89, left=True, right=True):
 
 def edge_find(_x0, _y0, _N):
     """given coords x0 and y0, figures out if it is
-    closer to left edge (0) or right rdge (N) of face
+    closer to left edge (0) or right edge (N) of face
     """
     A = abs(_x0 - _N), abs(_y0 - _N)
     B = _x0, _y0
