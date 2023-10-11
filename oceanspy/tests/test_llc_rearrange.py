@@ -2903,7 +2903,7 @@ def test_face_direction(od, face1, face2, value):
 # the following list represent faces through which a mooring_array goes
 # through, beginning at index = 0.
 
-list1 = [7, 5, 4, 1, 11]
+list1 = [11, 1, 4, 5, 7]
 list2 = list1[::-1]
 
 
@@ -2922,6 +2922,5 @@ list2 = list1[::-1]
 )
 def test_face_edge_check(i, list_faces, conxs, args):
     results = face_edge_check(i, list_faces, conxs)
-
     assert results["left"] == args["left"]
     assert results["right"] == args["right"]
