@@ -2911,8 +2911,7 @@ list2 = list1[::-1]
     "i, list_faces, conxs, args",
     [
         (0, list1, od.face_connections["face"], {"left": 0, "right": 1}),
-        (4, list1, od.face_connections["face"]),
-        {"left": 1, "right": 0},
+        (4, list1, od.face_connections["face"], {"left": 1, "right": 0}),
         (-1, list1, od.face_connections["face"], {"left": 1, "right": 0}),
         (1, list1, od.face_connections["face"], {"left": 1, "right": 1}),
         (0, list2, od.face_connections["face"], {"left": 1, "right": 0}),
