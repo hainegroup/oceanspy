@@ -1499,8 +1499,15 @@ def face_direction(face1, face2, face_connections):
     left, right = face_connections[face1]["X"]
     bot, top = face_connections[face1]["Y"]
 
-    if set([face2]).issubset([left, right, bot, top]):
-        return [left, right, bot, top].index(face2)
+    perimeter = []
+    for edge in [left, right, bot, top]:
+        if edge is not None:
+            perimeter.append(edge[0])
+        elif edge is None:  # faces 0, 3, 9, 12
+            perimeter.append(edge)
+
+    if set([face2]).issubset(perimeter):
+        return perimeter.index(face2)
     else:
         if face1 == face2:
             raise ValueError("faces {} and {} must be different.".format(face1, face2))
