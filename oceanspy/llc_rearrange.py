@@ -1496,10 +1496,8 @@ def face_direction(face1, face2, face_connections):
     from the topology `face_connections`, infers the direction
     of the array: `left (0)`, `right (1)`, `bottom (2)`, `top (3)`.
     """
-    left = face_connections[face1]["X"][0][0]
-    right = face_connections[face1]["X"][1][0]
-    bot = face_connections[face1]["Y"][0][0]
-    top = face_connections[face1]["Y"][1][0]
+    left, right = face_connections[face1]["X"]
+    bot, top = face_connections[face1]["Y"]
 
     if set([face2]).issubset([left, right, bot, top]):
         return [left, right, bot, top].index(face2)
