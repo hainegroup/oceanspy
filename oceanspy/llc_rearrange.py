@@ -1515,63 +1515,6 @@ def face_direction(face1, face2, face_connections):
             raise ValueError("faces {} and {} are not contiguous.".format(face1, face2))
 
 
-# def face_edge_check(ind=0, _faces=[0], _face_conxs=None):
-#     """
-#     Given an list of faceted-arrays of len>=1, each with a mooring
-#     array, returns dict of logical arguments that determine the direction
-#     (left = bool, right = bool) that the array within the face has to
-#     approach to reach the edge of the face.
-
-#     It is most consequential when the index of list of mooring array, is
-#     either 0 or -1.
-#     Consequential Cases:
-
-#         {`left`:False, `right`:True}  array reaches the edge of the
-#             face towards the right.
-
-#         {`left`:True, `right`:False}  array reaches the edge of the
-#             face towards the left.
-
-#     Parameters:
-#     ----------
-#         ind: int
-#             index of face in list of sequential faces through which the
-#             mooring array goes through. Default =0.
-#         _faces: list
-#             list of faces through which the mooring array goes through.
-#             default = [0]
-#         _face_conxs: dict, None (default)
-#             dictionary with the complex topology of grid. If no complex
-#             topology, then default.
-
-#     returns
-#         {`left`: bool, `right`: bool}
-#     """
-
-#     # default
-#     left = False
-#     right = False
-
-#     if len(_faces) > 1:  # more than a single face of complex topology
-#         if ind == 0:
-#             _dir = face_direction(_faces[ind], _faces[ind + 1], _face_conxs)
-#             if _dir == 0 or _dir == 2:
-#                 left = True
-#             else:
-#                 right = True
-#         elif ind == len(_faces) - 1 or ind == -1:  # last element of list
-#             _dir = face_direction(_faces[ind - 1], _faces[ind], _face_conxs)
-#             if _dir == 0 or _dir == 2:
-#                 right = True
-#             else:
-#                 left = True
-#         else:
-#             left = True
-#             right = True
-
-#     return {"left": left, "right": right}
-
-
 class Dims:
     """Creates a shortcut for dimension`s names associated with an arbitrary
     variable."""

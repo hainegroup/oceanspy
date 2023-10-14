@@ -1127,25 +1127,25 @@ def edge_completer(_x, _y, face_dir=None, ind=-1, _N=89):
         if ind == -1:
             _x, _y = _np.append(_x, _mx), _np.append(_y, _my)
         elif ind == 0:
-            _x, _y = _np.append(_mx, _x), _np.append(_my, _y)
+            _x, _y = _np.append(_mx[::-1], _x), _np.append(_my, _y)
     elif face_dir == 0:  # towards local left in x (increase x-index)
         _mx, _my = connector([0, _x[ind]], [_y[ind], _y[ind]])
         if ind == 0:
             _x, _y = _np.append(_mx, _x), _np.append(_my, _y)
         elif ind == -1:
-            _x, _y = _np.append(_x, _mx), _np.append(_y, _my)
-    if face_dir == 3:
+            _x, _y = _np.append(_x, _mx[::-1]), _np.append(_y, _my)
+    if face_dir == 3:  # towards local right in y
         _mx, _my = connector([_x[ind], _x[ind]], [_y[ind], _N])
         if ind == -1:
             _x, _y = _np.append(_x, _mx), _np.append(_y, _my)
         elif ind == 0:
-            _x, _y = _np.append(_mx, _x), _np.append(_my, _y)
+            _x, _y = _np.append(_mx, _x), _np.append(_my[::-1], _y)
     if face_dir == 2:
         _mx, _my = connector([_x[ind], _x[ind]], [0, _y[ind]])
         if ind == 0:
             _x, _y = _np.append(_mx, _x), _np.append(_my, _y)
-        elif ind == -1:
-            _x, _y = _np.append(_x, _mx), _np.append(_y, _my)
+        elif ind == -1:  # last entry
+            _x, _y = _np.append(_x, _mx), _np.append(_y, _my[::-1])
 
     mask = _np.abs(_np.diff(_x)) + _np.abs(_np.diff(_y)) == 0
     _x, _y = (_np.delete(ii, _np.argwhere(mask)) for ii in (_x, _y))

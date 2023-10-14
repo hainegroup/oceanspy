@@ -6,16 +6,15 @@ import xarray as _xr
 
 # From OceanSpy
 from oceanspy import open_oceandataset
-from oceanspy.llc_rearrange import Dims
+from oceanspy.llc_rearrange import Dims  # face_edge_check,
 from oceanspy.llc_rearrange import LLCtransformation as LLC
-from oceanspy.llc_rearrange import (
+from oceanspy.llc_rearrange import (  # face_edge_check,
     _edge_arc_data,
     _edge_facet_data,
     arc_limits_mask,
     arct_connect,
     combine_list_ds,
     face_direction,
-    face_edge_check,
     mask_var,
     mates,
     rotate_dataset,
@@ -2899,29 +2898,3 @@ def test_face_direction(od, face1, face2, value):
             face_direction(face1, face2, conxs)
     else:
         assert value == face_direction(face1, face2, conxs)
-
-
-# the following list represent faces through which a mooring_array goes
-# through, beginning at index = 0.
-
-list1 = [11, 1, 4, 5, 7]
-list2 = list1[::-1]
-
-
-@pytest.mark.parametrize(
-    "i, list_faces, conxs, args",
-    [
-        (0, list1, od.face_connections["face"], {"left": 0, "right": 1}),
-        (4, list1, od.face_connections["face"], {"left": 1, "right": 0}),
-        (-1, list1, od.face_connections["face"], {"left": 1, "right": 0}),
-        (1, list1, od.face_connections["face"], {"left": 1, "right": 1}),
-        (0, list2, od.face_connections["face"], {"left": 1, "right": 0}),
-        (4, list2, od.face_connections["face"], {"left": 0, "right": 1}),
-        (-1, list2, od.face_connections["face"], {"left": 0, "right": 1}),
-        (1, list2, od.face_connections["face"], {"left": 1, "right": 1}),
-    ],
-)
-def test_face_edge_check(i, list_faces, conxs, args):
-    results = face_edge_check(i, list_faces, conxs)
-    assert results["left"] == args["left"]
-    assert results["right"] == args["right"]
