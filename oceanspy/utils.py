@@ -10,6 +10,7 @@ import numpy as _np
 # Required dependencies (private)
 import xarray as _xr
 
+# from .llc_rearrange import face_edge_check
 from ._ospy_utils import _check_instance
 
 # Recommended dependencies (private)
@@ -1103,59 +1104,53 @@ def splitter(_ix, _iy, _ifaces):
     return X0, Y0
 
 
-def edge_completer(_x, _y, _N=89, left=True, right=True):
+def edge_completer(_x, _y, face_dir=None, ind=-1, _N=89):
     """verifies that an array begins and ends at the edge of a face.
 
-    if left=True: reach edge on the left of array. Reaches closest face edge.
-    if left=False: leave unchanged.
+    Parameters:
+    ----------
 
-    if right=True: read edge on the right. Picks closest face edge.
-    if right=False: leave unchanged
-
+        _x, _y: list, list
+            indexes of morring array in logical space.
+        face_dir: int
+            output of `od.llc_rearrange.face_direction. Indicates the direction
+            towards which the left endpoint of (mooring) array must reach the
+            edge of face.
+        ind: int, 0 or -1 (default).
+            indicates the index of the (mooring) array.
+        _N: int, default=89.
+            last index of each faceted dimension. (len(X)-1).
     """
 
-    ind0 = None  # 1st element of array`
-    ind1 = None  # last element of array
+    if face_dir == 1:  # towards local right in x (increase x-index)
+        _mx, _my = connector([_x[ind], _N], [_y[ind], _y[ind]])
+        if ind == -1:
+            _x, _y = _np.append(_x, _mx), _np.append(_y, _my)
+        elif ind == 0:
+            _x, _y = _np.append(_mx, _x), _np.append(_my, _y)
+    elif face_dir == 0:  # towards local left in x (increase x-index)
+        _mx, _my = connector([0, _x[ind]], [_y[ind], _y[ind]])
+        if ind == 0:
+            _x, _y = _np.append(_mx, _x), _np.append(_my, _y)
+        elif ind == -1:
+            _x, _y = _np.append(_x, _mx), _np.append(_y, _my)
+    if face_dir == 3:
+        _mx, _my = connector([_x[ind], _x[ind]], [_y[ind], _N])
+        if ind == -1:
+            _x, _y = _np.append(_x, _mx), _np.append(_y, _my)
+        elif ind == 0:
+            _x, _y = _np.append(_mx, _x), _np.append(_my, _y)
+    if face_dir == 2:
+        _mx, _my = connector([_x[ind], _x[ind]], [0, _y[ind]])
+        if ind == 0:
+            _x, _y = _np.append(_mx, _x), _np.append(_my, _y)
+        elif ind == -1:
+            _x, _y = _np.append(_x, _mx), _np.append(_y, _my)
 
-    if _x[0] > 0 and _x[0] < _N:
-        if _y[0] > 0 and _y[0] < _N:
-            ind0 = 1
+    mask = _np.abs(_np.diff(_x)) + _np.abs(_np.diff(_y)) == 0
+    _x, _y = (_np.delete(ii, _np.argwhere(mask)) for ii in (_x, _y))
 
-    if _x[-1] > 0 and _x[-1] < _N:
-        if _y[-1] > 0 and _y[-1] < _N:
-            ind1 = 1
-
-    if ind0 and left:  # element missing at left. add missing value
-        _x0, _y0 = _x[0], _y[0]
-        _nx, _ny = edge_find(_x0, _y0, _N)
-        _mx, _my = connector([_nx, _x0], [_ny, _y0])
-        _x, _y = _np.append(_mx[:-1], _x), _np.append(_my[:-1], _y)
-    if ind1 and right:  # element missing at right. add missing value
-        _x0, _y0 = _x[-1], _y[-1]
-        _nx, _ny = edge_find(_x0, _y0, _N)
-        _mx, _my = connector([_x0, _nx], [_y0, _ny])
-        _x, _y = _np.append(_x, _mx[1:]), _np.append(_y, _my[1:])
-
-    # complete at one or two edges
     return _x, _y
-
-
-def edge_find(_x0, _y0, _N):
-    """given coords x0 and y0, figures out if it is
-    closer to left edge (0) or right edge (N) of face
-    """
-    A = abs(_x0 - _N), abs(_y0 - _N)
-    B = _x0, _y0
-    mi = min(min(A), min(B))
-    if mi in B:  # close to left edge
-        i = B.index(mi)
-        P = list(B)
-        P[i] = 0
-    else:
-        i = A.index(mi)
-        P = [_x0, _y0]
-        P[i] = _N
-    return P
 
 
 def edge_slider(x1, y1, f1, x2, y2, f2, _N=89):
@@ -1199,7 +1194,7 @@ def edge_slider(x1, y1, f1, x2, y2, f2, _N=89):
     return new_P
 
 
-def fill_path(X, Y, face, k, _N=89):
+def fill_path(X, Y, face, k, _N=89, args={}):
     """
     Given a sequence of index arrays (each within a face)
     makes sure that it always begins and ends at the face edge, expend
@@ -1219,11 +1214,10 @@ def fill_path(X, Y, face, k, _N=89):
     """
     Ntot = len(face)
     x, y = connector(X[k], Y[k])
-    if k > 0 and k < Ntot - 1:
-        x, y = edge_completer(x, y, _N)
+    x, y = edge_completer(x, y, _N, **args)
     if k < Ntot - 1:
         x1, y1 = connector(X[k + 1], Y[k + 1])
-        x1, y1 = edge_completer(x1, y1, _N)
+        x1, y1 = edge_completer(x1, y1, _N, **args)
         P = edge_slider(x[-1], y[-1], face[k], x1[0], y1[0], face[k + 1], _N)
         x, y = connector(_np.append(x, P[0]), _np.append(y, P[1]))
     return x, y

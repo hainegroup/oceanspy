@@ -9,7 +9,6 @@ from oceanspy.utils import (
     circle_path_array,
     connector,
     edge_completer,
-    edge_find,
     edge_slider,
     fill_path,
     great_circle_path,
@@ -145,45 +144,34 @@ def test_reset_range(XRange, x0, expected_ref):
     assert _np.round(ref_lon, 2) == expected_ref
 
 
-@pytest.mark.parametrize(
-    "x, y, expected",
-    [(1, 2, [0, 2]), (20, 80, [20, 89]), (85, 80, [89, 80]), (85, 1, [85, 0])],
-)
-def test_edge_find(x, y, expected):
-    point = edge_find(x, y, 89)
-    assert point == expected
+x1 = _np.array([k for k in range(15, 45)])
+y1 = [10] * len(x1)
 
-
-x1 = _np.array([k for k in range(0, 85)])
-y1 = 10 * _np.ones(_np.shape(x1))
-x2 = _np.array([k for k in range(5, 89)])
-y2 = 10 * _np.ones(_np.shape(x2))
-x3 = _np.array([k for k in range(5, 85)])
-y3 = 10 * _np.ones(_np.shape(x3))
+y2 = [k for k in range(45, 78)]
+x2 = len(y2) * [40]
 
 
 @pytest.mark.parametrize(
-    "x, y, left, right, exp",
+    "x, y, facedir, ind, X0, X1",
     [
-        (x1, y1, True, True, [0, 89]),
-        (x1, y1, False, True, [0, 89]),
-        (x1, y1, False, False, [0, 84]),
-        (x2, y2, True, True, [0, 89]),
-        (x2, y2, False, True, [5, 89]),
-        (x2, y2, False, False, [5, 88]),
-        (x3, y3, True, True, [0, 89]),
-        (x3, y3, False, True, [5, 89]),
-        (x3, y3, False, False, [5, 84]),
-        (x3[::-1], y3, True, True, [89, 0]),
-        (x3[::-1], y3, False, True, [84, 0]),
-        (x3[::-1], y3, False, False, [84, 5]),
+        (x1, y1, 1, -1, [x1[0], y1[0]], [89, y1[-1]]),
+        (x1, y1, 0, 0, [0, y1[0]], [x1[-1], y1[-1]]),
+        (x1, y1, 3, -1, [x1[0], y1[0]], [x1[-1], 89]),
+        (x1, y1, 2, 0, [x1[0], 0], [x1[-1], y1[-1]]),
+        (x2, y2, 2, 0, [x2[0], 0], [x2[-1], y2[-1]]),
+        (x2, y2, 0, -1, [x2[0], y2[0]], [0, y2[-1]]),
+        (x2, y2, 1, -1, [x2[0], y2[0]], [89, y2[-1]]),
+        (x2, y2, 0, 0, [0, y2[0]], [x2[-1], y2[-1]]),
+        (x2, y2, 1, -1, [x2[0], y2[0]], [89, y2[-1]]),
     ],
 )
-def test_edge_completer(x, y, left, right, exp):
-    xn, yn = edge_completer(x, y, 89, left, right)
+def test_edge_completer(x, y, facedir, ind, X0, X1):
+    xn, yn = edge_completer(x, y, facedir, ind)
+    # assert unit distance between elements of array.
     diffs = abs(_np.diff(xn)) + abs(_np.diff(yn))
-    assert [xn[0], xn[-1]] == exp
     assert _np.max(diffs) == _np.min(diffs) == 1
+    assert [xn[0], yn[0]] == X0
+    assert [xn[-1], yn[-1]] == X1
 
 
 x1 = _np.array([k for k in range(0, 85, 10)])
