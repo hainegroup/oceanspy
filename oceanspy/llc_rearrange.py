@@ -12,7 +12,7 @@ import xarray as _xr
 from xarray import DataArray, Dataset
 from xgcm import Grid
 
-from .utils import _rel_lon, _reset_range, get_maskH
+from .utils import _rel_lon, _reset_range, connector, get_maskH
 
 # metric variables defined at vector points, defined as global within this file
 metrics = [
@@ -1513,6 +1513,220 @@ def face_direction(face1, face2, face_connections):
             raise ValueError("faces {} and {} must be different.".format(face1, face2))
         else:
             raise ValueError("faces {} and {} are not contiguous.".format(face1, face2))
+
+
+def splitter(_ix, _iy, _ifaces):
+    """
+    Takes the output from `connector(_ix, _iy)` as input, and splits it into
+    the many faces the array grows through. The numner of faces is determine
+    by the array `_ifaces`, or equal length as each element of `connector()`.
+    Then `ifaces` has the same element, there is only one face (or simple
+    topology), and the output is a list of len == 1.
+    """
+
+    # identify if and where there is a change in face
+    ll = _np.where(abs(_np.diff(_ifaces)))[0]
+
+    X0, Y0 = [], []
+    for ii in range(len(ll) + 1):
+        if ii == 0:
+            x0, y0 = _ix[: ll[ii] + 1], _iy[: ll[ii] + 1]
+        elif ii > 0 and ii < len(ll):
+            x0, y0 = (
+                _ix[ll[ii - 1] + 1 : ll[ii] + 1],
+                _iy[ll[ii - 1] + 1 : ll[ii] + 1],
+            )
+        elif ii == len(ll):
+            x0, y0 = _ix[ll[ii - 1] + 1 :], _iy[ll[ii - 1] + 1 :]
+        X0.append(x0)
+        Y0.append(y0)
+    return X0, Y0
+
+
+def edge_completer(_x, _y, face_dir=None, ind=-1, _N=89):
+    """verifies that an array begins and ends at the edge of a face.
+
+    Parameters:
+    ----------
+
+        _x, _y: list, list
+            indexes of morring array in logical space.
+        face_dir: int
+            output of `od.llc_rearrange.face_direction. Indicates the direction
+            towards which the left endpoint of (mooring) array must reach the
+            edge of face.
+        ind: int, 0 or -1 (default).
+            indicates the index of the (mooring) array.
+        _N: int, default=89.
+            last index of each faceted dimension. (len(X)-1).
+    """
+
+    if face_dir == 1:  # towards local right in x (increase x-index)
+        _mx, _my = connector([_x[ind], _N], [_y[ind], _y[ind]])
+        if ind == -1:
+            _x, _y = _np.append(_x, _mx), _np.append(_y, _my)
+        elif ind == 0:
+            _x, _y = _np.append(_mx[::-1], _x), _np.append(_my, _y)
+    elif face_dir == 0:  # towards local left in x (increase x-index)
+        _mx, _my = connector([0, _x[ind]], [_y[ind], _y[ind]])
+        if ind == 0:
+            _x, _y = _np.append(_mx, _x), _np.append(_my, _y)
+        elif ind == -1:
+            _x, _y = _np.append(_x, _mx[::-1]), _np.append(_y, _my)
+    if face_dir == 3:  # towards local right in y
+        _mx, _my = connector([_x[ind], _x[ind]], [_y[ind], _N])
+        if ind == -1:
+            _x, _y = _np.append(_x, _mx), _np.append(_y, _my)
+        elif ind == 0:
+            _x, _y = _np.append(_mx, _x), _np.append(_my[::-1], _y)
+    if face_dir == 2:
+        _mx, _my = connector([_x[ind], _x[ind]], [0, _y[ind]])
+        if ind == 0:
+            _x, _y = _np.append(_mx, _x), _np.append(_my, _y)
+        elif ind == -1:  # last entry
+            _x, _y = _np.append(_x, _mx), _np.append(_y, _my[::-1])
+
+    mask = _np.abs(_np.diff(_x)) + _np.abs(_np.diff(_y)) == 0
+    _x, _y = (_np.delete(ii, _np.argwhere(mask)) for ii in (_x, _y))
+
+    return _x, _y
+
+
+def edge_slider(x1, y1, f1, x2, y2, f2, _N=89):
+    """
+    Looks at the edge points between faces f1 (present)
+    and f2 (next). Returns a point in f1 that is aligned
+    with the first element in f2.
+
+    [x1, y1, f1] represents the present face
+    [x2, y2, f2] : next face
+
+    TODO: according to phase topology figure out
+    which element connect to which
+
+    """
+    # step 1 assess if there is a vhange in face topo:
+    crns = []
+    for p in [[0, 0], [0, _N], [_N, 0], [_N, _N]]:
+        crns.append(p == [x1, y1])
+    if crns.count(True):
+        # TODO:  check if this is an actual problem
+        raise ValueError("`[x1, y1]` can not be on a face corner")
+
+    rotS = _np.arange(7, 13)
+    nrotS = _np.arange(6)
+
+    set0 = set([x1, y1])
+    ind0, ind1 = set([0]).issubset(set0), set([_N]).issubset(set0)
+    if ind0:
+        i = (x1, y1).index(0)
+    elif ind1:
+        i = (x1, y1).index(_N)
+
+    if set([f1, f2]).issubset(rotS) or set([f1, f2]).issubset(nrotS):
+        new_P = [x2, y2]
+        new_P[i] = [x1, y1][i]
+    else:
+        new_P = [a - b for a, b in zip(2 * [_N], [x2, y2][::-1])]
+        new_P[i] = [x1, y1][i]
+
+    return new_P
+
+
+def fill_path(_X, _Y, _faces, k, _face_conxs, _N=89):
+    """
+    Given a sequence of index arrays (each within a face)
+    makes sure that it always begins and ends at the face edge, expend
+    the end faced-data which can either end or begin at the face edge
+
+    Parameters:
+    ----------
+        X, Y: each 1d array-like of ints
+            len(X) == len(Y) >= 1
+        face: 1d array-like
+            len(face)==len(X). Identifies which face the array is sampling
+            from
+        k: int
+            identifies the kth-array pair (X, Y) with kth-face.
+        _N: int
+            Length of x- or y- dimension. Default is 89, associated with
+    TODO:
+
+    incorporate the changes above.
+    """
+    # import numpy as _np
+
+    Ntot = len(_faces)
+    x, y = connector(_X[k], _Y[k])
+
+    # ASSUMPTION:
+    # Array normally increases monotonically with i and j at its end points.
+    # Under such assumption, the 1st faceted array always is completed at its
+    # right end point `index = -1`, but NOT at its left end point `index=0`.
+    # To generalize, I need to include an option that allows the first array
+    # (`k=0`) to be completed ONLY at the `index=0`, and the last faceted
+    # array (`k=-1`) to be completed. The rest of the
+
+    if k == 0:
+        # Under assumption, this always happens with first Face. But it does
+        # NOT happend with last face
+        # k=-1.
+        dir1 = face_direction(
+            _faces[k], _faces[k + 1], _face_conxs
+        )  # right end of array
+
+        x, y = edge_completer(x, y, face_dir=dir1, ind=-1, _N=_N)
+        x1, y1 = connector(_X[k + 1], _Y[k + 1])
+        dir2 = face_direction(
+            _faces[k + 1], _faces[k], _face_conxs
+        )  # check direction to complete its `index=0`
+        x1, y1 = edge_completer(
+            x1, y1, face_dir=dir2, ind=0, _N=_N
+        )  # include the indedx =0 and the face_direction.
+
+        P = edge_slider(x[-1], y[-1], _faces[k], x1[0], y1[0], _faces[k + 1], _N)
+
+        x, y = connector(_np.append(x, P[0]), _np.append(y, P[1]))
+
+    if k > 0 and k < Ntot - 1:
+        # interior faces - aalways get completed to left and right.
+        dir1 = face_direction(
+            _faces[k], _faces[k + 1], _face_conxs
+        )  # right end of array
+
+        x, y = edge_completer(x, y, face_dir=dir1, ind=-1, _N=_N)
+
+        # if not first of array, also complete towards beginning of array
+        dir0 = face_direction(
+            _faces[k], _faces[k - 1], _face_conxs
+        )  # check direction to complete `index=0`
+        # with previous face.
+        x, y = edge_completer(x, y, face_dir=dir0, ind=0, _N=_N)
+
+        # check next face, and how it intersect face edge to its left.
+
+        x1, y1 = connector(_X[k + 1], _Y[k + 1])
+        dir2 = face_direction(
+            _faces[k + 1], _faces[k], _face_conxs
+        )  # check direction to complete its `index=0`
+        x1, y1 = edge_completer(
+            x1, y1, face_dir=dir2, ind=0, _N=_N
+        )  # include the indedx =0 and the face_direction.
+
+        P = edge_slider(x[-1], y[-1], _faces[k], x1[0], y1[0], _faces[k + 1], _N)
+
+        x, y = connector(_np.append(x, P[0]), _np.append(y, P[1]))
+
+    if k == Ntot - 1:
+        # last faceted array. Under present assumption, need to
+        # complete the `index=0` but NOT `index=-1`.
+        dir0 = face_direction(
+            _faces[k], _faces[k - 1], _face_conxs
+        )  # check direction to complete `index=0`
+        # with previous face.
+        x, y = edge_completer(x, y, face_dir=dir0, ind=0, _N=_N)
+
+    return x, y
 
 
 class Dims:
