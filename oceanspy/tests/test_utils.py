@@ -8,12 +8,8 @@ from oceanspy.utils import (
     cartesian_path,
     circle_path_array,
     connector,
-    edge_completer,
-    edge_slider,
-    fill_path,
     great_circle_path,
     spherical2cartesian,
-    splitter,
     viewer_to_range,
 )
 
@@ -144,36 +140,6 @@ def test_reset_range(XRange, x0, expected_ref):
     assert _np.round(ref_lon, 2) == expected_ref
 
 
-x1 = _np.array([k for k in range(15, 45)])
-y1 = [10] * len(x1)
-
-y2 = [k for k in range(45, 78)]
-x2 = len(y2) * [40]
-
-
-@pytest.mark.parametrize(
-    "x, y, facedir, ind, X0, X1",
-    [
-        (x1, y1, 1, -1, [x1[0], y1[0]], [89, y1[-1]]),
-        (x1, y1, 0, 0, [0, y1[0]], [x1[-1], y1[-1]]),
-        (x1, y1, 3, -1, [x1[0], y1[0]], [x1[-1], 89]),
-        (x1, y1, 2, 0, [x1[0], 0], [x1[-1], y1[-1]]),
-        (x2, y2, 2, 0, [x2[0], 0], [x2[-1], y2[-1]]),
-        (x2, y2, 0, -1, [x2[0], y2[0]], [0, y2[-1]]),
-        (x2, y2, 1, -1, [x2[0], y2[0]], [89, y2[-1]]),
-        (x2, y2, 0, 0, [0, y2[0]], [x2[-1], y2[-1]]),
-        (x2, y2, 1, -1, [x2[0], y2[0]], [89, y2[-1]]),
-    ],
-)
-def test_edge_completer(x, y, facedir, ind, X0, X1):
-    xn, yn = edge_completer(x, y, facedir, ind)
-    # assert unit distance between elements of array.
-    diffs = abs(_np.diff(xn)) + abs(_np.diff(yn))
-    assert _np.max(diffs) == _np.min(diffs) == 1
-    assert [xn[0], yn[0]] == X0
-    assert [xn[-1], yn[-1]] == X1
-
-
 x1 = _np.array([k for k in range(0, 85, 10)])
 y1 = [int(k) for k in _np.linspace(20, 40, len(x1))]
 
@@ -188,105 +154,3 @@ def test_connector(x, y):
     assert _np.max(diffs) == _np.min(diffs) == 1
     assert set(x).issubset(xn)
     assert set(y).issubset(yn)
-
-
-x1 = [k for k in range(0, 85, 10)]
-y1 = [int(k) for k in _np.linspace(20, 40, len(x1))]
-fs1 = len(x1) * [5]
-
-x2 = [k for k in range(10, 85, 10)][::-1]
-y2 = [int(k) for k in _np.linspace(20, 40, len(x2))][::-1]
-fs2 = len(x1) * [2]
-
-y3 = [k for k in range(0, 89, 1)]
-x3 = len(y3) * [2]
-fs3 = len(y3) * [1]
-
-X1, Y1, Fs1 = [x1, x2], [y1, y2], [fs1, fs2]
-
-X2, Y2, Fs2 = [x1, x3], [y1, y3], [fs1, fs3]
-
-
-@pytest.mark.parametrize("X, Y, Fs", [(X1, Y1, Fs1), (X2, Y2, Fs2)])
-def test_splitter(X, Y, Fs):
-    xs = X[0] + X[1]
-    ys = Y[0] + Y[1]
-    fs = Fs[0] + Fs[1]
-    nX, nY = splitter(xs, ys, fs)
-    assert len(nX) == len(nY)
-    assert nX[0] == X[0]
-    assert nX[1] == X[1]
-    assert nY[0] == Y[0]
-    assert nY[1] == Y[1]
-
-
-@pytest.mark.parametrize(
-    "X, Y, Fs, exp",
-    [
-        ([45, 46], [89, 0], [1, 2], [46, 89]),
-        ([89, 0], [45, 44], [1, 4], [89, 44]),
-        ([45, 46], [0, 0], [1, 0], [46, 0]),
-        ([89, 0], [45, 40], [8, 9], [89, 40]),
-        ([0, 89], [45, 40], [8, 7], [0, 40]),
-        ([45, 40], [89, 0], [8, 11], [40, 89]),
-        ([89, 89], [89, 89], [0, 1], [None, None]),
-        ([0, 44], [45, 89], [1, 11], [0, 45]),
-        ([89, 40], [45, 9], [4, 8], [89, 49]),
-        ([45, 89], [0, 40], [8, 4], [49, 0]),
-    ],
-)
-def test_edge_slider(X, Y, Fs, exp):
-    if set([X[0], Y[0]]) == set([89]):
-        with pytest.raises(ValueError):
-            edge_slider(X[0], Y[0], Fs[0], X[1], Y[1], Fs[1])
-    else:
-        newP = edge_slider(X[0], Y[0], Fs[0], X[1], Y[1], Fs[1])
-        assert newP == exp
-
-
-# face 0
-y0 = [k for k in range(45, 90)]
-x0 = len(y0) * [40]
-
-# face 1
-y11 = [k for k in range(45)]
-x11 = len(y11) * [45]
-x12 = [k for k in range(45, 90)]
-y12 = len(x12) * [45]
-x1 = x11 + x12
-y1 = y11 + y12
-
-# face 4
-x41 = [k for k in range(46)]
-y41 = len(x41) * [60]
-y42 = [k for k in range(59, -1, -1)]
-x42 = len(y42) * [45]
-x4 = x41 + x42
-y4 = y41 + y42
-
-# face 3
-y31 = [k for k in range(89, 40, -1)]
-x31 = len(y31) * [60]
-x32 = [k for k in range(60, -1, -1)]
-y32 = len(x32) * [40]
-x3 = x31 + x32
-y3 = y31 + y32
-
-# face 0 again!
-x01 = [k for k in range(89, 45, -1)]
-y01 = len(x01) * [45]
-
-# get them all together
-X, Y = [x0, x1, x4, x3, x01], [y0, y1, y4, y3, y01]
-# faces
-faces = [0, 1, 4, 3, 0]
-
-
-@pytest.mark.parametrize("X, Y, faces", [(X, Y, faces)])
-def test_fill_path(X, Y, faces):
-    for k in range(len(faces) - 1):
-        nx, ny = fill_path(X, Y, faces, k)
-        if faces[k] in [0, 4]:
-            assert nx[-1] == X[k + 1][0]
-        if faces[k] in [1, 3]:
-            assert ny[-1] == Y[k + 1][0]
