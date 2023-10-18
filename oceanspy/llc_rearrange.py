@@ -1729,6 +1729,50 @@ def fill_path(_X, _Y, _faces, k, _face_conxs, _N=89):
     return x, y
 
 
+def face_adjascent(_ix, _iy, _iface, _face_connections, _N=89):
+    """
+    Given a collection of isolated, data points at the edge of a face,
+    returns the adjacent, nearest face.
+    """
+    adj_faces = []
+
+    for i in range(len(_ix)):
+        fleft, fright = _face_connections[_iface[i]]["X"]
+        fbot, ftop = _face_connections[_iface[i]]["Y"]
+
+        set0 = set([_ix[i], _iy[i]])
+        ind0, ind1 = set([0]).issubset(set0), set([_N]).issubset(set0)
+
+        if ([_ix[i], _iy[i]]).count(_N) > 1:
+            raise ValueError(
+                "OceanSpy cannot subsample data from upper right corner of a face"
+            )
+
+        if ind0:
+            k = ([_ix[i], _iy[i]]).index(0)
+            if k > 0:
+                loc_data = 2
+            else:
+                loc_data = 0
+        elif ind1:
+            k = ([_ix[i], _iy[i]]).index(_N)
+            if k > 0:
+                loc_data = 3
+            else:
+                loc_data = 1
+
+        if loc_data == 0:
+            adj_faces.append(fleft[0])
+        elif loc_data == 1:
+            adj_faces.append(fright[0])
+        elif loc_data == 2:
+            adj_faces.append(fbot[0])
+        elif loc_data == 3:
+            adj_faces.append(ftop[0])
+
+    return adj_faces
+
+
 class Dims:
     """Creates a shortcut for dimension`s names associated with an arbitrary
     variable."""
