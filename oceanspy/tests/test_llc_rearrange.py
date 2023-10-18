@@ -1,4 +1,5 @@
 import copy as _copy
+import random as rand
 
 import numpy as _np
 import pytest
@@ -16,6 +17,7 @@ from oceanspy.llc_rearrange import (  # face_edge_check,
     combine_list_ds,
     edge_completer,
     edge_slider,
+    edgesid,
     face_adjacent,
     face_direction,
     fill_path,
@@ -3134,3 +3136,32 @@ def test_face_adjacent(iX, iY, ifaces, face_connections, adjacent):
     else:
         adj = face_adjacent(iX, iY, ifaces, face_connections)
         assert adj == adjacent
+
+
+# edge data on ECCO random array
+edge1 = [[61, 89]]
+edge2 = edge1 + [[21, 89]]
+edge3 = edge2 + [[0, 55]]
+edge4 = edge3 + [[0, 0]]
+
+
+@pytest.mark.parametrize("edge", [edge1, edge2, edge3, edge4])
+def test_edgesid(edge):
+    # non-edge random array on ECCO
+    inX = [rand.randint(1, 88) for k in range(20)]
+    inY = [rand.randint(1, 88) for k in range(20)]
+
+    # create n-random indexes
+    n = [rand.randint(0, len(inX)) for k in range(len(edge))]
+    # insert edge data randomly into array
+    [inX.insert(n[k], edge[k][0]) for k in range(len(edge))]
+    [inY.insert(n[k], edge[k][1]) for k in range(len(edge))]
+
+    inX, inY, ind = edgesid(inX, inY)
+
+    extracted = set(
+        tuple(item) for item in [[inX[ind[ii]], inY[ind[ii]]] for ii in range(len(ind))]
+    )
+    given = set(tuple(item) for item in edge)
+
+    assert given == extracted

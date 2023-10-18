@@ -1773,6 +1773,27 @@ def face_adjacent(_ix, _iy, _iface, _face_connections, _N=89):
     return adj_faces
 
 
+def edgesid(_iX, _iY, _N=89):
+    """
+    From an array of isolated logical indexes within a face, extracts the ones
+    that lie at the edge between one or more faces. It also removes repeated
+    entries from input array.
+    """
+    unique = set(tuple([_iX[i], _iY[i]]) for i in range(len(_iX)))
+    _iX = _np.array([list(unit)[0] for unit in unique])
+    _iY = _np.array([list(unit)[1] for unit in unique])
+
+    # identify all x-edges, if any
+    ixe0 = _np.where(_iX == 0)[0]
+    ixe1 = _np.where(_iX == _N)[0]
+    # y-edges, if any
+    iye0 = _np.where(_iY == 0)[0]
+    iye1 = _np.where(_iY == _N)[0]
+    _index = list(ixe0) + list(ixe1) + list(iye0) + list(iye1)
+
+    return _iX, _iY, _index
+
+
 class Dims:
     """Creates a shortcut for dimension`s names associated with an arbitrary
     variable."""
