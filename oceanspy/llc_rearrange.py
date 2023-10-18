@@ -1729,7 +1729,7 @@ def fill_path(_X, _Y, _faces, k, _face_conxs, _N=89):
     return x, y
 
 
-def face_adjascent(_ix, _iy, _iface, _face_connections, _N=89):
+def face_adjacent(_ix, _iy, _iface, _face_connections, _N=89):
     """
     Given a collection of isolated, data points at the edge of a face,
     returns the adjacent, nearest face.
