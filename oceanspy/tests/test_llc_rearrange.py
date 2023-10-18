@@ -3118,13 +3118,19 @@ def test_fill_path(X, Y, faces):
 
 
 @pytest.mark.parametrize(
-    "iX, iY, ifaces, adjacent",
-    [([61], [89], [10], [2]), ([89], [89], [10], [2])],
+    "iX, iY, ifaces, face_connections, adjacent",
+    [
+        ([61], [89], [10], od.face_connections["face"], [2]),
+        ([89], [89], [10], od.face_connections["face"], [2]),
+        ([89], [19], [10], od.face_connections["face"], [11]),
+        ([0], [19], [10], od.face_connections["face"], [6]),
+        ([10], [0], [10], od.face_connections["face"], [7]),
+    ],
 )
-def test_face_adjacent(iX, iY, ifaces, adjacent):
+def test_face_adjacent(iX, iY, ifaces, face_connections, adjacent):
     if iX + iY == [89, 89]:
         with pytest.raises(ValueError):
-            face_adjacent(iX, iY, ifaces)
+            face_adjacent(iX, iY, ifaces, face_connections)
     else:
-        adj = face_adjacent(iX, iY, ifaces)
+        adj = face_adjacent(iX, iY, ifaces, face_connections)
         assert adj == adjacent
