@@ -3127,7 +3127,7 @@ def test_fill_path(X, Y, faces):
         ([89], [19], [10], od.face_connections["face"], [11]),
         ([0], [19], [10], od.face_connections["face"], [6]),
         ([10], [0], [10], od.face_connections["face"], [7]),
-        ([10], [0], [10], od.face_connections["face"], [-1]),
+        ([10], [89], [10], od.face_connections["face"], [-1]),
     ],
 )
 def test_face_adjacent(iX, iY, ifaces, face_connections, adjacent):
@@ -3136,10 +3136,10 @@ def test_face_adjacent(iX, iY, ifaces, face_connections, adjacent):
             face_adjacent(iX, iY, ifaces, face_connections)
     else:
         if adjacent == [-1]:
-            _N = 4320
+            N = 4320
         else:
-            _N = 89
-        adj = face_adjacent(iX, iY, ifaces, face_connections, _N=_N)
+            N = 89
+        adj = face_adjacent(iX, iY, ifaces, face_connections, _N=N)
         assert adj == adjacent
 
 
