@@ -1737,6 +1737,7 @@ def face_adjacent(_ix, _iy, _iface, _face_connections, _N=89):
     adj_faces = []
 
     for i in range(len(_ix)):
+        loc_data = -1  # initialize -- implies do edge data
         fleft, fright = _face_connections[_iface[i]]["X"]
         fbot, ftop = _face_connections[_iface[i]]["Y"]
 
@@ -1769,6 +1770,8 @@ def face_adjacent(_ix, _iy, _iface, _face_connections, _N=89):
             adj_faces.append(fbot[0])
         elif loc_data == 3:
             adj_faces.append(ftop[0])
+        elif loc_data == -1:
+            adj_faces.append(loc_data)
 
     return adj_faces
 

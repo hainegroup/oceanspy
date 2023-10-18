@@ -3127,6 +3127,7 @@ def test_fill_path(X, Y, faces):
         ([89], [19], [10], od.face_connections["face"], [11]),
         ([0], [19], [10], od.face_connections["face"], [6]),
         ([10], [0], [10], od.face_connections["face"], [7]),
+        ([10], [0], [10], od.face_connections["face"], [-1]),
     ],
 )
 def test_face_adjacent(iX, iY, ifaces, face_connections, adjacent):
@@ -3134,7 +3135,11 @@ def test_face_adjacent(iX, iY, ifaces, face_connections, adjacent):
         with pytest.raises(ValueError):
             face_adjacent(iX, iY, ifaces, face_connections)
     else:
-        adj = face_adjacent(iX, iY, ifaces, face_connections)
+        if adjacent == [-1]:
+            _N = 4320
+        else:
+            _N = 89
+        adj = face_adjacent(iX, iY, ifaces, face_connections, _N=_N)
         assert adj == adjacent
 
 
