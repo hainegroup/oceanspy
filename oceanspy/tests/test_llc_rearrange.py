@@ -16,6 +16,7 @@ from oceanspy.llc_rearrange import (  # face_edge_check,
     combine_list_ds,
     edge_completer,
     edge_slider,
+    face_adjacent,
     face_direction,
     fill_path,
     mask_var,
@@ -3114,3 +3115,16 @@ def test_fill_path(X, Y, faces):
                 assert xx[k1][0] == xx[k0][-1]
             else:  # change in topo
                 assert _N - xx[k1][0] == yy[k0][-1]
+
+
+@pytest.mark.parametrize(
+    "iX, iY, ifaces, adjacent",
+    [([61], [89], [10], [2]), ([89], [89], [10], [2])],
+)
+def test_face_adjacent(iX, iY, ifaces, adjacent):
+    if iX + iY == [89, 89]:
+        with pytest.raises(ValueError):
+            face_adjacent(iX, iY, ifaces)
+    else:
+        adj = face_adjacent(iX, iY, ifaces)
+        assert adj == adjacent
