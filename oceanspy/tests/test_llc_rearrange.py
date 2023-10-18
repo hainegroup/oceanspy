@@ -3016,18 +3016,101 @@ y3 = y31 + y32
 x01 = [k for k in range(80, 45, -1)]
 y01 = len(x01) * [45]
 # get them all together
-X, Y = [x0, x1, x4, x3, x01], [y0, y1, y4, y3, y01]
+X1, Y1 = [x0, x1, x4, x3, x01], [y0, y1, y4, y3, y01]
+
+Xac = [x01[::-1], x3[::-1], x4[::-1], x1[::-1], x0[::-1]]
+Yac = [y01[::-1], y3[::-1], y4[::-1], y1[::-1], y0[::-1]]
+
+
 # faces
-faces = [0, 1, 4, 3, 0]
+faces1 = [0, 1, 4, 3, 0]
+facesac = faces1[::-1]
 
 
-@pytest.mark.parametrize("X, Y, faces", [(X, Y, faces)])
+# topology changes
+x11 = _np.arange(20, 69)
+y11 = [60] * len(x11)
+y12 = _np.arange(61, 85)
+x12 = [70] * len(y12)
+x1 = _np.array(list(x11) + list(x12))
+y1 = _np.array(list(y11) + list(y12))
+x2 = _np.arange(10, 80)
+y2 = _np.array([10] * len(x2))
+x3 = _np.arange(20, 75)
+y3 = _np.array([25] * len(x3))
+y40 = _np.arange(15, 45)
+x40 = [60] * len(y40)
+x41 = _np.arange(60, 20, -1)
+y41 = [50] * len(x41)
+y42 = _np.arange(40, 10, -1)
+x42 = [20] * len(y42)
+x4 = _np.array(list(x40) + list(x41) + list(x42))
+y4 = _np.array(list(y40) + list(y41) + list(y42))
+x5 = _np.arange(60, 10, -1)
+y5 = _np.array([65] * len(x5))
+x6 = _np.arange(60, 10, -1)
+y6 = _np.array([80] * len(x6))
+y7 = _np.arange(85, 61, -1)
+x7 = [19] * len(y7)
+
+XX, YY = [x1, x2, x3, x4, x5, x6, x7], [y1, y2, y3, y4, y5, y6, y7]
+
+xfaces = [10, 2, 5, 7, 5, 2, 10]
+
+
+@pytest.mark.parametrize(
+    "X, Y, faces",
+    [
+        (X1, Y1, faces1),
+        (Xac, Yac, facesac),
+        (XX, YY, xfaces),
+    ],
+)
 def test_fill_path(X, Y, faces):
-    for k in range(len(faces) - 1):
+    xx, yy = [], []
+    for k in range(len(faces)):
         nx, ny = fill_path(X, Y, faces, k, od.face_connections["face"])
+        xx.append(nx)
+        yy.append(ny)
         diffs = abs(_np.diff(nx)) + abs(_np.diff(ny))
         assert _np.max(diffs) == _np.min(diffs) == 1
-        if faces[k] in [0, 4]:
-            assert nx[-1] == X[k + 1][0]
-        if faces[k] in [1, 3]:
-            assert ny[-1] == Y[k + 1][0]
+
+    nRot, Rot = _np.arange(6), _np.arange(6, 13)
+    _N = 89  # last index in ECCO (i or j)
+
+    for k in range(1, len(faces) - 1):
+        k0, k1, k2 = [k - 1, k, k + 1]
+
+        _past = face_direction(faces[k1], faces[k0], od.face_connections["face"])
+        _next = face_direction(faces[k1], faces[k2], od.face_connections["face"])
+
+        st_next, st_past = False, False  # initialize same topology flag
+        if set([faces[k1], faces[k2]]).issubset(nRot) or set(
+            [faces[k1], faces[k2]]
+        ).issubset(Rot):
+            st_next = True  # same topology
+        if set([faces[k1], faces[k0]]).issubset(nRot) or set(
+            [faces[k1], faces[k0]]
+        ).issubset(Rot):
+            st_past = True  # same topology
+
+        if _next in [0, 1]:
+            if st_next:
+                assert yy[k1][-1] == yy[k2][0]
+            else:  # change in topo
+                assert yy[k1][-1] == _N - xx[k2][0]
+        if _next in [2, 3]:
+            if st_next:
+                assert xx[k1][-1] == xx[k2][0]
+            else:  # change in topo
+                _N - xx[k1][-1] == yy[k2][0]
+        if _past in [0, 1]:
+            if st_past:
+                assert yy[k1][0] == yy[k0][-1]
+            else:  # change in topo
+                assert yy[k1][0] == 89 - xx[k0][-1]
+        if _past in [2, 3]:
+            if st_past:
+                assert xx[k1][0] == xx[k0][-1]
+            else:  # change in topo
+                assert _N - xx[k1][0] == yy[k0][-1]
