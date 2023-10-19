@@ -3274,16 +3274,12 @@ X2, Y2 = connector(x1[::-1], y1[::-1])
 
 x10 = _np.arange(89, 45, -1)
 y10 = [25] * len(x10)
-
 y11 = _np.arange(30, 65)
 x11 = [45] * len(y11)
-
 x12 = _np.arange(55, 89)
 y12 = [75] * len(x12)
-
 nx1 = _np.array(list(x10) + list(x11) + list(x12))
 ny1 = _np.array(list(y10) + list(y11) + list(y12))
-
 X3, Y3 = connector(nx1, ny1)
 X4, Y4 = connector(nx1[::-1], ny1[::-1])
 
