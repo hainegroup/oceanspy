@@ -24,6 +24,7 @@ from oceanspy.llc_rearrange import (  # face_edge_check,
     index_splitter,
     mask_var,
     mates,
+    order_from_indexing,
     rotate_dataset,
     rotate_vars,
     shift_dataset,
@@ -31,7 +32,7 @@ from oceanspy.llc_rearrange import (  # face_edge_check,
     slice_datasets,
     splitter,
 )
-from oceanspy.utils import _reset_range, get_maskH
+from oceanspy.utils import _reset_range, connector, get_maskH
 
 Datadir = "./oceanspy/tests/Data/"
 ECCO_url = "{}catalog_ECCO.yaml".format(Datadir)
@@ -3246,3 +3247,53 @@ def test_index_splitter(ix, iy, faces, face_connections, count):
     nx1, ny1 = fill_path(ix, iy, faces, 0, face_connections)
     nI = index_splitter(nx1, ny1)
     assert len(nI) == count
+
+
+# face 1
+y11 = [k for k in range(0, 11)]
+x11 = [49 + 4 * k for k in range(11)]
+y12 = [k for k in range(11, 16)]
+x12 = len(y12) * [89]
+x13 = [k for k in range(45, 60)]
+y13 = len(x13) * [25]
+y14 = [k for k in range(25, 35)]
+x14 = len(y14) * [89]
+x15 = [k for k in range(45, 60)]
+y15 = len(x15) * [45]
+x16 = [k for k in range(70, 80)]
+y16 = len(x16) * [89]
+x17 = [k for k in range(80, 85)]
+y17 = len(x17) * [79]
+x1 = x11 + x12 + x13 + x14 + x15 + x16 + x17
+y1 = y11 + y12 + y13 + y14 + y15 + y16 + y17
+
+# group together
+X1, Y1 = connector(x1, y1)
+X2, Y2 = connector(x1[::-1], y1[::-1])
+
+
+x10 = _np.arange(89, 45, -1)
+y10 = [25] * len(x10)
+
+y11 = _np.arange(30, 65)
+x11 = [45] * len(y11)
+
+x12 = _np.arange(55, 89)
+y12 = [75] * len(x12)
+
+nx1 = _np.array(list(x10) + list(x11) + list(x12))
+ny1 = _np.array(list(y10) + list(y11) + list(y12))
+
+X3, Y3 = connector(nx1, ny1)
+X4, Y4 = connector(nx1[::-1], ny1[::-1])
+
+
+@pytest.mark.parametrize("iX, iY", [(X1, Y1), (X2, Y2), (X3, Y3), (X4, Y4)])
+def test_order_from_indexing(iX, iY):
+    nI = index_splitter(iX, iY)
+    _mi, _ixx = order_from_indexing(iX, nI)
+    if len(_mi) == 0:
+        assert _ixx.all() == iX.all()
+    else:
+        for i in range(len(_mi)):
+            assert _ixx[i].all() == iX[_mi[i]].all()
