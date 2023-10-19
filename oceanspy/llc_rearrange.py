@@ -1842,9 +1842,9 @@ def index_splitter(ix, iy, _N=89):
         else:
             yb = []
 
-        if len(yb) == 0:  # only one set of edge data
+        if len(yb) == 0 and len(iiy) > 0:  # only one set of edge data
             Ii.append(list(iiy))
-        else:
+        elif len(yb) > 0:
             for k in range(len(yb) + 1):
                 if k == 0:
                     Ii.append(list(iiy[: yb[k] + 1]))
@@ -1852,9 +1852,9 @@ def index_splitter(ix, iy, _N=89):
                     Ii.append(list(iiy[yb[k - 1] + 1 : yb[k] + 1]))
                 elif k == len(yb):
                     Ii.append(list(iiy[yb[k - 1] + 1 :]))
-        if len(xb) == 0:
+        if len(xb) == 0 and len(iix) > 0:
             Ii.append(list(iix))
-        else:
+        elif len(xb) > 0:
             for k in range(len(xb) + 1):
                 if k == 0:
                     Ii.append(list(iix[: xb[k] + 1]))
