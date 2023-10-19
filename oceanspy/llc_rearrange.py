@@ -1637,14 +1637,15 @@ def fill_path(_X, _Y, _faces, k, _face_conxs, _N=89):
     """
     Given a sequence of index arrays (each within a face)
     makes sure that it always begins and ends at the face edge, expend
-    the end faced-data which can either end or begin at the face edge
+    the end faced-data which can either end or begin at the face edge. To be
+    used when len(_faces)>1. Otherwise, use `connector`.
 
     Parameters:
     ----------
         X, Y: each 1d array-like of ints
             len(X) == len(Y) >= 1
-        face: 1d array-like
-            len(face)==len(X). Identifies which face the array is sampling
+        face: 1d array-like.
+            len(face)==len(X)>1. Identifies which face the array is sampling
             from
         k: int
             identifies the kth-array pair (X, Y) with kth-face.
@@ -1658,6 +1659,8 @@ def fill_path(_X, _Y, _faces, k, _face_conxs, _N=89):
 
     Ntot = len(_faces)
     x, y = connector(_X[k], _Y[k])
+
+    # if Ntot > 1: # there is
 
     # ASSUMPTION:
     # Array normally increases monotonically with i and j at its end points.
@@ -1873,6 +1876,31 @@ def index_splitter(ix, iy, _N=89):
                 if not endpoint and not origin:
                     nI.append(Ii[ii[k]])
     return nI
+
+
+def order_from_indexing(_ix, _in):
+    """Given an array of bounded integers (indexing array), and a list of
+    indexes that subsets the indexing array, returns the mapping associated
+    with the subsetting array.
+    """
+    Nn = len(_in)
+    nx = []
+    if Nn == 0:  # preserves original data
+        mI = []  # there is no mapping/no data at edge of face
+        nx = _ix
+    if Nn > 0:  # there is edge data.
+        nx = [_ix[: _in[0][0]]]
+        for jj in range(1, Nn):
+            nx.append(_ix[_in[jj - 1][0] : _in[jj - 1][-1] + 1])
+            nx.append(_ix[_in[jj - 1][-1] + 1 : _in[jj][0]])
+        nx.append(_ix[_in[-1][0] : _in[-1][-1] + 1])
+        nx.append(_ix[_in[-1][-1] + 1 :])
+
+        mI = [[k for k in range(len(nx[0]))]]
+        for ii in range(1, len(nx)):
+            val = mI[ii - 1][-1] + 1
+            mI.append(list([val + k for k in range(len(nx[ii]))]))
+    return mI, nx
 
 
 class Dims:
