@@ -1835,8 +1835,12 @@ def index_splitter(ix, iy, _N=89):
         Ii = []  # there is right-edged data.
         if iix.shape[0] > 0:
             xb = _np.where(_np.diff(iix) > 1)[0]
+        else:
+            xb = []
         if iiy.shape[0] > 0:
             yb = _np.where(_np.diff(iiy) > 1)[0]
+        else:
+            yb = []
 
         if len(yb) == 0:  # only one set of edge data
             Ii.append(list(iiy))
