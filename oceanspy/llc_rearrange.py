@@ -1731,15 +1731,27 @@ def fill_path(_X, _Y, _faces, k, _face_conxs, _N=89):
 
 def face_adjacent(_ix, _iy, _iface, _face_connections, _N=89):
     """
-    Given a collection of isolated, data points at the edge of a face,
-    returns the adjacent, nearest face.
+    Given a collection of data points within a face, returns the adjacent
+    face next to boundary data. If data does not eval at the
+    boundary between two faces, returns -1.
+
+    Parameters:
+    ----------
+        _ix: 1d array-like, int data
+        _iy: 1d array-like. int data
+        _iface: int
+            face index where array lives.
+        _face_connections: dict
+            contains topology of data.
+        _N: int. default=89 (ECCO)
+            last index along  i or j index in faceted data.
     """
     adj_faces = []
+    fleft, fright = _face_connections[_iface]["X"]
+    fbot, ftop = _face_connections[_iface]["Y"]
 
     for i in range(len(_ix)):
         loc_data = -1  # initialize -- implies do edge data
-        fleft, fright = _face_connections[_iface[i]]["X"]
-        fbot, ftop = _face_connections[_iface[i]]["Y"]
 
         set0 = set([_ix[i], _iy[i]])
         ind0, ind1 = set([0]).issubset(set0), set([_N]).issubset(set0)
@@ -1765,14 +1777,19 @@ def face_adjacent(_ix, _iy, _iface, _face_connections, _N=89):
         if loc_data == 0:
             adj_faces.append(fleft[0])
         elif loc_data == 1:
-            adj_faces.append(fright[0])
+            if fright is not None:
+                adj_faces.append(fright[0])
+            else:
+                adj_faces.append(-1)  # singularity south pole.
         elif loc_data == 2:
-            adj_faces.append(fbot[0])
+            if fbot is not None:
+                adj_faces.append(fbot[0])
+            else:
+                adj_faces.append(-1)  # singularity south pole.
         elif loc_data == 3:
             adj_faces.append(ftop[0])
         elif loc_data == -1:
             adj_faces.append(loc_data)
-
     return adj_faces
 
 
@@ -1780,7 +1797,8 @@ def edgesid(_iX, _iY, _N=89):
     """
     From an array of isolated logical indexes within a face, extracts the ones
     that lie at the edge between one or more faces. It also removes repeated
-    entries from input array.
+    entries from input array. This function does not preserve the ordering of
+    the data.
     """
     unique = set(tuple([_iX[i], _iY[i]]) for i in range(len(_iX)))
     _iX = _np.array([list(unit)[0] for unit in unique])
@@ -1795,6 +1813,62 @@ def edgesid(_iX, _iY, _N=89):
     _index = list(ixe0) + list(ixe1) + list(iye0) + list(iye1)
 
     return _iX, _iY, _index
+
+
+def index_splitter(ix, iy, _N=89):
+    """
+    Takes the index pair (ix, iy) of ordered, continuous and
+    equidistant (unit) distanced array, and identifies the
+    location at which the pair reaches the edge of the face.
+    The edge of the face is identified by `_N`, the last index
+    along each dimention. Allows to split the array while preserving
+    its original order.
+    """
+
+    nI = []  # indexes of partition
+    Nx = len(ix)
+
+    iix = _np.where(ix == _N)[0]
+    iiy = _np.where(iy == _N)[0]
+
+    if iix.shape[0] + iiy.shape[0] > 0:
+        Ii = []  # there is right-edged data.
+        if iix.shape[0] > 0:
+            xb = _np.where(_np.diff(iix) > 1)[0]
+        if iiy.shape[0] > 0:
+            yb = _np.where(_np.diff(iiy) > 1)[0]
+
+        if len(yb) == 0:  # only one set of edge data
+            Ii.append(list(iiy))
+        else:
+            for k in range(len(yb) + 1):
+                if k == 0:
+                    Ii.append(list(iiy[: yb[k] + 1]))
+                elif k > 0 and k < len(yb):
+                    Ii.append(list(iiy[yb[k - 1] + 1 : yb[k] + 1]))
+                elif k == len(yb):
+                    Ii.append(list(iiy[yb[k - 1] + 1 :]))
+        if len(xb) == 0:
+            Ii.append(list(iix))
+        else:
+            for k in range(len(xb) + 1):
+                if k == 0:
+                    Ii.append(list(iix[: xb[k] + 1]))
+                elif k > 0 and k < len(xb):
+                    Ii.append(list(iix[xb[k - 1] + 1 : xb[k] + 1]))
+                elif k == len(xb):
+                    Ii.append(list(iix[xb[k - 1] + 1 :]))
+
+        if len(xb) + len(yb) > 0:
+            i0 = [Ii[k][0] for k in range(len(Ii))]
+            ii = _np.argsort(i0)  # order
+
+            for k in range(len(ii)):
+                endpoint = set([Nx - 1]).issubset(Ii[ii[k]])
+                origin = set([0]).issubset(Ii[ii[k]])
+                if not endpoint and not origin:
+                    nI.append(Ii[ii[k]])
+    return nI
 
 
 class Dims:
