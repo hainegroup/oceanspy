@@ -145,12 +145,14 @@ y1 = [int(k) for k in _np.linspace(20, 40, len(x1))]
 
 
 @pytest.mark.parametrize(
-    "x, y", [(x1, y1), (x1[::-1], y1), (x1[::-1], y1[::-1]), (x1, y1[::-1])]
+    "x, y",
+    [(x1, y1), (x1[::-1], y1), (x1[::-1], y1[::-1]), (x1, y1[::-1]), ([50], [50])],
 )
 def test_connector(x, y):
     xn, yn = connector(x, y)
-    diffs = abs(_np.diff(xn)) + abs(_np.diff(yn))
     assert len(xn) == len(yn)
-    assert _np.max(diffs) == _np.min(diffs) == 1
     assert set(x).issubset(xn)
     assert set(y).issubset(yn)
+    if len(xn) > 1:
+        diffs = abs(_np.diff(xn)) + abs(_np.diff(yn))
+        assert _np.max(diffs) == _np.min(diffs) == 1

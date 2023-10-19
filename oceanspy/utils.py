@@ -1054,23 +1054,25 @@ def connector(_ix, _iy):
     """
     Takes a collection of points defined in logical space (ix, iy), each of
     equal length arrays, and returns a new continous array (_ix, _iy) that
-    contains the original elements but the spacing between them in logical
-    space is always unity.
+    contains the original elements now with unit spacing.
 
     """
-    mask = _np.abs(_np.diff(_ix)) + _np.abs(_np.diff(_iy)) == 0
-    _ix, _iy = (_np.delete(ii, _np.argwhere(mask)) for ii in (_ix, _iy))
+    if len(_ix) == len(_iy) == 1:
+        return _ix, _iy
+    else:
+        mask = _np.abs(_np.diff(_ix)) + _np.abs(_np.diff(_iy)) == 0
+        _ix, _iy = (_np.delete(ii, _np.argwhere(mask)) for ii in (_ix, _iy))
 
-    # Initialize variables"
-    dx, dy, inds = diff_and_inds_where_insert(_ix, _iy)
-    while inds.size:
-        dx, dy = (di[inds] for di in (dx, dy))
-        mask = _np.abs(dx * dy) == 1
-        _ix = _np.insert(_ix, inds + 1, _ix[inds] + (dx / 2).astype(int))
-        _iy = _np.insert(
-            _iy, inds + 1, _iy[inds] + _np.where(mask, dy, (dy / 2).astype(int))
-        )
-        # Prepare for next iteration
+        # Initialize variables"
         dx, dy, inds = diff_and_inds_where_insert(_ix, _iy)
-    _iX, _iY = remove_repeated(_ix, _iy)
-    return _iX, _iY
+        while inds.size:
+            dx, dy = (di[inds] for di in (dx, dy))
+            mask = _np.abs(dx * dy) == 1
+            _ix = _np.insert(_ix, inds + 1, _ix[inds] + (dx / 2).astype(int))
+            _iy = _np.insert(
+                _iy, inds + 1, _iy[inds] + _np.where(mask, dy, (dy / 2).astype(int))
+            )
+            # Prepare for next iteration
+            dx, dy, inds = diff_and_inds_where_insert(_ix, _iy)
+        _iX, _iY = remove_repeated(_ix, _iy)
+        return _iX, _iY
