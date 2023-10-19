@@ -21,6 +21,7 @@ from oceanspy.llc_rearrange import (  # face_edge_check,
     face_adjacent,
     face_direction,
     fill_path,
+    index_splitter,
     mask_var,
     mates,
     rotate_dataset,
@@ -3120,27 +3121,33 @@ def test_fill_path(X, Y, faces):
 
 
 @pytest.mark.parametrize(
-    "iX, iY, ifaces, face_connections, adjacent",
+    "iX, iY, iface, face_connections, adjacent",
     [
-        ([61], [89], [10], od.face_connections["face"], [2]),
-        ([89], [89], [10], od.face_connections["face"], [2]),
-        ([89], [19], [10], od.face_connections["face"], [11]),
-        ([0], [19], [10], od.face_connections["face"], [6]),
-        ([10], [0], [10], od.face_connections["face"], [7]),
-        ([10], [89], [10], od.face_connections["face"], [-1]),
+        ([61], [89], 10, od.face_connections["face"], [2]),
+        ([89], [89], 10, od.face_connections["face"], [2]),
+        ([89], [19], 10, od.face_connections["face"], [11]),
+        ([0], [19], 10, od.face_connections["face"], [6]),
+        ([10], [0], 10, od.face_connections["face"], [7]),
+        ([10], [89], 10, od.face_connections["face"], [-1]),
+        ([10], [0], 0, od.face_connections["face"], None),  # south pole
+        ([89], [9], 12, od.face_connections["face"], None),  # south pole
     ],
 )
-def test_face_adjacent(iX, iY, ifaces, face_connections, adjacent):
+def test_face_adjacent(iX, iY, iface, face_connections, adjacent):
     if iX + iY == [89, 89]:
         with pytest.raises(ValueError):
-            face_adjacent(iX, iY, ifaces, face_connections)
+            face_adjacent(iX, iY, iface, face_connections)
     else:
-        if adjacent == [-1]:
-            N = 4320
+        if adjacent is None:  # southern pole singularity
+            adj = face_adjacent(iX, iY, iface, face_connections)
+            assert adj[0] == -1
         else:
-            N = 89
-        adj = face_adjacent(iX, iY, ifaces, face_connections, _N=N)
-        assert adj == adjacent
+            if adjacent == [-1]:
+                N = 4320
+            else:
+                N = 89
+            adj = face_adjacent(iX, iY, iface, face_connections, _N=N)
+            assert adj == adjacent
 
 
 # edge data on ECCO random array
@@ -3170,3 +3177,72 @@ def test_edgesid(edge):
     given = set(tuple(item) for item in edge)
 
     assert given == extracted
+
+
+# test 1
+# face 1
+y11 = [k for k in range(0, 11)]
+x11 = [49 + 4 * k for k in range(11)]
+y12 = [k for k in range(11, 16)]
+x12 = len(y12) * [89]
+x13 = [k for k in range(45, 60)]
+y13 = len(x13) * [25]
+y14 = [k for k in range(25, 35)]
+x14 = len(y14) * [89]
+x15 = [k for k in range(45, 60)]
+y15 = len(x15) * [45]
+x16 = [k for k in range(70, 80)]
+y16 = len(x16) * [89]
+x17 = [k for k in range(80, 85)]
+y17 = len(x17) * [79]
+x1 = x11 + x12 + x13 + x14 + x15 + x16 + x17
+y1 = y11 + y12 + y13 + y14 + y15 + y16 + y17
+
+# face 4
+x21 = [k for k in range(5, 46)]
+y21 = len(x21) * [60]
+y22 = [k for k in range(59, 10, -1)]
+x22 = len(y22) * [45]
+x2 = x21 + x22
+y2 = y21 + y22
+
+# group together
+X1, Y1 = [x1, x2], [y1, y2]
+faces1 = [1, 4]
+
+
+# test 2
+# face 2
+x10 = _np.arange(89, 45, -1)
+y10 = [25] * len(x10)
+y11 = _np.arange(30, 65)
+x11 = [45] * len(y11)
+x12 = _np.arange(55, 89)
+y12 = [75] * len(x12)
+nx1 = _np.array(list(x10) + list(x11) + list(x12))
+ny1 = _np.array(list(y10) + list(y11) + list(y12))
+# face 5
+x20 = _np.arange(45)
+y20 = [20] * len(x20)
+y21 = _np.arange(30, 75)
+x21 = [55] * len(y21)
+x22 = _np.arange(45, 0, -1)
+y22 = [80] * len(x22)
+nx2 = _np.array(list(x20) + list(x21) + list(x22))
+ny2 = _np.array(list(y20) + list(y21) + list(y22))
+# group together
+X2, Y2 = [nx1, nx2[::-1], nx1[:1]], [ny1, ny2[::-1], ny1[:1]]
+faces2 = [2, 5, 2]
+
+
+@pytest.mark.parametrize(
+    "ix, iy, faces, face_connections, count",
+    [
+        (X1, Y1, faces1, od.face_connections["face"], 3),
+        (X2, Y2, faces2, od.face_connections["face"], 0),
+    ],
+)
+def test_index_splitter(ix, iy, faces, face_connections, count):
+    nx1, ny1 = fill_path(ix, iy, faces, 0, face_connections)
+    nI = index_splitter(nx1, ny1)
+    assert len(nI) == count
