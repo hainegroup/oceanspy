@@ -1347,7 +1347,7 @@ def eval_dataset(_ds, _ix, _iy, _iface=None, _dim_name="mooring"):
         if _iface in _np.arange(7, 13):
             rename = {"yp1": "Xp1", "xp1": "Yp1", "x": "Y", "y": "X"}
 
-    new_ds = _ds.isel(**args).drop_vars(["Xp1", "Yp1", "X", "Y", "face"])
+    new_ds = _ds.isel(**args).drop_vars(["Xp1", "Yp1", "X", "Y"])
     new_ds = new_ds.rename_dims(rename).rename_vars(rename)
     if _iface is not None and _iface in _np.arange(7, 13):
         new_ds = rotate_vars(new_ds)
@@ -1788,18 +1788,24 @@ def ds_edge(_ds, _ix, _iy, _ifaces, ii, _face_topo, _Nx=89, _dim="mooring"):
                 # print(axis)
                 args = {"yp1": slice(1)}
                 rename = {"y": "yp1"}
+                if face1 in rotS:  # reverse the order of x points
+                    iXp1 = DataArray(
+                        _np.stack((_ix, _ix + 1)[::-1], 1),
+                        coords={_dim_name: new_dim, "xp1": xp1},
+                        dims=(_dim_name, "xp1"),
+                    )
                 iXp1n = iXp1.isel(mooring=moor)
                 iYp1n = iYp1.isel(mooring=moor, **args)
                 iargs = {"X": iXn, "Xp1": iXp1n, "Yp1": iYp1n - _Nx}
                 revar = "yp1"
                 vds = _ds.isel(face=face2, **iargs)
                 vds = vds.reset_coords()[vvars + gvars]
-                vds = reset_dim(vds, 1, revar)
 
                 # get the rest of the points
                 argsn = {"face": face1, "X": iXn, "Y": iYn, "Xp1": iXp1n, "Yp1": iYp1n}
                 mds = _ds.isel(**argsn).reset_coords()  # regular eval
                 mds = mds.drop_vars(["face", "Yp1", "Xp1", "X", "Y"])
+                vds = reset_dim(vds, 1, revar)
                 vgmds = _xr.combine_by_coords([mds[vvars + gvars], vds])
 
                 cumds = mds.reset_coords()[cvars + uvars]
