@@ -1723,8 +1723,6 @@ def ds_edge(_ds, _ix, _iy, _ifaces, ii, _face_topo, _Nx=89, _dim="mooring"):
 
     if connect:
         # if there is a need to sample from across the face interface
-        rotS = set(_np.arange(7, 13))
-        nrotS = set(_np.arange(6))
 
         iXn = iX.isel(mooring=moor)
         iYn = iY.isel(mooring=moor)
@@ -1760,16 +1758,13 @@ def ds_edge(_ds, _ix, _iy, _ifaces, ii, _face_topo, _Nx=89, _dim="mooring"):
                 # print(axis)
                 args = {"xp1": slice(1)}
                 rename = {"x": "xp1"}
-                iXp1n = iXp1.isel(mooring=moor, **args)
-                iYp1n = iYp1.isel(mooring=moor)
-                iargs = {"Y": iYn, "Yp1": iYp1n, "Xp1": iXp1n - _Nx}
                 revar = "xp1"
                 iXp1n = iXp1.isel(mooring=moor, **args)
                 iYp1n = iYp1.isel(mooring=moor)
+                iargs = {"Y": iYn, "Yp1": iYp1n, "Xp1": iXp1n - _Nx}
 
                 vds = _ds.isel(face=face2, **iargs)
                 vds = vds.reset_coords()[uvars + gvars]
-                vds = reset_dim(vds, 1, revar)
 
                 # get the rest of the points
                 argsn = {"face": face1, "X": iXn, "Y": iYn, "Xp1": iXp1n, "Yp1": iYp1n}
