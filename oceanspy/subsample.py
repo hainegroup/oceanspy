@@ -36,7 +36,7 @@ from ._ospy_utils import (
     _rename_aliased,
 )
 from .llc_rearrange import LLCtransformation as _llc_trans
-from .llc_rearrange import arctic_eval, mates, rotate_vars
+from .llc_rearrange import eval_dataset, mates
 from .utils import (
     _rel_lon,
     _reset_range,
@@ -1547,122 +1547,6 @@ def particle_properties(od, times, Ypart, Xpart, Zpart, **kwargs):
     od._ds = od._ds.reset_coords()
 
     return od
-
-
-def eval_dataset(_ds, _ix, _iy, _iface=None, _dim_name="mooring"):
-    """
-    Evaluates a dataset along (spatial) trajectory in the plane as defined by the
-    indexes in the plane. As a result, there is a new dimension/coordinate, hence
-    reducing the dimension of the original dataset.
-
-    Parameters:
-    ----------
-        _ds: xarray.Dataset
-            contains all x, y coordinates (but may be subsampled in Z or time)
-        _ix, _iy: 1D array, int
-            index values identifying the location in X Y (lat, lon) space
-        _iface: int, None (bool)
-            None (default) implies no complex topology in the dataset. Otherwise,
-            _iface indicates the face index which, along which the provided ix, iy,
-            identify the spatial (geo) coordinate location in lat/lon space.
-        _dim_name: str
-            names the new dimension along the pathway. By default this is 'mooring',
-            but can also be 'station' (when discrete, argo-like isolated coordinates).
-
-    Returns:
-        xarray.Dataset
-
-    """
-
-    nz = len(_ds.Z)
-    nzu = len(_ds.Zu)
-    nzp1 = len(_ds.Zp1)
-    nzl = len(_ds.Zl)
-
-    # rechunk in time and z
-    chunks = {"Z": nz, "Zu": nzu, "Zp1": nzp1, "Zl": nzl}
-    _ds = _ds.chunk(chunks)
-
-    new_dim = DataArray(
-        _np.arange(len(_ix)),
-        dims=(_dim_name),
-        attrs={"long_name": "index of " + _dim_name, "units": "none"},
-    )
-    y = DataArray(
-        _np.arange(1),
-        dims=("y"),
-        attrs={"long_name": "j-index of cell center", "units": "none"},
-    )
-    x = DataArray(
-        _np.arange(1),
-        dims=("x"),
-        attrs={"long_name": "i-index of cell center", "units": "none"},
-    )
-    yp1 = DataArray(
-        _np.arange(2),
-        dims=("yp1"),
-        attrs={"long_name": "j-index of cell corner", "units": "none"},
-    )
-    xp1 = DataArray(
-        _np.arange(2),
-        dims=("xp1"),
-        attrs={"long_name": "i-index of cell corner", "units": "none"},
-    )
-
-    # Transform indexes in DataArray
-    iY = DataArray(
-        _np.reshape(_iy, (len(new_dim), len(y))),
-        coords={_dim_name: new_dim, "y": y},
-        dims=(_dim_name, "y"),
-    )
-    iX = DataArray(
-        _np.reshape(_ix, (len(new_dim), len(x))),
-        coords={_dim_name: new_dim, "x": x},
-        dims=(_dim_name, "x"),
-    )
-
-    iYp1 = DataArray(
-        _np.stack((_iy, _iy + 1), 1),
-        coords={_dim_name: new_dim, "yp1": yp1},
-        dims=(_dim_name, "yp1"),
-    )
-
-    iXp1 = DataArray(
-        _np.stack((_ix, _ix + 1), 1),
-        coords={_dim_name: new_dim, "xp1": xp1},
-        dims=(_dim_name, "xp1"),
-    )
-
-    if _iface is not None:
-        if _iface == [6]:
-            return arctic_eval(_ds, _ix, _iy, _dim_name)
-        elif _iface in _np.arange(7, 13):
-            iXp1 = DataArray(
-                _np.stack((_ix + 1, _ix), 1),
-                coords={_dim_name: new_dim, "xp1": xp1},
-                dims=(_dim_name, "xp1"),
-            )
-
-    args = {
-        "X": iX,
-        "Y": iY,
-        "Xp1": iXp1,
-        "Yp1": iYp1,
-    }
-
-    rename = {"yp1": "Yp1", "xp1": "Xp1", "x": "X", "y": "Y"}
-
-    if _iface is not None:
-        args = {"face": _iface, **args}
-        if _iface in _np.arange(7, 13):
-            rename = {"yp1": "Xp1", "xp1": "Yp1", "x": "Y", "y": "X"}
-
-    new_ds = _ds.isel(**args).drop_vars(["Xp1", "Yp1", "X", "Y"])
-    new_ds = new_ds.rename_dims(rename).rename_vars(rename)
-    if _iface is not None and _iface in _np.arange(7, 13):
-        new_ds = rotate_vars(new_ds)
-
-    return new_ds
 
 
 class _subsampleMethods(object):
