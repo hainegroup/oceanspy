@@ -36,7 +36,13 @@ from ._ospy_utils import (
     _rename_aliased,
 )
 from .llc_rearrange import LLCtransformation as _llc_trans
-from .llc_rearrange import eval_dataset, mates, mooring_singleface, station_singleface
+from .llc_rearrange import (
+    eval_dataset,
+    mates,
+    mooring_singleface,
+    splitter,
+    station_singleface,
+)
 from .utils import (
     _rel_lon,
     _reset_range,
@@ -1234,40 +1240,32 @@ def stations(
                     DS = station_singleface(**args).persist()
                 return DS
             elif Niter > 1:
-                # split indexes along each face
-                X0, Y0 = [], []
-                for ii in range(len(ll) + 1):
-                    if ii == 0:
-                        x0, y0 = iX[: ll[ii] + 1], iY[: ll[ii] + 1]
-                    elif ii > 0 and ii < len(ll):
-                        x0, y0 = (
-                            iX[ll[ii - 1] + 1 : ll[ii] + 1],
-                            iY[ll[ii - 1] + 1 : ll[ii] + 1],
-                        )
-                    elif ii == len(ll):
-                        x0, y0 = iX[ll[ii - 1] + 1 :], iY[ll[ii - 1] + 1 :]
-                    X0.append(x0)
-                    Y0.append(y0)
-
+                # split array into N-subarrays for each N face crossing
+                nX0, nY0 = splitter(iX, iY, iface)
+                args = {
+                    "_ds": ds,
+                    "_order_faces": order_iface,
+                    "_face_connections": face_connections,
+                }
                 if _dim == "station":
-                    DS = []
-                    for i in range(Niter):
-                        DS.append(eval_dataset(ds, X0[i], Y0[i], order_iface[i], _dim))
-
-                    nDS = [DS[0].reset_coords()]
-                    for i in range(1, len(DS)):
-                        Nend = nDS[i - 1][_dim].values[-1]
-                        nDS.append(reset_dim(DS[i], Nend + 1, dim=_dim).reset_coords())
-
-                    DS = nDS[0]
-                    for i in range(1, len(nDS)):
-                        DS = DS.combine_first(nDS[i])
+                    DSf = []
+                    shift = 0
+                    for ii in range(Niter):
+                        args1 = {"_ix": nX0[ii], "_iy": nY0[ii], "_iface": ii}
+                        dse = station_singleface(**{**args, **args1})
+                        if ii > 0:
+                            shift += len(nX0[ii - 1])
+                            dse = reset_dim(dse, shift, dim=_dim)
+                        DSf.append(dse)
+                    DS = _xr.combine_by_coords(DSf).persist()
+                    del DSf
+                    return DS
                 elif _dim == "mooring":
                     for ii in range(Niter):
                         evals = {
                             "face": order_iface[ii],
-                            "X": X0[ii],
-                            "Y": Y0[ii],
+                            "X": nX0[ii],
+                            "Y": nY0[ii],
                         }
                         data = ds_grid.isel(**evals)
                         ix, iy = (data["i" + f"{i}"].data for i in ("X", "Y"))
