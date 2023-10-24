@@ -3291,5 +3291,6 @@ def test_order_from_indexing(iX, iY):
     if len(_mi) == 0:
         assert _ixx.all() == iX.all()
     else:
+        # assert that len(_mi) == 2*len(nI)+1
         for i in range(len(_mi)):
             assert _ixx[i].all() == iX[_mi[i]].all()

@@ -2365,9 +2365,27 @@ def ds_splitarray(
     eds = []  # each item will be a dataset
     for i in range(len(_ni)):  # parallelize this. It could take some time.
         if i % 2 == 0:
-            nds = eval_dataset(
-                _ds, _iXn[_ni[i]], _iYn[_ni[i]], _faces[_iface], _dim_name
-            )
+            if i in [0, len(_ni) - 1]:
+                nds, connect, moor = ds_edge(
+                    _ds, _iXn[_ni[i]], _iYn[_ni[i]], _faces, _iface, _face_connections
+                )
+                if len(moor) == 0:
+                    # array ends at 0 index
+                    nnx, nny = _iXn[_ni[i]][moor[0] + 1 :], _iYn[_ni[i]][moor[0] + 1 :]
+                    ds0 = eval_dataset(_ds, nnx, nny, _iface=_faces[_iface])
+                    shift = len(nds.mooring)
+                    ds0 = reset_dim(
+                        ds0, shift, _dim_name
+                    )  # before it was only if moor==0
+                    ds0 = _xr.combine_by_coords([nds, ds0])
+                else:
+                    nnx, nny = _iXn[_ni[i]][: moor[0] :], _iYn[_ni[i]][: moor[0] :]
+                    ds0 = eval_dataset(_ds, nnx, nny, _iface=_faces[_iface])
+                    ds0 = _xr.combine_by_coords([ds0, nds])
+            else:
+                nds = eval_dataset(
+                    _ds, _iXn[_ni[i]], _iYn[_ni[i]], _faces[_iface], _dim_name
+                )
         else:
             nds, *a = ds_edge(
                 _ds,

@@ -1242,6 +1242,7 @@ def stations(
             elif Niter > 1:
                 # split array into N-subarrays for each N face crossing
                 nX0, nY0 = splitter(iX, iY, iface)
+                # initialize common argument
                 args = {
                     "_ds": ds,
                     "_order_faces": order_iface,
