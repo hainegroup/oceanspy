@@ -1694,10 +1694,10 @@ def ds_edge(_ds, _ix, _iy, _ifaces, ii, _face_topo, _Nx=89, _dim="mooring"):
     )
 
     Yval = iYp1.where(iYp1 == _Nx + 1, drop=True)
-    ymoor = Yval.mooring
+    ymoor = Yval[_dim_name]
 
     Xval = iXp1.where(iXp1 == _Nx + 1, drop=True)
-    xmoor = Xval.mooring
+    xmoor = Xval[_dim_name]
 
     connect = False
     axis = None
@@ -1724,8 +1724,10 @@ def ds_edge(_ds, _ix, _iy, _ifaces, ii, _face_topo, _Nx=89, _dim="mooring"):
     if connect:
         # if there is a need to sample from across the face interface
 
-        iXn = iX.isel(mooring=moor)
-        iYn = iY.isel(mooring=moor)
+        dim_arg = {_dim_name: moor}
+
+        iXn = iX.isel(**dim_arg)  #
+        iYn = iY.isel(**dim_arg)  #
 
         zvars = [
             var
@@ -1759,8 +1761,8 @@ def ds_edge(_ds, _ix, _iy, _ifaces, ii, _face_topo, _Nx=89, _dim="mooring"):
                 args = {"xp1": slice(1)}
                 rename = {"x": "xp1"}
                 revar = "xp1"
-                iXp1n = iXp1.isel(mooring=moor, **args)
-                iYp1n = iYp1.isel(mooring=moor)
+                iXp1n = iXp1.isel(**dim_arg, **args)
+                iYp1n = iYp1.isel(**dim_arg)
                 iargs = {"Y": iYn, "Yp1": iYp1n, "Xp1": iXp1n - _Nx}
 
                 vds = _ds.isel(face=face2, **iargs)
@@ -1794,8 +1796,8 @@ def ds_edge(_ds, _ix, _iy, _ifaces, ii, _face_topo, _Nx=89, _dim="mooring"):
                         coords={_dim_name: new_dim, "xp1": xp1},
                         dims=(_dim_name, "xp1"),
                     )
-                iXp1n = iXp1.isel(mooring=moor)
-                iYp1n = iYp1.isel(mooring=moor, **args)
+                iXp1n = iXp1.isel(**dim_arg)
+                iYp1n = iYp1.isel(**dim_arg, **args)
                 iargs = {"X": iXn, "Xp1": iXp1n, "Yp1": iYp1n - _Nx}
                 revar = "yp1"
                 vds = _ds.isel(face=face2, **iargs)
@@ -1823,8 +1825,8 @@ def ds_edge(_ds, _ix, _iy, _ifaces, ii, _face_topo, _Nx=89, _dim="mooring"):
                 args = {"xp1": slice(1)}
                 rename = {"x": "xp1"}
                 revar = "xp1"
-                iXp1n = iXp1.isel(mooring=moor, **args)
-                iYp1n = iYp1.isel(mooring=moor)
+                iXp1n = iXp1.isel(**dim_arg, **args)
+                iYp1n = iYp1.isel(**dim_arg)
                 iargs = {"X": _Nx - iYn, "Xp1": _Nx - iYp1n + 1, "Yp1": iXn - _Nx}
 
                 dds = rotate_vars(_ds)[uvars + gvars]  # u and g variables
@@ -1865,8 +1867,8 @@ def ds_edge(_ds, _ix, _iy, _ifaces, ii, _face_topo, _Nx=89, _dim="mooring"):
                 # print(axis)
                 args = {"yp1": slice(1)}
                 rename = {"y": "yp1"}
-                iXp1n = iXp1.isel(mooring=moor)
-                iYp1n = iYp1.isel(mooring=moor, **args)
+                iXp1n = iXp1.isel(**dim_arg)
+                iYp1n = iYp1.isel(**dim_arg, **args)
                 iargs = {"Xp1": iYn - _Nx, "Y": _Nx - iXn, "Yp1": _Nx - iXp1n + 1}
                 dds = rotate_vars(_ds)[vvars + gvars]  # v and g variables
 
@@ -2377,6 +2379,7 @@ def ds_splitarray(
             nds = reset_dim(nds, shift)
         eds.append(nds)
     dsf = _xr.combine_by_coords(eds).chunk({"mooring": len(_iXn)})
+    del eds
     return dsf
 
 
