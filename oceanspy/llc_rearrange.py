@@ -2258,14 +2258,14 @@ def edgesid(_iX, _iY, _N=89):
 
 def index_splitter(ix, iy, _N):
     """
-    Takes the index pair (ix, iy) of ordered, continuous and
-    equidistant (unit) distanced array, and identifies the
-    location at which the pair reaches the edge of the face.
-    The edge of the face is identified by `_N`, the last index
-    along each dimention. Allows to split the array while preserving
-    its original order.
+    Takes the index pair (ix, iy) of ordered, continuous and equidistant
+    (unit) distanced array, and identifies the location at which the pair
+    reaches the edge of the face and reenters the same face (no crossing).
+    The edge of the face is identified by `_N`, the last index along each
+    dimention. If array only reches edge of face at end points, then returns
+    empty list. This allows to split the array while preserving its original
+    order.
     """
-
     nI = []  # indexes of partition
     Nx = len(ix)
 
@@ -2427,6 +2427,7 @@ def mooring_singleface(
         }
         dsf = ds_splitarray(**args)
     else:
+        # regular mooring eval -- can still cross into other face
         dsf = eval_dataset(_ds, _ixn, _iyn, _order_faces[_iface], "mooring").chunk(
             {"mooring": len(_ixn)}
         )
