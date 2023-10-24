@@ -36,15 +36,7 @@ from ._ospy_utils import (
     _rename_aliased,
 )
 from .llc_rearrange import LLCtransformation as _llc_trans
-from .llc_rearrange import (
-    ds_edge,
-    edgesid,
-    eval_dataset,
-    face_adjacent,
-    face_direction,
-    mates,
-    mooring_singleface,
-)
+from .llc_rearrange import eval_dataset, mates, mooring_singleface, station_singleface
 from .utils import (
     _rel_lon,
     _reset_range,
@@ -1233,80 +1225,11 @@ def stations(
                     DS = mooring_singleface(
                         ds, iX, iY, order_iface, ii, face_connections, _dim
                     ).persist()
-                    return DS
                 elif _dim == "station":
-                    iX, iY, ind = edgesid(iX, iY)
-                    # get edge data
-                    eX, eY = iX[ind], iY[ind]
-                    # remove from original array
-                    iX, iY = _np.delete(iX, ind), _np.delete(iY, ind)
-                    # data with index=0 somewhere is safe to eval at current
-                    # face. Find such data & restore it to original array
-                    aface = face_adjacent(eX, eY, order_iface[0], face_connections)
-                    directions = _np.array(
-                        [
-                            face_direction(order_iface[0], aface[i], face_connections)
-                            for i in range(len(aface))
-                        ]
-                    )
-                    dirs = []
-                    if set([0]).issubset(
-                        directions
-                    ):  # these can safely be eval at face
-                        dirs += list(
-                            [item[0] for item in _np.argwhere(directions == 0)]
-                        )
-                    if set([2]).issubset(directions):
-                        dirs += list(
-                            [item[0] for item in _np.argwhere(directions == 2)]
-                        )
-                    neX, neY = (
-                        eX[dirs],
-                        eY[dirs],
-                    )
-                    eX, eY, aface = (
-                        _np.delete(eX, dirs),
-                        _np.delete(eY, dirs),
-                        _np.delete(_np.array(aface), dirs),
-                    )
-                    iX, iY = _np.append(iX, neX), _np.append(iY, neY)
-                    DS = (
-                        eval_dataset(ds, iX, iY, order_iface[0], _dim_name=_dim)
-                        .chunk({_dim: len(iX)})
-                        .persist()
-                    )
-                    if eX.shape[0] > 0:
-                        # evaluate at edge of between faces.
-                        # need adjacent face and appropriate indexes
-                        DSe = []
-                        ii = 0
-                        for adjface in set(aface):
-                            aind = _np.where(aface == adjface)[0]
-                            dse, *a = ds_edge(
-                                ds,
-                                eX[aind],
-                                eY[aind],
-                                order_iface + [adjface],
-                                0,
-                                face_connections,
-                                _dim=_dim,
-                            )
-                            if ii > 0:
-                                shift = int(DSe[ii - 1][_dim].values[-1]) + 1
-                                dse = reset_dim(dse, shift, dim=_dim)
-                            DSe.append(dse)
-                            ii += 1
-                        dse = (
-                            _xr.combine_by_coords(DSe).chunk({_dim: len(eX)}).persist()
-                        )
-                        shift = int(DS[_dim].values[-1]) + 1
-                        dse = reset_dim(dse, shift, dim=_dim)
-                        DS = (
-                            _xr.combine_by_coords([DS, dse])
-                            .chunk({_dim: len(eX) + len(iX)})
-                            .persist()
-                        )
-                        del dse, DSe
+                    DS = station_singleface(
+                        ds, iX, iY, order_iface, ii, face_connections
+                    ).persist()
+                return DS
             elif Niter > 1:
                 # split indexes along each face
                 X0, Y0 = [], []
