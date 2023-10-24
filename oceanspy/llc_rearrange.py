@@ -2377,11 +2377,12 @@ def ds_splitarray(
                     ds0 = reset_dim(
                         ds0, shift, _dim_name
                     )  # before it was only if moor==0
-                    ds0 = _xr.combine_by_coords([nds, ds0])
+                    nds = _xr.combine_by_coords([nds, ds0])
                 else:
-                    nnx, nny = _iXn[_ni[i]][: moor[0] :], _iYn[_ni[i]][: moor[0] :]
+                    nnx, nny = _iXn[_ni[i]][: moor[0]], _iYn[_ni[i]][: moor[0]]
                     ds0 = eval_dataset(_ds, nnx, nny, _iface=_faces[_iface])
-                    ds0 = _xr.combine_by_coords([ds0, nds])
+                    nds = _xr.combine_by_coords([ds0, nds])
+                del ds0
             else:
                 nds = eval_dataset(
                     _ds, _iXn[_ni[i]], _iYn[_ni[i]], _faces[_iface], _dim_name
@@ -2405,9 +2406,7 @@ def ds_splitarray(
     return dsf
 
 
-def mooring_singleface(
-    _ds, _ix, _iy, _order_faces, _iface, _face_connections, _dim="mooring"
-):
+def mooring_singleface(_ds, _ix, _iy, _faces, _iface, _face_connections):
     """
     evaluates the mooring array within a single face.
     """
@@ -2420,21 +2419,42 @@ def mooring_singleface(
             "_iXn": _ixn,
             "_iYn": _iyn,
             "_nI": nI,
-            "_faces": _order_faces,
+            "_faces": _faces,
             "_iface": _iface,
             "_face_connections": _face_connections,
             "_dim_name": "mooring",
         }
         dsf = ds_splitarray(**args)
     else:
-        # regular mooring eval -- can still cross into other face
-        dsf = eval_dataset(_ds, _ixn, _iyn, _order_faces[_iface], "mooring").chunk(
-            {"mooring": len(_ixn)}
-        )
+        # no need to split into subarrays
+        iix = _np.where(_ixn == _Nx)[0]
+        iiy = _np.where(_iyn == _Nx)[0]
+
+        if iix.shape[0] + iiy.shape[0] == 0:
+            # array does not edge at right edge
+            dsf = eval_dataset(_ds, _ixn, _iyn, _faces[_iface], "mooring")
+            dsf = dsf.chunk({"mooring": len(_ixn)})
+        else:
+            # array ends at edge
+            nds, connect, moor = ds_edge(
+                _ds, _ixn, _iyn, _faces, _iface, _face_connections
+            )
+            if len(moor) == 0:  # this may be innecessary...
+                # array ends at 0 index
+                nnx, nny = _ixn[moor[0] + 1 :], _iyn[moor[0] + 1 :]
+                ds0 = eval_dataset(_ds, nnx, nny, _iface=_faces[_iface])
+                shift = len(nds.mooring)
+                ds0 = reset_dim(ds0, shift, "mooring")
+                dsf = _xr.combine_by_coords([nds, ds0])
+            else:
+                nnx, nny = _ixn[: moor[0]], _iyn[: moor[0]]
+                ds0 = eval_dataset(_ds, nnx, nny, _iface=_faces[_iface])
+                dsf = _xr.combine_by_coords([ds0, nds])
+            del ds0, nds
     return dsf
 
 
-def station_singleface(_ds, _ix, _iy, _order_faces, _iface, _face_connections):
+def station_singleface(_ds, _ix, _iy, _faces, _iface, _face_connections):
     iX, iY, ind = edgesid(_ix, _iy)
     # get edge data
     eX, eY = iX[ind], iY[ind]
@@ -2442,10 +2462,10 @@ def station_singleface(_ds, _ix, _iy, _order_faces, _iface, _face_connections):
     iX, iY = _np.delete(iX, ind), _np.delete(iY, ind)
     # data with index=0 somewhere is safe to eval at current face.
     # find such data and restore it to original index array
-    aface = face_adjacent(eX, eY, _order_faces[_iface], _face_connections)
+    aface = face_adjacent(eX, eY, _faces[_iface], _face_connections)
     directions = _np.array(
         [
-            face_direction(_order_faces[_iface], aface[i], _face_connections)
+            face_direction(_faces[_iface], aface[i], _face_connections)
             for i in range(len(aface))
         ]
     )
@@ -2464,7 +2484,7 @@ def station_singleface(_ds, _ix, _iy, _order_faces, _iface, _face_connections):
         _np.delete(_np.array(aface), dirs),
     )
     iX, iY = _np.append(iX, neX), _np.append(iY, neY)
-    dsf = eval_dataset(_ds, iX, iY, _order_faces[_iface], _dim_name="station")
+    dsf = eval_dataset(_ds, iX, iY, _faces[_iface], _dim_name="station")
     dsf = dsf.chunk({"station": len(iX)})
     if eX.shape[0] > 0:
         # evaluate at edge of between faces. need adjascent face and appropriate indexes
@@ -2476,7 +2496,7 @@ def station_singleface(_ds, _ix, _iy, _order_faces, _iface, _face_connections):
                 _ds,
                 eX[aind],
                 eY[aind],
-                [_order_faces[_iface]] + [adjface],
+                [_faces[_iface]] + [adjface],
                 0,
                 _face_connections,
                 _dim="station",

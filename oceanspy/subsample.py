@@ -1245,7 +1245,7 @@ def stations(
                 # initialize common argument
                 args = {
                     "_ds": ds,
-                    "_order_faces": order_iface,
+                    "_faces": order_iface,
                     "_face_connections": face_connections,
                 }
                 if _dim == "station":
