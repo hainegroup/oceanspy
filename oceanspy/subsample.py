@@ -38,6 +38,7 @@ from ._ospy_utils import (
 from .llc_rearrange import LLCtransformation as _llc_trans
 from .llc_rearrange import (
     eval_dataset,
+    fill_path,
     mates,
     mooring_singleface,
     splitter,
@@ -47,7 +48,6 @@ from .utils import (
     _rel_lon,
     _reset_range,
     circle_path_array,
-    create_list,
     diff_and_inds_where_insert,
     get_maskH,
     remove_repeated,
@@ -1155,7 +1155,6 @@ def stations(
 
     # Unpack ds
     od = _copy.deepcopy(od)
-    R = od.parameters["rSphere"]
     ds = od._ds
     face_connections = od.face_connections["face"]
 
@@ -1192,9 +1191,6 @@ def stations(
         ds_grid = ds[["XC", "YC"]]
 
         if _dim == "mooring":  # needed for transport
-            DATA, DATAs = [], []
-            dims = "mooring_midp"
-            _vars = ["XU", "XV", "YU", "YV"]
             for key, value in ds_grid.sizes.items():
                 ds_grid["i" + f"{key}"] = DataArray(range(value), dims=key)
 
@@ -1262,64 +1258,20 @@ def stations(
                     del DSf
                     return DS
                 elif _dim == "mooring":
+                    DSf = []
+                    shift = 0
                     for ii in range(Niter):
-                        evals = {
-                            "face": order_iface[ii],
-                            "X": nX0[ii],
-                            "Y": nY0[ii],
-                        }
-                        data = ds_grid.isel(**evals)
-                        ix, iy = (data["i" + f"{i}"].data for i in ("X", "Y"))
-                        # Remove duplicates that are next to each other.
-                        mask = _np.abs(_np.diff(ix)) + _np.abs(_np.diff(iy)) == 0
-                        ix, iy = (_np.delete(ii, _np.argwhere(mask)) for ii in (ix, iy))
-
-                        # Initialize variables
-                        dx, dy, inds = diff_and_inds_where_insert(ix, iy)
-                        while inds.size:
-                            dx, dy = (di[inds] for di in (dx, dy))
-                            mask = _np.abs(dx * dy) == 1
-                            ix = _np.insert(
-                                ix, inds + 1, ix[inds] + (dx / 2).astype(int)
-                            )
-                            iy = _np.insert(
-                                iy,
-                                inds + 1,
-                                iy[inds] + _np.where(mask, dy, (dy / 2).astype(int)),
-                            )
-                            # Prepare for next iteration
-                            dx, dy, inds = diff_and_inds_where_insert(ix, iy)
-                        ix, iy = remove_repeated(ix, iy)
-                        DATA.append(eval_dataset(ds, ix, iy, order_iface[ii]))
+                        # print(ii)
+                        nix, niy = fill_path(
+                            nX0, nY0, order_iface, ii, face_connections
+                        )
+                        args1 = {"_ix": nix, "_iy": niy, "_iface": ii}
+                        dse = mooring_singleface(**{**args, **args1})
                         if ii > 0:
-                            x0 = DATA[ii - 1].XC.isel(mooring=-1).values.squeeze()
-                            x1 = DATA[ii].XC.isel(mooring=0).values.squeeze()
-                            y0 = DATA[ii - 1].YC.isel(mooring=-1).values.squeeze()
-                            y1 = DATA[ii].YC.isel(mooring=0).values.squeeze()
-                            dr = 10 * _np.max([abs(x1 - x0), abs(y1 - y0)])
-                            if R is not None:
-                                Ym1, Xm1 = circle_path_array(
-                                    [y0, y1], [x0, x1], R, _res=dr
-                                )
-                            else:
-                                Ym1, Xm1 = [y0, y1], [x0, x1]
-                            nargs = {"Xmoor": Xm1, "Ymoor": Ym1, "varList": varList}
-                            od_moor = od.subsample.mooring_array(**nargs)
-                            DATAs.append(
-                                od_moor.dataset.drop_dims(dims).drop_vars(_vars)
-                            )
-                    # futures = dask.persist(*DATAs)
-                    # DATAs = dask.compute(*futures)
-                    new_Data = create_list(DATA, DATAs)
-
-                    DS = new_Data[0].reset_coords()
-                    for i in range(1, len(new_Data)):
-                        DS = DS.combine_first(new_Data[i].reset_coords())
-                    DS = DS.set_coords(co_list)
-                    DS = DS.drop_vars(
-                        [var for var in ["mooring_dist", "face"] if var in DS.data_vars]
-                    )
-
+                            shift += len(DSf[ii - 1].mooring)
+                            dse = reset_dim(dse, shift, dim=_dim)
+                        DSf.append(dse)
+                    DS = _xr.combine_by_coords(DSf).persist()
                     return DS
 
     DS = DS.set_coords(co_list)
