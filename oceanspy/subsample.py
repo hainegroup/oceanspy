@@ -1220,15 +1220,18 @@ def stations(
             order_iface = [_dat[i] for i in ll] + [_dat[-1]]
             Niter = len(order_iface)
             if Niter == 1:
-                ii = 0  # index of face - always zero here
+                args = {
+                    "_ds": ds,
+                    "_ix": iX,
+                    "_iy": iY,
+                    "_order_faces": order_iface,
+                    "_iface": 0,
+                    "face_connections": face_connections,
+                }
                 if _dim == "mooring":
-                    DS = mooring_singleface(
-                        ds, iX, iY, order_iface, ii, face_connections, _dim
-                    ).persist()
+                    DS = mooring_singleface(**args).persist()
                 elif _dim == "station":
-                    DS = station_singleface(
-                        ds, iX, iY, order_iface, ii, face_connections
-                    ).persist()
+                    DS = station_singleface(**args).persist()
                 return DS
             elif Niter > 1:
                 # split indexes along each face
