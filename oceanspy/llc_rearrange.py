@@ -2388,7 +2388,7 @@ def ds_splitarray(
 
 
 def mooring_singleface(
-    _ds, _ix, _iy, _order_faces, _iface, _face_connections, _dim_name
+    _ds, _ix, _iy, _order_faces, _iface, _face_connections, _dim="mooring"
 ):
     """
     evaluates the mooring array within a single face.
@@ -2405,19 +2405,17 @@ def mooring_singleface(
             "_faces": _order_faces,
             "_iface": _iface,
             "_face_connections": _face_connections,
-            "_dim_name": _dim_name,
+            "_dim_name": "mooring",
         }
         dsf = ds_splitarray(**args)
     else:
-        dsf = eval_dataset(_ds, _ixn, _iyn, _order_faces[_iface], _dim_name).chunk(
-            {_dim_name: len(_ixn)}
+        dsf = eval_dataset(_ds, _ixn, _iyn, _order_faces[_iface], "mooring").chunk(
+            {"mooring": len(_ixn)}
         )
     return dsf
 
 
-def station_singleface(
-    _ds, _ix, _iy, _order_faces, _iface, face_connections, _dim="station"
-):
+def station_singleface(_ds, _ix, _iy, _order_faces, _iface, face_connections):
     iX, iY, ind = edgesid(_ix, _iy)
     # get edge data
     eX, eY = iX[ind], iY[ind]
@@ -2447,9 +2445,8 @@ def station_singleface(
         _np.delete(_np.array(aface), dirs),
     )
     iX, iY = _np.append(iX, neX), _np.append(iY, neY)
-    dsf = eval_dataset(_ds, iX, iY, _order_faces[_iface], _dim_name=_dim).chunk(
-        {_dim: len(iX)}
-    )
+    dsf = eval_dataset(_ds, iX, iY, _order_faces[_iface], _dim_name="station")
+    dsf = dsf.chunk({"station": len(iX)})
     if eX.shape[0] > 0:
         # evaluate at edge of between faces. need adjascent face and appropriate indexes
         DSe = []
@@ -2463,18 +2460,18 @@ def station_singleface(
                 [_order_faces[_iface]] + [adjface],
                 0,
                 face_connections,
-                _dim=_dim,
+                _dim="station",
             )
             if ii > 0:
-                shift = int(DSe[ii - 1][_dim].values[-1]) + 1
-                dse = reset_dim(dse, shift, dim=_dim)
+                shift = int(DSe[ii - 1]["station"].values[-1]) + 1
+                dse = reset_dim(dse, shift, dim="station")
             DSe.append(dse)
             ii += 1
-        dse = _xr.combine_by_coords(DSe).chunk({_dim: len(eX)})
+        dse = _xr.combine_by_coords(DSe).chunk({"station": len(eX)})
         del DSe
-        shift = int(dsf[_dim].values[-1]) + 1
-        dse = reset_dim(dse, shift, dim=_dim)
-        dsf = _xr.combine_by_coords([dsf, dse]).chunk({_dim: len(eX) + len(iX)})
+        shift = int(dsf["station"].values[-1]) + 1
+        dse = reset_dim(dse, shift, dim="station")
+        dsf = _xr.combine_by_coords([dsf, dse]).chunk({"station": len(eX) + len(iX)})
 
     return dsf
 
