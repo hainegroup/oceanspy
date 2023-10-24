@@ -1352,6 +1352,9 @@ def eval_dataset(_ds, _ix, _iy, _iface=None, _dim_name="mooring"):
     if _iface is not None and _iface in _np.arange(7, 13):
         new_ds = rotate_vars(new_ds)
 
+    if "face" in new_ds.reset_coords().data_vars:
+        new_ds = new_ds.drop_vars(["face"])
+
     return new_ds
 
 
@@ -1771,7 +1774,7 @@ def ds_edge(_ds, _ix, _iy, _ifaces, ii, _face_topo, _Nx=89, _dim="mooring"):
                 # get the rest of the points
                 argsn = {"face": face1, "X": iXn, "Y": iYn, "Xp1": iXp1n, "Yp1": iYp1n}
                 mds = _ds.isel(**argsn).reset_coords()  # regular eval
-                mds = mds.drop_vars(["face", "Yp1", "Xp1", "X", "Y"])
+                mds = mds.drop_vars(["Yp1", "Xp1", "X", "Y"])
                 if face1 in rotS:
                     mds = reset_dim(mds, 1, revar)
                 elif face1 not in rotS:
@@ -1806,7 +1809,7 @@ def ds_edge(_ds, _ix, _iy, _ifaces, ii, _face_topo, _Nx=89, _dim="mooring"):
                 # get the rest of the points
                 argsn = {"face": face1, "X": iXn, "Y": iYn, "Xp1": iXp1n, "Yp1": iYp1n}
                 mds = _ds.isel(**argsn).reset_coords()  # regular eval
-                mds = mds.drop_vars(["face", "Yp1", "Xp1", "X", "Y"])
+                mds = mds.drop_vars(["Yp1", "Xp1", "X", "Y"])
                 vds = reset_dim(vds, 1, revar)
                 vgmds = _xr.combine_by_coords([mds[vvars + gvars], vds])
 
@@ -1840,7 +1843,7 @@ def ds_edge(_ds, _ix, _iy, _ifaces, ii, _face_topo, _Nx=89, _dim="mooring"):
 
                 argsn = {"face": face1, "X": iXn, "Y": iYn, "Xp1": iXp1n, "Yp1": iYp1n}
                 mds = _ds.isel(**argsn)  # regular eval
-                mds = mds.drop_vars(["face", "Yp1", "Xp1", "X", "Y"])
+                mds = mds.drop_vars(["Yp1", "Xp1", "X", "Y"])
 
                 ugmds = _xr.combine_by_coords([mds[uvars + gvars], nvds])
 
@@ -1884,9 +1887,7 @@ def ds_edge(_ds, _ix, _iy, _ifaces, ii, _face_topo, _Nx=89, _dim="mooring"):
                 # evaluate at edge of present face -- missing Yp1 data
                 argsn = {"face": face1, "X": iXn, "Y": iYn, "Xp1": iXp1n, "Yp1": iYp1n}
                 mds = _ds.isel(**argsn)  # regular eval
-                mds = mds.drop_vars(
-                    ["face", "Yp1", "Xp1", "X", "Y"]
-                )  # always drop these
+                mds = mds.drop_vars(["Yp1", "Xp1", "X", "Y"])  # always drop these
 
                 # combine to create complete, edge data at v and g points
                 vgmds = _xr.combine_by_coords([mds[vvars + gvars], nvds])
@@ -1917,6 +1918,8 @@ def ds_edge(_ds, _ix, _iy, _ifaces, ii, _face_topo, _Nx=89, _dim="mooring"):
 
         moor = moor.values
         nds = _xr.merge([nds, ds1D])
+        if "face" in nds.reset_coords().data_vars:
+            nds = nds.drop_vars(["face"])
 
     else:
         # print('not connect or 0 reentry')
@@ -2378,7 +2381,7 @@ def ds_splitarray(
             shift = int(eds[i - 1].mooring.values[-1]) + 1
             nds = reset_dim(nds, shift)
         eds.append(nds)
-    dsf = _xr.combine_by_coords(eds).chunk({"mooring": len(_iXn)})
+    dsf = _xr.combine_by_coords(eds).chunk({_dim_name: len(_iXn)})
     del eds
     return dsf
 
