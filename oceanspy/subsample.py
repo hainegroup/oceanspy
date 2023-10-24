@@ -1232,9 +1232,9 @@ def stations(
                 }
                 if _dim == "mooring":
                     DS = mooring_singleface(**args).persist()
+                    return DS
                 elif _dim == "station":
                     DS = station_singleface(**args).persist()
-                return DS
             elif Niter > 1:
                 # split array into N-subarrays for each N face crossing
                 nX0, nY0 = splitter(iX, iY, iface)
@@ -1256,7 +1256,6 @@ def stations(
                         DSf.append(dse)
                     DS = _xr.combine_by_coords(DSf).persist()
                     del DSf
-                    return DS
                 elif _dim == "mooring":
                     DSf = []
                     shift = 0
@@ -1273,7 +1272,6 @@ def stations(
                         DSf.append(dse)
                     DS = _xr.combine_by_coords(DSf).persist()
                     return DS
-
     DS = DS.set_coords(co_list)
 
     if Xcoords is None and Ycoords is None:
