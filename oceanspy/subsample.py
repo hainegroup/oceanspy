@@ -36,7 +36,16 @@ from ._ospy_utils import (
     _rename_aliased,
 )
 from .llc_rearrange import LLCtransformation as _llc_trans
-from .llc_rearrange import ds_splitarray, eval_dataset, index_splitter, mates
+from .llc_rearrange import (
+    ds_edge,
+    ds_splitarray,
+    edgesid,
+    eval_dataset,
+    face_adjacent,
+    face_direction,
+    index_splitter,
+    mates,
+)
 from .utils import (
     _rel_lon,
     _reset_range,
@@ -1153,6 +1162,7 @@ def stations(
     R = od.parameters["rSphere"]
     ds = od._ds
     face_connections = od.face_connections["face"]
+    Nx = len(ds.X) - 1
 
     if varList is not None:
         nvarlist = [var for var in ds.data_vars if var not in varList]
@@ -1223,8 +1233,11 @@ def stations(
             if Niter == 1:
                 if _dim == "mooring":
                     iXn, iYn = connector(iX, iY)
-                    nI = index_splitter(iXn, iYn)
-                    if len(nI) > 0:  # most split face into multiple arrays
+                    # check for edge data that is not endpoints
+                    # of array
+                    nI = index_splitter(iXn, iYn, Nx)
+                    if len(nI) > 0:
+                        # split array into multiple subarrays if edge data
                         args = {
                             "_ds": ds,
                             "_iXn": iXn,
@@ -1233,7 +1246,6 @@ def stations(
                             "_faces": order_iface,
                             "_iface": 0,
                             "_face_connections": face_connections,
-                            "_Nx": 89,
                             "_dim_name": _dim,
                         }
                         DS = ds_splitarray(**args).persist()
@@ -1242,7 +1254,78 @@ def stations(
                         DS = DS.chunk({_dim: len(iXn)}).persist()
                     return DS
                 elif _dim == "station":
-                    DS = eval_dataset(ds, iX, iY, order_iface, _dim)
+                    iX, iY, ind = edgesid(iX, iY)
+                    # get edge data
+                    eX, eY = iX[ind], iY[ind]
+                    # remove from original array
+                    iX, iY = _np.delete(iX, ind), _np.delete(iY, ind)
+                    # data with index=0 somewhere is safe to eval at current
+                    # face. Find such data & restore it to original array
+                    aface = face_adjacent(eX, eY, order_iface[0], face_connections)
+                    directions = _np.array(
+                        [
+                            face_direction(order_iface[0], aface[i], face_connections)
+                            for i in range(len(aface))
+                        ]
+                    )
+                    dirs = []
+                    if set([0]).issubset(
+                        directions
+                    ):  # these can safely be eval at face
+                        dirs += list(
+                            [item[0] for item in _np.argwhere(directions == 0)]
+                        )
+                    if set([2]).issubset(directions):
+                        dirs += list(
+                            [item[0] for item in _np.argwhere(directions == 2)]
+                        )
+                    neX, neY = (
+                        eX[dirs],
+                        eY[dirs],
+                    )
+                    eX, eY, aface = (
+                        _np.delete(eX, dirs),
+                        _np.delete(eY, dirs),
+                        _np.delete(_np.array(aface), dirs),
+                    )
+                    iX, iY = _np.append(iX, neX), _np.append(iY, neY)
+                    DS = (
+                        eval_dataset(ds, iX, iY, order_iface[0], _dim_name=_dim)
+                        .chunk({_dim: len(iX)})
+                        .persist()
+                    )
+                    if eX.shape[0] > 0:
+                        # evaluate at edge of between faces.
+                        # need adjacent face and appropriate indexes
+                        DSe = []
+                        ii = 0
+                        for adjface in set(aface):
+                            aind = _np.where(aface == adjface)[0]
+                            dse, *a = ds_edge(
+                                ds,
+                                eX[aind],
+                                eY[aind],
+                                order_iface + [adjface],
+                                0,
+                                face_connections,
+                                _dim=_dim,
+                            )
+                            if ii > 0:
+                                shift = int(DSe[ii - 1][_dim].values[-1]) + 1
+                                dse = reset_dim(dse, shift, dim=_dim)
+                            DSe.append(dse)
+                            ii += 1
+                        dse = (
+                            _xr.combine_by_coords(DSe).chunk({_dim: len(eX)}).persist()
+                        )
+                        shift = int(DS[_dim].values[-1]) + 1
+                        dse = reset_dim(dse, shift, dim=_dim)
+                        DS = (
+                            _xr.combine_by_coords([DS, dse])
+                            .chunk({_dim: len(eX) + len(iX)})
+                            .persist()
+                        )
+                        del dse, DSe
             elif Niter > 1:
                 # split indexes along each face
                 X0, Y0 = [], []

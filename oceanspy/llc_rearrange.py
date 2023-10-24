@@ -1610,7 +1610,7 @@ def arctic_eval(_ds, _ix, _iy, _dim_name="mooring"):
     return new_ds
 
 
-def ds_edge(_ds, _ix, _iy, _ifaces, ii, _face_topo, _Nx=89, _dim="mooring"):
+def ds_edge(_ds, _ix, _iy, _ifaces, ii, _face_topo, _dim="mooring"):
     """
     Given an array of index point that ends at the
     face boundary, it samplest from the neighbor faced data
@@ -1644,6 +1644,7 @@ def ds_edge(_ds, _ix, _iy, _ifaces, ii, _face_topo, _Nx=89, _dim="mooring"):
     _Niter = len(_ifaces)
     rotS = set(_np.arange(7, 13))
     nrotS = set(_np.arange(6))
+    _Nx = len(_ds.X) - 1
 
     _dim_name = _dim
     new_dim = DataArray(
@@ -2255,7 +2256,7 @@ def edgesid(_iX, _iY, _N=89):
     return _iX, _iY, _index
 
 
-def index_splitter(ix, iy, _N=89):
+def index_splitter(ix, iy, _N):
     """
     Takes the index pair (ix, iy) of ordered, continuous and
     equidistant (unit) distanced array, and identifies the
@@ -2341,7 +2342,7 @@ def order_from_indexing(_ix, _in):
 
 
 def ds_splitarray(
-    _ds, _iXn, _iYn, _faces, _iface, _nI, _face_connections, _Nx=89, _dim_name="mooring"
+    _ds, _iXn, _iYn, _faces, _iface, _nI, _face_connections, _dim_name="mooring"
 ):
     """
     Creates a dataset from an array that reaches the edges of the face/tile
