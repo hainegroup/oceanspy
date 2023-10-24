@@ -38,19 +38,17 @@ from ._ospy_utils import (
 from .llc_rearrange import LLCtransformation as _llc_trans
 from .llc_rearrange import (
     ds_edge,
-    ds_splitarray,
     edgesid,
     eval_dataset,
     face_adjacent,
     face_direction,
-    index_splitter,
     mates,
+    mooring_singleface,
 )
 from .utils import (
     _rel_lon,
     _reset_range,
     circle_path_array,
-    connector,
     create_list,
     diff_and_inds_where_insert,
     get_maskH,
@@ -1162,7 +1160,6 @@ def stations(
     R = od.parameters["rSphere"]
     ds = od._ds
     face_connections = od.face_connections["face"]
-    Nx = len(ds.X) - 1
 
     if varList is not None:
         nvarlist = [var for var in ds.data_vars if var not in varList]
@@ -1231,27 +1228,11 @@ def stations(
             order_iface = [_dat[i] for i in ll] + [_dat[-1]]
             Niter = len(order_iface)
             if Niter == 1:
+                ii = 0  # index of face - always zero here
                 if _dim == "mooring":
-                    iXn, iYn = connector(iX, iY)
-                    # check for edge data that is not endpoints
-                    # of array
-                    nI = index_splitter(iXn, iYn, Nx)
-                    if len(nI) > 0:
-                        # split array into multiple subarrays if edge data
-                        args = {
-                            "_ds": ds,
-                            "_iXn": iXn,
-                            "_iYn": iYn,
-                            "_nI": nI,
-                            "_faces": order_iface,
-                            "_iface": 0,
-                            "_face_connections": face_connections,
-                            "_dim_name": _dim,
-                        }
-                        DS = ds_splitarray(**args).persist()
-                    else:
-                        DS = eval_dataset(ds, iXn, iYn, order_iface, _dim)
-                        DS = DS.chunk({_dim: len(iXn)}).persist()
+                    DS = mooring_singleface(
+                        ds, iX, iY, order_iface, ii, face_connections, _dim
+                    ).persist()
                     return DS
                 elif _dim == "station":
                     iX, iY, ind = edgesid(iX, iY)
