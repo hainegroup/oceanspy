@@ -1723,7 +1723,11 @@ def ds_edge(_ds, _ix, _iy, _ifaces, ii, _face_topo, _dim="mooring"):
             # Will neeed to sumplement at the boundary
             face1, face2 = _ifaces[ii - 1 : ii + 1][::-1]
     else:
-        fdir = None
+        if connect:  # index = 0 is at far right
+            face1, face2 = _ifaces[ii], _ifaces[ii - 1]
+            fdir = face_direction(face2, face1, _face_topo)
+        else:
+            fdir = None
 
     if connect:
         # if there is a need to sample from across the face interface
@@ -2353,6 +2357,11 @@ def ds_splitarray(
 
     # construct entire index mapper that reconstructs iXn from broken array (nI)
     _ni, _ = order_from_indexing(_iXn, _nI)
+    if _iface < len(_faces) - 1:
+        fdir = face_direction(_faces[_iface], _faces[_iface + 1], _face_connections)
+    else:  # last face index=0 at far right.
+        fdir = face_direction(_faces[_iface - 1], _faces[_iface], _face_connections)
+
     # construct a list of adjacent faces where array does not end.
     adj_faces = []
     for ii in range(len(_nI)):
@@ -2369,23 +2378,35 @@ def ds_splitarray(
                 nds, connect, moor = ds_edge(
                     _ds, _iXn[_ni[i]], _iYn[_ni[i]], _faces, _iface, _face_connections
                 )
-                if len(moor) == 0:
-                    # array ends at 0 index
-                    nnx, nny = _iXn[_ni[i]][moor[0] + 1 :], _iYn[_ni[i]][moor[0] + 1 :]
-                    ds0 = eval_dataset(_ds, nnx, nny, _iface=_faces[_iface])
-                    shift = len(nds.mooring)
-                    ds0 = reset_dim(
-                        ds0, shift, _dim_name
-                    )  # before it was only if moor==0
-                    nds = _xr.combine_by_coords([nds, ds0])
-                else:
-                    nnx, nny = _iXn[_ni[i]][: moor[0]], _iYn[_ni[i]][: moor[0]]
-                    ds0 = eval_dataset(_ds, nnx, nny, _iface=_faces[_iface])
-                    nds = _xr.combine_by_coords([ds0, nds])
-                del ds0
+                if connect:  # subarry end at right edge
+                    if len(moor) == 0 or fdir in [0, 2]:
+                        # array ends at 0 index
+                        nnx, nny = (
+                            _iXn[_ni[i]][moor[-1] + 1 :],
+                            _iYn[_ni[i]][moor[-1] + 1 :],
+                        )
+                        ds0 = eval_dataset(
+                            _ds, nnx, nny, _iface=_faces[_iface], _dim_name=_dim_name
+                        )
+                        shift = len(nds.mooring)
+                        ds0 = reset_dim(ds0, shift, _dim_name)
+                        nds = _xr.combine_by_coords([nds, ds0])
+                    else:
+                        nnx, nny = _iXn[_ni[i]][: moor[0]], _iYn[_ni[i]][: moor[0]]
+                        ds0 = eval_dataset(
+                            _ds, nnx, nny, _iface=_faces[_iface], _dim_name=_dim_name
+                        )
+                        nds = _xr.combine_by_coords([ds0, nds])
+                    del ds0
+                else:  # safe to eval everywhere
+                    nnx, nny = _iXn[_ni[i]], _iYn[_ni[i]]
+                    nds = eval_dataset(
+                        _ds, nnx, nny, _iface=_faces[_iface], _dim_name=_dim_name
+                    )
             else:
+                nnx, nny = _iXn[_ni[i]], _iYn[_ni[i]]
                 nds = eval_dataset(
-                    _ds, _iXn[_ni[i]], _iYn[_ni[i]], _faces[_iface], _dim_name
+                    _ds, nnx, nny, _iface=_faces[_iface], _dim_name=_dim_name
                 )
         else:
             nds, *a = ds_edge(
@@ -2411,6 +2432,11 @@ def mooring_singleface(_ds, _ix, _iy, _faces, _iface, _face_connections):
     evaluates the mooring array within a single face.
     """
     _Nx = len(_ds.X) - 1
+    if _iface < len(_faces) - 1:
+        fdir = face_direction(_faces[_iface], _faces[_iface + 1], _face_connections)
+    else:
+        fdir = face_direction(_faces[_iface - 1], _faces[_iface], _face_connections)
+
     _ixn, _iyn = connector(_ix, _iy)
     nI = index_splitter(_ixn, _iyn, _Nx)
     if len(nI) > 0:
@@ -2432,25 +2458,34 @@ def mooring_singleface(_ds, _ix, _iy, _faces, _iface, _face_connections):
 
         if iix.shape[0] + iiy.shape[0] == 0:
             # array does not edge at right edge
-            dsf = eval_dataset(_ds, _ixn, _iyn, _faces[_iface], "mooring")
+            dsf = eval_dataset(_ds, _ixn, _iyn, _faces[_iface], _dim_name="mooring")
             dsf = dsf.chunk({"mooring": len(_ixn)})
         else:
             # array ends at edge
             nds, connect, moor = ds_edge(
                 _ds, _ixn, _iyn, _faces, _iface, _face_connections
             )
-            if len(moor) == 0:  # this may be innecessary...
-                # array ends at 0 index
-                nnx, nny = _ixn[moor[0] + 1 :], _iyn[moor[0] + 1 :]
-                ds0 = eval_dataset(_ds, nnx, nny, _iface=_faces[_iface])
-                shift = len(nds.mooring)
-                ds0 = reset_dim(ds0, shift, "mooring")
-                dsf = _xr.combine_by_coords([nds, ds0])
-            else:
-                nnx, nny = _ixn[: moor[0]], _iyn[: moor[0]]
-                ds0 = eval_dataset(_ds, nnx, nny, _iface=_faces[_iface])
-                dsf = _xr.combine_by_coords([ds0, nds])
-            del ds0, nds
+            if connect:
+                if len(moor) == 0 or fdir in [0, 2]:
+                    # array ends at 0 index
+                    nnx, nny = _ixn[moor[-1] + 1 :], _iyn[moor[-1] + 1 :]
+                    ds0 = eval_dataset(
+                        _ds, nnx, nny, _iface=_faces[_iface], _dim_name="mooring"
+                    )
+                    shift = len(nds.mooring)
+                    ds0 = reset_dim(ds0, shift, "mooring")
+                    dsf = _xr.combine_by_coords([nds, ds0])
+                else:
+                    nnx, nny = _ixn[: moor[0]], _iyn[: moor[0]]
+                    ds0 = eval_dataset(
+                        _ds, nnx, nny, _iface=_faces[_iface], _dim_name="mooring"
+                    )
+                    dsf = _xr.combine_by_coords([ds0, nds])
+                del ds0, nds
+            else:  # safe to eval everywhere
+                dsf = eval_dataset(
+                    _ds, _ixn, _iyn, _iface=_faces[_iface], _dim_name="mooring"
+                )
     return dsf
 
 
