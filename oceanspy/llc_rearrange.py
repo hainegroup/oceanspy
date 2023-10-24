@@ -2415,7 +2415,7 @@ def mooring_singleface(
     return dsf
 
 
-def station_singleface(_ds, _ix, _iy, _order_faces, _iface, face_connections):
+def station_singleface(_ds, _ix, _iy, _order_faces, _iface, _face_connections):
     iX, iY, ind = edgesid(_ix, _iy)
     # get edge data
     eX, eY = iX[ind], iY[ind]
@@ -2423,10 +2423,10 @@ def station_singleface(_ds, _ix, _iy, _order_faces, _iface, face_connections):
     iX, iY = _np.delete(iX, ind), _np.delete(iY, ind)
     # data with index=0 somewhere is safe to eval at current face.
     # find such data and restore it to original index array
-    aface = face_adjacent(eX, eY, _order_faces[_iface], face_connections)
+    aface = face_adjacent(eX, eY, _order_faces[_iface], _face_connections)
     directions = _np.array(
         [
-            face_direction(_order_faces[_iface], aface[i], face_connections)
+            face_direction(_order_faces[_iface], aface[i], _face_connections)
             for i in range(len(aface))
         ]
     )
@@ -2459,7 +2459,7 @@ def station_singleface(_ds, _ix, _iy, _order_faces, _iface, face_connections):
                 eY[aind],
                 [_order_faces[_iface]] + [adjface],
                 0,
-                face_connections,
+                _face_connections,
                 _dim="station",
             )
             if ii > 0:
