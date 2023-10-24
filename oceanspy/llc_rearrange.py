@@ -2387,6 +2387,98 @@ def ds_splitarray(
     return dsf
 
 
+def mooring_singleface(
+    _ds, _ix, _iy, _order_faces, _iface, _face_connections, _dim_name
+):
+    """
+    evaluates the mooring array within a single face.
+    """
+    _Nx = len(_ds.X) - 1
+    _ixn, _iyn = connector(_ix, _iy)
+    nI = index_splitter(_ixn, _iyn, _Nx)
+    if len(nI) > 0:
+        args = {
+            "_ds": _ds,
+            "_iXn": _ixn,
+            "_iYn": _iyn,
+            "_nI": nI,
+            "_faces": _order_faces,
+            "_iface": _iface,
+            "_face_connections": _face_connections,
+            "_dim_name": _dim_name,
+        }
+        dsf = ds_splitarray(**args)
+    else:
+        dsf = eval_dataset(_ds, _ixn, _iyn, _order_faces[_iface], _dim_name).chunk(
+            {_dim_name: len(_ixn)}
+        )
+    return dsf
+
+
+def station_singleface(
+    _ds, _ix, _iy, _order_faces, _iface, face_connections, _dim="station"
+):
+    iX, iY, ind = edgesid(_ix, _iy)
+    # get edge data
+    eX, eY = iX[ind], iY[ind]
+    # remove from original array
+    iX, iY = _np.delete(iX, ind), _np.delete(iY, ind)
+    # data with index=0 somewhere is safe to eval at current face.
+    # find such data and restore it to original index array
+    aface = face_adjacent(eX, eY, _order_faces[_iface], face_connections)
+    directions = _np.array(
+        [
+            face_direction(_order_faces[_iface], aface[i], face_connections)
+            for i in range(len(aface))
+        ]
+    )
+    dirs = []
+    if set([0]).issubset(directions):  # these can safely be eval at face
+        dirs += list([item[0] for item in _np.argwhere(directions == 0)])
+    if set([2]).issubset(directions):
+        dirs += list([item[0] for item in _np.argwhere(directions == 2)])
+    neX, neY = (
+        eX[dirs],
+        eY[dirs],
+    )
+    eX, eY, aface = (
+        _np.delete(eX, dirs),
+        _np.delete(eY, dirs),
+        _np.delete(_np.array(aface), dirs),
+    )
+    iX, iY = _np.append(iX, neX), _np.append(iY, neY)
+    dsf = eval_dataset(_ds, iX, iY, _order_faces[_iface], _dim_name=_dim).chunk(
+        {_dim: len(iX)}
+    )
+    if eX.shape[0] > 0:
+        # evaluate at edge of between faces. need adjascent face and appropriate indexes
+        DSe = []
+        ii = 0
+        for adjface in set(aface):
+            aind = _np.where(aface == adjface)[0]
+            dse, *a = ds_edge(
+                _ds,
+                eX[aind],
+                eY[aind],
+                [_order_faces[_iface]] + [adjface],
+                0,
+                face_connections,
+                _dim=_dim,
+            )
+            if ii > 0:
+                shift = int(DSe[ii - 1][_dim].values[-1]) + 1
+                dse = reset_dim(dse, shift, dim=_dim)
+            DSe.append(dse)
+            ii += 1
+        dse = _xr.combine_by_coords(DSe).chunk({_dim: len(eX)})
+        del DSe
+        shift = int(dsf[_dim].values[-1]) + 1
+        dse = reset_dim(dse, shift, dim=_dim)
+        dsf = _xr.combine_by_coords([dsf, dse]).chunk({_dim: len(eX) + len(iX)})
+
+    return dsf
+
+
 class Dims:
     """Creates a shortcut for dimension`s names associated with an arbitrary
     variable."""
