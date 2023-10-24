@@ -36,11 +36,12 @@ from ._ospy_utils import (
     _rename_aliased,
 )
 from .llc_rearrange import LLCtransformation as _llc_trans
-from .llc_rearrange import eval_dataset, mates
+from .llc_rearrange import ds_splitarray, eval_dataset, index_splitter, mates
 from .utils import (
     _rel_lon,
     _reset_range,
     circle_path_array,
+    connector,
     create_list,
     diff_and_inds_where_insert,
     get_maskH,
@@ -1151,6 +1152,7 @@ def stations(
     od = _copy.deepcopy(od)
     R = od.parameters["rSphere"]
     ds = od._ds
+    face_connections = od.face_connections["face"]
 
     if varList is not None:
         nvarlist = [var for var in ds.data_vars if var not in varList]
@@ -1211,53 +1213,33 @@ def stations(
             iX, iY = (nds[f"{i}"].data for i in ("X", "Y"))
             DS = eval_dataset(ds, iX, iY, _dim_name=_dim)
             DS = DS.squeeze()
-
         else:
             ds = mates(ds)
             iX, iY, iface = (nds[f"{i}"].data for i in ("X", "Y", "face"))
             _dat = nds.face.values
-            if _dim == "mooring":  # need to remove points at face boundaries
-                Nx = len(ds["X"].values) - 1
-                mask = _np.array(
-                    list(_np.argwhere(iX == Nx)) + list(_np.argwhere(iY == Nx))
-                )
-                if len(mask):
-                    iX, iY, _dat = (_np.delete(ii, mask) for ii in (iX, iY, _dat))
-
             ll = _np.where(abs(_np.diff(_dat)))[0]
             order_iface = [_dat[i] for i in ll] + [_dat[-1]]
             Niter = len(order_iface)
-
             if Niter == 1:
                 if _dim == "mooring":
-                    evals = {
-                        "face": order_iface[0],
-                        "X": iX,
-                        "Y": iY,
-                    }
-                    data = ds_grid.isel(**evals)
-                    ix, iy = (data["i" + f"{i}"].data for i in ("X", "Y"))
-                    # Remove duplicates that are next to each other.
-                    mask = _np.abs(_np.diff(ix)) + _np.abs(_np.diff(iy)) == 0
-                    ix, iy = (_np.delete(ii, _np.argwhere(mask)) for ii in (ix, iy))
-
-                    # Initialize variables
-                    dx, dy, inds = diff_and_inds_where_insert(ix, iy)
-                    while inds.size:
-                        dx, dy = (di[inds] for di in (dx, dy))
-                        mask = _np.abs(dx * dy) == 1
-                        ix = _np.insert(ix, inds + 1, ix[inds] + (dx / 2).astype(int))
-                        iy = _np.insert(
-                            iy,
-                            inds + 1,
-                            iy[inds] + _np.where(mask, dy, (dy / 2).astype(int)),
-                        )
-                        # Prepare for next iteration
-                        dx, dy, inds = diff_and_inds_where_insert(ix, iy)
-                    iX, iY = remove_repeated(ix, iy)
-                    DS = eval_dataset(ds, iX, iY, order_iface, _dim)
-                    DS = DS.chunk({_dim: len(iX)})
-
+                    iXn, iYn = connector(iX, iY)
+                    nI = index_splitter(iXn, iYn)
+                    if len(nI) > 0:  # most split face into multiple arrays
+                        args = {
+                            "_ds": ds,
+                            "_iXn": iXn,
+                            "_iYn": iYn,
+                            "_nI": nI,
+                            "_faces": order_iface,
+                            "_iface": 0,
+                            "_face_connections": face_connections,
+                            "_Nx": 89,
+                            "_dim_name": _dim,
+                        }
+                        DS = ds_splitarray(**args).persist()
+                    else:
+                        DS = eval_dataset(ds, iXn, iYn, order_iface, _dim)
+                        DS = DS.chunk({_dim: len(iXn)}).persist()
                     return DS
                 elif _dim == "station":
                     DS = eval_dataset(ds, iX, iY, order_iface, _dim)
