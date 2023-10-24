@@ -1216,6 +1216,10 @@ def stations(
             DS = DS.squeeze()
         else:
             ds = mates(ds)
+            varlist = [var for var in ds.reset_coords().data_vars if var not in "face"]
+            attrs = {}
+            for var in varlist:
+                attrs[var] = ds[var].attrs
             iX, iY, iface = (nds[f"{i}"].data for i in ("X", "Y", "face"))
             _dat = nds.face.values
             ll = _np.where(abs(_np.diff(_dat)))[0]
@@ -1236,41 +1240,35 @@ def stations(
                 elif _dim == "station":
                     DS = station_singleface(**args).persist()
             elif Niter > 1:
-                # split array into N-subarrays for each N face crossing
                 nX0, nY0 = splitter(iX, iY, iface)
-                # initialize common argument
                 args = {
                     "_ds": ds,
                     "_faces": order_iface,
                     "_face_connections": face_connections,
                 }
-                if _dim == "station":
-                    DSf = []
-                    shift = 0
-                    for ii in range(Niter):
+                DSf = []
+                shift = 0
+                for ii in range(Niter):
+                    if _dim == "station":
                         args1 = {"_ix": nX0[ii], "_iy": nY0[ii], "_iface": ii}
                         dse = station_singleface(**{**args, **args1})
-                        if ii > 0:
-                            shift += len(nX0[ii - 1])
-                            dse = reset_dim(dse, shift, dim=_dim)
-                        DSf.append(dse)
-                    DS = _xr.combine_by_coords(DSf).persist()
-                    del DSf
-                elif _dim == "mooring":
-                    DSf = []
-                    shift = 0
-                    for ii in range(Niter):
-                        # print(ii)
+                    elif _dim == "mooring":
                         nix, niy = fill_path(
                             nX0, nY0, order_iface, ii, face_connections
                         )
                         args1 = {"_ix": nix, "_iy": niy, "_iface": ii}
                         dse = mooring_singleface(**{**args, **args1})
-                        if ii > 0:
-                            shift += len(DSf[ii - 1].mooring)
-                            dse = reset_dim(dse, shift, dim=_dim)
-                        DSf.append(dse)
-                    DS = _xr.combine_by_coords(DSf).persist()
+                    for var in dse.reset_coords().data_vars:
+                        dse[var].attrs = {}
+                    if ii > 0:
+                        shift += len(DS[ii - 1][_dim])
+                        dse = reset_dim(dse, shift, dim=_dim)
+                    DSf.append(dse)
+                DS = _xr.combine_by_coords(DSf).persist()
+                del DSf
+                for var in DS.reset_coords().data_vars:
+                    DS[var].attrs = attrs
+                if _dim == "mooring":
                     return DS
     DS = DS.set_coords(co_list)
 
