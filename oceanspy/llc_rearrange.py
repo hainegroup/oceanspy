@@ -2468,6 +2468,8 @@ def mooring_singleface(_ds, _ix, _iy, _faces, _iface, _face_connections):
             "_dim_name": "mooring",
         }
         dsf = ds_splitarray(**args)
+        nx = len(dsf.mooring)
+        dsf = dsf.chunk({"mooring": nx})
     else:
         # no need to split into subarrays
         iix = _np.where(_ixn == _Nx)[0]
@@ -2476,6 +2478,8 @@ def mooring_singleface(_ds, _ix, _iy, _faces, _iface, _face_connections):
         if iix.shape[0] + iiy.shape[0] == 0:
             # array does not end at right edge
             dsf = eval_dataset(_ds, _ixn, _iyn, _faces[_iface], _dim_name="mooring")
+            nx = len(dsf.mooring)
+            dsf = dsf.chunk({"mooring": nx})
         else:
             DSt = []
             # array reaches at least one right edge
@@ -2563,11 +2567,15 @@ def mooring_singleface(_ds, _ix, _iy, _faces, _iface, _face_connections):
                             _ds, nnx, nny, _iface=_faces[_iface], _dim_name="mooring"
                         )
                 dsf = _xr.combine_by_coords(DSt + [ds0])
+                nx = len(dsf.mooring)
+                dsf = dsf.chunk({"mooring": nx})
                 del ds0, nds
             else:  # safe to eval everywhere
                 dsf = eval_dataset(
                     _ds, _ixn, _iyn, _iface=_faces[_iface], _dim_name="mooring"
                 )
+                nx = len(dsf.mooring)
+                dsf = dsf.chunk({"mooring": nx})
     return dsf
 
 

@@ -1264,7 +1264,9 @@ def stations(
                         shift += len(DSf[ii - 1][_dim])
                         dse = reset_dim(dse, shift, dim=_dim)
                     DSf.append(dse)
-                DS = _xr.combine_by_coords(DSf).persist()
+                DS = _xr.combine_by_coords(DSf)
+                Ndim = len(DS[_dim])
+                DS = DS.chunk({_dim: Ndim}).persist()
                 del DSf
                 for var in DS.reset_coords().data_vars:
                     DS[var].attrs = attrs
