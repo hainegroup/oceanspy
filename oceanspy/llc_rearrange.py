@@ -1925,9 +1925,7 @@ def ds_edge(_ds, _ix, _iy, _ifaces, ii, _face_topo, _dim="mooring"):
         nds = _xr.merge([nds, ds1D])
         if "face" in nds.reset_coords().data_vars:
             nds = nds.drop_vars(["face"])
-
     else:
-        # print('not connect or 0 reentry')
         nds = None
         moor = None
     return nds, connect, moor
