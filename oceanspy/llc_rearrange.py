@@ -1610,7 +1610,7 @@ def arctic_eval(_ds, _ix, _iy, _dim_name="mooring"):
     return new_ds
 
 
-def ds_edge(_ds, _ix, _iy, _ifaces, ii, _face_topo, _dim="mooring"):
+def ds_edge(_ds, _ix, _iy, _ifaces, ii, _face_topo, _dim="mooring", **kwargs):
     """
     Given an array of index point that ends at the
     face boundary, it samplest from the neighbor faced data
