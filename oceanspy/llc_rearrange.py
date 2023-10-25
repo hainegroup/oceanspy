@@ -1706,14 +1706,33 @@ def ds_edge(_ds, _ix, _iy, _ifaces, ii, _face_topo, _dim="mooring", **kwargs):
     connect = False
     axis = None
     moor = []
-
+    moors = []  # local direction of crossing
     if len(ymoor) + len(xmoor) > 0:
         connect = True  # array crosses into other face
-        moors = [xmoor, ymoor]  # local direction of crossing
+        for imoor in [xmoor, ymoor]:
+            if imoor.size:
+                moors.append(imoor)
         axes = ["x", "y"]  # for debugging purpose
-        indm = [i for i, e in enumerate([len(xmoor), len(ymoor)]) if e != 0][0]
-        moor = moors[indm]
-        axis = axes[indm]  # for debug purpose
+        indm = [i for i, e in enumerate([len(xmoor), len(ymoor)]) if e != 0]
+        if len(indm) == 1:  # crossing long a single direction
+            indm = indm[0]
+            axis = axes[indm]  # for debug purpose
+            moor = [xmoor, ymoor][indm]
+        else:  # crossing in two directions (both `x` and `y`)
+            # can only take one direction at a time
+            # see if the direction to considered is provided
+            # as input/argument
+            axis = kwargs.pop("axis", None)
+            if axis is None:
+                # it is not. pick one => `x`
+                indm = indm[0]
+                axis = axes[indm]  # for debug purpose
+            elif axis in ["x", "y"]:
+                # pick the given
+                indm = indm[["x", "y"].index(axis)]
+            else:
+                raise ValueError("axis given is not appropriate")
+            moor = moors[indm]
 
     if ii < _Niter - 1:
         fdir = face_direction(_ifaces[ii], _ifaces[ii + 1], _face_topo)
@@ -1928,7 +1947,7 @@ def ds_edge(_ds, _ix, _iy, _ifaces, ii, _face_topo, _dim="mooring", **kwargs):
     else:
         nds = None
         moor = None
-    return nds, connect, moor
+    return nds, connect, moor, moors
 
 
 def face_direction(face1, face2, face_connections):
@@ -2373,7 +2392,7 @@ def ds_splitarray(
     for i in range(len(_ni)):  # parallelize this. It could take some time.
         if i % 2 == 0:
             if i in [0, len(_ni) - 1]:
-                nds, connect, moor = ds_edge(
+                nds, connect, moor, _ = ds_edge(
                     _ds, _iXn[_ni[i]], _iYn[_ni[i]], _faces, _iface, _face_connections
                 )
                 if connect:  # subarry end at right edge
@@ -2460,17 +2479,62 @@ def mooring_singleface(_ds, _ix, _iy, _faces, _iface, _face_connections):
         else:
             DSt = []
             # array reaches at least one right edge
-            nds, connect, moor = ds_edge(
+            nds, connect, moor, moors = ds_edge(
                 _ds, _ixn, _iyn, _faces, _iface, _face_connections
             )
-            diffm = _np.diff(nds.mooring)
-            jump = _np.argwhere(abs(diffm) != 1)
-            if jump.shape[0]:  # two right-end points
-                moor = jump
-                ds2 = nds.isel(mooring=slice(int(moor[-1]) + 1, len(nds.mooring) + 1))
-                moor2 = ds2.mooring.values[0]
-                nds = nds.isel(mooring=slice(int(moor[-1]) + 1))  # 1st end point
+            if len(moors) == 1:
+                # array redges edge along dim
+                diffm = _np.diff(nds.mooring)
+                jump = _np.argwhere(abs(diffm) != 1)
+                if jump.shape[0]:  # two right-end points
+                    moor = jump
+                    ds2 = nds.isel(
+                        mooring=slice(int(moor[-1]) + 1, len(nds.mooring) + 1)
+                    )
+                    moor2 = ds2.mooring.values[0]
+                    nds = nds.isel(mooring=slice(int(moor[-1]) + 1))  # 1st end point
+                    DSt.append(ds2)
+            else:
+                jump = _np.array([])
+                # array ends/begins at different axes.
+                # `ds_edge` can only extract edged-data from a single axis
+                # at a time. need to evaluate again.
+                if (moors[0].values == moor).all():
+                    # the `x` axis was picked in previous eval.
+                    kwargs = {"axis": "y"}  # need y-axis endpoint
+                    _ind = moors[1].mooring.values[0]
+                else:
+                    kwargs = {"axis": "x"}
+                # select adjacent face to index `_ind`.
+                new_face = face_adjacent(
+                    [_ixn[_ind]], [_iyn[_ind]], _faces[_iface], _face_connections
+                )
+                present_face = 0
+                dst, *a = ds_edge(
+                    _ds,
+                    _ixn,
+                    _iyn,
+                    [_faces[_iface]] + new_face,
+                    present_face,
+                    _face_connections,
+                    **kwargs,
+                )
+                # from the two edge evals - I need to order them
+                moor_a, moor_b = moor, dst.mooring.values
+                ds_a, ds_b = nds, dst
+                ind1 = [moor_a.min(), moor_b.min()].index(
+                    min([moor_a.min(), moor_b.min()])
+                )
+                ind2 = [moor_a.min(), moor_b.min()].index(
+                    max([moor_a.min(), moor_b.min()])
+                )
+                moor = [moor_a, moor_b][ind1]
+                moor2 = [moor_a, moor_b][ind2][0]  # only care ab out first element
+                # can now order the datasets with edge data
+                nds = [ds_a, ds_b][ind1]  # mooring near zero
+                ds2 = [ds_a, ds_b][ind2]  # mooring near end
                 DSt.append(ds2)
+
             DSt.append(nds)
 
             if connect:
@@ -2483,7 +2547,7 @@ def mooring_singleface(_ds, _ix, _iy, _faces, _iface, _face_connections):
                     shift = len(nds.mooring)
                     ds0 = reset_dim(ds0, shift, "mooring")
                 else:
-                    if jump.shape[0]:  # two right ends
+                    if jump.shape[0] or len(moors) > 1:  # two right ends
                         nnx, nny = (
                             _ixn[int(moor[-1]) + 1 : moor2],
                             _iyn[int(moor[-1]) + 1 : moor2],
