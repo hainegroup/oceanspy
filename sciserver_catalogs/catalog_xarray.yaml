@@ -554,93 +554,6 @@ sources:
         T: time
       original_output: average
 
-  # ===========================
-  # Arctic Control
-  # grd_Arctic_Control:
-  #   description: Grid of Arctic Control
-  #   driver: netcdf
-  #   model: MITGCM
-  #   args:
-  #     # urlpath: /sciserver/oceanography/exp_Arctic_Control/GRID/grid_glued_swapped.nc
-  #     urlpath: /home/idies/workspace/OceanCirculation/exp_Arctic_Control/GRID/grid_glued_swapped.nc
-  #     xarray_kwargs:
-  #       engine: netcdf4
-  #       drop_variables: ['RC', 'RF', 'RU', 'RL']
-  #   metadata:
-  #     manipulate_coords:
-  #       coordsUVfromG: true
-  #     grid_coords:
-  #       add_midp: true
-  #       grid_coords:
-  #         Y:
-  #           Y:
-  #           Yp1: 0.5
-  #         X:
-  #           X:
-  #           Xp1: 0.5
-  #         Z:
-  #           Z:
-  #           Zp1: 0.5
-  #           Zu: 0.5
-  #           Zl: -0.5
-  #         time:
-  #           time: -0.5
-  #     shift_averages:
-  #       averageList:
-  #     parameters:
-  #       rSphere: 6.371e+03
-  #       eq_state: jmd95
-  #       rho0: 1027
-  #       g: 9.81
-  #       eps_nh: 0
-  #       omega: 7.292123516990373e-05
-  #       c_p: 3.986e+03
-  #       tempFrz0: 9.01e-02
-  #       dTempFrz_dS: -5.75e-02
-  #       grid_type: 'spherical'
-  #     # grid_type: spherical
-  #     name: Arctic_Control
-  #     description: |
-  #       Curvilinear grid test. Setup by Dr. Renske Gelderloos.
-  #     projection: NorthPolarStereo
-
-#   fld_Arctic_Control:
-#     description: Average fields of Arctic_Control
-#     driver: netcdf
-#     model: MITGCM
-#     args:
-#       # urlpath: /sciserver/oceanography/exp_Arctic_Control/days*/DIAGS/*.nc
-#       urlpath: /home/idies/workspace/OceanCirculation/exp_Arctic_Control/days*/DIAGS/*.nc
-#       xarray_kwargs:
-#         engine: netcdf4
-#         concat_dim: T
-#         parallel: true
-#         combine: nested
-#         drop_variables: ['diag_levels', 'iter', 'SIGMA0']
-#     metadata:
-#       rename:
-#         T: time
-#         THETA: Temp
-#       original_output: average
-
-#   state_Arctic_Control:
-#     description: State variables of Arctic_Control
-#     driver: netcdf
-#     model: MITGCM
-#     args:
-#       # urlpath: /sciserver/oceanography/exp_Arctic_Control/days*/STATE/*.nc
-#       urlpath: /home/idies/workspace/OceanCirculation/exp_Arctic_Control/days*/STATE/*.nc
-#       xarray_kwargs:
-#         engine: netcdf4
-#         concat_dim: T
-#         parallel: true
-#         combine: nested
-#     metadata:
-#       rename:
-#         T: time
-#       original_output: snapshot
-
-
   LLC4320_flds:
     description: 10 day sample of hourly data from the LLC4320 simulation
     driver: zarr
@@ -1059,19 +972,17 @@ sources:
 
 # ===========================
   # Arctic Control
-  Arctic_Control:
-    description: Arctic Control
-    driver: zarr
+  grd_Arctic_Control:
+    description: Grid of Arctic Control
+    driver: netcdf
     model: MITGCM
     args:
-      urlpath: '/home/idies/workspace/poseidon/data10_02/arctic_control.zarr'
+      # urlpath: /sciserver/oceanography/exp_Arctic_Control/GRID/grid_glued_swapped.nc
+      urlpath: /home/idies/workspace/OceanCirculation/exp_Arctic_Control/GRID/grid_glued_swapped.nc
       xarray_kwargs:
-        engine: zarr
+        engine: netcdf4
+        drop_variables: ['RC', 'RF', 'RU', 'RL']
     metadata:
-      rename:
-        T: time
-        THETA: Temp
-      original_output: snapshot
       manipulate_coords:
         coordsUVfromG: true
       grid_coords:
@@ -1108,39 +1019,18 @@ sources:
       description: |
         Curvilinear grid test. Setup by Dr. Renske Gelderloos.
       projection: NorthPolarStereo
-      
-#   fld_Arctic_Control:
-#     description: Average fields of Arctic_Control
-#     driver: netcdf
-#     model: MITGCM
-#     args:
-#       # urlpath: /sciserver/oceanography/exp_Arctic_Control/days*/DIAGS/*.nc
-#       urlpath: /home/idies/workspace/OceanCirculation/exp_Arctic_Control/days*/DIAGS/*.nc
-#       xarray_kwargs:
-#         engine: netcdf4
-#         concat_dim: T
-#         parallel: true
-#         combine: nested
-#         drop_variables: ['diag_levels', 'iter', 'SIGMA0']
-#     metadata:
-#       rename:
-#         T: time
-#         THETA: Temp
-#       original_output: average
 
-#   state_Arctic_Control:
-#     description: State variables of Arctic_Control
-#     driver: netcdf
-#     model: MITGCM
-#     args:
-#       # urlpath: /sciserver/oceanography/exp_Arctic_Control/days*/STATE/*.nc
-#       urlpath: /home/idies/workspace/OceanCirculation/exp_Arctic_Control/days*/STATE/*.nc
-#       xarray_kwargs:
-#         engine: netcdf4
-#         concat_dim: T
-#         parallel: true
-#         combine: nested
-#     metadata:
-#       rename:
-#         T: time
-#       original_output: snapshot
+  Arctic_Control_content:
+    description: Arctic Control
+    driver: zarr
+    model: MITGCM
+    args:
+      urlpath: '/home/idies/workspace/poseidon/data10_02/arctic_control.zarr'
+    xarray_kwargs:
+      engine: zarr
+    metadata:
+      rename:
+        T: time
+        # THETA: Temp
+      manipulate_coords:
+        coordsUVfromG: true
