@@ -2202,7 +2202,7 @@ def face_adjacent(_ix, _iy, _iface, _face_connections, _N=89):
         _ix: 1d array-like, int data
         _iy: 1d array-like. int data
         _iface: int
-            face index where array lives.
+            face index value where array lives.
         _face_connections: dict
             contains topology of data.
         _N: int. default=89 (ECCO)
@@ -2444,19 +2444,36 @@ def ds_splitarray(
     return dsf
 
 
+def fdir_completer(_ix, _iy, _faces, _iface, _Nx, _face_connections):
+    """completes the next directional face , whether the face is defined
+    within the path of the array, or if the next face eval is an adjacent
+    face. This matters when the arrays ends of beginnins at an endpoint
+    """
+    if _iface < len(_faces) - 1:
+        fdir = face_direction(_faces[_iface], _faces[_iface + 1], _face_connections)
+    else:  # last face array (fdir may not matter)
+        _idx, _idy, _index = edgesid(_ix, _iy, _Nx)
+        if len(_index) == 0:
+            # no edge data
+            fdir = None
+        else:
+            # infer the direction from face topology.
+            aface = face_adjacent(_ix, _iy, _faces[_iface], _face_connections)
+            fdir = face_direction(_faces[_iface], aface[0], _face_connections)
+    return fdir
+
+
 def mooring_singleface(_ds, _ix, _iy, _faces, _iface, _face_connections):
     """
     evaluates the mooring array within a single face.
     """
     _Nx = len(_ds.X) - 1
-    if _iface < len(_faces) - 1:
-        fdir = face_direction(_faces[_iface], _faces[_iface + 1], _face_connections)
-    else:
-        fdir = face_direction(_faces[_iface - 1], _faces[_iface], _face_connections)
-
     _ixn, _iyn = connector(_ix, _iy)
     nI = index_splitter(_ixn, _iyn, _Nx)
     if len(nI) > 0:
+        # data reaches edge of face, but reenters. Need to split intp
+        # subarrays in order to eval corner/vel points at adjacent
+        # face which is NOT necessarily next in ordered sequence array.
         args = {
             "_ds": _ds,
             "_iXn": _ixn,
@@ -2475,22 +2492,26 @@ def mooring_singleface(_ds, _ix, _iy, _faces, _iface, _face_connections):
         iix = _np.where(_ixn == _Nx)[0]
         iiy = _np.where(_iyn == _Nx)[0]
 
-        if iix.shape[0] + iiy.shape[0] == 0:
+        if iix.size + iiy.size == 0:
             # array does not end at right edge
             dsf = eval_dataset(_ds, _ixn, _iyn, _faces[_iface], _dim_name="mooring")
             nx = len(dsf.mooring)
             dsf = dsf.chunk({"mooring": nx})
         else:
+            # there is at least one right-edge point
+            # must split into subarray (edge+interior)
             DSt = []
-            # array reaches at least one right edge
             nds, connect, moor, moors = ds_edge(
                 _ds, _ixn, _iyn, _faces, _iface, _face_connections
             )
+
+            # check twice-appearing right ends (same axis or different)
             if len(moors) == 1:
-                # array redges edge along dim
+                # array reaches right edge once along either `x` or `y`,
+                # need to check it arrays begins and ends same index eval
                 diffm = _np.diff(nds.mooring)
                 jump = _np.argwhere(abs(diffm) != 1)
-                if jump.shape[0]:  # two right-end points
+                if jump.size:  # two right-end points
                     moor = jump
                     ds2 = nds.isel(
                         mooring=slice(int(moor[-1]) + 1, len(nds.mooring) + 1)
@@ -2498,9 +2519,9 @@ def mooring_singleface(_ds, _ix, _iy, _faces, _iface, _face_connections):
                     moor2 = ds2.mooring.values[0]
                     nds = nds.isel(mooring=slice(int(moor[-1]) + 1))  # 1st end point
                     DSt.append(ds2)
-            else:
-                jump = _np.array([])
-                # array ends/begins at different axes.
+            elif len(moors) == 2:
+                # array ends/begins at a right edge at different axes.
+                jump = _np.array([])  # no repeated ends
                 # `ds_edge` can only extract edged-data from a single axis
                 # at a time. need to evaluate again.
                 if (moors[0].values == moor).all():
@@ -2538,44 +2559,42 @@ def mooring_singleface(_ds, _ix, _iy, _faces, _iface, _face_connections):
                 nds = [ds_a, ds_b][ind1]  # mooring near zero
                 ds2 = [ds_a, ds_b][ind2]  # mooring near end
                 DSt.append(ds2)
-
             DSt.append(nds)
 
+            # get interior points
             if connect:
-                if len(moor) == 0 or fdir in [0, 2]:
-                    # array ends at 0 index
-                    nnx, nny = _ixn[int(moor[-1]) + 1 :], _iyn[int(moor[-1]) + 1 :]
+                shift = False
+                _eval = True
+                if jump.size or len(moors) > 1:
+                    # interior inbetween two right edge points
+                    nnx, nny = (
+                        _ixn[int(moor[-1]) + 1 : moor2],
+                        _iyn[int(moor[-1]) + 1 : moor2],
+                    )
+                    shift = len(nds.mooring)  # shift from 0
+                elif len(_ixn) == len(moor):
+                    # No interior point
+                    DS0, _eval = [], False
+                else:
+                    if 0 in moor:
+                        # edge of array towards beginning of array
+                        nnx, nny = _ixn[int(moor[-1]) + 1 :], _iyn[int(moor[-1]) + 1 :]
+                        shift = len(nds.mooring)
+                    else:
+                        # edge of array towards end - interior before
+                        nnx, nny = _ixn[: int(moor[0])], _iyn[: int(moor[0])]
+                if _eval:
                     ds0 = eval_dataset(
                         _ds, nnx, nny, _iface=_faces[_iface], _dim_name="mooring"
                     )
-                    shift = len(nds.mooring)
+                if shift is not None:
                     ds0 = reset_dim(ds0, shift, "mooring")
-                else:
-                    if jump.shape[0] or len(moors) > 1:  # two right ends
-                        nnx, nny = (
-                            _ixn[int(moor[-1]) + 1 : moor2],
-                            _iyn[int(moor[-1]) + 1 : moor2],
-                        )
-                        ds0 = eval_dataset(
-                            _ds, nnx, nny, _iface=_faces[_iface], _dim_name="mooring"
-                        )
-                        shift = len(nds.mooring)
-                        ds0 = reset_dim(ds0, shift, "mooring")
-                    else:
-                        nnx, nny = _ixn[: int(moor[0])], _iyn[: int(moor[0])]
-                        ds0 = eval_dataset(
-                            _ds, nnx, nny, _iface=_faces[_iface], _dim_name="mooring"
-                        )
-                dsf = _xr.combine_by_coords(DSt + [ds0])
+                    DS0 = [ds0]
+                DSt = DSt + DS0
+                dsf = _xr.combine_by_coords(DSt)
                 nx = len(dsf.mooring)
                 dsf = dsf.chunk({"mooring": nx})
-                del ds0, nds
-            else:  # safe to eval everywhere
-                dsf = eval_dataset(
-                    _ds, _ixn, _iyn, _iface=_faces[_iface], _dim_name="mooring"
-                )
-                nx = len(dsf.mooring)
-                dsf = dsf.chunk({"mooring": nx})
+                del nds, DS0
     return dsf
 
 

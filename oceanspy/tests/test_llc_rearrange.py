@@ -9,7 +9,7 @@ import xarray as _xr
 from oceanspy import open_oceandataset
 from oceanspy.llc_rearrange import Dims  # face_edge_check,
 from oceanspy.llc_rearrange import LLCtransformation as LLC
-from oceanspy.llc_rearrange import (  # face_edge_check,
+from oceanspy.llc_rearrange import (  # cross_face_diffs,
     _edge_arc_data,
     _edge_facet_data,
     arc_limits_mask,
@@ -20,6 +20,7 @@ from oceanspy.llc_rearrange import (  # face_edge_check,
     edgesid,
     face_adjacent,
     face_direction,
+    fdir_completer,
     fill_path,
     index_splitter,
     mask_var,
@@ -3291,6 +3292,86 @@ def test_order_from_indexing(iX, iY):
     if len(_mi) == 0:
         assert _ixx.all() == iX.all()
     else:
-        # assert that len(_mi) == 2*len(nI)+1
         for i in range(len(_mi)):
             assert _ixx[i].all() == iX[_mi[i]].all()
+
+
+# face 2
+x10 = _np.arange(89, 45, -1)
+y10 = [25] * len(x10)
+y11 = _np.arange(30, 65)
+x11 = [45] * len(y11)
+x12 = _np.arange(55, 89)
+y12 = [75] * len(x12)
+nx1 = _np.array(list(x10) + list(x11) + list(x12))
+ny1 = _np.array(list(y10) + list(y11) + list(y12))
+# face 5
+x20 = _np.arange(45)
+y20 = [20] * len(x20)
+y21 = _np.arange(30, 75)
+x21 = [55] * len(y21)
+x22 = _np.arange(45, 0, -1)
+y22 = [80] * len(x22)
+nx2 = _np.array(list(x20) + list(x21) + list(x22))
+ny2 = _np.array(list(y20) + list(y21) + list(y22))
+# group together
+oX1, oY1 = [nx1, nx2[::-1], nx1[:1]], [ny1, ny2[::-1], ny1[:1]]
+faces1 = [2, 5, 2]
+
+# connect them across interface
+X1, Y1 = [], []
+for k in range(len(oX1)):
+    x, y = fill_path(oX1, oY1, faces1, k, od.face_connections["face"])
+    X1.append(x)
+    Y1.append(y)
+
+
+# another case
+# face 5
+x1 = _np.arange(20, 75)
+y1 = _np.array([25] * len(x1))
+
+y20 = _np.arange(15, 45)
+x20 = [60] * len(y20)
+x21 = _np.arange(60, 20, -1)
+y21 = [50] * len(x21)
+
+y22 = _np.arange(40, 10, -1)
+x22 = [20] * len(y22)
+
+x2 = _np.array(list(x20) + list(x21) + list(x22))
+y2 = _np.array(list(y20) + list(y21) + list(y22))
+
+x3 = _np.arange(60, 10, -1)
+y3 = _np.array([65] * len(35))
+
+oX2, oY2 = [x1, x2, x3], [y1, y2, y3]
+faces2 = [5, 7, 5]
+
+# connect them across interface
+X2, Y2 = [], []
+for k in range(len(oX2)):
+    x, y = fill_path(oX2, oY2, faces2, k, od.face_connections["face"])
+    X2.append(x)
+    Y2.append(y)
+
+
+@pytest.mark.parametrize(
+    "ix, iy, faces, iface, face_connections, val",
+    [
+        (X1, Y1, faces1, 0, od.face_connections["face"], 1),
+        (X1, Y1, faces1, 1, od.face_connections["face"], 0),
+        (X1, Y1, faces1, len(faces1) - 1, od.face_connections["face"], 0),
+        (
+            _np.array([15]),
+            _np.array([15]),
+            faces1,
+            len(faces1) - 1,
+            od.face_connections["face"],
+            None,
+        ),
+    ],
+)
+def test_fdir_completer(iX, iY, faces, iface, face_connections, val):
+    fdir = fdir_completer(iX, iY, faces, iface, 89, face_connections)
+    assert fdir == val
