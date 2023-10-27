@@ -2563,7 +2563,7 @@ def mooring_singleface(_ds, _ix, _iy, _faces, _iface, _face_connections):
 
             # get interior points
             if connect:
-                shift = False
+                shift = None
                 _eval = True
                 if jump.size or len(moors) > 1:
                     # interior inbetween two right edge points
