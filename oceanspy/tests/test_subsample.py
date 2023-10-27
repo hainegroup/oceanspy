@@ -450,22 +450,35 @@ def test_survey(od, cartesian, delta, kwargs):
 # STATIONS
 # ========
 # create cyclonic vel
-nU = _copy.deepcopy(ECCOod._ds["CS"].values)
-nV = -_copy.deepcopy(ECCOod._ds["SN"].values)
-Ucoords = {
-    "face": ECCOod._ds.face.values,
-    "Y": _copy.deepcopy(ECCOod._ds.Y.values),
-    "Xp1": _copy.deepcopy(ECCOod._ds.Xp1.values),
-}
-Vcoords = {
-    "face": ECCOod._ds.face.values,
-    "Yp1": _copy.deepcopy(ECCOod._ds.Yp1.values),
-    "X": _copy.deepcopy(ECCOod._ds.X.values),
-}
-ECCOod._ds["UVELMASS"] = xr.DataArray(nU, coords=Ucoords, dims=["face", "Y", "Xp1"])
-ECCOod._ds["VVELMASS"] = xr.DataArray(nV, coords=Vcoords, dims=["face", "Yp1", "X"])
+co_list = [var for var in ECCOod._ds.coords if var not in ECCOod._ds.dims]
 
-ECCOod._ds = mates(ECCOod._ds)
+nU = _copy.deepcopy(ECCOod._ds["CS"]).expand_dims({"time": 1}).values
+nV = -_copy.deepcopy(ECCOod._ds["SN"]).expand_dims({"time": 1}).values
+
+Ucoords = {
+    "time": ECCOod._ds.time.values,
+    "face": ECCOod._ds.face.values,
+    "Y": ECCOod._ds.Y.values,
+    "Xp1": ECCOod._ds.Xp1.values,
+}
+
+Vcoords = {
+    "time": ECCOod._ds.time.values,
+    "face": ECCOod._ds.face.values,
+    "Yp1": ECCOod._ds.Yp1.values,
+    "X": ECCOod._ds.X.values,
+}
+
+ECCOod._ds["UVELMASS"] = xr.DataArray(
+    nU, coords=Ucoords, dims=["time", "face", "Y", "Xp1"]
+)
+ECCOod._ds["VVELMASS"] = xr.DataArray(
+    nV, coords=Vcoords, dims=["time", "face", "Yp1", "X"]
+)
+
+
+ECCOod._ds = mates(ECCOod._ds.set_coords(co_list))
+
 
 # coordinate locations
 lons76N = np.array([6.2, 97.8, -172.21623, -83.78377])

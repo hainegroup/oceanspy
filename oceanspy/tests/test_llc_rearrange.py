@@ -3360,12 +3360,12 @@ for k in range(len(oX2)):
     [
         (X1, Y1, faces1, 0, od.face_connections["face"], 1),
         (X1, Y1, faces1, 1, od.face_connections["face"], 0),
-        (X1, Y1, faces1, len(faces1) - 1, od.face_connections["face"], 0),
+        (X1, Y1, faces1, 2, od.face_connections["face"], 0),
         (
             _np.array([15]),
             _np.array([15]),
             faces1,
-            len(faces1) - 1,
+            2,
             od.face_connections["face"],
             None,
         ),
