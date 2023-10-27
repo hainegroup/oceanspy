@@ -2587,8 +2587,8 @@ def mooring_singleface(_ds, _ix, _iy, _faces, _iface, _face_connections):
                     ds0 = eval_dataset(
                         _ds, nnx, nny, _iface=_faces[_iface], _dim_name="mooring"
                     )
-                if shift is not None:
-                    ds0 = reset_dim(ds0, shift, "mooring")
+                    if shift is not None:
+                        ds0 = reset_dim(ds0, shift, "mooring")
                     DS0 = [ds0]
                 DSt = DSt + DS0
                 dsf = _xr.combine_by_coords(DSt)
@@ -2659,7 +2659,7 @@ def station_singleface(_ds, _ix, _iy, _faces, _iface, _face_connections):
     return dsf
 
 
-def cross_face_diffs(_ds, _faces, _iface, _face_connection):
+def cross_face_diffs(_ds, _faces, _iface, _face_connections):
     """computes the distance between the location of index spaces in both directions
     diffX and diffY when data has complex topology (face is dim).
 
@@ -2686,8 +2686,8 @@ def cross_face_diffs(_ds, _faces, _iface, _face_connection):
     Rot = _np.arange(7, 13)
     _ds = _ds.reset_coords()
     Xind, Yind = _ds["Xind"], _ds["Yind"]
-    ind_coords = _ds.reset_coords()["Xind"].coords
-    ind_dims = _ds.reset_coords()["Xind"].dims
+    # ind_coords = _ds.reset_coords()["Xind"].coords
+    # ind_dims = _ds.reset_coords()["Xind"].dims
 
     # define all 4 unit vectors defining crossing from face i to face i+1
     # inherits face topo (ordering), and assumes that of non rot faces.
@@ -2698,8 +2698,8 @@ def cross_face_diffs(_ds, _faces, _iface, _face_connection):
         Xind, Yind = Xind, Nx - Yind
         _ds = _ds.drop_vars(["Xind", "Yind"])
         # update vals in dataset
-        _ds["Xind"] = DataArray(Xind, coords=ind_coords, dims=ind_dims)
-        _ds["Yind"] = DataArray(Yind, coords=ind_coords, dims=ind_dims)
+        # _ds["Xind"] = DataArray(Xind, coords=ind_coords, dims=ind_dims)
+        # _ds["Yind"] = DataArray(Yind, coords=ind_coords, dims=ind_dims)
         # redefine options with corrected topology
         # keep same result from `face_direction`
         fdirs_options = [[0, 1], [0, -1], [-1, 0], [1, 0]]
@@ -2710,14 +2710,14 @@ def cross_face_diffs(_ds, _faces, _iface, _face_connection):
     # only when there is another face.
     if _iface < len(_faces) - 1:
         # local face direction for next face
-        fdir = face_direction(_faces[_iface], _faces[_iface + 1], _face_connection)
+        fdir = face_direction(_faces[_iface], _faces[_iface + 1], _face_connections)
         # when crossing into other face - get logical dir vectors
         tdiffx, tdiffy = fdirs_options[fdir]
         diffX, diffY = _np.append(diffX, tdiffx), _np.append(diffY, tdiffy)
     else:
         tdiffx, tdiffy = _np.array([]), _np.array([])
 
-    return _ds, diffX, diffY, tdiffx, tdiffy
+    return diffX, diffY, tdiffx, tdiffy
 
 
 class Dims:
