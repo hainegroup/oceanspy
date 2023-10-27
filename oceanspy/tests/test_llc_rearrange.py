@@ -9,12 +9,13 @@ import xarray as _xr
 from oceanspy import open_oceandataset
 from oceanspy.llc_rearrange import Dims  # face_edge_check,
 from oceanspy.llc_rearrange import LLCtransformation as LLC
-from oceanspy.llc_rearrange import (  # cross_face_diffs,
+from oceanspy.llc_rearrange import (
     _edge_arc_data,
     _edge_facet_data,
     arc_limits_mask,
     arct_connect,
     combine_list_ds,
+    cross_face_diffs,
     edge_completer,
     edge_slider,
     edgesid,
@@ -25,6 +26,7 @@ from oceanspy.llc_rearrange import (  # cross_face_diffs,
     index_splitter,
     mask_var,
     mates,
+    mooring_singleface,
     order_from_indexing,
     rotate_dataset,
     rotate_vars,
@@ -3374,3 +3376,22 @@ for k in range(len(oX2)):
 def test_fdir_completer(ix, iy, faces, iface, face_connections, val):
     fdir = fdir_completer(ix, iy, faces, iface, 89, face_connections)
     assert fdir == val
+
+
+@pytest.mark.parametrize(
+    "ds, ix, iy, faces, iface, face_connections, valx, valy",
+    [(ds, X1, Y1, faces1, 0, od.face_connections["face"], 1, 0)],
+)
+def test_cross_face_diffs(ds, ix, iy, faces, iface, face_connections, valx, valy):
+    nix, niy = fill_path(X1, Y1, faces, iface, face_connections)
+    dse = mooring_singleface(ds, nix, niy, faces, iface, face_connections)
+    diffX, diffY, tdx, tdy = cross_face_diffs(dse, faces, iface, face_connections)
+
+    assert tdx == valx
+    assert tdy == valx
+
+    diffX = _np.append(diffX, tdx)
+    diffY = _np.append(diffY, tdy)
+
+    assert (abs(diffX) + abs(diffY) == 1).all()
+    assert len(diffX) == len(dse.mooring) - 1
