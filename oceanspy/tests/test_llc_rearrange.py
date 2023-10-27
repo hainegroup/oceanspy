@@ -3287,7 +3287,7 @@ X4, Y4 = connector(nx1[::-1], ny1[::-1])
 
 @pytest.mark.parametrize("iX, iY", [(X1, Y1), (X2, Y2), (X3, Y3), (X4, Y4)])
 def test_order_from_indexing(iX, iY):
-    nI = index_splitter(iX, iY)
+    nI = index_splitter(iX, iY, 89)
     _mi, _ixx = order_from_indexing(iX, nI)
     if len(_mi) == 0:
         assert _ixx.all() == iX.all()
@@ -3324,7 +3324,6 @@ for k in range(len(oX1)):
     x, y = fill_path(oX1, oY1, faces1, k, od.face_connections["face"])
     X1.append(x)
     Y1.append(y)
-
 
 # another case
 # face 5

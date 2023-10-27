@@ -23,6 +23,10 @@ MITgcm_rect_nc = open_oceandataset.from_netcdf("{}MITgcm_rect_nc.nc" "".format(D
 ECCO_url = "{}catalog_ECCO.yaml".format(Datadir)
 ECCOod = open_oceandataset.from_catalog("LLC", ECCO_url)
 
+ECCOod._ds = ECCOod._ds.rename_vars(
+    {"hFacS": "HFacS", "hFacW": "HFacW", "hFacC": "HFacC"}
+)
+
 
 # =======
 # CUTOUT
@@ -340,7 +344,7 @@ def test_cutout_faces(
 def test_mooring(od, cartesian, kwargs):
     this_od = od
     serial = False
-    if "face" not in od.dataset.dims:
+    if "face" not in this_od.dataset.dims:
         Xmoor = [this_od.dataset["XC"].min().values, this_od.dataset["XC"].max().values]
         Ymoor = [this_od.dataset["YC"].min().values, this_od.dataset["YC"].max().values]
         kwargs.pop("XRange", None)

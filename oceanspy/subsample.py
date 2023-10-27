@@ -816,6 +816,8 @@ def mooring_array(od, Ymoor, Xmoor, xoak_index="scipy_kdtree", **kwargs):
         dists = _np.insert(dists, 0, 0)  # add zero as 1st element
         if "units" in new_ds["XC"].attrs:
             unit = new_ds["XC"].attrs["units"]
+        else:
+            unit = "km"
 
     dists = _np.cumsum(dists)
     distance = DataArray(
