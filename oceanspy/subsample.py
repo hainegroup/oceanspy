@@ -1230,7 +1230,7 @@ def stations(
                     "_ds": ds,
                     "_ix": iX,
                     "_iy": iY,
-                    "_order_faces": order_iface,  # single element list
+                    "_faces": order_iface,  # single element list
                     "_iface": 0,  # index of face
                     "_face_connections": face_connections,
                 }

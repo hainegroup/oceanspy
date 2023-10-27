@@ -3246,7 +3246,7 @@ faces2 = [2, 5, 2]
 )
 def test_index_splitter(ix, iy, faces, face_connections, count):
     nx1, ny1 = fill_path(ix, iy, faces, 0, face_connections)
-    nI = index_splitter(nx1, ny1)
+    nI = index_splitter(nx1, ny1, 89)
     assert len(nI) == count
 
 
@@ -3343,7 +3343,7 @@ x2 = _np.array(list(x20) + list(x21) + list(x22))
 y2 = _np.array(list(y20) + list(y21) + list(y22))
 
 x3 = _np.arange(60, 10, -1)
-y3 = _np.array([65] * len(35))
+y3 = _np.array([65] * len(x3))
 
 oX2, oY2 = [x1, x2, x3], [y1, y2, y3]
 faces2 = [5, 7, 5]
@@ -3372,6 +3372,6 @@ for k in range(len(oX2)):
         ),
     ],
 )
-def test_fdir_completer(iX, iY, faces, iface, face_connections, val):
-    fdir = fdir_completer(iX, iY, faces, iface, 89, face_connections)
+def test_fdir_completer(ix, iy, faces, iface, face_connections, val):
+    fdir = fdir_completer(ix, iy, faces, iface, 89, face_connections)
     assert fdir == val
