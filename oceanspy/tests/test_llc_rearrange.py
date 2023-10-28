@@ -3432,17 +3432,21 @@ def test_cross_face_diffs(od, ix, iy, faces, iface, valx, valy):
 
 @pytest.mark.parametrize("od", [od])
 @pytest.mark.parametrize(
-    "iX, iY, faces, iface",
+    "iX, iY, faces",
     [
-        ([61], [89], [10], 0),
+        ([61], [89], [10]),
+        ([61, 61, 61, 89], [50, 50, 89, 50], [10]),
+        ([61, 61, 61, 89], [50, 50, 89, 50], [10]),
     ],
 )
-def test_station_singleface(od, iX, iY, faces, iface):
+def test_station_singleface(od, iX, iY, faces):
     ds = od._ds
     face_connections = od.face_connections["face"]
-    dsf = station_singleface(ds, iX, iY, faces, iface, face_connections)
+    dsf = station_singleface(ds, iX, iY, faces, 0, face_connections)
 
-    assert len(iX) == len(dsf.station)
+    _set = set(tuple((iX[i], iY[i])) for i in range(len(iX)))
+
+    assert len(_set) == len(dsf.station)
 
     for m in range(len(dsf.station)):
         yargs0 = {"Yp1": 0, "station": m}
