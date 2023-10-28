@@ -3557,7 +3557,7 @@ xfaces = [10, 2, 5, 7, 5, 2, 10]
 
 @pytest.mark.parametrize("od", [od])
 @pytest.mark.parametrize(
-    "iX, iY, faces, iface",
+    "od, iX, iY, faces, iface",
     [
         ([61, 61, 61, 89], [50, 50, 89, 50], [10], 0),
         (Xc, Yc, faces1, 0),
@@ -3573,7 +3573,7 @@ xfaces = [10, 2, 5, 7, 5, 2, 10]
         (XX, YY, xfaces, 6),
     ],
 )
-def test_mooring_singleface(iX, iY, faces, iface):
+def test_mooring_singleface(od, iX, iY, faces, iface):
     _ds = mates(od._ds)
     Yind, Xind = _xr.broadcast(_ds["Y"], _ds["X"])
     Yind = Yind.expand_dims({"face": _ds["face"]})
