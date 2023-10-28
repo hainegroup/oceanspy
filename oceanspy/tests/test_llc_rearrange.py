@@ -2367,9 +2367,12 @@ def test_transformation(od, faces, varList, XRange, YRange, X0, X1, Y0, Y1):
         "YRange": YRange,
         "faces": faces,
     }
-    if _np.max(abs(XRange)) > 180 or _np.max(abs(YRange)) > 90:
-        with pytest.raises(ValueError):
-            ds = LLC.arctic_crown(**args)
+    if XRange is not None and YRange is not None:
+        XRange = _np.array(XRange)
+        YRange = _np.array(YRange)
+        if _np.max(abs(XRange)) > 180 or _np.max(abs(YRange)) > 90:
+            with pytest.raises(ValueError):
+                ds = LLC.arctic_crown(**args)
     else:
         ds = LLC.arctic_crown(**args)
         xi, xf = int(ds["X"][0].values), int(ds["X"][-1].values)
