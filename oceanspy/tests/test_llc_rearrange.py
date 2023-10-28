@@ -3440,9 +3440,15 @@ def test_cross_face_diffs(od, ix, iy, faces, iface, valx, valy):
     ],
 )
 def test_station_singleface(od, iX, iY, faces):
-    ds = od._ds
+    _ds = mates(od._ds)
+    Yind, Xind = _xr.broadcast(_ds["Y"], _ds["X"])
+    Yind = Yind.expand_dims({"face": _ds["face"]})
+    Xind = Xind.expand_dims({"face": _ds["face"]})
+    _ds["Xind"] = Xind.transpose(*_ds["XC"].dims)
+    _ds["Yind"] = Yind.transpose(*_ds["YC"].dims)
+    _ds = _ds.set_coords(["Yind", "Xind"])
     face_connections = od.face_connections["face"]
-    dsf = station_singleface(ds, iX, iY, faces, 0, face_connections)
+    dsf = station_singleface(_ds, iX, iY, faces, 0, face_connections)
 
     _set = set(tuple((iX[i], iY[i])) for i in range(len(iX)))
 
@@ -3453,6 +3459,139 @@ def test_station_singleface(od, iX, iY, faces):
         yargs1 = {"Yp1": 1, "station": m}
         xargs0 = {"Xp1": 0, "station": m}
         xargs1 = {"Xp1": 1, "station": m}
+        YG0 = dsf.YG.isel(**yargs0).values
+        YG1 = dsf.YG.isel(**yargs1).values
+        XG0 = dsf.XG.isel(**xargs0).values
+        XG1 = dsf.XG.isel(**xargs1).values
+
+        assert (YG0 < YG1).flatten().all()
+        assert (XG0 < XG1).flatten().all()
+
+
+y0 = [k for k in range(45, 80)]
+x0 = len(y0) * [40]
+
+# face 1
+y11 = [k for k in range(0, 11)]
+x11 = [49 + 4 * k for k in range(11)]
+
+y12 = [k for k in range(11, 16)]
+x12 = len(y12) * [89]
+
+x13 = [k for k in range(45, 60)]
+y13 = len(x13) * [25]
+
+y14 = [k for k in range(25, 35)]
+x14 = len(y14) * [89]
+
+x15 = [k for k in range(45, 60)]
+y15 = len(x15) * [45]
+
+x16 = [k for k in range(70, 80)]
+y16 = len(x16) * [87]
+
+x17 = [k for k in range(80, 85)]
+y17 = len(x17) * [79]
+
+x1 = x11 + x12 + x13 + x14 + x15 + x16 + x17
+y1 = y11 + y12 + y13 + y14 + y15 + y16 + y17
+
+# face 4
+x41 = [k for k in range(5, 46)]
+y41 = len(x41) * [60]
+y42 = [k for k in range(59, 10, -1)]
+x42 = len(y42) * [45]
+x4 = x41 + x42
+y4 = y41 + y42
+
+# face 3
+y31 = [k for k in range(80, 40, -1)]
+x31 = len(y31) * [60]
+x32 = [k for k in range(60, 5, -1)]
+y32 = len(x32) * [40]
+x3 = x31 + x32
+y3 = y31 + y32
+
+# face 0 again!
+x01 = [k for k in range(80, 45, -1)]
+y01 = len(x01) * [45]
+
+# get them all together
+# cyclonic orientation
+Xc, Yc = [x0, x1, x4, x3, x01], [y0, y1, y4, y3, y01]
+
+# faces
+faces1 = [1, 2, 5, 4, 1]
+
+
+# another case
+x11 = _np.arange(20, 69)
+y11 = [20] * len(x11)
+y12 = _np.arange(21, 75)
+x12 = [70] * len(y12)
+x1 = _np.array(list(x11) + list(x12))
+y1 = _np.array(list(y11) + list(y12))
+
+x2 = _np.arange(10, 80)
+y2 = _np.array([10] * len(x2))
+x3 = _np.arange(20, 75)
+y3 = _np.array([25] * len(x3))
+y40 = _np.arange(5, 25)
+x40 = [60] * len(y40)
+x41 = _np.arange(60, 20, -1)
+y41 = [30] * len(x41)
+y42 = _np.arange(20, 4, -1)
+x42 = [20] * len(y42)
+x4 = _np.array(list(x40) + list(x41) + list(x42))
+y4 = _np.array(list(y40) + list(y41) + list(y42))
+x5 = _np.arange(60, 10, -1)
+y5 = _np.array([65] * len(x5))
+x6 = _np.arange(60, 10, -1)
+y6 = _np.array([80] * len(x6))
+y7 = _np.arange(85, 21, -1)
+x7 = [19] * len(y7)
+
+XX, YY = [x1, x2, x3, x4, x5, x6, x7], [y1, y2, y3, y4, y5, y6, y7]
+xfaces = [10, 2, 5, 7, 5, 2, 10]
+
+
+@pytest.mark.parametrize("od", [od])
+@pytest.mark.parametrize(
+    "iX, iY, faces, iface",
+    [
+        ([61, 61, 61, 89], [50, 50, 89, 50], [10], 0),
+        (Xc, Yc, faces1, 0),
+        (Xc, Yc, faces1, 1),
+        (Xc, Yc, faces1, 2),
+        (Xc, Yc, faces1, 3),
+        (XX, YY, xfaces, 0),
+        (XX, YY, xfaces, 1),
+        (XX, YY, xfaces, 2),
+        (XX, YY, xfaces, 3),
+        (XX, YY, xfaces, 4),
+        (XX, YY, xfaces, 5),
+        (XX, YY, xfaces, 6),
+    ],
+)
+def test_mooring_singleface(iX, iY, faces, iface):
+    _ds = mates(od._ds)
+    Yind, Xind = _xr.broadcast(_ds["Y"], _ds["X"])
+    Yind = Yind.expand_dims({"face": _ds["face"]})
+    Xind = Xind.expand_dims({"face": _ds["face"]})
+    _ds["Xind"] = Xind.transpose(*_ds["XC"].dims)
+    _ds["Yind"] = Yind.transpose(*_ds["YC"].dims)
+    _ds = _ds.set_coords(["Yind", "Xind"])
+    face_connections = od.face_connections["face"]
+
+    niX, niY = fill_path(iX, iY, faces, iface, face_connections)
+    dsf = mooring_singleface(_ds, niX, niY, faces, iface, face_connections)
+
+    for m in range(len(dsf["mooring"])):
+        yargs0 = {"Yp1": 0, "mooring": m}
+        yargs1 = {"Yp1": 1, "mooring": m}
+        xargs0 = {"Xp1": 0, "mooring": m}
+        xargs1 = {"Xp1": 1, "mooring": m}
+
         YG0 = dsf.YG.isel(**yargs0).values
         YG1 = dsf.YG.isel(**yargs1).values
         XG0 = dsf.XG.isel(**xargs0).values
