@@ -2204,14 +2204,12 @@ def test_original_dims(od, var, expected):
 
 
 @pytest.mark.parametrize("ds", [od._ds.isel(face=0).drop_vars(["face"])])
-def error_face(ds):
+def test_error_face(ds):
     with pytest.raises(ValueError):
         LLC.arctic_crown(ds)
 
 
 faces = [k for k in range(13)]
-
-
 expected = [2, 5, 7, 10]  # most faces that connect with arctic cap face=6
 acshape = (Nx // 2, Ny)
 cuts = [[0, 28], [0, 0], [0, 0], [0, 0]]
@@ -2320,6 +2318,7 @@ _YRanges_ = YRanges_A + YRanges_P + YRanges_I
         (od, [0, 9, 12], varList, None, None, 0, 268, 0, 89),
         (od, [0, 3, 12], varList, None, None, 0, 268, 0, 89),
         (od, [0], varList[0], None, None, 0, 88, 0, 88),
+        (od, [0], None, None, None, 0, 88, 0, 88),
         (od, [1], varList[0], None, None, 0, 88, 0, 88),
         (od, [2], varList[0], None, None, 0, 88, 0, 88),
         (od, [3], varList[0], None, None, 0, 88, 0, 88),
@@ -2353,11 +2352,14 @@ _YRanges_ = YRanges_A + YRanges_P + YRanges_I
         (od, None, varList, [-120, -60], [58, 85.2], 0, 63, 0, 69),
         (od, None, varList, [160, -150], [58, 85.2], 0, 53, 0, 69),
         (od, None, varList, [60, 130], [58, 85.2], 0, 73, 0, 69),
+        (od, None, None, [260, 330], [58, 85.2], 0, 73, 0, 69),
+        (od, None, None, [20, 30], [5008, 5.2], 0, 73, 0, 69),
     ],
 )
 def test_transformation(od, faces, varList, XRange, YRange, X0, X1, Y0, Y1):
     """Test the transformation fn by checking the final dimensions."""
     ds = _copy.deepcopy(od._ds.reset_coords())
+
     args = {
         "ds": ds,
         "varList": varList,
@@ -2365,14 +2367,17 @@ def test_transformation(od, faces, varList, XRange, YRange, X0, X1, Y0, Y1):
         "YRange": YRange,
         "faces": faces,
     }
-
-    ds = LLC.arctic_crown(**args)
-    xi, xf = int(ds["X"][0].values), int(ds["X"][-1].values)
-    yi, yf = int(ds["Y"][0].values), int(ds["Y"][-1].values)
-    assert xi == X0
-    assert xf == X1
-    assert yi == Y0
-    assert yf == Y1
+    if _np.max(abs(XRange)) > 180 or _np.max(abs(YRange)) > 90:
+        with pytest.raises(ValueError):
+            ds = LLC.arctic_crown(**args)
+    else:
+        ds = LLC.arctic_crown(**args)
+        xi, xf = int(ds["X"][0].values), int(ds["X"][-1].values)
+        yi, yf = int(ds["Y"][0].values), int(ds["Y"][-1].values)
+        assert xi == X0
+        assert xf == X1
+        assert yi == Y0
+        assert yf == Y1
 
 
 DIMS_c = [dim for dim in od.dataset["XC"].dims if dim not in ["face"]]
