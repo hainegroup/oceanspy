@@ -40,6 +40,11 @@ from oceanspy.utils import _reset_range, connector, get_maskH
 Datadir = "./oceanspy/tests/Data/"
 ECCO_url = "{}catalog_ECCO.yaml".format(Datadir)
 od = open_oceandataset.from_catalog("LLC", ECCO_url)
+od._ds = od._ds.rename_vars({"hFacS": "HFacS", "hFacW": "HFacW", "hFacC": "HFacC"})
+co_list = [var for var in od._ds.data_vars if "time" not in od._ds[var].dims]
+od._ds = od._ds.set_coords(co_list)
+if "timestep" in od._ds.data_vars:
+    od._ds = od._ds.drop_vars(["timestep"])
 
 Nx = od._ds.dims["X"]
 Ny = od._ds.dims["Y"]
@@ -3348,7 +3353,7 @@ x3 = _np.arange(60, 10, -1)
 y3 = _np.array([65] * len(x3))
 
 oX2, oY2 = [x1, x2, x3], [y1, y2, y3]
-faces2 = [5, 7, 5]
+faces2 = [4, 8, 4]
 
 # connect them across interface
 X2, Y2 = [], []
@@ -3381,20 +3386,25 @@ def test_fdir_completer(ix, iy, faces, iface, face_connections, val):
 
 @pytest.mark.parametrize(
     "od, ix, iy, faces, iface, valx, valy",
-    [(od, X1, Y1, faces1, 0, 1, 0)],
+    [
+        (od, X1, Y1, faces1, 0, 1, 0),
+        (od, X1, Y1, faces1, 1, -1, 0),
+        (od, X2, Y2, faces2, 0, 1, 0),
+        (od, X2, Y2, faces2, 1, -1, 0),
+    ],
 )
 def test_cross_face_diffs(od, ix, iy, faces, iface, valx, valy):
-    Yind, Xind = _xr.broadcast(od._ds["Y"], od._ds["X"])
-    Yind = Yind.expand_dims({"face": od._ds["face"]})
-    Xind = Xind.expand_dims({"face": od._ds["face"]})
-    od._ds["Xind"] = Xind.transpose(*od._ds["XC"].dims)
-    od._ds["Yind"] = Yind.transpose(*od._ds["YC"].dims)
-    od._ds = od._ds.set_coords(["Yind", "Xind"])
-    ds = od._ds
-
+    _ds = mates(od._ds)
+    Yind, Xind = _xr.broadcast(_ds["Y"], _ds["X"])
+    Yind = Yind.expand_dims({"face": _ds["face"]})
+    Xind = Xind.expand_dims({"face": _ds["face"]})
+    _ds["Xind"] = Xind.transpose(*_ds["XC"].dims)
+    _ds["Yind"] = Yind.transpose(*_ds["YC"].dims)
+    _ds = _ds.set_coords(["Yind", "Xind"])
     face_connections = od.face_connections["face"]
+
     nix, niy = fill_path(ix, iy, faces, iface, face_connections)
-    dse = mooring_singleface(ds, nix, niy, faces, iface, face_connections)
+    dse = mooring_singleface(_ds, nix, niy, faces, iface, face_connections)
     diffX, diffY, tdx, tdy = cross_face_diffs(dse, faces, iface, face_connections)
 
     assert tdx == valx

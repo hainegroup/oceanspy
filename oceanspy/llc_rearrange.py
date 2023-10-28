@@ -2485,8 +2485,6 @@ def mooring_singleface(_ds, _ix, _iy, _faces, _iface, _face_connections):
             "_dim_name": "mooring",
         }
         dsf = ds_splitarray(**args)
-        nx = len(dsf.mooring)
-        dsf = dsf.chunk({"mooring": nx})
     else:
         # no need to split into subarrays
         iix = _np.where(_ixn == _Nx)[0]
@@ -2495,8 +2493,6 @@ def mooring_singleface(_ds, _ix, _iy, _faces, _iface, _face_connections):
         if iix.size + iiy.size == 0:
             # array does not end at right edge
             dsf = eval_dataset(_ds, _ixn, _iyn, _faces[_iface], _dim_name="mooring")
-            nx = len(dsf.mooring)
-            dsf = dsf.chunk({"mooring": nx})
         else:
             # there is at least one right-edge point
             # must split into subarray (edge+interior)
@@ -2592,9 +2588,7 @@ def mooring_singleface(_ds, _ix, _iy, _faces, _iface, _face_connections):
                     DS0 = [ds0]
                 DSt = DSt + DS0
                 dsf = _xr.combine_by_coords(DSt)
-                nx = len(dsf.mooring)
-                dsf = dsf.chunk({"mooring": nx})
-                del nds, DS0
+                del nds, DS0, DSt
     return dsf
 
 
@@ -2629,7 +2623,7 @@ def station_singleface(_ds, _ix, _iy, _faces, _iface, _face_connections):
     )
     iX, iY = _np.append(iX, neX), _np.append(iY, neY)
     dsf = eval_dataset(_ds, iX, iY, _faces[_iface], _dim_name="station")
-    dsf = dsf.chunk({"station": len(iX)})
+    dsf = dsf
     if eX.shape[0] > 0:
         # evaluate at edge of between faces. need adjascent face and appropriate indexes
         DSe = []
@@ -2650,11 +2644,11 @@ def station_singleface(_ds, _ix, _iy, _faces, _iface, _face_connections):
                 dse = reset_dim(dse, shift, dim="station")
             DSe.append(dse)
             ii += 1
-        dse = _xr.combine_by_coords(DSe).chunk({"station": len(eX)})
+        dse = _xr.combine_by_coords(DSe)
         del DSe
         shift = int(dsf["station"].values[-1]) + 1
         dse = reset_dim(dse, shift, dim="station")
-        dsf = _xr.combine_by_coords([dsf, dse]).chunk({"station": len(eX) + len(iX)})
+        dsf = _xr.combine_by_coords([dsf, dse])
 
     return dsf
 
