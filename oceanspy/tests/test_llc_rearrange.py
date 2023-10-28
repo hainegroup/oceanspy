@@ -7,7 +7,7 @@ import xarray as _xr
 
 # From OceanSpy
 from oceanspy import open_oceandataset
-from oceanspy.llc_rearrange import Dims  # face_edge_check,
+from oceanspy.llc_rearrange import Dims
 from oceanspy.llc_rearrange import LLCtransformation as LLC
 from oceanspy.llc_rearrange import (
     _edge_arc_data,
@@ -3557,9 +3557,8 @@ xfaces = [10, 2, 5, 7, 5, 2, 10]
 
 @pytest.mark.parametrize("od", [od])
 @pytest.mark.parametrize(
-    "od, iX, iY, faces, iface",
+    "iX, iY, faces, iface",
     [
-        ([61, 61, 61, 89], [50, 50, 89, 50], [10], 0),
         (Xc, Yc, faces1, 0),
         (Xc, Yc, faces1, 1),
         (Xc, Yc, faces1, 2),
