@@ -37,6 +37,7 @@ from ._ospy_utils import (
 )
 from .llc_rearrange import LLCtransformation as _llc_trans
 from .llc_rearrange import (
+    cross_face_diffs,
     eval_dataset,
     fill_path,
     mates,
@@ -718,7 +719,7 @@ def mooring_array(od, Ymoor, Xmoor, xoak_index="scipy_kdtree", **kwargs):
         od._ds = od._ds.set_coords(["Yind", "Xind"])
 
         # when passed, od.subsample.statins returns dataset
-        new_ds = od.subsample.stations(**args)
+        new_ds, diffX, diffY = od.subsample.stations(**args)
         coords = [var for var in new_ds.coords]
 
         # TODO: need to add Xind, Yind
@@ -1238,7 +1239,10 @@ def stations(
                 }
                 if _dim == "mooring":
                     DS = mooring_singleface(**args).persist()
-                    return DS
+                    diffX, diffY, *a = cross_face_diffs(
+                        DS, order_iface, 0, face_connections
+                    )
+                    return DS, diffX, diffY
                 elif _dim == "station":
                     DS = station_singleface(**args).persist()
             elif Niter > 1:

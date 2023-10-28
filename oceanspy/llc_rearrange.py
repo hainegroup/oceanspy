@@ -2690,7 +2690,7 @@ def cross_face_diffs(_ds, _faces, _iface, _face_connections):
 
     if _faces[_iface] in Rot:  # correct for topology
         Xind, Yind = Xind, Nx - Yind
-        _ds = _ds.drop_vars(["Xind", "Yind"])
+        # _ds = _ds.drop_vars(["Xind", "Yind"])
         # update vals in dataset
         # _ds["Xind"] = DataArray(Xind, coords=ind_coords, dims=ind_dims)
         # _ds["Yind"] = DataArray(Yind, coords=ind_coords, dims=ind_dims)
