@@ -3327,6 +3327,7 @@ for k in range(len(oX1)):
     X1.append(x)
     Y1.append(y)
 
+
 # another case
 # face 5
 x1 = _np.arange(20, 75)
@@ -3362,27 +3363,36 @@ for k in range(len(oX2)):
     [
         (X1, Y1, faces1, 0, od.face_connections["face"], 1),
         (X1, Y1, faces1, 1, od.face_connections["face"], 0),
-        (X1, Y1, faces1, 2, od.face_connections["face"], 0),
+        (X1, Y1, faces1, 2, od.face_connections["face"], 1),
         (
             _np.array([15]),
             _np.array([15]),
-            faces1,
-            2,
+            [2],
+            0,
             od.face_connections["face"],
             None,
         ),
     ],
 )
 def test_fdir_completer(ix, iy, faces, iface, face_connections, val):
-    fdir = fdir_completer(ix, iy, faces, iface, 89, face_connections)
+    fdir = fdir_completer(ix[iface], iy[iface], faces, iface, 89, face_connections)
     assert fdir == val
 
 
 @pytest.mark.parametrize(
-    "ds, ix, iy, faces, iface, face_connections, valx, valy",
-    [(ds, X1, Y1, faces1, 0, od.face_connections["face"], 1, 0)],
+    "od, ix, iy, faces, iface, valx, valy",
+    [(od, X1, Y1, faces1, 0, 1, 0)],
 )
-def test_cross_face_diffs(ds, ix, iy, faces, iface, face_connections, valx, valy):
+def test_cross_face_diffs(od, ix, iy, faces, iface, valx, valy):
+    Yind, Xind = _xr.broadcast(od._ds["Y"], od._ds["X"])
+    Yind = Yind.expand_dims({"face": od._ds["face"]})
+    Xind = Xind.expand_dims({"face": od._ds["face"]})
+    od._ds["Xind"] = Xind.transpose(*od._ds["XC"].dims)
+    od._ds["Yind"] = Yind.transpose(*od._ds["YC"].dims)
+    od._ds = od._ds.set_coords(["Yind", "Xind"])
+    ds = od._ds
+
+    face_connections = od.face_connections["face"]
     nix, niy = fill_path(X1, Y1, faces, iface, face_connections)
     dse = mooring_singleface(ds, nix, niy, faces, iface, face_connections)
     diffX, diffY, tdx, tdy = cross_face_diffs(dse, faces, iface, face_connections)
