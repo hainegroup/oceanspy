@@ -2711,7 +2711,7 @@ def cross_face_diffs(_ds, _faces, _iface, _face_connections):
     else:
         tdiffx, tdiffy = _np.array([]), _np.array([])
 
-    return diffX, diffY, tdiffx, tdiffy
+    return diffX, diffY, _np.array([tdiffx]), _np.array([tdiffy])
 
 
 class Dims:
