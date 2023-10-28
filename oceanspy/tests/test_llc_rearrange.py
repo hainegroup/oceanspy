@@ -34,6 +34,7 @@ from oceanspy.llc_rearrange import (
     shift_list_ds,
     slice_datasets,
     splitter,
+    station_singleface,
 )
 from oceanspy.utils import _reset_range, connector, get_maskH
 
@@ -3427,3 +3428,31 @@ def test_cross_face_diffs(od, ix, iy, faces, iface, valx, valy):
         assert len(diffX) == len(dse.mooring)
     else:
         assert len(diffX) == len(dse.mooring) - 1
+
+
+@pytest.mark.parametrize("od", [od])
+@pytest.mark.parametrize(
+    "iX, iY, faces, iface",
+    [
+        ([61], [89], [10], 0),
+    ],
+)
+def test_station_singleface(od, iX, iY, faces, iface):
+    ds = od._ds
+    face_connections = od.face_connections["face"]
+    dsf = station_singleface(ds, iX, iY, faces, iface, face_connections)
+
+    assert len(iX) == len(dsf.station)
+
+    for m in range(len(dsf.station)):
+        yargs0 = {"Yp1": 0, "station": m}
+        yargs1 = {"Yp1": 1, "station": m}
+        xargs0 = {"Xp1": 0, "station": m}
+        xargs1 = {"Xp1": 1, "station": m}
+        YG0 = dsf.YG.isel(**yargs0).values
+        YG1 = dsf.YG.isel(**yargs1).values
+        XG0 = dsf.XG.isel(**xargs0).values
+        XG1 = dsf.XG.isel(**xargs1).values
+
+        assert (YG0 < YG1).flatten().all()
+        assert (XG0 < XG1).flatten().all()
