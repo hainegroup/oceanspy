@@ -2351,7 +2351,7 @@ _YRanges_ = YRanges_A + YRanges_P + YRanges_I
 )
 def test_transformation(od, faces, varList, XRange, YRange, X0, X1, Y0, Y1):
     """Test the transformation fn by checking the final dimensions."""
-    ds = _copy.deepcopy(od._ds.reset_coords().drop_vars({"hFacC", "hFacS", "hFacW"}))
+    ds = _copy.deepcopy(od._ds.reset_coords())
     args = {
         "ds": ds,
         "varList": varList,
