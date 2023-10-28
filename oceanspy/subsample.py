@@ -1254,6 +1254,7 @@ def stations(
                 }
                 DSf = []
                 shift = 0
+                diffsX, diffsY = _np.array([]), _np.array([])
                 for ii in range(Niter):
                     if _dim == "station":
                         args1 = {"_ix": nX0[ii], "_iy": nY0[ii], "_iface": ii}
@@ -1264,6 +1265,11 @@ def stations(
                         )
                         args1 = {"_ix": nix, "_iy": niy, "_iface": ii}
                         dse = mooring_singleface(**{**args, **args1})
+                        diX, diY, *a = cross_face_diffs(
+                            dse, order_iface, ii, face_connections
+                        )
+                        diffsX = _np.append(diffsX, diX)
+                        diffsY = _np.append(diffsY, diY)
                     for var in dse.reset_coords().data_vars:
                         dse[var].attrs = {}
                     if ii > 0:
@@ -1277,7 +1283,7 @@ def stations(
                 for var in DS.reset_coords().data_vars:
                     DS[var].attrs = attrs
                 if _dim == "mooring":
-                    return DS
+                    return DS, diffsX, diffsY
     DS = DS.set_coords(co_list)
 
     if Xcoords is None and Ycoords is None:
