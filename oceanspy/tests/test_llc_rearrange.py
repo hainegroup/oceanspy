@@ -2203,6 +2203,12 @@ def test_original_dims(od, var, expected):
     assert dims == expected
 
 
+@pytest.mark.parametrize("ds", [od._ds.isel(face=0).drop_vars(["face"])])
+def error_face(ds):
+    with pytest.raises(ValueError):
+        LLC.arctic_crown(ds)
+
+
 faces = [k for k in range(13)]
 
 
@@ -2597,9 +2603,6 @@ def test_mask_var(od, XRange, YRange):
     ds = od._ds
     ds = mask_var(ds, XRange, YRange)
     assert _np.isnan(ds["nYG"].data).all()
-
-
-_zeros = [0, 0]
 
 
 @pytest.mark.parametrize(
@@ -3391,6 +3394,7 @@ def test_fdir_completer(ix, iy, faces, iface, face_connections, val):
         (od, X1, Y1, faces1, 1, -1, 0),
         (od, X2, Y2, faces2, 0, 1, 0),
         (od, X2, Y2, faces2, 1, -1, 0),
+        (od, X2, Y2, faces2, 2, None, None),
     ],
 )
 def test_cross_face_diffs(od, ix, iy, faces, iface, valx, valy):
@@ -3407,7 +3411,11 @@ def test_cross_face_diffs(od, ix, iy, faces, iface, valx, valy):
     dse = mooring_singleface(_ds, nix, niy, faces, iface, face_connections)
     diffX, diffY, tdx, tdy = cross_face_diffs(dse, faces, iface, face_connections)
 
-    assert tdx == valx
-    assert tdy == valy
     assert (abs(diffX) + abs(diffY) == 1).all()
-    assert len(diffX) == len(dse.mooring)
+
+    if tdx.size:
+        assert tdx == valx
+        assert tdy == valy
+        assert len(diffX) == len(dse.mooring)
+    else:
+        assert len(diffX) == len(dse.mooring) - 1
