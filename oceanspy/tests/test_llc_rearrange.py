@@ -3365,10 +3365,10 @@ for k in range(len(oX2)):
         (X1, Y1, faces1, 1, od.face_connections["face"], 0),
         (X1, Y1, faces1, 2, od.face_connections["face"], 1),
         (
-            _np.array([15]),
-            _np.array([15]),
-            [2],
-            0,
+            [0, 10, _np.array([15])],
+            [10, 0, _np.array([15])],
+            [2, 5, 2],
+            2,
             od.face_connections["face"],
             None,
         ),
@@ -3393,15 +3393,11 @@ def test_cross_face_diffs(od, ix, iy, faces, iface, valx, valy):
     ds = od._ds
 
     face_connections = od.face_connections["face"]
-    nix, niy = fill_path(X1, Y1, faces, iface, face_connections)
+    nix, niy = fill_path(ix, iy, faces, iface, face_connections)
     dse = mooring_singleface(ds, nix, niy, faces, iface, face_connections)
     diffX, diffY, tdx, tdy = cross_face_diffs(dse, faces, iface, face_connections)
 
     assert tdx == valx
-    assert tdy == valx
-
-    diffX = _np.append(diffX, tdx)
-    diffY = _np.append(diffY, tdy)
-
+    assert tdy == valy
     assert (abs(diffX) + abs(diffY) == 1).all()
-    assert len(diffX) == len(dse.mooring) - 1
+    assert len(diffX) == len(dse.mooring)
