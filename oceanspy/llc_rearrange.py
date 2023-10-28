@@ -2593,6 +2593,11 @@ def mooring_singleface(_ds, _ix, _iy, _faces, _iface, _face_connections):
 
 
 def station_singleface(_ds, _ix, _iy, _faces, _iface, _face_connections):
+    """Extracts isolated station values from dataset from the given horizontal
+    index values (`iface`, '_iy', '_ix'). These are not ordered as the original
+    coords.
+    """
+    shift = True
     iX, iY, ind = edgesid(_ix, _iy)
     # get edge data
     eX, eY = iX[ind], iY[ind]
@@ -2623,7 +2628,8 @@ def station_singleface(_ds, _ix, _iy, _faces, _iface, _face_connections):
     )
     iX, iY = _np.append(iX, neX), _np.append(iY, neY)
     dsf = eval_dataset(_ds, iX, iY, _faces[_iface], _dim_name="station")
-    dsf = dsf
+    if iX.size == 0:
+        shift = None
     if eX.shape[0] > 0:
         # evaluate at edge of between faces. need adjascent face and appropriate indexes
         DSe = []
@@ -2646,9 +2652,13 @@ def station_singleface(_ds, _ix, _iy, _faces, _iface, _face_connections):
             ii += 1
         dse = _xr.combine_by_coords(DSe)
         del DSe
-        shift = int(dsf["station"].values[-1]) + 1
-        dse = reset_dim(dse, shift, dim="station")
-        dsf = _xr.combine_by_coords([dsf, dse])
+        if shift is None:
+            # no interior point. only edge data
+            dsf = dse
+        else:
+            shift = int(dsf["station"].values[-1]) + 1
+            dse = reset_dim(dse, shift, dim="station")
+            dsf = _xr.combine_by_coords([dsf, dse])
 
     return dsf
 
