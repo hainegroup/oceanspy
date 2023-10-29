@@ -1748,202 +1748,236 @@ def ds_edge(_ds, _ix, _iy, _ifaces, ii, _face_topo, _dim="mooring", **kwargs):
         else:
             fdir = None
 
+    # prepare coords (C-grid)
+    dim_arg = {_dim_name: moor}
+    iXn = iX.isel(**dim_arg)  #
+    iYn = iY.isel(**dim_arg)  #
+
+    zvars = [
+        var
+        for var in _ds.reset_coords().data_vars
+        if len(_ds[var].dims) == 1 and var not in _ds.dims
+    ]
+    # 1D dataset : scalars that are depth dependent, or time dependent.
+    ds1D = _ds[zvars]
+
+    varlist = [var for var in _ds.reset_coords().data_vars]
+    zcoords = ["Zl", "Zu", "Zp1"]
+    tcoords = ["time_midp"]
+    uvars = zcoords + tcoords  # u-points
+    vvars = zcoords + tcoords  # v-points
+    gvars = zcoords + tcoords  # corner points
+    cvars = zcoords + tcoords
+    for var in varlist:
+        if set(["Xp1", "Y"]).issubset(_ds[var].dims):
+            uvars.append(var)
+        if set(["Xp1", "Yp1"]).issubset(_ds[var].dims):
+            gvars.append(var)
+        if set(["Yp1", "X"]).issubset(_ds[var].dims):
+            vvars.append(var)
+        if set(["Y", "X"]).issubset(_ds[var].dims):
+            cvars.append(var)
+
     if connect:
-        # if there is a need to sample from across the face interface
+        if set([6]).issubset([face1, face2]):
+            print("arctic edges -eval with other edge function")
+            return _ds, connect, moor, moors
+        else:
+            # if there is a need to sample from across the face interface
 
-        dim_arg = {_dim_name: moor}
+            if set([face1, face2]).issubset(nrotS) or set([face1, face2]).issubset(
+                rotS
+            ):
+                # same topology across faces
+                if axis == "x":
+                    # print(axis)
+                    args = {"xp1": slice(1)}
+                    rename = {"x": "xp1"}
+                    revar = "xp1"
+                    iXp1n = iXp1.isel(**dim_arg, **args)
+                    iYp1n = iYp1.isel(**dim_arg)
+                    iargs = {"Y": iYn, "Yp1": iYp1n, "Xp1": iXp1n - _Nx}
 
-        iXn = iX.isel(**dim_arg)  #
-        iYn = iY.isel(**dim_arg)  #
+                    vds = _ds.isel(face=face2, **iargs)
+                    vds = vds.reset_coords()[uvars + gvars]
 
-        zvars = [
-            var
-            for var in _ds.reset_coords().data_vars
-            if len(_ds[var].dims) == 1 and var not in _ds.dims
-        ]
-        # 1D dataset : scalars that are depth dependent, or time dependent.
-        ds1D = _ds[zvars]
+                    # get the rest of the points
+                    argsn = {
+                        "face": face1,
+                        "X": iXn,
+                        "Y": iYn,
+                        "Xp1": iXp1n,
+                        "Yp1": iYp1n,
+                    }
+                    mds = _ds.isel(**argsn).reset_coords()  # regular eval
+                    mds = mds.drop_vars(["Yp1", "Xp1", "X", "Y"])
+                    if face1 in rotS:
+                        mds = reset_dim(mds, 1, revar)
+                    elif face1 not in rotS:
+                        vds = reset_dim(vds, 1, revar)
 
-        varlist = [var for var in _ds.reset_coords().data_vars]
-        zcoords = ["Zl", "Zu", "Zp1"]
-        tcoords = ["time_midp"]
-        uvars = zcoords + tcoords  # u-points
-        vvars = zcoords + tcoords  # v-points
-        gvars = zcoords + tcoords  # corner points
-        cvars = zcoords + tcoords
-        for var in varlist:
-            if set(["Xp1", "Y"]).issubset(_ds[var].dims):
-                uvars.append(var)
-            if set(["Xp1", "Yp1"]).issubset(_ds[var].dims):
-                gvars.append(var)
-            if set(["Yp1", "X"]).issubset(_ds[var].dims):
-                vvars.append(var)
-            if set(["Y", "X"]).issubset(_ds[var].dims):
-                cvars.append(var)
+                    ugmds = _xr.combine_by_coords([mds[uvars + gvars], vds])
 
-        if set([face1, face2]).issubset(nrotS) or set([face1, face2]).issubset(rotS):
-            # same topology across faces
-            if axis == "x":
-                # print(axis)
-                args = {"xp1": slice(1)}
-                rename = {"x": "xp1"}
-                revar = "xp1"
-                iXp1n = iXp1.isel(**dim_arg, **args)
-                iYp1n = iYp1.isel(**dim_arg)
-                iargs = {"Y": iYn, "Yp1": iYp1n, "Xp1": iXp1n - _Nx}
+                    cvmds = mds.reset_coords()[cvars + vvars]
+                    nds = _xr.combine_by_coords([cvmds, ugmds])
+                    co_list = [
+                        var for var in nds.data_vars if "time" not in nds[var].dims
+                    ]
+                    nds = nds.set_coords(co_list)
+                    rename = {"x": "X", "y": "Y", "xp1": "Xp1", "yp1": "Yp1"}
+                    nds = nds.rename_dims(rename).rename_vars(rename)
 
-                vds = _ds.isel(face=face2, **iargs)
-                vds = vds.reset_coords()[uvars + gvars]
+                elif axis == "y":
+                    # print(axis)
+                    args = {"yp1": slice(1)}
+                    rename = {"y": "yp1"}
+                    if face1 in rotS:  # reverse the order of x points
+                        iXp1 = DataArray(
+                            _np.stack((_ix, _ix + 1)[::-1], 1),
+                            coords={_dim_name: new_dim, "xp1": xp1},
+                            dims=(_dim_name, "xp1"),
+                        )
+                    iXp1n = iXp1.isel(**dim_arg)
+                    iYp1n = iYp1.isel(**dim_arg, **args)
+                    iargs = {"X": iXn, "Xp1": iXp1n, "Yp1": iYp1n - _Nx}
+                    revar = "yp1"
+                    vds = _ds.isel(face=face2, **iargs)
+                    vds = vds.reset_coords()[vvars + gvars]
 
-                # get the rest of the points
-                argsn = {"face": face1, "X": iXn, "Y": iYn, "Xp1": iXp1n, "Yp1": iYp1n}
-                mds = _ds.isel(**argsn).reset_coords()  # regular eval
-                mds = mds.drop_vars(["Yp1", "Xp1", "X", "Y"])
-                if face1 in rotS:
-                    mds = reset_dim(mds, 1, revar)
-                elif face1 not in rotS:
+                    # get the rest of the points
+                    argsn = {
+                        "face": face1,
+                        "X": iXn,
+                        "Y": iYn,
+                        "Xp1": iXp1n,
+                        "Yp1": iYp1n,
+                    }
+                    mds = _ds.isel(**argsn).reset_coords()  # regular eval
+                    mds = mds.drop_vars(["Yp1", "Xp1", "X", "Y"])
                     vds = reset_dim(vds, 1, revar)
+                    vgmds = _xr.combine_by_coords([mds[vvars + gvars], vds])
 
-                ugmds = _xr.combine_by_coords([mds[uvars + gvars], vds])
+                    cumds = mds.reset_coords()[cvars + uvars]
+                    nds = _xr.combine_by_coords([cumds, vgmds])
 
-                cvmds = mds.reset_coords()[cvars + vvars]
-                nds = _xr.combine_by_coords([cvmds, ugmds])
-                co_list = [var for var in nds.data_vars if "time" not in nds[var].dims]
-                nds = nds.set_coords(co_list)
-                rename = {"x": "X", "y": "Y", "xp1": "Xp1", "yp1": "Yp1"}
-                nds = nds.rename_dims(rename).rename_vars(rename)
+                    co_list = [
+                        var for var in nds.data_vars if "time" not in nds[var].dims
+                    ]
+                    nds = nds.set_coords(co_list)
+                    rename = {"x": "X", "y": "Y", "xp1": "Xp1", "yp1": "Yp1"}
+                    nds = nds.rename_dims(rename).rename_vars(rename)
 
-            elif axis == "y":
-                # print(axis)
-                args = {"yp1": slice(1)}
-                rename = {"y": "yp1"}
-                if face1 in rotS:  # reverse the order of x points
+            else:
+                # there is a change in topology across faces
+                if axis == "x":
+                    # print(axis)
+                    args = {"xp1": slice(1)}
+                    rename = {"x": "xp1"}
+                    revar = "xp1"
+                    iXp1n = iXp1.isel(**dim_arg, **args)
+                    iYp1n = iYp1.isel(**dim_arg)
+                    iargs = {"X": _Nx - iYn, "Xp1": _Nx - iYp1n + 1, "Yp1": iXn - _Nx}
+
+                    dds = rotate_vars(_ds)[uvars + gvars]  # u and g variables
+                    vds = dds.isel(face=face2, **iargs)  # this is next face
+
+                    nvds = vds.rename_dims({"x": "xp1"}).rename_vars({"x": "xp1"})
+                    nvds = reset_dim(nvds, 1, "xp1")
+                    nvds = nvds.drop_vars(["Yp1", "X", "Xp1"])
+                    for var in nvds.reset_coords().data_vars:
+                        nvds[var].attrs = {}  # remove metadata for now
+
+                    argsn = {
+                        "face": face1,
+                        "X": iXn,
+                        "Y": iYn,
+                        "Xp1": iXp1n,
+                        "Yp1": iYp1n,
+                    }
+                    mds = _ds.isel(**argsn)  # regular eval
+                    mds = mds.drop_vars(["Yp1", "Xp1", "X", "Y"])
+
+                    ugmds = _xr.combine_by_coords([mds[uvars + gvars], nvds])
+
+                    # get rest of u and center data
+                    cvmds = mds.reset_coords()[cvars + vvars]
+                    nds = _xr.combine_by_coords([cvmds, ugmds])
+                    nds = nds.set_coords(
+                        [var for var in nds.data_vars if "time" not in nds[var].dims]
+                    )
+
+                    rename = {"x": "X", "xp1": "Xp1", "yp1": "Yp1", "y": "Y"}
+                    nds = nds.rename_dims(rename).rename_vars(rename)
+
+                    for var in nds.reset_coords().data_vars:
+                        nds[var].attrs = {}
+
+                if axis == "y":
+                    # have to redefine iXp1 in decreasing order
                     iXp1 = DataArray(
                         _np.stack((_ix, _ix + 1)[::-1], 1),
                         coords={_dim_name: new_dim, "xp1": xp1},
                         dims=(_dim_name, "xp1"),
                     )
-                iXp1n = iXp1.isel(**dim_arg)
-                iYp1n = iYp1.isel(**dim_arg, **args)
-                iargs = {"X": iXn, "Xp1": iXp1n, "Yp1": iYp1n - _Nx}
-                revar = "yp1"
-                vds = _ds.isel(face=face2, **iargs)
-                vds = vds.reset_coords()[vvars + gvars]
+                    # print(axis)
+                    args = {"yp1": slice(1)}
+                    rename = {"y": "yp1"}
+                    iXp1n = iXp1.isel(**dim_arg)
+                    iYp1n = iYp1.isel(**dim_arg, **args)
+                    iargs = {"Xp1": iYn - _Nx, "Y": _Nx - iXn, "Yp1": _Nx - iXp1n + 1}
+                    dds = rotate_vars(_ds)[vvars + gvars]  # v and g variables
 
-                # get the rest of the points
-                argsn = {"face": face1, "X": iXn, "Y": iYn, "Xp1": iXp1n, "Yp1": iYp1n}
-                mds = _ds.isel(**argsn).reset_coords()  # regular eval
-                mds = mds.drop_vars(["Yp1", "Xp1", "X", "Y"])
-                vds = reset_dim(vds, 1, revar)
-                vgmds = _xr.combine_by_coords([mds[vvars + gvars], vds])
+                    # sample from the next face
+                    vds = dds.isel(face=face2, **iargs)
+                    nvds = vds.rename_dims({"y": "yp1"}).rename_vars({"y": "yp1"})
+                    nvds = reset_dim(nvds, 1, "yp1")
+                    nvds = nvds.drop_vars(["Xp1", "Y", "Yp1"])
 
-                cumds = mds.reset_coords()[cvars + uvars]
-                nds = _xr.combine_by_coords([cumds, vgmds])
+                    for var in nvds.reset_coords().data_vars:
+                        nvds[var].attrs = {}  # remove metadata for now
 
-                co_list = [var for var in nds.data_vars if "time" not in nds[var].dims]
-                nds = nds.set_coords(co_list)
-                rename = {"x": "X", "y": "Y", "xp1": "Xp1", "yp1": "Yp1"}
-                nds = nds.rename_dims(rename).rename_vars(rename)
+                    # evaluate at edge of present face -- missing Yp1 data
+                    argsn = {
+                        "face": face1,
+                        "X": iXn,
+                        "Y": iYn,
+                        "Xp1": iXp1n,
+                        "Yp1": iYp1n,
+                    }
+                    mds = _ds.isel(**argsn)  # regular eval
+                    mds = mds.drop_vars(["Yp1", "Xp1", "X", "Y"])  # always drop these
 
-        else:
-            # there is a change in topology across faces
-            if axis == "x":
-                # print(axis)
-                args = {"xp1": slice(1)}
-                rename = {"x": "xp1"}
-                revar = "xp1"
-                iXp1n = iXp1.isel(**dim_arg, **args)
-                iYp1n = iYp1.isel(**dim_arg)
-                iargs = {"X": _Nx - iYn, "Xp1": _Nx - iYp1n + 1, "Yp1": iXn - _Nx}
+                    # combine to create complete, edge data at v and g points
+                    vgmds = _xr.combine_by_coords([mds[vvars + gvars], nvds])
 
-                dds = rotate_vars(_ds)[uvars + gvars]  # u and g variables
-                vds = dds.isel(face=face2, **iargs)  # this is next face
+                    # get rest of u and center data
+                    cumds = mds.reset_coords()[cvars + uvars]
+                    nds = _xr.combine_by_coords([cumds, vgmds])
+                    nds = nds.set_coords(
+                        [var for var in nds.data_vars if "time" not in nds[var].dims]
+                    )
 
-                nvds = vds.rename_dims({"x": "xp1"}).rename_vars({"x": "xp1"})
-                nvds = reset_dim(nvds, 1, "xp1")
-                nvds = nvds.drop_vars(["Yp1", "X", "Xp1"])
-                for var in nvds.reset_coords().data_vars:
-                    nvds[var].attrs = {}  # remove metadata for now
+                    rename = {"x": "X", "xp1": "Xp1", "yp1": "Yp1", "y": "Y"}
+                    nds = nds.rename_dims(rename).rename_vars(rename)
 
-                argsn = {"face": face1, "X": iXn, "Y": iYn, "Xp1": iXp1n, "Yp1": iYp1n}
-                mds = _ds.isel(**argsn)  # regular eval
-                mds = mds.drop_vars(["Yp1", "Xp1", "X", "Y"])
+                    for var in nds.reset_coords().data_vars:
+                        nds[var].attrs = {}
+            if face1 in rotS:
+                # print('rotate vars')
+                if set(["Ucycl", "Vcycl"]).issubset(_ds.data_vars):
+                    pair = ["Ucycl", "Vcycl"]
+                else:
+                    pair = []
+                nds = rotate_vars(mates(nds, pair=pair))
+                rename_rdims1 = {"Xp1": "nYp1", "Yp1": "nXp1", "X": "nY", "Y": "nX"}
+                rename_rdims2 = {"nXp1": "Xp1", "nYp1": "Yp1", "nX": "X", "nY": "Y"}
+                nds = nds.rename_dims(rename_rdims1).rename_vars(rename_rdims1)
+                nds = nds.rename_dims(rename_rdims2).rename_vars(rename_rdims2)
 
-                ugmds = _xr.combine_by_coords([mds[uvars + gvars], nvds])
-
-                # get rest of u and center data
-                cvmds = mds.reset_coords()[cvars + vvars]
-                nds = _xr.combine_by_coords([cvmds, ugmds])
-                nds = nds.set_coords(
-                    [var for var in nds.data_vars if "time" not in nds[var].dims]
-                )
-
-                rename = {"x": "X", "xp1": "Xp1", "yp1": "Yp1", "y": "Y"}
-                nds = nds.rename_dims(rename).rename_vars(rename)
-
-                for var in nds.reset_coords().data_vars:
-                    nds[var].attrs = {}
-
-            if axis == "y":
-                # have to redefine iXp1 in decreasing order
-                iXp1 = DataArray(
-                    _np.stack((_ix, _ix + 1)[::-1], 1),
-                    coords={_dim_name: new_dim, "xp1": xp1},
-                    dims=(_dim_name, "xp1"),
-                )
-                # print(axis)
-                args = {"yp1": slice(1)}
-                rename = {"y": "yp1"}
-                iXp1n = iXp1.isel(**dim_arg)
-                iYp1n = iYp1.isel(**dim_arg, **args)
-                iargs = {"Xp1": iYn - _Nx, "Y": _Nx - iXn, "Yp1": _Nx - iXp1n + 1}
-                dds = rotate_vars(_ds)[vvars + gvars]  # v and g variables
-
-                # sample from the next face
-                vds = dds.isel(face=face2, **iargs)
-                nvds = vds.rename_dims({"y": "yp1"}).rename_vars({"y": "yp1"})
-                nvds = reset_dim(nvds, 1, "yp1")
-                nvds = nvds.drop_vars(["Xp1", "Y", "Yp1"])
-
-                for var in nvds.reset_coords().data_vars:
-                    nvds[var].attrs = {}  # remove metadata for now
-
-                # evaluate at edge of present face -- missing Yp1 data
-                argsn = {"face": face1, "X": iXn, "Y": iYn, "Xp1": iXp1n, "Yp1": iYp1n}
-                mds = _ds.isel(**argsn)  # regular eval
-                mds = mds.drop_vars(["Yp1", "Xp1", "X", "Y"])  # always drop these
-
-                # combine to create complete, edge data at v and g points
-                vgmds = _xr.combine_by_coords([mds[vvars + gvars], nvds])
-
-                # get rest of u and center data
-                cumds = mds.reset_coords()[cvars + uvars]
-                nds = _xr.combine_by_coords([cumds, vgmds])
-                nds = nds.set_coords(
-                    [var for var in nds.data_vars if "time" not in nds[var].dims]
-                )
-
-                rename = {"x": "X", "xp1": "Xp1", "yp1": "Yp1", "y": "Y"}
-                nds = nds.rename_dims(rename).rename_vars(rename)
-
-                for var in nds.reset_coords().data_vars:
-                    nds[var].attrs = {}
-        if face1 in rotS:
-            # print('rotate vars')
-            if set(["Ucycl", "Vcycl"]).issubset(_ds.data_vars):
-                pair = ["Ucycl", "Vcycl"]
-            else:
-                pair = []
-            nds = rotate_vars(mates(nds, pair=pair))
-            rename_rdims1 = {"Xp1": "nYp1", "Yp1": "nXp1", "X": "nY", "Y": "nX"}
-            rename_rdims2 = {"nXp1": "Xp1", "nYp1": "Yp1", "nX": "X", "nY": "Y"}
-            nds = nds.rename_dims(rename_rdims1).rename_vars(rename_rdims1)
-            nds = nds.rename_dims(rename_rdims2).rename_vars(rename_rdims2)
-
-        moor = moor.values
-        nds = _xr.merge([nds, ds1D])
-        if "face" in nds.reset_coords().data_vars:
-            nds = nds.drop_vars(["face"])
+            moor = moor.values
+            nds = _xr.merge([nds, ds1D])
+            if "face" in nds.reset_coords().data_vars:
+                nds = nds.drop_vars(["face"])
     else:
         nds = None
         moor = None
