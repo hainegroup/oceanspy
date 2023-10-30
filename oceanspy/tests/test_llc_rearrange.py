@@ -3658,9 +3658,15 @@ def test_ds_arcedge(od, ix, iy, face1, face2):
         (_np.array([0]), _np.array([89]), [0, 1]),
         (_np.array([0]), _np.array([89]), [7, 10]),
         (_np.array([89]), _np.array([0]), [7, 8]),
+        (_np.array([10]), _np.array([89]), [1, 2]),
+        (_np.array([89]), _np.array([10]), [1, 4]),
+        (_np.array([89]), _np.array([10]), [4, 8]),
+        (_np.array([89]), _np.array([10]), [8, 9]),
+        (_np.array([10]), _np.array([89]), [8, 11]),
+        (_np.array([10]), _np.array([89]), [11, 1]),
     ],
 )
-def test_ds_edge(od, ix, iy, faces, exp_axis):
+def test_ds_edge(od, ix, iy, faces):
     face_connections = od.face_connections["face"]
     args = {
         "_ds": od._ds,
@@ -3679,6 +3685,7 @@ def test_ds_edge(od, ix, iy, faces, exp_axis):
     else:
         if set([89]).issubset(set.union(set(ix), set(iy))):
             _dim = "mooring"
+            assert type(nds) == _dstype
             assert len(nds.Xp1) == 2
             assert len(nds.Yp1) == 2
             assert len(nds.X) == 1
@@ -3718,6 +3725,7 @@ def test_arctic_eval(od, ix, iy):
     _dim = "station"
     nds = arctic_eval(od._ds, ix, iy, _dim)
 
+    assert type(nds) == _dstype
     assert len(nds.Xp1) == 2
     assert len(nds.Yp1) == 2
     assert len(nds.X) == 1
