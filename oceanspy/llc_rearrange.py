@@ -1959,11 +1959,7 @@ def ds_edge(_ds, _ix, _iy, _ifaces, ii, _face_topo, _dim="mooring", **kwargs):
                     for var in nds.reset_coords().data_vars:
                         nds[var].attrs = {}
             if face1 in rotS:
-                if set(["Ucycl", "Vcycl"]).issubset(_ds.data_vars):
-                    pair = ["Ucycl", "Vcycl"]
-                else:
-                    pair = []
-                nds = rotate_vars(mates(nds, pair=pair))
+                nds = rotate_vars(mates(nds, pair=kwargs.pop("pair", None)))
                 rename_rdims1 = {"Xp1": "nYp1", "Yp1": "nXp1", "X": "nY", "Y": "nX"}
                 rename_rdims2 = {"nXp1": "Xp1", "nYp1": "Yp1", "nX": "X", "nY": "Y"}
                 nds = nds.rename_dims(rename_rdims1).rename_vars(rename_rdims1)
