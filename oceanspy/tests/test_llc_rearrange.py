@@ -3654,6 +3654,9 @@ def test_ds_arcedge(od, ix, iy, face1, face2):
         (_np.array([0]), _np.array([0]), [4]),
         (_np.array([89]), _np.array([10]), [0, 3]),
         (_np.array([89]), _np.array([10]), [3, 9]),
+        (_np.array([0]), _np.array([89]), [0, 1]),
+        (_np.array([0]), _np.array([89]), [7, 10]),
+        (_np.array([89]), _np.array([0]), [7, 8]),
     ],
 )
 def test_ds_edge(od, ix, iy, faces):
