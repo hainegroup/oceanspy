@@ -2099,7 +2099,6 @@ def ds_arcedge(_ds, _ix, _iy, moor, face1, face2, _dim="mooring"):
     iYn = iY.isel(**dim_arg)  #
 
     if face1 == 6 and face2 == 7:
-        print("sample in x, same topo - same ordering")
         args = {"xp1": slice(1)}  # used by both
         rename = {"x": "xp1"}
         revar = "xp1"
@@ -2133,8 +2132,6 @@ def ds_arcedge(_ds, _ix, _iy, moor, face1, face2, _dim="mooring"):
                 nds[_varName] = -nds[_varName]
 
     elif face1 == 6 and face2 == 10:
-        print("change in topology")
-
         # have to redefine iXp1 in decreasing order
         iXp1 = DataArray(
             _np.stack((_ix, _ix + 1)[::-1], 1),
@@ -2194,7 +2191,6 @@ def ds_arcedge(_ds, _ix, _iy, moor, face1, face2, _dim="mooring"):
                 nds[_varName] = -nds[_varName]
 
     elif face1 == 2 and face2 == 6:
-        print("y in 2, x in 6")
         iXp1 = DataArray(
             _np.stack((_ix, _ix + 1), 1),
             coords={_dim_name: new_dim, "xp1": xp1},
@@ -2241,7 +2237,6 @@ def ds_arcedge(_ds, _ix, _iy, moor, face1, face2, _dim="mooring"):
             nds[var].attrs = {}
 
     elif face1 == 5 and face2 == 6:
-        print("same topology, correct orientation")
         args = {"yp1": slice(1)}
         rename = {"y": "yp1"}
         iXp1n = iXp1.isel(**dim_arg)
