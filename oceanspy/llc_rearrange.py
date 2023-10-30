@@ -1823,23 +1823,6 @@ def ds_edge(_ds, _ix, _iy, _ifaces, ii, _face_topo, _dim="mooring", **kwargs):
                 rename = {"x": "X", "y": "Y", "xp1": "Xp1", "yp1": "Yp1"}
                 nds = nds.rename_dims(rename).rename_vars(rename)
 
-                # correct topology of rotated face
-                if face1 in rotS:
-                    nds = rotate_vars(mates(nds, pair=pair))
-                    rename_rdims1 = {"Xp1": "nYp1", "Yp1": "nXp1", "X": "nY", "Y": "nX"}
-                    rename_rdims2 = {"nXp1": "Xp1", "nYp1": "Yp1", "nX": "X", "nY": "Y"}
-                    nds = nds.rename_dims(rename_rdims1).rename_vars(rename_rdims1)
-                    nds = nds.rename_dims(rename_rdims2).rename_vars(rename_rdims2)
-
-                # append vertical variables
-                moor = moor.values
-                nds = _xr.merge([nds, ds1D])
-                # make sure to remove `face` as coord
-                if "face" in nds.reset_coords().data_vars:
-                    nds = nds.drop_vars(["face"])
-
-                return nds, connect, moor, moors
-
             elif axis == "y":
                 args = {"yp1": slice(1)}
                 rename = {"y": "yp1"}
@@ -1875,23 +1858,6 @@ def ds_edge(_ds, _ix, _iy, _ifaces, ii, _face_topo, _dim="mooring", **kwargs):
                 nds = nds.set_coords(co_list)
                 rename = {"x": "X", "y": "Y", "xp1": "Xp1", "yp1": "Yp1"}
                 nds = nds.rename_dims(rename).rename_vars(rename)
-
-                # correct topology of rotated face
-                if face1 in rotS:
-                    nds = rotate_vars(mates(nds, pair=pair))
-                    rename_rdims1 = {"Xp1": "nYp1", "Yp1": "nXp1", "X": "nY", "Y": "nX"}
-                    rename_rdims2 = {"nXp1": "Xp1", "nYp1": "Yp1", "nX": "X", "nY": "Y"}
-                    nds = nds.rename_dims(rename_rdims1).rename_vars(rename_rdims1)
-                    nds = nds.rename_dims(rename_rdims2).rename_vars(rename_rdims2)
-
-                # append vertical variables
-                moor = moor.values
-                nds = _xr.merge([nds, ds1D])
-                # make sure to remove `face` as coord
-                if "face" in nds.reset_coords().data_vars:
-                    nds = nds.drop_vars(["face"])
-
-                return nds, connect, moor, moors
 
         elif not set([face1, face2]).issubset(nrotS) or not set(
             [face1, face2]
@@ -1938,23 +1904,6 @@ def ds_edge(_ds, _ix, _iy, _ifaces, ii, _face_topo, _dim="mooring", **kwargs):
 
                 for var in nds.reset_coords().data_vars:
                     nds[var].attrs = {}
-
-                # correct topology of rotated face
-                if face1 in rotS:
-                    nds = rotate_vars(mates(nds, pair=pair))
-                    rename_rdims1 = {"Xp1": "nYp1", "Yp1": "nXp1", "X": "nY", "Y": "nX"}
-                    rename_rdims2 = {"nXp1": "Xp1", "nYp1": "Yp1", "nX": "X", "nY": "Y"}
-                    nds = nds.rename_dims(rename_rdims1).rename_vars(rename_rdims1)
-                    nds = nds.rename_dims(rename_rdims2).rename_vars(rename_rdims2)
-
-                # append vertical variables
-                moor = moor.values
-                nds = _xr.merge([nds, ds1D])
-                # make sure to remove `face` as coord
-                if "face" in nds.reset_coords().data_vars:
-                    nds = nds.drop_vars(["face"])
-
-                return nds, connect, moor, moors
 
             if axis == "y":
                 # have to redefine iXp1 in decreasing order
@@ -2006,27 +1955,25 @@ def ds_edge(_ds, _ix, _iy, _ifaces, ii, _face_topo, _dim="mooring", **kwargs):
                 for var in nds.reset_coords().data_vars:
                     nds[var].attrs = {}
 
-                # correct topology of rotated face
-                if face1 in rotS:
-                    nds = rotate_vars(mates(nds, pair=pair))
-                    rename_rdims1 = {"Xp1": "nYp1", "Yp1": "nXp1", "X": "nY", "Y": "nX"}
-                    rename_rdims2 = {"nXp1": "Xp1", "nYp1": "Yp1", "nX": "X", "nY": "Y"}
-                    nds = nds.rename_dims(rename_rdims1).rename_vars(rename_rdims1)
-                    nds = nds.rename_dims(rename_rdims2).rename_vars(rename_rdims2)
+        # correct topology of rotated face
+        if face1 in rotS:
+            nds = rotate_vars(mates(nds, pair=pair))
+            rename_rdims1 = {"Xp1": "nYp1", "Yp1": "nXp1", "X": "nY", "Y": "nX"}
+            rename_rdims2 = {"nXp1": "Xp1", "nYp1": "Yp1", "nX": "X", "nY": "Y"}
+            nds = nds.rename_dims(rename_rdims1).rename_vars(rename_rdims1)
+            nds = nds.rename_dims(rename_rdims2).rename_vars(rename_rdims2)
 
-                # append vertical variables
-                moor = moor.values
-                nds = _xr.merge([nds, ds1D])
-                # make sure to remove `face` as coord
-                if "face" in nds.reset_coords().data_vars:
-                    nds = nds.drop_vars(["face"])
-
-                return nds, connect, moor, moors
+        # append vertical variables
+        moor = moor.values
+        nds = _xr.merge([nds, ds1D])
+        # make sure to remove `face` as coord
+        if "face" in nds.reset_coords().data_vars:
+            nds = nds.drop_vars(["face"])
 
     else:
         nds = None
         moor = None
-    return nds, connect, moor, moors
+        return nds, connect, moor, moors, axis
 
 
 def ds_arcedge(_ds, _ix, _iy, moor, face1, face2, _dim="mooring"):
@@ -2874,7 +2821,7 @@ def mooring_singleface(_ds, _ix, _iy, _faces, _iface, _face_connections):
             # there is at least one right-edge point
             # must split into subarray (edge+interior)
             DSt = []
-            nds, connect, moor, moors = ds_edge(
+            nds, connect, moor, moors, _ = ds_edge(
                 _ds, _ixn, _iyn, _faces, _iface, _face_connections
             )
 
