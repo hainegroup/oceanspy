@@ -1265,6 +1265,8 @@ def stations(
                         )
                         args1 = {"_ix": nix, "_iy": niy, "_iface": ii}
                         dse = mooring_singleface(**{**args, **args1})
+                        # if "face" in dse.reset_coords().data_vars:
+                        #     dse = dse.drop_vars(["face"])
                         diX, diY, *a = cross_face_diffs(
                             dse, order_iface, ii, face_connections
                         )

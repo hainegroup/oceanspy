@@ -1780,7 +1780,7 @@ def ds_edge(_ds, _ix, _iy, _ifaces, ii, _face_topo, _dim="mooring", **kwargs):
 
     if connect:
         if set([6]).issubset([face1, face2]):
-            nds = ds_arcedge(_ds, iX, iY, moor, face1, face2, _dim)
+            nds = ds_arcedge(_ds, _ix, _iy, moor, face1, face2, _dim)
             return nds, connect, moor, moors
         else:
             # if there is a need to sample from across the face interface
@@ -2914,6 +2914,9 @@ def mooring_singleface(_ds, _ix, _iy, _faces, _iface, _face_connections):
                 DSt = DSt + DS0
                 dsf = _xr.combine_by_coords(DSt)
                 del nds, DS0, DSt
+
+    if "face" in dsf.reset_coords().data_vars:
+        dsf = dsf.drop_vars(["face"])
     return dsf
 
 
