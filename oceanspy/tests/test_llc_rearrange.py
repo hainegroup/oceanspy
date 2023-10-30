@@ -3679,7 +3679,7 @@ def test_ds_edge(od, ix, iy, faces, kwargs):
         "ii": 0,
         "_face_topo": face_connections,
     }
-    if kwargs["axis"] not in ["x", "y"]:
+    if kwargs.pop("axis", None) not in ["x", "y"]:
         with pytest.raises(ValueError):
             ds_edge(**args, **kwargs)
     else:
