@@ -2021,57 +2021,57 @@ def ds_edge(_ds, _ix, _iy, _ifaces, ii, _face_topo, _dim="mooring", **kwargs):
         if set([6]).issubset([face1, face2]):
             nds = ds_arcedge(_ds, _ix, _iy, moor, face1, face2, _dim)
             return nds, connect, moor, moors
-        elif set([face1, face2]).issubset(nrotS) or set([face1, face2]).issubset(rotS):
-            # same topology across faces
-            if axis == "x":
-                nds, *a = ds_edge_sametx(
-                    _ds, iX, iY, iXp1, iYp1, face1, face2, _dim, moor, **vkwargs
-                )
-            elif axis == "y":
-                nds, *a = ds_edge_samety(
-                    _ds,
-                    iX,
-                    iY,
-                    _ix,
-                    xp1,
-                    iXp1,
-                    iYp1,
-                    face1,
-                    face2,
-                    _dim,
-                    moor,
-                    **vkwargs,
-                )
+        else:
+            if set([face1, face2]).issubset(nrotS) or set([face1, face2]).issubset(
+                rotS
+            ):
+                # same topology across faces
+                if axis == "x":
+                    nds, *a = ds_edge_sametx(
+                        _ds, iX, iY, iXp1, iYp1, face1, face2, _dim, moor, **vkwargs
+                    )
+                elif axis == "y":
+                    nds, *a = ds_edge_samety(
+                        _ds,
+                        iX,
+                        iY,
+                        _ix,
+                        xp1,
+                        iXp1,
+                        iYp1,
+                        face1,
+                        face2,
+                        _dim,
+                        moor,
+                        **vkwargs,
+                    )
 
-        elif not set([face1, face2]).issubset(nrotS) or not set(
-            [face1, face2]
-        ).issubset(rotS):
-            # there is a change in topology across faces
-            if axis == "x":
-                nds, *a = ds_edge_difftx(
-                    _ds, iX, iY, iXp1, iYp1, face1, face2, _dim, moor, **vkwargs
-                )
+            else:
+                # there is a change in topology across faces
+                if axis == "x":
+                    nds, *a = ds_edge_difftx(
+                        _ds, iX, iY, iXp1, iYp1, face1, face2, _dim, moor, **vkwargs
+                    )
 
-            if axis == "y":
-                nds, *a = ds_edge_diffty(
-                    _ds, iX, iY, _ix, xp1, iYp1, face1, face2, _dim, moor, **vkwargs
-                )
+                if axis == "y":
+                    nds, *a = ds_edge_diffty(
+                        _ds, iX, iY, _ix, xp1, iYp1, face1, face2, _dim, moor, **vkwargs
+                    )
 
-        # correct topology of rotated face
-        if face1 in rotS:
-            nds = rotate_vars(mates(nds, pair=pair))
-            rename_rdims1 = {"Xp1": "nYp1", "Yp1": "nXp1", "X": "nY", "Y": "nX"}
-            rename_rdims2 = {"nXp1": "Xp1", "nYp1": "Yp1", "nX": "X", "nY": "Y"}
-            nds = nds.rename_dims(rename_rdims1).rename_vars(rename_rdims1)
-            nds = nds.rename_dims(rename_rdims2).rename_vars(rename_rdims2)
+            # correct topology of rotated face
+            if face1 in rotS:
+                nds = rotate_vars(mates(nds, pair=pair))
+                rename_rdims1 = {"Xp1": "nYp1", "Yp1": "nXp1", "X": "nY", "Y": "nX"}
+                rename_rdims2 = {"nXp1": "Xp1", "nYp1": "Yp1", "nX": "X", "nY": "Y"}
+                nds = nds.rename_dims(rename_rdims1).rename_vars(rename_rdims1)
+                nds = nds.rename_dims(rename_rdims2).rename_vars(rename_rdims2)
 
-        # append vertical variables
-        moor = moor.values
-        nds = _xr.merge([nds, ds1D])
-        # make sure to remove `face` as coord
-        if "face" in nds.reset_coords().data_vars:
-            nds = nds.drop_vars(["face"])
-
+            # append vertical variables
+            moor = moor.values
+            nds = _xr.merge([nds, ds1D])
+            # make sure to remove `face` as coord
+            if "face" in nds.reset_coords().data_vars:
+                nds = nds.drop_vars(["face"])
     else:
         nds = None
         moor = None
