@@ -2176,6 +2176,10 @@ def ds_arcedge(_ds, _ix, _iy, moor, face1, face2, _dim="mooring"):
             if _varName == "CS":
                 nds[_varName] = -nds[_varName]
 
+        nds = _xr.merge([nds, ds1D])
+
+        return nds
+
     elif face1 == 6 and face2 == 10:
         # have to redefine iXp1 in decreasing order
         iXp1 = DataArray(
@@ -2235,6 +2239,10 @@ def ds_arcedge(_ds, _ix, _iy, moor, face1, face2, _dim="mooring"):
             if _varName == "CS":
                 nds[_varName] = -nds[_varName]
 
+        nds = _xr.merge([nds, ds1D])
+
+        return nds
+
     elif face1 == 2 and face2 == 6:
         iXp1 = DataArray(
             _np.stack((_ix, _ix + 1), 1),
@@ -2281,6 +2289,10 @@ def ds_arcedge(_ds, _ix, _iy, moor, face1, face2, _dim="mooring"):
         for var in nds.reset_coords().data_vars:
             nds[var].attrs = {}
 
+        nds = _xr.merge([nds, ds1D])
+
+        return nds
+
     elif face1 == 5 and face2 == 6:
         args = {"yp1": slice(1)}
         rename = {"y": "yp1"}
@@ -2310,9 +2322,9 @@ def ds_arcedge(_ds, _ix, _iy, moor, face1, face2, _dim="mooring"):
         rename = {"x": "X", "y": "Y", "xp1": "Xp1", "yp1": "Yp1"}
         nds = nds.rename_dims(rename).rename_vars(rename)
 
-    nds = _xr.merge([nds, ds1D])
+        nds = _xr.merge([nds, ds1D])
 
-    return nds
+        return nds
 
 
 def face_direction(face1, face2, face_connections):
