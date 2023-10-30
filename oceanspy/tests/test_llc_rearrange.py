@@ -3648,25 +3648,28 @@ def test_ds_arcedge(od, ix, iy, face1, face2):
 
 @pytest.mark.parametrize("od", [od])
 @pytest.mark.parametrize(
-    "ix, iy, faces",
+    "ix, iy, faces, kwargs",
     [
-        (_np.array([45]), _np.array([89]), [2, 6]),
-        (_np.array([45]), _np.array([89]), [5, 6]),
-        (_np.array([0]), _np.array([0]), [4]),
-        (_np.array([89]), _np.array([10]), [0, 3]),
-        (_np.array([89]), _np.array([10]), [3, 9]),
-        (_np.array([0]), _np.array([89]), [0, 1]),
-        (_np.array([0]), _np.array([89]), [7, 10]),
-        (_np.array([89]), _np.array([0]), [7, 8]),
-        (_np.array([10]), _np.array([89]), [1, 2]),
-        (_np.array([89]), _np.array([10]), [1, 4]),
-        (_np.array([89]), _np.array([10]), [4, 8]),
-        (_np.array([89]), _np.array([10]), [8, 9]),
-        (_np.array([10]), _np.array([89]), [8, 11]),
-        (_np.array([10]), _np.array([89]), [11, 1]),
+        (_np.array([45]), _np.array([89]), [2, 6], {}),
+        (_np.array([45]), _np.array([89]), [5, 6], {}),
+        (_np.array([0]), _np.array([0]), [4], {}),
+        (_np.array([89]), _np.array([10]), [0, 3], {}),
+        (_np.array([89]), _np.array([10]), [3, 9], {}),
+        (_np.array([0]), _np.array([89]), [0, 1], {}),
+        (_np.array([0]), _np.array([89]), [7, 10], {}),
+        (_np.array([89]), _np.array([0]), [7, 8], {}),
+        (_np.array([10]), _np.array([89]), [1, 2], {}),
+        (_np.array([10, 89]), _np.array([89, 10]), [1, 2], {"axis": "x"}),
+        (_np.array([10, 89]), _np.array([89, 10]), [1, 2], {"axis": "y"}),
+        (_np.array([10, 89]), _np.array([89, 10]), [1, 2], {"axis": "t"}),
+        (_np.array([89]), _np.array([10]), [1, 4], {}),
+        (_np.array([89]), _np.array([10]), [4, 8], {}),
+        (_np.array([89]), _np.array([10]), [8, 9], {}),
+        (_np.array([10]), _np.array([89]), [8, 11], {}),
+        (_np.array([10]), _np.array([89]), [11, 1], {}),
     ],
 )
-def test_ds_edge(od, ix, iy, faces):
+def test_ds_edge(od, ix, iy, faces, kwargs):
     face_connections = od.face_connections["face"]
     args = {
         "_ds": od._ds,
@@ -3676,35 +3679,38 @@ def test_ds_edge(od, ix, iy, faces):
         "ii": 0,
         "_face_topo": face_connections,
     }
-
-    nds, connect, moor, moors = ds_edge(**args)
-    if set([6]).issubset(faces):
-        mds = ds_arcedge(od._ds, ix, iy, moor, faces[0], faces[1])
-        if _xr.testing.assert_equal(mds, nds):
-            assert 1
+    if kwargs["axis"] not in ["x", "y"]:
+        with pytest.raises(ValueError):
+            ds_edge(**args, **kwargs)
     else:
-        if set([89]).issubset(set.union(set(ix), set(iy))):
-            _dim = "mooring"
-            assert type(nds) == _dstype
-            assert len(nds.Xp1) == 2
-            assert len(nds.Yp1) == 2
-            assert len(nds.X) == 1
-            assert len(nds.Y) == 1
-            assert "face" not in nds.reset_coords().data_vars
-
-            for m in range(len(nds[_dim])):
-                yargs0 = {"Yp1": 0, _dim: m}
-                yargs1 = {"Yp1": 1, _dim: m}
-                xargs0 = {"Xp1": 0, _dim: m}
-                xargs1 = {"Xp1": 1, _dim: m}
-                YG0 = nds.YG.isel(**yargs0).values
-                YG1 = nds.YG.isel(**yargs1).values
-                XG0 = nds.XG.isel(**xargs0).values
-                XG1 = nds.XG.isel(**xargs1).values
-                assert (YG0 < YG1).flatten().all()
-                assert (XG0 < XG1).flatten().all()
+        nds, connect, moor, moors = ds_edge(**args, **kwargs)
+        if set([6]).issubset(faces):
+            mds = ds_arcedge(od._ds, ix, iy, moor, faces[0], faces[1])
+            if _xr.testing.assert_equal(mds, nds):
+                assert 1
         else:
-            assert connect is False
+            if set([89]).issubset(set.union(set(ix), set(iy))):
+                _dim = "mooring"
+                assert type(nds) == _dstype
+                assert len(nds.Xp1) == 2
+                assert len(nds.Yp1) == 2
+                assert len(nds.X) == 1
+                assert len(nds.Y) == 1
+                assert "face" not in nds.reset_coords().data_vars
+
+                for m in range(len(nds[_dim])):
+                    yargs0 = {"Yp1": 0, _dim: m}
+                    yargs1 = {"Yp1": 1, _dim: m}
+                    xargs0 = {"Xp1": 0, _dim: m}
+                    xargs1 = {"Xp1": 1, _dim: m}
+                    YG0 = nds.YG.isel(**yargs0).values
+                    YG1 = nds.YG.isel(**yargs1).values
+                    XG0 = nds.XG.isel(**xargs0).values
+                    XG1 = nds.XG.isel(**xargs1).values
+                    assert (YG0 < YG1).flatten().all()
+                    assert (XG0 < XG1).flatten().all()
+            else:
+                assert connect is False
 
 
 ixx, iyy = _np.array([10, 45, 80, 45]), _np.array([45, 10, 45, 80])
