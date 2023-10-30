@@ -1659,7 +1659,9 @@ def ds_edge_sametx(_ds, iX, iY, iXp1, iYp1, face1, face2, _dim, moor, **kwargs):
     return nds, vds, mds
 
 
-def ds_edge_samety(_ds, iX, iY, iXp1, iYp1, face1, face2, _dim, moor, **kwargs):
+def ds_edge_samety(
+    _ds, iX, iY, _ix, xp1, iXp1, iYp1, face1, face2, _dim, moor, **kwargs
+):
     """
     same topology, axis=`y`.
     """
@@ -1678,19 +1680,12 @@ def ds_edge_samety(_ds, iX, iY, iXp1, iYp1, face1, face2, _dim, moor, **kwargs):
     args = {"yp1": slice(1)}
     rename = {"y": "yp1"}
     if face1 in rotS:  # reverse the order of x points
-        _ix = _np.array([iX.squeeze().values])
-
         new_dim = DataArray(
             _np.arange(len(_ix)),
             dims=(_dim),
             attrs={"long_name": "index of " + _dim, "units": "none"},
         )
 
-        xp1 = DataArray(
-            _np.arange(2),
-            dims=("xp1"),
-            attrs={"long_name": "i-index of cell corner", "units": "none"},
-        )
         iXp1 = DataArray(
             _np.stack((_ix, _ix + 1)[::-1], 1),
             coords={_dim: new_dim, "xp1": xp1},
@@ -1783,7 +1778,7 @@ def ds_edge_difftx(_ds, iX, iY, iXp1, iYp1, face1, face2, _dim, moor, **kwargs):
     return nds, vds, mds
 
 
-def ds_edge_diffty(_ds, iX, iY, iXp1, iYp1, face1, face2, _dim, moor, **kwargs):
+def ds_edge_diffty(_ds, iX, iY, _ix, xp1, iYp1, face1, face2, _dim, moor, **kwargs):
     """different topology, axis=`y`"""
     _Nx = len(_ds.X) - 1
     dim_arg = {_dim: moor}
@@ -1795,18 +1790,10 @@ def ds_edge_diffty(_ds, iX, iY, iXp1, iYp1, face1, face2, _dim, moor, **kwargs):
     gvars = kwargs["g"]
     cvars = kwargs["c"]
 
-    _ix = _np.array([iX.squeeze().values])
-
     new_dim = DataArray(
         _np.arange(len(_ix)),
         dims=(_dim),
         attrs={"long_name": "index of " + _dim, "units": "none"},
-    )
-
-    xp1 = DataArray(
-        _np.arange(2),
-        dims=("xp1"),
-        attrs={"long_name": "i-index of cell corner", "units": "none"},
     )
 
     # have to redefine iXp1 in decreasing order
@@ -2042,7 +2029,18 @@ def ds_edge(_ds, _ix, _iy, _ifaces, ii, _face_topo, _dim="mooring", **kwargs):
                 )
             elif axis == "y":
                 nds, *a = ds_edge_samety(
-                    _ds, iX, iY, iXp1, iYp1, face1, face2, _dim, moor, **vkwargs
+                    _ds,
+                    iX,
+                    iY,
+                    _ix,
+                    xp1,
+                    iXp1,
+                    iYp1,
+                    face1,
+                    face2,
+                    _dim,
+                    moor,
+                    **vkwargs,
                 )
 
         elif not set([face1, face2]).issubset(nrotS) or not set(
@@ -2056,7 +2054,7 @@ def ds_edge(_ds, _ix, _iy, _ifaces, ii, _face_topo, _dim="mooring", **kwargs):
 
             if axis == "y":
                 nds, *a = ds_edge_diffty(
-                    _ds, iX, iY, iXp1, iYp1, face1, face2, _dim, moor, **vkwargs
+                    _ds, iX, iY, _ix, xp1, iYp1, face1, face2, _dim, moor, **vkwargs
                 )
 
         # correct topology of rotated face
