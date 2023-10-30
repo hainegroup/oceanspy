@@ -3706,10 +3706,10 @@ ixx, iyy = _np.array([10, 45, 80, 45]), _np.array([45, 10, 45, 80])
 @pytest.mark.parametrize(
     "ix, iy",
     [
-        (ixx[0], iyy[0]),
-        (ixx[1], iyy[1]),
-        (ixx[2], iyy[2]),
-        (ixx[3], iyy[3]),
+        (ixx[:1], iyy[:1]),
+        (ixx[1:2], iyy[1:2]),
+        (ixx[2:3], iyy[2:3]),
+        (ixx[3:], iyy[3:]),
         (ixx, iyy),
     ],
 )
