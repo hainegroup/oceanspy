@@ -1611,7 +1611,7 @@ def arctic_eval(_ds, _ix, _iy, _dim_name="mooring"):
 
 
 def ds_edge_sametx(_ds, iX, iY, iXp1, iYp1, face1, face2, _dim, moor, **kwargs):
-    _Nx = len(_ds.X)
+    _Nx = len(_ds.X) - 1
     rotS = _np.arange(7, 13)
 
     dim_arg = {_dim: moor}
@@ -1665,7 +1665,7 @@ def ds_edge_samety(_ds, iX, iY, iXp1, iYp1, face1, face2, _dim, moor, **kwargs):
     """
     rotS = _np.arange(7, 13)
 
-    _Nx = len(_ds.X)
+    _Nx = len(_ds.X) - 1
     dim_arg = {_dim: moor}
     iXn = iX.isel(**dim_arg)  #
     iYn = iY.isel(**dim_arg)  #
@@ -1728,7 +1728,7 @@ def ds_edge_samety(_ds, iX, iY, iXp1, iYp1, face1, face2, _dim, moor, **kwargs):
 
 def ds_edge_difftx(_ds, iX, iY, iXp1, iYp1, face1, face2, _dim, moor, **kwargs):
     """different topology, axis=`x`"""
-    _Nx = len(_ds.X)
+    _Nx = len(_ds.X) - 1
 
     dim_arg = {_dim: moor}
     iXn = iX.isel(**dim_arg)  #
@@ -1785,7 +1785,7 @@ def ds_edge_difftx(_ds, iX, iY, iXp1, iYp1, face1, face2, _dim, moor, **kwargs):
 
 def ds_edge_diffty(_ds, iX, iY, iXp1, iYp1, face1, face2, _dim, moor, **kwargs):
     """different topology, axis=`y`"""
-    _Nx = len(_ds.X)
+    _Nx = len(_ds.X) - 1
     dim_arg = {_dim: moor}
     iXn = iX.isel(**dim_arg)  #
     iYn = iY.isel(**dim_arg)  #
