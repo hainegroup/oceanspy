@@ -17,6 +17,7 @@ from oceanspy.llc_rearrange import (  # ds_edge,
     combine_list_ds,
     cross_face_diffs,
     ds_arcedge,
+    ds_edge,
     edge_completer,
     edge_slider,
     edgesid,
@@ -3636,3 +3637,35 @@ def test_ds_arcedge(od, ix, iy, face1, face2):
         XG1 = dsf.XG.isel(**xargs1).values
         assert (YG0 < YG1).flatten().all()
         assert (XG0 < XG1).flatten().all()
+
+
+# include :
+# array than begins and ends at 0 indexes
+# array thatn beings at two 89 indexes on same axis
+# array that being and ends at two 89 axis on different axis.
+
+
+@pytest.mark.parametrize("od", [od])
+@pytest.mark.parametrize(
+    "ix, iy, face1, face2",
+    [
+        (_np.array([45]), _np.array([89]), 2, 6),
+        (_np.array([45]), _np.array([89]), 5, 6),
+    ],
+)
+def test_ds_edge(od, ix, iy, face1, face2):
+    face_connections = od.face_connections["face"]
+    args = {
+        "_ds": od._ds,
+        "_ix": ix,
+        "_iy": iy,
+        "_ifaces": [face1, face2],
+        "ii": 0,
+        "_face_topo": face_connections,
+    }
+
+    nds, connect, moor, moors = ds_edge(**args)
+    if set([6]).issubset([face1, face2]):
+        mds = ds_arcedge(od._ds, ix, iy, moor, face1, face2)
+        if _xr.testing.assert_equal(mds, nds):
+            assert 1
