@@ -1973,7 +1973,7 @@ def ds_edge(_ds, _ix, _iy, _ifaces, ii, _face_topo, _dim="mooring", **kwargs):
     else:
         nds = None
         moor = None
-    return nds, connect, moor, moors, axis
+    return nds, connect, moor, moors
 
 
 def ds_arcedge(_ds, _ix, _iy, moor, face1, face2, _dim="mooring"):
@@ -2123,10 +2123,6 @@ def ds_arcedge(_ds, _ix, _iy, moor, face1, face2, _dim="mooring"):
             if _varName == "CS":
                 nds[_varName] = -nds[_varName]
 
-        nds = _xr.merge([nds, ds1D])
-
-        return nds
-
     elif face1 == 6 and face2 == 10:
         # have to redefine iXp1 in decreasing order
         iXp1 = DataArray(
@@ -2186,10 +2182,6 @@ def ds_arcedge(_ds, _ix, _iy, moor, face1, face2, _dim="mooring"):
             if _varName == "CS":
                 nds[_varName] = -nds[_varName]
 
-        nds = _xr.merge([nds, ds1D])
-
-        return nds
-
     elif face1 == 2 and face2 == 6:
         iXp1 = DataArray(
             _np.stack((_ix, _ix + 1), 1),
@@ -2236,10 +2228,6 @@ def ds_arcedge(_ds, _ix, _iy, moor, face1, face2, _dim="mooring"):
         for var in nds.reset_coords().data_vars:
             nds[var].attrs = {}
 
-        nds = _xr.merge([nds, ds1D])
-
-        return nds
-
     elif face1 == 5 and face2 == 6:
         args = {"yp1": slice(1)}
         rename = {"y": "yp1"}
@@ -2269,9 +2257,9 @@ def ds_arcedge(_ds, _ix, _iy, moor, face1, face2, _dim="mooring"):
         rename = {"x": "X", "y": "Y", "xp1": "Xp1", "yp1": "Yp1"}
         nds = nds.rename_dims(rename).rename_vars(rename)
 
-        nds = _xr.merge([nds, ds1D])
+    nds = _xr.merge([nds, ds1D])
 
-        return nds
+    return nds
 
 
 def face_direction(face1, face2, face_connections):
@@ -2716,7 +2704,7 @@ def ds_splitarray(
     for i in range(len(_ni)):  # parallelize this. It could take some time.
         if i % 2 == 0:
             if i in [0, len(_ni) - 1]:
-                nds, connect, moor, _ = ds_edge(
+                nds, connect, moor, *a = ds_edge(
                     _ds, _iXn[_ni[i]], _iYn[_ni[i]], _faces, _iface, _face_connections
                 )
                 if connect:  # subarry end at right edge
@@ -2821,7 +2809,7 @@ def mooring_singleface(_ds, _ix, _iy, _faces, _iface, _face_connections):
             # there is at least one right-edge point
             # must split into subarray (edge+interior)
             DSt = []
-            nds, connect, moor, moors, _ = ds_edge(
+            nds, connect, moor, moors, *a = ds_edge(
                 _ds, _ixn, _iyn, _faces, _iface, _face_connections
             )
 

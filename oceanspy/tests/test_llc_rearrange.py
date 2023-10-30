@@ -3648,16 +3648,16 @@ def test_ds_arcedge(od, ix, iy, face1, face2):
 
 @pytest.mark.parametrize("od", [od])
 @pytest.mark.parametrize(
-    "ix, iy, faces, exp_axis",
+    "ix, iy, faces",
     [
-        (_np.array([45]), _np.array([89]), [2, 6], None),
-        (_np.array([45]), _np.array([89]), [5, 6], None),
-        (_np.array([0]), _np.array([0]), [4], None),
-        (_np.array([89]), _np.array([10]), [0, 3], "x"),
-        (_np.array([89]), _np.array([10]), [3, 9], "x"),
-        (_np.array([0]), _np.array([89]), [0, 1], "y"),
-        (_np.array([0]), _np.array([89]), [7, 10], "y"),
-        (_np.array([89]), _np.array([0]), [7, 8], "x"),
+        (_np.array([45]), _np.array([89]), [2, 6]),
+        (_np.array([45]), _np.array([89]), [5, 6]),
+        (_np.array([0]), _np.array([0]), [4]),
+        (_np.array([89]), _np.array([10]), [0, 3]),
+        (_np.array([89]), _np.array([10]), [3, 9]),
+        (_np.array([0]), _np.array([89]), [0, 1]),
+        (_np.array([0]), _np.array([89]), [7, 10]),
+        (_np.array([89]), _np.array([0]), [7, 8]),
     ],
 )
 def test_ds_edge(od, ix, iy, faces, exp_axis):
@@ -3671,7 +3671,7 @@ def test_ds_edge(od, ix, iy, faces, exp_axis):
         "_face_topo": face_connections,
     }
 
-    nds, connect, moor, moors, axis = ds_edge(**args)
+    nds, connect, moor, moors = ds_edge(**args)
     if set([6]).issubset(faces):
         mds = ds_arcedge(od._ds, ix, iy, moor, faces[0], faces[1])
         if _xr.testing.assert_equal(mds, nds):
@@ -3679,7 +3679,6 @@ def test_ds_edge(od, ix, iy, faces, exp_axis):
     else:
         if set([89]).issubset(set.union(set(ix), set(iy))):
             _dim = "mooring"
-            assert axis == exp_axis
             assert len(nds.Xp1) == 2
             assert len(nds.Yp1) == 2
             assert len(nds.X) == 1
