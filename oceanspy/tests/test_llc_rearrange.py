@@ -7,15 +7,16 @@ import xarray as _xr
 
 # From OceanSpy
 from oceanspy import open_oceandataset
-from oceanspy.llc_rearrange import Dims
+from oceanspy.llc_rearrange import Dims  # ds_edge,
 from oceanspy.llc_rearrange import LLCtransformation as LLC
-from oceanspy.llc_rearrange import (
+from oceanspy.llc_rearrange import (  # ds_edge,
     _edge_arc_data,
     _edge_facet_data,
     arc_limits_mask,
     arct_connect,
     combine_list_ds,
     cross_face_diffs,
+    ds_arcedge,
     edge_completer,
     edge_slider,
     edgesid,
@@ -3596,5 +3597,42 @@ def test_mooring_singleface(od, iX, iY, faces, iface):
         XG0 = dsf.XG.isel(**xargs0).values
         XG1 = dsf.XG.isel(**xargs1).values
 
+        assert (YG0 < YG1).flatten().all()
+        assert (XG0 < XG1).flatten().all()
+
+
+ixx, iyy = _np.array([0, 89, 45, 45]), _np.array([45, 45, 0, 89])
+faces1 = [6, 6]
+faces2 = [7, 10]
+
+
+@pytest.mark.parametrize("od", [od])
+@pytest.mark.parametrize(
+    "ix, iy, face1, face2",
+    [
+        (ixx[:1], iyy[::1], faces1[0], faces2[0]),
+        (ixx[3:], iyy[3:], faces1[1], faces2[1]),
+        (_np.array([45]), _np.array([89]), 2, 6),
+        (_np.array([45]), _np.array([89]), 5, 6),
+    ],
+)
+def test_ds_arcedge(od, ix, iy, face1, face2):
+    _dim = "mooring"  # does not matter
+    dsf = ds_arcedge(od._ds, ix, iy, _np.array([0]), faces1, faces2, _dim)
+
+    assert len(dsf.Xp1) == 2
+    assert len(dsf.Yp1) == 2
+    assert len(dsf.X) == 1
+    assert len(dsf.Y) == 1
+
+    for m in range(len(dsf[_dim])):
+        yargs0 = {"Yp1": 0, _dim: m}
+        yargs1 = {"Yp1": 1, _dim: m}
+        xargs0 = {"Xp1": 0, _dim: m}
+        xargs1 = {"Xp1": 1, _dim: m}
+        YG0 = dsf.YG.isel(**yargs0).values
+        YG1 = dsf.YG.isel(**yargs1).values
+        XG0 = dsf.XG.isel(**xargs0).values
+        XG1 = dsf.XG.isel(**xargs1).values
         assert (YG0 < YG1).flatten().all()
         assert (XG0 < XG1).flatten().all()
