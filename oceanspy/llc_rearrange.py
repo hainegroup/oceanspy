@@ -1842,7 +1842,7 @@ def ds_edge(_ds, _ix, _iy, _ifaces, ii, _face_topo, _dim="mooring", **kwargs):
             # same topology across faces
             if axis == "x":
                 nds, *a = ds_edge_sametx(
-                    _ds, iX, iY, iXp1, iYp1, face1, face2, _dim, **vkwargs
+                    _ds, iX, iY, iXp1, iYp1, face1, face2, _dim, moor, **vkwargs
                 )
                 # args = {"xp1": slice(1)}
                 # rename = {"x": "xp1"}
