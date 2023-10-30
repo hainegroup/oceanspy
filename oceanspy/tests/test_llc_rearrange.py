@@ -3647,25 +3647,47 @@ def test_ds_arcedge(od, ix, iy, face1, face2):
 
 @pytest.mark.parametrize("od", [od])
 @pytest.mark.parametrize(
-    "ix, iy, face1, face2",
+    "ix, iy, faces",
     [
-        (_np.array([45]), _np.array([89]), 2, 6),
-        (_np.array([45]), _np.array([89]), 5, 6),
+        (_np.array([45]), _np.array([89]), [2, 6]),
+        (_np.array([45]), _np.array([89]), [5, 6]),
+        (_np.array([0]), _np.array([0]), [4]),
     ],
 )
-def test_ds_edge(od, ix, iy, face1, face2):
+def test_ds_edge(od, ix, iy, faces):
     face_connections = od.face_connections["face"]
     args = {
         "_ds": od._ds,
         "_ix": ix,
         "_iy": iy,
-        "_ifaces": [face1, face2],
+        "_ifaces": faces,
         "ii": 0,
         "_face_topo": face_connections,
     }
 
     nds, connect, moor, moors = ds_edge(**args)
-    if set([6]).issubset([face1, face2]):
-        mds = ds_arcedge(od._ds, ix, iy, moor, face1, face2)
+    if set([6]).issubset(faces):
+        mds = ds_arcedge(od._ds, ix, iy, moor, faces[0], faces[1])
         if _xr.testing.assert_equal(mds, nds):
             assert 1
+    else:
+        if set([89]).issubset(set.union(set(ix), set(iy))):
+            _dim = "mooring"
+            assert len(nds.Xp1) == 2
+            assert len(nds.Yp1) == 2
+            assert len(nds.X) == 1
+            assert len(nds.Y) == 1
+
+            for m in range(len(nds[_dim])):
+                yargs0 = {"Yp1": 0, _dim: m}
+                yargs1 = {"Yp1": 1, _dim: m}
+                xargs0 = {"Xp1": 0, _dim: m}
+                xargs1 = {"Xp1": 1, _dim: m}
+                YG0 = nds.YG.isel(**yargs0).values
+                YG1 = nds.YG.isel(**yargs1).values
+                XG0 = nds.XG.isel(**xargs0).values
+                XG1 = nds.XG.isel(**xargs1).values
+                assert (YG0 < YG1).flatten().all()
+                assert (XG0 < XG1).flatten().all()
+        else:
+            assert connect is False
