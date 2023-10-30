@@ -3671,7 +3671,7 @@ def test_ds_edge(od, ix, iy, faces):
         "_face_topo": face_connections,
     }
 
-    nds, connect, moor, moors = ds_edge(**args)
+    nds, connect, moor, moors, axis = ds_edge(**args)
     if set([6]).issubset(faces):
         mds = ds_arcedge(od._ds, ix, iy, moor, faces[0], faces[1])
         if _xr.testing.assert_equal(mds, nds):
