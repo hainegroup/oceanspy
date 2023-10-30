@@ -3648,38 +3648,40 @@ def test_ds_arcedge(od, ix, iy, face1, face2):
 
 @pytest.mark.parametrize("od", [od])
 @pytest.mark.parametrize(
-    "ix, iy, faces, kwargs",
+    "ix, iy, faces, k, kwargs",
     [
-        (_np.array([45]), _np.array([89]), [2, 6], {}),
-        (_np.array([45]), _np.array([89]), [5, 6], {}),
-        (_np.array([0]), _np.array([0]), [4], {}),
-        (_np.array([89]), _np.array([10]), [0, 3], {}),
-        (_np.array([89]), _np.array([10]), [3, 9], {}),
-        (_np.array([0]), _np.array([89]), [0, 1], {}),
-        (_np.array([0]), _np.array([89]), [7, 10], {}),
-        (_np.array([89]), _np.array([0]), [7, 8], {}),
-        (_np.array([10]), _np.array([89]), [1, 2], {}),
-        (_np.array([10, 89]), _np.array([89, 10]), [1, 2], {"axis": "x"}),
-        (_np.array([10, 89]), _np.array([89, 10]), [1, 2], {"axis": "y"}),
-        (_np.array([10, 89]), _np.array([89, 10]), [1, 2], {"axis": "t"}),
-        (_np.array([89]), _np.array([10]), [1, 4], {}),
-        (_np.array([89]), _np.array([10]), [4, 8], {}),
-        (_np.array([89]), _np.array([10]), [8, 9], {}),
-        (_np.array([10]), _np.array([89]), [8, 11], {}),
-        (_np.array([10]), _np.array([89]), [11, 1], {}),
+        (_np.array([45]), _np.array([89]), [2, 6], 0, {}),
+        (_np.array([45]), _np.array([89]), [5, 6], 0, {}),
+        (_np.array([0]), _np.array([0]), [4], 0, {}),
+        (_np.array([89]), _np.array([10]), [0, 3], 0, {}),
+        (_np.array([89]), _np.array([10]), [3, 9], 0, {}),
+        (_np.array([0]), _np.array([89]), [0, 1], 0, {}),
+        (_np.array([0]), _np.array([89]), [7, 10], 0, {}),
+        (_np.array([89]), _np.array([0]), [7, 8], 0, {}),
+        (_np.array([10]), _np.array([89]), [1, 2], 0, {}),
+        (_np.array([10, 89]), _np.array([89, 10]), [1, 4], 0, {"axis": "x"}),
+        (_np.array([10, 89]), _np.array([89, 10]), [2, 1], 1, {"axis": "y"}),
+        (_np.array([10, 89]), _np.array([89, 10]), [1, 2], 0, {"axis": "t"}),
+        (_np.array([89]), _np.array([10]), [1, 4], 0, {}),
+        (_np.array([89]), _np.array([10]), [4, 8], 0, {}),
+        (_np.array([89]), _np.array([10]), [8, 9], 0, {}),
+        (_np.array([10]), _np.array([89]), [8, 11], 0, {}),
+        (_np.array([10]), _np.array([89]), [11, 1], 0, {}),
     ],
 )
-def test_ds_edge(od, ix, iy, faces, kwargs):
+def test_ds_edge(od, ix, iy, faces, k, kwargs):
     face_connections = od.face_connections["face"]
+    axis = kwargs.pop("axis", None)
     args = {
         "_ds": od._ds,
         "_ix": ix,
         "_iy": iy,
         "_ifaces": faces,
-        "ii": 0,
+        "ii": k,
         "_face_topo": face_connections,
     }
-    if kwargs.pop("axis", None) not in ["x", "y"]:
+    if axis is not None and axis not in ["x", "y"]:
+        kwargs = {"axis": axis}
         with pytest.raises(ValueError):
             ds_edge(**args, **kwargs)
     else:
