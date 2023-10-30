@@ -1973,7 +1973,7 @@ def ds_edge(_ds, _ix, _iy, _ifaces, ii, _face_topo, _dim="mooring", **kwargs):
     else:
         nds = None
         moor = None
-        return nds, connect, moor, moors, axis
+    return nds, connect, moor, moors, axis
 
 
 def ds_arcedge(_ds, _ix, _iy, moor, face1, face2, _dim="mooring"):
