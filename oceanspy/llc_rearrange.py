@@ -2844,8 +2844,8 @@ def ds_splitarray(
                 _ds,
                 _iXn[_ni[i]],
                 _iYn[_ni[i]],
-                _faces + adj_faces[j],
-                _iface,
+                [_faces[_iface]] + adj_faces[j],
+                0,
                 _face_connections,
             )
             j += 1  # update the count for eval at a face edge
