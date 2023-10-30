@@ -3610,7 +3610,7 @@ faces2 = [7, 10]
 @pytest.mark.parametrize(
     "ix, iy, face1, face2",
     [
-        (ixx[:1], iyy[::1], faces1[0], faces2[0]),
+        (ixx[1:2], iyy[1:2], faces1[0], faces2[0]),
         (ixx[3:], iyy[3:], faces1[1], faces2[1]),
         (_np.array([45]), _np.array([89]), 2, 6),
         (_np.array([45]), _np.array([89]), 5, 6),
