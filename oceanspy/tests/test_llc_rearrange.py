@@ -3618,7 +3618,7 @@ faces2 = [7, 10]
 )
 def test_ds_arcedge(od, ix, iy, face1, face2):
     _dim = "mooring"  # does not matter
-    dsf = ds_arcedge(od._ds, ix, iy, _np.array([0]), faces1, faces2, _dim)
+    dsf = ds_arcedge(od._ds, ix, iy, _np.array([0]), face1, face2, _dim)
 
     assert len(dsf.Xp1) == 2
     assert len(dsf.Yp1) == 2
