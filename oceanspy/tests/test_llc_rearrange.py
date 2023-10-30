@@ -14,6 +14,7 @@ from oceanspy.llc_rearrange import (  # ds_edge,
     _edge_facet_data,
     arc_limits_mask,
     arct_connect,
+    arctic_eval,
     combine_list_ds,
     cross_face_diffs,
     ds_arcedge,
@@ -3696,3 +3697,39 @@ def test_ds_edge(od, ix, iy, faces):
                 assert (XG0 < XG1).flatten().all()
         else:
             assert connect is False
+
+
+ixx, iyy = _np.array([10, 45, 80, 45]), _np.array([45, 10, 45, 80])
+
+
+@pytest.mark.parametrize("od", [od])
+@pytest.mark.parametrize(
+    "ix, iy",
+    [
+        (ixx[0], iyy[0]),
+        (ixx[1], iyy[1]),
+        (ixx[2], iyy[2]),
+        (ixx[3], iyy[3]),
+        (ixx, iyy),
+    ],
+)
+def test_arctic_eval(od, ix, iy):
+    _dim = "station"
+    nds = arctic_eval(od._ds, ix, iy, _dim)
+
+    assert len(nds.Xp1) == 2
+    assert len(nds.Yp1) == 2
+    assert len(nds.X) == 1
+    assert len(nds.Y) == 1
+
+    for m in range(len(nds[_dim])):
+        yargs0 = {"Yp1": 0, _dim: m}
+        yargs1 = {"Yp1": 1, _dim: m}
+        xargs0 = {"Xp1": 0, _dim: m}
+        xargs1 = {"Xp1": 1, _dim: m}
+        YG0 = nds.YG.isel(**yargs0).values
+        YG1 = nds.YG.isel(**yargs1).values
+        XG0 = nds.XG.isel(**xargs0).values
+        XG1 = nds.XG.isel(**xargs1).values
+        assert (YG0 < YG1).flatten().all()
+        assert (XG0 < XG1).flatten().all()
