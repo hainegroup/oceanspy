@@ -1646,6 +1646,11 @@ def ds_edge(_ds, _ix, _iy, _ifaces, ii, _face_topo, _dim="mooring", **kwargs):
     nrotS = set(_np.arange(6))
     _Nx = len(_ds.X) - 1
 
+    if "pair" in kwargs.keys():
+        pair = kwargs.pop("pair", None)
+    else:
+        pair = []
+
     _dim_name = _dim
     new_dim = DataArray(
         _np.arange(len(_ix)),
@@ -1820,7 +1825,7 @@ def ds_edge(_ds, _ix, _iy, _ifaces, ii, _face_topo, _dim="mooring", **kwargs):
 
                 # correct topology of rotated face
                 if face1 in rotS:
-                    nds = rotate_vars(mates(nds, pair=kwargs.pop("pair", None)))
+                    nds = rotate_vars(mates(nds, pair=pair))
                     rename_rdims1 = {"Xp1": "nYp1", "Yp1": "nXp1", "X": "nY", "Y": "nX"}
                     rename_rdims2 = {"nXp1": "Xp1", "nYp1": "Yp1", "nX": "X", "nY": "Y"}
                     nds = nds.rename_dims(rename_rdims1).rename_vars(rename_rdims1)
@@ -1873,7 +1878,7 @@ def ds_edge(_ds, _ix, _iy, _ifaces, ii, _face_topo, _dim="mooring", **kwargs):
 
                 # correct topology of rotated face
                 if face1 in rotS:
-                    nds = rotate_vars(mates(nds, pair=kwargs.pop("pair", None)))
+                    nds = rotate_vars(mates(nds, pair=pair))
                     rename_rdims1 = {"Xp1": "nYp1", "Yp1": "nXp1", "X": "nY", "Y": "nX"}
                     rename_rdims2 = {"nXp1": "Xp1", "nYp1": "Yp1", "nX": "X", "nY": "Y"}
                     nds = nds.rename_dims(rename_rdims1).rename_vars(rename_rdims1)
@@ -1936,7 +1941,7 @@ def ds_edge(_ds, _ix, _iy, _ifaces, ii, _face_topo, _dim="mooring", **kwargs):
 
                 # correct topology of rotated face
                 if face1 in rotS:
-                    nds = rotate_vars(mates(nds, pair=kwargs.pop("pair", None)))
+                    nds = rotate_vars(mates(nds, pair=pair))
                     rename_rdims1 = {"Xp1": "nYp1", "Yp1": "nXp1", "X": "nY", "Y": "nX"}
                     rename_rdims2 = {"nXp1": "Xp1", "nYp1": "Yp1", "nX": "X", "nY": "Y"}
                     nds = nds.rename_dims(rename_rdims1).rename_vars(rename_rdims1)
@@ -2003,7 +2008,7 @@ def ds_edge(_ds, _ix, _iy, _ifaces, ii, _face_topo, _dim="mooring", **kwargs):
 
                 # correct topology of rotated face
                 if face1 in rotS:
-                    nds = rotate_vars(mates(nds, pair=kwargs.pop("pair", None)))
+                    nds = rotate_vars(mates(nds, pair=pair))
                     rename_rdims1 = {"Xp1": "nYp1", "Yp1": "nXp1", "X": "nY", "Y": "nX"}
                     rename_rdims2 = {"nXp1": "Xp1", "nYp1": "Yp1", "nX": "X", "nY": "Y"}
                     nds = nds.rename_dims(rename_rdims1).rename_vars(rename_rdims1)
