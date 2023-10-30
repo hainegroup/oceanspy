@@ -3683,6 +3683,7 @@ def test_ds_edge(od, ix, iy, faces):
             assert len(nds.Yp1) == 2
             assert len(nds.X) == 1
             assert len(nds.Y) == 1
+            assert "face" not in nds.reset_coords().data_vars
 
             for m in range(len(nds[_dim])):
                 yargs0 = {"Yp1": 0, _dim: m}
