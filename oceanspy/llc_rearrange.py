@@ -1790,7 +1790,6 @@ def ds_edge(_ds, _ix, _iy, _ifaces, ii, _face_topo, _dim="mooring", **kwargs):
             ):
                 # same topology across faces
                 if axis == "x":
-                    # print(axis)
                     args = {"xp1": slice(1)}
                     rename = {"x": "xp1"}
                     revar = "xp1"
@@ -1828,7 +1827,6 @@ def ds_edge(_ds, _ix, _iy, _ifaces, ii, _face_topo, _dim="mooring", **kwargs):
                     nds = nds.rename_dims(rename).rename_vars(rename)
 
                 elif axis == "y":
-                    # print(axis)
                     args = {"yp1": slice(1)}
                     rename = {"y": "yp1"}
                     if face1 in rotS:  # reverse the order of x points
@@ -1870,7 +1868,6 @@ def ds_edge(_ds, _ix, _iy, _ifaces, ii, _face_topo, _dim="mooring", **kwargs):
             else:
                 # there is a change in topology across faces
                 if axis == "x":
-                    # print(axis)
                     args = {"xp1": slice(1)}
                     rename = {"x": "xp1"}
                     revar = "xp1"
@@ -1919,7 +1916,6 @@ def ds_edge(_ds, _ix, _iy, _ifaces, ii, _face_topo, _dim="mooring", **kwargs):
                         coords={_dim_name: new_dim, "xp1": xp1},
                         dims=(_dim_name, "xp1"),
                     )
-                    # print(axis)
                     args = {"yp1": slice(1)}
                     rename = {"y": "yp1"}
                     iXp1n = iXp1.isel(**dim_arg)
@@ -1963,7 +1959,6 @@ def ds_edge(_ds, _ix, _iy, _ifaces, ii, _face_topo, _dim="mooring", **kwargs):
                     for var in nds.reset_coords().data_vars:
                         nds[var].attrs = {}
             if face1 in rotS:
-                # print('rotate vars')
                 if set(["Ucycl", "Vcycl"]).issubset(_ds.data_vars):
                     pair = ["Ucycl", "Vcycl"]
                 else:
