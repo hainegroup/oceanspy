@@ -3685,6 +3685,7 @@ def test_ds_edge(od, ix, iy, faces, k, kwargs):
         with pytest.raises(ValueError):
             ds_edge(**args, **kwargs)
     else:
+        kwargs = {"axis": axis}
         nds, connect, moor, moors = ds_edge(**args, **kwargs)
         if set([6]).issubset(faces):
             mds = ds_arcedge(od._ds, ix, iy, moor, faces[0], faces[1])
