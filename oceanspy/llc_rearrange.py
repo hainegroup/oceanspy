@@ -3103,7 +3103,6 @@ def cross_face_diffs(_ds, _faces, _iface, _face_connections):
     """
 
     # exclude the arctic for now
-    Nx = len(_ds.X) - 1
     Rot = _np.arange(7, 13)
     _ds = _ds.reset_coords()
     Xind, Yind = _ds["Xind"], _ds["Yind"]
@@ -3115,17 +3114,16 @@ def cross_face_diffs(_ds, _faces, _iface, _face_connections):
     # format: [[xvec, yvec], [.], ...] and inherets logics from `face_directions`
     fdirs_options = [[-1, 0], [1, 0], [0, -1], [0, 1]]
 
+    diffX, diffY = _np.diff(Xind.squeeze().values), _np.diff(Yind.squeeze().values)
+
     if _faces[_iface] in Rot:  # correct for topology
-        Xind, Yind = Xind, Nx - Yind
-        # _ds = _ds.drop_vars(["Xind", "Yind"])
-        # update vals in dataset
-        # _ds["Xind"] = DataArray(Xind, coords=ind_coords, dims=ind_dims)
-        # _ds["Yind"] = DataArray(Yind, coords=ind_coords, dims=ind_dims)
         # redefine options with corrected topology
         # keep same result from `face_direction`
         fdirs_options = [[0, 1], [0, -1], [-1, 0], [1, 0]]
-
-    diffX, diffY = _np.diff(Xind.squeeze().values), _np.diff(Yind.squeeze().values)
+        # create copy and rotate
+        ndiffX, ndiffY = _copy.deepcopy(diffX), _copy.deepcopy(diffY)
+        diffX = ndiffY
+        diffY = -ndiffX
 
     # get direction between the edge point of present face
     # only when there is another face.
