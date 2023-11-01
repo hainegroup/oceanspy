@@ -14,6 +14,7 @@ from oceanspy.llc_rearrange import (  # ds_edge,
     _edge_facet_data,
     arc_limits_mask,
     arct_connect,
+    arct_diffs,
     arctic_eval,
     combine_list_ds,
     cross_face_diffs,
@@ -3746,3 +3747,46 @@ def test_arctic_eval(od, ix, iy):
         XG1 = nds.XG.isel(**xargs1).values
         assert (YG0 < YG1).flatten().all()
         assert (XG0 < XG1).flatten().all()
+
+
+y2 = _np.arange(79, 10, -1)
+x2 = _np.array([10] * len(y2))
+
+x5 = _np.arange(10, 80)
+y5 = _np.array([10] * len(x5))
+
+y7 = _np.arange(11, 80)
+x7 = _np.array([79] * len(y7))
+
+x10 = _np.arange(78, 10, -1)
+y10 = _np.array([79] * len(x10))
+
+Xc = _np.append(_np.append(_np.append(x2, x5), x7), x10)
+Yc = _np.append(_np.append(_np.append(y2, y5), y7), y10)
+
+nXc, nYc = connector(Xc, Yc)
+nXac, nYac = connector(Xc[::-1], Yc[::-1])
+
+valx = _np.ones(_np.shape(nXc))
+
+
+@pytest.mark.parametrize("od", [od])
+@pytest.mark.parametrize(
+    "ix, iy, ediffX, ediffY",
+    [
+        (nXc, nYc, valx, 0 * valx),
+        (nXac, nYac, -valx, 0 * valx),
+    ],
+)
+def test_arct_diffs(od, ix, iy, ediffX, ediffY):
+    _ds = od._ds
+    diffX, diffY, cset, miss = arct_diffs(_ds, ix, iy)
+    full_set = set(tuple((ix[i], iy[i]) for i in range(len(ix))))
+    miss_set = set(tuple((ix[miss[j]], iy[miss[j]]) for j in range(len(miss))))
+    assert len(diffX) == len(ix) - 1
+    assert len(diffY) == len(iy) - 1
+    assert full_set == cset.union(miss_set)
+
+    if ediffX is not None:
+        assert diffX == ediffX
+        assert diffY == ediffY
