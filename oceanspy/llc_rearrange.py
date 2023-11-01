@@ -3225,10 +3225,7 @@ def arct_diffs(_ds, _Xind, _Yind):
     setR10 = set(tuple((niXR10[i], niYR10[i])) for i in range(len(niYR10)))
 
     # assert I am capturing all data points
-    full_set = set(tuple((_Xind[i], _Yind[i]) for i in range(len(_Xind))))
     captured_set = setR2.union(setR5).union(setR7).union(setR10)
-    if not captured_set.difference(full_set) == set():
-        print("find  missing points and assigned them to a set based on the neighbor")
 
     ndiffX, ndiffY = [], []
     for i in range(len(_Xind) - 1):
