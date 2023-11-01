@@ -9,6 +9,7 @@ import reprlib
 import dask
 import numpy as _np
 import xarray as _xr
+from shapely import Point, Polygon
 from xarray import DataArray, Dataset
 from xgcm import Grid
 
@@ -3137,6 +3138,182 @@ def cross_face_diffs(_ds, _faces, _iface, _face_connections):
         tdiffx, tdiffy = _np.array([]), _np.array([])
 
     return diffX, diffY, _np.array([tdiffx]), _np.array([tdiffy])
+
+
+def arct_diffs(_ds, _Xind, _Yind):
+    _Nx = len(_ds.X) - 1
+
+    # define triangular areas that split the arctic
+    XR5 = Polygon([(0, 0), (_Nx / 2, _Nx / 2), (_Nx, 0)])
+    XR7 = Polygon([(_Nx, 0), (_Nx / 2, _Nx / 2), (_Nx, _Nx)])
+    XR10 = Polygon([(0, _Nx), (_Nx / 2, _Nx / 2), (_Nx, _Nx)])
+    XR2 = Polygon([(0, _Nx), (_Nx / 2, _Nx / 2), (0, 0)])
+
+    # define a small polygon that contains the theoretical line
+    # dividing the areas above
+
+    lower_left = Polygon(
+        [
+            (0, 3),
+            ((_Nx + 1) // 2 - 3, (_Nx + 1) // 2),
+            ((_Nx + 1) // 2, (_Nx + 1) // 2),
+            ((_Nx + 1) // 2, (_Nx + 1) // 2 - 3),
+            (3, 0),
+            (0, 0),
+        ]
+    )
+    lower_right = Polygon(
+        [
+            ((_Nx + 1) // 2, (_Nx + 1) // 2),
+            ((_Nx + 1) // 2, (_Nx + 1) // 2 - 3),
+            (_Nx - 3, 0),
+            (_Nx, 0),
+            (_Nx, 3),
+            ((_Nx + 1) // 2 + 3, (_Nx + 1) // 2),
+            ((_Nx + 1) // 2, (_Nx + 1) // 2),
+        ]
+    )
+    upper_right = Polygon(
+        [
+            ((_Nx + 1) // 2, (_Nx + 1) // 2),
+            ((_Nx + 1) // 2 + 3, (_Nx + 1) // 2),
+            (_Nx, _Nx - 3),
+            (_Nx, _Nx),
+            (_Nx - 3, _Nx),
+            ((_Nx + 1) // 2, (_Nx + 1) // 2 + 3),
+        ]
+    )
+    upper_left = Polygon(
+        [
+            (0, _Nx),
+            (0, _Nx - 3),
+            ((_Nx + 1) // 2 - 3, (_Nx + 1) // 2),
+            ((_Nx + 1) // 2, (_Nx + 1) // 2),
+            ((_Nx + 1) // 2, (_Nx + 1) // 2 + 3),
+            (3, _Nx),
+        ]
+    )
+
+    def _mask_array(iX, iY, polygon):  # no testing
+        mask = []
+        for i in range(len(iX)):
+            point = Point(iX[i], iY[i])
+            mask.append(polygon.contains(point))
+        return _np.array(mask).nonzero()[0]
+
+    # define masks
+    maskR5 = _mask_array(_Xind, _Yind, XR5)
+    maskR7 = _mask_array(_Xind, _Yind, XR7)
+    maskR10 = _mask_array(_Xind, _Yind, XR10)
+    maskR2 = _mask_array(_Xind, _Yind, XR2)
+
+    # applu masks and consolidate points
+    niXR2 = _Xind[maskR2]
+    niYR2 = _Yind[maskR2]
+    setR2 = set(tuple((niXR2[i], niYR2[i])) for i in range(len(niYR2)))
+
+    niXR5 = _Xind[maskR5]
+    niYR5 = _Yind[maskR5]
+    setR5 = set(tuple((niXR5[i], niYR5[i])) for i in range(len(niYR5)))
+
+    niXR7 = _Xind[maskR7]
+    niYR7 = _Yind[maskR7]
+    setR7 = set(tuple((niXR7[i], niYR7[i])) for i in range(len(niYR7)))
+
+    niXR10 = _Xind[maskR10]
+    niYR10 = _Yind[maskR10]
+    setR10 = set(tuple((niXR10[i], niYR10[i])) for i in range(len(niYR10)))
+
+    # assert I am capturing all data points
+    full_set = set(tuple((_Xind[i], _Yind[i]) for i in range(len(_Xind))))
+    captured_set = setR2.union(setR5).union(setR7).union(setR10)
+    if not captured_set.difference(full_set) == set():
+        print("find  missing points and assigned them to a set based on the neighbor")
+
+    ndiffX, ndiffY = [], []
+    for i in range(len(_Xind) - 1):
+        dX = _Xind[i + 1] - _Xind[i]
+        dY = _Yind[i + 1] - _Yind[i]
+        pair1 = set(tuple((_Xind[j], _Yind[j])) for j in range(i, i + 1))
+        pair2 = set(tuple((_Xind[j + 1], _Yind[j + 1])) for j in range(i, i + 1))
+        set_pair = pair1.union(pair2)
+        if set_pair.issubset(setR5):
+            # same topology
+            ndiffX.append(dX)
+            ndiffY.append(dY)
+        elif set_pair.issubset(setR10):
+            # same topo - oposite ordering in both directions.
+            ndiffX.append(-dX)
+            ndiffY.append(-dY)
+        elif set_pair.issubset(setR7):
+            ndiffX.append(dY)
+            ndiffY.append(-dX)
+        elif set_pair.issubset(setR2):
+            ndiffX.append(-dY)
+            ndiffY.append(dX)
+        else:
+            # edge data - need add place holder value
+            # for accurate indexing reference
+            ndiffX.append(None)
+            ndiffY.append(None)
+
+    # identify the missing index values
+    miss = []
+    for i in range(len(_Xind) - 1):
+        pair = set(tuple((_Xind[j], _Yind[j])) for j in range(i, i + 1))
+        if not pair.issubset(captured_set):
+            miss.append(i)
+
+    for i in miss:
+        # forward from c
+        dXf = _Xind[i + 1] - _Xind[i]
+        dYf = _Yind[i + 1] - _Yind[i]
+        # behind from c
+        dXb = _Xind[i] - _Xind[i - 1]
+        dYb = _Yind[i] - _Yind[i - 1]
+
+        pointc = Point(_Xind[i], _Yind[i])
+        pairb = set(tuple((_Xind[i - 1], _Yind[i - 1])) for j in range(i, i + 1))
+        pairf = set(tuple((_Xind[j + 1], _Yind[j + 1])) for j in range(i, i + 1))
+
+        if lower_left.contains(pointc):
+            if pairb.issubset(setR2) and pairf.issubset(setR5):
+                # print('lower_left + bR2 + fR5')
+                ndiffX[i - 1], ndiffY[i - 1] = -dYb, dXb
+                ndiffX[i], ndiffY[i] = dXf, dYf
+            elif pairb.issubset(setR5) and pairf.issubset(setR2):
+                # print('lower_left + bR5 + fR2')
+                ndiffX[i - 1], ndiffY[i - 1] = dXb, dYb
+                ndiffX[i], ndiffY[i] = -dYf, dXf
+        elif lower_right.contains(pointc):
+            if pairb.issubset(setR5) and pairf.issubset(setR7):
+                # print('lower_right + bR5 + fR7')
+                ndiffX[i - 1], ndiffY[i - 1] = dXb, dYb
+                ndiffX[i], ndiffY[i] = dYf, -dXf
+            elif pairb.issubset(setR7) and pairf.issubset(setR5):
+                # print('lower_right + bR7 + fR5')
+                ndiffX[i - 1], ndiffY[i - 1] = dYb, -dXb
+                ndiffX[i], ndiffY[i] = dXf, dYf
+        elif upper_right.contains(pointc):
+            if pairb.issubset(setR7) and pairf.issubset(setR10):
+                # print('upper_right + bR7 + fR10')
+                ndiffX[i - 1], ndiffY[i - 1] = dYb, -dXb
+                ndiffX[i], ndiffY[i] = -dXf, -dYf
+            elif pairb.issubset(setR10) and pairf.issubset(setR7):
+                # print('upper_right + bR10 + fR7')
+                ndiffX[i - 1], ndiffY[i - 1] = -dXb, -dYb
+                ndiffX[i], ndiffY[i] = dYf, -dXf
+        elif upper_left.contains(pointc):
+            if pairb.issubset(setR10) and pairf.issubset(setR2):
+                # print('upper_left + bR10 + fR2')
+                ndiffX[i - 1], ndiffY[i - 1] = -dXb, -dYb
+                ndiffX[i], ndiffY[i] = -dYf, dXf
+            elif pairb.issubset(setR2) and pairf.issubset(setR10):
+                # print('upper_left + bR2 + fR10')
+                ndiffX[i - 1], ndiffY[i - 1] = -dYb, dXb
+                ndiffX[i], ndiffY[i] = -dXf, -dYf
+
+    return _np.array(ndiffX), _np.array(ndiffY)
 
 
 class Dims:
