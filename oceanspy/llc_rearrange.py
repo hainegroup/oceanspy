@@ -3317,7 +3317,7 @@ def arct_diffs(_ds, _Xind, _Yind):
     return _np.array(ndiffX), _np.array(ndiffY), captured_set, miss
 
 
-class Dims:
+class Dims:  # pragma: no cover
     """Creates a shortcut for dimension`s names associated with an arbitrary
     variable."""
 
