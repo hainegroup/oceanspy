@@ -37,6 +37,7 @@ from ._ospy_utils import (
 )
 from .llc_rearrange import LLCtransformation as _llc_trans
 from .llc_rearrange import (
+    connector,
     cross_face_diffs,
     eval_dataset,
     fill_path,
@@ -1238,9 +1239,10 @@ def stations(
                     "_face_connections": face_connections,
                 }
                 if _dim == "mooring":
+                    nix, niy = connector(iX, iY)
                     DS = mooring_singleface(**args).persist()
                     diffX, diffY, *a = cross_face_diffs(
-                        DS, order_iface, 0, face_connections
+                        ds, nix, niy, order_iface, 0, face_connections
                     )
                     return DS, diffX, diffY
                 elif _dim == "station":
@@ -1266,7 +1268,7 @@ def stations(
                         args1 = {"_ix": nix, "_iy": niy, "_iface": ii}
                         dse = mooring_singleface(**{**args, **args1})
                         diX, diY, *a = cross_face_diffs(
-                            dse, order_iface, ii, face_connections
+                            ds, nix, niy, order_iface, ii, face_connections
                         )
                         diffsX = _np.append(diffsX, diX)
                         diffsY = _np.append(diffsY, diY)

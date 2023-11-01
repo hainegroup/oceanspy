@@ -3081,15 +3081,14 @@ def station_singleface(_ds, _ix, _iy, _faces, _iface, _face_connections):
     return dsf
 
 
-def cross_face_diffs(_ds, _faces, _iface, _face_connections):
-    """computes the distance between the location of index spaces in both directions
-    diffX and diffY when data has complex topology (face is dim).
+def cross_face_diffs(_ds, _ix, _iy, _faces, _iface, _face_connections):
+    """computes the unit distance between the location of index spaces in
+    both directions diffX and diffY when data has complex topology.
 
     Parameters:
     ----------
-        ds: xr.dataset
-            sampled along a track. `Xind` and `Yind` must be 1D and unit distant from
-            each other. Output from `mooring_singleface`.
+        _ix, _iy: 1d-array like.
+            elements are int values. Output from `connector()`, whch
         _faces: list
             contains the face indexes of the ordered track. len()>=1
         _iface: int
@@ -3098,24 +3097,18 @@ def cross_face_diffs(_ds, _faces, _iface, _face_connections):
             face topology.
     returns
         diffX: 1D array-like
-            len(diffX) = len(mooring) - 1
-        diffY: 1D array-like:
-            len(diffX) = len(mooring) - 1
+        diffY: 1D array-like
     """
 
     # exclude the arctic for now
     Rot = _np.arange(7, 13)
-    _ds = _ds.reset_coords()
-    Xind, Yind = _ds["Xind"], _ds["Yind"]
-    # ind_coords = _ds.reset_coords()["Xind"].coords
-    # ind_dims = _ds.reset_coords()["Xind"].dims
 
     # define all 4 unit vectors defining crossing from face i to face i+1
     # inherits face topo (ordering), and assumes that of non rot faces.
     # format: [[xvec, yvec], [.], ...] and inherets logics from `face_directions`
     fdirs_options = [[-1, 0], [1, 0], [0, -1], [0, 1]]
 
-    diffX, diffY = _np.diff(Xind.squeeze().values), _np.diff(Yind.squeeze().values)
+    diffX, diffY = _np.diff(_ix), _np.diff(_iy)
 
     if _faces[_iface] in Rot:  # correct for topology
         # redefine options with corrected topology
@@ -3125,6 +3118,11 @@ def cross_face_diffs(_ds, _faces, _iface, _face_connections):
         ndiffX, ndiffY = _copy.deepcopy(diffX), _copy.deepcopy(diffY)
         diffX = ndiffY
         diffY = -ndiffX
+
+    if _faces[_iface] == 6:
+        # arctic array
+        fdirs_options = [[0, -1], [0, -1], [0, -1], [0, -1]]
+        diffX, diffY, *a = arct_diffs(_ds, _ix, _iy)
 
     # get direction between the edge point of present face
     # only when there is another face.

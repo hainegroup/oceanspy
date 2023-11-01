@@ -3412,26 +3412,21 @@ def test_fdir_completer(ix, iy, faces, iface, face_connections, val):
 )
 def test_cross_face_diffs(od, ix, iy, faces, iface, valx, valy):
     _ds = mates(od._ds)
-    Yind, Xind = _xr.broadcast(_ds["Y"], _ds["X"])
-    Yind = Yind.expand_dims({"face": _ds["face"]})
-    Xind = Xind.expand_dims({"face": _ds["face"]})
-    _ds["Xind"] = Xind.transpose(*_ds["XC"].dims)
-    _ds["Yind"] = Yind.transpose(*_ds["YC"].dims)
-    _ds = _ds.set_coords(["Yind", "Xind"])
     face_connections = od.face_connections["face"]
 
     nix, niy = fill_path(ix, iy, faces, iface, face_connections)
-    dse = mooring_singleface(_ds, nix, niy, faces, iface, face_connections)
-    diffX, diffY, tdx, tdy = cross_face_diffs(dse, faces, iface, face_connections)
+    diffX, diffY, tdx, tdy = cross_face_diffs(
+        _ds, nix, niy, faces, iface, face_connections
+    )
 
     assert (abs(diffX) + abs(diffY) == 1).all()
 
     if tdx.size:
         assert tdx == valx
         assert tdy == valy
-        assert len(diffX) == len(dse.mooring)
+        assert len(diffX) == len(nix)
     else:
-        assert len(diffX) == len(dse.mooring) - 1
+        assert len(diffX) == len(nix) - 1
 
 
 @pytest.mark.parametrize("od", [od])
