@@ -3259,60 +3259,64 @@ def arct_diffs(_ds, _Xind, _Yind):
 
     # identify the missing index values
     miss = []
-    for i in range(len(_Xind) - 1):
+    for i in range(len(_Xind)):
         pair = set(tuple((_Xind[j], _Yind[j])) for j in range(i, i + 1))
         if not pair.issubset(captured_set):
             miss.append(i)
 
     for i in miss:
         # forward from c
-        dXf = _Xind[i + 1] - _Xind[i]
-        dYf = _Yind[i + 1] - _Yind[i]
+        if i < len(_Xind) - 1:
+            dXf = _Xind[i + 1] - _Xind[i]
+            dYf = _Yind[i + 1] - _Yind[i]
+            pairf = set(tuple((_Xind[j + 1], _Yind[j + 1])) for j in range(i, i + 1))
+        else:
+            pairf = set(tuple((None, None)) for j in range(i, i + 1))
         # behind from c
-        dXb = _Xind[i] - _Xind[i - 1]
-        dYb = _Yind[i] - _Yind[i - 1]
+        if i > 0:
+            dXb = _Xind[i] - _Xind[i - 1]
+            dYb = _Yind[i] - _Yind[i - 1]
+            pairb = set(tuple((_Xind[i - 1], _Yind[i - 1])) for j in range(i, i + 1))
+        else:
+            pairb = set(tuple((None, None)) for j in range(i, i + 1))
 
         pointc = Point(_Xind[i], _Yind[i])
-        pairb = set(tuple((_Xind[i - 1], _Yind[i - 1])) for j in range(i, i + 1))
-        pairf = set(tuple((_Xind[j + 1], _Yind[j + 1])) for j in range(i, i + 1))
 
-        if lower_left.contains(pointc):
-            if pairb.issubset(setR2) and pairf.issubset(setR5):
-                # print('lower_left + bR2 + fR5')
-                ndiffX[i - 1], ndiffY[i - 1] = -dYb, dXb
-                ndiffX[i], ndiffY[i] = dXf, dYf
-            elif pairb.issubset(setR5) and pairf.issubset(setR2):
-                # print('lower_left + bR5 + fR2')
-                ndiffX[i - 1], ndiffY[i - 1] = dXb, dYb
-                ndiffX[i], ndiffY[i] = -dYf, dXf
-        elif lower_right.contains(pointc):
-            if pairb.issubset(setR5) and pairf.issubset(setR7):
-                # print('lower_right + bR5 + fR7')
-                ndiffX[i - 1], ndiffY[i - 1] = dXb, dYb
-                ndiffX[i], ndiffY[i] = dYf, -dXf
-            elif pairb.issubset(setR7) and pairf.issubset(setR5):
-                # print('lower_right + bR7 + fR5')
-                ndiffX[i - 1], ndiffY[i - 1] = dYb, -dXb
-                ndiffX[i], ndiffY[i] = dXf, dYf
-        elif upper_right.contains(pointc):
-            if pairb.issubset(setR7) and pairf.issubset(setR10):
-                # print('upper_right + bR7 + fR10')
-                ndiffX[i - 1], ndiffY[i - 1] = dYb, -dXb
-                ndiffX[i], ndiffY[i] = -dXf, -dYf
-            elif pairb.issubset(setR10) and pairf.issubset(setR7):
-                # print('upper_right + bR10 + fR7')
-                ndiffX[i - 1], ndiffY[i - 1] = -dXb, -dYb
-                ndiffX[i], ndiffY[i] = dYf, -dXf
-        elif upper_left.contains(pointc):
-            if pairb.issubset(setR10) and pairf.issubset(setR2):
-                # print('upper_left + bR10 + fR2')
-                ndiffX[i - 1], ndiffY[i - 1] = -dXb, -dYb
-                ndiffX[i], ndiffY[i] = -dYf, dXf
-            elif pairb.issubset(setR2) and pairf.issubset(setR10):
-                # print('upper_left + bR2 + fR10')
-                ndiffX[i - 1], ndiffY[i - 1] = -dYb, dXb
-                ndiffX[i], ndiffY[i] = -dXf, -dYf
+        # tried nested if statements, but to incorporate
+        # end points (non-cyclic) this worked best
 
+        if lower_left.contains(pointc) and pairb.issubset(setR2):
+            ndiffX[i - 1], ndiffY[i - 1] = -dYb, dXb
+        if lower_left.contains(pointc) and pairb.issubset(setR5):
+            ndiffX[i - 1], ndiffY[i - 1] = dXb, dYb
+        if lower_left.contains(pointc) and pairf.issubset(setR5):
+            ndiffX[i], ndiffY[i] = dXf, dYf
+        if lower_left.contains(pointc) and pairf.issubset(setR2):
+            ndiffX[i], ndiffY[i] = -dYf, dXf
+        if lower_right.contains(pointc) and pairb.issubset(setR5):
+            ndiffX[i - 1], ndiffY[i - 1] = dXb, dYb
+        if lower_right.contains(pointc) and pairb.issubset(setR7):
+            ndiffX[i - 1], ndiffY[i - 1] = dYb, -dXb
+        if lower_right.contains(pointc) and pairf.issubset(setR7):
+            ndiffX[i], ndiffY[i] = dYf, -dXf
+        if lower_right.contains(pointc) and pairf.issubset(setR5):
+            ndiffX[i], ndiffY[i] = dXf, dYf
+        if upper_right.contains(pointc) and pairb.issubset(setR7):
+            ndiffX[i - 1], ndiffY[i - 1] = dYb, -dXb
+        if upper_right.contains(pointc) and pairb.issubset(setR10):
+            ndiffX[i - 1], ndiffY[i - 1] = -dXb, -dYb
+        if upper_right.contains(pointc) and pairf.issubset(setR10):
+            ndiffX[i], ndiffY[i] = -dXf, -dYf
+        if upper_right.contains(pointc) and pairf.issubset(setR7):
+            ndiffX[i], ndiffY[i] = dYf, -dXf
+        if upper_left.contains(pointc) and pairb.issubset(setR10):
+            ndiffX[i - 1], ndiffY[i - 1] = -dXb, -dYb
+        if upper_left.contains(pointc) and pairb.issubset(setR2):
+            ndiffX[i - 1], ndiffY[i - 1] = -dYb, dXb
+        if upper_left.contains(pointc) and pairf.issubset(setR2):
+            ndiffX[i], ndiffY[i] = -dYf, dXf
+        if upper_left.contains(pointc) and pairf.issubset(setR10):
+            ndiffX[i], ndiffY[i] = -dXf, -dYf
     return _np.array(ndiffX), _np.array(ndiffY)
 
 
