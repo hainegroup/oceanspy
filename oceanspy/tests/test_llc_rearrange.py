@@ -3764,18 +3764,182 @@ y10 = _np.array([79] * len(x10))
 Xc = _np.append(_np.append(_np.append(x2, x5), x7), x10)
 Yc = _np.append(_np.append(_np.append(y2, y5), y7), y10)
 
-nXc, nYc = connector(Xc, Yc)
-nXac, nYac = connector(Xc[::-1], Yc[::-1])
+Xc, Yc = connector(Xc, Yc)
+Xac, Yac = connector(Xc[::-1], Yc[::-1])
 
-valx = _np.ones(_np.shape(nXc)[1:])
+valx = _np.ones(_np.shape(Xc)[1:])
+
+
+y20 = _np.arange(79, 50, -1)
+x20 = _np.array([10] * len(y20))
+
+x21 = _np.arange(10, 30)
+y21 = _np.array([50] * len(x21))
+
+y22 = _np.arange(50, 40, -1)
+x22 = _np.array([30] * len(y22))
+
+x23 = _np.arange(30, 10, -1)
+y23 = [40] * len(x23)
+
+y24 = _np.arange(40, 10, -1)
+x24 = _np.array([10] * len(y24))
+
+nx2 = _np.array(list(x20) + list(x21) + list(x22) + list(x23) + list(x24))
+ny2 = _np.array(list(y20) + list(y21) + list(y22) + list(y23) + list(y24))
+
+
+x50 = _np.arange(11, 40)
+y50 = _np.array([10] * len(x50))
+
+y51 = _np.arange(10, 30)
+x51 = [40] * len(y51)
+
+x52 = _np.arange(40, 50)
+y52 = [30] * len(x52)
+
+y53 = _np.arange(30, 10, -1)
+x53 = [50] * len(y53)
+
+x54 = _np.arange(50, 80)
+y54 = [10] * len(x54)
+
+nx5 = _np.array(list(x50) + list(x51) + list(x52) + list(x53) + list(x54))
+ny5 = _np.array(list(y50) + list(y51) + list(y52) + list(y53) + list(y54))
+
+y70 = _np.arange(11, 40)
+x70 = _np.array([79] * len(y70))
+
+x71 = _np.arange(79, 60, -1)
+y71 = [40] * len(x71)
+
+y72 = _np.arange(40, 50)
+x72 = [60] * len(y72)
+
+x73 = _np.arange(60, 80)
+y73 = [50] * len(x73)
+
+y74 = _np.arange(50, 80)
+x74 = [79] * len(y74)
+
+nx7 = _np.array(list(x70) + list(x71) + list(x72) + list(x73) + list(x74))
+ny7 = _np.array(list(y70) + list(y71) + list(y72) + list(y73) + list(y74))
+
+x100 = _np.arange(78, 50, -1)
+y100 = _np.array([79] * len(x100))
+
+y101 = _np.arange(79, 59, -1)
+x101 = [50] * len(y101)
+
+x102 = _np.arange(50, 40, -1)
+y102 = [59] * len(x102)
+
+y103 = _np.arange(59, 79)
+x103 = [40] * len(y103)
+
+x104 = _np.arange(40, 10, -1)
+y104 = [79] * len(x104)
+
+nx10 = _np.array(list(x100) + list(x101) + list(x102) + list(x103) + list(x104))
+ny10 = _np.array(list(y100) + list(y101) + list(y102) + list(y103) + list(y104))
+
+
+nXc = _np.append(_np.append(_np.append(nx2, nx5), nx7), nx10)
+nYc = _np.append(_np.append(_np.append(ny2, ny5), ny7), ny10)
+
+nXc, nYc = connector(nXc, nYc)
+
+# solution to nXc, nYc
+x20 = _np.arange(29)
+y20 = _np.array([10] * len(x20))
+
+y21 = _np.arange(10, 30)
+x21 = _np.array([29] * len(y21))
+
+x22 = _np.arange(29, 39)
+y22 = _np.array([30] * len(x22))
+
+y23 = _np.arange(30, 10, -1)
+x23 = [39] * len(y23)
+
+x24 = _np.arange(40, 70)
+y24 = _np.array([10] * len(x24))
+
+xs2 = _np.array(list(x20) + list(x21) + list(x22) + list(x23) + list(x24))
+ys2 = _np.array(list(y20) + list(y21) + list(y22) + list(y23) + list(y24))
+
+
+x50 = _np.arange(xs2[-1], xs2[-1] + 30)
+y50 = _np.array([10] * len(x50))
+
+y51 = _np.arange(10, 30)
+x51 = [xs2[-1] + 30] * len(y51)
+
+x52 = _np.arange(xs2[-1] + 30, xs2[-1] + 41)
+y52 = [30] * len(x52)
+
+y53 = _np.arange(30, 10, -1)
+x53 = [xs2[-1] + 40] * len(y53)
+
+x54 = _np.arange(xs2[-1] + 40, xs2[-1] + 70)
+y54 = [10] * len(x54)
+
+xs5 = _np.array(list(x50) + list(x51) + list(x52) + list(x53) + list(x54))
+ys5 = _np.array(list(y50) + list(y51) + list(y52) + list(y53) + list(y54))
+
+
+x70 = _np.arange(xs5[-1], xs5[-1] + 30)
+y70 = _np.array([10] * len(x70))
+
+y71 = _np.arange(10, 29)
+x71 = [xs5[-1] + 30] * len(y71)
+
+x72 = _np.arange(xs5[-1] + 30, xs5[-1] + 40)
+y72 = [29] * len(x72)
+
+y73 = _np.arange(29, 9, -1)
+x73 = [xs5[-1] + 40] * len(y73)
+
+x74 = _np.arange(xs5[-1] + 42, xs5[-1] + 70)
+y74 = [10] * len(x74)
+
+xs7 = _np.array(list(x70) + list(x71) + list(x72) + list(x73) + list(x74))
+ys7 = _np.array(list(y70) + list(y71) + list(y72) + list(y73) + list(y74))
+
+
+x100 = _np.arange(xs7[-1], xs7[-1] + 29)
+y100 = _np.array([10] * len(x100))
+
+y101 = _np.arange(10, 30)
+x101 = [xs7[-1] + 29] * len(y101)
+
+x102 = _np.arange(xs7[-1] + 29, xs7[-1] + 39)
+y102 = [30] * len(x102)
+
+y103 = _np.arange(30, 10, -1)
+x103 = [xs7[-1] + 39] * len(y103)
+
+x104 = _np.arange(xs7[-1] + 40, xs7[-1] + 69)
+y104 = [10] * len(x104)
+
+xs10 = _np.array(list(x100) + list(x101) + list(x102) + list(x103) + list(x104))
+ys10 = _np.array(list(y100) + list(y101) + list(y102) + list(y103) + list(y104))
+
+
+Xsc = _np.append(_np.append(_np.append(xs2, xs5), xs7), xs10)
+Ysc = _np.append(_np.append(_np.append(ys2, ys5), ys7), ys10)
+
+nXsc, nYsc = connector(Xsc, Ysc)
+soln_diffX, soln_diffY = _np.diff(nXsc), _np.diff(nYsc)
 
 
 @pytest.mark.parametrize("od", [od])
 @pytest.mark.parametrize(
     "ix, iy, ediffX, ediffY",
     [
-        (nXc, nYc, valx, 0 * valx),
-        (nXac, nYac, -valx, 0 * valx),
+        (Xc, Yc, valx, 0 * valx),
+        (Xac, Yac, -valx, 0 * valx),
+        (nXc, nYc, soln_diffX, soln_diffY),
     ],
 )
 def test_arct_diffs(od, ix, iy, ediffX, ediffY):
@@ -3786,7 +3950,8 @@ def test_arct_diffs(od, ix, iy, ediffX, ediffY):
     assert len(diffX) == len(ix) - 1
     assert len(diffY) == len(iy) - 1
     assert full_set == cset.union(miss_set)
+    assert (abs(diffX) + abs(diffY) == 1).all()
 
     if ediffX is not None:
-        assert diffX == ediffX
-        assert diffY == ediffY
+        assert (diffX == ediffX).all()
+        assert (diffY == ediffY).all()
