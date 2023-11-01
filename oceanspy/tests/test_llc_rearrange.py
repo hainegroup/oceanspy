@@ -3767,7 +3767,7 @@ Yc = _np.append(_np.append(_np.append(y2, y5), y7), y10)
 nXc, nYc = connector(Xc, Yc)
 nXac, nYac = connector(Xc[::-1], Yc[::-1])
 
-valx = _np.ones(_np.shape(nXc))
+valx = _np.ones(_np.shape(nXc)[1:])
 
 
 @pytest.mark.parametrize("od", [od])
