@@ -3194,7 +3194,7 @@ def arct_diffs(_ds, _Xind, _Yind):
         ]
     )
 
-    def _mask_array(iX, iY, polygon):  # no testing
+    def _mask_array(iX, iY, polygon):  # pragma no cover
         mask = []
         for i in range(len(iX)):
             point = Point(iX[i], iY[i])
@@ -3314,7 +3314,7 @@ def arct_diffs(_ds, _Xind, _Yind):
             ndiffX[i], ndiffY[i] = -dYf, dXf
         if upper_left.contains(pointc) and pairf.issubset(setR10):
             ndiffX[i], ndiffY[i] = -dXf, -dYf
-    return _np.array(ndiffX), _np.array(ndiffY)
+    return _np.array(ndiffX), _np.array(ndiffY), captured_set, miss
 
 
 class Dims:
