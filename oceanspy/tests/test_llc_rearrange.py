@@ -3430,8 +3430,8 @@ Xarc2, Yarc2 = [x1, x2], [y1, y2]
         (od, X2, Y2, faces2, 0, 1, 0),
         (od, X2, Y2, faces2, 1, -1, 0),
         (od, X2, Y2, faces2, 2, None, None),
-        (od, Xarc2, Yarc2, facesarc2, 0, 1),
-        (od, Xarc2, Yarc2, facesarc2, None, None),
+        (od, Xarc2, Yarc2, facesarc2, 0, 0, 1),
+        (od, Xarc2, Yarc2, facesarc2, 1, None, None),
     ],
 )
 def test_cross_face_diffs(od, ix, iy, faces, iface, valx, valy):
