@@ -3091,6 +3091,8 @@ def cross_face_diffs(_ds, _ix, _iy, _faces, _iface, _face_connections):
 
     Parameters:
     ----------
+        _ds: xarray.Dataset
+            contains `face`, and original dataset.
         _ix, _iy: 1d-array like.
             elements are int values. Output from `connector()`, whch
         _faces: list
@@ -3146,10 +3148,14 @@ def arct_diffs(_ds, _Xind, _Yind):
     _Nx = len(_ds.X) - 1
 
     # define triangular areas that split the arctic
-    XR5 = Polygon([(0, 0), (_Nx / 2, _Nx / 2), (_Nx, 0)])
-    XR7 = Polygon([(_Nx, 0), (_Nx / 2, _Nx / 2), (_Nx, _Nx)])
-    XR10 = Polygon([(0, _Nx), (_Nx / 2, _Nx / 2), (_Nx, _Nx)])
-    XR2 = Polygon([(0, _Nx), (_Nx / 2, _Nx / 2), (0, 0)])
+    XR5 = Polygon([(0, -1), (0, 0), (_Nx / 2, _Nx / 2), (_Nx, 0), (_Nx, -1)])
+    XR7 = Polygon(
+        [(_Nx + 1, 0), (_Nx, 0), (_Nx / 2, _Nx / 2), (_Nx, _Nx), (_Nx + 1, _Nx)]
+    )
+    XR10 = Polygon(
+        [(0, _Nx + 1), (0, _Nx), (_Nx / 2, _Nx / 2), (_Nx, _Nx), (_Nx, _Nx + 1)]
+    )
+    XR2 = Polygon([(-1, _Nx), (0, _Nx), (_Nx / 2, _Nx / 2), (0, 0), (-1, 0)])
 
     # define a small polygon that contains the theoretical line
     # dividing the areas above
