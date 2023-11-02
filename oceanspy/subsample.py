@@ -1144,12 +1144,12 @@ def stations(
     Depending on the choice of dim_name, two types of returns:
     see https://github.com/hainegroup/oceanspy/issues/398
 
-    1) dim_name: 'stations`
+    1) if `dim_name: 'stations'`
 
     od: OceanDataset
         Subsampled oceandataset.
 
-    2) dim_name: `mooring`
+    2) if `dim_name: 'mooring'`
 
     ds: xarray.dataset
     diffX: numpy.array
