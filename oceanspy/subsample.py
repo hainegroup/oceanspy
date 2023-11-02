@@ -707,7 +707,7 @@ def mooring_array(od, Ymoor, Xmoor, xoak_index="scipy_kdtree", **kwargs):
             "varList": varList,
             "Xcoords": Xmoor,
             "Ycoords": Ymoor,
-            "_dim": "mooring",
+            "dim_name": "mooring",
         }
         od = _copy.deepcopy(od)
 
@@ -1106,10 +1106,17 @@ def stations(
     Xcoords=None,
     xoak_index="scipy_kdtree",
     method="nearest",
-    _dim="station",
+    dim_name="station",
 ):
     """
-    Extract stations using nearest-neighbor lookup.
+    Extract nearest-neighbor data from given spatial coordinate.
+    Data may be isolated and unordered (`dim_name=stations`), or contiguous
+    and unit distanced (`dim_name=mooring`).
+
+    Following the C-grid convention,
+    for every scalar point extracted (along the new dimension `dim_name`)
+    returns 4 velocity points: 2 U-points, 2 V-points and their respective
+    coordinates, and 4 corner coordinate points.
 
     Parameters
     ----------
@@ -1129,19 +1136,32 @@ def stations(
         xoak index to be used. `scipy_kdtree` by default.
     method: str, `nearest` (default).
         see .sel via xarray.dataSet.sel method
-    _dim: str, `station` (default) or `mooring`.
+    dim_name: str
+        `station` (default) or `mooring`.
 
     Returns
     -------
+    Depending on the choice of dim_name, two types of returns:
+    see https://github.com/hainegroup/oceanspy/issues/398
+
+    1) dim_name: 'stations`
+
     od: OceanDataset
         Subsampled oceandataset.
 
+    2) dim_name: `mooring`
+
+    ds: xarray.dataset
+    diffX: numpy.array
+    diffX: numpy.array
+
+
     See Also
     --------
-    oceanspy.OceanDataset.mooring
+    oceanspy.subsample.mooring_array
 
     """
-    _check_native_grid(od, _dim)
+    _check_native_grid(od, dim_name)
 
     # Convert variables to numpy arrays and make some check
     tcoords = _check_range(od, tcoords, "timeRange")
@@ -1150,8 +1170,8 @@ def stations(
     Xcoords = _check_range(od, Xcoords, "Xcoords")
 
     # Message
-    message = "Extracting " + _dim
-    if _dim == "mooring":
+    message = "Extracting " + dim_name
+    if dim_name == "mooring":
         message = message + " array"
     else:
         message = message + "s"
@@ -1194,7 +1214,7 @@ def stations(
     if Xcoords is not None and Ycoords is not None:
         ds_grid = ds[["XC", "YC"]]
 
-        if _dim == "mooring":  # needed for transport
+        if dim_name == "mooring":  # needed for transport
             for key, value in ds_grid.sizes.items():
                 ds_grid["i" + f"{key}"] = DataArray(range(value), dims=key)
 
@@ -1208,7 +1228,7 @@ def stations(
 
             ds_grid.xoak.set_index(["XC", "YC"], xoak_index)
 
-        cdata = {"XC": (_dim, Xcoords), "YC": (_dim, Ycoords)}
+        cdata = {"XC": (dim_name, Xcoords), "YC": (dim_name, Ycoords)}
         ds_data = _xr.Dataset(cdata)
 
         # find nearest points to given data.
@@ -1216,7 +1236,7 @@ def stations(
 
         if "face" not in ds.dims:
             iX, iY = (nds[f"{i}"].data for i in ("X", "Y"))
-            DS = eval_dataset(ds, iX, iY, _dim_name=_dim)
+            DS = eval_dataset(ds, iX, iY, _dim_name=dim_name)
             DS = DS.squeeze()
         else:
             ds = mates(ds)
@@ -1238,14 +1258,14 @@ def stations(
                     "_iface": 0,  # index of face
                     "_face_connections": face_connections,
                 }
-                if _dim == "mooring":
+                if dim_name == "mooring":
                     nix, niy = connector(iX, iY)
                     DS = mooring_singleface(**args).persist()
                     diffX, diffY, *a = cross_face_diffs(
                         ds, nix, niy, order_iface, 0, face_connections
                     )
                     return DS, diffX, diffY
-                elif _dim == "station":
+                elif dim_name == "station":
                     DS = station_singleface(**args).persist()
             elif Niter > 1:
                 nX0, nY0 = splitter(iX, iY, iface)
@@ -1258,10 +1278,12 @@ def stations(
                 shift = 0
                 diffsX, diffsY = _np.array([]), _np.array([])
                 for ii in range(Niter):
-                    if _dim == "station":
+                    if dim_name == "station":
+                        _returns = False
                         args1 = {"_ix": nX0[ii], "_iy": nY0[ii], "_iface": ii}
                         dse = station_singleface(**{**args, **args1})
-                    elif _dim == "mooring":
+                    elif dim_name == "mooring":
+                        _returns = True
                         nix, niy = fill_path(
                             nX0, nY0, order_iface, ii, face_connections
                         )
@@ -1275,16 +1297,16 @@ def stations(
                     for var in dse.reset_coords().data_vars:
                         dse[var].attrs = {}
                     if ii > 0:
-                        shift += len(DSf[ii - 1][_dim])
-                        dse = reset_dim(dse, shift, dim=_dim)
+                        shift += len(DSf[ii - 1][dim_name])
+                        dse = reset_dim(dse, shift, dim=dim_name)
                     DSf.append(dse)
                 DS = _xr.combine_by_coords(DSf)
-                Ndim = len(DS[_dim])
-                DS = DS.chunk({_dim: Ndim}).persist()
+                Ndim = len(DS[dim_name])
+                DS = DS.chunk({dim_name: Ndim}).persist()
                 del DSf
                 for var in DS.reset_coords().data_vars:
                     DS[var].attrs = attrs
-                if _dim == "mooring":
+                if _returns:
                     return DS, diffsX, diffsY
     DS = DS.set_coords(co_list)
 

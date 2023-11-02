@@ -1243,26 +1243,25 @@ def llc_local_to_lat_lon(ds, co_list=metrics):
 def eval_dataset(_ds, _ix, _iy, _iface=None, _dim_name="mooring"):
     """
     Evaluates a dataset along (spatial) trajectory in the plane as defined by the
-    indexes in the plane. As a result, there is a new dimension/coordinate, hence
-    reducing the dimension of the original dataset.
+    indexes in the plane.
+    The data in the new xarray.dataset has a new dimension/coordinate.
 
     Parameters:
     ----------
-        _ds: xarray.Dataset
-            contains all x, y coordinates (but may be subsampled in Z or time)
-        _ix, _iy: 1D array, int
-            index values identifying the location in X Y (lat, lon) space
-        _iface: int, None (bool)
-            None (default) implies no complex topology in the dataset. Otherwise,
-            _iface indicates the face index which, along which the provided ix, iy,
-            identify the spatial (geo) coordinate location in lat/lon space.
-        _dim_name: str
-            names the new dimension along the pathway. By default this is 'mooring',
-            but can also be 'station' (when discrete, argo-like isolated coordinates).
+    _ds: xarray.Dataset
+        contains all x, y coordinates (but may be subsampled in Z or time)
+    _ix, _iy: 1D array, int
+        index values identifying the location in X Y (lat, lon) space
+    _iface: int, None (bool)
+        None (default) implies no complex topology in the dataset. Otherwise,
+        _iface indicates the face index which, along which the provided ix, iy,
+        identify the spatial (geo) coordinate location in lat/lon space.
+    _dim_name: str
+        names the new dimension along the pathway. By default this is 'mooring',
+        but can also be 'station' (when discrete, argo-like isolated coordinates).
 
     Returns:
         xarray.Dataset
-
     """
 
     nz = len(_ds.Z)
@@ -1360,6 +1359,9 @@ def eval_dataset(_ds, _ix, _iy, _iface=None, _dim_name="mooring"):
 
 
 def arctic_eval(_ds, _ix, _iy, _dim_name="mooring"):
+    """
+    Evaluates a dataset
+    """
     _ds = mates(_ds.isel(face=6))
 
     nz = len(_ds.Z)
