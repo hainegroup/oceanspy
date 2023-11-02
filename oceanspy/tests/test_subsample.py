@@ -492,46 +492,167 @@ lons90W = -87.5 * np.ones(np.shape(lats_6E))
 lons170W = -170 * np.ones(np.shape(lats_6E))
 
 
+# ==
+y0 = [k for k in range(45, 80)]
+x0 = len(y0) * [40]
+
+# face 1
+y11 = [k for k in range(0, 11)]
+x11 = [49 + 4 * k for k in range(11)]
+
+y12 = [k for k in range(11, 16)]
+x12 = len(y12) * [89]
+
+x13 = [k for k in range(45, 60)]
+y13 = len(x13) * [25]
+
+y14 = [k for k in range(25, 35)]
+x14 = len(y14) * [89]
+
+x15 = [k for k in range(45, 60)]
+y15 = len(x15) * [45]
+
+x16 = [k for k in range(70, 80)]
+y16 = len(x16) * [89]
+
+x17 = [k for k in range(80, 85)]
+y17 = len(x17) * [79]
+
+x1 = x11 + x12 + x13 + x14 + x15 + x16 + x17
+y1 = y11 + y12 + y13 + y14 + y15 + y16 + y17
+
+# face 4
+x41 = [k for k in range(5, 46)]
+y41 = len(x41) * [60]
+y42 = [k for k in range(59, 10, -1)]
+x42 = len(y42) * [45]
+x4 = x41 + x42
+y4 = y41 + y42
+
+# face 3
+y31 = [k for k in range(80, 40, -1)]
+x31 = len(y31) * [60]
+x32 = [k for k in range(60, 5, -1)]
+y32 = len(x32) * [40]
+x3 = x31 + x32
+y3 = y31 + y32
+
+# face 0 again!
+x01 = [k for k in range(80, 45, -1)]
+y01 = len(x01) * [45]
+
+# cyclonic orientation
+Xc, Yc = [x0, x1, x4, x3, x01], [y0, y1, y4, y3, y01]
+
+# faces
+faces1 = [1, 2, 5, 4, 1]
+
+# extract lats/lons from data
+lonsc, latsc = [], []
+for i in range(len(Xc)):
+    for j in range(len(Xc[i])):
+        lonsc.append(
+            ECCOod._ds["XC"]
+            .isel(face=faces1[i], X=Xc[i][j], Y=Yc[i][j])
+            .squeeze()
+            .values
+        )
+        latsc.append(
+            ECCOod._ds["YC"]
+            .isel(face=faces1[i], X=Xc[i][j], Y=Yc[i][j])
+            .squeeze()
+            .values
+        )
+
+lons1, lats1 = [], []
+for j in range(len(Xc[1])):
+    lons1.append(
+        ECCOod._ds["XC"].isel(face=faces1[1], X=Xc[1][j], Y=Yc[1][j]).squeeze().values
+    )
+    lats1.append(
+        ECCOod._ds["YC"].isel(face=faces1[1], X=Xc[1][j], Y=Yc[1][j]).squeeze().values
+    )
+
+
+lons0, lats0 = [], []
+for j in range(len(Xc[0])):
+    lons0.append(
+        ECCOod._ds["XC"].isel(face=faces1[0], X=Xc[0][j], Y=Yc[0][j]).squeeze().values
+    )
+    lats0.append(
+        ECCOod._ds["YC"].isel(face=faces1[0], X=Xc[0][j], Y=Yc[0][j]).squeeze().values
+    )
+
+
 @pytest.mark.parametrize("od", [ECCOod])
 @pytest.mark.parametrize(
     "args",
     [
         {"Ycoords": None, "Xcoords": None},
         {"Ycoords": lats76N, "Xcoords": lons76N},
+        {"Ycoords": lats76N, "Xcoords": lons76N, "xoak_index": "invalid"},
         {"Ycoords": lats_6E, "Xcoords": lons6E},
         {"Ycoords": lats_6E, "Xcoords": lons90W},
         {"Ycoords": lats_6E, "Xcoords": lons170W},
+        {"Ycoords": latsc, "Xcoords": lonsc, "_dim": "mooring"},
+        {"Ycoords": lats1, "Xcoords": lons1, "_dim": "mooring"},
+        {"Ycoords": lats0, "Xcoords": lons0},
     ],
 )
 def test_stations(od, args):
     this_od = _copy.deepcopy(od)
-    od_stns = this_od.subsample.stations(**args)
-
-    if args["Ycoords"] is None or args["Xcoords"] is None:
-        assert this_od._ds.XC.shape == od_stns._ds.XC.shape
-        assert this_od._ds.YC.shape == od_stns._ds.YC.shape
+    xoak_index = args.pop("xoak_index", None)
+    _dim = args.pop("_dim", None)
+    if xoak_index is not None:
+        with pytest.raises(ValueError):
+            this_od.subsample.stations(**args, _dim=_dim, xoak_index=xoak_index)
+    if _dim is not None and _dim == "mooring":
+        DS, diffX, diffY = this_od.subsample.stations(**args, _dim=_dim)
+        assert (abs(diffX) + abs(diffY) == 1).all()
+        assert type(DS) == xr.Dataset
     else:
-        YC, XC = args["Ycoords"], args["Xcoords"]
-        XCstn, YCstn = od_stns._ds.XC.squeeze(), od_stns._ds.YC.squeeze()
-        XGstn, YGstn = od_stns._ds.XG, od_stns._ds.YG
-        stations = od_stns._ds.station.values
-        argsu0, argsu1 = {"Xp1": 0}, {"Xp1": 1}
-        argsv0, argsv1 = {"Yp1": 0}, {"Yp1": 1}
-        assert len(stations) == len(XC) == len(YC)
-        for i in range(len(stations)):
-            assert XGstn.isel(station=i, Xp1=0, Yp1=0).values < XCstn.isel(station=i)
-            assert XGstn.isel(station=i, Xp1=1, Yp1=0).values > XCstn.isel(station=i)
-            assert YGstn.isel(station=i, Xp1=0, Yp1=0).values < YCstn.isel(station=i)
-            assert YGstn.isel(station=i, Xp1=0, Yp1=1).values > YCstn.isel(station=i)
+        od_stns = this_od.subsample.stations(**args)
+        if args["Ycoords"] is None or args["Xcoords"] is None:
+            assert this_od._ds.XC.shape == od_stns._ds.XC.shape
+            assert this_od._ds.YC.shape == od_stns._ds.YC.shape
+        else:
+            YC, XC = args["Ycoords"], args["Xcoords"]
+            XCstn, YCstn = od_stns._ds.XC.squeeze(), od_stns._ds.YC.squeeze()
+            XGstn, YGstn = od_stns._ds.XG, od_stns._ds.YG
+            stations = od_stns._ds.station.values
+            argsu0, argsu1 = {"Xp1": 0}, {"Xp1": 1}
+            argsv0, argsv1 = {"Yp1": 0}, {"Yp1": 1}
+            assert len(stations) == len(XC) == len(YC)
+            for i in range(len(stations)):
+                assert XGstn.isel(station=i, Xp1=0, Yp1=0).values < XCstn.isel(
+                    station=i
+                )
+                assert XGstn.isel(station=i, Xp1=1, Yp1=0).values > XCstn.isel(
+                    station=i
+                )
+                assert YGstn.isel(station=i, Xp1=0, Yp1=0).values < YCstn.isel(
+                    station=i
+                )
+                assert YGstn.isel(station=i, Xp1=0, Yp1=1).values > YCstn.isel(
+                    station=i
+                )
 
-            Uval0 = od_stns._ds["UVELMASS"].isel(**{**{"station": i}, **argsu0}).values
-            Uval1 = od_stns._ds["UVELMASS"].isel(**{**{"station": i}, **argsu1}).values
-            Vval0 = od_stns._ds["VVELMASS"].isel(**{**{"station": i}, **argsv0}).values
-            Vval1 = od_stns._ds["VVELMASS"].isel(**{**{"station": i}, **argsv1}).values
+                Uval0 = (
+                    od_stns._ds["UVELMASS"].isel(**{**{"station": i}, **argsu0}).values
+                )
+                Uval1 = (
+                    od_stns._ds["UVELMASS"].isel(**{**{"station": i}, **argsu1}).values
+                )
+                Vval0 = (
+                    od_stns._ds["VVELMASS"].isel(**{**{"station": i}, **argsv0}).values
+                )
+                Vval1 = (
+                    od_stns._ds["VVELMASS"].isel(**{**{"station": i}, **argsv1}).values
+                )
 
-            assert np.round(abs(Uval0), 1) == np.round(abs(Uval1), 1) == 1
-            assert np.round(abs(Vval0), 1) <= 0.1
-            assert np.round(abs(Vval1), 1) <= 0.1
+                assert np.round(abs(Uval0), 1) == np.round(abs(Uval1), 1) == 1
+                assert np.round(abs(Vval0), 1) <= 0.1
+                assert np.round(abs(Vval1), 1) <= 0.1
 
 
 # =========
