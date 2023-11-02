@@ -3413,13 +3413,33 @@ def test_fdir_completer(ix, iy, faces, iface, face_connections, val):
 
 y1 = _np.arange(40, 90)
 x1 = _np.array([40] * len(y1))
-
 x2 = _np.arange(10, 30)
 y2 = _np.array([30] * len(x2))
+facesa2 = [2, 6]
+Xa2, Ya2 = [x1, x2], [y1, y2]
 
-facesarc2 = [2, 6]
+x1 = _np.arange(40, 5, -1)
+y1 = _np.array([40] * len(x1))
+x2 = _np.arange(85, 65, -1)
+y2 = _np.array([50] * len(x2))
+facesa7 = [7, 6]
+Xa7, Ya7 = [x1, x2], [y1, y2]
 
-Xarc2, Yarc2 = [x1, x2], [y1, y2]
+
+y1 = _np.arange(40, 85)
+x1 = _np.array([40] * len(y1))
+y2 = _np.arange(5, 25)
+x2 = _np.array([70] * len(y2))
+facesa5 = [5, 6]
+Xa5, Ya5 = [x1, x2], [y1, y2]
+
+
+x1 = _np.arange(40, 0, -1)
+y1 = _np.array([40] * len(x1))
+y2 = _np.arange(85, 65, -1)
+x2 = _np.array([70] * len(y2))
+facesa10 = [10, 6]
+Xa10, Ya10 = [x1, x2], [y1, y2]
 
 
 @pytest.mark.parametrize(
@@ -3430,8 +3450,14 @@ Xarc2, Yarc2 = [x1, x2], [y1, y2]
         (od, X2, Y2, faces2, 0, 1, 0),
         (od, X2, Y2, faces2, 1, -1, 0),
         (od, X2, Y2, faces2, 2, None, None),
-        (od, Xarc2, Yarc2, facesarc2, 0, 0, 1),
-        (od, Xarc2, Yarc2, facesarc2, 1, None, None),
+        (od, Xa2, Ya2, facesa2, 0, 0, 1),
+        (od, Xa2, Ya2, facesa2, 1, None, None),
+        (od, Xa7, Ya7, facesa7, 0, 0, 1),
+        (od, Xa7, Ya7, facesa7, 1, None, None),
+        (od, Xa5, Ya5, facesa5, 0, 0, 1),
+        (od, Xa5, Ya5, facesa5, 1, None, None),
+        (od, Xa10, Ya10, facesa10, 0, 0, 1),
+        (od, Xa10, Ya10, facesa10, 1, None, None),
     ],
 )
 def test_cross_face_diffs(od, ix, iy, faces, iface, valx, valy):
