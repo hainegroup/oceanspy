@@ -727,6 +727,7 @@ def mooring_array(od, Ymoor, Xmoor, xoak_index="scipy_kdtree", **kwargs):
         # needed for transports (via cutout)
 
     else:
+        diffX = None
         # Cutout
         if "YRange" not in kwargs:
             kwargs["YRange"] = Ymoor
@@ -860,6 +861,30 @@ def mooring_array(od, Ymoor, Xmoor, xoak_index="scipy_kdtree", **kwargs):
     od._ds = od._ds.set_coords(
         [coord for coord in od._ds.coords] + ["mooring_midp_dist"]
     )
+    if not diffX:  # pragma: no cover
+        moor_midp = od._ds.mooring_midp.values
+        if diffX.size == len(moor_midp):
+            # include in dataset
+            xr_diffX = DataArray(
+                diffX,
+                coords={"mooring_midp": moor_midp},
+                dims=("mooring_midp"),
+                attrs={"long_name": "x-difference between moorings", "units": unit},
+            )
+
+            xr_diffY = DataArray(
+                diffY,
+                coords={"mooring_midp": moor_midp},
+                dims=("mooring_midp"),
+                attrs={"long_name": "y-difference between moorings", "units": unit},
+            )
+
+            od._ds["diffX"] = xr_diffX
+            od._ds["diffY"] = xr_diffY
+        else:
+            _warnings.warn(
+                "diffX and diffYs have inconsistent lengths with mooring dimension"
+            )
 
     return od
 
