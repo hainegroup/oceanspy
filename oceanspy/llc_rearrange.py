@@ -2789,10 +2789,14 @@ def ds_splitarray(
 
     # construct entire index mapper that reconstructs iXn from broken array (nI)
     _ni, _ = order_from_indexing(_iXn, _nI)
-    if _iface < len(_faces) - 1:
-        fdir = face_direction(_faces[_iface], _faces[_iface + 1], _face_connections)
-    else:  # last face index=0 at far right.
-        fdir = face_direction(_faces[_iface - 1], _faces[_iface], _face_connections)
+    if len(_faces) == 1:
+        # single face with multiple edge connections
+        fdir = 0
+    else:
+        if _iface < len(_faces) - 1:
+            fdir = face_direction(_faces[_iface], _faces[_iface + 1], _face_connections)
+        else:  # last face index=0 at far right.
+            fdir = face_direction(_faces[_iface - 1], _faces[_iface], _face_connections)
 
     # construct a list of adjacent faces where array does not end.
     adj_faces = []
