@@ -2963,6 +2963,7 @@ def test_splitter(X, Y, Fs):
     assert nY[1] == Y[1]
 
 
+@pytest.mark.parametrize("od", [od])
 @pytest.mark.parametrize(
     "X, Y, Fs, exp",
     [
@@ -2976,14 +2977,24 @@ def test_splitter(X, Y, Fs):
         ([0, 44], [45, 89], [1, 11], [0, 45]),
         ([89, 40], [45, 9], [4, 8], [89, 49]),
         ([45, 89], [0, 40], [8, 4], [49, 0]),
+        ([40, 24], [0, 40], [2, 6], [49, 89]),
+        ([0, 40], [89, 50], [7, 6], [0, 50]),
+        ([40, 89], [70, 0], [5, 6], [70, 89]),
+        ([0, 40], [70, 89], [10, 6], [0, 19]),
+        ([0, 40], [40, 89], [6, 2], [0, 49]),
+        ([70, 0], [40, 89], [6, 5], [40, 0]),
+        ([89, 50], [0, 40], [6, 7], [89, 40]),
+        ([70, 89], [0, 40], [6, 10], [49, 89]),
     ],
 )
-def test_edge_slider(X, Y, Fs, exp):
+def test_edge_slider(od, X, Y, Fs, exp):
+    face_connections = od.face_connections["face"]
     if set([X[0], Y[0]]) == set([89]):
+        # upper right corner
         with pytest.raises(ValueError):
-            edge_slider(X[0], Y[0], Fs[0], X[1], Y[1], Fs[1])
+            edge_slider(X[0], Y[0], Fs[0], X[1], Y[1], Fs[1], face_connections)
     else:
-        newP = edge_slider(X[0], Y[0], Fs[0], X[1], Y[1], Fs[1])
+        newP = edge_slider(X[0], Y[0], Fs[0], X[1], Y[1], Fs[1], face_connections)
         assert newP == exp
 
 
@@ -3400,6 +3411,17 @@ def test_fdir_completer(ix, iy, faces, iface, face_connections, val):
     assert fdir == val
 
 
+y1 = _np.arange(40, 90)
+x1 = _np.array([40] * len(y1))
+
+x2 = _np.arange(10, 30)
+y2 = _np.array([30] * len(x2))
+
+facesarc2 = [2, 6]
+
+Xarc2, Yarc2 = [x1, x2], [y1, y2]
+
+
 @pytest.mark.parametrize(
     "od, ix, iy, faces, iface, valx, valy",
     [
@@ -3408,6 +3430,8 @@ def test_fdir_completer(ix, iy, faces, iface, face_connections, val):
         (od, X2, Y2, faces2, 0, 1, 0),
         (od, X2, Y2, faces2, 1, -1, 0),
         (od, X2, Y2, faces2, 2, None, None),
+        (od, Xarc2, Yarc2, facesarc2, 0, 1),
+        (od, Xarc2, Yarc2, facesarc2, None, None),
     ],
 )
 def test_cross_face_diffs(od, ix, iy, faces, iface, valx, valy):

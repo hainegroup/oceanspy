@@ -2466,22 +2466,30 @@ def edge_completer(_x, _y, face_dir=None, ind=-1, _N=89):
     return _x, _y
 
 
-def edge_slider(x1, y1, f1, x2, y2, f2, _N=89):
+def edge_slider(x1, y1, f1, x2, y2, f2, face_connections, _N=89):
     """
     Looks at the edge points between faces f1 (present)
     and f2 (next). Returns a point in f1 that is aligned
     with the first element in f2.
 
-    [x1, y1, f1] represents the present face
-    [x2, y2, f2] : next face
+    Parameters:
+    ----------
+        [x1, y1, f1]: list of integers.
+            Present face (`f1`) coordinates.
+        [x2, y2, f2] : list of integers.
+            Next face (`f2`) coordinates
+        face_connections: dict.
+            topology of grid.
+        _N: int
+            last index along `X` or `Y`
 
-    TODO: according to phase topology figure out
-    which element connect to which
-
+    Returns:
+        newP: list
+            It's elements are int values for present face `f1`
     """
-    # step 1 assess if there is a vhange in face topo:
+    # cannot handle upper right corner (with 3 face data).
     crns = []
-    for p in [[0, 0], [0, _N], [_N, 0], [_N, _N]]:
+    for p in [[_N, _N]]:
         crns.append(p == [x1, y1])
     if crns.count(True):
         # TODO:  check if this is an actual problem
@@ -2489,21 +2497,47 @@ def edge_slider(x1, y1, f1, x2, y2, f2, _N=89):
 
     rotS = _np.arange(7, 13)
     nrotS = _np.arange(6)
+    arc = _np.array([6])
+    # it only matters is one case.
+    fdir = face_direction(f1, f2, face_connections)
 
+    # see if array left-ends (at 0) or right-ends (at len(ds.X)-1)
     set0 = set([x1, y1])
     ind0, ind1 = set([0]).issubset(set0), set([_N]).issubset(set0)
+    # identify the local axis at which the array ends
     if ind0:
         i = (x1, y1).index(0)
     elif ind1:
         i = (x1, y1).index(_N)
 
-    if set([f1, f2]).issubset(rotS) or set([f1, f2]).issubset(nrotS):
+    if set([6, 7]) == set([f1, f2]):
+        # match in y. No shift necessary
         new_P = [x2, y2]
         new_P[i] = [x1, y1][i]
-    else:
-        new_P = [a - b for a, b in zip(2 * [_N], [x2, y2][::-1])]
+    elif set([6, 2]) == set([f1, f2]):
+        if fdir == 3:
+            new_P = [x2, _N - y2][::-1]
+            new_P[i] = [x1, y1][i]
+        else:
+            new_P = [_N - x2, y2][::-1]
+            new_P[i] = [x1, y1][i]
+    elif set([6, 5]) == set([f1, f2]):
+        new_P = [x2, y2]
         new_P[i] = [x1, y1][i]
-
+    elif set([6, 10]) == set([f1, f2]):
+        if fdir == 0:
+            new_P = [_N - x2, y2][::-1]
+            new_P[i] = [x1, y1][i]
+        else:
+            new_P = [x2, _N - y2][::-1]
+            new_P[i] = [x1, y1][i]
+    elif arc not in [f1, f2]:
+        if set([f1, f2]).issubset(rotS) or set([f1, f2]).issubset(nrotS):
+            new_P = [x2, y2]
+            new_P[i] = [x1, y1][i]
+        else:
+            new_P = [a - b for a, b in zip(2 * [_N], [x2, y2][::-1])]
+            new_P[i] = [x1, y1][i]
     return new_P
 
 
@@ -2546,7 +2580,7 @@ def fill_path(_X, _Y, _faces, k, _face_conxs, _N=89):
 
     if k == 0:
         # Under assumption, this always happens with first Face. But it does
-        # NOT happend with last face
+        # NOT happen with last face
         # k=-1.
         dir1 = face_direction(
             _faces[k], _faces[k + 1], _face_conxs
@@ -2561,7 +2595,9 @@ def fill_path(_X, _Y, _faces, k, _face_conxs, _N=89):
             x1, y1, face_dir=dir2, ind=0, _N=_N
         )  # include the indedx =0 and the face_direction.
 
-        P = edge_slider(x[-1], y[-1], _faces[k], x1[0], y1[0], _faces[k + 1], _N)
+        P = edge_slider(
+            x[-1], y[-1], _faces[k], x1[0], y1[0], _faces[k + 1], _face_conxs, _N
+        )
 
         x, y = connector(_np.append(x, P[0]), _np.append(y, P[1]))
 
@@ -2590,7 +2626,9 @@ def fill_path(_X, _Y, _faces, k, _face_conxs, _N=89):
             x1, y1, face_dir=dir2, ind=0, _N=_N
         )  # include the indedx =0 and the face_direction.
 
-        P = edge_slider(x[-1], y[-1], _faces[k], x1[0], y1[0], _faces[k + 1], _N)
+        P = edge_slider(
+            x[-1], y[-1], _faces[k], x1[0], y1[0], _faces[k + 1], _face_conxs, _N
+        )
 
         x, y = connector(_np.append(x, P[0]), _np.append(y, P[1]))
 
