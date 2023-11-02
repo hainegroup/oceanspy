@@ -701,6 +701,7 @@ def mooring_array(od, Ymoor, Xmoor, xoak_index="scipy_kdtree", **kwargs):
     serial = kwargs.pop("serial", None)
 
     if serial:
+        _diffXYs = True
         varList = kwargs.pop("varList", None)
 
         args = {
@@ -727,7 +728,7 @@ def mooring_array(od, Ymoor, Xmoor, xoak_index="scipy_kdtree", **kwargs):
         # needed for transports (via cutout)
 
     else:
-        diffX = None
+        _diffXYs = False
         # Cutout
         if "YRange" not in kwargs:
             kwargs["YRange"] = Ymoor
@@ -861,7 +862,7 @@ def mooring_array(od, Ymoor, Xmoor, xoak_index="scipy_kdtree", **kwargs):
     od._ds = od._ds.set_coords(
         [coord for coord in od._ds.coords] + ["mooring_midp_dist"]
     )
-    if not diffX:  # pragma: no cover
+    if _diffXYs:  # pragma: no cover
         moor_midp = od._ds.mooring_midp.values
         if diffX.size == len(moor_midp):
             # include in dataset
