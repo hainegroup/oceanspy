@@ -605,7 +605,7 @@ def test_stations(od, args):
     _dim = args.pop("_dim", None)
     if xoak_index is not None:
         with pytest.raises(ValueError):
-            this_od.subsample.stations(**args, _dim=_dim, xoak_index=xoak_index)
+            this_od.subsample.stations(**args, xoak_index=xoak_index)
     if _dim is not None and _dim == "mooring":
         DS, diffX, diffY = this_od.subsample.stations(**args, _dim=_dim)
         assert (abs(diffX) + abs(diffY) == 1).all()
