@@ -1286,11 +1286,11 @@ def stations(
                 }
                 if dim_name == "mooring":
                     nix, niy = connector(iX, iY)
-                    DS = mooring_singleface(**args).persist()
+                    DS, nix, niy = mooring_singleface(**args)
                     diffX, diffY, *a = cross_face_diffs(
                         ds, nix, niy, order_iface, 0, face_connections
                     )
-                    return DS, diffX, diffY
+                    return DS.persist(), diffX, diffY
                 elif dim_name == "station":
                     DS = station_singleface(**args).persist()
             elif Niter > 1:
