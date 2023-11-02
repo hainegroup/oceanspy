@@ -883,8 +883,9 @@ def mooring_array(od, Ymoor, Xmoor, xoak_index="scipy_kdtree", **kwargs):
             od._ds["diffX"] = xr_diffX
             od._ds["diffY"] = xr_diffY
         else:
+            print(diffX.size)
             _warnings.warn(
-                "diffX and diffYs have inconsistent lengths with mooring dimension"
+                "diffX and diffY have inconsistent lengths with mooring dimension"
             )
 
     return od
@@ -1251,7 +1252,6 @@ def stations(
                     "\nAvailable options: {}"
                     "".format(xoak_index, _xoak.IndexRegistry())
                 )
-
             ds_grid.xoak.set_index(["XC", "YC"], xoak_index)
 
         cdata = {"XC": (dim_name, Xcoords), "YC": (dim_name, Ycoords)}
@@ -1314,7 +1314,7 @@ def stations(
                             nX0, nY0, order_iface, ii, face_connections
                         )
                         args1 = {"_ix": nix, "_iy": niy, "_iface": ii}
-                        dse = mooring_singleface(**{**args, **args1})
+                        dse, nix, niy = mooring_singleface(**{**args, **args1})
                         diX, diY, *a = cross_face_diffs(
                             ds, nix, niy, order_iface, ii, face_connections
                         )

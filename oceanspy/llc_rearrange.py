@@ -3051,7 +3051,7 @@ def mooring_singleface(_ds, _ix, _iy, _faces, _iface, _face_connections):
 
     if "face" in dsf.reset_coords().data_vars:
         dsf = dsf.drop_vars(["face"])
-    return dsf
+    return dsf, _ixn, _iyn
 
 
 def station_singleface(_ds, _ix, _iy, _faces, _iface, _face_connections):

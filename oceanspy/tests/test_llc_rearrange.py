@@ -3632,7 +3632,7 @@ def test_mooring_singleface(od, iX, iY, faces, iface):
     face_connections = od.face_connections["face"]
 
     niX, niY = fill_path(iX, iY, faces, iface, face_connections)
-    dsf = mooring_singleface(_ds, niX, niY, faces, iface, face_connections)
+    dsf, *a = mooring_singleface(_ds, niX, niY, faces, iface, face_connections)
 
     for m in range(len(dsf["mooring"])):
         yargs0 = {"Yp1": 0, "mooring": m}
