@@ -1983,9 +1983,15 @@ def ds_edge(_ds, _ix, _iy, _ifaces, ii, _face_topo, _dim="mooring", **kwargs):
         fdir = face_direction(_ifaces[ii], _ifaces[ii + 1], _face_topo)
         face1, face2 = _ifaces[ii : ii + 2]
         if fdir in [0, 2]:
+            # the array begins at the edge with another face, and
             # array advances towards left in `x` or `y`.
             # Will neeed to sumplement at the boundary
-            face1, face2 = _ifaces[ii - 1 : ii + 1][::-1]
+            # need to infer what the face is -- it may not be defined
+            # within `_ifaces`
+            face2 = face_adjacent(
+                [_ix[moor[0]]], [_iy[moor[0]]], _ifaces[ii], _face_topo, _Nx
+            )[0]
+
     else:
         if connect:  # index = 0 is at far right
             face1, face2 = _ifaces[ii], _ifaces[ii - 1]

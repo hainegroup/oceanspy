@@ -23,12 +23,12 @@ try:
     import numba
 
     has_numba = True
-except ImportError:
+except ImportError:  # pragma: no cover
     has_numba = False
 
 
 def compilable(f):
-    if has_numba:
+    if has_numba:  # pragma : no cover
         return numba.njit(f)
     return f
 
