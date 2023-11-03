@@ -27,8 +27,8 @@ except ImportError:  # pragma: no cover
     has_numba = False
 
 
-def compilable(f):
-    if has_numba:  # pragma : no cover
+def compilable(f):  # pragma : no cover
+    if has_numba:
         return numba.njit(f)
     return f
 
@@ -73,7 +73,7 @@ def viewer_to_range(p):
         coords = []
         for i in range(len(p)):
             coords.append(p[i]["coordinates"])
-    elif p_type == "LineString":
+    elif p_type == "LineString":  # pragma : no cover
         coords = p[0]["coordinates"]
 
     lon = []
@@ -924,7 +924,7 @@ def to_180(x):
     return x + (-1) * (x // 180) * 360
 
 
-def get_combination(lst, select):
+def get_combination(lst, select):  # pragma: no cover
     """
     Iteratively find all the combination that
     has (select) amount of elements

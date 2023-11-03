@@ -2214,6 +2214,13 @@ def test_error_face(ds):
         LLC.arctic_crown(ds)
 
 
+@pytest.mark.parametrize("ds", [od._ds])
+@pytest.mark.parametrize("XRange, YRange", [-11111, 1111])
+def test_error_range(ds, XRange, YRange):
+    with pytest.raises(ValueError):
+        LLC.arctic_crown(ds, XRange, YRange)
+
+
 faces = [k for k in range(13)]
 expected = [2, 5, 7, 10]  # most faces that connect with arctic cap face=6
 acshape = (Nx // 2, Ny)

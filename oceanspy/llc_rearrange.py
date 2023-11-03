@@ -34,29 +34,8 @@ metrics = [
 ]
 
 
-class LLCtransformation:
+class LLCtransformation(object):
     """A class containing the transformation types of LLCgrids."""
-
-    def __init__(
-        self,
-        ds,
-        varList=None,
-        add_Hbdr=0,
-        XRange=None,
-        YRange=None,
-        faces=None,
-        centered=False,
-        chunks=None,
-    ):
-        self._ds = ds  # xarray.DataSet
-        self._varList = varList  # variables names to be transformed
-        self._add_Hbdr = add_Hbdr
-        self._XRange = XRange  # lon range of data to retain
-        self._YRange = YRange  # lat range of data to retain.
-        self._chunks = chunks  # dict.
-        self._faces = faces  # faces involved in transformation
-        self._centered = centered
-        self._chunks = chunks
 
     @classmethod
     def arctic_crown(
