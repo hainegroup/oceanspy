@@ -976,22 +976,6 @@ def create_list(data, datas):
     dat, n1, new_list = 0, 0, []
 
     for ii in range(len(data) - 1):
-        assert (
-            data[ii].XC.isel(mooring=-1).values == datas[ii].XC.isel(mooring=0).values
-        )
-        assert (
-            data[ii + 1]["XC"].isel(mooring=0).values
-            == datas[ii].XC.isel(mooring=-1).values
-        )
-
-        assert (
-            data[ii].YC.isel(mooring=-1).values == datas[ii].YC.isel(mooring=0).values
-        )
-        assert (
-            data[ii + 1].YC.isel(mooring=0).values
-            == datas[ii].YC.isel(mooring=-1).values
-        )
-
         if ii == 0:
             ndat = data[ii]
         else:

@@ -18,15 +18,6 @@ def test_RNone():
     spherical2cartesian(1, 1)
 
 
-def test_error_viewer_to_range():
-    with pytest.raises(TypeError):
-        viewer_to_range("does not eval to a list")
-        viewer_to_range(0)
-        viewer_to_range(["not from viewer"])
-        viewer_to_range([{"type": "other"}])
-        viewer_to_range([{"type": "Polygon", "coordinates": "a"}])
-
-
 def test_error_path():
     with pytest.raises(ValueError):
         great_circle_path(1, 1, 1, 1)
@@ -76,6 +67,9 @@ coords4 = '[{"type":"Point","coordinates":[-169.23960833202577,22.86567726183126
 coords5 = '[{"type":"Point","coordinates":[636.7225446274502, -56.11128546740994]}]'
 coords6 = '[{"type":"Point","coordinates":[754.2277421326479, -57.34299561290217]}]'
 coords7 = '[{"type":"Point","coordinates":[-424.42989807993234, 37.87263032287052]}]'
+coords8 = (
+    '[{"type":"not valid","coordinates":[-424.42989807993234, 37.87263032287052]}]'
+)
 
 
 @pytest.mark.parametrize(
@@ -91,16 +85,21 @@ coords7 = '[{"type":"Point","coordinates":[-424.42989807993234, 37.8726303228705
         (coords5, "Point", [-83.27745537254975], [-56.11128546740994]),
         (coords6, "Point", [34.227742132647904], [-57.34299561290217]),
         (coords7, "Point", [-64.42989807993234], [37.87263032287052]),
+        (coords8, None, None, None),
     ],
 )
 def test_viewer_to_range(coords, types, lon, lat):
-    if isinstance(coords, list):
-        p = [{"type": types, "coordinates": list(coords)}]
-    elif isinstance(coords, str):
-        p = coords
-    x, y = viewer_to_range(p)
-    assert x == lon
-    assert y == lat
+    if not types:
+        if isinstance(coords, list):
+            p = [{"type": types, "coordinates": list(coords)}]
+        elif isinstance(coords, str):
+            p = coords
+        x, y = viewer_to_range(p)
+        assert x == lon
+        assert y == lat
+    else:
+        with pytest.raises(TypeError):
+            viewer_to_range(coords)
 
 
 X0 = _np.array([161, -161])  # track begins west, ends east
