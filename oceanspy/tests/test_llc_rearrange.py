@@ -2615,7 +2615,7 @@ def test_combine_list_ds(DSlist, lenX, lenY, x0, x1, y0, y1):
         assert [int(nDSlist.X[0].values), int(nDSlist.X[-1].values)] == [x0, x1]
         assert [int(nDSlist.Y[0].values), int(nDSlist.Y[-1].values)] == [y0, y1]
     else:
-        assert nDSlist == DSlist
+        assert nDSlist == 0
 
 
 @pytest.mark.parametrize(

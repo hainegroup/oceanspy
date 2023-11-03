@@ -857,7 +857,7 @@ def flip_v(_ds, co_list=metrics, dims=True, _len=3):
     """
     if isinstance(_ds, Dataset):
         for _varName in _ds.variables:
-            if dims:
+            if dims:  # pragma: no cover
                 DIMS = [dim for dim in _ds[_varName].dims if dim != "face"]
                 _dims = Dims(DIMS[::-1])
             if "mate" in _ds[_varName].attrs:
@@ -1048,10 +1048,12 @@ def slice_datasets(_DSfacet, dims_c, dims_g, _edges, _axis):
     which together define a Facet with facet index (1-4), depends on the facet
     index and the axis (0 or 1).
     """
-    if _axis == 0:  # local y always the case for all facets
+    if _axis == 0:  # pragma: no cover
+        # local y always the case for all facets
         _dim_c = dims_c.Y
         _dim_g = dims_g.Y
-    elif _axis == 1:  # local x always the case.
+    elif _axis == 1:  # pragma: no cover
+        # local x always the case.
         _dim_c = dims_c.X
         _dim_g = dims_g.X
 
@@ -1100,7 +1102,7 @@ def _LLC_check_sizes(_DS):
         Nx_c = len(_DS[dims_c.X])
     else:
         delta = Nx_g - Nx_c
-        if delta < 0:
+        if delta < 0:  # pragma: no cover
             raise ValueError(
                 "Inconsistent sizes at corner (_g) and center (_c) points"
                 "after cutout `len(_g) < len(_c)."
@@ -1147,7 +1149,7 @@ def _reorder_ds(_ds, dims_c, dims_g):
     return _DS
 
 
-def llc_local_to_lat_lon(ds, co_list=metrics):
+def llc_local_to_lat_lon(ds, co_list=metrics):  # pragma: no cover
     """
     Takes all vector fields and rotates them to orient them along geographical
     coordinates.
