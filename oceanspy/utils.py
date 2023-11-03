@@ -964,36 +964,6 @@ def reset_dim(_ds, N, dim="mooring"):
     return _ds
 
 
-def create_list(data, datas):
-    """
-    Creates a single list of datasets, taking elements of two distinct lists, each
-    element a dataset with matching variables and dimensions. The input lists
-    satisfy:
-                        len(data) == len(datas)+1.
-    The final output has the dimension mooring monotonically increasing within each
-    element of the list.
-    """
-    dat, n1, new_list = 0, 0, []
-
-    for ii in range(len(data) - 1):
-        if ii == 0:
-            ndat = data[ii]
-        else:
-            n1 = dat.mooring.values[-1]
-            ndat = reset_dim(data[ii], n1 + 1)
-
-        new_list.append(ndat)  # long array
-        m1 = ndat.mooring.values[-1]
-        dat = reset_dim(datas[ii].isel(mooring=slice(1, -1)), m1)
-        new_list.append(dat)
-
-    n1 = dat.mooring.values[-1]
-    ndat = reset_dim(data[-1], n1 + 1)
-    new_list.append(ndat)
-
-    return new_list
-
-
 def diff_and_inds_where_insert(ix, iy):
     dx, dy = (_np.diff(ii) for ii in (ix, iy))
     inds = _np.argwhere(_np.abs(dx) + _np.abs(dy) > 1).squeeze()
