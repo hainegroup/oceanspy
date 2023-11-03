@@ -609,7 +609,7 @@ def test_stations(od, args):
     if _dim is not None and _dim == "mooring":
         DS, diffX, diffY = this_od.subsample.stations(**args, dim_name=_dim)
         assert (abs(diffX) + abs(diffY) == 1).all()
-        assert type(DS) == xr.Dataset
+        assert isinstance(DS, xr.Dataset)
     else:
         od_stns = this_od.subsample.stations(**args)
         if args["Ycoords"] is None or args["Xcoords"] is None:

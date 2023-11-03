@@ -3735,7 +3735,7 @@ def test_ds_edge(od, ix, iy, faces, k, kwargs):
         else:
             if set([89]).issubset(set.union(set(ix), set(iy))):
                 _dim = "mooring"
-                assert type(nds) == _dstype
+                assert isinstance(nds, _dstype)
                 assert len(nds.Xp1) == 2
                 assert len(nds.Yp1) == 2
                 assert len(nds.X) == 1
@@ -3775,7 +3775,7 @@ def test_arctic_eval(od, ix, iy):
     _dim = "station"
     nds = arctic_eval(od._ds, ix, iy, _dim)
 
-    assert type(nds) == _dstype
+    assert isinstance(nds, _dstype)
     assert len(nds.Xp1) == 2
     assert len(nds.Yp1) == 2
     assert len(nds.X) == 1
