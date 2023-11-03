@@ -89,11 +89,11 @@ coords8 = (
     ],
 )
 def test_viewer_to_range(coords, types, lon, lat):
-    if not types:
+    if types is not None:
         if isinstance(coords, list):
             p = [{"type": types, "coordinates": list(coords)}]
         elif isinstance(coords, str):
-            p = coords
+            p = [{"type": types, "coordinates": list(coords)}]
         x, y = viewer_to_range(p)
         assert x == lon
         assert y == lat
