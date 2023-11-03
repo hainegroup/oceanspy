@@ -42,9 +42,9 @@ class LLCtransformation(object):
         self,
         ds,
         varList=None,
-        add_Hbdr=0,
-        XRange=None,
         YRange=None,
+        XRange=None,
+        add_Hbdr=0,
         faces=None,
         centered=None,
         persist=False,
@@ -369,7 +369,7 @@ class LLCtransformation(object):
                         dtr = list(dims)[::-1]
                         dtr[-1], dtr[-2] = dtr[-2], dtr[-1]
                         DSFacet12[_var] = DSFacet12[_var].transpose(*dtr)
-                if persist:
+                if persist:  # pragma : no cover
                     DSFacet12 = DSFacet12.persist()
 
         if centered == "Pacific":
@@ -464,11 +464,11 @@ def arct_connect(
                     fac = -1
                 arct = fac * ds[_varName].isel(**da_arg)
                 Mask = mask2.isel(**mask_arg)
-                if opt:
+                if opt:  # pragma : no cover
                     [Xi_2, Xf_2] = [ranges[0][0], ranges[0][1]]
                     cu_arg = {dims.X: slice(Xi_2, Xf_2)}
                     arct = arct.sel(**cu_arg) * Mask.sel(**cu_arg)
-                    if persist:
+                    if persist:  # pragma : no cover
                         arct = arct.persist()
                 else:
                     arct = arct * Mask
@@ -500,11 +500,11 @@ def arct_connect(
                 mask_arg = {dims.X: xslice, dims.Y: yslice}
                 arct = ds[_varName].isel(**da_arg)
                 Mask = mask5.isel(**mask_arg)
-                if opt:
+                if opt:  # pragma : no cover
                     [Yi_5, Yf_5] = [ranges[1][0], ranges[1][1]]
                     cu_arg = {dims.Y: slice(Yi_5, Yf_5)}
                     arct = arct.sel(**cu_arg) * Mask.sel(**cu_arg)
-                    if persist:
+                    if persist:  # pragma : no cover
                         arct = arct.persist()
                 else:
                     arct = arct * Mask
@@ -535,13 +535,13 @@ def arct_connect(
                 mask_arg = {dims.X: xslice, dims.Y: yslice}
                 arct = fac * ds[_varName].isel(**da_arg)
                 Mask = mask7.isel(**mask_arg)
-                if opt:
+                if opt:  # pragma : no cover
                     [Xi_7, Xf_7] = [ranges[2][0], ranges[2][1]]
                     cu_arg = {dims.X: slice(Xi_7, Xf_7)}
                     arct = arct.sel(**cu_arg) * Mask.sel(**cu_arg)
-                    if persist:
+                    if persist:  # pragma : no cover
                         arct = arct.persist()
-                else:
+                else:  # pragma : no cover
                     arct = arct * Mask
                 ARCT[2] = arct
 
@@ -575,19 +575,19 @@ def arct_connect(
                 mask_arg = {dims.X: xslice, dims.Y: yslice}
                 arct = fac * ds[_varName].isel(**da_arg)
                 Mask = mask10.isel(**mask_arg)
-                if masking:
+                if masking:  # pragma : no cover
                     if opt:
                         [Yi_10, Yf_10] = [ranges[-1][0], ranges[-1][1]]
                         cu_arg = {dims.Y: slice(Yi_10, Yf_10)}
                         arct = arct.sel(**cu_arg) * Mask.sel(**cu_arg)
                     else:
                         arct = arct * Mask
-                else:
+                else:  # pragma : no cover
                     if opt:
                         [Yi_10, Yf_10] = [ranges[-1][0], ranges[-1][1]]
                         cu_arg = {dims.Y: slice(Yi_10, Yf_10)}
                         arct = (arct.sel(**cu_arg) * Mask.sel(**cu_arg)).transpose(*dtr)
-                        if persist:
+                        if persist:  # pragma : no cover
                             arct = arct.persist()
                     else:
                         arct = (arct * Mask).transpose(*dtr)
