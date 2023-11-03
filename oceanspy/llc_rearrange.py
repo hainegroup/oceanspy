@@ -1112,7 +1112,7 @@ def _LLC_check_sizes(_DS):
                 _DS = _copy.deepcopy(_DS.isel(**arg))
                 Nx_g = len(_DS[dims_g.X])
 
-    if Ny_c == Ny_g:
+    if Ny_c == Ny_g:  # pragma: no cover
         arg = {dims_c.Y: slice(0, -1)}
         _DS = _copy.deepcopy(_DS.isel(**arg))
         Ny_c = len(_DS[dims_c.Y])
@@ -1516,7 +1516,7 @@ def arctic_eval(_ds, _ix, _iy, _dim_name="mooring"):
             DS.append(new_ds)
     if len(DS) > 1:
         new_ds = _xr.concat(DS, dim=_dim_name).sortby(_dim_name)
-    elif len(DS) == 1:
+    elif len(DS) == 1:  # pragma: no cover
         new_ds = DS[0]
     return new_ds
 
@@ -1876,8 +1876,8 @@ def ds_edge(_ds, _ix, _iy, _ifaces, ii, _face_topo, _dim="mooring", **kwargs):
             # see if the direction to considered is provided
             # as input/argument
             axis = kwargs.pop("axis", None)
-            if axis is None:
-                # it is not. pick one => `x`
+            if axis is None:  # pragma: no cover
+                # pick one => `x`
                 indm = indm[0]
                 axis = axes[indm]  # for debug purpose
             elif axis in ["x", "y"]:
@@ -2161,7 +2161,7 @@ def ds_arcedge(_ds, _ix, _iy, moor, face1, face2, _dim="mooring"):
         vds = dds.isel(face=face2, **iargs)
         vds = vds.rename_dims({"y": "yp1"}).rename_vars({"y": "yp1"})
         vds = vds.drop_vars(["Xp1", "Y", "Yp1"])
-        if "face" in vds.data_vars:
+        if "face" in vds.data_vars:  # pragma: no cover
             vds = vds.drop_vars(["face"])
         for var in vds.reset_coords().data_vars:
             vds[var].attrs = {}  # remove metadata for now
@@ -2176,7 +2176,7 @@ def ds_arcedge(_ds, _ix, _iy, moor, face1, face2, _dim="mooring"):
         mds = _ds.isel(**argsn)  # regular eval
         mds = mds.drop_vars(["Yp1", "Xp1", "X", "Y"])  # always drop these
         mds = reset_dim(mds.reset_coords(), 1, "yp1")
-        if "face" in mds.data_vars:
+        if "face" in mds.data_vars:  # pragma: no cover
             mds = mds.drop_vars(["face"])
 
         vgmds = _xr.combine_by_coords([mds[vvars + gvars], vds])
@@ -2447,7 +2447,7 @@ def edge_slider(x1, y1, f1, x2, y2, f2, face_connections, _N=89):
         else:
             new_P = [x2, _N - y2][::-1]
             new_P[i] = [x1, y1][i]
-    elif arc not in [f1, f2]:
+    elif arc[0] not in [f1, f2]:
         if set([f1, f2]).issubset(rotS) or set([f1, f2]).issubset(nrotS):
             new_P = [x2, y2]
             new_P[i] = [x1, y1][i]

@@ -2934,6 +2934,7 @@ def test_mates(dataset, pairs):
         (10, 7, 2),
         (10, 2, 3),
         (0, 1, 3),
+        (0, 3, None),
     ],
 )
 def test_face_direction(od, face1, face2, value):
