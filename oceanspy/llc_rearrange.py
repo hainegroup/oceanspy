@@ -11,7 +11,6 @@ import numpy as _np
 import xarray as _xr
 from shapely import Point, Polygon
 from xarray import DataArray, Dataset
-from xgcm import Grid
 
 from .utils import _rel_lon, _reset_range, connector, get_maskH, reset_dim
 
@@ -1147,70 +1146,6 @@ def _reorder_ds(_ds, dims_c, dims_g):
             _da = _ds[var].transpose(*dtr)[::-1, :]
             _DS[var] = _da
     return _DS
-
-
-def llc_local_to_lat_lon(ds, co_list=metrics):  # pragma: no cover
-    """
-    Takes all vector fields and rotates them to orient them along geographical
-    coordinates.
-    """
-    _ds = mates(_copy.deepcopy(ds))
-
-    if ["CS", "SN"] not in _ds.data_vars():
-        print(
-            "CS and SN are not defined in dataset. We assume then that velocities are"
-            "geographically correct"
-        )
-    else:
-        grid_coords = {
-            "Y": {"center": "Y", "outer": "Yp1"},
-            "X": {"center": "X", "outer": "Xp1"},
-            "Z": {"center": "Z", "outer": "Zp1", "right": "Zu", "left": "Zl"},
-            "time": {"center": "time_midp", "left": "time"},
-        }
-
-        # create grid object to interpolate
-        grid = Grid(_ds, coords=grid_coords, periodic=[])
-
-        CS = _ds["CS"]  # cosine of angle between logical and geo axis. At tracer points
-        SN = _ds["SN"]  # sine of angle between logical and geo axis. At tracer points
-
-        CSU = grid.interp(CS, axis="X", boundary="extend")  # cos at u-point
-        CSV = grid.interp(CS, axis="Y", boundary="extend")  # cos at v-point
-
-        SNU = grid.interp(SN, axis="X", boundary="extend")  # sin at u-point
-        SNV = grid.interp(SN, axis="Y", boundary="extend")  # sin at v-point
-
-        data_vars = [var for var in _ds.data_vars if len(ds[var].dims) > 1]
-
-        for var in data_vars:
-            DIMS = [dim for dim in _ds[var].dims]
-            dims = Dims(DIMS[::-1])
-            if len(dims.X) + len(dims.Y) == 4:  # vector field (metric)
-                if len(dims.Y) == 1 and var not in co_list:  # u vector
-                    _da = _copy.deepcopy(_ds[var])
-                    if "mate" in _ds[var].attrs:
-                        mate = _ds[var].mate
-                        _ds = _ds.drop_vars([var])
-                        VU = grid.interp(
-                            grid.interp(_ds[mate], axis="Y", boundary="extend"),
-                            axis="X",
-                            boundary="extend",
-                        )
-                        _ds[var] = _da * CSU - VU * SNU
-                elif len(dims.Y) == 3 and var not in co_list:  # v vector
-                    _da = _copy.deepcopy(_ds[var])
-                    if "mate" in _ds[var].attrs:
-                        mate = _ds[var].mate
-                        _ds = _ds.drop_vars([var])
-                        UV = grid.interp(
-                            grid.interp(_ds[mate], axis="X", boundary="extend"),
-                            axis="Y",
-                            boundary="extend",
-                        )
-                        _ds[var] = UV * SNV + _da * CSV
-
-    return _ds
 
 
 def eval_dataset(_ds, _ix, _iy, _iface=None, _dim_name="mooring"):
