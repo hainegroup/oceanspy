@@ -2215,10 +2215,10 @@ def test_error_face(ds):
 
 
 @pytest.mark.parametrize("ds", [od._ds])
-@pytest.mark.parametrize("XRange, YRange", [-11111, 1111])
+@pytest.mark.parametrize("XRange, YRange", [([-11111, 1111], [-999, 999])])
 def test_error_range(ds, XRange, YRange):
     with pytest.raises(ValueError):
-        LLC.arctic_crown(ds, XRange, YRange)
+        LLC.arctic_crown(ds, XRange=XRange, YRange=YRange)
 
 
 faces = [k for k in range(13)]
