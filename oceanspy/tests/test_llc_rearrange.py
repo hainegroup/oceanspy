@@ -2603,14 +2603,19 @@ nlist4y4 = shift_list_ds(_copy.copy(list4), dims_c.Y, dims_g.Y, Np, facet=4)
         (nlist4y1, int(Np), int(Np), 0, 89, 45, 134),
         (nlist4x4, int(Np), int(Np), 90, 179, 0, 89),
         (nlist4y4, int(Np), int(Np), 0, 89, 90, 179),
+        ([], None, None, None, None, None, None),
+        ([0], None, None, None, None, None, None),
     ],
 )
 def test_combine_list_ds(DSlist, lenX, lenY, x0, x1, y0, y1):
     nDSlist = combine_list_ds(DSlist)
-    assert len(nDSlist.X) == lenX
-    assert len(nDSlist.Y) == lenY
-    assert [int(nDSlist.X[0].values), int(nDSlist.X[-1].values)] == [x0, x1]
-    assert [int(nDSlist.Y[0].values), int(nDSlist.Y[-1].values)] == [y0, y1]
+    if lenX is not None:
+        assert len(nDSlist.X) == lenX
+        assert len(nDSlist.Y) == lenY
+        assert [int(nDSlist.X[0].values), int(nDSlist.X[-1].values)] == [x0, x1]
+        assert [int(nDSlist.Y[0].values), int(nDSlist.Y[-1].values)] == [y0, y1]
+    else:
+        assert nDSlist == DSlist
 
 
 @pytest.mark.parametrize(
