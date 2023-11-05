@@ -27,7 +27,7 @@ except ImportError:  # pragma: no cover
     has_numba = False
 
 
-def compilable(f):  # pragma : no cover
+def compilable(f):  # pragma: no cover
     if has_numba:
         return numba.njit(f)
     return f
@@ -53,7 +53,7 @@ def viewer_to_range(p):
         if p[0] == "[" and p[-1] == "]":
             p = _ast.literal_eval(p)  # turn string into list
         else:
-            TypeError("not a type extracted by poseidon viewer")
+            raise TypeError("not a type extracted by poseidon viewer")
     _check_instance({"p": p}, {"p": ["list"]})
     _check_instance({"p[0]": p[0]}, {"p[0]": ["dict"]})
     _check_instance({"type": p[0]["type"]}, {"type": "str"})

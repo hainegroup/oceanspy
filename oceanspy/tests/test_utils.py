@@ -70,6 +70,7 @@ coords7 = '[{"type":"Point","coordinates":[-424.42989807993234, 37.8726303228705
 coords8 = (
     '[{"type":"not valid","coordinates":[-424.42989807993234, 37.87263032287052]}]'
 )
+coords9 = '"Point","coordinates":[-169.23960833202577,22.865677261831266]}'
 
 
 @pytest.mark.parametrize(
@@ -86,6 +87,7 @@ coords8 = (
         (coords6, "Point", [34.227742132647904], [-57.34299561290217]),
         (coords7, "Point", [-64.42989807993234], [37.87263032287052]),
         (coords8, None, None, None),
+        (coords9, None, None, None),
     ],
 )
 def test_viewer_to_range(coords, types, lon, lat):
