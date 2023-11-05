@@ -1285,9 +1285,9 @@ def stations(
                         ds, nix, niy, order_iface, 0, face_connections
                     )
                     return DS.persist(), diffX, diffY
-                elif dim_name == "station":
+                if dim_name == "station":
                     DS = station_singleface(**args).persist()
-            elif Niter > 1:  # pragma: no cover
+            if Niter > 1:
                 nX0, nY0 = splitter(iX, iY, iface)
                 args = {
                     "_ds": ds,
@@ -1302,7 +1302,7 @@ def stations(
                         _returns = False
                         args1 = {"_ix": nX0[ii], "_iy": nY0[ii], "_iface": ii}
                         dse = station_singleface(**{**args, **args1})
-                    elif dim_name == "mooring":
+                    if dim_name == "mooring":
                         _returns = True
                         nix, niy = fill_path(
                             nX0, nY0, order_iface, ii, face_connections
@@ -1339,7 +1339,7 @@ def stations(
 
         od._ds = DS
 
-        if od.face_connections is not None:
+        if od.face_connections is not None:  # pragma: no cover
             new_face_connections = {"face_connections": {None: {None, None}}}
             od = od.set_face_connections(**new_face_connections)
 

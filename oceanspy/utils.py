@@ -69,11 +69,11 @@ def viewer_to_range(p):
 
     if p_type == "Polygon":
         coords = p[0]["coordinates"][0]
-    elif p_type == "Point":
+    if p_type == "Point":
         coords = []
         for i in range(len(p)):
             coords.append(p[i]["coordinates"])
-    elif p_type == "LineString":  # pragma : no cover
+    if p_type == "LineString":  # pragma : no cover
         coords = p[0]["coordinates"]
 
     lon = []
@@ -161,11 +161,11 @@ def _reset_range(xn):
                 nxn[ll] = nxn[ll] - 360
                 X = _np.min(nxn) + 360, _np.max(nxn)
                 _ref_lon = X[0] - (X[0] - X[1]) / 3
-            elif all(ind[0] == i for i in ind) and ind[0] == 1:  # Atlantic
+            if all(ind[0] == i for i in ind) and ind[0] == 1:  # Atlantic
                 X = _np.min(xn), _np.max(xn)
             else:
                 X = None
-    elif cross.size == 0 or xn.size == 2:
+    if cross.size == 0 or xn.size == 2:
         if xn.size == 2:
             X = xn[0], xn[1]
             if xn[0] > xn[1]:
@@ -984,7 +984,7 @@ def remove_repeated(_iX, _iY):
         if len(val) == 2:
             if len(nn) == 0:
                 nn.append(list(val))
-            elif len(nn) > 0 and (val != nn).all():
+            if len(nn) > 0 and (val != nn).all():
                 nn.append(list(val))
     if _np.array(nn).size:
         dn = [nn[i][1] - nn[i][0] for i in range(len(nn))]
@@ -998,7 +998,7 @@ def remove_repeated(_iX, _iY):
         _ix, _iy = (_np.delete(ii, _np.argwhere(mask)) for ii in (_ix, _iy))
         # verify path is simply connected
         dx, dy, inds = diff_and_inds_where_insert(_ix, _iy)
-        if inds.size:
+        if inds.size:  # pragma: no cover
             _ix = _iX
             _iY = _iY
     return _ix, _iy

@@ -2142,7 +2142,7 @@ def ds_arcedge(_ds, _ix, _iy, moor, face1, face2, _dim="mooring"):
             if _varName == "CS":
                 nds[_varName] = -nds[_varName]
 
-    elif face1 == 6 and face2 == 10:
+    if face1 == 6 and face2 == 10:
         # have to redefine iXp1 in decreasing order
         iXp1 = DataArray(
             _np.stack((_ix, _ix + 1)[::-1], 1),
@@ -2201,7 +2201,7 @@ def ds_arcedge(_ds, _ix, _iy, moor, face1, face2, _dim="mooring"):
             if _varName == "CS":
                 nds[_varName] = -nds[_varName]
 
-    elif face1 == 2 and face2 == 6:
+    if face1 == 2 and face2 == 6:
         iXp1 = DataArray(
             _np.stack((_ix, _ix + 1), 1),
             coords={_dim_name: new_dim, "xp1": xp1},
@@ -2247,7 +2247,7 @@ def ds_arcedge(_ds, _ix, _iy, moor, face1, face2, _dim="mooring"):
         for var in nds.reset_coords().data_vars:
             nds[var].attrs = {}
 
-    elif face1 == 5 and face2 == 6:
+    if face1 == 5 and face2 == 6:
         args = {"yp1": slice(1)}
         rename = {"y": "yp1"}
         iXp1n = iXp1.isel(**dim_arg)
@@ -2293,7 +2293,7 @@ def face_direction(face1, face2, face_connections):
     for edge in [left, right, bot, top]:
         if edge is not None:
             perimeter.append(edge[0])
-        elif edge is None:  # faces 0, 3, 9, 12
+        if edge is None:  # faces 0, 3, 9, 12
             perimeter.append(edge)
 
     if set([face2]).issubset(perimeter):
@@ -2321,12 +2321,12 @@ def splitter(_ix, _iy, _ifaces):
     for ii in range(len(ll) + 1):
         if ii == 0:
             x0, y0 = _ix[: ll[ii] + 1], _iy[: ll[ii] + 1]
-        elif ii > 0 and ii < len(ll):
+        if ii > 0 and ii < len(ll):
             x0, y0 = (
                 _ix[ll[ii - 1] + 1 : ll[ii] + 1],
                 _iy[ll[ii - 1] + 1 : ll[ii] + 1],
             )
-        elif ii == len(ll):
+        if ii == len(ll):
             x0, y0 = _ix[ll[ii - 1] + 1 :], _iy[ll[ii - 1] + 1 :]
         X0.append(x0)
         Y0.append(y0)
@@ -2355,25 +2355,25 @@ def edge_completer(_x, _y, face_dir=None, ind=-1, _N=89):
         _mx, _my = connector([_x[ind], _N], [_y[ind], _y[ind]])
         if ind == -1:
             _x, _y = _np.append(_x, _mx), _np.append(_y, _my)
-        elif ind == 0:
+        if ind == 0:
             _x, _y = _np.append(_mx[::-1], _x), _np.append(_my, _y)
-    elif face_dir == 0:  # towards local left in x (increase x-index)
+    if face_dir == 0:  # towards local left in x (increase x-index)
         _mx, _my = connector([0, _x[ind]], [_y[ind], _y[ind]])
         if ind == 0:
             _x, _y = _np.append(_mx, _x), _np.append(_my, _y)
-        elif ind == -1:
+        if ind == -1:
             _x, _y = _np.append(_x, _mx[::-1]), _np.append(_y, _my)
     if face_dir == 3:  # towards local right in y
         _mx, _my = connector([_x[ind], _x[ind]], [_y[ind], _N])
         if ind == -1:
             _x, _y = _np.append(_x, _mx), _np.append(_y, _my)
-        elif ind == 0:
+        if ind == 0:
             _x, _y = _np.append(_mx, _x), _np.append(_my[::-1], _y)
     if face_dir == 2:
         _mx, _my = connector([_x[ind], _x[ind]], [0, _y[ind]])
         if ind == 0:
             _x, _y = _np.append(_mx, _x), _np.append(_my, _y)
-        elif ind == -1:  # last entry
+        if ind == -1:  # last entry
             _x, _y = _np.append(_x, _mx), _np.append(_y, _my[::-1])
 
     mask = _np.abs(_np.diff(_x)) + _np.abs(_np.diff(_y)) == 0
@@ -2423,31 +2423,31 @@ def edge_slider(x1, y1, f1, x2, y2, f2, face_connections, _N=89):
     # identify the local axis at which the array ends
     if ind0:
         i = (x1, y1).index(0)
-    elif ind1:
+    if ind1:
         i = (x1, y1).index(_N)
 
     if set([6, 7]) == set([f1, f2]):
         # match in y. No shift necessary
         new_P = [x2, y2]
         new_P[i] = [x1, y1][i]
-    elif set([6, 2]) == set([f1, f2]):
+    if set([6, 2]) == set([f1, f2]):
         if fdir == 3:
             new_P = [x2, _N - y2][::-1]
             new_P[i] = [x1, y1][i]
         else:
             new_P = [_N - x2, y2][::-1]
             new_P[i] = [x1, y1][i]
-    elif set([6, 5]) == set([f1, f2]):
+    if set([6, 5]) == set([f1, f2]):
         new_P = [x2, y2]
         new_P[i] = [x1, y1][i]
-    elif set([6, 10]) == set([f1, f2]):
+    if set([6, 10]) == set([f1, f2]):
         if fdir == 0:
             new_P = [_N - x2, y2][::-1]
             new_P[i] = [x1, y1][i]
         else:
             new_P = [x2, _N - y2][::-1]
             new_P[i] = [x1, y1][i]
-    elif arc[0] not in [f1, f2]:
+    if arc[0] not in [f1, f2]:
         if set([f1, f2]).issubset(rotS) or set([f1, f2]).issubset(nrotS):
             new_P = [x2, y2]
             new_P[i] = [x1, y1][i]
@@ -2598,7 +2598,7 @@ def face_adjacent(_ix, _iy, _iface, _face_connections, _N=89):
                 loc_data = 2
             else:
                 loc_data = 0
-        elif ind1:
+        if ind1:
             k = ([_ix[i], _iy[i]]).index(_N)
             if k > 0:
                 loc_data = 3
@@ -2607,19 +2607,19 @@ def face_adjacent(_ix, _iy, _iface, _face_connections, _N=89):
 
         if loc_data == 0:
             adj_faces.append(fleft[0])
-        elif loc_data == 1:
+        if loc_data == 1:
             if fright is not None:
                 adj_faces.append(fright[0])
             else:
                 adj_faces.append(-1)  # singularity south pole.
-        elif loc_data == 2:
+        if loc_data == 2:
             if fbot is not None:
                 adj_faces.append(fbot[0])
             else:
                 adj_faces.append(-1)  # singularity south pole.
-        elif loc_data == 3:
+        if loc_data == 3:
             adj_faces.append(ftop[0])
-        elif loc_data == -1:
+        if loc_data == -1:
             adj_faces.append(loc_data)
     return adj_faces
 
@@ -2675,23 +2675,23 @@ def index_splitter(ix, iy, _N):
 
         if len(yb) == 0 and len(iiy) > 0:  # only one set of edge data
             Ii.append(list(iiy))
-        elif len(yb) > 0:
+        if len(yb) > 0:
             for k in range(len(yb) + 1):
                 if k == 0:
                     Ii.append(list(iiy[: yb[k] + 1]))
-                elif k > 0 and k < len(yb):
+                if k > 0 and k < len(yb):
                     Ii.append(list(iiy[yb[k - 1] + 1 : yb[k] + 1]))
-                elif k == len(yb):
+                if k == len(yb):
                     Ii.append(list(iiy[yb[k - 1] + 1 :]))
         if len(xb) == 0 and len(iix) > 0:
             Ii.append(list(iix))
-        elif len(xb) > 0:
+        if len(xb) > 0:
             for k in range(len(xb) + 1):
                 if k == 0:
                     Ii.append(list(iix[: xb[k] + 1]))
-                elif k > 0 and k < len(xb):
+                if k > 0 and k < len(xb):
                     Ii.append(list(iix[xb[k - 1] + 1 : xb[k] + 1]))
-                elif k == len(xb):
+                if k == len(xb):
                     Ii.append(list(iix[xb[k - 1] + 1 :]))
 
         if len(xb) + len(yb) > 0:
@@ -2888,7 +2888,7 @@ def mooring_singleface(_ds, _ix, _iy, _faces, _iface, _face_connections):
                     moor2 = ds2.mooring.values[0]
                     nds = nds.isel(mooring=slice(int(moor[-1]) + 1))  # 1st end point
                     DSt.append(ds2)
-            elif len(moors) == 2:
+            if len(moors) == 2:
                 # array ends/begins at a right edge at different axes.
                 jump = _np.array([])  # no repeated ends
                 # `ds_edge` can only extract edged-data from a single axis
@@ -2941,7 +2941,7 @@ def mooring_singleface(_ds, _ix, _iy, _faces, _iface, _face_connections):
                         _iyn[int(moor[-1]) + 1 : moor2],
                     )
                     shift = len(nds.mooring)  # shift from 0
-                elif len(_ixn) == len(moor):
+                if len(_ixn) == len(moor):
                     # No interior point
                     DS0, _eval = [], False
                 else:
