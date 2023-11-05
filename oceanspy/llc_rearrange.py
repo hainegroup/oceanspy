@@ -1947,7 +1947,7 @@ def ds_edge(_ds, _ix, _iy, _ifaces, ii, _face_topo, _dim="mooring", **kwargs):
                     nds, *a = ds_edge_sametx(
                         _ds, iX, iY, iXp1, iYp1, face1, face2, _dim, moor, **vkwargs
                     )
-                elif axis == "y":
+                if axis == "y":
                     nds, *a = ds_edge_samety(
                         _ds,
                         iX,

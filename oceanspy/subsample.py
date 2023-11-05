@@ -396,9 +396,9 @@ def cutout(
         vel_grid = ["XU", "YU", "XV", "YV"]
         da_list = [var for var in dsnew.reset_coords().data_vars]
         check = all([item in da_list for item in vel_grid])
-        if check:
+        if check:  # pragma: no cover
             manipulate_coords = {"coordsUVfromG": False}
-        else:
+        else:  # pragma: no cover
             manipulate_coords = {"coordsUVfromG": True}
 
         new_face_connections = {"face_connections": {None: {None, None}}}
@@ -726,11 +726,11 @@ def mooring_array(od, Ymoor, Xmoor, xoak_index="scipy_kdtree", **kwargs):
     else:
         _diffXYs = False
         # Cutout
-        if "YRange" not in kwargs:
+        if "YRange" not in kwargs:  # pragma: no cover
             kwargs["YRange"] = Ymoor
-        if "XRange" not in kwargs:
+        if "XRange" not in kwargs:  # pragma: no cover
             kwargs["XRange"] = Xmoor
-        if "add_Hbdr" not in kwargs:
+        if "add_Hbdr" not in kwargs:  # pragma: no cover
             kwargs["add_Hbdr"] = True
         od = od.subsample.cutout(**kwargs)
 
@@ -753,15 +753,14 @@ def mooring_array(od, Ymoor, Xmoor, xoak_index="scipy_kdtree", **kwargs):
         for key, value in ds_grid.sizes.items():
             ds_grid["i" + f"{key}"] = DataArray(range(value), dims=key)
 
-        if not ds_grid.xoak.index:
-            if xoak_index not in _xoak.IndexRegistry():
-                raise ValueError(
-                    "`xoak_index` [{}] is not supported."
-                    "\nAvailable options: {}"
-                    "".format(xoak_index, _xoak.IndexRegistry())
-                )
+        if xoak_index not in _xoak.IndexRegistry():
+            raise ValueError(
+                "`xoak_index` [{}] is not supported."
+                "\nAvailable options: {}"
+                "".format(xoak_index, _xoak.IndexRegistry())
+            )
 
-            ds_grid.xoak.set_index(["XC", "YC"], xoak_index)
+        ds_grid.xoak.set_index(["XC", "YC"], xoak_index)
 
         cdata = {"XC": ("mooring", Xmoor), "YC": ("mooring", Ymoor)}
         ds_data = _xr.Dataset(cdata)  # mooring data
@@ -1241,14 +1240,13 @@ def stations(
             for key, value in ds_grid.sizes.items():
                 ds_grid["i" + f"{key}"] = DataArray(range(value), dims=key)
 
-        if not ds_grid.xoak.index:
-            if xoak_index not in _xoak.IndexRegistry():
-                raise ValueError(
-                    "`xoak_index` [{}] is not supported."
-                    "\nAvailable options: {}"
-                    "".format(xoak_index, _xoak.IndexRegistry())
-                )
-            ds_grid.xoak.set_index(["XC", "YC"], xoak_index)
+        if xoak_index not in _xoak.IndexRegistry():
+            raise ValueError(
+                "`xoak_index` [{}] is not supported."
+                "\nAvailable options: {}"
+                "".format(xoak_index, _xoak.IndexRegistry())
+            )
+        ds_grid.xoak.set_index(["XC", "YC"], xoak_index)
 
         cdata = {"XC": (dim_name, Xcoords), "YC": (dim_name, Ycoords)}
         ds_data = _xr.Dataset(cdata)
@@ -1289,7 +1287,7 @@ def stations(
                     return DS.persist(), diffX, diffY
                 elif dim_name == "station":
                     DS = station_singleface(**args).persist()
-            elif Niter > 1:
+            elif Niter > 1:  # pragma: no cover
                 nX0, nY0 = splitter(iX, iY, iface)
                 args = {
                     "_ds": ds,

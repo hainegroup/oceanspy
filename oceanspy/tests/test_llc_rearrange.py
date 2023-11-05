@@ -7,9 +7,9 @@ import xarray as _xr
 
 # From OceanSpy
 from oceanspy import open_oceandataset
-from oceanspy.llc_rearrange import Dims  # ds_edge,
+from oceanspy.llc_rearrange import Dims
 from oceanspy.llc_rearrange import LLCtransformation as LLC
-from oceanspy.llc_rearrange import (  # ds_edge,
+from oceanspy.llc_rearrange import (
     _edge_arc_data,
     _edge_facet_data,
     arc_limits_mask,
@@ -20,6 +20,8 @@ from oceanspy.llc_rearrange import (  # ds_edge,
     cross_face_diffs,
     ds_arcedge,
     ds_edge,
+    ds_edge_sametx,
+    ds_edge_samety,
     edge_completer,
     edge_slider,
     edgesid,
@@ -3714,9 +3716,9 @@ def test_ds_arcedge(od, ix, iy, face1, face2):
         (_np.array([0]), _np.array([0]), [4], 0, {}),
         (_np.array([89]), _np.array([10]), [0, 3], 0, {"axis": "x"}),
         (_np.array([89]), _np.array([10]), [3, 9], 0, {}),
-        (_np.array([0]), _np.array([89]), [0, 1], 0, {"axis": "y"}),
-        (_np.array([0]), _np.array([89]), [7, 10], 0, {"axis": "y"}),
-        (_np.array([89]), _np.array([0]), [7, 8], 0, {"axis": "x"}),
+        (_np.array([10]), _np.array([89]), [0, 1], 0, {"axis": "y"}),
+        (_np.array([10]), _np.array([89]), [7, 10], 0, {"axis": "y"}),
+        (_np.array([89]), _np.array([10]), [7, 8], 0, {"axis": "x"}),
         (_np.array([10]), _np.array([89]), [1, 2], 0, {"axis": "y"}),
         (_np.array([10, 89]), _np.array([89, 10]), [1, 4], 0, {"axis": "x"}),
         (_np.array([10, 89]), _np.array([89, 10]), [2, 1], 1, {"axis": "y"}),
@@ -4013,3 +4015,154 @@ def test_arct_diffs(od, ix, iy, ediffX, ediffY):
     if ediffX is not None:
         assert (diffX == ediffX).all()
         assert (diffY == ediffY).all()
+
+
+y1 = [k for k in range(45, 90)]
+x1 = len(y1) * [40]
+
+# crossing in y
+Y1, X1 = _np.array(y1), _np.array(x1)
+# crossing in x
+Y2, X2 = _np.array(x1), _np.array(y1)
+
+varlist = [var for var in od._ds.reset_coords().data_vars]
+zcoords = ["Zl", "Zu", "Zp1"]
+tcoords = ["time_midp"]
+uvars = zcoords + tcoords  # u-points
+vvars = zcoords + tcoords  # v-points
+gvars = zcoords + tcoords  # corner points
+cvars = zcoords + tcoords
+for var in varlist:
+    if set(["Xp1", "Y"]).issubset(od._ds[var].dims):
+        uvars.append(var)
+    if set(["Xp1", "Yp1"]).issubset(od._ds[var].dims):
+        gvars.append(var)
+    if set(["Yp1", "X"]).issubset(od._ds[var].dims):
+        vvars.append(var)
+    if set(["Y", "X"]).issubset(od._ds[var].dims):
+        cvars.append(var)
+
+vkwargs = {"u": uvars, "v": vvars, "g": gvars, "c": cvars}
+
+# face 1
+faces1 = [1, 2]  # crosses in y - same topo
+faces2 = [7, 10]  # corsses in y - diff topo
+
+
+@pytest.mark.parametrize("od", [od])
+@pytest.mark.parametrize(
+    "_ix, _iy, faces, vkwargs",
+    [
+        (X1, Y1, faces1, vkwargs),
+        (X1, Y1, faces2, vkwargs),
+    ],
+)
+def test_ds_edge_samety(od, _ix, _iy, faces, vkwargs):
+    _dim_name = "mooring"
+    _ds = od._ds
+    new_dim = _xr.DataArray(_np.arange(len(_ix)), dims=(_dim_name))
+    y = _xr.DataArray(_np.arange(1), dims=("y"))
+    x = _xr.DataArray(_np.arange(1), dims=("x"))
+    yp1 = _xr.DataArray(_np.arange(2), dims=("yp1"))
+    xp1 = _xr.DataArray(_np.arange(2), dims=("xp1"))
+    # Transform indexes in DataArray
+    iY = _xr.DataArray(
+        _np.reshape(_iy, (len(new_dim), len(y))),
+        coords={_dim_name: new_dim, "y": y},
+        dims=(_dim_name, "y"),
+    )
+    iX = _xr.DataArray(
+        _np.reshape(_ix, (len(new_dim), len(x))),
+        coords={_dim_name: new_dim, "x": x},
+        dims=(_dim_name, "x"),
+    )
+    iYp1 = _xr.DataArray(
+        _np.stack((_iy, _iy + 1), 1),
+        coords={_dim_name: new_dim, "yp1": yp1},
+        dims=(_dim_name, "yp1"),
+    )
+    iXp1 = _xr.DataArray(
+        _np.stack((_ix, _ix + 1), 1),
+        coords={_dim_name: new_dim, "xp1": xp1},
+        dims=(_dim_name, "xp1"),
+    )
+
+    # crossing in y
+    Yval = iYp1.where(iYp1 == 90, drop=True)
+    moor = Yval[_dim_name]
+
+    nds, vds, mds = ds_edge_samety(
+        _ds,
+        iX,
+        iY,
+        _ix,
+        xp1,
+        iXp1,
+        iYp1,
+        faces[0],
+        faces[1],
+        "mooring",
+        moor,
+        **vkwargs,
+    )
+    assert (nds.mooring == moor).values.all()
+    assert (vds.mooring == mds.mooring).values.all()
+    assert len(vds.yp1) == 1
+    assert vds.yp1.values == 1
+    assert mds.yp1.values == 0
+    assert len(mds.yp1) == 1
+    assert (mds.xp1.values == _np.array([0, 1])).all()
+    assert len(vds.xp1) == 2
+
+
+@pytest.mark.parametrize("od", [od])
+@pytest.mark.parametrize(
+    "_ix, _iy, faces, vkwargs",
+    [
+        (Y1, X1, [1, 4], vkwargs),
+    ],
+)
+def test_ds_edge_sametx(od, _ix, _iy, faces, vkwargs):
+    _dim_name = "mooring"
+    _ds = od._ds
+    new_dim = _xr.DataArray(_np.arange(len(_ix)), dims=(_dim_name))
+    y = _xr.DataArray(_np.arange(1), dims=("y"))
+    x = _xr.DataArray(_np.arange(1), dims=("x"))
+    yp1 = _xr.DataArray(_np.arange(2), dims=("yp1"))
+    xp1 = _xr.DataArray(_np.arange(2), dims=("xp1"))
+    # Transform indexes in DataArray
+    iY = _xr.DataArray(
+        _np.reshape(_iy, (len(new_dim), len(y))),
+        coords={_dim_name: new_dim, "y": y},
+        dims=(_dim_name, "y"),
+    )
+    iX = _xr.DataArray(
+        _np.reshape(_ix, (len(new_dim), len(x))),
+        coords={_dim_name: new_dim, "x": x},
+        dims=(_dim_name, "x"),
+    )
+    iYp1 = _xr.DataArray(
+        _np.stack((_iy, _iy + 1), 1),
+        coords={_dim_name: new_dim, "yp1": yp1},
+        dims=(_dim_name, "yp1"),
+    )
+    iXp1 = _xr.DataArray(
+        _np.stack((_ix, _ix + 1), 1),
+        coords={_dim_name: new_dim, "xp1": xp1},
+        dims=(_dim_name, "xp1"),
+    )
+
+    # crossing in y
+    Xval = iXp1.where(iXp1 == 90, drop=True)
+    moor = Xval[_dim_name]
+
+    nds, vds, mds = ds_edge_sametx(
+        _ds, iX, iY, iXp1, iYp1, faces[0], faces[1], "mooring", moor, **vkwargs
+    )
+    assert (nds.mooring == moor).values.all()
+    assert (vds.mooring == mds.mooring).values.all()
+    assert vds.xp1.values == 1
+    assert mds.xp1.values == 0
+    assert len(mds.xp1) == 1
+    assert (mds.yp1.values == _np.array([0, 1])).all()
+    assert len(vds.yp1) == 2
