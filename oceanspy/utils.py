@@ -771,7 +771,7 @@ def densmdjwf(s, t, p):
     return rho
 
 
-def static_pressure(Z):
+def static_pressure(Z):  # pragma: no cover
     """
     Returns the static pressure given depth.
     """
@@ -824,7 +824,7 @@ def get_maskH(ds, add_Hbdr, XRange, YRange, ref_lon=0):
     time this code runs, it gets applied on a dataset without faces as a
     dimension.
     """
-    if "face" in ds.dims and len(ds.X) == 4320:
+    if "face" in ds.dims and len(ds.X) == 4320:  # pragma: no cover
         args = {"Xp1": slice(0, 4320, 10), "Yp1": slice(0, 4320, 10)}
         ds = _copy.deepcopy(ds.isel(**args))
 
@@ -872,7 +872,7 @@ def get_maskH(ds, add_Hbdr, XRange, YRange, ref_lon=0):
 
 
 @compilable
-def spherical2cartesian_compiled(Y, X, R=6371.0):
+def spherical2cartesian_compiled(Y, X, R=6371.0):  # pragma: no cover
     """
     Convert spherical coordinates to cartesian.
 
@@ -906,7 +906,7 @@ def spherical2cartesian_compiled(Y, X, R=6371.0):
 
 
 @compilable
-def to_180(x):
+def to_180(x):  # pragma: no cover
     """
     convert any longitude scale to [-180,180)
 

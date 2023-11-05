@@ -22,6 +22,7 @@ from oceanspy.llc_rearrange import (
     ds_edge,
     ds_edge_sametx,
     ds_edge_samety,
+    ds_splitarray,
     edge_completer,
     edge_slider,
     edgesid,
@@ -4166,3 +4167,59 @@ def test_ds_edge_sametx(od, _ix, _iy, faces, vkwargs):
     assert len(mds.xp1) == 1
     assert (mds.yp1.values == _np.array([0, 1])).all()
     assert len(vds.yp1) == 2
+
+
+# face 1
+y11 = [k for k in range(0, 11)]
+x11 = [49 + 4 * k for k in range(11)]
+
+y12 = [k for k in range(11, 16)]
+x12 = len(y12) * [89]
+
+x13 = [k for k in range(45, 60)]
+y13 = len(x13) * [25]
+
+y14 = [k for k in range(25, 35)]
+x14 = len(y14) * [89]
+
+x15 = [k for k in range(45, 60)]
+y15 = len(x15) * [45]
+
+x16 = [k for k in range(70, 80)]
+y16 = len(x16) * [89]
+
+x17 = [k for k in range(80, 85)]
+y17 = len(x17) * [79]
+
+x1 = x11 + x12 + x13 + x14 + x15 + x16 + x17
+y1 = y11 + y12 + y13 + y14 + y15 + y16 + y17
+
+faces1 = [1, 2]
+
+
+@pytest.mark.parametrize("od", [od])
+@pytest.mark.parametrize(
+    "ix, iy, faces, iface",
+    [
+        (x1, y1, faces1, 1),
+        (x1[::-1], y1[::-1], faces1, 1),
+    ],
+)
+def test_ds_splitter(od, ix, iy, faces, iface):
+    _ds = od._ds.drop_vars(["Xind", "Yind"])
+    face_connections = od.face_connections["face"]
+    _Nx = len(_ds.X) - 1
+    _ixn, _iyn = connector(ix, iy)
+    nI = index_splitter(_ixn, _iyn, _Nx)
+    args = {
+        "_ds": _ds,
+        "_iXn": _ixn,
+        "_iYn": _iyn,
+        "_nI": nI,
+        "_faces": faces,
+        "_iface": iface,
+        "_face_connections": face_connections,
+        "_dim_name": "mooring",
+    }
+    dsf = ds_splitarray(**args)
+    assert len(_ixn) == len(dsf.mooring)
