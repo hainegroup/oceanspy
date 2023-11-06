@@ -2888,7 +2888,7 @@ def mooring_singleface(_ds, _ix, _iy, _faces, _iface, _face_connections):
                     moor2 = ds2.mooring.values[0]
                     nds = nds.isel(mooring=slice(int(moor[-1]) + 1))  # 1st end point
                     DSt.append(ds2)
-            if len(moors) == 2:
+            elif len(moors) == 2:
                 # array ends/begins at a right edge at different axes.
                 jump = _np.array([])  # no repeated ends
                 # `ds_edge` can only extract edged-data from a single axis
@@ -2941,7 +2941,7 @@ def mooring_singleface(_ds, _ix, _iy, _faces, _iface, _face_connections):
                         _iyn[int(moor[-1]) + 1 : moor2],
                     )
                     shift = len(nds.mooring)  # shift from 0
-                if len(_ixn) == len(moor):
+                elif len(_ixn) == len(moor):
                     # No interior point
                     DS0, _eval = [], False
                 else:
