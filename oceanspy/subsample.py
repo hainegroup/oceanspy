@@ -890,8 +890,11 @@ def mooring_array(od, Ymoor, Xmoor, xoak_index="scipy_kdtree", **kwargs):
         else:  # pragma: no cover
             manipulate_coords = {"coordsUVfromG": True}
         od = od.manipulate_coords(**manipulate_coords)
-
-    od._ds = od._ds.set_coords(coords + ["mooring_midp_dist"])
+        od._ds = od._ds.set_coords(
+            coords + vel_grid + ["mooring_dist, mooring_midp_dist"]
+        )
+    else:
+        od._ds = od._ds.set_coords(coords + ["mooring_midp_dist"])
 
     return od
 
