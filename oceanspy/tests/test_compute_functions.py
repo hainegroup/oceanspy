@@ -388,27 +388,6 @@ def test_mooring_volume_transport(od_in, mooring, closed, flippedX, flippedY):
         Xmin, Xmax = -80, 0
         Ymin, Ymax = 35, 35
 
-        # compute missing (for testing purposes assume uniform)
-
-        Scoords = {
-            "Z": od_in._ds.Z.values,
-            "face": od_in._ds.face.values,
-            "Yp1": od_in._ds.Yp1.values,
-            "X": od_in._ds.X.values,
-        }
-        Wcoords = {
-            "Z": od_in._ds.Z.values,
-            "face": od_in._ds.face.values,
-            "Y": od_in._ds.Yp1.values,
-            "Xp1": od_in._ds.X.values,
-        }
-
-        Stmp = xr.DataArray(1, coords=Scoords, dims={"Z", "face", "Yp1", "X"})
-        Wtmp = xr.DataArray(1, coords=Wcoords, dims={"Z", "face", "Y", "Xp1"})
-
-        od_in._ds["HFacS"] = Stmp
-        od_in._ds["HFacW"] = Wtmp
-
     if mooring is True:
         if not closed:
             X = [Xmin, Xmax]
