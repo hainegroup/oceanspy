@@ -41,6 +41,7 @@ from .llc_rearrange import (
     cross_face_diffs,
     eval_dataset,
     fill_path,
+    flip_v,
     mates,
     mooring_singleface,
     splitter,
@@ -1294,11 +1295,15 @@ def stations(
                 if dim_name == "mooring":
                     nix, niy = connector(iX, iY)
                     DS, nix, niy = mooring_singleface(**args)
+                    if order_iface[0] in _np.arange(6, 13):
+                        DS = flip_v(mates(DS))
                     diffX, diffY, *a = cross_face_diffs(
-                        ds, nix, niy, order_iface, 0, face_connections
+                        DS, nix, niy, order_iface, 0, face_connections
                     )
                     return DS.persist(), diffX, diffY
                 if dim_name == "station":  # pragma: no cover
+                    if order_iface[0] in _np.arange(6, 13):
+                        DS = flip_v(mates(DS))
                     DS = station_singleface(**args).persist()
             if Niter > 1:
                 nX0, nY0 = splitter(iX, iY, iface)
@@ -1315,6 +1320,8 @@ def stations(
                         _returns = False
                         args1 = {"_ix": nX0[ii], "_iy": nY0[ii], "_iface": ii}
                         dse = station_singleface(**{**args, **args1})
+                        if order_iface[ii] in _np.arange(6, 13):
+                            dse = flip_v(mates(dse))
                     if dim_name == "mooring":
                         _returns = True
                         nix, niy = fill_path(
@@ -1322,6 +1329,8 @@ def stations(
                         )
                         args1 = {"_ix": nix, "_iy": niy, "_iface": ii}
                         dse, nix, niy = mooring_singleface(**{**args, **args1})
+                        if order_iface[ii] in _np.arange(6, 13):
+                            dse = flip_v(mates(dse))
                         diX, diY, *a = cross_face_diffs(
                             ds, nix, niy, order_iface, ii, face_connections
                         )
