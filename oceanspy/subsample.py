@@ -1254,7 +1254,7 @@ def stations(
         # find nearest points to given data.
         nds = ds_grid.xoak.sel(XC=ds_data["XC"], YC=ds_data["YC"])
 
-        if "face" not in ds.dims:
+        if "face" not in ds.dims:  # pragma: no cover
             iX, iY = (nds[f"{i}"].data for i in ("X", "Y"))
             DS = eval_dataset(ds, iX, iY, _dim_name=dim_name)
             DS = DS.squeeze()
@@ -1285,7 +1285,7 @@ def stations(
                         ds, nix, niy, order_iface, 0, face_connections
                     )
                     return DS.persist(), diffX, diffY
-                if dim_name == "station":
+                if dim_name == "station":  # pragma: no cover
                     DS = station_singleface(**args).persist()
             if Niter > 1:
                 nX0, nY0 = splitter(iX, iY, iface)

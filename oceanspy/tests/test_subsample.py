@@ -590,6 +590,12 @@ for j in range(len(Xc[0])):
     [
         {"Ycoords": None, "Xcoords": None},
         {"Ycoords": lats76N, "Xcoords": lons76N},
+        {
+            "Ycoords": lats76N,
+            "Xcoords": lons76N,
+            "Zcoords": 0,
+            "tcoords": "1992-01-16T12",
+        },
         {"Ycoords": lats76N, "Xcoords": lons76N, "xoak_index": "invalid"},
         {"Ycoords": lats_6E, "Xcoords": lons6E},
         {"Ycoords": lats_6E, "Xcoords": lons90W},
