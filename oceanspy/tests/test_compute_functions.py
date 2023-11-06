@@ -43,6 +43,11 @@ od_curv = open_oceandataset.from_netcdf("{}MITgcm_curv_nc.nc" "".format(Datadir)
 
 ECCO_url = "{}catalog_ECCO.yaml".format(Datadir)
 ECCOod = open_oceandataset.from_catalog("LLC", ECCO_url)
+# rename coord variables
+ECCOod._ds = ECCOod._ds.rename_vars(
+    {"hFacS": "HFacS", "hFacW": "HFacW", "hFacC": "HFacC"}
+)
+
 
 # Aliased od
 ds = od.dataset
