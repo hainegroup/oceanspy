@@ -883,6 +883,16 @@ def mooring_array(od, Ymoor, Xmoor, xoak_index="scipy_kdtree", **kwargs):
                 "diffX and diffY have inconsistent lengths with mooring dimension"
             )
 
+        # compute missing grid velocities from datasets if necessary
+        vel_grid = ["XU", "YU", "XV", "YV"]
+        da_list = [var for var in od._ds.reset_coords().data_vars]
+        check = all([item in da_list for item in vel_grid])
+        if check:  # pragma: no cover
+            manipulate_coords = {"coordsUVfromG": False}
+        else:  # pragma: no cover
+            manipulate_coords = {"coordsUVfromG": True}
+        od = od.manipulate_coords(**manipulate_coords)
+
     return od
 
 
