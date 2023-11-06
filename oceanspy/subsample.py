@@ -854,9 +854,7 @@ def mooring_array(od, Ymoor, Xmoor, xoak_index="scipy_kdtree", **kwargs):
         attrs=od._ds["mooring_dist"].attrs,
     )
     od = od.merge_into_oceandataset(dist_midp.rename("mooring_midp_dist"))
-    od._ds = od._ds.set_coords(
-        [coord for coord in od._ds.coords] + ["mooring_midp_dist"]
-    )
+
     if _diffXYs:  # pragma: no cover
         moor_midp = od._ds.mooring_midp.values
         if diffX.size == len(moor_midp):
@@ -892,7 +890,8 @@ def mooring_array(od, Ymoor, Xmoor, xoak_index="scipy_kdtree", **kwargs):
         else:  # pragma: no cover
             manipulate_coords = {"coordsUVfromG": True}
         od = od.manipulate_coords(**manipulate_coords)
-        od._ds = od._ds.set_coords(coords)
+
+    od._ds = od._ds.set_coords(coords + ["mooring_midp_dist"])
 
     return od
 
