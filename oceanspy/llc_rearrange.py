@@ -1112,7 +1112,7 @@ def _LLC_check_sizes(_DS):
                 _DS = _copy.deepcopy(_DS.isel(**arg))
                 Nx_g = len(_DS[dims_g.X])
 
-    if Ny_c == Ny_g:  # pragma: no cover
+    if Ny_c == Ny_g:
         arg = {dims_c.Y: slice(0, -1)}
         _DS = _copy.deepcopy(_DS.isel(**arg))
         Ny_c = len(_DS[dims_c.Y])

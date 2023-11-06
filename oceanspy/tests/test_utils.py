@@ -91,6 +91,7 @@ coords9 = '"Point","coordinates":[-169.23960833202577,22.865677261831266]}'
     ],
 )
 def test_viewer_to_range(coords, types, lon, lat):
+
     if types is not None:
         if isinstance(coords, list):
             p = [{"type": types, "coordinates": list(coords)}]
