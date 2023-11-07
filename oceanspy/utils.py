@@ -19,19 +19,6 @@ try:
 except ImportError:  # pragma: no cover
     pass
 
-try:
-    import numba
-
-    has_numba = True
-except ImportError:  # pragma: no cover
-    has_numba = False
-
-
-def compilable(f):  # pragma: no cover
-    if has_numba:
-        return numba.njit(f)
-    return f
-
 
 def viewer_to_range(p):
     """
@@ -869,91 +856,6 @@ def get_maskH(ds, add_Hbdr, XRange, YRange, ref_lon=0):
     )
     dmaskH = maskH.where(maskH.compute(), drop=True)
     return maskH, dmaskH, XRange, YRange
-
-
-@compilable
-def spherical2cartesian_compiled(Y, X, R=6371.0):  # pragma: no cover
-    """
-    Convert spherical coordinates to cartesian.
-
-    Parameters
-    ----------
-    Y: np.array
-        Spherical Y coordinate (latitude)
-    X: np.array
-        Spherical X coordinate (longitude)
-    R: scalar
-        Earth radius in km
-        If None, use geopy default
-    Returns
-    -------
-    x: np.array
-        Cartesian x coordinate
-    y: np.array
-        Cartesian y coordinate
-    z: np.array
-        Cartesian z coordinate
-    """
-
-    # Convert
-    Y_rad = _np.deg2rad(Y)
-    X_rad = _np.deg2rad(X)
-    x = R * _np.cos(Y_rad) * _np.cos(X_rad)
-    y = R * _np.cos(Y_rad) * _np.sin(X_rad)
-    z = R * _np.sin(Y_rad)
-
-    return x, y, z
-
-
-@compilable
-def to_180(x):  # pragma: no cover
-    """
-    convert any longitude scale to [-180,180)
-
-    Parameters
-    ----------
-    x: float ,numpy.array
-        angles in degree
-
-    Returns
-    -------
-    redefined_x: float,numpy.ndarray
-        the same angle coverted to [-180,180)
-    """
-    x = x % 360
-    return x + (-1) * (x // 180) * 360
-
-
-def get_combination(lst, select):  # pragma: no cover
-    """
-    Iteratively find all the combination that
-    has (select) amount of elements
-    and every element belongs to lst
-
-    Parameters
-    ----------
-    lst: list
-        a iterable object to select from
-    select: int
-        the number of objects to select
-
-    Returns
-    -------
-    com_list: list
-        a list of all the possible combinations
-    """
-    # TODO: see if the one in itertools can replace this
-    if select == 1:
-        return [[num] for num in lst]
-    else:
-        the_lst = []
-        for i, num in enumerate(lst):
-            sub_lst = get_combination(lst[i + 1 :], select - 1)
-            for com in sub_lst:
-                com.append(num)
-            #             print(sub_lst)
-            the_lst += sub_lst
-        return the_lst
 
 
 def reset_dim(_ds, N, dim="mooring"):
