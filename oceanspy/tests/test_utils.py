@@ -7,6 +7,7 @@ from oceanspy.utils import (
     _reset_range,
     cartesian_path,
     circle_path_array,
+    connector,
     great_circle_path,
     spherical2cartesian,
     viewer_to_range,
@@ -15,15 +16,6 @@ from oceanspy.utils import (
 
 def test_RNone():
     spherical2cartesian(1, 1)
-
-
-def test_error_viewer_to_range():
-    with pytest.raises(TypeError):
-        viewer_to_range("does not eval to a list")
-        viewer_to_range(0)
-        viewer_to_range(["not from viewer"])
-        viewer_to_range([{"type": "other"}])
-        viewer_to_range([{"type": "Polygon", "coordinates": "a"}])
 
 
 def test_error_path():
@@ -75,6 +67,10 @@ coords4 = '[{"type":"Point","coordinates":[-169.23960833202577,22.86567726183126
 coords5 = '[{"type":"Point","coordinates":[636.7225446274502, -56.11128546740994]}]'
 coords6 = '[{"type":"Point","coordinates":[754.2277421326479, -57.34299561290217]}]'
 coords7 = '[{"type":"Point","coordinates":[-424.42989807993234, 37.87263032287052]}]'
+coords8 = (
+    '[{"type":"not valid","coordinates":[-424.42989807993234, 37.87263032287052]}]'
+)
+coords9 = '"Point","coordinates":[-169.23960833202577,22.865677261831266]}'
 
 
 @pytest.mark.parametrize(
@@ -90,16 +86,22 @@ coords7 = '[{"type":"Point","coordinates":[-424.42989807993234, 37.8726303228705
         (coords5, "Point", [-83.27745537254975], [-56.11128546740994]),
         (coords6, "Point", [34.227742132647904], [-57.34299561290217]),
         (coords7, "Point", [-64.42989807993234], [37.87263032287052]),
+        (coords8, None, None, None),
+        (coords9, None, None, None),
     ],
 )
 def test_viewer_to_range(coords, types, lon, lat):
-    if isinstance(coords, list):
-        p = [{"type": types, "coordinates": list(coords)}]
-    elif isinstance(coords, str):
-        p = coords
-    x, y = viewer_to_range(p)
-    assert x == lon
-    assert y == lat
+    if types is not None:
+        if isinstance(coords, list):
+            p = [{"type": types, "coordinates": list(coords)}]
+        elif isinstance(coords, str):
+            p = coords
+        x, y = viewer_to_range(p)
+        assert x == lon
+        assert y == lat
+    else:
+        with pytest.raises(TypeError):
+            viewer_to_range(coords)
 
 
 X0 = _np.array([161, -161])  # track begins west, ends east
@@ -137,3 +139,21 @@ def test_reset_range(XRange, x0, expected_ref):
     else:
         assert x_range is None
     assert _np.round(ref_lon, 2) == expected_ref
+
+
+x1 = _np.array([k for k in range(0, 85, 10)])
+y1 = [int(k) for k in _np.linspace(20, 40, len(x1))]
+
+
+@pytest.mark.parametrize(
+    "x, y",
+    [(x1, y1), (x1[::-1], y1), (x1[::-1], y1[::-1]), (x1, y1[::-1]), ([50], [50])],
+)
+def test_connector(x, y):
+    xn, yn = connector(x, y)
+    assert len(xn) == len(yn)
+    assert set(x).issubset(xn)
+    assert set(y).issubset(yn)
+    if len(xn) > 1:
+        diffs = abs(_np.diff(xn)) + abs(_np.diff(yn))
+        assert _np.max(diffs) == _np.min(diffs) == 1

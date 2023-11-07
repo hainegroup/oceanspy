@@ -10,7 +10,7 @@ import numpy as _np
 # Required dependencies (private)
 import xarray as _xr
 
-# From oceanspy (private)
+# from .llc_rearrange import face_edge_check
 from ._ospy_utils import _check_instance
 
 # Recommended dependencies (private)
@@ -18,19 +18,6 @@ try:
     from geopy.distance import great_circle as _great_circle
 except ImportError:  # pragma: no cover
     pass
-
-try:
-    import numba
-
-    has_numba = True
-except ImportError:
-    has_numba = False
-
-
-def compilable(f):
-    if has_numba:
-        return numba.njit(f)
-    return f
 
 
 def viewer_to_range(p):
@@ -53,7 +40,7 @@ def viewer_to_range(p):
         if p[0] == "[" and p[-1] == "]":
             p = _ast.literal_eval(p)  # turn string into list
         else:
-            TypeError("not a type extracted by poseidon viewer")
+            raise TypeError("not a type extracted by poseidon viewer")
     _check_instance({"p": p}, {"p": ["list"]})
     _check_instance({"p[0]": p[0]}, {"p[0]": ["dict"]})
     _check_instance({"type": p[0]["type"]}, {"type": "str"})
@@ -69,11 +56,11 @@ def viewer_to_range(p):
 
     if p_type == "Polygon":
         coords = p[0]["coordinates"][0]
-    elif p_type == "Point":
+    if p_type == "Point":
         coords = []
         for i in range(len(p)):
             coords.append(p[i]["coordinates"])
-    elif p_type == "LineString":
+    if p_type == "LineString":  # pragma : no cover
         coords = p[0]["coordinates"]
 
     lon = []
@@ -161,11 +148,11 @@ def _reset_range(xn):
                 nxn[ll] = nxn[ll] - 360
                 X = _np.min(nxn) + 360, _np.max(nxn)
                 _ref_lon = X[0] - (X[0] - X[1]) / 3
-            elif all(ind[0] == i for i in ind) and ind[0] == 1:  # Atlantic
+            if all(ind[0] == i for i in ind) and ind[0] == 1:  # Atlantic
                 X = _np.min(xn), _np.max(xn)
             else:
                 X = None
-    elif cross.size == 0 or xn.size == 2:
+    if cross.size == 0 or xn.size == 2:
         if xn.size == 2:
             X = xn[0], xn[1]
             if xn[0] > xn[1]:
@@ -771,7 +758,7 @@ def densmdjwf(s, t, p):
     return rho
 
 
-def static_pressure(Z):
+def static_pressure(Z):  # pragma: no cover
     """
     Returns the static pressure given depth.
     """
@@ -824,7 +811,7 @@ def get_maskH(ds, add_Hbdr, XRange, YRange, ref_lon=0):
     time this code runs, it gets applied on a dataset without faces as a
     dimension.
     """
-    if "face" in ds.dims and len(ds.X) == 4320:
+    if "face" in ds.dims and len(ds.X) == 4320:  # pragma: no cover
         args = {"Xp1": slice(0, 4320, 10), "Yp1": slice(0, 4320, 10)}
         ds = _copy.deepcopy(ds.isel(**args))
 
@@ -871,86 +858,77 @@ def get_maskH(ds, add_Hbdr, XRange, YRange, ref_lon=0):
     return maskH, dmaskH, XRange, YRange
 
 
-@compilable
-def spherical2cartesian_compiled(Y, X, R=6371.0):
+def reset_dim(_ds, N, dim="mooring"):
+    """resets the dimension mooring by shifting it by a value set by N"""
+    _ds["n" + dim] = N + _ds[dim]
+    _ds = _ds.swap_dims({dim: "n" + dim}).drop_vars(dim).rename({"n" + dim: dim})
+
+    return _ds
+
+
+def diff_and_inds_where_insert(ix, iy):
+    dx, dy = (_np.diff(ii) for ii in (ix, iy))
+    inds = _np.argwhere(_np.abs(dx) + _np.abs(dy) > 1).squeeze()
+    return dx, dy, inds
+
+
+def remove_repeated(_iX, _iY):
+    """Attemps to remove repeated coords not adjascent to each other,
+    while retaining the trajectory property of being simply connected
+    (i.e. the distance between each index point is one). If it cannot
+    remove repeated coordinate values, returns the original array.
     """
-    Convert spherical coordinates to cartesian.
+    _ix, _iy = _iX, _iY
+    nn = []
+    for n in range(len(_ix)):
+        val = _np.where(abs(_ix - _ix[n]) + abs(_iy - _iy[n]) == 0)[0]
+        # select only repeated values with deg of multiplicity = 2
+        if len(val) == 2:
+            if len(nn) == 0:
+                nn.append(list(val))
+            if len(nn) > 0 and (val != nn).all():
+                nn.append(list(val))
+    if _np.array(nn).size:
+        dn = [nn[i][1] - nn[i][0] for i in range(len(nn))]
+        # remove if the distance between repeated coords is 2
+        mask = _np.where(_np.array(dn) == 2)[0]
+        remove = [nn[i][1] for i in mask]
+        _ix, _iy = (_np.delete(ii, remove) for ii in (_ix, _iy))
+        # find the hole left
+        mask = _np.abs(_np.diff(_ix)) + _np.abs(_np.diff(_iy)) == 2
+        # delete hole left behind
+        _ix, _iy = (_np.delete(ii, _np.argwhere(mask)) for ii in (_ix, _iy))
+        # verify path is simply connected
+        dx, dy, inds = diff_and_inds_where_insert(_ix, _iy)
+        if inds.size:  # pragma: no cover
+            _ix = _iX
+            _iY = _iY
+    return _ix, _iy
 
-    Parameters
-    ----------
-    Y: np.array
-        Spherical Y coordinate (latitude)
-    X: np.array
-        Spherical X coordinate (longitude)
-    R: scalar
-        Earth radius in km
-        If None, use geopy default
-    Returns
-    -------
-    x: np.array
-        Cartesian x coordinate
-    y: np.array
-        Cartesian y coordinate
-    z: np.array
-        Cartesian z coordinate
+
+def connector(_ix, _iy):
     """
+    Takes a collection of points defined in logical space (ix, iy), each of
+    equal length arrays, and returns a new continous array (_ix, _iy) that
+    contains the original elements now with unit spacing.
 
-    # Convert
-    Y_rad = _np.deg2rad(Y)
-    X_rad = _np.deg2rad(X)
-    x = R * _np.cos(Y_rad) * _np.cos(X_rad)
-    y = R * _np.cos(Y_rad) * _np.sin(X_rad)
-    z = R * _np.sin(Y_rad)
-
-    return x, y, z
-
-
-@compilable
-def to_180(x):
     """
-    convert any longitude scale to [-180,180)
-
-    Parameters
-    ----------
-    x: float ,numpy.array
-        angles in degree
-
-    Returns
-    -------
-    redefined_x: float,numpy.ndarray
-        the same angle coverted to [-180,180)
-    """
-    x = x % 360
-    return x + (-1) * (x // 180) * 360
-
-
-def get_combination(lst, select):
-    """
-    Iteratively find all the combination that
-    has (select) amount of elements
-    and every element belongs to lst
-
-    Parameters
-    ----------
-    lst: list
-        a iterable object to select from
-    select: int
-        the number of objects to select
-
-    Returns
-    -------
-    com_list: list
-        a list of all the possible combinations
-    """
-    # TODO: see if the one in itertools can replace this
-    if select == 1:
-        return [[num] for num in lst]
+    if len(_ix) == len(_iy) == 1:
+        return _ix, _iy
     else:
-        the_lst = []
-        for i, num in enumerate(lst):
-            sub_lst = get_combination(lst[i + 1 :], select - 1)
-            for com in sub_lst:
-                com.append(num)
-            #             print(sub_lst)
-            the_lst += sub_lst
-        return the_lst
+        mask = _np.abs(_np.diff(_ix)) + _np.abs(_np.diff(_iy)) == 0
+        _ix, _iy = (_np.delete(ii, _np.argwhere(mask)) for ii in (_ix, _iy))
+
+        # Initialize variables"
+        dx, dy, inds = diff_and_inds_where_insert(_ix, _iy)
+        while inds.size:
+            dx, dy = (di[inds] for di in (dx, dy))
+            mask = _np.abs(dx * dy) == 1
+            _ix = _np.insert(_ix, inds + 1, _ix[inds] + (dx / 2).astype(int))
+            _iy = _np.insert(
+                _iy, inds + 1, _iy[inds] + _np.where(mask, dy, (dy / 2).astype(int))
+            )
+            # Prepare for next iteration
+            dx, dy, inds = diff_and_inds_where_insert(_ix, _iy)
+        _iX, _iY = remove_repeated(_ix, _iy)
+        return _iX, _iY

@@ -9,7 +9,7 @@ dependencies:
 - xarray
 - xoak
 - cartopy
-- scipy < 1.11
+- scipy
 - intake-xarray
 - geopy
 - xesmf > 0.6.3
@@ -29,3 +29,4 @@ dependencies:
 - pooch
 - pip
 - xmitgcm
+- shapely

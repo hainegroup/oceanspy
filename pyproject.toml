@@ -17,7 +17,8 @@ classifiers = [
 dependencies = [
   "dask",
   "xarray >= 0.14.1",
-  "xgcm >= 0.2.0"
+  "xgcm >= 0.2.0",
+  "shapely"
 ]
 description = "A Python package to facilitate ocean model data analysis and visualization."
 dynamic = ["version"]

@@ -1,4 +1,5 @@
 import copy as _copy
+import random as rand
 
 import numpy as _np
 import pytest
@@ -13,20 +14,45 @@ from oceanspy.llc_rearrange import (
     _edge_facet_data,
     arc_limits_mask,
     arct_connect,
+    arct_diffs,
+    arctic_eval,
     combine_list_ds,
+    cross_face_diffs,
+    ds_arcedge,
+    ds_edge,
+    ds_edge_sametx,
+    ds_edge_samety,
+    ds_splitarray,
+    edge_completer,
+    edge_slider,
+    edgesid,
+    face_adjacent,
+    face_direction,
+    fdir_completer,
+    fill_path,
+    index_splitter,
     mask_var,
     mates,
+    mooring_singleface,
+    order_from_indexing,
     rotate_dataset,
     rotate_vars,
     shift_dataset,
     shift_list_ds,
     slice_datasets,
+    splitter,
+    station_singleface,
 )
-from oceanspy.utils import _reset_range, get_maskH
+from oceanspy.utils import _reset_range, connector, get_maskH
 
 Datadir = "./oceanspy/tests/Data/"
 ECCO_url = "{}catalog_ECCO.yaml".format(Datadir)
 od = open_oceandataset.from_catalog("LLC", ECCO_url)
+od._ds = od._ds.rename_vars({"hFacS": "HFacS", "hFacW": "HFacW", "hFacC": "HFacC"})
+co_list = [var for var in od._ds.data_vars if "time" not in od._ds[var].dims]
+od._ds = od._ds.set_coords(co_list)
+if "timestep" in od._ds.data_vars:
+    od._ds = od._ds.drop_vars(["timestep"])
 
 Nx = od._ds.dims["X"]
 Ny = od._ds.dims["Y"]
@@ -2185,9 +2211,20 @@ def test_original_dims(od, var, expected):
     assert dims == expected
 
 
+@pytest.mark.parametrize("ds", [od._ds.isel(face=0).drop_vars(["face"])])
+def test_error_face(ds):
+    with pytest.raises(ValueError):
+        LLC.arctic_crown(ds)
+
+
+@pytest.mark.parametrize("ds", [od._ds])
+@pytest.mark.parametrize("XRange, YRange", [([-11111, 1111], [-999, 999])])
+def test_error_range(ds, XRange, YRange):
+    with pytest.raises(ValueError):
+        LLC.arctic_crown(ds, XRange=XRange, YRange=YRange)
+
+
 faces = [k for k in range(13)]
-
-
 expected = [2, 5, 7, 10]  # most faces that connect with arctic cap face=6
 acshape = (Nx // 2, Ny)
 cuts = [[0, 28], [0, 0], [0, 0], [0, 0]]
@@ -2296,6 +2333,7 @@ _YRanges_ = YRanges_A + YRanges_P + YRanges_I
         (od, [0, 9, 12], varList, None, None, 0, 268, 0, 89),
         (od, [0, 3, 12], varList, None, None, 0, 268, 0, 89),
         (od, [0], varList[0], None, None, 0, 88, 0, 88),
+        (od, [0], None, None, None, 0, 88, 0, 88),
         (od, [1], varList[0], None, None, 0, 88, 0, 88),
         (od, [2], varList[0], None, None, 0, 88, 0, 88),
         (od, [3], varList[0], None, None, 0, 88, 0, 88),
@@ -2329,11 +2367,14 @@ _YRanges_ = YRanges_A + YRanges_P + YRanges_I
         (od, None, varList, [-120, -60], [58, 85.2], 0, 63, 0, 69),
         (od, None, varList, [160, -150], [58, 85.2], 0, 53, 0, 69),
         (od, None, varList, [60, 130], [58, 85.2], 0, 73, 0, 69),
+        (od, None, None, [260, 330], [58, 85.2], 0, 73, 0, 69),
+        (od, None, None, [20, 30], [5008, 5.2], 0, 73, 0, 69),
     ],
 )
 def test_transformation(od, faces, varList, XRange, YRange, X0, X1, Y0, Y1):
     """Test the transformation fn by checking the final dimensions."""
-    ds = od._ds.reset_coords().drop_vars({"hFacC", "hFacS", "hFacW"})
+    ds = _copy.deepcopy(od._ds.reset_coords())
+
     args = {
         "ds": ds,
         "varList": varList,
@@ -2341,14 +2382,20 @@ def test_transformation(od, faces, varList, XRange, YRange, X0, X1, Y0, Y1):
         "YRange": YRange,
         "faces": faces,
     }
-
-    ds = LLC.arctic_crown(**args)
-    xi, xf = int(ds["X"][0].values), int(ds["X"][-1].values)
-    yi, yf = int(ds["Y"][0].values), int(ds["Y"][-1].values)
-    assert xi == X0
-    assert xf == X1
-    assert yi == Y0
-    assert yf == Y1
+    if XRange is not None and YRange is not None:
+        XRange = _np.array(XRange)
+        YRange = _np.array(YRange)
+        if _np.max(abs(XRange)) > 180 or _np.max(abs(YRange)) > 90:
+            with pytest.raises(ValueError):
+                ds = LLC.arctic_crown(**args)
+    else:
+        ds = LLC.arctic_crown(**args)
+        xi, xf = int(ds["X"][0].values), int(ds["X"][-1].values)
+        yi, yf = int(ds["Y"][0].values), int(ds["Y"][-1].values)
+        assert xi == X0
+        assert xf == X1
+        assert yi == Y0
+        assert yf == Y1
 
 
 DIMS_c = [dim for dim in od.dataset["XC"].dims if dim not in ["face"]]
@@ -2559,14 +2606,19 @@ nlist4y4 = shift_list_ds(_copy.copy(list4), dims_c.Y, dims_g.Y, Np, facet=4)
         (nlist4y1, int(Np), int(Np), 0, 89, 45, 134),
         (nlist4x4, int(Np), int(Np), 90, 179, 0, 89),
         (nlist4y4, int(Np), int(Np), 0, 89, 90, 179),
+        ([], None, None, None, None, None, None),
+        ([0], None, None, None, None, None, None),
     ],
 )
 def test_combine_list_ds(DSlist, lenX, lenY, x0, x1, y0, y1):
     nDSlist = combine_list_ds(DSlist)
-    assert len(nDSlist.X) == lenX
-    assert len(nDSlist.Y) == lenY
-    assert [int(nDSlist.X[0].values), int(nDSlist.X[-1].values)] == [x0, x1]
-    assert [int(nDSlist.Y[0].values), int(nDSlist.Y[-1].values)] == [y0, y1]
+    if lenX is not None:
+        assert len(nDSlist.X) == lenX
+        assert len(nDSlist.Y) == lenY
+        assert [int(nDSlist.X[0].values), int(nDSlist.X[-1].values)] == [x0, x1]
+        assert [int(nDSlist.Y[0].values), int(nDSlist.Y[-1].values)] == [y0, y1]
+    else:
+        assert nDSlist == 0
 
 
 @pytest.mark.parametrize(
@@ -2579,9 +2631,6 @@ def test_mask_var(od, XRange, YRange):
     ds = od._ds
     ds = mask_var(ds, XRange, YRange)
     assert _np.isnan(ds["nYG"].data).all()
-
-
-_zeros = [0, 0]
 
 
 @pytest.mark.parametrize(
@@ -2837,3 +2886,1340 @@ def test_edge_arc_data(od, XRange, YRange, F_indx, Nx):
     Xf = _edge_arc_data(DSa[_var_], F_indx, dims_g)
 
     assert Xf == Nx
+
+
+_ds = _copy.deepcopy(od._ds)
+nU = _copy.deepcopy(_ds["CS"].values)
+nV = -_copy.deepcopy(_ds["SN"].values)
+Ucoords = {
+    "face": _ds.face.values,
+    "Y": _ds.Y.values,
+    "Xp1": _ds.Xp1.values,
+}
+
+Vcoords = {
+    "face": _ds.face.values,
+    "Yp1": _ds.Yp1.values,
+    "X": _ds.X.values,
+}
+
+_ds["Ucycl"] = _xr.DataArray(nU, coords=Ucoords, dims=["face", "Y", "Xp1"])
+_ds["Vcycl"] = _xr.DataArray(nV, coords=Vcoords, dims=["face", "Yp1", "X"])
+
+
+@pytest.mark.parametrize("dataset", [_ds])
+@pytest.mark.parametrize(
+    "pairs", [["a", "b"], ["Ucycl", "Vcycl"], ["Ucycl", "Vcycl", "a"]]
+)
+def test_mates(dataset, pairs):
+    nvar = [var for var in pairs if var not in dataset.variables]
+    if len(nvar) > 0 and len(nvar) % 2 == 0:
+        with pytest.raises(ValueError):
+            mates(dataset, pairs)
+    elif len(pairs) > 0 and (len(pairs) - len(nvar)) % 2 == 0:
+        dataset = mates(dataset, pairs)
+        _vars = [var for var in pairs if var not in nvar]
+        for n in range(len(_vars[::2])):
+            assert dataset[_vars[n]].attrs["mate"] == _vars[n + 1]
+
+
+@pytest.mark.parametrize("od", [od])
+@pytest.mark.parametrize(
+    "face1, face2, value",
+    [
+        (5, 2, 0),
+        (2, 2, None),
+        (5, 7, 1),
+        (5, 6, 3),
+        (5, 4, 2),
+        (10, 6, 0),
+        (10, 11, 1),
+        (10, 7, 2),
+        (10, 2, 3),
+        (0, 1, 3),
+        (0, 8, None),
+    ],
+)
+def test_face_direction(od, face1, face2, value):
+    conxs = od.face_connections["face"]
+    if value is None:
+        with pytest.raises(ValueError):
+            face_direction(face1, face2, conxs)
+    else:
+        assert value == face_direction(face1, face2, conxs)
+
+
+x1 = [k for k in range(0, 85, 10)]
+y1 = [int(k) for k in _np.linspace(20, 40, len(x1))]
+fs1 = len(x1) * [5]
+
+x2 = [k for k in range(10, 85, 10)][::-1]
+y2 = [int(k) for k in _np.linspace(20, 40, len(x2))][::-1]
+fs2 = len(x1) * [2]
+
+y3 = [k for k in range(0, 89, 1)]
+x3 = len(y3) * [2]
+fs3 = len(y3) * [1]
+
+X1, Y1, Fs1 = [x1, x2], [y1, y2], [fs1, fs2]
+
+X2, Y2, Fs2 = [x1, x3], [y1, y3], [fs1, fs3]
+
+
+@pytest.mark.parametrize("X, Y, Fs", [(X1, Y1, Fs1), (X2, Y2, Fs2)])
+def test_splitter(X, Y, Fs):
+    xs = X[0] + X[1]
+    ys = Y[0] + Y[1]
+    fs = Fs[0] + Fs[1]
+    nX, nY = splitter(xs, ys, fs)
+    assert len(nX) == len(nY)
+    assert nX[0] == X[0]
+    assert nX[1] == X[1]
+    assert nY[0] == Y[0]
+    assert nY[1] == Y[1]
+
+
+@pytest.mark.parametrize("od", [od])
+@pytest.mark.parametrize(
+    "X, Y, Fs, exp",
+    [
+        ([45, 46], [89, 0], [1, 2], [46, 89]),
+        ([89, 0], [45, 44], [1, 4], [89, 44]),
+        ([45, 46], [0, 0], [1, 0], [46, 0]),
+        ([89, 0], [45, 40], [8, 9], [89, 40]),
+        ([0, 89], [45, 40], [8, 7], [0, 40]),
+        ([45, 40], [89, 0], [8, 11], [40, 89]),
+        ([89, 89], [89, 89], [0, 1], [None, None]),
+        ([0, 44], [45, 89], [1, 11], [0, 45]),
+        ([89, 40], [45, 9], [4, 8], [89, 49]),
+        ([45, 89], [0, 40], [8, 4], [49, 0]),
+        ([40, 0], [89, 40], [2, 6], [49, 89]),
+        ([0, 89], [40, 50], [7, 6], [0, 50]),
+        ([40, 70], [89, 0], [5, 6], [70, 89]),
+        ([0, 70], [40, 89], [10, 6], [0, 19]),
+        ([0, 40], [40, 89], [6, 2], [0, 49]),
+        ([70, 40], [0, 89], [6, 5], [40, 0]),
+        ([89, 0], [50, 40], [6, 7], [89, 40]),
+        ([70, 0], [89, 40], [6, 10], [49, 89]),
+    ],
+)
+def test_edge_slider(od, X, Y, Fs, exp):
+    face_connections = od.face_connections["face"]
+    if set([X[0], Y[0]]) == set([89]):
+        # upper right corner
+        with pytest.raises(ValueError):
+            edge_slider(X[0], Y[0], Fs[0], X[1], Y[1], Fs[1], face_connections)
+    else:
+        newP = edge_slider(X[0], Y[0], Fs[0], X[1], Y[1], Fs[1], face_connections)
+        assert newP == exp
+
+
+x1 = _np.array([k for k in range(15, 45)])
+y1 = [10] * len(x1)
+
+y2 = [k for k in range(45, 78)]
+x2 = len(y2) * [40]
+
+
+@pytest.mark.parametrize(
+    "x, y, facedir, ind, X0, X1",
+    [
+        (x1, y1, 1, -1, [x1[0], y1[0]], [89, y1[-1]]),
+        (x1, y1, 0, 0, [0, y1[0]], [x1[-1], y1[-1]]),
+        (x1, y1, 3, -1, [x1[0], y1[0]], [x1[-1], 89]),
+        (x1, y1, 2, 0, [x1[0], 0], [x1[-1], y1[-1]]),
+        (x2, y2, 2, 0, [x2[0], 0], [x2[-1], y2[-1]]),
+        (x2, y2, 0, -1, [x2[0], y2[0]], [0, y2[-1]]),
+        (x2, y2, 1, -1, [x2[0], y2[0]], [89, y2[-1]]),
+        (x2, y2, 0, 0, [0, y2[0]], [x2[-1], y2[-1]]),
+        (x2, y2, 1, -1, [x2[0], y2[0]], [89, y2[-1]]),
+    ],
+)
+def test_edge_completer(x, y, facedir, ind, X0, X1):
+    xn, yn = edge_completer(x, y, facedir, ind)
+    # assert unit distance between elements of array.
+    diffs = abs(_np.diff(xn)) + abs(_np.diff(yn))
+    assert _np.max(diffs) == _np.min(diffs) == 1
+    assert [xn[0], yn[0]] == X0
+    assert [xn[-1], yn[-1]] == X1
+
+
+# face = 0
+y0 = [k for k in range(45, 80)]
+x0 = len(y0) * [40]
+# face 1
+y11 = [k for k in range(5, 45)]
+x11 = len(y11) * [45]
+x12 = [k for k in range(45, 80)]
+y12 = len(x12) * [45]
+x1 = x11 + x12
+y1 = y11 + y12
+# face 4
+x41 = [k for k in range(5, 46)]
+y41 = len(x41) * [60]
+y42 = [k for k in range(59, 10, -1)]
+x42 = len(y42) * [45]
+x4 = x41 + x42
+y4 = y41 + y42
+# face 3
+y31 = [k for k in range(80, 40, -1)]
+x31 = len(y31) * [60]
+x32 = [k for k in range(60, 5, -1)]
+y32 = len(x32) * [40]
+x3 = x31 + x32
+y3 = y31 + y32
+# face 0 again!
+x01 = [k for k in range(80, 45, -1)]
+y01 = len(x01) * [45]
+# get them all together
+X1, Y1 = [x0, x1, x4, x3, x01], [y0, y1, y4, y3, y01]
+
+Xac = [x01[::-1], x3[::-1], x4[::-1], x1[::-1], x0[::-1]]
+Yac = [y01[::-1], y3[::-1], y4[::-1], y1[::-1], y0[::-1]]
+
+
+# faces
+faces1 = [0, 1, 4, 3, 0]
+facesac = faces1[::-1]
+
+
+# topology changes
+x11 = _np.arange(20, 69)
+y11 = [60] * len(x11)
+y12 = _np.arange(61, 85)
+x12 = [70] * len(y12)
+x1 = _np.array(list(x11) + list(x12))
+y1 = _np.array(list(y11) + list(y12))
+x2 = _np.arange(10, 80)
+y2 = _np.array([10] * len(x2))
+x3 = _np.arange(20, 75)
+y3 = _np.array([25] * len(x3))
+y40 = _np.arange(15, 45)
+x40 = [60] * len(y40)
+x41 = _np.arange(60, 20, -1)
+y41 = [50] * len(x41)
+y42 = _np.arange(40, 10, -1)
+x42 = [20] * len(y42)
+x4 = _np.array(list(x40) + list(x41) + list(x42))
+y4 = _np.array(list(y40) + list(y41) + list(y42))
+x5 = _np.arange(60, 10, -1)
+y5 = _np.array([65] * len(x5))
+x6 = _np.arange(60, 10, -1)
+y6 = _np.array([80] * len(x6))
+y7 = _np.arange(85, 61, -1)
+x7 = [19] * len(y7)
+
+XX, YY = [x1, x2, x3, x4, x5, x6, x7], [y1, y2, y3, y4, y5, y6, y7]
+
+xfaces = [10, 2, 5, 7, 5, 2, 10]
+
+
+@pytest.mark.parametrize(
+    "X, Y, faces",
+    [
+        (X1, Y1, faces1),
+        (Xac, Yac, facesac),
+        (XX, YY, xfaces),
+    ],
+)
+def test_fill_path(X, Y, faces):
+    xx, yy = [], []
+    for k in range(len(faces)):
+        nx, ny = fill_path(X, Y, faces, k, od.face_connections["face"])
+        xx.append(nx)
+        yy.append(ny)
+        diffs = abs(_np.diff(nx)) + abs(_np.diff(ny))
+        assert _np.max(diffs) == _np.min(diffs) == 1
+
+    nRot, Rot = _np.arange(6), _np.arange(6, 13)
+    _N = 89  # last index in ECCO (i or j)
+
+    for k in range(1, len(faces) - 1):
+        k0, k1, k2 = [k - 1, k, k + 1]
+
+        _past = face_direction(faces[k1], faces[k0], od.face_connections["face"])
+        _next = face_direction(faces[k1], faces[k2], od.face_connections["face"])
+
+        st_next, st_past = False, False  # initialize same topology flag
+        if set([faces[k1], faces[k2]]).issubset(nRot) or set(
+            [faces[k1], faces[k2]]
+        ).issubset(Rot):
+            st_next = True  # same topology
+        if set([faces[k1], faces[k0]]).issubset(nRot) or set(
+            [faces[k1], faces[k0]]
+        ).issubset(Rot):
+            st_past = True  # same topology
+
+        if _next in [0, 1]:
+            if st_next:
+                assert yy[k1][-1] == yy[k2][0]
+            else:  # change in topo
+                assert yy[k1][-1] == _N - xx[k2][0]
+        if _next in [2, 3]:
+            if st_next:
+                assert xx[k1][-1] == xx[k2][0]
+            else:  # change in topo
+                _N - xx[k1][-1] == yy[k2][0]
+        if _past in [0, 1]:
+            if st_past:
+                assert yy[k1][0] == yy[k0][-1]
+            else:  # change in topo
+                assert yy[k1][0] == 89 - xx[k0][-1]
+        if _past in [2, 3]:
+            if st_past:
+                assert xx[k1][0] == xx[k0][-1]
+            else:  # change in topo
+                assert _N - xx[k1][0] == yy[k0][-1]
+
+
+@pytest.mark.parametrize(
+    "iX, iY, iface, face_connections, adjacent",
+    [
+        ([61], [89], 10, od.face_connections["face"], [2]),
+        ([89], [89], 10, od.face_connections["face"], [2]),
+        ([89], [19], 10, od.face_connections["face"], [11]),
+        ([0], [19], 10, od.face_connections["face"], [6]),
+        ([10], [0], 10, od.face_connections["face"], [7]),
+        ([10], [89], 10, od.face_connections["face"], [-1]),
+        ([10], [0], 0, od.face_connections["face"], None),  # south pole
+        ([89], [9], 12, od.face_connections["face"], None),  # south pole
+    ],
+)
+def test_face_adjacent(iX, iY, iface, face_connections, adjacent):
+    if iX + iY == [89, 89]:
+        with pytest.raises(ValueError):
+            face_adjacent(iX, iY, iface, face_connections)
+    else:
+        if adjacent is None:  # southern pole singularity
+            adj = face_adjacent(iX, iY, iface, face_connections)
+            assert adj[0] == -1
+        else:
+            if adjacent == [-1]:
+                N = 4320
+            else:
+                N = 89
+            adj = face_adjacent(iX, iY, iface, face_connections, _N=N)
+            assert adj == adjacent
+
+
+# edge data on ECCO random array
+edge1 = [[61, 89]]
+edge2 = edge1 + [[21, 89]]
+edge3 = edge2 + [[0, 55]]
+edge4 = edge3 + [[0, 0]]
+
+
+@pytest.mark.parametrize("edge", [edge1, edge2, edge3, edge4])
+def test_edgesid(edge):
+    # non-edge random array on ECCO
+    inX = [rand.randint(1, 88) for k in range(20)]
+    inY = [rand.randint(1, 88) for k in range(20)]
+
+    # create n-random indexes
+    n = [rand.randint(0, len(inX)) for k in range(len(edge))]
+    # insert edge data randomly into array
+    [inX.insert(n[k], edge[k][0]) for k in range(len(edge))]
+    [inY.insert(n[k], edge[k][1]) for k in range(len(edge))]
+
+    inX, inY, ind = edgesid(inX, inY)
+
+    extracted = set(
+        tuple(item) for item in [[inX[ind[ii]], inY[ind[ii]]] for ii in range(len(ind))]
+    )
+    given = set(tuple(item) for item in edge)
+
+    assert given == extracted
+
+
+# test 1
+# face 1
+y11 = [k for k in range(0, 11)]
+x11 = [49 + 4 * k for k in range(11)]
+y12 = [k for k in range(11, 16)]
+x12 = len(y12) * [89]
+x13 = [k for k in range(45, 60)]
+y13 = len(x13) * [25]
+y14 = [k for k in range(25, 35)]
+x14 = len(y14) * [89]
+x15 = [k for k in range(45, 60)]
+y15 = len(x15) * [45]
+x16 = [k for k in range(70, 80)]
+y16 = len(x16) * [89]
+x17 = [k for k in range(80, 85)]
+y17 = len(x17) * [79]
+x1 = x11 + x12 + x13 + x14 + x15 + x16 + x17
+y1 = y11 + y12 + y13 + y14 + y15 + y16 + y17
+
+# face 4
+x21 = [k for k in range(5, 46)]
+y21 = len(x21) * [60]
+y22 = [k for k in range(59, 10, -1)]
+x22 = len(y22) * [45]
+x2 = x21 + x22
+y2 = y21 + y22
+
+# group together
+X1, Y1 = [x1, x2], [y1, y2]
+faces1 = [1, 4]
+
+
+# test 2
+# face 2
+x10 = _np.arange(89, 45, -1)
+y10 = [25] * len(x10)
+y11 = _np.arange(30, 65)
+x11 = [45] * len(y11)
+x12 = _np.arange(55, 89)
+y12 = [75] * len(x12)
+nx1 = _np.array(list(x10) + list(x11) + list(x12))
+ny1 = _np.array(list(y10) + list(y11) + list(y12))
+# face 5
+x20 = _np.arange(45)
+y20 = [20] * len(x20)
+y21 = _np.arange(30, 75)
+x21 = [55] * len(y21)
+x22 = _np.arange(45, 0, -1)
+y22 = [80] * len(x22)
+nx2 = _np.array(list(x20) + list(x21) + list(x22))
+ny2 = _np.array(list(y20) + list(y21) + list(y22))
+# group together
+X2, Y2 = [nx1, nx2[::-1], nx1[:1]], [ny1, ny2[::-1], ny1[:1]]
+faces2 = [2, 5, 2]
+
+
+@pytest.mark.parametrize(
+    "ix, iy, faces, face_connections, count",
+    [
+        (X1, Y1, faces1, od.face_connections["face"], 3),
+        (X2, Y2, faces2, od.face_connections["face"], 0),
+    ],
+)
+def test_index_splitter(ix, iy, faces, face_connections, count):
+    nx1, ny1 = fill_path(ix, iy, faces, 0, face_connections)
+    nI = index_splitter(nx1, ny1, 89)
+    assert len(nI) == count
+
+
+# face 1
+y11 = [k for k in range(0, 11)]
+x11 = [49 + 4 * k for k in range(11)]
+y12 = [k for k in range(11, 16)]
+x12 = len(y12) * [89]
+x13 = [k for k in range(45, 60)]
+y13 = len(x13) * [25]
+y14 = [k for k in range(25, 35)]
+x14 = len(y14) * [89]
+x15 = [k for k in range(45, 60)]
+y15 = len(x15) * [45]
+x16 = [k for k in range(70, 80)]
+y16 = len(x16) * [89]
+x17 = [k for k in range(80, 85)]
+y17 = len(x17) * [79]
+x1 = x11 + x12 + x13 + x14 + x15 + x16 + x17
+y1 = y11 + y12 + y13 + y14 + y15 + y16 + y17
+
+# group together
+X1, Y1 = connector(x1, y1)
+X2, Y2 = connector(x1[::-1], y1[::-1])
+
+
+x10 = _np.arange(89, 45, -1)
+y10 = [25] * len(x10)
+y11 = _np.arange(30, 65)
+x11 = [45] * len(y11)
+x12 = _np.arange(55, 89)
+y12 = [75] * len(x12)
+nx1 = _np.array(list(x10) + list(x11) + list(x12))
+ny1 = _np.array(list(y10) + list(y11) + list(y12))
+X3, Y3 = connector(nx1, ny1)
+X4, Y4 = connector(nx1[::-1], ny1[::-1])
+
+
+@pytest.mark.parametrize("iX, iY", [(X1, Y1), (X2, Y2), (X3, Y3), (X4, Y4)])
+def test_order_from_indexing(iX, iY):
+    nI = index_splitter(iX, iY, 89)
+    _mi, _ixx = order_from_indexing(iX, nI)
+    if len(_mi) == 0:
+        assert _ixx.all() == iX.all()
+    else:
+        for i in range(len(_mi)):
+            assert _ixx[i].all() == iX[_mi[i]].all()
+
+
+# face 2
+x10 = _np.arange(89, 45, -1)
+y10 = [25] * len(x10)
+y11 = _np.arange(30, 65)
+x11 = [45] * len(y11)
+x12 = _np.arange(55, 89)
+y12 = [75] * len(x12)
+nx1 = _np.array(list(x10) + list(x11) + list(x12))
+ny1 = _np.array(list(y10) + list(y11) + list(y12))
+# face 5
+x20 = _np.arange(45)
+y20 = [20] * len(x20)
+y21 = _np.arange(30, 75)
+x21 = [55] * len(y21)
+x22 = _np.arange(45, 0, -1)
+y22 = [80] * len(x22)
+nx2 = _np.array(list(x20) + list(x21) + list(x22))
+ny2 = _np.array(list(y20) + list(y21) + list(y22))
+# group together
+oX1, oY1 = [nx1, nx2[::-1], nx1[:1]], [ny1, ny2[::-1], ny1[:1]]
+faces1 = [2, 5, 2]
+
+# connect them across interface
+X1, Y1 = [], []
+for k in range(len(oX1)):
+    x, y = fill_path(oX1, oY1, faces1, k, od.face_connections["face"])
+    X1.append(x)
+    Y1.append(y)
+
+
+# another case
+# face 5
+x1 = _np.arange(20, 75)
+y1 = _np.array([25] * len(x1))
+
+y20 = _np.arange(15, 45)
+x20 = [60] * len(y20)
+x21 = _np.arange(60, 20, -1)
+y21 = [50] * len(x21)
+
+y22 = _np.arange(40, 10, -1)
+x22 = [20] * len(y22)
+
+x2 = _np.array(list(x20) + list(x21) + list(x22))
+y2 = _np.array(list(y20) + list(y21) + list(y22))
+
+x3 = _np.arange(60, 10, -1)
+y3 = _np.array([65] * len(x3))
+
+oX2, oY2 = [x1, x2, x3], [y1, y2, y3]
+faces2 = [4, 8, 4]
+
+# connect them across interface
+X2, Y2 = [], []
+for k in range(len(oX2)):
+    x, y = fill_path(oX2, oY2, faces2, k, od.face_connections["face"])
+    X2.append(x)
+    Y2.append(y)
+
+
+@pytest.mark.parametrize(
+    "ix, iy, faces, iface, face_connections, val",
+    [
+        (X1, Y1, faces1, 0, od.face_connections["face"], 1),
+        (X1, Y1, faces1, 1, od.face_connections["face"], 0),
+        (X1, Y1, faces1, 2, od.face_connections["face"], 1),
+        (
+            [0, 10, _np.array([15])],
+            [10, 0, _np.array([15])],
+            [2, 5, 2],
+            2,
+            od.face_connections["face"],
+            None,
+        ),
+    ],
+)
+def test_fdir_completer(ix, iy, faces, iface, face_connections, val):
+    fdir = fdir_completer(ix[iface], iy[iface], faces, iface, 89, face_connections)
+    assert fdir == val
+
+
+y1 = _np.arange(40, 90)
+x1 = _np.array([40] * len(y1))
+x2 = _np.arange(10, 30)
+y2 = _np.array([30] * len(x2))
+facesa2 = [2, 6]
+Xa2, Ya2 = [x1, x2], [y1, y2]
+
+x1 = _np.arange(40, 5, -1)
+y1 = _np.array([40] * len(x1))
+x2 = _np.arange(85, 65, -1)
+y2 = _np.array([50] * len(x2))
+facesa7 = [7, 6]
+Xa7, Ya7 = [x1, x2], [y1, y2]
+
+
+y1 = _np.arange(40, 85)
+x1 = _np.array([40] * len(y1))
+y2 = _np.arange(5, 25)
+x2 = _np.array([70] * len(y2))
+facesa5 = [5, 6]
+Xa5, Ya5 = [x1, x2], [y1, y2]
+
+
+x1 = _np.arange(40, 0, -1)
+y1 = _np.array([40] * len(x1))
+y2 = _np.arange(85, 65, -1)
+x2 = _np.array([70] * len(y2))
+facesa10 = [10, 6]
+Xa10, Ya10 = [x1, x2], [y1, y2]
+
+
+@pytest.mark.parametrize(
+    "od, ix, iy, faces, iface, valx, valy",
+    [
+        (od, X1, Y1, faces1, 0, 1, 0),
+        (od, X1, Y1, faces1, 1, -1, 0),
+        (od, X2, Y2, faces2, 0, 1, 0),
+        (od, X2, Y2, faces2, 1, -1, 0),
+        (od, X2, Y2, faces2, 2, None, None),
+        (od, Xa2, Ya2, facesa2, 0, 0, 1),
+        (od, Xa2, Ya2, facesa2, 1, None, None),
+        (od, Xa7, Ya7, facesa7, 0, 0, 1),
+        (od, Xa7, Ya7, facesa7, 1, None, None),
+        (od, Xa5, Ya5, facesa5, 0, 0, 1),
+        (od, Xa5, Ya5, facesa5, 1, None, None),
+        (od, Xa10, Ya10, facesa10, 0, 0, 1),
+        (od, Xa10, Ya10, facesa10, 1, None, None),
+    ],
+)
+def test_cross_face_diffs(od, ix, iy, faces, iface, valx, valy):
+    _ds = mates(od._ds)
+    face_connections = od.face_connections["face"]
+
+    nix, niy = fill_path(ix, iy, faces, iface, face_connections)
+    diffX, diffY, tdx, tdy = cross_face_diffs(
+        _ds, nix, niy, faces, iface, face_connections
+    )
+
+    assert (abs(diffX) + abs(diffY) == 1).all()
+
+    if tdx.size:
+        assert tdx == valx
+        assert tdy == valy
+        assert len(diffX) == len(nix)
+    else:
+        assert len(diffX) == len(nix) - 1
+
+
+@pytest.mark.parametrize("od", [od])
+@pytest.mark.parametrize(
+    "iX, iY, faces",
+    [
+        ([61], [89], [10]),
+        ([61, 61, 61, 89], [50, 50, 89, 50], [10]),
+        ([61, 61, 61, 89], [50, 50, 89, 50], [10]),
+    ],
+)
+def test_station_singleface(od, iX, iY, faces):
+    _ds = mates(od._ds)
+    Yind, Xind = _xr.broadcast(_ds["Y"], _ds["X"])
+    Yind = Yind.expand_dims({"face": _ds["face"]})
+    Xind = Xind.expand_dims({"face": _ds["face"]})
+    _ds["Xind"] = Xind.transpose(*_ds["XC"].dims)
+    _ds["Yind"] = Yind.transpose(*_ds["YC"].dims)
+    _ds = _ds.set_coords(["Yind", "Xind"])
+    face_connections = od.face_connections["face"]
+    dsf = station_singleface(_ds, iX, iY, faces, 0, face_connections)
+
+    _set = set(tuple((iX[i], iY[i])) for i in range(len(iX)))
+
+    assert len(_set) == len(dsf.station)
+
+    for m in range(len(dsf.station)):
+        yargs0 = {"Yp1": 0, "station": m}
+        yargs1 = {"Yp1": 1, "station": m}
+        xargs0 = {"Xp1": 0, "station": m}
+        xargs1 = {"Xp1": 1, "station": m}
+        YG0 = dsf.YG.isel(**yargs0).values
+        YG1 = dsf.YG.isel(**yargs1).values
+        XG0 = dsf.XG.isel(**xargs0).values
+        XG1 = dsf.XG.isel(**xargs1).values
+
+        assert (YG0 < YG1).flatten().all()
+        assert (XG0 < XG1).flatten().all()
+
+
+y0 = [k for k in range(45, 80)]
+x0 = len(y0) * [40]
+
+# face 1
+y11 = [k for k in range(0, 11)]
+x11 = [49 + 4 * k for k in range(11)]
+
+y12 = [k for k in range(11, 16)]
+x12 = len(y12) * [89]
+
+x13 = [k for k in range(45, 60)]
+y13 = len(x13) * [25]
+
+y14 = [k for k in range(25, 35)]
+x14 = len(y14) * [89]
+
+x15 = [k for k in range(45, 60)]
+y15 = len(x15) * [45]
+
+x16 = [k for k in range(70, 80)]
+y16 = len(x16) * [87]
+
+x17 = [k for k in range(80, 85)]
+y17 = len(x17) * [79]
+
+x1 = x11 + x12 + x13 + x14 + x15 + x16 + x17
+y1 = y11 + y12 + y13 + y14 + y15 + y16 + y17
+
+# face 4
+x41 = [k for k in range(5, 46)]
+y41 = len(x41) * [60]
+y42 = [k for k in range(59, 10, -1)]
+x42 = len(y42) * [45]
+x4 = x41 + x42
+y4 = y41 + y42
+
+# face 3
+y31 = [k for k in range(80, 40, -1)]
+x31 = len(y31) * [60]
+x32 = [k for k in range(60, 5, -1)]
+y32 = len(x32) * [40]
+x3 = x31 + x32
+y3 = y31 + y32
+
+# face 0 again!
+x01 = [k for k in range(80, 45, -1)]
+y01 = len(x01) * [45]
+
+# get them all together
+# cyclonic orientation
+Xc, Yc = [x0, x1, x4, x3, x01], [y0, y1, y4, y3, y01]
+
+# faces
+faces1 = [1, 2, 5, 4, 1]
+
+
+# another case
+x11 = _np.arange(20, 69)
+y11 = [20] * len(x11)
+y12 = _np.arange(21, 75)
+x12 = [70] * len(y12)
+x1 = _np.array(list(x11) + list(x12))
+y1 = _np.array(list(y11) + list(y12))
+
+x2 = _np.arange(10, 80)
+y2 = _np.array([10] * len(x2))
+x3 = _np.arange(20, 75)
+y3 = _np.array([25] * len(x3))
+y40 = _np.arange(5, 25)
+x40 = [60] * len(y40)
+x41 = _np.arange(60, 20, -1)
+y41 = [30] * len(x41)
+y42 = _np.arange(20, 4, -1)
+x42 = [20] * len(y42)
+x4 = _np.array(list(x40) + list(x41) + list(x42))
+y4 = _np.array(list(y40) + list(y41) + list(y42))
+x5 = _np.arange(60, 10, -1)
+y5 = _np.array([65] * len(x5))
+x6 = _np.arange(60, 10, -1)
+y6 = _np.array([80] * len(x6))
+y7 = _np.arange(85, 21, -1)
+x7 = [19] * len(y7)
+
+XX, YY = [x1, x2, x3, x4, x5, x6, x7], [y1, y2, y3, y4, y5, y6, y7]
+xfaces = [10, 2, 5, 7, 5, 2, 10]
+
+
+@pytest.mark.parametrize("od", [od])
+@pytest.mark.parametrize(
+    "iX, iY, faces, iface",
+    [
+        (Xc, Yc, faces1, 0),
+        (Xc, Yc, faces1, 1),
+        (Xc, Yc, faces1, 2),
+        (Xc, Yc, faces1, 3),
+        (XX, YY, xfaces, 0),
+        (XX, YY, xfaces, 1),
+        (XX, YY, xfaces, 2),
+        (XX, YY, xfaces, 3),
+        (XX, YY, xfaces, 4),
+        (XX, YY, xfaces, 5),
+        (XX, YY, xfaces, 6),
+    ],
+)
+def test_mooring_singleface(od, iX, iY, faces, iface):
+    _ds = mates(od._ds)
+    Yind, Xind = _xr.broadcast(_ds["Y"], _ds["X"])
+    Yind = Yind.expand_dims({"face": _ds["face"]})
+    Xind = Xind.expand_dims({"face": _ds["face"]})
+    _ds["Xind"] = Xind.transpose(*_ds["XC"].dims)
+    _ds["Yind"] = Yind.transpose(*_ds["YC"].dims)
+    _ds = _ds.set_coords(["Yind", "Xind"])
+    face_connections = od.face_connections["face"]
+
+    niX, niY = fill_path(iX, iY, faces, iface, face_connections)
+    dsf, *a = mooring_singleface(_ds, niX, niY, faces, iface, face_connections)
+
+    for m in range(len(dsf["mooring"])):
+        yargs0 = {"Yp1": 0, "mooring": m}
+        yargs1 = {"Yp1": 1, "mooring": m}
+        xargs0 = {"Xp1": 0, "mooring": m}
+        xargs1 = {"Xp1": 1, "mooring": m}
+
+        YG0 = dsf.YG.isel(**yargs0).values
+        YG1 = dsf.YG.isel(**yargs1).values
+        XG0 = dsf.XG.isel(**xargs0).values
+        XG1 = dsf.XG.isel(**xargs1).values
+
+        assert (YG0 < YG1).flatten().all()
+        assert (XG0 < XG1).flatten().all()
+
+
+ixx, iyy = _np.array([0, 89, 45, 45]), _np.array([45, 45, 0, 89])
+faces1 = [6, 6]
+faces2 = [7, 10]
+
+
+@pytest.mark.parametrize("od", [od])
+@pytest.mark.parametrize(
+    "ix, iy, face1, face2",
+    [
+        (ixx[1:2], iyy[1:2], faces1[0], faces2[0]),
+        (ixx[3:], iyy[3:], faces1[1], faces2[1]),
+        (_np.array([45]), _np.array([89]), 2, 6),
+        (_np.array([45]), _np.array([89]), 5, 6),
+    ],
+)
+def test_ds_arcedge(od, ix, iy, face1, face2):
+    _dim = "mooring"  # does not matter
+    dsf = ds_arcedge(od._ds, ix, iy, _np.array([0]), face1, face2, _dim)
+
+    assert len(dsf.Xp1) == 2
+    assert len(dsf.Yp1) == 2
+    assert len(dsf.X) == 1
+    assert len(dsf.Y) == 1
+
+    for m in range(len(dsf[_dim])):
+        yargs0 = {"Yp1": 0, _dim: m}
+        yargs1 = {"Yp1": 1, _dim: m}
+        xargs0 = {"Xp1": 0, _dim: m}
+        xargs1 = {"Xp1": 1, _dim: m}
+        YG0 = dsf.YG.isel(**yargs0).values
+        YG1 = dsf.YG.isel(**yargs1).values
+        XG0 = dsf.XG.isel(**xargs0).values
+        XG1 = dsf.XG.isel(**xargs1).values
+        assert (YG0 < YG1).flatten().all()
+        assert (XG0 < XG1).flatten().all()
+
+
+# include :
+# array than begins and ends at 0 indexes
+# array thatn beings at two 89 indexes on same axis
+# array that being and ends at two 89 axis on different axis.
+
+
+@pytest.mark.parametrize("od", [od])
+@pytest.mark.parametrize(
+    "ix, iy, faces, k, kwargs",
+    [
+        (_np.array([45]), _np.array([89]), [2, 6], 0, {}),
+        (_np.array([45]), _np.array([89]), [5, 6], 0, {}),
+        (_np.array([0]), _np.array([0]), [4], 0, {}),
+        (_np.array([89]), _np.array([10]), [0, 3], 0, {"axis": "x"}),
+        (_np.array([89]), _np.array([10]), [3, 9], 0, {}),
+        (_np.array([10]), _np.array([89]), [0, 1], 0, {"axis": "y"}),
+        (_np.array([10]), _np.array([89]), [7, 10], 0, {"axis": "y"}),
+        (_np.array([89]), _np.array([10]), [7, 8], 0, {"axis": "x"}),
+        (_np.array([10]), _np.array([89]), [1, 2], 0, {"axis": "y"}),
+        (_np.array([10, 89]), _np.array([89, 10]), [1, 4], 0, {"axis": "x"}),
+        (_np.array([10, 89]), _np.array([89, 10]), [2, 1], 1, {"axis": "y"}),
+        (_np.array([10, 89]), _np.array([89, 10]), [1, 2], 0, {"axis": "t"}),
+    ],
+)
+def test_ds_edge(od, ix, iy, faces, k, kwargs):
+    face_connections = od.face_connections["face"]
+    axis = kwargs.pop("axis", None)
+    args = {
+        "_ds": od._ds,
+        "_ix": ix,
+        "_iy": iy,
+        "_ifaces": faces,
+        "ii": k,
+        "_face_topo": face_connections,
+    }
+    if axis is not None and axis not in ["x", "y"]:
+        kwargs = {"axis": axis}
+        with pytest.raises(ValueError):
+            ds_edge(**args, **kwargs)
+    else:
+        kwargs = {"axis": axis}
+        nds, connect, moor, moors = ds_edge(**args, **kwargs)
+        if set([6]).issubset(faces):
+            mds = ds_arcedge(od._ds, ix, iy, moor, faces[0], faces[1])
+            if _xr.testing.assert_equal(mds, nds):
+                assert 1
+        else:
+            if set([89]).issubset(set.union(set(ix), set(iy))):
+                _dim = "mooring"
+                assert isinstance(nds, _dstype)
+                assert len(nds.Xp1) == 2
+                assert len(nds.Yp1) == 2
+                assert len(nds.X) == 1
+                assert len(nds.Y) == 1
+                assert "face" not in nds.reset_coords().data_vars
+
+                for m in range(len(nds[_dim])):
+                    yargs0 = {"Yp1": 0, _dim: m}
+                    yargs1 = {"Yp1": 1, _dim: m}
+                    xargs0 = {"Xp1": 0, _dim: m}
+                    xargs1 = {"Xp1": 1, _dim: m}
+                    YG0 = nds.YG.isel(**yargs0).values
+                    YG1 = nds.YG.isel(**yargs1).values
+                    XG0 = nds.XG.isel(**xargs0).values
+                    XG1 = nds.XG.isel(**xargs1).values
+                    assert (YG0 < YG1).flatten().all()
+                    assert (XG0 < XG1).flatten().all()
+            else:
+                assert connect is False
+
+
+ixx, iyy = _np.array([10, 45, 80, 45]), _np.array([45, 10, 45, 80])
+
+
+@pytest.mark.parametrize("od", [od])
+@pytest.mark.parametrize(
+    "ix, iy",
+    [
+        (ixx[:1], iyy[:1]),
+        (ixx[1:2], iyy[1:2]),
+        (ixx[2:3], iyy[2:3]),
+        (ixx[3:], iyy[3:]),
+        (ixx, iyy),
+    ],
+)
+def test_arctic_eval(od, ix, iy):
+    _dim = "station"
+    nds = arctic_eval(od._ds, ix, iy, _dim)
+
+    assert isinstance(nds, _dstype)
+    assert len(nds.Xp1) == 2
+    assert len(nds.Yp1) == 2
+    assert len(nds.X) == 1
+    assert len(nds.Y) == 1
+
+    for m in range(len(nds[_dim])):
+        yargs0 = {"Yp1": 0, _dim: m}
+        yargs1 = {"Yp1": 1, _dim: m}
+        xargs0 = {"Xp1": 0, _dim: m}
+        xargs1 = {"Xp1": 1, _dim: m}
+        YG0 = nds.YG.isel(**yargs0).values
+        YG1 = nds.YG.isel(**yargs1).values
+        XG0 = nds.XG.isel(**xargs0).values
+        XG1 = nds.XG.isel(**xargs1).values
+        assert (YG0 < YG1).flatten().all()
+        assert (XG0 < XG1).flatten().all()
+
+
+y2 = _np.arange(79, 10, -1)
+x2 = _np.array([10] * len(y2))
+
+x5 = _np.arange(10, 80)
+y5 = _np.array([10] * len(x5))
+
+y7 = _np.arange(11, 80)
+x7 = _np.array([79] * len(y7))
+
+x10 = _np.arange(78, 10, -1)
+y10 = _np.array([79] * len(x10))
+
+Xc = _np.append(_np.append(_np.append(x2, x5), x7), x10)
+Yc = _np.append(_np.append(_np.append(y2, y5), y7), y10)
+
+Xc, Yc = connector(Xc, Yc)
+Xac, Yac = connector(Xc[::-1], Yc[::-1])
+
+valx = _np.ones(_np.shape(Xc)[1:])
+
+
+y20 = _np.arange(79, 50, -1)
+x20 = _np.array([10] * len(y20))
+
+x21 = _np.arange(10, 30)
+y21 = _np.array([50] * len(x21))
+
+y22 = _np.arange(50, 40, -1)
+x22 = _np.array([30] * len(y22))
+
+x23 = _np.arange(30, 10, -1)
+y23 = [40] * len(x23)
+
+y24 = _np.arange(40, 10, -1)
+x24 = _np.array([10] * len(y24))
+
+nx2 = _np.array(list(x20) + list(x21) + list(x22) + list(x23) + list(x24))
+ny2 = _np.array(list(y20) + list(y21) + list(y22) + list(y23) + list(y24))
+
+
+x50 = _np.arange(11, 40)
+y50 = _np.array([10] * len(x50))
+
+y51 = _np.arange(10, 30)
+x51 = [40] * len(y51)
+
+x52 = _np.arange(40, 50)
+y52 = [30] * len(x52)
+
+y53 = _np.arange(30, 10, -1)
+x53 = [50] * len(y53)
+
+x54 = _np.arange(50, 80)
+y54 = [10] * len(x54)
+
+nx5 = _np.array(list(x50) + list(x51) + list(x52) + list(x53) + list(x54))
+ny5 = _np.array(list(y50) + list(y51) + list(y52) + list(y53) + list(y54))
+
+y70 = _np.arange(11, 40)
+x70 = _np.array([79] * len(y70))
+
+x71 = _np.arange(79, 60, -1)
+y71 = [40] * len(x71)
+
+y72 = _np.arange(40, 50)
+x72 = [60] * len(y72)
+
+x73 = _np.arange(60, 80)
+y73 = [50] * len(x73)
+
+y74 = _np.arange(50, 80)
+x74 = [79] * len(y74)
+
+nx7 = _np.array(list(x70) + list(x71) + list(x72) + list(x73) + list(x74))
+ny7 = _np.array(list(y70) + list(y71) + list(y72) + list(y73) + list(y74))
+
+x100 = _np.arange(78, 50, -1)
+y100 = _np.array([79] * len(x100))
+
+y101 = _np.arange(79, 59, -1)
+x101 = [50] * len(y101)
+
+x102 = _np.arange(50, 40, -1)
+y102 = [59] * len(x102)
+
+y103 = _np.arange(59, 79)
+x103 = [40] * len(y103)
+
+x104 = _np.arange(40, 10, -1)
+y104 = [79] * len(x104)
+
+nx10 = _np.array(list(x100) + list(x101) + list(x102) + list(x103) + list(x104))
+ny10 = _np.array(list(y100) + list(y101) + list(y102) + list(y103) + list(y104))
+
+
+nXc = _np.append(_np.append(_np.append(nx2, nx5), nx7), nx10)
+nYc = _np.append(_np.append(_np.append(ny2, ny5), ny7), ny10)
+
+nXc, nYc = connector(nXc, nYc)
+
+# solution to nXc, nYc
+x20 = _np.arange(29)
+y20 = _np.array([10] * len(x20))
+
+y21 = _np.arange(10, 30)
+x21 = _np.array([29] * len(y21))
+
+x22 = _np.arange(29, 39)
+y22 = _np.array([30] * len(x22))
+
+y23 = _np.arange(30, 10, -1)
+x23 = [39] * len(y23)
+
+x24 = _np.arange(40, 70)
+y24 = _np.array([10] * len(x24))
+
+xs2 = _np.array(list(x20) + list(x21) + list(x22) + list(x23) + list(x24))
+ys2 = _np.array(list(y20) + list(y21) + list(y22) + list(y23) + list(y24))
+
+
+x50 = _np.arange(xs2[-1], xs2[-1] + 30)
+y50 = _np.array([10] * len(x50))
+
+y51 = _np.arange(10, 30)
+x51 = [xs2[-1] + 30] * len(y51)
+
+x52 = _np.arange(xs2[-1] + 30, xs2[-1] + 41)
+y52 = [30] * len(x52)
+
+y53 = _np.arange(30, 10, -1)
+x53 = [xs2[-1] + 40] * len(y53)
+
+x54 = _np.arange(xs2[-1] + 40, xs2[-1] + 70)
+y54 = [10] * len(x54)
+
+xs5 = _np.array(list(x50) + list(x51) + list(x52) + list(x53) + list(x54))
+ys5 = _np.array(list(y50) + list(y51) + list(y52) + list(y53) + list(y54))
+
+
+x70 = _np.arange(xs5[-1], xs5[-1] + 30)
+y70 = _np.array([10] * len(x70))
+
+y71 = _np.arange(10, 29)
+x71 = [xs5[-1] + 30] * len(y71)
+
+x72 = _np.arange(xs5[-1] + 30, xs5[-1] + 40)
+y72 = [29] * len(x72)
+
+y73 = _np.arange(29, 9, -1)
+x73 = [xs5[-1] + 40] * len(y73)
+
+x74 = _np.arange(xs5[-1] + 42, xs5[-1] + 70)
+y74 = [10] * len(x74)
+
+xs7 = _np.array(list(x70) + list(x71) + list(x72) + list(x73) + list(x74))
+ys7 = _np.array(list(y70) + list(y71) + list(y72) + list(y73) + list(y74))
+
+
+x100 = _np.arange(xs7[-1], xs7[-1] + 29)
+y100 = _np.array([10] * len(x100))
+
+y101 = _np.arange(10, 30)
+x101 = [xs7[-1] + 29] * len(y101)
+
+x102 = _np.arange(xs7[-1] + 29, xs7[-1] + 39)
+y102 = [30] * len(x102)
+
+y103 = _np.arange(30, 10, -1)
+x103 = [xs7[-1] + 39] * len(y103)
+
+x104 = _np.arange(xs7[-1] + 40, xs7[-1] + 69)
+y104 = [10] * len(x104)
+
+xs10 = _np.array(list(x100) + list(x101) + list(x102) + list(x103) + list(x104))
+ys10 = _np.array(list(y100) + list(y101) + list(y102) + list(y103) + list(y104))
+
+
+Xsc = _np.append(_np.append(_np.append(xs2, xs5), xs7), xs10)
+Ysc = _np.append(_np.append(_np.append(ys2, ys5), ys7), ys10)
+
+nXsc, nYsc = connector(Xsc, Ysc)
+soln_diffX, soln_diffY = _np.diff(nXsc), _np.diff(nYsc)
+
+
+@pytest.mark.parametrize("od", [od])
+@pytest.mark.parametrize(
+    "ix, iy, ediffX, ediffY",
+    [
+        (Xc, Yc, valx, 0 * valx),
+        (Xac, Yac, -valx, 0 * valx),
+        (nXc, nYc, soln_diffX, soln_diffY),
+    ],
+)
+def test_arct_diffs(od, ix, iy, ediffX, ediffY):
+    _ds = od._ds
+    diffX, diffY, cset, miss = arct_diffs(_ds, ix, iy)
+    full_set = set(tuple((ix[i], iy[i]) for i in range(len(ix))))
+    miss_set = set(tuple((ix[miss[j]], iy[miss[j]]) for j in range(len(miss))))
+    assert len(diffX) == len(ix) - 1
+    assert len(diffY) == len(iy) - 1
+    assert full_set == cset.union(miss_set)
+    assert (abs(diffX) + abs(diffY) == 1).all()
+
+    if ediffX is not None:
+        assert (diffX == ediffX).all()
+        assert (diffY == ediffY).all()
+
+
+y1 = [k for k in range(45, 90)]
+x1 = len(y1) * [40]
+
+# crossing in y
+Y1, X1 = _np.array(y1), _np.array(x1)
+# crossing in x
+Y2, X2 = _np.array(x1), _np.array(y1)
+
+varlist = [var for var in od._ds.reset_coords().data_vars]
+zcoords = ["Zl", "Zu", "Zp1"]
+tcoords = ["time_midp"]
+uvars = zcoords + tcoords  # u-points
+vvars = zcoords + tcoords  # v-points
+gvars = zcoords + tcoords  # corner points
+cvars = zcoords + tcoords
+for var in varlist:
+    if set(["Xp1", "Y"]).issubset(od._ds[var].dims):
+        uvars.append(var)
+    if set(["Xp1", "Yp1"]).issubset(od._ds[var].dims):
+        gvars.append(var)
+    if set(["Yp1", "X"]).issubset(od._ds[var].dims):
+        vvars.append(var)
+    if set(["Y", "X"]).issubset(od._ds[var].dims):
+        cvars.append(var)
+
+vkwargs = {"u": uvars, "v": vvars, "g": gvars, "c": cvars}
+
+# face 1
+faces1 = [1, 2]  # crosses in y - same topo
+faces2 = [7, 10]  # corsses in y - diff topo
+
+
+@pytest.mark.parametrize("od", [od])
+@pytest.mark.parametrize(
+    "_ix, _iy, faces, vkwargs",
+    [
+        (X1, Y1, faces1, vkwargs),
+        (X1, Y1, faces2, vkwargs),
+    ],
+)
+def test_ds_edge_samety(od, _ix, _iy, faces, vkwargs):
+    _dim_name = "mooring"
+    _ds = od._ds
+    new_dim = _xr.DataArray(_np.arange(len(_ix)), dims=(_dim_name))
+    y = _xr.DataArray(_np.arange(1), dims=("y"))
+    x = _xr.DataArray(_np.arange(1), dims=("x"))
+    yp1 = _xr.DataArray(_np.arange(2), dims=("yp1"))
+    xp1 = _xr.DataArray(_np.arange(2), dims=("xp1"))
+    # Transform indexes in DataArray
+    iY = _xr.DataArray(
+        _np.reshape(_iy, (len(new_dim), len(y))),
+        coords={_dim_name: new_dim, "y": y},
+        dims=(_dim_name, "y"),
+    )
+    iX = _xr.DataArray(
+        _np.reshape(_ix, (len(new_dim), len(x))),
+        coords={_dim_name: new_dim, "x": x},
+        dims=(_dim_name, "x"),
+    )
+    iYp1 = _xr.DataArray(
+        _np.stack((_iy, _iy + 1), 1),
+        coords={_dim_name: new_dim, "yp1": yp1},
+        dims=(_dim_name, "yp1"),
+    )
+    iXp1 = _xr.DataArray(
+        _np.stack((_ix, _ix + 1), 1),
+        coords={_dim_name: new_dim, "xp1": xp1},
+        dims=(_dim_name, "xp1"),
+    )
+
+    # crossing in y
+    Yval = iYp1.where(iYp1 == 90, drop=True)
+    moor = Yval[_dim_name]
+
+    nds, vds, mds = ds_edge_samety(
+        _ds,
+        iX,
+        iY,
+        _ix,
+        xp1,
+        iXp1,
+        iYp1,
+        faces[0],
+        faces[1],
+        "mooring",
+        moor,
+        **vkwargs,
+    )
+    assert (nds.mooring == moor).values.all()
+    assert (vds.mooring == mds.mooring).values.all()
+    assert len(vds.yp1) == 1
+    assert vds.yp1.values == 1
+    assert mds.yp1.values == 0
+    assert len(mds.yp1) == 1
+    assert (mds.xp1.values == _np.array([0, 1])).all()
+    assert len(vds.xp1) == 2
+
+
+@pytest.mark.parametrize("od", [od])
+@pytest.mark.parametrize(
+    "_ix, _iy, faces, vkwargs",
+    [
+        (Y1, X1, [1, 4], vkwargs),
+    ],
+)
+def test_ds_edge_sametx(od, _ix, _iy, faces, vkwargs):
+    _dim_name = "mooring"
+    _ds = od._ds
+    new_dim = _xr.DataArray(_np.arange(len(_ix)), dims=(_dim_name))
+    y = _xr.DataArray(_np.arange(1), dims=("y"))
+    x = _xr.DataArray(_np.arange(1), dims=("x"))
+    yp1 = _xr.DataArray(_np.arange(2), dims=("yp1"))
+    xp1 = _xr.DataArray(_np.arange(2), dims=("xp1"))
+    # Transform indexes in DataArray
+    iY = _xr.DataArray(
+        _np.reshape(_iy, (len(new_dim), len(y))),
+        coords={_dim_name: new_dim, "y": y},
+        dims=(_dim_name, "y"),
+    )
+    iX = _xr.DataArray(
+        _np.reshape(_ix, (len(new_dim), len(x))),
+        coords={_dim_name: new_dim, "x": x},
+        dims=(_dim_name, "x"),
+    )
+    iYp1 = _xr.DataArray(
+        _np.stack((_iy, _iy + 1), 1),
+        coords={_dim_name: new_dim, "yp1": yp1},
+        dims=(_dim_name, "yp1"),
+    )
+    iXp1 = _xr.DataArray(
+        _np.stack((_ix, _ix + 1), 1),
+        coords={_dim_name: new_dim, "xp1": xp1},
+        dims=(_dim_name, "xp1"),
+    )
+
+    # crossing in y
+    Xval = iXp1.where(iXp1 == 90, drop=True)
+    moor = Xval[_dim_name]
+
+    nds, vds, mds = ds_edge_sametx(
+        _ds, iX, iY, iXp1, iYp1, faces[0], faces[1], "mooring", moor, **vkwargs
+    )
+    assert (nds.mooring == moor).values.all()
+    assert (vds.mooring == mds.mooring).values.all()
+    assert vds.xp1.values == 1
+    assert mds.xp1.values == 0
+    assert len(mds.xp1) == 1
+    assert (mds.yp1.values == _np.array([0, 1])).all()
+    assert len(vds.yp1) == 2
+
+
+# face 1
+y11 = [k for k in range(0, 11)]
+x11 = [49 + 4 * k for k in range(11)]
+
+y12 = [k for k in range(11, 16)]
+x12 = len(y12) * [89]
+
+x13 = [k for k in range(45, 60)]
+y13 = len(x13) * [25]
+
+y14 = [k for k in range(25, 35)]
+x14 = len(y14) * [89]
+
+x15 = [k for k in range(45, 60)]
+y15 = len(x15) * [45]
+
+x16 = [k for k in range(70, 80)]
+y16 = len(x16) * [89]
+
+x17 = [k for k in range(80, 85)]
+y17 = len(x17) * [79]
+
+x1 = x11 + x12 + x13 + x14 + x15 + x16 + x17
+y1 = y11 + y12 + y13 + y14 + y15 + y16 + y17
+
+faces1 = [1, 2]
+
+
+@pytest.mark.parametrize("od", [od])
+@pytest.mark.parametrize(
+    "ix, iy, faces, iface",
+    [
+        (x1, y1, faces1, 1),
+        (x1[::-1], y1[::-1], faces1, 1),
+    ],
+)
+def test_ds_splitter(od, ix, iy, faces, iface):
+    _ds = od._ds.drop_vars(["Xind", "Yind"])
+    face_connections = od.face_connections["face"]
+    _Nx = len(_ds.X) - 1
+    _ixn, _iyn = connector(ix, iy)
+    nI = index_splitter(_ixn, _iyn, _Nx)
+    args = {
+        "_ds": _ds,
+        "_iXn": _ixn,
+        "_iYn": _iyn,
+        "_nI": nI,
+        "_faces": faces,
+        "_iface": iface,
+        "_face_connections": face_connections,
+        "_dim_name": "mooring",
+    }
+    dsf = ds_splitarray(**args)
+    assert len(_ixn) == len(dsf.mooring)

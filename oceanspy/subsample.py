@@ -15,6 +15,7 @@ import copy as _copy
 import functools as _functools
 import warnings as _warnings
 
+# import dask
 import numpy as _np
 import pandas as _pd
 
@@ -35,8 +36,26 @@ from ._ospy_utils import (
     _rename_aliased,
 )
 from .llc_rearrange import LLCtransformation as _llc_trans
-from .llc_rearrange import arctic_eval, reset_dim, rotate_vars
-from .utils import _rel_lon, _reset_range, circle_path_array, get_maskH
+from .llc_rearrange import (
+    connector,
+    cross_face_diffs,
+    eval_dataset,
+    fill_path,
+    flip_v,
+    mates,
+    mooring_singleface,
+    splitter,
+    station_singleface,
+)
+from .utils import (
+    _rel_lon,
+    _reset_range,
+    circle_path_array,
+    diff_and_inds_where_insert,
+    get_maskH,
+    remove_repeated,
+    reset_dim,
+)
 
 # Recommended dependencies (private)
 try:
@@ -378,9 +397,9 @@ def cutout(
         vel_grid = ["XU", "YU", "XV", "YV"]
         da_list = [var for var in dsnew.reset_coords().data_vars]
         check = all([item in da_list for item in vel_grid])
-        if check:
+        if check:  # pragma: no cover
             manipulate_coords = {"coordsUVfromG": False}
-        else:
+        else:  # pragma: no cover
             manipulate_coords = {"coordsUVfromG": True}
 
         new_face_connections = {"face_connections": {None: {None, None}}}
@@ -676,35 +695,65 @@ def mooring_array(od, Ymoor, Xmoor, xoak_index="scipy_kdtree", **kwargs):
     Ymoor = _check_range(od, Ymoor, "Ymoor")
     Xmoor = _check_range(od, Xmoor, "Xmoor")
 
-    # Cutout
-    if "YRange" not in kwargs:
-        kwargs["YRange"] = Ymoor
-    if "XRange" not in kwargs:
-        kwargs["XRange"] = Xmoor
-    if "add_Hbdr" not in kwargs:
-        kwargs["add_Hbdr"] = True
-    od = od.subsample.cutout(**kwargs)
+    serial = kwargs.pop("serial", None)
 
-    # Add indexes needed for transports
-    Yind, Xind = _xr.broadcast(od._ds["Y"], od._ds["X"])
-    od._ds["Xind"] = Xind.transpose(*od._ds["XC"].dims)
-    od._ds["Yind"] = Yind.transpose(*od._ds["YC"].dims)
-    od._ds = od._ds.set_coords(["Xind", "Yind"])
+    if serial:
+        _diffXYs = True
+        varList = kwargs.pop("varList", None)
 
-    # Message
-    print("Extracting mooring array.")
+        args = {
+            "varList": varList,
+            "Xcoords": Xmoor,
+            "Ycoords": Ymoor,
+            "dim_name": "mooring",
+        }
+        od = _copy.deepcopy(od)
 
-    # Unpack ds
-    ds = od._ds
-    # create list of coordinates.
-    coords = [var for var in ds if "time" not in ds[var].dims]
+        # indexes needed for transport
+        Yind, Xind = _xr.broadcast(od._ds["Y"], od._ds["X"])
+        Yind = Yind.expand_dims({"face": od._ds["face"]})
+        Xind = Xind.expand_dims({"face": od._ds["face"]})
+        od._ds["Xind"] = Xind.transpose(*od._ds["XC"].dims)
+        od._ds["Yind"] = Yind.transpose(*od._ds["YC"].dims)
+        od._ds = od._ds.set_coords(["Yind", "Xind"])
 
-    ds_grid = ds[["XC", "YC"]]  # by convention center point
+        # when passed, od.subsample.statins returns dataset
+        new_ds, diffX, diffY = od.subsample.stations(**args)
+        coords = [var for var in new_ds.coords]
 
-    for key, value in ds_grid.sizes.items():
-        ds_grid["i" + f"{key}"] = DataArray(range(value), dims=key)
+        # TODO: need to add Xind, Yind
+        # needed for transports (via cutout)
 
-    if not ds_grid.xoak.index:
+    else:
+        _diffXYs = False
+        # Cutout
+        if "YRange" not in kwargs:  # pragma: no cover
+            kwargs["YRange"] = Ymoor
+        if "XRange" not in kwargs:  # pragma: no cover
+            kwargs["XRange"] = Xmoor
+        if "add_Hbdr" not in kwargs:  # pragma: no cover
+            kwargs["add_Hbdr"] = True
+        od = od.subsample.cutout(**kwargs)
+
+        # Add indexes needed for transports
+        Yind, Xind = _xr.broadcast(od._ds["Y"], od._ds["X"])
+        od._ds["Xind"] = Xind.transpose(*od._ds["XC"].dims)
+        od._ds["Yind"] = Yind.transpose(*od._ds["YC"].dims)
+        od._ds = od._ds.set_coords(["Xind", "Yind"])
+
+        # Message
+        print("Extracting mooring array.")
+
+        # Unpack ds
+        ds = od._ds
+        # create list of coordinates.
+        coords = [var for var in ds if "time" not in ds[var].dims]
+
+        ds_grid = ds[["XC", "YC"]]  # by convention center point
+
+        for key, value in ds_grid.sizes.items():
+            ds_grid["i" + f"{key}"] = DataArray(range(value), dims=key)
+
         if xoak_index not in _xoak.IndexRegistry():
             raise ValueError(
                 "`xoak_index` [{}] is not supported."
@@ -714,77 +763,39 @@ def mooring_array(od, Ymoor, Xmoor, xoak_index="scipy_kdtree", **kwargs):
 
         ds_grid.xoak.set_index(["XC", "YC"], xoak_index)
 
-    cdata = {"XC": ("mooring", Xmoor), "YC": ("mooring", Ymoor)}
-    ds_data = _xr.Dataset(cdata)  # mooring data
+        cdata = {"XC": ("mooring", Xmoor), "YC": ("mooring", Ymoor)}
+        ds_data = _xr.Dataset(cdata)  # mooring data
 
-    # find nearest points to given data.
-    nds = ds_grid.xoak.sel(XC=ds_data["XC"], YC=ds_data["YC"])
+        # find nearest points to given data.
+        nds = ds_grid.xoak.sel(XC=ds_data["XC"], YC=ds_data["YC"])
 
-    def diff_and_inds_where_insert(ix, iy):
-        dx, dy = (_np.diff(ii) for ii in (ix, iy))
-        inds = _np.argwhere(_np.abs(dx) + _np.abs(dy) > 1).squeeze()
-        return dx, dy, inds
+        ix, iy = (nds["i" + f"{i}"].data for i in ("X", "Y"))
 
-    ix, iy = (nds["i" + f"{i}"].data for i in ("X", "Y"))
+        # Remove duplicates that are next to each other.
+        mask = _np.argwhere(_np.abs(_np.diff(ix)) + _np.abs(_np.diff(iy)) == 0)
+        ix, iy = (_np.delete(ii, mask) for ii in (ix, iy))
 
-    # Remove duplicates that are next to each other.
-    mask = _np.abs(_np.diff(ix)) + _np.abs(_np.diff(iy)) == 0
-    ix, iy = (_np.delete(ii, _np.argwhere(mask)) for ii in (ix, iy))
-
-    # Initialize variables
-    dx, dy, inds = diff_and_inds_where_insert(ix, iy)
-    while inds.size:
-        dx, dy = (di[inds] for di in (dx, dy))
-        mask = _np.abs(dx * dy) == 1
-        ix = _np.insert(ix, inds + 1, ix[inds] + (dx / 2).astype(int))
-        iy = _np.insert(
-            iy, inds + 1, iy[inds] + _np.where(mask, dy, (dy / 2).astype(int))
-        )
-        # Prepare for next iteration
+        # Initialize variables
         dx, dy, inds = diff_and_inds_where_insert(ix, iy)
+        while inds.size:
+            dx, dy = (di[inds] for di in (dx, dy))
+            mask = _np.abs(dx * dy) == 1
+            ix = _np.insert(ix, inds + 1, ix[inds] + (dx / 2).astype(int))
+            iy = _np.insert(
+                iy, inds + 1, iy[inds] + _np.where(mask, dy, (dy / 2).astype(int))
+            )
+            # Prepare for next iteration
+            dx, dy, inds = diff_and_inds_where_insert(ix, iy)
 
-    def remove_repeated(_iX, _iY):
-        """Attemps to remove repeated coords not adjascent to each other,
-        while retaining the trajectory property of being simply connected
-        (i.e. the distance between each index point is one). If it cannot
-        remove repeated coordinate values, returns the original array.
-        """
-        _ix, _iy = _iX, _iY
-        nn = []
-        for n in range(len(_ix)):
-            val = _np.where(abs(_ix - _ix[n]) + abs(_iy - _iy[n]) == 0)[0]
-            # select only repeated values with deg of multiplicity = 2
-            if len(val) == 2:
-                if len(nn) == 0:
-                    nn.append(list(val))
-                elif len(nn) > 0 and (val != nn).all():
-                    nn.append(list(val))
-        if _np.array(nn).size:
-            dn = [nn[i][1] - nn[i][0] for i in range(len(nn))]
-            # remove if the distance between repeated coords is 2
-            mask = _np.where(_np.array(dn) == 2)[0]
-            remove = [nn[i][1] for i in mask]
-            _ix, _iy = (_np.delete(ii, remove) for ii in (_ix, _iy))
-            # find the hole left
-            mask = _np.abs(_np.diff(_ix)) + _np.abs(_np.diff(_iy)) == 2
-            # delete hole left behind
-            _ix, _iy = (_np.delete(ii, _np.argwhere(mask)) for ii in (_ix, _iy))
-            # verify path is simply connected
-            dx, dy, inds = diff_and_inds_where_insert(_ix, _iy)
-            if inds.size:
-                _ix = _iX
-                _iY = _iY
-        return _ix, _iy
+        # attempt to remove repeated (but not adjacent) coord values
+        ix, iy = remove_repeated(ix, iy)
 
-    # attempt to remove repeated (but not adjacent) coord values
-    ix, iy = remove_repeated(ix, iy)
-
-    new_ds = eval_dataset(ds, ix, iy)
+        new_ds = eval_dataset(ds, ix, iy)
 
     mooring = new_ds.mooring
 
-    near_Y = new_ds["YC"].compute().data.squeeze()
-    near_X = new_ds["XC"].compute().data.squeeze()
+    near_Y = new_ds["YC"].values
+    near_X = new_ds["XC"].values
 
     # Add distance (0 always first element)
     if R is not None:
@@ -805,6 +816,8 @@ def mooring_array(od, Ymoor, Xmoor, xoak_index="scipy_kdtree", **kwargs):
         dists = _np.insert(dists, 0, 0)  # add zero as 1st element
         if "units" in new_ds["XC"].attrs:
             unit = new_ds["XC"].attrs["units"]
+        else:
+            unit = "None"
 
     dists = _np.cumsum(dists)
     distance = DataArray(
@@ -821,6 +834,16 @@ def mooring_array(od, Ymoor, Xmoor, xoak_index="scipy_kdtree", **kwargs):
 
     # Recreate od
     od._ds = new_ds
+
+    # remove complex topology from grid
+    if od.face_connections is not None:
+        new_face_connections = {"face_connections": {None: {None, None}}}
+        od = od.set_face_connections(**new_face_connections)
+        grid_coords = od.grid_coords
+        # remove face from grid coord
+        grid_coords.pop("face", None)
+        od = od.set_grid_coords(grid_coords, overwrite=True)
+
     od = od.set_grid_coords(
         {"mooring": {"mooring": -0.5}}, add_midp=True, overwrite=False
     )
@@ -832,9 +855,47 @@ def mooring_array(od, Ymoor, Xmoor, xoak_index="scipy_kdtree", **kwargs):
         attrs=od._ds["mooring_dist"].attrs,
     )
     od = od.merge_into_oceandataset(dist_midp.rename("mooring_midp_dist"))
-    od._ds = od._ds.set_coords(
-        [coord for coord in od._ds.coords] + ["mooring_midp_dist"]
-    )
+
+    if _diffXYs:  # pragma: no cover
+        moor_midp = od._ds.mooring_midp.values
+        if diffX.size == len(moor_midp):
+            # include in dataset
+            xr_diffX = DataArray(
+                diffX,
+                coords={"mooring_midp": moor_midp},
+                dims=("mooring_midp"),
+                attrs={"long_name": "x-difference between moorings", "units": unit},
+            )
+
+            xr_diffY = DataArray(
+                diffY,
+                coords={"mooring_midp": moor_midp},
+                dims=("mooring_midp"),
+                attrs={"long_name": "y-difference between moorings", "units": unit},
+            )
+
+            od._ds["diffX"] = xr_diffX
+            od._ds["diffY"] = xr_diffY
+        else:
+            print(diffX.size)
+            _warnings.warn(
+                "diffX and diffY have inconsistent lengths with mooring dimension"
+            )
+
+        # compute missing grid velocities from datasets if necessary
+        vel_grid = ["XU", "YU", "XV", "YV"]
+        da_list = [var for var in od._ds.reset_coords().data_vars]
+        check = all([item in da_list for item in vel_grid])
+        if check:  # pragma: no cover
+            manipulate_coords = {"coordsUVfromG": False}
+        else:  # pragma: no cover
+            manipulate_coords = {"coordsUVfromG": True}
+        od = od.manipulate_coords(**manipulate_coords)
+        od._ds = od._ds.set_coords(
+            coords + vel_grid + ["mooring_dist", "mooring_midp_dist"]
+        )
+    else:
+        od._ds = od._ds.set_coords(coords + ["mooring_midp_dist"])
 
     return od
 
@@ -1081,14 +1142,24 @@ def stations(
     Xcoords=None,
     xoak_index="scipy_kdtree",
     method="nearest",
+    dim_name="station",
 ):
     """
-    Extract stations using nearest-neighbor lookup.
+    Extract nearest-neighbor data from given spatial coordinate.
+    Data may be isolated and unordered (`dim_name=stations`), or contiguous
+    and unit distanced (`dim_name=mooring`).
+
+    Following the C-grid convention,
+    for every scalar point extracted (along the new dimension `dim_name`)
+    returns 4 velocity points: 2 U-points, 2 V-points and their respective
+    coordinates, and 4 corner coordinate points.
 
     Parameters
     ----------
     od: OceanDataset
         od that will be subsampled.
+    varList: 1D array_lie, NoneType
+        variable names to sample.
     tcoords: 1D array_like, NoneType
         time-coordinates (datetime).
     Zcoords: 1D array_like, NoneType
@@ -1099,18 +1170,34 @@ def stations(
         lon coordinates of locations at center point.
     xoak_index: str
         xoak index to be used. `scipy_kdtree` by default.
+    method: str, `nearest` (default).
+        see .sel via xarray.dataSet.sel method
+    dim_name: str
+        `station` (default) or `mooring`.
 
     Returns
     -------
+    Depending on the choice of dim_name, two types of returns:
+    see https://github.com/hainegroup/oceanspy/issues/398
+
+    1) if `dim_name: 'stations'`
+
     od: OceanDataset
         Subsampled oceandataset.
 
+    2) if `dim_name: 'mooring'`
+
+    ds: xarray.dataset
+    diffX: numpy.array
+    diffX: numpy.array
+
+
     See Also
     --------
-    oceanspy.OceanDataset.mooring
+    oceanspy.subsample.mooring_array
 
     """
-    _check_native_grid(od, "stations")
+    _check_native_grid(od, dim_name)
 
     # Convert variables to numpy arrays and make some check
     tcoords = _check_range(od, tcoords, "timeRange")
@@ -1119,11 +1206,17 @@ def stations(
     Xcoords = _check_range(od, Xcoords, "Xcoords")
 
     # Message
-    print("Extracting stations.")
+    message = "Extracting " + dim_name
+    if dim_name == "mooring":
+        message = message + " array"
+    else:
+        message = message + "s"
+    print(message)
 
     # Unpack ds
-    od = _copy.copy(od)
+    od = _copy.deepcopy(od)
     ds = od._ds
+    face_connections = od.face_connections["face"]
 
     if varList is not None:
         nvarlist = [var for var in ds.data_vars if var not in varList]
@@ -1155,70 +1248,108 @@ def stations(
         DS = ds
 
     if Xcoords is not None and Ycoords is not None:
-        if not ds.xoak.index:
-            if xoak_index not in _xoak.IndexRegistry():
-                raise ValueError(
-                    "`xoak_index` [{}] is not supported."
-                    "\nAvailable options: {}"
-                    "".format(xoak_index, _xoak.IndexRegistry())
-                )
+        ds_grid = ds[["XC", "YC"]]
 
-            ds.xoak.set_index(["XC", "YC"], xoak_index)
+        if dim_name == "mooring":  # needed for transport
+            for key, value in ds_grid.sizes.items():
+                ds_grid["i" + f"{key}"] = DataArray(range(value), dims=key)
 
-        cdata = {"XC": ("station", Xcoords), "YC": ("station", Ycoords)}
+        if xoak_index not in _xoak.IndexRegistry():
+            raise ValueError(
+                "`xoak_index` [{}] is not supported."
+                "\nAvailable options: {}"
+                "".format(xoak_index, _xoak.IndexRegistry())
+            )
+        ds_grid.xoak.set_index(["XC", "YC"], xoak_index)
+
+        cdata = {"XC": (dim_name, Xcoords), "YC": (dim_name, Ycoords)}
         ds_data = _xr.Dataset(cdata)
 
         # find nearest points to given data.
-        nds = ds.xoak.sel(XC=ds_data["XC"], YC=ds_data["YC"])
+        nds = ds_grid.xoak.sel(XC=ds_data["XC"], YC=ds_data["YC"])
 
-        if "face" not in ds.dims:
+        if "face" not in ds.dims:  # pragma: no cover
             iX, iY = (nds[f"{i}"].data for i in ("X", "Y"))
-            DS = eval_dataset(ds, iX, iY, _dim_name="station")
+            DS = eval_dataset(ds, iX, iY, _dim_name=dim_name)
             DS = DS.squeeze()
-
-        if "face" in ds.dims:
+        else:
+            ds = mates(ds)
+            varlist = [var for var in ds.reset_coords().data_vars if var not in "face"]
+            attrs = {}
+            for var in varlist:
+                attrs[var] = ds[var].attrs
             iX, iY, iface = (nds[f"{i}"].data for i in ("X", "Y", "face"))
-
             _dat = nds.face.values
             ll = _np.where(abs(_np.diff(_dat)))[0]
             order_iface = [_dat[i] for i in ll] + [_dat[-1]]
             Niter = len(order_iface)
-
             if Niter == 1:
-                X0, Y0 = iX, iY
-                DS = eval_dataset(ds, X0, Y0, order_iface, "station")
-                DS = DS.squeeze()
-
-            else:
-                # split indexes along each face
-                X0, Y0 = [], []
-                for ii in range(len(ll) + 1):
-                    if ii == 0:
-                        x0, y0 = iX[: ll[ii] + 1], iY[: ll[ii] + 1]
-                    elif ii > 0 and ii < len(ll):
-                        x0, y0 = (
-                            iX[ll[ii - 1] + 1 : ll[ii] + 1],
-                            iY[ll[ii - 1] + 1 : ll[ii] + 1],
+                args = {
+                    "_ds": ds,
+                    "_ix": iX,
+                    "_iy": iY,
+                    "_faces": order_iface,  # single element list
+                    "_iface": 0,  # index of face
+                    "_face_connections": face_connections,
+                }
+                if dim_name == "mooring":
+                    nix, niy = connector(iX, iY)
+                    DS, nix, niy = mooring_singleface(**args)
+                    if order_iface[0] in _np.arange(7, 13):
+                        DS = flip_v(mates(DS))
+                    diffX, diffY, *a = cross_face_diffs(
+                        DS, nix, niy, order_iface, 0, face_connections
+                    )
+                    return DS.persist(), diffX, diffY
+                if dim_name == "station":  # pragma: no cover
+                    DS = station_singleface(**args).persist()
+                    if order_iface[0] in _np.arange(7, 13):
+                        DS = flip_v(mates(DS))
+            if Niter > 1:
+                nX0, nY0 = splitter(iX, iY, iface)
+                args = {
+                    "_ds": ds,
+                    "_faces": order_iface,
+                    "_face_connections": face_connections,
+                }
+                DSf = []
+                shift = 0
+                diffsX, diffsY = _np.array([]), _np.array([])
+                for ii in range(Niter):
+                    if dim_name == "station":
+                        _returns = False
+                        args1 = {"_ix": nX0[ii], "_iy": nY0[ii], "_iface": ii}
+                        dse = station_singleface(**{**args, **args1})
+                        if order_iface[ii] in _np.arange(7, 13):
+                            dse = flip_v(mates(dse))
+                    if dim_name == "mooring":
+                        _returns = True
+                        nix, niy = fill_path(
+                            nX0, nY0, order_iface, ii, face_connections
                         )
-                    elif ii == len(ll):
-                        x0, y0 = iX[ll[ii - 1] + 1 :], iY[ll[ii - 1] + 1 :]
-                    X0.append(x0)
-                    Y0.append(y0)
-
-                DS = []
-                for i in range(Niter):
-                    DS.append(eval_dataset(ds, X0[i], Y0[i], order_iface[i], "station"))
-
-                _dim = "station"
-                nDS = [DS[0].reset_coords()]
-                for i in range(1, len(DS)):
-                    Nend = nDS[i - 1][_dim].values[-1]
-                    nDS.append(reset_dim(DS[i], Nend + 1, dim=_dim).reset_coords())
-
-                DS = nDS[0]
-                for i in range(1, len(nDS)):
-                    DS = DS.combine_first(nDS[i])
-
+                        args1 = {"_ix": nix, "_iy": niy, "_iface": ii}
+                        dse, nix, niy = mooring_singleface(**{**args, **args1})
+                        if order_iface[ii] in _np.arange(7, 13):
+                            dse = flip_v(mates(dse))
+                        diX, diY, *a = cross_face_diffs(
+                            ds, nix, niy, order_iface, ii, face_connections
+                        )
+                        diffsX = _np.append(diffsX, diX)
+                        diffsY = _np.append(diffsY, diY)
+                    for var in dse.reset_coords().data_vars:
+                        dse[var].attrs = {}
+                    if ii > 0:
+                        shift += len(DSf[ii - 1][dim_name])
+                        dse = reset_dim(dse, shift, dim=dim_name)
+                    DSf.append(dse)
+                DS = _xr.combine_by_coords(DSf)
+                Ndim = len(DS[dim_name])
+                DS = DS.chunk({dim_name: Ndim}).persist()
+                del DSf
+                for var in DS.reset_coords().data_vars:
+                    DS[var].attrs = attrs
+                if _returns:
+                    return DS, diffsX, diffsY
     DS = DS.set_coords(co_list)
 
     if Xcoords is None and Ycoords is None:
@@ -1230,13 +1361,11 @@ def stations(
 
         od._ds = DS
 
-        if od.face_connections is not None:
+        if od.face_connections is not None:  # pragma: no cover
             new_face_connections = {"face_connections": {None: {None, None}}}
             od = od.set_face_connections(**new_face_connections)
 
         grid_coords = od.grid_coords
-        grid_coords.pop("X", None)
-        grid_coords.pop("Y", None)
         od = od.set_grid_coords(grid_coords, overwrite=True)
 
     return od
@@ -1417,113 +1546,6 @@ def particle_properties(od, times, Ypart, Xpart, Zpart, **kwargs):
     od._ds = od._ds.reset_coords()
 
     return od
-
-
-def eval_dataset(_ds, _ix, _iy, _iface=None, _dim_name="mooring"):
-    """
-    Evaluates a dataset along (spatial) trajectory in the plane as defined by the
-    indexes in the plane. As a result, there is a new dimension/coordinate, hence
-    reducing the dimension of the original dataset.
-
-    Parameters:
-    ----------
-        _ds: xarray.Dataset
-            contains all x, y coordinates (but may be subsampled in Z or time)
-        _ix, _iy: 1D array, int
-            index values identifying the location in X Y (lat, lon) space
-        _iface: int, None (bool)
-            None (default) implies no complex topology in the dataset. Otherwise,
-            _iface indicates the face index which, along which the provided ix, iy,
-            identify the spatial (geo) coordinate location in lat/lon space.
-        _dim_name: str
-            names the new dimension along the pathway. By default this is 'mooring',
-            but can also be 'station' (when discrete, argo-like isolated coordinates).
-
-    Returns:
-        xarray.Dataset
-
-    """
-
-    new_dim = DataArray(
-        _np.arange(len(_ix)),
-        dims=(_dim_name),
-        attrs={"long_name": "index of " + _dim_name, "units": "none"},
-    )
-    y = DataArray(
-        _np.arange(1),
-        dims=("y"),
-        attrs={"long_name": "j-index of cell center", "units": "none"},
-    )
-    x = DataArray(
-        _np.arange(1),
-        dims=("x"),
-        attrs={"long_name": "i-index of cell center", "units": "none"},
-    )
-    yp1 = DataArray(
-        _np.arange(2),
-        dims=("yp1"),
-        attrs={"long_name": "j-index of cell corner", "units": "none"},
-    )
-    xp1 = DataArray(
-        _np.arange(2),
-        dims=("xp1"),
-        attrs={"long_name": "i-index of cell corner", "units": "none"},
-    )
-
-    # Transform indexes in DataArray
-    iY = DataArray(
-        _np.reshape(_iy, (len(new_dim), len(y))),
-        coords={_dim_name: new_dim, "y": y},
-        dims=(_dim_name, "y"),
-    )
-    iX = DataArray(
-        _np.reshape(_ix, (len(new_dim), len(x))),
-        coords={_dim_name: new_dim, "x": x},
-        dims=(_dim_name, "x"),
-    )
-
-    iYp1 = DataArray(
-        _np.stack((_iy, _iy + 1), 1),
-        coords={_dim_name: new_dim, "yp1": yp1},
-        dims=(_dim_name, "yp1"),
-    )
-
-    iXp1 = DataArray(
-        _np.stack((_ix, _ix + 1), 1),
-        coords={_dim_name: new_dim, "xp1": xp1},
-        dims=(_dim_name, "xp1"),
-    )
-
-    if _iface is not None:
-        if _iface == [6]:
-            return arctic_eval(_ds, _ix, _iy, _dim_name)
-        elif _iface in _np.arange(7, 13):
-            iXp1 = DataArray(
-                _np.stack((_ix + 1, _ix), 1),
-                coords={_dim_name: new_dim, "xp1": xp1},
-                dims=(_dim_name, "xp1"),
-            )
-
-    args = {
-        "X": iX,
-        "Y": iY,
-        "Xp1": iXp1,
-        "Yp1": iYp1,
-    }
-
-    rename = {"yp1": "Yp1", "xp1": "Xp1", "x": "X", "y": "Y"}
-
-    if _iface is not None:
-        args = {"face": _iface, **args}
-        if _iface in _np.arange(7, 13):
-            rename = {"yp1": "Xp1", "xp1": "Yp1", "x": "Y", "y": "X"}
-
-    new_ds = _ds.isel(**args).drop_vars(["Xp1", "Yp1", "X", "Y"])
-    new_ds = new_ds.rename_dims(rename).rename_vars(rename)
-    if _iface is not None and _iface in _np.arange(7, 13):
-        new_ds = rotate_vars(new_ds)
-
-    return new_ds
 
 
 class _subsampleMethods(object):

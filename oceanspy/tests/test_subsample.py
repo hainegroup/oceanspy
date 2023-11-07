@@ -23,6 +23,10 @@ MITgcm_rect_nc = open_oceandataset.from_netcdf("{}MITgcm_rect_nc.nc" "".format(D
 ECCO_url = "{}catalog_ECCO.yaml".format(Datadir)
 ECCOod = open_oceandataset.from_catalog("LLC", ECCO_url)
 
+ECCOod._ds = ECCOod._ds.rename_vars(
+    {"hFacS": "HFacS", "hFacW": "HFacW", "hFacC": "HFacC"}
+)
+
 
 # =======
 # CUTOUT
@@ -330,26 +334,41 @@ def test_cutout_faces(
 @pytest.mark.parametrize("od", [MITgcm_rect_nc, ECCOod])
 @pytest.mark.parametrize("cartesian", [True, False])
 @pytest.mark.parametrize(
-    "kwargs", [{}, {"YRange": None, "XRange": None, "add_Hbdr": True}]
+    "kwargs",
+    [
+        {},
+        {"YRange": None, "XRange": None, "add_Hbdr": True},
+        {"YRange": [74, 78], "XRange": None},
+    ],
 )
 def test_mooring(od, cartesian, kwargs):
     this_od = od
+    serial = False
+    if "face" not in this_od.dataset.dims:
+        Xmoor = [this_od.dataset["XC"].min().values, this_od.dataset["XC"].max().values]
+        Ymoor = [this_od.dataset["YC"].min().values, this_od.dataset["YC"].max().values]
+        kwargs.pop("XRange", None)
+        kwargs.pop("YRange", None)
+    else:
+        if kwargs.pop("XRange", None) is None and kwargs.pop("YRange", None) is None:
+            Xmoor = [-80, 0]
+            Ymoor = [35, 35]
+        else:
+            Xmoor = np.arange(-179.5, 179.5)
+            Ymoor = 76 * np.ones(np.shape(Xmoor))
+        serial = True
     if cartesian:
         this_od = this_od.set_parameters({"rSphere": None})
 
-    if "face" not in od.dataset.dims:
-        Xmoor = [this_od.dataset["XC"].min().values, this_od.dataset["XC"].max().values]
-        Ymoor = [this_od.dataset["YC"].min().values, this_od.dataset["YC"].max().values]
-    else:
-        Xmoor = [-80, 0]
-        Ymoor = [35, 35]
+    kwargs["serial"] = serial
+
     new_od = this_od.subsample.mooring_array(Xmoor=Xmoor, Ymoor=Ymoor, **kwargs)
 
     with pytest.raises(ValueError):
         new_od.subsample.mooring_array(Xmoor=Xmoor, Ymoor=Ymoor)
 
     for index in [0, -1]:
-        if "face" not in od.dataset.dims:
+        if "face" not in this_od.dataset.dims:
             assert new_od.dataset["XC"].isel(mooring=index).values == Xmoor[index]
             assert new_od.dataset["YC"].isel(mooring=index).values == Ymoor[index]
         else:
@@ -431,22 +450,35 @@ def test_survey(od, cartesian, delta, kwargs):
 # STATIONS
 # ========
 # create cyclonic vel
-nU = _copy.deepcopy(ECCOod._ds["CS"].values)
-nV = -_copy.deepcopy(ECCOod._ds["SN"].values)
+co_list = [var for var in ECCOod._ds.coords if var not in ECCOod._ds.dims]
+
+nU = _copy.deepcopy(ECCOod._ds["CS"]).expand_dims({"time": 1}).values
+nV = -_copy.deepcopy(ECCOod._ds["SN"]).expand_dims({"time": 1}).values
+
 Ucoords = {
+    "time": ECCOod._ds.time.values,
     "face": ECCOod._ds.face.values,
     "Y": ECCOod._ds.Y.values,
     "Xp1": ECCOod._ds.Xp1.values,
 }
+
 Vcoords = {
+    "time": ECCOod._ds.time.values,
     "face": ECCOod._ds.face.values,
     "Yp1": ECCOod._ds.Yp1.values,
     "X": ECCOod._ds.X.values,
 }
-ECCOod._ds["UVELMASS"] = xr.DataArray(nU, coords=Ucoords, dims=["face", "Y", "Xp1"])
-ECCOod._ds["VVELMASS"] = xr.DataArray(nV, coords=Vcoords, dims=["face", "Yp1", "X"])
 
-ECCOod._ds = mates(ECCOod._ds)
+ECCOod._ds["UVELMASS"] = xr.DataArray(
+    nU, coords=Ucoords, dims=["time", "face", "Y", "Xp1"]
+)
+ECCOod._ds["VVELMASS"] = xr.DataArray(
+    nV, coords=Vcoords, dims=["time", "face", "Yp1", "X"]
+)
+
+
+ECCOod._ds = mates(ECCOod._ds.set_coords(co_list))
+
 
 # coordinate locations
 lons76N = np.array([6.2, 97.8, -172.21623, -83.78377])
@@ -460,45 +492,178 @@ lons90W = -87.5 * np.ones(np.shape(lats_6E))
 lons170W = -170 * np.ones(np.shape(lats_6E))
 
 
-@pytest.mark.parametrize("this_od", [ECCOod])
+# ==
+y0 = [k for k in range(45, 80)]
+x0 = len(y0) * [40]
+
+# face 1
+y11 = [k for k in range(0, 11)]
+x11 = [49 + 4 * k for k in range(11)]
+
+y12 = [k for k in range(11, 16)]
+x12 = len(y12) * [89]
+
+x13 = [k for k in range(45, 60)]
+y13 = len(x13) * [25]
+
+y14 = [k for k in range(25, 35)]
+x14 = len(y14) * [89]
+
+x15 = [k for k in range(45, 60)]
+y15 = len(x15) * [45]
+
+x16 = [k for k in range(70, 80)]
+y16 = len(x16) * [89]
+
+x17 = [k for k in range(80, 85)]
+y17 = len(x17) * [79]
+
+x1 = x11 + x12 + x13 + x14 + x15 + x16 + x17
+y1 = y11 + y12 + y13 + y14 + y15 + y16 + y17
+
+# face 4
+x41 = [k for k in range(5, 46)]
+y41 = len(x41) * [60]
+y42 = [k for k in range(59, 10, -1)]
+x42 = len(y42) * [45]
+x4 = x41 + x42
+y4 = y41 + y42
+
+# face 3
+y31 = [k for k in range(80, 40, -1)]
+x31 = len(y31) * [60]
+x32 = [k for k in range(60, 5, -1)]
+y32 = len(x32) * [40]
+x3 = x31 + x32
+y3 = y31 + y32
+
+# face 0 again!
+x01 = [k for k in range(80, 45, -1)]
+y01 = len(x01) * [45]
+
+# cyclonic orientation
+Xc, Yc = [x0, x1, x4, x3, x01], [y0, y1, y4, y3, y01]
+
+# faces
+faces1 = [1, 2, 5, 4, 1]
+
+# extract lats/lons from data
+lonsc, latsc = [], []
+for i in range(len(Xc)):
+    for j in range(len(Xc[i])):
+        lonsc.append(
+            ECCOod._ds["XC"]
+            .isel(face=faces1[i], X=Xc[i][j], Y=Yc[i][j])
+            .squeeze()
+            .values
+        )
+        latsc.append(
+            ECCOod._ds["YC"]
+            .isel(face=faces1[i], X=Xc[i][j], Y=Yc[i][j])
+            .squeeze()
+            .values
+        )
+
+lons1, lats1 = [], []
+for j in range(len(Xc[1])):
+    lons1.append(
+        ECCOod._ds["XC"].isel(face=faces1[1], X=Xc[1][j], Y=Yc[1][j]).squeeze().values
+    )
+    lats1.append(
+        ECCOod._ds["YC"].isel(face=faces1[1], X=Xc[1][j], Y=Yc[1][j]).squeeze().values
+    )
+
+
+lons0, lats0 = [], []
+for j in range(len(Xc[0])):
+    lons0.append(
+        ECCOod._ds["XC"].isel(face=faces1[0], X=Xc[0][j], Y=Yc[0][j]).squeeze().values
+    )
+    lats0.append(
+        ECCOod._ds["YC"].isel(face=faces1[0], X=Xc[0][j], Y=Yc[0][j]).squeeze().values
+    )
+
+
+@pytest.mark.parametrize("od", [ECCOod])
 @pytest.mark.parametrize(
     "args",
     [
         {"Ycoords": None, "Xcoords": None},
         {"Ycoords": lats76N, "Xcoords": lons76N},
+        {
+            "Ycoords": lats76N,
+            "Xcoords": lons76N,
+            "Zcoords": 0,
+            "tcoords": "1992-01-16T12",
+        },
+        {
+            "Ycoords": lats76N,
+            "Xcoords": lons76N,
+            "varList": ["T", "UVELMASS", "VVELMASS"],
+        },
+        {"Ycoords": lats76N, "Xcoords": lons76N, "xoak_index": "invalid"},
         {"Ycoords": lats_6E, "Xcoords": lons6E},
         {"Ycoords": lats_6E, "Xcoords": lons90W},
         {"Ycoords": lats_6E, "Xcoords": lons170W},
+        {"Ycoords": latsc, "Xcoords": lonsc, "_dim": "mooring"},
+        {"Ycoords": lats1, "Xcoords": lons1, "_dim": "mooring"},
+        {"Ycoords": lats0, "Xcoords": lons0},
     ],
 )
-def test_stations(this_od, args):
-    od_stns = this_od.subsample.stations(**args)
-
-    if args["Ycoords"] is None or args["Xcoords"] is None:
-        assert this_od._ds.XC.shape == od_stns._ds.XC.shape
-        assert this_od._ds.YC.shape == od_stns._ds.YC.shape
+def test_stations(od, args):
+    this_od = _copy.deepcopy(od)
+    xoak_index = args.pop("xoak_index", None)
+    _dim = args.pop("_dim", None)
+    if xoak_index is not None:
+        with pytest.raises(ValueError):
+            this_od.subsample.stations(**args, xoak_index=xoak_index)
+    if _dim is not None and _dim == "mooring":
+        DS, diffX, diffY = this_od.subsample.stations(**args, dim_name=_dim)
+        assert (abs(diffX) + abs(diffY) == 1).all()
+        assert isinstance(DS, xr.Dataset)
     else:
-        YC, XC = args["Ycoords"], args["Xcoords"]
-        XCstn, YCstn = od_stns._ds.XC, od_stns._ds.YC
-        XGstn, YGstn = od_stns._ds.XG, od_stns._ds.YG
-        stations = od_stns._ds.station.values
-        argsu0, argsu1 = {"Xp1": 0}, {"Xp1": 1}
-        argsv0, argsv1 = {"Yp1": 0}, {"Yp1": 1}
-        assert len(stations) == len(XC) == len(YC)
-        for i in range(len(stations)):
-            assert XGstn.isel(station=i, Xp1=0, Yp1=0).values < XCstn.isel(station=i)
-            assert XGstn.isel(station=i, Xp1=1, Yp1=0).values > XCstn.isel(station=i)
-            assert YGstn.isel(station=i, Xp1=0, Yp1=0).values < YCstn.isel(station=i)
-            assert YGstn.isel(station=i, Xp1=0, Yp1=1).values > YCstn.isel(station=i)
+        od_stns = this_od.subsample.stations(**args)
+        if args["Ycoords"] is None or args["Xcoords"] is None:
+            assert this_od._ds.XC.shape == od_stns._ds.XC.shape
+            assert this_od._ds.YC.shape == od_stns._ds.YC.shape
+        else:
+            YC, XC = args["Ycoords"], args["Xcoords"]
+            XCstn, YCstn = od_stns._ds.XC.squeeze(), od_stns._ds.YC.squeeze()
+            XGstn, YGstn = od_stns._ds.XG, od_stns._ds.YG
+            stations = od_stns._ds.station.values
+            argsu0, argsu1 = {"Xp1": 0}, {"Xp1": 1}
+            argsv0, argsv1 = {"Yp1": 0}, {"Yp1": 1}
+            assert len(stations) == len(XC) == len(YC)
+            for i in range(len(stations)):
+                assert XGstn.isel(station=i, Xp1=0, Yp1=0).values < XCstn.isel(
+                    station=i
+                )
+                assert XGstn.isel(station=i, Xp1=1, Yp1=0).values > XCstn.isel(
+                    station=i
+                )
+                assert YGstn.isel(station=i, Xp1=0, Yp1=0).values < YCstn.isel(
+                    station=i
+                )
+                assert YGstn.isel(station=i, Xp1=0, Yp1=1).values > YCstn.isel(
+                    station=i
+                )
 
-            Uval0 = od_stns._ds["UVELMASS"].isel(**{**{"station": i}, **argsu0}).values
-            Uval1 = od_stns._ds["UVELMASS"].isel(**{**{"station": i}, **argsu1}).values
-            Vval0 = od_stns._ds["VVELMASS"].isel(**{**{"station": i}, **argsv0}).values
-            Vval1 = od_stns._ds["VVELMASS"].isel(**{**{"station": i}, **argsv1}).values
+                Uval0 = (
+                    od_stns._ds["UVELMASS"].isel(**{**{"station": i}, **argsu0}).values
+                )
+                Uval1 = (
+                    od_stns._ds["UVELMASS"].isel(**{**{"station": i}, **argsu1}).values
+                )
+                Vval0 = (
+                    od_stns._ds["VVELMASS"].isel(**{**{"station": i}, **argsv0}).values
+                )
+                Vval1 = (
+                    od_stns._ds["VVELMASS"].isel(**{**{"station": i}, **argsv1}).values
+                )
 
-            assert np.round(abs(Uval0), 1) == np.round(abs(Uval1), 1) == 1
-            assert np.round(abs(Vval0), 1) <= 0.1
-            assert np.round(abs(Vval1), 1) <= 0.1
+                assert np.round(abs(Uval0), 1) == np.round(abs(Uval1), 1) == 1
+                assert np.round(abs(Vval0), 1) <= 0.1
+                assert np.round(abs(Vval1), 1) <= 0.1
 
 
 # =========
