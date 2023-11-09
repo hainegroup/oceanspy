@@ -7,7 +7,6 @@ dependencies:
 - matplotlib
 - pandas
 - bokeh
-- rise
 - dask
 - distributed
 - bottleneck
@@ -29,3 +28,4 @@ dependencies:
 - pip:
   - git+https://github.com/hainegroup/oceanspy.git
   - jupyter-contrib-nbextensions
+  - jupyterlab-rise
