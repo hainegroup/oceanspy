@@ -2,12 +2,11 @@ name: rise-environment
 channels:
 - conda-forge
 dependencies:
-- python=3.10
+- python
 - numpy
 - matplotlib
 - pandas
 - bokeh
-- rise
 - dask
 - distributed
 - bottleneck
@@ -29,3 +28,4 @@ dependencies:
 - pip:
   - git+https://github.com/hainegroup/oceanspy.git
   - jupyter-contrib-nbextensions
+  - jupyterlab-rise
