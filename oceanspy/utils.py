@@ -20,7 +20,7 @@ except ImportError:  # pragma: no cover
     pass
 
 
-def viewer_to_range(p):
+def viewer2range(p):
     """
     Takes the output from the poseidon viewer `p` and returns the coordinate
     trajectories in X and Y in a way that is compatible with oceanspy.subsample

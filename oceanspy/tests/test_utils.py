@@ -10,7 +10,7 @@ from oceanspy.utils import (
     connector,
     great_circle_path,
     spherical2cartesian,
-    viewer_to_range,
+    viewer2range,
 )
 
 
@@ -90,18 +90,18 @@ coords9 = '"Point","coordinates":[-169.23960833202577,22.865677261831266]}'
         (coords9, None, None, None),
     ],
 )
-def test_viewer_to_range(coords, types, lon, lat):
+def test_viewer2range(coords, types, lon, lat):
     if types is not None:
         if isinstance(coords, list):
             p = [{"type": types, "coordinates": list(coords)}]
         elif isinstance(coords, str):
             p = coords
-        x, y = viewer_to_range(p)
+        x, y = viewer2range(p)
         assert x == lon
         assert y == lat
     else:
         with pytest.raises(TypeError):
-            viewer_to_range(coords)
+            viewer2range(coords)
 
 
 X0 = _np.array([161, -161])  # track begins west, ends east
