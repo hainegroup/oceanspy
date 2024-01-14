@@ -1,8 +1,6 @@
 """
 OceanSpy utilities that don't need OceanDataset objects.
 """
-
-import ast as _ast
 import copy as _copy
 
 import numpy as _np
@@ -35,33 +33,32 @@ def viewer2range(p):
     lon: list.
     lat: list.
     """
-
-    if isinstance(p, str):
-        if p[0] == "[" and p[-1] == "]":
-            p = _ast.literal_eval(p)  # turn string into list
-        else:
-            raise TypeError("not a type extracted by poseidon viewer")
-    _check_instance({"p": p}, {"p": ["list"]})
-    _check_instance({"p[0]": p[0]}, {"p[0]": ["dict"]})
-    _check_instance({"type": p[0]["type"]}, {"type": "str"})
-    _check_instance({"coord": p[0]["coordinates"]}, {"coord": "list"})
-
-    if p[0]["type"] in ["Polygon", "LineString", "Point"]:
-        # print messege
-        print("extracting " + p[0]["type"])
-    else:
+    _check_instance({"p": p}, {"p": ["dict"]})
+    if not set(["type", "features"]) == p.keys():
         raise TypeError("not a type extracted by poseidon viewer")
+    if len(p["features"]) == 0:
+        raise ValueError("empty data collection")
+    else:
+        Time = p["features"][0]["properties"]
+        timeRange = [Time["timeFrom"], Time["timeTo"]]
+        fs, nfs = p["features"], len(p["features"])
+        types = [fs[i]["geometry"]["type"] for i in range(nfs)]
+        if len(set(types)) > 1:
+            raise ValueError("too many geometry types")
 
-    p_type = p[0]["type"]
+        p_type = fs[0]["geometry"]["type"]
 
-    if p_type == "Polygon":
-        coords = p[0]["coordinates"][0]
-    if p_type == "Point":
-        coords = []
-        for i in range(len(p)):
-            coords.append(p[i]["coordinates"])
-    if p_type == "LineString":  # pragma : no cover
-        coords = p[0]["coordinates"]
+        print("extracting " + p_type)
+
+        if p_type == "Polygon":
+            coords = fs[0]["geometry"]["coordinates"][0]
+        if p_type == "LineString":  # pragma : no cover
+            coords = fs[0]["geometry"]["coordinates"]
+
+        if p_type == "Point":
+            coords = []
+            for i in range(len(fs)):
+                coords.append(fs[i]["geometry"]["coordinates"])
 
     lon = []
     lat = []
@@ -79,7 +76,7 @@ def viewer2range(p):
         nlon = lon[ll] - 360 * sign * fac
         lon[ll] = nlon
 
-    return list(lon), lat
+    return timeRange, lat, list(lon)
 
 
 def _rel_lon(x, ref_lon):
