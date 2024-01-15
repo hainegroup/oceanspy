@@ -134,15 +134,15 @@ pnew1 = {
     ],
 }
 
-p4 = pnew = {"type": "FeatureCollection", "features": [pnew1["features"][0]]}
-p5 = pnew = {"type": "FeatureCollection", "features": [pnew1["features"][2]]}
+p4 = {"type": "FeatureCollection", "features": [pnew1["features"][0]]}
+p5 = {"type": "FeatureCollection", "features": [pnew1["features"][1]]}
 
 
 @pytest.mark.parametrize(
-    "p, timeRange, lats, lons",
+    "p, timeRange, lons, lats",
     [
         (p1, tR, [Point1[0]], [Point1[1]]),
-        (p2, tR, [Point1[0], Point1[0]], [Point1[1]], Point2[1]),
+        (p2, tR, [Point1[0], Point2[0]], [Point1[1], Point2[1]]),
         (p3, None, None, None),
         (
             p4,
