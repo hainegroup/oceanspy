@@ -59,49 +59,119 @@ def test_circle_path_array(lats, lons, symmetry, resolution):
         assert len(nY) == len(lats)
 
 
-coords1 = [[[0, 0], [1, 1], [2, 2], [3, 3], [4, 4], [5, 5]]]
-coords2 = [[[5, 0], [4, 1], [3, 2], [2, 3], [1, 4], [0, 5]]]
-coords3 = [[[0, 6], [0, 7], [0, 8], [0, 9], [0, 10], [0, 11]]]
-lons = []
-coords4 = '[{"type":"Point","coordinates":[-169.23960833202577,22.865677261831266]}]'
-coords5 = '[{"type":"Point","coordinates":[636.7225446274502, -56.11128546740994]}]'
-coords6 = '[{"type":"Point","coordinates":[754.2277421326479, -57.34299561290217]}]'
-coords7 = '[{"type":"Point","coordinates":[-424.42989807993234, 37.87263032287052]}]'
-coords8 = (
-    '[{"type":"not valid","coordinates":[-424.42989807993234, 37.87263032287052]}]'
-)
-coords9 = '"Point","coordinates":[-169.23960833202577,22.865677261831266]}'
+tR = ["2012-04-25T00", "2012-04-25T08"]
+Point1 = [-37.49995880442971, 56.15599523245322]
+Point2 = [-44.90083986169844, 38.27074364198387]
+p1 = {
+    "type": "FeatureCollection",
+    "features": [
+        {
+            "type": "Feature",
+            "properties": {"timeFrom": tR[0], "timeTo": tR[1]},
+            "geometry": {"type": "Point", "coordinates": Point1},
+        }
+    ],
+}
+p2 = {
+    "type": "FeatureCollection",
+    "features": [
+        {
+            "type": "Feature",
+            "properties": {"timeFrom": tR[0], "timeTo": tR[1]},
+            "geometry": {"type": "Point", "coordinates": Point1},
+        },
+        {
+            "type": "Feature",
+            "properties": {"timeFrom": tR[0], "timeTo": tR[1]},
+            "geometry": {"type": "Point", "coordinates": Point2},
+        },
+    ],
+}
+p3 = {"A": 1, "B": 0}
+
+Polygon = [
+    [-49.39423193218302, 21.652186887750887],
+    [-47.54401166786583, -4.241096331293235],
+    [-10.010972020288738, -4.241096331293235],
+    [-1.5528222405530512, 18.42461597093053],
+    [-5.5175799498041425, 29.049519444696543],
+    [-22.962513870508992, 27.1846556076123],
+    [-27.98454030222706, 22.142679863561654],
+    [-19.262073341874636, 18.92541577075147],
+    [-10.539606381522212, 21.406311271560995],
+    [-11.86119228460591, 9.45629361187676],
+    [-21.640927967425295, 4.2093834199523315],
+    [-39.87881342998037, 10.237557106013753],
+    [-39.61449624936363, 20.418704257499954],
+    [-43.314936777997985, 27.1846556076123],
+    [-58.64533325376892, 26.94928795043414],
+    [-61.552822240553056, 21.652186887750887],
+    [-56.26647862821826, 18.675200810535287],
+    [-56.002161447601516, 22.387289688558397],
+    [-49.39423193218302, 21.652186887750887],
+]
+
+LineString = [
+    [-29.83476056654425, 35.091987524867804],
+    [-27.19158876037684, 44.03609515845176],
+    [-27.19158876037684, 48.42109044135867],
+    [-28.51317466346055, 54.80814625184328],
+]
+
+pnew1 = {
+    "type": "FeatureCollection",
+    "features": [
+        {
+            "type": "Feature",
+            "properties": {"timeFrom": tR[0], "timeTo": tR[1]},
+            "geometry": {"type": "Polygon", "coordinates": [Polygon]},
+        },
+        {
+            "type": "Feature",
+            "properties": {"timeFrom": tR[0], "timeTo": tR[1]},
+            "geometry": {"type": "LineString", "coordinates": LineString},
+        },
+    ],
+}
+
+p4 = pnew = {"type": "FeatureCollection", "features": [pnew1["features"][0]]}
+p5 = pnew = {"type": "FeatureCollection", "features": [pnew1["features"][2]]}
 
 
 @pytest.mark.parametrize(
-    "coords, types, lon, lat",
+    "p, timeRange, lats, lons",
     [
-        (coords1, "Polygon", [0, 1, 2, 3, 4, 5], [0, 1, 2, 3, 4, 5]),
-        (coords2, "Polygon", [5, 4, 3, 2, 1, 0], [0, 1, 2, 3, 4, 5]),
-        (coords3, "Polygon", [0, 0, 0, 0, 0, 0], [6, 7, 8, 9, 10, 11]),
-        (coords1, "LineString", [[0, 0]], [[1, 1]]),
-        (coords2, "LineString", [[5, 0]], [[4, 1]]),
-        (coords3, "LineString", [[0, 6]], [[0, 7]]),
-        (coords4, "Point", [-169.23960833202577], [22.865677261831266]),
-        (coords5, "Point", [-83.27745537254975], [-56.11128546740994]),
-        (coords6, "Point", [34.227742132647904], [-57.34299561290217]),
-        (coords7, "Point", [-64.42989807993234], [37.87263032287052]),
-        (coords8, None, None, None),
-        (coords9, None, None, None),
+        (p1, tR, [Point1[0]], [Point1[1]]),
+        (p2, tR, [Point1[0], Point1[0]], [Point1[1]], Point2[1]),
+        (p3, None, None, None),
+        (
+            p4,
+            tR,
+            [Polygon[k][0] for k in range(len(Polygon))],
+            [Polygon[k][1] for k in range(len(Polygon))],
+        ),
+        (
+            p5,
+            tR,
+            [LineString[k][0] for k in range(len(LineString))],
+            [LineString[k][1] for k in range(len(LineString))],
+        ),
+        (pnew1, None, 1, 1),  # multiple geometry types
     ],
 )
-def test_viewer2range(coords, types, lon, lat):
-    if types is not None:
-        if isinstance(coords, list):
-            p = [{"type": types, "coordinates": list(coords)}]
-        elif isinstance(coords, str):
-            p = coords
-        x, y = viewer2range(p)
-        assert x == lon
-        assert y == lat
+def test_viewer2range(p, timeRange, lats, lons):
+    if timeRange is not None:
+        t, y, x = viewer2range(p)
+        assert x == lons
+        assert y == lats
+        assert t == timeRange
     else:
-        with pytest.raises(TypeError):
-            viewer2range(coords)
+        if lats is None:
+            with pytest.raises(TypeError):
+                viewer2range(p)
+        else:
+            with pytest.raises(ValueError):
+                viewer2range(p)
 
 
 X0 = _np.array([161, -161])  # track begins west, ends east

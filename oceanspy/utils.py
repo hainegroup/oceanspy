@@ -44,7 +44,7 @@ def viewer2range(p):
         fs, nfs = p["features"], len(p["features"])
         types = [fs[i]["geometry"]["type"] for i in range(nfs)]
         if len(set(types)) > 1:
-            raise ValueError("too many geometry types")
+            raise ValueError("too many geometry types in the collection")
 
         p_type = fs[0]["geometry"]["type"]
 
