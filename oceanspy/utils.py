@@ -1,6 +1,7 @@
 """
 OceanSpy utilities that don't need OceanDataset objects.
 """
+
 import copy as _copy
 
 import numpy as _np
