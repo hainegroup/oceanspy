@@ -8,9 +8,9 @@ from pooch import Untar
 # Download data if necessary
 def pytest_configure():
     fnames = pooch.retrieve(
-        url="https://zenodo.org/record/10713953/files/Data.tar.gz?download=1",
+        url="https://zenodo.org/record/10720195/files/Data.tar.gz?download=1",
         processor=Untar(),
-        known_hash="md5:92a2e858a6ba1c37d37fedbd5e932797",
+        known_hash="md5:ecbbd609cd7e185c862c08b92304b7d4",
     )
     symlink_args = dict(
         src=f"{os.path.commonpath(fnames)}",
