@@ -10,7 +10,7 @@ dependencies:
 - xoak
 - cartopy
 - scipy
-- intake = 0.7
+- intake
 - intake-xarray
 - geopy
 - xesmf > 0.6.3
