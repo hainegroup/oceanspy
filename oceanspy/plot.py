@@ -16,7 +16,6 @@ import warnings as _warnings
 import numpy as _np
 import pandas as _pd
 import xarray as _xr
-import xoak as _xoak
 from xarray import DataArray
 
 import oceanspy as _ospy
@@ -45,6 +44,10 @@ except ImportError:  # pragma: no cover
     pass
 try:
     import cartopy.crs as _ccrs
+except ImportError:  # pragma: no cover
+    pass
+try:
+    import xoak as _xoak
 except ImportError:  # pragma: no cover
     pass
 
