@@ -1107,6 +1107,7 @@ def faces_array(
 
     """
     transpose = [k for k in range(7, 13)]
+    _N = len(od._ds.X)  # len size of face
     data = od._ds[varName]  # assert 2D, otherwise pick z=0, time=0
     # =========================================================
     # repeated code from mooring array
@@ -1135,7 +1136,6 @@ def faces_array(
     ll = _np.where(abs(_np.diff(_dat)))[0]
     _faces = [_dat[i] for i in ll] + [_dat[-1]]
     print(_faces)
-    Niter = len(_faces)
     Niter = len(set(_faces))
     # ===========================================================
 
@@ -1154,7 +1154,7 @@ def faces_array(
         for ii in range(
             len(_faces)
         ):  # Niter count total faces. _faces can have repeated faces
-            nix, niy = fill_path(nX0, nY0, _faces, ii, face_connections)
+            nix, niy = fill_path(nX0, nY0, _faces, ii, face_connections, _N)
             inface += [_faces[ii]] * len(list(nix))
             inX += list(nix)
             inY += list(niy)
@@ -1222,7 +1222,7 @@ def faces_array(
         inX, inY, inface = [], [], []
         # for ii in range(Niter):
         for ii in range(len(_faces)):
-            nix, niy = fill_path(nX0, nY0, _faces, ii, face_connections)
+            nix, niy = fill_path(nX0, nY0, _faces, ii, face_connections, _N)
             inface += [_faces[ii]] * len(list(nix))
             inX += list(nix)
             inY += list(niy)
