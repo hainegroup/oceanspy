@@ -17,6 +17,16 @@ Datadir = "./oceanspy/tests/Data/"
 # Test oceandataset
 od = open_oceandataset.from_netcdf("{}MITgcm_rect_nc.nc" "".format(Datadir))
 
+ECCO_url = "{}catalog_ECCO.yaml".format(Datadir)
+ECCOod = open_oceandataset.from_catalog("LLC", ECCO_url)
+ECCOod._ds = ECCOod._ds.rename_vars(
+    {"hFacS": "HFacS", "hFacW": "HFacW", "hFacC": "HFacC"}
+)
+co_list = [var for var in ECCOod._ds.data_vars if "time" not in ECCOod._ds[var].dims]
+ECCOod._ds = ECCOod._ds.set_coords(co_list)
+if "timestep" in ECCOod._ds.data_vars:
+    ECCOod._ds = ECCOod._ds.drop_vars(["timestep"])
+
 # Create mooring, sruvey, and particles
 Xmoor = [od.dataset["XC"].min().values, od.dataset["XC"].max().values]
 Ymoor = [od.dataset["YC"].min().values, od.dataset["YC"].max().values]
@@ -372,6 +382,70 @@ def test_ver_facet(od_in, contourName):
     else:
         ax = vertical_section(od_in, varName="Temp", contourName=contourName)
         assert isinstance(ax, xr.plot.FacetGrid)
+
+
+# New face plotting
+# single face
+X0, Y0 = np.array([-80, -42]), np.array([12, 50])
+# two faces (oppo topo)
+X1, Y1 = np.array([-50, 1]), np.array([20, 60])
+# > two faces (arctic)
+Y90W = np.arange(-60, 77.5, 15)
+X90W = np.array([-90] * len(Y90W))
+
+# face2axis for all faces
+Face2Axis = {
+    0: (3, 3, 0),
+    1: (4, 2, 0),
+    2: (5, 1, 0),
+    3: (6, 0, 2),
+    4: (7, 1, 1),
+    5: (8, 2, 1),
+    6: (9, 3, 1),
+    7: (10, 1, 2),
+    8: (11, 2, 2),
+    9: (12, 3, 2),
+    10: (None, 0, 0),
+    11: (None, 0, 1),
+    12: (None, 0, 3),
+    13: (0, 3, 3),
+    14: (1, 2, 3),
+    15: (2, 1, 3),
+    16: (None, 0, 3),
+}
+
+
+@pytest.mark.parametrize("od_in", [ECCOod])
+@pytest.mark.parametrize("Rectangular", [True, False])
+@pytest.mark.parametrize("Moorings", [(X0, Y0), (X1, Y1), (X90W, Y90W)])
+@pytest.mark.parametrize("face2axis", [None, Face2Axis])
+def test_faces(od_in, Rectangular, Moorings, face2axis):
+    if Rectangular:
+        R = None
+    else:
+        R = 6371.0
+    od_in.parameters["rSphere"] = R
+    Xm, Ym = Moorings
+    plt.close()
+    axes_faces = od_in.plot.faces_array(Xmoor=Xm, Ymoor=Ym, face2axis=face2axis)
+    if isinstance(axes_faces, np.ndarray):
+        if face2axis is None:
+            if axes_faces.shape != (4, 4):
+                for i in range(len(axes_faces)):
+                    assert isinstance(axes_faces[i], plt.Axes)
+            else:  # all faces
+                for i in range(max(Face2Axis.keys())):
+                    if Face2Axis[i][0] is not None:
+                        iy, ix = Face2Axis[i][1], Face2Axis[i][2]
+                        assert isinstance(axes_faces[iy, ix], plt.Axes)
+
+        else:
+            for i in range(max(face2axis.keys())):
+                if face2axis[i][0] is not None:
+                    iy, ix = face2axis[i][1], face2axis[i][2]
+                    assert isinstance(axes_faces[iy, ix], plt.Axes)
+    else:
+        assert isinstance(axes_faces, plt.Axes)
 
 
 def test_shortcuts():
