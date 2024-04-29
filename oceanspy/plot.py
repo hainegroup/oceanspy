@@ -1074,8 +1074,10 @@ def faces_array(
     **kwargs,
 ):
     """
-    Plots a variable defined on the LLC4320 grid by joining and rotating
-    each face next to each other on a flat plane. No projection is needed.
+    Makes a surface map of a 2D variable defined on the LLC grid by joining and rotating
+    each face next to each other on a flat plane. No projection is needed. Overlying the
+    The extent of the map depends on the arrays Xmoor and Ymoor, which mimick a mooring
+    array.
 
     Parameters
     ----------
@@ -1212,7 +1214,6 @@ def faces_array(
                         fi0, fi1 = (0, 0), (0, 1)
 
             face2axis = {0: (_faces[i0],) + fi0, 1: (_faces[i1],) + fi1}
-        print("face2axis: ", face2axis)
 
     elif Niter > 2:
         # it is possible to only have two faces but len(Niter)>2
@@ -1279,6 +1280,7 @@ def faces_array(
         nrows += 1
         ncols += 1
 
+    # Code largely inspired by code from Ryan Abernathey's repository.
     fig, axes = _plt.subplots(nrows=nrows, ncols=ncols, **spkwargs)
 
     plt_params = ["ls", "color", "marker", "markersize", "alpha"]
@@ -1358,11 +1360,11 @@ def faces_array(
                     elif 10 in _faces and _exch_fs == 1:
                         xvals, yvals = xvals[::-1], yvals[::-1]
                     else:
-                        # more that two faces that exchange with arctic
-                        # are present in the array
-                        print("Warning - 2 or more faces exchanging with arctic")
-                        print("is not yet supported. if you would like to")
-                        print(" contribute to this - please raise an issue")
+                        _warnings.warn(
+                            "2 or more faces exchanging with arctic face is"
+                            "not yet supported. if you would like this"
+                            "option to be a feature raise an issue on GitHub"
+                        )
                 elif face in transpose:
                     xvals, yvals = yvals, xvals
                 ax.plot(xvals, yvals, **pkwargs)
