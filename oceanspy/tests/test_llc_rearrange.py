@@ -4,6 +4,7 @@ import random as rand
 import numpy as _np
 import pytest
 import xarray as _xr
+from xarray.core.dataarray import DataArray, Dataset
 
 # From OceanSpy
 from oceanspy import open_oceandataset
@@ -57,8 +58,6 @@ if "timestep" in od._ds.data_vars:
 Nx = od._ds.dims["X"]
 Ny = od._ds.dims["Y"]
 
-_datype = _xr.core.dataarray.DataArray
-_dstype = _xr.core.dataset.Dataset
 
 # WOCE standard sections
 A01_lon = [
@@ -2233,17 +2232,17 @@ cuts = [[0, 28], [0, 0], [0, 0], [0, 0]]
 @pytest.mark.parametrize(
     "od, faces, expected, atype, XRange, YRange, opt, cuts, masking, size",
     [
-        (od, faces, expected, _datype, None, None, False, 0, False, None),
+        (od, faces, expected, DataArray, None, None, False, 0, False, None),
         (od, faces[:2], [0, 0, 0, 0], int, None, None, False, 0, False, None),
         (od, faces[:6], [0, 0, 0, 0], int, None, None, False, 0, False, None),
-        (od, [0, 1, 2, 6], [2, 0, 0, 0], _datype, None, None, False, 0, False, None),
-        (od, faces[:7], [2, 5, 0, 0], _datype, None, None, False, 0, False, None),
+        (od, [0, 1, 2, 6], [2, 0, 0, 0], DataArray, None, None, False, 0, False, None),
+        (od, faces[:7], [2, 5, 0, 0], DataArray, None, None, False, 0, False, None),
         (od, faces[6:], [0, 0, 7, 10], int, None, None, False, 0, False, None),
         (
             od,
             [2, 6],
             [2, 0, 0, 0],
-            _datype,
+            DataArray,
             [-30, 22],
             [60.0, 80.2],
             True,
@@ -2255,7 +2254,7 @@ cuts = [[0, 28], [0, 0], [0, 0], [0, 0]]
             od,
             [2, 6],
             [2, 0, 0, 0],
-            _datype,
+            DataArray,
             [-30, 22],
             [60.0, 80.2],
             True,
@@ -2276,7 +2275,7 @@ def test_arc_connect(
             ds, "YG", faces=faces, masking=masking, opt=opt, ranges=cuts
         )
         for i in range(len(DS)):
-            if isinstance(DS[i], _datype):
+            if isinstance(DS[i], atype):
                 assert _np.shape(DS[i]) == size
     else:
         arc_faces, *a, DS = arct_connect(ds, "YG", faces)
@@ -2417,7 +2416,7 @@ for var_name in varList:
     ARCT[2].append(DS[2])
     ARCT[3].append(DS[3])
 for i in range(len(ARCT)):  # Not all faces survive the cutout
-    if isinstance(ARCT[i][0], _datype):
+    if isinstance(ARCT[i][0], DataArray):
         ARCT[i] = _xr.merge(ARCT[i])
 
 ds2, ds5, ds7, ds10 = ARCT
@@ -2453,7 +2452,7 @@ def test_shift_dataset(ds, dimc, dimg, init_c, final_c, init_g, final_g):
 )
 def test_rotate_dataset(ds, var, dimc, dimg, rot_dims):
     nds = rotate_dataset(ds, dimc, dimg)
-    if isinstance(ds, _dstype):
+    if isinstance(ds, Dataset):
         nvar = nds[var]
         assert nvar.dims == rot_dims
 
@@ -2484,7 +2483,7 @@ def test_rotate_dataset(ds, var, dimc, dimg, rot_dims):
 )
 def test_rotate_vars(ds, var, dims0, rot_dims):
     nds = rotate_vars(ds)
-    if isinstance(ds, _dstype):
+    if isinstance(ds, Dataset):
         nvar = nds[var]
         assert nvar.dims == rot_dims
 
@@ -2875,7 +2874,7 @@ def test_edge_arc_data(od, XRange, YRange, F_indx, Nx):
     ARCT[3].append(DS[3])
 
     for i in range(len(ARCT)):  # Not all faces survive the cutout
-        if isinstance(ARCT[i][0], _datype):
+        if isinstance(ARCT[i][0], DataArray):
             ARCT[i] = _xr.merge(ARCT[i])
 
     face_order = _np.array([2, 5, 7, 10])
@@ -3751,7 +3750,7 @@ def test_ds_edge(od, ix, iy, faces, k, kwargs):
         else:
             if set([89]).issubset(set.union(set(ix), set(iy))):
                 _dim = "mooring"
-                assert isinstance(nds, _dstype)
+                assert isinstance(nds, Dataset)
                 assert len(nds.Xp1) == 2
                 assert len(nds.Yp1) == 2
                 assert len(nds.X) == 1
@@ -3791,7 +3790,7 @@ def test_arctic_eval(od, ix, iy):
     _dim = "station"
     nds = arctic_eval(od._ds, ix, iy, _dim)
 
-    assert isinstance(nds, _dstype)
+    assert isinstance(nds, Dataset)
     assert len(nds.Xp1) == 2
     assert len(nds.Yp1) == 2
     assert len(nds.X) == 1
