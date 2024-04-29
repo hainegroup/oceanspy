@@ -2188,14 +2188,6 @@ I08S09N_lat = [
 ]
 
 
-YRange_test1 = [35, 40]  # degrees latitude
-XRange_test1 = [-80, 0]  # longitude
-
-
-YRange_test2 = [35, 40]  # degrees latitude
-XRange_test2 = [-170, -100]  # longitude
-
-
 @pytest.mark.parametrize(
     "od, var, expected",
     [
@@ -2902,8 +2894,8 @@ Vcoords = {
     "X": _ds.X.values,
 }
 
-_ds["Ucycl"] = _xr.DataArray(nU, coords=Ucoords, dims=["face", "Y", "Xp1"])
-_ds["Vcycl"] = _xr.DataArray(nV, coords=Vcoords, dims=["face", "Yp1", "X"])
+_ds["Ucycl"] = DataArray(nU, coords=Ucoords, dims=["face", "Y", "Xp1"])
+_ds["Vcycl"] = DataArray(nV, coords=Vcoords, dims=["face", "Yp1", "X"])
 
 
 @pytest.mark.parametrize("dataset", [_ds])
@@ -3259,7 +3251,6 @@ y2 = y21 + y22
 
 # group together
 X1, Y1 = [x1, x2], [y1, y2]
-faces1 = [1, 4]
 
 
 # test 2
@@ -3283,14 +3274,13 @@ nx2 = _np.array(list(x20) + list(x21) + list(x22))
 ny2 = _np.array(list(y20) + list(y21) + list(y22))
 # group together
 X2, Y2 = [nx1, nx2[::-1], nx1[:1]], [ny1, ny2[::-1], ny1[:1]]
-faces2 = [2, 5, 2]
 
 
 @pytest.mark.parametrize(
     "ix, iy, faces, face_connections, count",
     [
-        (X1, Y1, faces1, od.face_connections["face"], 3),
-        (X2, Y2, faces2, od.face_connections["face"], 0),
+        (X1, Y1, [1, 4], od.face_connections["face"], 3),
+        (X2, Y2, [2, 5, 2], od.face_connections["face"], 0),
     ],
 )
 def test_index_splitter(ix, iy, faces, face_connections, count):
@@ -3370,7 +3360,7 @@ faces1 = [2, 5, 2]
 # connect them across interface
 X1, Y1 = [], []
 for k in range(len(oX1)):
-    x, y = fill_path(oX1, oY1, faces1, k, od.face_connections["face"])
+    x, y = fill_path(oX1, oY1, [2, 5, 2], k, od.face_connections["face"])
     X1.append(x)
     Y1.append(y)
 
@@ -3400,7 +3390,7 @@ faces2 = [4, 8, 4]
 # connect them across interface
 X2, Y2 = [], []
 for k in range(len(oX2)):
-    x, y = fill_path(oX2, oY2, faces2, k, od.face_connections["face"])
+    x, y = fill_path(oX2, oY2, [4, 8, 4], k, od.face_connections["face"])
     X2.append(x)
     Y2.append(y)
 
@@ -3408,9 +3398,9 @@ for k in range(len(oX2)):
 @pytest.mark.parametrize(
     "ix, iy, faces, iface, face_connections, val",
     [
-        (X1, Y1, faces1, 0, od.face_connections["face"], 1),
-        (X1, Y1, faces1, 1, od.face_connections["face"], 0),
-        (X1, Y1, faces1, 2, od.face_connections["face"], 1),
+        (X1, Y1, [2, 5, 2], 0, od.face_connections["face"], 1),
+        (X1, Y1, [2, 5, 2], 1, od.face_connections["face"], 0),
+        (X1, Y1, [2, 5, 2], 2, od.face_connections["face"], 1),
         (
             [0, 10, _np.array([15])],
             [10, 0, _np.array([15])],
@@ -3419,6 +3409,8 @@ for k in range(len(oX2)):
             od.face_connections["face"],
             None,
         ),
+        (X2, Y2, [4, 8, 4], 0, od.face_connections["face"], 1),
+        (X2, Y2, [4, 8, 4], 1, od.face_connections["face"], 2),
     ],
 )
 def test_fdir_completer(ix, iy, faces, iface, face_connections, val):
