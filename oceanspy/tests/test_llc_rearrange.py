@@ -4060,28 +4060,28 @@ faces2 = [7, 10]  # corsses in y - diff topo
 def test_ds_edge_samety(od, _ix, _iy, faces, vkwargs):
     _dim_name = "mooring"
     _ds = od._ds
-    new_dim = _xr.DataArray(_np.arange(len(_ix)), dims=(_dim_name))
-    y = _xr.DataArray(_np.arange(1), dims=("y"))
-    x = _xr.DataArray(_np.arange(1), dims=("x"))
-    yp1 = _xr.DataArray(_np.arange(2), dims=("yp1"))
-    xp1 = _xr.DataArray(_np.arange(2), dims=("xp1"))
+    new_dim = DataArray(_np.arange(len(_ix)), dims=(_dim_name))
+    y = DataArray(_np.arange(1), dims=("y"))
+    x = DataArray(_np.arange(1), dims=("x"))
+    yp1 = DataArray(_np.arange(2), dims=("yp1"))
+    xp1 = DataArray(_np.arange(2), dims=("xp1"))
     # Transform indexes in DataArray
-    iY = _xr.DataArray(
+    iY = DataArray(
         _np.reshape(_iy, (len(new_dim), len(y))),
         coords={_dim_name: new_dim, "y": y},
         dims=(_dim_name, "y"),
     )
-    iX = _xr.DataArray(
+    iX = DataArray(
         _np.reshape(_ix, (len(new_dim), len(x))),
         coords={_dim_name: new_dim, "x": x},
         dims=(_dim_name, "x"),
     )
-    iYp1 = _xr.DataArray(
+    iYp1 = DataArray(
         _np.stack((_iy, _iy + 1), 1),
         coords={_dim_name: new_dim, "yp1": yp1},
         dims=(_dim_name, "yp1"),
     )
-    iXp1 = _xr.DataArray(
+    iXp1 = DataArray(
         _np.stack((_ix, _ix + 1), 1),
         coords={_dim_name: new_dim, "xp1": xp1},
         dims=(_dim_name, "xp1"),
@@ -4125,28 +4125,28 @@ def test_ds_edge_samety(od, _ix, _iy, faces, vkwargs):
 def test_ds_edge_sametx(od, _ix, _iy, faces, vkwargs):
     _dim_name = "mooring"
     _ds = od._ds
-    new_dim = _xr.DataArray(_np.arange(len(_ix)), dims=(_dim_name))
-    y = _xr.DataArray(_np.arange(1), dims=("y"))
-    x = _xr.DataArray(_np.arange(1), dims=("x"))
-    yp1 = _xr.DataArray(_np.arange(2), dims=("yp1"))
-    xp1 = _xr.DataArray(_np.arange(2), dims=("xp1"))
+    new_dim = DataArray(_np.arange(len(_ix)), dims=(_dim_name))
+    y = DataArray(_np.arange(1), dims=("y"))
+    x = DataArray(_np.arange(1), dims=("x"))
+    yp1 = DataArray(_np.arange(2), dims=("yp1"))
+    xp1 = DataArray(_np.arange(2), dims=("xp1"))
     # Transform indexes in DataArray
-    iY = _xr.DataArray(
+    iY = DataArray(
         _np.reshape(_iy, (len(new_dim), len(y))),
         coords={_dim_name: new_dim, "y": y},
         dims=(_dim_name, "y"),
     )
-    iX = _xr.DataArray(
+    iX = DataArray(
         _np.reshape(_ix, (len(new_dim), len(x))),
         coords={_dim_name: new_dim, "x": x},
         dims=(_dim_name, "x"),
     )
-    iYp1 = _xr.DataArray(
+    iYp1 = DataArray(
         _np.stack((_iy, _iy + 1), 1),
         coords={_dim_name: new_dim, "yp1": yp1},
         dims=(_dim_name, "yp1"),
     )
-    iXp1 = _xr.DataArray(
+    iXp1 = DataArray(
         _np.stack((_ix, _ix + 1), 1),
         coords={_dim_name: new_dim, "xp1": xp1},
         dims=(_dim_name, "xp1"),
