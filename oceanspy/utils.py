@@ -865,6 +865,7 @@ def reset_dim(_ds, N, dim="mooring"):
 
 
 def diff_and_inds_where_insert(ix, iy):
+    """identifies where distances are > 1 (diagonal) between indexes"""
     dx, dy = (_np.diff(ii) for ii in (ix, iy))
     inds = _np.argwhere(_np.abs(dx) + _np.abs(dy) > 1).squeeze()
     return dx, dy, inds

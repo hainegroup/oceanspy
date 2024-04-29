@@ -1268,7 +1268,28 @@ def eval_dataset(_ds, _ix, _iy, _iface=None, _dim_name="mooring"):
 
 def arctic_eval(_ds, _ix, _iy, _dim_name="mooring"):
     """
-    Evaluates a dataset
+    Evaluates all variables along the indexes (_ix, _iy) on the arctic face
+    face = 6. Returns a new dataset without complex topology,
+    an a new dimensions _dim_name of length = length(_ix).
+
+    Parameters
+    ----------
+
+    ds: xarray.Dataset
+    _ix: 1D array-like. int values
+    _iy: 1D array-like. int values
+    _dim_name: str. default='mooring'
+
+
+    Returns
+    -------
+    xarray.Dataset
+
+
+    See Also
+    --------
+    oceanspy.subsample.mooring_array
+
     """
     _ds = mates(_ds.isel(face=6))
 
@@ -1522,6 +1543,39 @@ def arctic_eval(_ds, _ix, _iy, _dim_name="mooring"):
 
 
 def ds_edge_sametx(_ds, iX, iY, iXp1, iYp1, face1, face2, _dim, moor, **kwargs):
+    """
+    Evaluates all variables of a xarray.dataset along the indexes (iX, iY) at
+    center points (C), and (iXp1, iYp1) at corner points (G) at the edge between
+    two faces (face1, face2). The center points lie within face1, whereas the
+    some corner points surrounding the center points liek within face1, and
+    others at face2 along the dimension _dim. The two faces have same topology
+    in the X direction.
+
+    Parameters
+    ----------
+
+    ds: xarray.Dataset
+    iX: 1D array like, or scalar int values
+    iY: 1D array like, or scalar int values
+    iXp1: 2D array-like. Int values surrounding each of iX
+    iYp1: 2D array-like. Int values surrounding each of iY
+    face1: int
+    face2: int
+    _dim: str, 'X' or 'Y'
+
+
+    Returns
+    -------
+    xarray.Dataset
+
+
+    See Also
+    --------
+    oceanspy.subsample.mooring_array
+    oceanspy.llc_rearrange.ds_edge
+
+    """
+
     _Nx = len(_ds.X) - 1
     rotS = _np.arange(7, 13)
 
@@ -1574,8 +1628,40 @@ def ds_edge_samety(
     _ds, iX, iY, _ix, xp1, iXp1, iYp1, face1, face2, _dim, moor, **kwargs
 ):
     """
-    same topology, axis=`y`.
+    Evaluates all variables of a xarray.dataset along the indexes (iX, iY) at
+    center points (C), and (iXp1, iYp1) at corner points (G) at the edge between
+    two faces (face1, face2). The center points lie within face1, whereas the
+    some corner points surrounding the center points liek within face1, and
+    others at face2 along the dimension _dim. The two faces have same topology
+    in the Y direction.
+
+    Parameters
+    ----------
+
+    ds: xarray.Dataset
+    iX: 1D array like, or scalar int values
+    iY: 1D array like, or scalar int values
+    _ix: old (complete) array dim values at center points
+    xp1: old (complete) array dim values at corner points
+    iXp1: 2D array-like. Int values surrounding each of iX
+    iYp1: 2D array-like. Int values surrounding each of iY
+    face1: int
+    face2: int
+    _dim: str, 'X' or 'Y'
+
+
+    Returns
+    -------
+    xarray.Dataset
+
+
+    See Also
+    --------
+    oceanspy.subsample.mooring_array
+    oceanspy.llc_rearrange.ds_edge
+
     """
+
     rotS = _np.arange(7, 13)
 
     _Nx = len(_ds.X) - 1
@@ -1633,7 +1719,38 @@ def ds_edge_samety(
 
 
 def ds_edge_difftx(_ds, iX, iY, iXp1, iYp1, face1, face2, _dim, moor, **kwargs):
-    """different topology, axis=`x`"""
+    """
+    Evaluates all variables of a xarray.dataset along the indexes (iX, iY) at
+    center points (C), and (iXp1, iYp1) at corner points (G) at the edge between
+    two faces (face1, face2). The center points lie within face1, whereas the
+    some corner points surrounding the center points liek within face1, and
+    others at face2 along the dimension _dim. The two faces have different
+    topology in the X direction.
+
+    Parameters
+    ----------
+
+    ds: xarray.Dataset
+    iX: 1D array like, or scalar int values
+    iY: 1D array like, or scalar int values
+    iXp1: 2D array-like. Int values surrounding each of iX
+    iYp1: 2D array-like. Int values surrounding each of iY
+    face1: int
+    face2: int
+    _dim: str, 'X' or 'Y'
+
+
+    Returns
+    -------
+    xarray.Dataset
+
+
+    See Also
+    --------
+    oceanspy.subsample.mooring_array
+    oceanspy.llc_rearrange.ds_edge
+
+    """
     _Nx = len(_ds.X) - 1
 
     dim_arg = {_dim: moor}
@@ -1690,7 +1807,39 @@ def ds_edge_difftx(_ds, iX, iY, iXp1, iYp1, face1, face2, _dim, moor, **kwargs):
 
 
 def ds_edge_diffty(_ds, iX, iY, _ix, xp1, iYp1, face1, face2, _dim, moor, **kwargs):
-    """different topology, axis=`y`"""
+    """
+    Evaluates all variables of a xarray.dataset along the indexes (iX, iY) at
+    center points (C), and (iXp1, iYp1) at corner points (G) at the edge between
+    two faces (face1, face2). The center points lie within face1, whereas the
+    some corner points surrounding the center points liek within face1, and
+    others at face2 along the dimension _dim. The two faces have different
+    topology in the Y direction.
+
+    Parameters
+    ----------
+
+    ds: xarray.Dataset
+    iX: 1D array like, or scalar int values
+    iY: 1D array like, or scalar int values
+    _ix: old (complete) array dim values at center points
+    xp1: old (complete) array dim values at corner points
+    iYp1: 2D array-like. Int values surrounding each of iY
+    face1: int
+    face2: int
+    _dim: str, 'X' or 'Y'
+
+
+    Returns
+    -------
+    xarray.Dataset
+
+
+    See Also
+    --------
+    oceanspy.subsample.mooring_array
+    oceanspy.llc_rearrange.ds_edge
+
+    """
     _Nx = len(_ds.X) - 1
     dim_arg = {_dim: moor}
     iXn = iX.isel(**dim_arg)  #
@@ -1761,31 +1910,34 @@ def ds_edge_diffty(_ds, iX, iY, _ix, xp1, iYp1, face1, face2, _dim, moor, **kwar
 
 def ds_edge(_ds, _ix, _iy, _ifaces, ii, _face_topo, _dim="mooring", **kwargs):
     """
-    Given an array of index point that ends at the
-    face boundary, it samplest from the neighbor faced data
-    the corresponding vector value.
+    Given an array of index point that ends at the face boundary, it samples
+    from the neighbor faced data the corresponding vector value.
 
-    Parameters:
+    Parameters
     ----------
 
-        _ds: xarray.dataset
-            faced data.
-        _ix, _iy: 1d array-like
-            Integers. array of index positions for the present
-            ith-face. It may end or beginning at the face edge.
-        _ifaces: 1d array-like. integers
-            full array of all faces sampled along the entire
-            mooring trajectory.
-        ii: int
-            identifies the present face.
-        _face_topo: dict
-            dictionary with face connections - topology
-        _Nx: int
-            Last index along the x or y direction. Default=89
-            associated with ECCO.
+    _ds: xarray.dataset
+        faced data.
+    _ix, _iy: 1d array-like
+        Integers. array of index positions for the present
+        ith-face. It may end or beginning at the face edge.
+    _ifaces: 1d array-like. integers
+        full array of all faces sampled along the entire
+        mooring trajectory.
+    ii: int
+        identifies the present face.
+    _face_topo: dict
+        dictionary with face connections - topology
+    _dim: str. `mooting` default
+        Name of the new dimension along the array.
 
-    Returns:
+    Returns
+    -------
+    xarray.Dataset
+
+    See Also
     --------
+    oceanspy.subsample.mooring_array
 
     """
 
@@ -2016,7 +2168,14 @@ def ds_arcedge(_ds, _ix, _iy, moor, face1, face2, _dim="mooring"):
             name of dimension. either `mooring` or `station`
     Returns:
     --------
-        xarray.DataSet.
+        xarray.Dataset
+
+
+    See Also
+    --------
+    oceanspy.subsample.mooring_array
+    oceanspy.llc_rearrange.ds_edge
+
     """
     _Nx = len(_ds.X) - 1
     dim_list = _ds.dims
@@ -3099,6 +3258,16 @@ def cross_face_diffs(_ds, _ix, _iy, _faces, _iface, _face_connections):
 
 
 def arct_diffs(_ds, _Xind, _Yind):
+    """
+    Computes the unit distance between the location of index spaces in
+    both directions diffX and diffY when data is defined along the arctic
+    face.
+
+    The arctic face is divided in 4 theoretical triangular regions. diffX
+    and diffY differ across these regions, in order to match a lat-lon
+    geometry.
+
+    """
     _Nx = len(_ds.X) - 1
 
     # define triangular areas that split the arctic
