@@ -86,12 +86,14 @@ def _rel_lon(x, ref_lon):
     Return how much east one need to go from ref_lon to x
     This function aims to address the confusion caused by
     the discontinuity in longitude.
+
     Parameters
     ----------
     x: float, numpy.array, dask.array
         longitude to convert
     ref_lon: float
         a reference longitude. This longitude will become 0deg
+
     Returns
     -------
     redefined_x: float, numpy.array, dask.array

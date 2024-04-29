@@ -1154,7 +1154,7 @@ def eval_dataset(_ds, _ix, _iy, _iface=None, _dim_name="mooring"):
     indexes in the plane.
     The data in the new xarray.dataset has a new dimension/coordinate.
 
-    Parameters:
+    Parameters
     ----------
     _ds: xarray.Dataset
         contains all x, y coordinates (but may be subsampled in Z or time)
@@ -1168,8 +1168,10 @@ def eval_dataset(_ds, _ix, _iy, _iface=None, _dim_name="mooring"):
         names the new dimension along the pathway. By default this is 'mooring',
         but can also be 'station' (when discrete, argo-like isolated coordinates).
 
-    Returns:
-        xarray.Dataset
+    Returns
+    -------
+    xarray.Dataset
+
     """
 
     nz = len(_ds.Z)
@@ -2152,23 +2154,24 @@ def ds_arcedge(_ds, _ix, _iy, moor, face1, face2, _dim="mooring"):
     Given an array of index points that right ends at the edge between the arctic and
     another face, returns the complete set of center point and  corner/velocity points.
 
-    Parameters:
+    Parameters
     ----------
-        _ds: xarray.dataset
-            `face` is a dimension.
-        _ix, _iy: 1d array-like
-            Integers. Index positions for the present
-            ith-face that evaluate at the right edge between faces.
-            Either all `_ix` or all `_iy` are `len(_ds.X)-1`
-        face1: Int
-            present face. index evaluates at this face
-        face2: Int
-            adjacent face from which to sample.
-        _dim: str
-            name of dimension. either `mooring` or `station`
-    Returns:
-    --------
-        xarray.Dataset
+    _ds: xarray.dataset
+        `face` is a dimension.
+    _ix, _iy: 1d array-like
+        Integers. Index positions for the present
+        ith-face that evaluate at the right edge between faces.
+        Either all `_ix` or all `_iy` are `len(_ds.X)-1`
+    face1: Int
+        present face. index evaluates at this face
+    face2: Int
+        adjacent face from which to sample.
+    _dim: str
+        name of dimension. either `mooring` or `station`
+
+    Returns
+    -------
+    xarray.Dataset
 
 
     See Also
@@ -2495,19 +2498,23 @@ def splitter(_ix, _iy, _ifaces):
 def edge_completer(_x, _y, face_dir=None, ind=-1, _N=89):
     """verifies that an array begins and ends at the edge of a face.
 
-    Parameters:
+    Parameters
     ----------
 
-        _x, _y: list, list
-            indexes of morring array in logical space.
-        face_dir: int
-            output of `od.llc_rearrange.face_direction. Indicates the direction
-            towards which the left endpoint of (mooring) array must reach the
-            edge of face.
-        ind: int, 0 or -1 (default).
-            indicates the index of the (mooring) array.
-        _N: int, default=89.
-            last index of each faceted dimension. (len(X)-1).
+    _x, _y: list, list
+        indexes of morring array in logical space.
+    face_dir: int
+        output of `od.llc_rearrange.face_direction. Indicates the direction
+        towards which the left endpoint of (mooring) array must reach the
+        edge of face.
+    ind: int, 0 or -1 (default).
+        indicates the index of the (mooring) array.
+    _N: int, default=89.
+        last index of each faceted dimension. (len(X)-1).
+
+    Returns
+    -------
+    _X, _Y: 1D array-like
     """
 
     if face_dir == 1:  # towards local right in x (increase x-index)
@@ -2547,20 +2554,22 @@ def edge_slider(x1, y1, f1, x2, y2, f2, face_connections, _N=89):
     and f2 (next). Returns a point in f1 that is aligned
     with the first element in f2.
 
-    Parameters:
+    Parameters
     ----------
-        [x1, y1, f1]: list of integers.
-            Present face (`f1`) coordinates.
-        [x2, y2, f2] : list of integers.
-            Next face (`f2`) coordinates
-        face_connections: dict.
-            topology of grid.
-        _N: int
-            last index along `X` or `Y`
+    [x1, y1, f1]: list of integers.
+        Present face (`f1`) coordinates.
+    [x2, y2, f2] : list of integers.
+        Next face (`f2`) coordinates
+    face_connections: dict.
+        topology of grid.
+    _N: int
+        last index along `X` or `Y`
 
-    Returns:
-        newP: list
-            It's elements are int values for present face `f1`
+    Returns
+    -------
+
+    newP: list
+        It's elements are int values for present face `f1`
     """
     # cannot handle upper right corner (with 3 face data).
     crns = []
@@ -2623,22 +2632,22 @@ def fill_path(_X, _Y, _faces, k, _face_conxs, _N=89):
     the end faced-data which can either end or begin at the face edge. To be
     used when len(_faces)>1. Otherwise, use `connector`.
 
-    Parameters:
+    Parameters
     ----------
-        X, Y: each 1d array-like of ints
-            len(X) == len(Y) >= 1
-        face: 1d array-like.
-            len(face)==len(X)>1. Identifies which face the array is sampling
-            from
-        k: int
-            identifies the kth-array pair (X, Y) with kth-face.
-        _N: int
-            Length of x- or y- dimension. Default is 89, associated with
-    TODO:
+    X, Y: each 1d array-like of ints
+        len(X) == len(Y) >= 1
+    face: 1d array-like.
+        len(face)==len(X)>1. Identifies which face the array is sampling from
+    k: int
+        identifies the kth-array pair (X, Y) with kth-face.
+    _N: int
+        Length of x- or y- dimension. Default is 89, associated with
 
-    incorporate the changes above.
+    Returns
+    -------
+    _x, _y: 1D array-like
+
     """
-    # import numpy as _np
 
     Ntot = len(_faces)
     x, y = connector(_X[k], _Y[k])
@@ -2725,16 +2734,20 @@ def face_adjacent(_ix, _iy, _iface, _face_connections, _N=89):
     face next to boundary data. If data does not eval at the
     boundary between two faces, returns -1.
 
-    Parameters:
+    Parameters
     ----------
-        _ix: 1d array-like, int data
-        _iy: 1d array-like. int data
-        _iface: int
-            face index value where array lives.
-        _face_connections: dict
-            contains topology of data.
-        _N: int. default=89 (ECCO)
-            last index along  i or j index in faceted data.
+    _ix: 1d array-like, int data
+    _iy: 1d array-like. int data
+    _iface: int
+        face index value where array lives.
+    _face_connections: dict
+        contains topology of data.
+    _N: int. default=89 (ECCO)
+        last index along  i or j index in faceted data.
+
+    Returns
+    -------
+    int
     """
     adj_faces = []
     fleft, fright = _face_connections[_iface]["X"]
@@ -3202,21 +3215,23 @@ def cross_face_diffs(_ds, _ix, _iy, _faces, _iface, _face_connections):
     """computes the unit distance between the location of index spaces in
     both directions diffX and diffY when data has complex topology.
 
-    Parameters:
+    Parameters
     ----------
-        _ds: xarray.Dataset
-            contains `face`, and original dataset.
-        _ix, _iy: 1d-array like.
-            elements are int values. Output from `connector()`, whch
-        _faces: list
-            contains the face indexes of the ordered track. len()>=1
-        _iface: int
-            index of current face.
-        _face_connection: dict
-            face topology.
-    returns
-        diffX: 1D array-like
-        diffY: 1D array-like
+    _ds: xarray.Dataset
+        contains `face`, and original dataset.
+    _ix, _iy: 1d-array like.
+        elements are int values. Output from `connector()`, whch
+    _faces: list
+        contains the face indexes of the ordered track. len()>=1
+    _iface: int
+        index of current face.
+    _face_connection: dict
+        face topology.
+
+    Returns
+    -------
+    diffX: 1D array-like
+    diffY: 1D array-like
     """
 
     # exclude the arctic for now
