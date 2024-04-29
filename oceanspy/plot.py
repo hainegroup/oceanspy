@@ -1074,10 +1074,14 @@ def faces_array(
     **kwargs,
 ):
     """
-    Makes a surface map of a 2D variable defined on the LLC grid by joining and rotating
-    each face next to each other on a flat plane. No projection is needed. Overlying the
-    The extent of the map depends on the arrays Xmoor and Ymoor, which mimick a mooring
-    array.
+    Makes a surface map of a 2D variable (`Depth` by default), and on top of
+    that plots the coordinate of a mooring array. Data must be defined on an
+    LLC grid (12 faces/tiles) defined on the LLC grid by joining and rotating
+    each face next to each other on a flat plane. No projection is needed.
+    The extent of the map depends on the arrays Xmoor and Ymoor, but a custom
+    domain extent can be pre-defined by providing a `face2axis` dictionary
+    that set which faces are being plotted, and their arrangement on the
+    map.
 
     Parameters
     ----------
@@ -1094,10 +1098,8 @@ def faces_array(
         {face_count: (face index, subplot_rows, subplot_cols)}.
         face_count = range(len(faces with data)).
         face_index: range(0, 12).
-
-        face_count, face_index must be consistent with data. otherwise ValueError.
-
     kargs: matplotlib.pyplot
+
 
     Returns
     -------
