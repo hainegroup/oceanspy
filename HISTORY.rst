@@ -3,12 +3,27 @@
 =======
 History
 =======
+
+v0.3.5 (2023-12-05)
+-------------------
+
+New Station subsampleMethod by (#377) by `Miguel Jimenez Urias`_. Improved
+behavior of subsample.mooring_array (#354, #355, #361, #364, #386, #387, #398, #391
+and #399), by `Miguel Jimenez Urias`_. Updating documentation (notebooks) by
+`Miguel Jimenez Urias`_ in #340. Replaced rise with jupyterlab-rise to allow
+binder to be build by `Miguel Jimenez Urias`_ in #400. Fix arctic_control
+not opening by `Wenrui Jiang`_ (#396). Also fixed issues #321 and #269 by
+`Wenrui Jiang`_. Allow trusted publishing by @malmans2 in #350. Ttest and
+support python 3.11 by `Mattia Almansi`_ (#351). Added the ETOPO topography
+to sciserver catalog by `Wenrui Jiang`_ (in #360).
+
+
 v0.3.4 (2022-04-03)
 -------------------
 Fixed issues 322 (PR 325), 324 (PR 328), 332 (PR 324), and 312 (PR 337). Additional
 grid files and removing (for the day) access to velocity LLC4320 data (PR 326) and update
 environment (PR 335). All by `Miguel Jimenez Urias`_. Add daily mean ecco dataset to
-catalog (PR 333) by `Wenrui Jiang`_.
+catalog (PR 333) by
 
 
 v0.3.3 (2022-02-07)

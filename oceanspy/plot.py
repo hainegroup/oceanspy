@@ -15,9 +15,8 @@ import warnings as _warnings
 
 import numpy as _np
 import pandas as _pd
-
-# Required dependencies (private)
 import xarray as _xr
+from xarray import DataArray
 
 import oceanspy as _ospy
 
@@ -32,7 +31,11 @@ from ._ospy_utils import (
 from .compute import _add_missing_variables
 from .compute import integral as _integral
 from .compute import weighted_mean as _weighted_mean
-from .llc_rearrange import Dims
+from .llc_rearrange import Dims, face_direction, fill_path, splitter
+from .utils import circle_path_array, connector
+
+# Required dependencies (private)
+
 
 # Additional dependencies (private)
 try:
@@ -41,6 +44,10 @@ except ImportError:  # pragma: no cover
     pass
 try:
     import cartopy.crs as _ccrs
+except ImportError:  # pragma: no cover
+    pass
+try:
+    import xoak as _xoak
 except ImportError:  # pragma: no cover
     pass
 
@@ -1057,6 +1064,317 @@ def vertical_section(
         return p
 
 
+def faces_array(
+    od,
+    Ymoor,
+    Xmoor,
+    varName="Depth",
+    xoak_index="scipy_kdtree",
+    face2axis=None,
+    **kwargs,
+):
+    """
+    Makes a surface map of a 2D variable (`Depth` by default), and on top of
+    that plots the coordinate of a mooring array. Data must be defined on an
+    LLC grid (12 faces/tiles) defined on the LLC grid by joining and rotating
+    each face next to each other on a flat plane. No projection is needed.
+    The extent of the map depends on the arrays Xmoor and Ymoor, but a custom
+    domain extent can be pre-defined by providing a `face2axis` dictionary
+    that set which faces are being plotted, and their arrangement on the
+    map.
+
+    Parameters
+    ----------
+    od: OceanDataset
+        oceandataset used to plot.
+
+    Ymoor, Xmoor: array-like data.
+        degrees lat and lons. equal length
+    varName: str
+        name of (2D) variable to plot. default = `Depth`
+    xoak_index: str
+        default `scipy_kdtree`.
+    face2axis: dict, default=None
+        {face_count: (face index, subplot_rows, subplot_cols)}.
+        face_count = range(len(faces with data)).
+        face_index: range(0, 12).
+    kargs: matplotlib.pyplot
+
+
+    Returns
+    -------
+    matplotlib.pyplot.axes or xarray.plot.FacetGrid
+
+    See Also
+    --------
+    oceanspy.subsample.mooring_array
+
+    """
+    transpose = [k for k in range(7, 13)]
+    _N = len(od._ds.X)  # len size of face
+    data = od._ds[varName]  # assert 2D, otherwise pick z=0, time=0
+    # =========================================================
+    # repeated code from mooring array
+    ds_grid = od._ds[["XC", "YC"]]  # center points
+    R = od.parameters["rSphere"]
+    face_connections = od.face_connections["face"]
+
+    if R is not None:
+        Ymoor, Xmoor = circle_path_array(Ymoor, Xmoor, R)
+    for key, value in ds_grid.sizes.items():
+        ds_grid["i" + f"{key}"] = DataArray(range(value), dims=key)
+    if xoak_index not in _xoak.IndexRegistry():
+        raise ValueError(
+            "`xoak_index` [{}] is not supported."
+            "\nAvailable options: {}"
+            "".format(xoak_index, _xoak.IndexRegistry())
+        )
+    ds_grid.xoak.set_index(["XC", "YC"], xoak_index)
+    cdata = {"XC": ("mooring", Xmoor), "YC": ("mooring", Ymoor)}
+    ds_data = _xr.Dataset(cdata)  # mooring data
+
+    # find nearest points to given data.
+    nds = ds_grid.xoak.sel(XC=ds_data["XC"], YC=ds_data["YC"])
+    iX, iY, iface = (nds[f"{i}"].data for i in ("X", "Y", "face"))
+    _dat = nds.face.values
+    ll = _np.where(abs(_np.diff(_dat)))[0]
+    _faces = [_dat[i] for i in ll] + [_dat[-1]]
+    print(_faces)
+    Niter = len(set(_faces))
+    # ===========================================================
+
+    # ========================================================
+    # initialize
+    nrows, ncols = None, None
+    if Niter == 1:
+        inX, inY = connector(iX, iY)
+        inface = [_faces[0]] * len(inX)
+        nrows, ncols = 1, 1
+        face2axis = {0: (_faces[0],) + (0, 0)}
+    elif Niter == 2:
+        nX0, nY0 = splitter(iX, iY, iface)
+        inX, inY, inface = [], [], []
+        # for ii in range(Niter): #
+        for ii in range(
+            len(_faces)
+        ):  # Niter count total faces. _faces can have repeated faces
+            nix, niy = fill_path(nX0, nY0, _faces, ii, face_connections, _N)
+            inface += [_faces[ii]] * len(list(nix))
+            inX += list(nix)
+            inY += list(niy)
+        if face2axis is None:
+            # no dict defined, figure out one from face topo
+            # there are 2 posibilities.
+            nrot = [k for k in set(_faces) if k in range(6)]
+            if len(nrot) > 0:
+                # 1) There is a non-rotated face. Use this as anchor
+                i0 = _faces.index(nrot[0])  # pick one / inrot
+                i1 = _faces.index(list(set(_faces) - set([_faces[i0]]))[0])
+                # below, face direction from non-rot to rot
+                fdir = face_direction(_faces[i0], _faces[i1], face_connections)
+                if fdir in [0, 1]:
+                    # horizontal orientation
+                    nrows, ncols = 1, 2
+                    if fdir == 0:  # to left
+                        fi0, fi1 = (0, 1), (0, 0)
+                    else:  # to right
+                        fi0, fi1 = (0, 0), (0, 1)
+                else:
+                    # vertical orientation
+                    nrows, ncols = 2, 1
+                    if fdir == 2:
+                        fi0, fi1 = (0, 0), (1, 0)
+                    elif fdir == 3:
+                        fi0, fi1 = (1, 0), (0, 0)
+            else:
+                # case 2) There is no non-rotated face
+                # two posibilities: 1) no arctic, 2) arctic
+                if _faces[0] != 6:
+                    i0 = 0
+                    i1 = 1
+                else:
+                    i1 = 0
+                    i0 = 1
+                fdir = face_direction(_faces[i0], _faces[i1], face_connections)
+                if fdir in [0, 1]:
+                    # vertical orientation
+                    nrows, ncols = 2, 1
+                    if fdir == 0:
+                        # i0 on top
+                        fi0, fi1 = (1, 0), (0, 0)
+                    else:
+                        # i0 on bottom
+                        fi0, fi1 = (0, 0), (0, 1)
+                else:
+                    # horizontal orientation
+                    nrows, ncols = 1, 2
+                    if fdir == 2:
+                        # i0 on left
+                        fi0, fi1 = (0, 1), (0, 0)
+                    else:
+                        # i0 on right
+                        fi0, fi1 = (0, 0), (0, 1)
+
+            face2axis = {0: (_faces[i0],) + fi0, 1: (_faces[i1],) + fi1}
+
+    elif Niter > 2:
+        # it is possible to only have two faces but len(Niter)>2
+        # for example re entry. Need to make it so that it
+        # len(Niter)>2 means 3 or more faces.
+        nX0, nY0 = splitter(iX, iY, iface)
+        inX, inY, inface = [], [], []
+        # for ii in range(Niter):
+        for ii in range(len(_faces)):
+            nix, niy = fill_path(nX0, nY0, _faces, ii, face_connections, _N)
+            inface += [_faces[ii]] * len(list(nix))
+            inX += list(nix)
+            inY += list(niy)
+
+        if face2axis is None:
+            nrows = 4
+            ncols = 4
+            # need to do this smartly.
+            face2axis = {
+                0: (3, 3, 0),
+                1: (4, 2, 0),
+                2: (5, 1, 0),
+                3: (6, 0, 2),
+                4: (7, 1, 1),
+                5: (8, 2, 1),
+                6: (9, 3, 1),
+                7: (10, 1, 2),
+                8: (11, 2, 2),
+                9: (12, 3, 2),
+                10: (None, 0, 0),
+                11: (None, 0, 1),
+                12: (None, 0, 3),
+                13: (0, 3, 3),
+                14: (1, 2, 3),
+                15: (2, 1, 3),
+                16: (None, 0, 3),
+            }
+            # todo: improve arctic face representation
+            # to expand domain towards right.
+
+    # ========================================================
+    ndata = {"iX": ("X", inX), "iY": ("Y", inY), "iface": ("face", inface)}
+    nds = _xr.Dataset(ndata)  # mooring data
+
+    spkwargs = {}  # dict for initializing subplots
+
+    gridspec_kw = dict(left=0, bottom=0, right=1, top=1)
+
+    params = ["wspace", "hspace"]
+    for param in params:
+        if param in kwargs.keys():
+            gridspec_kw[param] = kwargs.pop(param)
+        else:
+            gridspec_kw[param] = 0.001
+    spkwargs["gridspec_kw"] = gridspec_kw
+    if "figsize" in kwargs.keys():
+        spkwargs["figsize"] = kwargs.pop("figsize")  # should I pop it?
+
+    if nrows is None and ncols is None:
+        nrows, ncols = 0, 0
+        for i in face2axis.keys():
+            nrows = max(nrows, face2axis[i][1])
+            ncols = max(ncols, face2axis[i][2])
+        nrows += 1
+        ncols += 1
+
+    # Code largely inspired by code from Ryan Abernathey's repository.
+    fig, axes = _plt.subplots(nrows=nrows, ncols=ncols, **spkwargs)
+
+    plt_params = ["ls", "color", "marker", "markersize", "alpha"]
+    plt_preset = ["", "#FF8000", ".", "2", 1]
+    pkwargs = {}  # plot kwargs
+
+    for param, val in zip(plt_params, plt_preset):
+        if param in kwargs.keys():
+            pkwargs[param] = kwargs.pop(param, None)
+        else:
+            pkwargs[param] = val
+
+    kw_params = ["vmin", "vmax", "cmap", "levels"]
+    kw_preset = [0, 1000, "Greys_r", 10]
+    for pm, val in zip(kw_params, kw_preset):
+        if pm not in kwargs.keys():
+            kwargs[pm] = val
+    kwargs["add_colorbar"] = False  # fixed
+
+    for count, (face, j, i) in face2axis.items():
+        kwargs["xincrease"] = True
+        kwargs["yincrease"] = True
+        if ncols * nrows == 1:
+            ax = axes
+        elif nrows > 1 and ncols == 1:
+            ax = axes[j]
+        elif nrows == 1 and ncols > 1:
+            # vertical, allow arctic
+            ax = axes[i]
+        elif nrows > 1 and ncols > 1:
+            ax = axes[j, i]
+        # here the plotting begins.
+        if face is None:
+            ax.axis("off")
+        else:
+            data_ax = data.isel(face=face)
+
+            # 2d plotting / contourf
+            if face == 6:
+                # faces present that connect with arctic
+                _exch_fs = len(set([2, 5, 7, 10]) & set(_faces))
+                if Niter >= 2:
+                    if 2 in _faces and _exch_fs == 1:
+                        kwargs.pop("xincrease")
+                        data_ax, kwargs["xincrease"] = data_ax.transpose(), False
+                    elif 5 in _faces and _exch_fs == 1:
+                        pass
+                    elif 7 in _faces and _exch_fs == 1:
+                        kwargs.pop("yincrease")
+                        data_ax, kwargs["yincrease"] = data_ax.transpose(), False
+                    elif 10 in _faces and _exch_fs == 1:
+                        [kwargs.pop(var) for var in ["xincrease", "yincrease"]]
+                        kwargs["xincrease"], kwargs["yincrease"] = False, False
+                    else:
+                        # face = 6 atop face = 7
+                        [kwargs.pop(var) for var in ["xincrease", "yincrease"]]
+                        kwargs["xincrease"], kwargs["yincrease"] = False, False
+            if face in transpose:
+                data_ax = data_ax.transpose()
+                kwargs["yincrease"] = False
+            data_ax.plot(ax=ax, **kwargs)
+
+            # line plotting of arrays
+            if face in nds.iface.values:
+                ind = _np.argwhere(nds["iface"].data == face)
+                xvals, yvals = nds["iX"].values[ind], nds["iY"].values[ind]
+                if face == 6 and Niter == 1:
+                    # face 6 atop face 7
+                    xvals, yvals = xvals[::-1], yvals[::-1]
+                elif face == 6 and Niter >= 2:
+                    if 2 in _faces and _exch_fs == 1:
+                        xvals, yvals = yvals, xvals
+                    elif 5 in _faces and _exch_fs == 1:
+                        pass
+                    elif 7 in _faces and _exch_fs == 1:
+                        xvals, yvals = yvals, xvals
+                    elif 10 in _faces and _exch_fs == 1:
+                        xvals, yvals = xvals[::-1], yvals[::-1]
+                    else:
+                        _warnings.warn(
+                            "2 or more faces exchanging with arctic face is"
+                            "not yet supported. if you would like this"
+                            "option to be a feature raise an issue on GitHub"
+                        )
+                elif face in transpose:
+                    xvals, yvals = yvals, xvals
+                ax.plot(xvals, yvals, **pkwargs)
+            ax.axis("off")
+            ax.set_title("")
+    return axes
+
+
 def _compute_mean_and_int(od, varName, meanAxes, intAxes):
     # Mean and sum
     if meanAxes is not False:
@@ -1154,3 +1472,7 @@ class _plotMethods(object):
     @_functools.wraps(vertical_section)
     def vertical_section(self, **kwargs):
         return vertical_section(self._od, **kwargs)
+
+    @_functools.wraps(faces_array)
+    def faces_array(self, **kwargs):
+        return faces_array(self._od, **kwargs)

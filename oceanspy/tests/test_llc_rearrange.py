@@ -4,6 +4,7 @@ import random as rand
 import numpy as _np
 import pytest
 import xarray as _xr
+from xarray.core.dataarray import DataArray, Dataset
 
 # From OceanSpy
 from oceanspy import open_oceandataset
@@ -57,8 +58,6 @@ if "timestep" in od._ds.data_vars:
 Nx = od._ds.dims["X"]
 Ny = od._ds.dims["Y"]
 
-_datype = _xr.core.dataarray.DataArray
-_dstype = _xr.core.dataset.Dataset
 
 # WOCE standard sections
 A01_lon = [
@@ -2189,14 +2188,6 @@ I08S09N_lat = [
 ]
 
 
-YRange_test1 = [35, 40]  # degrees latitude
-XRange_test1 = [-80, 0]  # longitude
-
-
-YRange_test2 = [35, 40]  # degrees latitude
-XRange_test2 = [-170, -100]  # longitude
-
-
 @pytest.mark.parametrize(
     "od, var, expected",
     [
@@ -2233,17 +2224,17 @@ cuts = [[0, 28], [0, 0], [0, 0], [0, 0]]
 @pytest.mark.parametrize(
     "od, faces, expected, atype, XRange, YRange, opt, cuts, masking, size",
     [
-        (od, faces, expected, _datype, None, None, False, 0, False, None),
+        (od, faces, expected, DataArray, None, None, False, 0, False, None),
         (od, faces[:2], [0, 0, 0, 0], int, None, None, False, 0, False, None),
         (od, faces[:6], [0, 0, 0, 0], int, None, None, False, 0, False, None),
-        (od, [0, 1, 2, 6], [2, 0, 0, 0], _datype, None, None, False, 0, False, None),
-        (od, faces[:7], [2, 5, 0, 0], _datype, None, None, False, 0, False, None),
+        (od, [0, 1, 2, 6], [2, 0, 0, 0], DataArray, None, None, False, 0, False, None),
+        (od, faces[:7], [2, 5, 0, 0], DataArray, None, None, False, 0, False, None),
         (od, faces[6:], [0, 0, 7, 10], int, None, None, False, 0, False, None),
         (
             od,
             [2, 6],
             [2, 0, 0, 0],
-            _datype,
+            DataArray,
             [-30, 22],
             [60.0, 80.2],
             True,
@@ -2255,7 +2246,7 @@ cuts = [[0, 28], [0, 0], [0, 0], [0, 0]]
             od,
             [2, 6],
             [2, 0, 0, 0],
-            _datype,
+            DataArray,
             [-30, 22],
             [60.0, 80.2],
             True,
@@ -2276,7 +2267,7 @@ def test_arc_connect(
             ds, "YG", faces=faces, masking=masking, opt=opt, ranges=cuts
         )
         for i in range(len(DS)):
-            if isinstance(DS[i], _datype):
+            if isinstance(DS[i], atype):
                 assert _np.shape(DS[i]) == size
     else:
         arc_faces, *a, DS = arct_connect(ds, "YG", faces)
@@ -2417,7 +2408,7 @@ for var_name in varList:
     ARCT[2].append(DS[2])
     ARCT[3].append(DS[3])
 for i in range(len(ARCT)):  # Not all faces survive the cutout
-    if isinstance(ARCT[i][0], _datype):
+    if isinstance(ARCT[i][0], DataArray):
         ARCT[i] = _xr.merge(ARCT[i])
 
 ds2, ds5, ds7, ds10 = ARCT
@@ -2453,7 +2444,7 @@ def test_shift_dataset(ds, dimc, dimg, init_c, final_c, init_g, final_g):
 )
 def test_rotate_dataset(ds, var, dimc, dimg, rot_dims):
     nds = rotate_dataset(ds, dimc, dimg)
-    if isinstance(ds, _dstype):
+    if isinstance(ds, Dataset):
         nvar = nds[var]
         assert nvar.dims == rot_dims
 
@@ -2484,7 +2475,7 @@ def test_rotate_dataset(ds, var, dimc, dimg, rot_dims):
 )
 def test_rotate_vars(ds, var, dims0, rot_dims):
     nds = rotate_vars(ds)
-    if isinstance(ds, _dstype):
+    if isinstance(ds, Dataset):
         nvar = nds[var]
         assert nvar.dims == rot_dims
 
@@ -2875,7 +2866,7 @@ def test_edge_arc_data(od, XRange, YRange, F_indx, Nx):
     ARCT[3].append(DS[3])
 
     for i in range(len(ARCT)):  # Not all faces survive the cutout
-        if isinstance(ARCT[i][0], _datype):
+        if isinstance(ARCT[i][0], DataArray):
             ARCT[i] = _xr.merge(ARCT[i])
 
     face_order = _np.array([2, 5, 7, 10])
@@ -2903,8 +2894,8 @@ Vcoords = {
     "X": _ds.X.values,
 }
 
-_ds["Ucycl"] = _xr.DataArray(nU, coords=Ucoords, dims=["face", "Y", "Xp1"])
-_ds["Vcycl"] = _xr.DataArray(nV, coords=Vcoords, dims=["face", "Yp1", "X"])
+_ds["Ucycl"] = DataArray(nU, coords=Ucoords, dims=["face", "Y", "Xp1"])
+_ds["Vcycl"] = DataArray(nV, coords=Vcoords, dims=["face", "Yp1", "X"])
 
 
 @pytest.mark.parametrize("dataset", [_ds])
@@ -3260,7 +3251,6 @@ y2 = y21 + y22
 
 # group together
 X1, Y1 = [x1, x2], [y1, y2]
-faces1 = [1, 4]
 
 
 # test 2
@@ -3284,14 +3274,13 @@ nx2 = _np.array(list(x20) + list(x21) + list(x22))
 ny2 = _np.array(list(y20) + list(y21) + list(y22))
 # group together
 X2, Y2 = [nx1, nx2[::-1], nx1[:1]], [ny1, ny2[::-1], ny1[:1]]
-faces2 = [2, 5, 2]
 
 
 @pytest.mark.parametrize(
     "ix, iy, faces, face_connections, count",
     [
-        (X1, Y1, faces1, od.face_connections["face"], 3),
-        (X2, Y2, faces2, od.face_connections["face"], 0),
+        (X1, Y1, [1, 4], od.face_connections["face"], 3),
+        (X2, Y2, [2, 5, 2], od.face_connections["face"], 0),
     ],
 )
 def test_index_splitter(ix, iy, faces, face_connections, count):
@@ -3371,7 +3360,7 @@ faces1 = [2, 5, 2]
 # connect them across interface
 X1, Y1 = [], []
 for k in range(len(oX1)):
-    x, y = fill_path(oX1, oY1, faces1, k, od.face_connections["face"])
+    x, y = fill_path(oX1, oY1, [2, 5, 2], k, od.face_connections["face"])
     X1.append(x)
     Y1.append(y)
 
@@ -3401,7 +3390,7 @@ faces2 = [4, 8, 4]
 # connect them across interface
 X2, Y2 = [], []
 for k in range(len(oX2)):
-    x, y = fill_path(oX2, oY2, faces2, k, od.face_connections["face"])
+    x, y = fill_path(oX2, oY2, [4, 8, 4], k, od.face_connections["face"])
     X2.append(x)
     Y2.append(y)
 
@@ -3409,9 +3398,9 @@ for k in range(len(oX2)):
 @pytest.mark.parametrize(
     "ix, iy, faces, iface, face_connections, val",
     [
-        (X1, Y1, faces1, 0, od.face_connections["face"], 1),
-        (X1, Y1, faces1, 1, od.face_connections["face"], 0),
-        (X1, Y1, faces1, 2, od.face_connections["face"], 1),
+        (X1, Y1, [2, 5, 2], 0, od.face_connections["face"], 1),
+        (X1, Y1, [2, 5, 2], 1, od.face_connections["face"], 0),
+        (X1, Y1, [2, 5, 2], 2, od.face_connections["face"], 1),
         (
             [0, 10, _np.array([15])],
             [10, 0, _np.array([15])],
@@ -3420,6 +3409,8 @@ for k in range(len(oX2)):
             od.face_connections["face"],
             None,
         ),
+        (X2, Y2, [4, 8, 4], 0, od.face_connections["face"], 1),
+        (X2, Y2, [4, 8, 4], 1, od.face_connections["face"], 2),
     ],
 )
 def test_fdir_completer(ix, iy, faces, iface, face_connections, val):
@@ -3751,7 +3742,7 @@ def test_ds_edge(od, ix, iy, faces, k, kwargs):
         else:
             if set([89]).issubset(set.union(set(ix), set(iy))):
                 _dim = "mooring"
-                assert isinstance(nds, _dstype)
+                assert isinstance(nds, Dataset)
                 assert len(nds.Xp1) == 2
                 assert len(nds.Yp1) == 2
                 assert len(nds.X) == 1
@@ -3791,7 +3782,7 @@ def test_arctic_eval(od, ix, iy):
     _dim = "station"
     nds = arctic_eval(od._ds, ix, iy, _dim)
 
-    assert isinstance(nds, _dstype)
+    assert isinstance(nds, Dataset)
     assert len(nds.Xp1) == 2
     assert len(nds.Yp1) == 2
     assert len(nds.X) == 1
@@ -4061,28 +4052,28 @@ faces2 = [7, 10]  # corsses in y - diff topo
 def test_ds_edge_samety(od, _ix, _iy, faces, vkwargs):
     _dim_name = "mooring"
     _ds = od._ds
-    new_dim = _xr.DataArray(_np.arange(len(_ix)), dims=(_dim_name))
-    y = _xr.DataArray(_np.arange(1), dims=("y"))
-    x = _xr.DataArray(_np.arange(1), dims=("x"))
-    yp1 = _xr.DataArray(_np.arange(2), dims=("yp1"))
-    xp1 = _xr.DataArray(_np.arange(2), dims=("xp1"))
+    new_dim = DataArray(_np.arange(len(_ix)), dims=(_dim_name))
+    y = DataArray(_np.arange(1), dims=("y"))
+    x = DataArray(_np.arange(1), dims=("x"))
+    yp1 = DataArray(_np.arange(2), dims=("yp1"))
+    xp1 = DataArray(_np.arange(2), dims=("xp1"))
     # Transform indexes in DataArray
-    iY = _xr.DataArray(
+    iY = DataArray(
         _np.reshape(_iy, (len(new_dim), len(y))),
         coords={_dim_name: new_dim, "y": y},
         dims=(_dim_name, "y"),
     )
-    iX = _xr.DataArray(
+    iX = DataArray(
         _np.reshape(_ix, (len(new_dim), len(x))),
         coords={_dim_name: new_dim, "x": x},
         dims=(_dim_name, "x"),
     )
-    iYp1 = _xr.DataArray(
+    iYp1 = DataArray(
         _np.stack((_iy, _iy + 1), 1),
         coords={_dim_name: new_dim, "yp1": yp1},
         dims=(_dim_name, "yp1"),
     )
-    iXp1 = _xr.DataArray(
+    iXp1 = DataArray(
         _np.stack((_ix, _ix + 1), 1),
         coords={_dim_name: new_dim, "xp1": xp1},
         dims=(_dim_name, "xp1"),
@@ -4126,28 +4117,28 @@ def test_ds_edge_samety(od, _ix, _iy, faces, vkwargs):
 def test_ds_edge_sametx(od, _ix, _iy, faces, vkwargs):
     _dim_name = "mooring"
     _ds = od._ds
-    new_dim = _xr.DataArray(_np.arange(len(_ix)), dims=(_dim_name))
-    y = _xr.DataArray(_np.arange(1), dims=("y"))
-    x = _xr.DataArray(_np.arange(1), dims=("x"))
-    yp1 = _xr.DataArray(_np.arange(2), dims=("yp1"))
-    xp1 = _xr.DataArray(_np.arange(2), dims=("xp1"))
+    new_dim = DataArray(_np.arange(len(_ix)), dims=(_dim_name))
+    y = DataArray(_np.arange(1), dims=("y"))
+    x = DataArray(_np.arange(1), dims=("x"))
+    yp1 = DataArray(_np.arange(2), dims=("yp1"))
+    xp1 = DataArray(_np.arange(2), dims=("xp1"))
     # Transform indexes in DataArray
-    iY = _xr.DataArray(
+    iY = DataArray(
         _np.reshape(_iy, (len(new_dim), len(y))),
         coords={_dim_name: new_dim, "y": y},
         dims=(_dim_name, "y"),
     )
-    iX = _xr.DataArray(
+    iX = DataArray(
         _np.reshape(_ix, (len(new_dim), len(x))),
         coords={_dim_name: new_dim, "x": x},
         dims=(_dim_name, "x"),
     )
-    iYp1 = _xr.DataArray(
+    iYp1 = DataArray(
         _np.stack((_iy, _iy + 1), 1),
         coords={_dim_name: new_dim, "yp1": yp1},
         dims=(_dim_name, "yp1"),
     )
-    iXp1 = _xr.DataArray(
+    iXp1 = DataArray(
         _np.stack((_ix, _ix + 1), 1),
         coords={_dim_name: new_dim, "xp1": xp1},
         dims=(_dim_name, "xp1"),

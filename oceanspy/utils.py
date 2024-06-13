@@ -86,12 +86,14 @@ def _rel_lon(x, ref_lon):
     Return how much east one need to go from ref_lon to x
     This function aims to address the confusion caused by
     the discontinuity in longitude.
+
     Parameters
     ----------
     x: float, numpy.array, dask.array
         longitude to convert
     ref_lon: float
         a reference longitude. This longitude will become 0deg
+
     Returns
     -------
     redefined_x: float, numpy.array, dask.array
@@ -865,6 +867,7 @@ def reset_dim(_ds, N, dim="mooring"):
 
 
 def diff_and_inds_where_insert(ix, iy):
+    """identifies where distances are > 1 (diagonal) between indexes"""
     dx, dy = (_np.diff(ii) for ii in (ix, iy))
     inds = _np.argwhere(_np.abs(dx) + _np.abs(dy) > 1).squeeze()
     return dx, dy, inds
