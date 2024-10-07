@@ -14,7 +14,7 @@ repos:
   - id: debug-statements
   - id: mixed-line-ending
 - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
-  rev: v2.13.0
+  rev: v2.14.0
   hooks:
   - id: pretty-format-yaml
     args: [--autofix, --preserve-quotes]
@@ -25,15 +25,15 @@ repos:
   hooks:
   - id: isort
 - repo: https://github.com/psf/black
-  rev: 24.4.2
+  rev: 24.8.0
   hooks:
   - id: black
 - repo: https://github.com/PyCQA/flake8
-  rev: 7.1.0
+  rev: 7.1.1
   hooks:
   - id: flake8
 - repo: https://github.com/nbQA-dev/nbQA
-  rev: 1.8.5
+  rev: 1.8.7
   hooks:
   - id: nbqa-black
     additional_dependencies: [black]
