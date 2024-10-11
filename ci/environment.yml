@@ -6,7 +6,7 @@ dependencies:
 - distributed
 - bottleneck
 - netCDF4
-- numpy>=2.0
+- numpy
 - xarray
 - xoak
 - cartopy
