@@ -9,14 +9,14 @@ classifiers = [
   "Operating System :: OS Independent",
   "Programming Language :: Python",
   "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
   "Topic :: Scientific/Engineering"
 ]
 dependencies = [
   "dask",
-  "xarray >= 0.14.1",
+  "xarray >= 2024.7.0",
   "xgcm >= 0.2.0",
   "shapely"
 ]
@@ -25,7 +25,7 @@ dynamic = ["version"]
 license = {file = "LICENSE"}
 name = "oceanspy"
 readme = "README.rst"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 
 [tool.coverage.run]
 branch = true
