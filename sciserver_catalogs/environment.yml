@@ -2,8 +2,9 @@ name: Oceanography
 channels:
 - conda-forge
 dependencies:
-- python=3.10
+- python=3.11
 - dask
+- numpy
 - distributed
 - bottleneck
 - netCDF4
@@ -12,7 +13,7 @@ dependencies:
 - cartopy
 - esmpy
 - geopy
-- xesmf > 0.6.3
+- xesmf>0.6.3
 - esmf
 - xgcm
 - Ipython
@@ -54,7 +55,7 @@ dependencies:
 - imageio
 - pre-commit
 - xmitgcm
-- intake
+- intake=0.7
 - intake-xarray
 - pip:
   - black-nb
