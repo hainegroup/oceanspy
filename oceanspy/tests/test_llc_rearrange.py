@@ -8,7 +8,9 @@ from xarray.core.dataarray import DataArray, Dataset
 
 # From OceanSpy
 from oceanspy import open_oceandataset
-from oceanspy.llc_rearrange import Dims
+from oceanspy.llc_rearrange import (
+    Dims,
+)
 from oceanspy.llc_rearrange import LLCtransformation as LLC
 from oceanspy.llc_rearrange import (
     _edge_arc_data,
