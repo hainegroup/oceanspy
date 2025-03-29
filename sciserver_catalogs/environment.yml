@@ -55,8 +55,8 @@ dependencies:
 - imageio
 - pre-commit
 - xmitgcm
-- intake=0.7
-- intake-xarray
+- intake<2.0
+- intake-xarray<2.0
 - pip:
   - black-nb
   - numbagg
