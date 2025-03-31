@@ -11,8 +11,8 @@ dependencies:
 - xoak
 - cartopy
 - scipy
-- intake=0.7
-- intake-xarray
+- intake<2.0
+- intake-xarray<2.0
 - geopy
 - xesmf>0.6.3
 - esmf
