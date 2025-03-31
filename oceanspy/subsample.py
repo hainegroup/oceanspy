@@ -832,6 +832,9 @@ def mooring_array(od, Ymoor, Xmoor, xoak_index="scipy_kdtree", **kwargs):
     # Reset coordinates
     new_ds = new_ds.set_coords(coords + ["mooring_dist"])
 
+    # assert that Xp1 and Yp1 are chunked properly
+    new_ds = new_ds.chunk({"Xp1": 2, "Yp1": 2})
+
     # Recreate od
     od._ds = new_ds
 
@@ -885,15 +888,15 @@ def mooring_array(od, Ymoor, Xmoor, xoak_index="scipy_kdtree", **kwargs):
         # compute missing grid velocities from datasets if necessary
         vel_grid = ["XU", "YU", "XV", "YV"]
         da_list = [var for var in od._ds.reset_coords().data_vars]
-        check = all([item in da_list for item in vel_grid])
-        if check:  # pragma: no cover
+        if all([item in da_list for item in vel_grid]):  # pragma: no cover
+            # XU, YU, XV, YV are already in the dataset
             manipulate_coords = {"coordsUVfromG": False}
         else:  # pragma: no cover
             manipulate_coords = {"coordsUVfromG": True}
         od = od.manipulate_coords(**manipulate_coords)
         od._ds = od._ds.set_coords(
-            coords + vel_grid + ["mooring_dist", "mooring_midp_dist"]
-        )
+            coords + ["mooring_dist", "mooring_midp_dist"]
+        )  # + vel_grid
     else:
         od._ds = od._ds.set_coords(coords + ["mooring_midp_dist"])
 
