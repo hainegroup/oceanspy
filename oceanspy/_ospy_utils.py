@@ -159,7 +159,16 @@ def _check_range(od, obj, objName):
     -------
     obj: Range object
     """
-
+    warnings.filterwarnings(
+        "ignore",
+        message=(
+            "The return type of `Dataset.dims` will be changed to return a set of"
+            " dimension names in future, in order to be more consistent with "
+            " `DataArray.dims`. To access a mapping from dimension names to lengths"
+            ", please use `Dataset.sizes`."
+        ),
+        category=FutureWarning,
+    )
     if "face" in od._ds.dims and od._ds.dims["face"] == 13:
         cdata = {
             "XG": ("XG", numpy.asarray([-180, 180], dtype=od._ds["XG"].dtype)),
