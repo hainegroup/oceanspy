@@ -1,5 +1,4 @@
 # Import modules
-import subprocess
 import urllib
 
 import numpy as np
@@ -47,7 +46,7 @@ def test_find_entries(names):
         ("HYCOM", hycom_url),
     ],
 )
-def test_opening_and_saving(name, catalog_url):
+def test_opening_and_saving(name, catalog_url, tmp_path):
     if name == "error":
         # Open oceandataset
         with pytest.raises(ValueError):
@@ -92,7 +91,7 @@ def test_opening_and_saving(name, catalog_url):
             )
 
         # Save to netcdf
-        filename = "tmp.nc"
+        filename = str(tmp_path / f"tmp_{name}.nc")
         od1.to_netcdf(filename)
 
         # Reopen
@@ -101,6 +100,3 @@ def test_opening_and_saving(name, catalog_url):
         else:
             args = {}
         from_netcdf(filename, **args)
-
-        # Clean up
-        subprocess.call("rm -f " + filename, shell=True)
