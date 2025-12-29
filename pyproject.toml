@@ -35,6 +35,14 @@ profile = "black"
 
 [tool.pytest.ini_options]
 addopts = "-v --cov"
+filterwarnings = [
+  "ignore:.*:DeprecationWarning",
+  "ignore:.*blockwise.*:UserWarning",
+  "ignore:.*:FutureWarning",
+  "ignore:.*yaml.load().*",
+  "ignore:.*Adding.*",
+  "ignore:.*Tight layout not applied.*:UserWarning"
+]
 testpaths = ["oceanspy/tests"]
 
 [tool.setuptools]
