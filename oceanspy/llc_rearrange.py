@@ -1614,10 +1614,10 @@ def ds_edge_sametx(_ds, iX, iY, iXp1, iYp1, face1, face2, _dim, moor, **kwargs):
         mds = reset_dim(mds, 1, revar)
     elif face1 not in rotS:
         vds = reset_dim(vds, 1, revar)
-    ugmds = _xr.combine_by_coords([mds[uvars + gvars], vds])
+    ugmds = _xr.combine_by_coords([mds[uvars + gvars], vds], combine_attrs="override")
 
     cvmds = mds.reset_coords()[cvars + vvars]
-    nds = _xr.combine_by_coords([cvmds, ugmds])
+    nds = _xr.combine_by_coords([cvmds, ugmds], combine_attrs="override")
     co_list = [var for var in nds.data_vars if "time" not in nds[var].dims]
     nds = nds.set_coords(co_list)
     rename = {"x": "X", "y": "Y", "xp1": "Xp1", "yp1": "Yp1"}
@@ -1708,10 +1708,10 @@ def ds_edge_samety(
     mds = _ds.isel(**argsn).reset_coords()  # regular eval
     mds = mds.drop_vars(["Yp1", "Xp1", "X", "Y"])
     vds = reset_dim(vds, 1, revar)
-    vgmds = _xr.combine_by_coords([mds[vvars + gvars], vds])
+    vgmds = _xr.combine_by_coords([mds[vvars + gvars], vds], combine_attrs="override")
 
     cumds = mds.reset_coords()[cvars + uvars]
-    nds = _xr.combine_by_coords([cumds, vgmds])
+    nds = _xr.combine_by_coords([cumds, vgmds], combine_attrs="override")
     co_list = [var for var in nds.data_vars if "time" not in nds[var].dims]
     nds = nds.set_coords(co_list)
     rename = {"x": "X", "y": "Y", "xp1": "Xp1", "yp1": "Yp1"}
@@ -1791,11 +1791,11 @@ def ds_edge_difftx(_ds, iX, iY, iXp1, iYp1, face1, face2, _dim, moor, **kwargs):
     mds = _ds.isel(**argsn)  # regular eval
     mds = mds.drop_vars(["Yp1", "Xp1", "X", "Y"])
 
-    ugmds = _xr.combine_by_coords([mds[uvars + gvars], nvds])
+    ugmds = _xr.combine_by_coords([mds[uvars + gvars], nvds], combine_attrs="override")
 
     # get rest of u and center data
     cvmds = mds.reset_coords()[cvars + vvars]
-    nds = _xr.combine_by_coords([cvmds, ugmds])
+    nds = _xr.combine_by_coords([cvmds, ugmds], combine_attrs="override")
     co_list = [var for var in nds.data_vars if "time" not in nds[var].dims]
     nds = nds.set_coords(co_list)
 
@@ -1893,11 +1893,11 @@ def ds_edge_diffty(_ds, iX, iY, _ix, xp1, iYp1, face1, face2, _dim, moor, **kwar
     mds = mds.drop_vars(["Yp1", "Xp1", "X", "Y"])  # always drop these
 
     # combine to create complete, edge data at v and g points
-    vgmds = _xr.combine_by_coords([mds[vvars + gvars], nvds])
+    vgmds = _xr.combine_by_coords([mds[vvars + gvars], nvds], combine_attrs="override")
 
     # get rest of u and center data
     cumds = mds.reset_coords()[cvars + uvars]
-    nds = _xr.combine_by_coords([cumds, vgmds])
+    nds = _xr.combine_by_coords([cumds, vgmds], combine_attrs="override")
     co_list = [var for var in nds.data_vars if "time" not in nds[var].dims]
     nds = nds.set_coords(co_list)
 
@@ -2286,10 +2286,12 @@ def ds_arcedge(_ds, _ix, _iy, moor, face1, face2, _dim="mooring"):
         mds = _ds.isel(**argsn).reset_coords()  # regular eval
         mds = mds.drop_vars(["Yp1", "Xp1", "X", "Y"])
         mds = reset_dim(mds, 1, revar)
-        ugmds = _xr.combine_by_coords([mds[uvars + gvars], vds])
+        ugmds = _xr.combine_by_coords(
+            [mds[uvars + gvars], vds], combine_attrs="override"
+        )
 
         cvmds = mds.reset_coords()[cvars + vvars]
-        nds = _xr.combine_by_coords([cvmds, ugmds])
+        nds = _xr.combine_by_coords([cvmds, ugmds], combine_attrs="override")
         co_list = [var for var in nds.data_vars if "time" not in nds[var].dims]
         nds = nds.set_coords(co_list)
         rename = {"yp1": "Xp1", "xp1": "Yp1", "x": "Y", "y": "X"}
@@ -2341,11 +2343,13 @@ def ds_arcedge(_ds, _ix, _iy, moor, face1, face2, _dim="mooring"):
         if "face" in mds.data_vars:  # pragma: no cover
             mds = mds.drop_vars(["face"])
 
-        vgmds = _xr.combine_by_coords([mds[vvars + gvars], vds])
+        vgmds = _xr.combine_by_coords(
+            [mds[vvars + gvars], vds], combine_attrs="override"
+        )
 
         # get rest of u and center data
         cumds = mds.reset_coords()[cvars + uvars]
-        nds = _xr.combine_by_coords([cumds, vgmds])
+        nds = _xr.combine_by_coords([cumds, vgmds], combine_attrs="override")
         nds = nds.set_coords(
             [var for var in nds.data_vars if "time" not in nds[var].dims]
         )
@@ -2395,11 +2399,13 @@ def ds_arcedge(_ds, _ix, _iy, moor, face1, face2, _dim="mooring"):
         mds = _ds.isel(**argsn)  # regular eval
         mds = mds.drop_vars(["Yp1", "Xp1", "X", "Y"])  # always drop these
         # combine to create complete, edge data at v and g points
-        vgmds = _xr.combine_by_coords([mds[vvars + gvars], nvds])
+        vgmds = _xr.combine_by_coords(
+            [mds[vvars + gvars], nvds], combine_attrs="override"
+        )
 
         # get rest of u and center data
         cumds = mds.reset_coords()[cvars + uvars]
-        nds = _xr.combine_by_coords([cumds, vgmds])
+        nds = _xr.combine_by_coords([cumds, vgmds], combine_attrs="override")
         nds = nds.set_coords(
             [var for var in nds.data_vars if "time" not in nds[var].dims]
         )
@@ -2429,10 +2435,12 @@ def ds_arcedge(_ds, _ix, _iy, moor, face1, face2, _dim="mooring"):
         mds = _ds.isel(**argsn).reset_coords()  # regular eval
         mds = mds.drop_vars(["Yp1", "Xp1", "X", "Y"])
         vds = reset_dim(vds, 1, revar)
-        vgmds = _xr.combine_by_coords([mds[vvars + gvars], vds])
+        vgmds = _xr.combine_by_coords(
+            [mds[vvars + gvars], vds], combine_attrs="override"
+        )
 
         cumds = mds.reset_coords()[cvars + uvars]
-        nds = _xr.combine_by_coords([cumds, vgmds])
+        nds = _xr.combine_by_coords([cumds, vgmds], combine_attrs="override")
         co_list = [var for var in nds.data_vars if "time" not in nds[var].dims]
         nds = nds.set_coords(co_list)
         rename = {"x": "X", "y": "Y", "xp1": "Xp1", "yp1": "Yp1"}
@@ -2952,13 +2960,17 @@ def ds_splitarray(
                         )
                         shift = len(nds.mooring)
                         ds0 = reset_dim(ds0, shift, _dim_name)
-                        nds = _xr.combine_by_coords([nds, ds0])
+                        nds = _xr.combine_by_coords(
+                            [nds, ds0], combine_attrs="override"
+                        )
                     else:
                         nnx, nny = _iXn[_ni[i]][: moor[0]], _iYn[_ni[i]][: moor[0]]
                         ds0 = eval_dataset(
                             _ds, nnx, nny, _iface=_faces[_iface], _dim_name=_dim_name
                         )
-                        nds = _xr.combine_by_coords([ds0, nds])
+                        nds = _xr.combine_by_coords(
+                            [ds0, nds], combine_attrs="override"
+                        )
                     del ds0
                 else:  # safe to eval everywhere
                     nnx, nny = _iXn[_ni[i]], _iYn[_ni[i]]
@@ -3206,7 +3218,7 @@ def station_singleface(_ds, _ix, _iy, _faces, _iface, _face_connections):
         else:
             shift = int(dsf["station"].values[-1]) + 1
             dse = reset_dim(dse, shift, dim="station")
-            dsf = _xr.combine_by_coords([dsf, dse])
+            dsf = _xr.combine_by_coords([dsf, dse], combine_attrs="override")
 
     return dsf
 
