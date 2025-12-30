@@ -1791,11 +1791,15 @@ def ds_edge_difftx(_ds, iX, iY, iXp1, iYp1, face1, face2, _dim, moor, **kwargs):
     mds = _ds.isel(**argsn)  # regular eval
     mds = mds.drop_vars(["Yp1", "Xp1", "X", "Y"])
 
-    ugmds = _xr.combine_by_coords([mds[uvars + gvars], nvds], combine_attrs="override")
+    ugmds = _xr.combine_by_coords(
+        [mds[uvars + gvars], nvds], data_vars="minimal", combine_attrs="override"
+    )
 
     # get rest of u and center data
     cvmds = mds.reset_coords()[cvars + vvars]
-    nds = _xr.combine_by_coords([cvmds, ugmds], combine_attrs="override")
+    nds = _xr.combine_by_coords(
+        [cvmds, ugmds], data_vars="minimal", combine_attrs="override"
+    )
     co_list = [var for var in nds.data_vars if "time" not in nds[var].dims]
     nds = nds.set_coords(co_list)
 
@@ -1893,11 +1897,15 @@ def ds_edge_diffty(_ds, iX, iY, _ix, xp1, iYp1, face1, face2, _dim, moor, **kwar
     mds = mds.drop_vars(["Yp1", "Xp1", "X", "Y"])  # always drop these
 
     # combine to create complete, edge data at v and g points
-    vgmds = _xr.combine_by_coords([mds[vvars + gvars], nvds], combine_attrs="override")
+    vgmds = _xr.combine_by_coords(
+        [mds[vvars + gvars], nvds], data_vars="minimal", combine_attrs="override"
+    )
 
     # get rest of u and center data
     cumds = mds.reset_coords()[cvars + uvars]
-    nds = _xr.combine_by_coords([cumds, vgmds], combine_attrs="override")
+    nds = _xr.combine_by_coords(
+        [cumds, vgmds], data_vars="minimal", combine_attrs="override"
+    )
     co_list = [var for var in nds.data_vars if "time" not in nds[var].dims]
     nds = nds.set_coords(co_list)
 
@@ -2400,12 +2408,14 @@ def ds_arcedge(_ds, _ix, _iy, moor, face1, face2, _dim="mooring"):
         mds = mds.drop_vars(["Yp1", "Xp1", "X", "Y"])  # always drop these
         # combine to create complete, edge data at v and g points
         vgmds = _xr.combine_by_coords(
-            [mds[vvars + gvars], nvds], combine_attrs="override"
+            [mds[vvars + gvars], nvds], data_vars="minimal", combine_attrs="override"
         )
 
         # get rest of u and center data
         cumds = mds.reset_coords()[cvars + uvars]
-        nds = _xr.combine_by_coords([cumds, vgmds], combine_attrs="override")
+        nds = _xr.combine_by_coords(
+            [cumds, vgmds], data_vars="minimal", combine_attrs="override"
+        )
         nds = nds.set_coords(
             [var for var in nds.data_vars if "time" not in nds[var].dims]
         )

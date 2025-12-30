@@ -4199,7 +4199,9 @@ faces1 = [1, 2]
     ],
 )
 def test_ds_splitter(od, ix, iy, faces, iface):
-    _ds = od._ds.drop_vars(["Xind", "Yind"])
+    if set(["Xind", "Yind"]).issubset(od.dataset.data_vars):
+        od._ds = od._ds.drop_vars(["Xind", "Yind"])
+    _ds = od._ds
     face_connections = od.face_connections["face"]
     _Nx = len(_ds.X) - 1
     _ixn, _iyn = connector(ix, iy)
