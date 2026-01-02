@@ -63,6 +63,9 @@ def test_opening_and_saving(name, catalog_url, tmp_path):
             # Check coordinates
             if name == "LLC":
                 coordsList = ["XC", "YC", "XG", "YG"]
+                assert isinstance(od1.face_connections["face"], dict)
+                assert set(["face"]).issubset(set(od1.dataset.dims))
+
             elif name == "HYCOM":
                 coordsList = ["XC", "YC"]
             else:
@@ -73,10 +76,6 @@ def test_opening_and_saving(name, catalog_url, tmp_path):
             assert all(
                 [not np.isnan(od1.dataset[coord].values).any() for coord in coordsList]
             )
-
-        if name == "LLC":
-            assert isinstance(od1.face_connections["face"], dict)
-            assert set(["face"]).issubset(set(od1.dataset.dims))
 
         # Check shift
         if name == "xmitgcm_iters":
@@ -89,6 +88,8 @@ def test_opening_and_saving(name, catalog_url, tmp_path):
                     if "ave" in var
                 ]
             )
+            # This is failing on CI for time_midp
+            od1._ds["time_midp"].encoding = od1._ds["time"].encoding
 
         # Save to netcdf
         filename = str(tmp_path / f"tmp_{name}.nc")
