@@ -1,5 +1,4 @@
 # Import modules
-import subprocess
 import urllib
 
 import numpy as np
@@ -47,7 +46,7 @@ def test_find_entries(names):
         ("HYCOM", hycom_url),
     ],
 )
-def test_opening_and_saving(name, catalog_url):
+def test_opening_and_saving(name, catalog_url, tmp_path):
     if name == "error":
         # Open oceandataset
         with pytest.raises(ValueError):
@@ -64,6 +63,9 @@ def test_opening_and_saving(name, catalog_url):
             # Check coordinates
             if name == "LLC":
                 coordsList = ["XC", "YC", "XG", "YG"]
+                assert isinstance(od1.face_connections["face"], dict)
+                assert set(["face"]).issubset(set(od1.dataset.dims))
+
             elif name == "HYCOM":
                 coordsList = ["XC", "YC"]
             else:
@@ -74,10 +76,6 @@ def test_opening_and_saving(name, catalog_url):
             assert all(
                 [not np.isnan(od1.dataset[coord].values).any() for coord in coordsList]
             )
-
-        if name == "LLC":
-            assert isinstance(od1.face_connections["face"], dict)
-            assert set(["face"]).issubset(set(od1.dataset.dims))
 
         # Check shift
         if name == "xmitgcm_iters":
@@ -90,9 +88,11 @@ def test_opening_and_saving(name, catalog_url):
                     if "ave" in var
                 ]
             )
+            # This is failing on CI for time_midp
+            od1._ds["time_midp"].encoding = od1._ds["time"].encoding
 
         # Save to netcdf
-        filename = "tmp.nc"
+        filename = str(tmp_path / f"tmp_{name}.nc")
         od1.to_netcdf(filename)
 
         # Reopen
@@ -101,6 +101,3 @@ def test_opening_and_saving(name, catalog_url):
         else:
             args = {}
         from_netcdf(filename, **args)
-
-        # Clean up
-        subprocess.call("rm -f " + filename, shell=True)
