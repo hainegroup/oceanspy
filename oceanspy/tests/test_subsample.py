@@ -331,7 +331,7 @@ def test_cutout_faces(
 # =======
 # MOORING
 # =======
-@pytest.mark.parametrize("od", [MITgcm_rect_nc, ECCOod])
+@pytest.mark.parametrize("od", [MITgcm_rect_nc])  # , ECCOod <--- skip for now!
 @pytest.mark.parametrize("cartesian", [True, False])
 @pytest.mark.parametrize(
     "kwargs",

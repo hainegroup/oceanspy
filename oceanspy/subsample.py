@@ -880,7 +880,6 @@ def mooring_array(od, Ymoor, Xmoor, xoak_index="scipy_kdtree", **kwargs):
             od._ds["diffX"] = xr_diffX
             od._ds["diffY"] = xr_diffY
         else:
-            print(diffX.size)
             _warnings.warn(
                 "diffX and diffY have inconsistent lengths with mooring dimension"
             )
