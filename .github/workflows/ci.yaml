@@ -22,8 +22,8 @@ defaults:
 
 # Create a shared path for pooch cache and extracted data directory
 env:
-  POOCH_CACHE_DIR: ~/.cache/pooch
-  OCEANSPY_TEST_DATA_DIR: ~/.cache/pooch/oceanspy-test-data
+  POOCH_CACHE_DIR: ${{ github.workspace }}/.pooch_cache
+  OCEANSPY_TEST_DATA_DIR: ${{ github.workspace }}/.pooch_cache/oceanspy-test-data
 
 jobs:
   # Primes data download outside of pytest (single job, no matrix)
@@ -46,8 +46,16 @@ jobs:
     - name: Restore Pooch cache
       uses: actions/cache@v4
       with:
-        path: ~/.cache/pooch
+        path: ${{ github.workspace }}/.pooch_cache
         key: pooch-zenodo-10779221-md5-b0277b809840e08a84f3a5d2c3f7404b
+
+    - name: Test primed data presence
+      run: |
+        echo "POOCH_CACHE_DIR=$POOCH_CACHE_DIR"
+        echo "OCEANSPY_TEST_DATA_DIR=$OCEANSPY_TEST_DATA_DIR"
+        ls -la "$POOCH_CACHE_DIR" || true
+        ls -la "$OCEANSPY_TEST_DATA_DIR" || true
+
 
     # Download + untar once
     - name: Prime dataset (download + untar if missing)
@@ -89,7 +97,7 @@ jobs:
     - name: Restore Pooch cache
       uses: actions/cache@v4
       with:
-        path: ~/.cache/pooch
+        path: ${{ github.workspace }}/.pooch_cache
         key: pooch-zenodo-10779221-md5-b0277b809840e08a84f3a5d2c3f7404b
 
     - name: Set up conda environment
