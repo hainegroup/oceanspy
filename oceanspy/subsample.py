@@ -1057,12 +1057,10 @@ def survey_stations(
     try:
         regridder = _xe.Regridder(ds_in, ds, **xesmf_regridder_kwargs)
     except ValueError:
-        raise ValueError(
-            """
+        raise ValueError("""
         An error occured when creating the xesmf.Regridder object,
         try add_Hbdr = M, where M>1.5 times horizontal spacing
-        """
-        )
+        """)
     regridder._grid_in = None  # See https://github.com/JiaweiZhuang/xESMF/issues/71
     regridder._grid_out = None  # See https://github.com/JiaweiZhuang/xESMF/issues/71
     interp_vars = [
