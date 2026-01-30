@@ -2,7 +2,12 @@
 # This modules collect useful functions used by OceanSpy.
 # All functions here must be private (names start with underscore `_`)
 
+from __future__ import annotations
+
+import builtins
+import importlib
 import warnings
+from typing import Any, Iterable
 
 # Import modules (can be public here)
 import numpy
@@ -71,36 +76,106 @@ def _create_grid(dataset, coords, periodic, face_connections):
     return grid
 
 
-def _check_instance(objs, classinfos):
+def _resolve_type(spec: str) -> type | tuple[type, ...]:
     """
-    Check if the object is an instance or subclass of classinfo class.
+    Resolve a string type specification into a real Python type or tuple of types.
+
+    Supports:
+      - "bool", "int", "float", "str", etc. (builtins)
+      - "type(None)" -> NoneType
+      - "(float, int, bool)" -> (float, int, bool)
+      - "xarray.Dataset" / "oceanspy.OceanDataset" -> imported attribute
+    """
+    spec = spec.strip()
+
+    # tuple syntax like "(float, int, bool)"
+    if spec.startswith("(") and spec.endswith(")"):
+        inner = spec[1:-1].strip()
+        if not inner:
+            return tuple()
+        parts = [p.strip() for p in inner.split(",") if p.strip()]
+        resolved = tuple(_resolve_type(p) for p in parts)
+        # _resolve_type can return tuples; flatten defensively
+        flat: list[type] = []
+        for r in resolved:
+            if isinstance(r, tuple):
+                flat.extend(r)
+            else:
+                flat.append(r)
+        return tuple(flat)
+
+    # special case: type(None)
+    if spec == "type(None)":
+        return type(None)
+
+    # builtins like "int", "bool", "str"
+    if hasattr(builtins, spec):
+        obj = getattr(builtins, spec)
+        if isinstance(obj, type):
+            return obj
+
+    # dotted path like "xarray.Dataset" or "numpy.ScalarType"
+    if "." in spec:
+        mod_name, attr_name = spec.rsplit(".", 1)
+        mod = importlib.import_module(mod_name)
+        obj = getattr(mod, attr_name)
+
+        # 1) a normal class/type
+        if isinstance(obj, type):
+            return obj
+
+        # 2) a tuple/list of types (e.g., numpy.ScalarType)
+        if isinstance(obj, (tuple, list)) and all(isinstance(t, type) for t in obj):
+            return tuple(obj)
+
+        raise TypeError(
+            f"Resolved '{spec}' to {obj!r}, which is not a type or tuple of types."
+        )
+
+    raise TypeError(f"Unrecognized type spec: {spec!r}")
+
+
+def _check_instance(objs: dict[str, Any], classinfos: Any) -> None:
+    """
+    Check if each object in `objs` is an instance of the allowed types given by
+    `classinfos`.
 
     Parameters
     ----------
-    objs: dict
+    objs : dict
         {'obj_name': obj}
-    classinfos: dict
-        E.g.: {'obj_name': ['float', 'int']}
+    classinfos : str | list[str] | dict
+        - str: applies to all objs
+        - list[str]: applies to all objs
+        - dict: {'obj_name': 'spec' | ['spec1','spec2']}
+
+    Raises
+    ------
+    TypeError if any object doesn't match any allowed type.
     """
     for key, value in objs.items():
-        if isinstance(classinfos, str):
-            classinfo = classinfos
-        else:
-            classinfo = classinfos[key]
+        # choose spec(s) for this key
+        classinfo = (
+            classinfos
+            if isinstance(classinfos, (str, list, tuple))
+            else classinfos[key]
+        )
 
         if isinstance(classinfo, str):
-            classinfo = [classinfo]
+            specs: Iterable[str] = [classinfo]
+        else:
+            specs = classinfo
 
-        check = []
-        for this_classinfo in classinfo:
-            if "." in this_classinfo:
-                package = this_classinfo.split(".")[0]
-                exec("import {}".format(package))
+        allowed: list[type] = []
+        for spec in specs:
+            resolved = _resolve_type(spec)
+            if isinstance(resolved, tuple):
+                allowed.extend(resolved)
+            else:
+                allowed.append(resolved)
 
-            check = check + [eval("isinstance(value, {})" "".format(this_classinfo))]
-
-        if not any(check):
-            raise TypeError("`{}` must be {}".format(key, classinfo))
+        if not isinstance(value, tuple(allowed)):
+            raise TypeError(f"`{key}` must be {list(specs)}")
 
 
 def _check_oceanspy_axes(axes2check):
