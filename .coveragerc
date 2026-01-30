@@ -12,3 +12,4 @@ omit = oceanspy/tests/*
        oceanspy/Catalogs/*
        oceanspy/__init__.py
        docs/*
+       */conftest.py

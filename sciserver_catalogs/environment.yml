@@ -2,7 +2,7 @@ name: Oceanography
 channels:
 - conda-forge
 dependencies:
-- python=3.11
+- python=3.12
 - dask
 - numpy
 - distributed
@@ -54,10 +54,10 @@ dependencies:
 - cmasher
 - imageio
 - pre-commit
-- xmitgcm
 - intake
 - intake-xarray
 - pip:
   - black-nb
   - numbagg
   - git+https://github.com/hainegroup/oceanspy.git
+  - git+https://github.com/MITgcm/xmitgcm.git
