@@ -28,9 +28,6 @@ requires-python = ">=3.11"
 
 [tool.coverage.run]
 branch = true
-omit = [
-  "*/conftest.py"
-]
 
 [tool.isort]
 profile = "black"
