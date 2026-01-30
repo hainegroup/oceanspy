@@ -2,7 +2,7 @@ name: rise-environment
 channels:
 - conda-forge
 dependencies:
-- python
+- python=3.12
 - numpy
 - matplotlib
 - pandas
@@ -15,14 +15,13 @@ dependencies:
 - xoak
 - cartopy
 - esmpy
-- intake=0.7
+- intake
 - intake-xarray
 - geopy
 - xesmf>0.6.3
 - esmf
 - xgcm
 - Ipython
-- xmitgcm
 - ffmpeg
 - tqdm
 - pip
@@ -30,3 +29,4 @@ dependencies:
   - git+https://github.com/hainegroup/oceanspy.git
   - jupyter-contrib-nbextensions
   - jupyterlab-rise
+  - git+https://github.com/MITgcm/xmitgcm.git
