@@ -236,7 +236,7 @@ def test_time_cutout(od, dropAxes):
 
 
 @pytest.mark.parametrize("od", [MITgcm_rect_nc])
-@pytest.mark.parametrize("timeFreq", ["6H", "12H", "8H", "1D"])
+@pytest.mark.parametrize("timeFreq", ["6h", "12h", "8h", "1D"])
 @pytest.mark.parametrize("sampMethod", ["snapshot", "mean"])
 def test_time_resampling(od, timeFreq, sampMethod):
     # Warning due to tiset(['1, 20'])me_midp
