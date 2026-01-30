@@ -1,10 +1,9 @@
-import pytest
 import numpy as np
+import pytest
 import xarray as xr
 
 from oceanspy import open_oceandataset
 from oceanspy._ospy_utils import _check_instance
-
 
 # -----------------------------------------------------------------------------
 # Test data location (symlinked by conftest.py)
@@ -14,6 +13,7 @@ DATADIR = "./oceanspy/tests/Data/"
 # -----------------------------------------------------------------------------
 # Pure type-checking behavior
 # -----------------------------------------------------------------------------
+
 
 def test_check_instance_accepts_builtins():
     _check_instance(
@@ -61,14 +61,13 @@ def test_check_instance_raises_typeerror_with_key_name():
 # Integration tests: xarray + OceanDataset
 # -----------------------------------------------------------------------------
 
+
 @pytest.fixture(scope="module")
 def oceandataset():
     """
     Load a real OceanDataset from test data.
     """
-    return open_oceandataset.from_netcdf(
-        f"{DATADIR}MITgcm_rect_nc.nc"
-    )
+    return open_oceandataset.from_netcdf(f"{DATADIR}MITgcm_rect_nc.nc")
 
 
 def test_check_instance_accepts_xarray_dataset(oceandataset):
