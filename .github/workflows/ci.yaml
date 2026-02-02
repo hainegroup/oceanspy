@@ -44,7 +44,7 @@ jobs:
 
     # Restore/save pooch cache
     - name: Restore Pooch cache
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: ${{ github.workspace }}/.pooch_cache
         key: pooch-zenodo-10779221-md5-b0277b809840e08a84f3a5d2c3f7404b
@@ -95,7 +95,7 @@ jobs:
 
     # Restore pooch cache in each matrix job using the key defined above
     - name: Restore Pooch cache
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: ${{ github.workspace }}/.pooch_cache
         key: pooch-zenodo-10779221-md5-b0277b809840e08a84f3a5d2c3f7404b
