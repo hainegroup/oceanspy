@@ -1,0 +1,29 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: Oceanspy
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Mattia
+    family-names: Almansi
+    affiliation: B-Open Solutions
+    orcid: 'https://orcid.org/0000-0001-6849-3647'
+identifiers:
+  - type: doi
+    value: 10.21105/joss.01506
+    description: Journal of Open Source Software article
+repository-code: 'https://github.com/hainegroup/oceanspy'
+url: 'https://github.com/hainegroup'
+repository: 'https://oceanspy.readthedocs.io'
+abstract: >-
+  A Python package to facilitate ocean model data analysis
+  and visualization.
+keywords:
+  - ocean model
+  - data analysis
+  - Python
+license: MIT
