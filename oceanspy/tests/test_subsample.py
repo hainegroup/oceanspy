@@ -267,6 +267,52 @@ def test_reduce_variables(od, varList):
 
 @pytest.mark.parametrize("od", [ECCOod])
 @pytest.mark.parametrize(
+    "LonRange, LatRange, varList, NZ, NY, NX",
+    [
+        (
+            [-90, 20],
+            [20, 60],
+            ["T"],
+            50,
+            56,
+            110,
+        ),
+    ],
+)
+def test_cutout_faces_latlon(
+    od,
+    LonRange,
+    LatRange,
+    varList,
+    NZ,
+    NY,
+    NX,
+):
+    args = {
+        "varList": varList,
+        "LatRange": LatRange,
+        "LonRange": LonRange,
+    }
+    new_od = od.subsample.cutout(**args)
+    old_dims = od.dataset.dims
+    new_dims = new_od.dataset.dims
+
+    Yp1 = new_od.dataset["Yp1"]
+    Xp1 = new_od.dataset["Xp1"]
+
+    assert (set(old_dims) - set(new_dims)) == set(["face"])
+    assert new_dims["Z"] == NZ
+    assert new_dims["Y"] == NY
+    assert new_dims["X"] == NX
+    assert new_dims["Y"] == new_dims["Yp1"] - 1
+    assert new_dims["X"] == new_dims["Xp1"] - 1
+
+    assert int(Yp1[-1]) == new_dims["Yp1"] + int(Yp1[0]) - 1
+    assert int(Xp1[-1]) == new_dims["Xp1"] + int(Xp1[0]) - 1
+
+
+@pytest.mark.parametrize("od", [ECCOod])
+@pytest.mark.parametrize(
     "XRange, YRange, ZRange, varList, NZ, NY, NX",
     [
         (
@@ -339,6 +385,7 @@ def test_cutout_faces(
         {},
         {"YRange": None, "XRange": None, "add_Hbdr": True},
         {"YRange": [74, 78], "XRange": None},
+        {"latitude": [74, 78], "longitude": None},
     ],
 )
 def test_mooring(od, cartesian, kwargs):
@@ -597,6 +644,12 @@ for j in range(len(Xc[0])):
             "tcoords": "1992-01-16T12",
         },
         {
+            "latitude": lats76N,
+            "longitude": lons76N,
+            "Z": 0,
+            "tcoords": "1992-01-16T12",
+        },
+        {
             "Ycoords": lats76N,
             "Xcoords": lons76N,
             "varList": ["T", "UVELMASS", "VVELMASS"],
@@ -623,11 +676,13 @@ def test_stations(od, args):
         assert isinstance(DS, xr.Dataset)
     else:
         od_stns = this_od.subsample.stations(**args)
-        if args["Ycoords"] is None or args["Xcoords"] is None:
+        Ycoords = args["Ycoords"] if "Ycoords" in args else args["latitude"]
+        Xcoords = args["Xcoords"] if "Xcoords" in args else args["longitude"]
+        if Ycoords is None or Xcoords is None:
             assert this_od._ds.XC.shape == od_stns._ds.XC.shape
             assert this_od._ds.YC.shape == od_stns._ds.YC.shape
         else:
-            YC, XC = args["Ycoords"], args["Xcoords"]
+            YC, XC = Ycoords, Xcoords
             XCstn, YCstn = od_stns._ds.XC.squeeze(), od_stns._ds.YC.squeeze()
             XGstn, YGstn = od_stns._ds.XG, od_stns._ds.YG
             stations = od_stns._ds.station.values
