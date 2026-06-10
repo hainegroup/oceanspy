@@ -307,7 +307,8 @@ def test_weighted_mean(od, varNameList):
     w_mean_ds = weighted_mean(od, varNameList)
     var = w_mean_ds["w_mean_" + varNameList].values
     check = od.dataset[varNameList].mean().values
-    assert var == check
+    # test values are identical up to 6 decimals (default)
+    np.testing.assert_array_almost_equal(var, check)
 
 
 # INTEGRAL

@@ -832,6 +832,9 @@ def mooring_array(od, Ymoor, Xmoor, xoak_index="scipy_kdtree", **kwargs):
     # Reset coordinates
     new_ds = new_ds.set_coords(coords + ["mooring_dist"])
 
+    # assert that Xp1 and Yp1 are chunked properly
+    new_ds = new_ds.chunk({"Xp1": 2, "Yp1": 2})
+
     # Recreate od
     od._ds = new_ds
 
@@ -877,7 +880,6 @@ def mooring_array(od, Ymoor, Xmoor, xoak_index="scipy_kdtree", **kwargs):
             od._ds["diffX"] = xr_diffX
             od._ds["diffY"] = xr_diffY
         else:
-            print(diffX.size)
             _warnings.warn(
                 "diffX and diffY have inconsistent lengths with mooring dimension"
             )
@@ -885,8 +887,8 @@ def mooring_array(od, Ymoor, Xmoor, xoak_index="scipy_kdtree", **kwargs):
         # compute missing grid velocities from datasets if necessary
         vel_grid = ["XU", "YU", "XV", "YV"]
         da_list = [var for var in od._ds.reset_coords().data_vars]
-        check = all([item in da_list for item in vel_grid])
-        if check:  # pragma: no cover
+        if all([item in da_list for item in vel_grid]):  # pragma: no cover
+            # XU, YU, XV, YV are already in the dataset
             manipulate_coords = {"coordsUVfromG": False}
         else:  # pragma: no cover
             manipulate_coords = {"coordsUVfromG": True}
@@ -1055,12 +1057,10 @@ def survey_stations(
     try:
         regridder = _xe.Regridder(ds_in, ds, **xesmf_regridder_kwargs)
     except ValueError:
-        raise ValueError(
-            """
+        raise ValueError("""
         An error occured when creating the xesmf.Regridder object,
         try add_Hbdr = M, where M>1.5 times horizontal spacing
-        """
-        )
+        """)
     regridder._grid_in = None  # See https://github.com/JiaweiZhuang/xESMF/issues/71
     regridder._grid_out = None  # See https://github.com/JiaweiZhuang/xESMF/issues/71
     interp_vars = [

@@ -133,9 +133,10 @@ def from_catalog(name, catalog_url=None):
     for entry in entries:
         if intake_switch:
             # Use intake-xarray
+            obj = cat._entries[entry]
 
             # Pop metadata
-            mtdt = cat[entry].metadata
+            mtdt = getattr(obj, "_metadata", None) or {}
 
             # Create ds
             ds = cat[entry].to_dask()

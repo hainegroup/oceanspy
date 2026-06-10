@@ -424,5 +424,5 @@ def test_save_load(tmp_path, od, compute):
     open_oceandataset.from_netcdf(nc_path)
 
     zarr_path = str(tmp_path / "test.zarr")
-    od.to_zarr(path=zarr_path, compute=compute)
+    od.to_zarr(path=zarr_path, compute=compute, mode="w")
     open_oceandataset.from_zarr(zarr_path)

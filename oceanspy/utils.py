@@ -520,7 +520,7 @@ def densjmd95(s, t, p):
         if isinstance(var, _xr.DataArray):
             var = var.astype("float")
         else:
-            var = _np.asfarray(var)
+            var = _np.asarray(var, _np.float64)
 
     # coefficients nonlinear equation of state in pressure coordinates for
     # 1. density of fresh water at p = 0
@@ -681,7 +681,7 @@ def densmdjwf(s, t, p):
         if isinstance(var, _xr.DataArray):
             var = var.astype("float")
         else:
-            var = _np.asfarray(var)
+            var = _np.asarray(var, _np.float64)
 
     # coefficients nonlinear equation of state in pressure coordinates for
     eosMDJWFnum = [
