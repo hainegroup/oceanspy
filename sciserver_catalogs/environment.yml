@@ -15,7 +15,7 @@ dependencies:
 - geopy
 - xesmf>0.6.3
 - esmf
-- xgcm
+- xgcm=0.6.1
 - Ipython
 - tqdm
 - pytest
@@ -56,6 +56,7 @@ dependencies:
 - pre-commit
 - intake
 - intake-xarray
+- seaduck
 - pip:
   - black-nb
   - numbagg
