@@ -57,6 +57,9 @@ dependencies:
 - intake
 - intake-xarray
 - seaduck
+- kerchunk
+- fsspec
+- fastparquet
 - pip:
   - black-nb
   - numbagg
