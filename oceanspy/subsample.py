@@ -77,6 +77,8 @@ def cutout(
     varList=None,
     YRange=None,
     XRange=None,
+    LatRange=None,
+    LonRange=None,
     add_Hbdr=False,
     mask_outside=False,
     ZRange=None,
@@ -159,6 +161,10 @@ def cutout(
 
     # Checks
     unsupported_dims = ["mooring", "particle", "station"]
+
+    XRange = LonRange if XRange is None else XRange
+    YRange = LatRange if YRange is None else YRange
+
     check1 = XRange is not None or YRange is not None
     if check1 and any([dim in unsupported_dims for dim in od._ds.dims]):
         _warnings.warn(
@@ -657,7 +663,15 @@ def cutout(
     return od
 
 
-def mooring_array(od, Ymoor, Xmoor, xoak_index="scipy_kdtree", **kwargs):
+def mooring_array(
+    od,
+    Ymoor=None,
+    Xmoor=None,
+    latitude=None,
+    longitude=None,
+    xoak_index="scipy_kdtree",
+    **kwargs,
+):
     """
     Extract a mooring array section following the grid.
     Trajectories are great circle paths if coordinates are spherical.
@@ -683,6 +697,17 @@ def mooring_array(od, Ymoor, Xmoor, xoak_index="scipy_kdtree", **kwargs):
 
     # Check
     _check_native_grid(od, "mooring_array")
+
+    Xmoor = longitude if Xmoor is None else Xmoor
+    Ymoor = latitude if Ymoor is None else Ymoor
+
+    check1 = Xmoor is not None or Ymoor is not None
+    if check1 is None:
+        _warnings.warn(
+            "Could not find coordinates to subsample along.",
+            stacklevel=2,
+        )
+        return
 
     # Useful variable
     R = od.parameters["rSphere"]
@@ -904,9 +929,11 @@ def mooring_array(od, Ymoor, Xmoor, xoak_index="scipy_kdtree", **kwargs):
 
 def survey_stations(
     od,
-    Ysurv,
-    Xsurv,
+    Ysurv=None,
+    Xsurv=None,
     delta=None,
+    latitude=None,
+    longitude=None,
     xesmf_regridder_kwargs={"method": "bilinear"},
     **kwargs,
 ):
@@ -958,6 +985,17 @@ def survey_stations(
 
     # Check
     _check_native_grid(od, "survey_stations")
+
+    Xsurv = longitude if Xsurv is None else Xsurv
+    Ysurv = latitude if Ysurv is None else Ysurv
+
+    check1 = Xsurv is not None or Ysurv is not None
+    if check1 is None:
+        _warnings.warn(
+            "Could not find coordinates to subsample along.",
+            stacklevel=2,
+        )
+        return
 
     # Convert variables to numpy arrays and make some check
     Ysurv = _check_range(od, Ysurv, "Ysurv")
@@ -1140,6 +1178,10 @@ def stations(
     Zcoords=None,
     Ycoords=None,
     Xcoords=None,
+    time=None,
+    Z=None,
+    longitude=None,
+    latitude=None,
     xoak_index="scipy_kdtree",
     method="nearest",
     dim_name="station",
@@ -1198,6 +1240,11 @@ def stations(
 
     """
     _check_native_grid(od, dim_name)
+
+    tcoords = time if tcoords is None else tcoords
+    Zcoords = Z if Zcoords is None else Zcoords
+    Xcoords = longitude if Xcoords is None else Xcoords
+    Ycoords = latitude if Ycoords is None else Ycoords
 
     # Convert variables to numpy arrays and make some check
     tcoords = _check_range(od, tcoords, "timeRange")
