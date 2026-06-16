@@ -3,8 +3,8 @@
 KangerFjord:
   description: Kanger Fjord from SAMS
   args:
-    data_dir: /home/idies/workspace/OceanCirculation/fromNeil
-    grid_dir: /home/idies/workspace/OceanCirculation/fromNeil
+    data_dir: /home/idies/workspace/ocean_circulation_ceph/fromNeil
+    grid_dir: /home/idies/workspace/ocean_circulation_ceph/fromNeil
     delta_t: 5
     ref_date: '2007-08-21:30'
     grid_vars_to_coords: false
@@ -57,8 +57,8 @@ KangerFjord:
 EGshelfSJsec500m_3H_hydro:
   description: EGshelfSJsec500m_3H_hydro
   args:
-    data_dir: /home/idies/workspace/OceanCirculation/fromMarcello/exp1/all_result/3H/
-    grid_dir: /home/idies/workspace/OceanCirculation/fromMarcello/exp1/all_result
+    data_dir: /home/idies/workspace/ocean_circulation_ceph/fromMarcello/exp1/all_result/3H/
+    grid_dir: /home/idies/workspace/ocean_circulation_ceph/fromMarcello/exp1/all_result
     delta_t: 6
     ref_date: '2003-06-01'
     grid_vars_to_coords: false
@@ -113,8 +113,8 @@ EGshelfSJsec500m_3H_hydro:
 fldEGshelfSJsec500m_6H_hydro:
   description: Fields of EGshelfSJsec500m_6H_hydro
   args:
-    data_dir: /home/idies/workspace/OceanCirculation/fromMarcello/exp1/all_result/3H/
-    grid_dir: /home/idies/workspace/OceanCirculation/fromMarcello/exp1/all_result
+    data_dir: /home/idies/workspace/ocean_circulation_ceph/fromMarcello/exp1/all_result/3H/
+    grid_dir: /home/idies/workspace/ocean_circulation_ceph/fromMarcello/exp1/all_result
     delta_t: 6
     iters: range(0, 1321200+1, 3600)
     ref_date: '2003-06-01'
@@ -168,8 +168,8 @@ fldEGshelfSJsec500m_6H_hydro:
 exfEGshelfSJsec500m_6H_hydro:
   description: EXF fields of EGshelfSJsec500m_6H_hydro
   args:
-    data_dir: /home/idies/workspace/OceanCirculation/fromMarcello/exp1/all_result/6H/
-    grid_dir: /home/idies/workspace/OceanCirculation/fromMarcello/exp1/all_result
+    data_dir: /home/idies/workspace/ocean_circulation_ceph/fromMarcello/exp1/all_result/6H/
+    grid_dir: /home/idies/workspace/ocean_circulation_ceph/fromMarcello/exp1/all_result
     delta_t: 6
     ref_date: '2003-06-01'
     grid_vars_to_coords: false
@@ -186,8 +186,8 @@ exfEGshelfSJsec500m_6H_hydro:
 EGshelfSJsec500m_3H_NONhydro:
   description: EGshelfSJsec500m_3H_NONhydro
   args:
-    data_dir: /home/idies/workspace/OceanCirculation/fromMarcello/exp6/all_result/3H/
-    grid_dir: /home/idies/workspace/OceanCirculation/fromMarcello/exp6/all_result
+    data_dir: /home/idies/workspace/ocean_circulation_ceph/fromMarcello/exp6/all_result/3H/
+    grid_dir: /home/idies/workspace/ocean_circulation_ceph/fromMarcello/exp6/all_result
     delta_t: 6
     ref_date: '2003-06-01'
     grid_vars_to_coords: false
@@ -242,8 +242,8 @@ EGshelfSJsec500m_3H_NONhydro:
 fldEGshelfSJsec500m_6H_NONhydro:
   description: Fields of EGshelfSJsec500m_6H_NONhydro
   args:
-    data_dir: /home/idies/workspace/OceanCirculation/fromMarcello/exp6/all_result/3H/
-    grid_dir: /home/idies/workspace/OceanCirculation/fromMarcello/exp6/all_result
+    data_dir: /home/idies/workspace/ocean_circulation_ceph/fromMarcello/exp6/all_result/3H/
+    grid_dir: /home/idies/workspace/ocean_circulation_ceph/fromMarcello/exp6/all_result
     delta_t: 6
     iters: range(0, 1321200+1, 3600)
     ref_date: '2003-06-01'
@@ -297,8 +297,8 @@ fldEGshelfSJsec500m_6H_NONhydro:
 exfEGshelfSJsec500m_6H_NONhydro:
   description: EXF fields of EGshelfSJsec500m_6H_NONhydro
   args:
-    data_dir: /home/idies/workspace/OceanCirculation/fromMarcello/exp6/all_result/6H/
-    grid_dir: /home/idies/workspace/OceanCirculation/fromMarcello/exp6/all_result
+    data_dir: /home/idies/workspace/ocean_circulation_ceph/fromMarcello/exp6/all_result/6H/
+    grid_dir: /home/idies/workspace/ocean_circulation_ceph/fromMarcello/exp6/all_result
     delta_t: 6
     ref_date: '2003-06-01'
     grid_vars_to_coords: false

@@ -7,7 +7,7 @@ sources:
     driver: netcdf
     model: MITGCM
     args:
-      urlpath: /home/idies/workspace/OceanCirculation/exp_ASR/grid.nc
+      urlpath: /home/idies/workspace/ocean_circulation_ceph/get_started/grid.nc
       xarray_kwargs:
         engine: netcdf4
         drop_variables: ['RC', 'RF', 'RU', 'RL']
@@ -67,7 +67,7 @@ sources:
     driver: netcdf
     model: MITGCM
     args:
-      urlpath: /home/idies/workspace/OceanCirculation/exp_ASR/full_2007-09-01.nc
+      urlpath: /home/idies/workspace/ocean_circulation_ceph/get_started/full_2007-09-01.nc
       xarray_kwargs:
         engine: netcdf4
     metadata:
@@ -87,7 +87,7 @@ sources:
     driver: netcdf
     model: MITGCM
     args:
-      urlpath: /home/idies/workspace/OceanCirculation/exp_ASR/crop_2007-09-01.nc
+      urlpath: /home/idies/workspace/ocean_circulation_ceph/get_started/crop_2007-09-01.nc
       xarray_kwargs:
         engine: netcdf4
     metadata:
@@ -101,12 +101,13 @@ sources:
   # IGP
   grd_IGPwinter:
     description: Grid of IGPwinter
-    driver: netcdf
+    model: MITGCM
+    driver: zarr
     args:
-      urlpath: /home/idies/workspace/OceanCirculation/IGP/grid.nc
-      xarray_kwargs:
-        engine: netcdf4
-        drop_variables: ['RC', 'RF', 'RU', 'RL']
+      urlpath: /home/idies/workspace/ocean_circulation_ceph/IGPwinter_zarr
+    xarray_kwargs:
+      engine: zarr
+      drop_variables: ['RC', 'RF', 'RU', 'RL']
     metadata:
       manipulate_coords:
         coordsUVfromG: true
@@ -126,8 +127,8 @@ sources:
             Zl: -0.5
           time:
             time: -0.5
-      shift_averages:
-        averageList: ['UVELMASS', 'VVELMASS', 'WVELMASS', 'ADVr_TH', 'ADVx_TH', 'ADVy_TH', 'DFrI_TH', 'ADVr_SLT', 'ADVx_SLT', 'ADVy_SLT', 'DFrI_SLT', 'KPPg_TH', 'KPPg_SLT', 'oceSPtnd', 'oceQsw_AVG', 'TFLUX', 'SFLUX', 'oceFWflx_AVG']
+#      shift_averages:
+#        averageList: ['UVELMASS', 'VVELMASS', 'WVELMASS', 'ADVr_TH', 'ADVx_TH', 'ADVy_TH', 'DFrI_TH', 'ADVr_SLT', 'ADVx_SLT', 'ADVy_SLT', 'DFrI_SLT', 'KPPg_TH', 'KPPg_SLT', 'oceSPtnd', 'oceQsw_AVG', 'TFLUX', 'SFLUX', 'oceFWflx_AVG']
       parameters:
         rSphere: 6.371e+03
         eq_state: mdjwf
@@ -138,7 +139,7 @@ sources:
         c_p: 3.986e+03
         tempFrz0: 9.01e-02
         dTempFrz_dS: -5.75e-02
-      name: IGP
+      name: IGPwinter
       description: |
         High-resolution numerical simulation carried out in parallel to the observational
         component of the Iceland Greenland Seas Project (IGP).
@@ -148,28 +149,29 @@ sources:
 
   fld_IGPwinter:
     description: Fields of IGPwinter
-    driver: netcdf
+    model: MITGCM
+    driver: zarr
     args:
-      urlpath: /home/idies/workspace/OceanCirculation/IGP/day*.nc
-      xarray_kwargs:
-        engine: netcdf4
-        concat_dim: T
-        parallel: true
-        combine: nested
+      urlpath: /home/idies/workspace/ocean_circulation_ceph/IGPwinter_zarr
+    xarray_kwargs:
+      engine: zarr
+      concat_dim: T
+      parallel: true
+      combine: nested
     metadata:
-      rename:
-        T: time
+      original_output: snapshot
 
   # ===========================
   # IGPyearlong
   grd_IGPyearlong:
     description: Grid of IGPyearlong
-    driver: netcdf
+    driver: zarr
+    model: MITGCM
     args:
-      urlpath: /home/idies/workspace/ocean_circulation/data01_01/IGP/grid.nc
-      xarray_kwargs:
-        engine: netcdf4
-        drop_variables: ['RC', 'RF', 'RU', 'RL']
+      urlpath: /home/idies/workspace/ocean_circulation_ceph/IGPyearlong_zarr
+    xarray_kwargs:
+      engine: zarr
+      drop_variables: ['RC', 'RF', 'RU', 'RL']
     metadata:
       manipulate_coords:
         coordsUVfromG: true
@@ -189,8 +191,8 @@ sources:
             Zl: -0.5
           time:
             time: -0.5
-      shift_averages:
-        averageList: ['UVELMASS', 'VVELMASS', 'WVELMASS', 'ADVr_TH', 'ADVx_TH', 'ADVy_TH', 'DFrI_TH', 'ADVr_SLT', 'ADVx_SLT', 'ADVy_SLT', 'DFrI_SLT', 'KPPg_TH', 'KPPg_SLT', 'oceSPtnd', 'oceQsw_AVG', 'TFLUX', 'SFLUX', 'oceFWflx_AVG']
+#      shift_averages:
+#        averageList: ['UVELMASS', 'VVELMASS', 'WVELMASS', 'ADVr_TH', 'ADVx_TH', 'ADVy_TH', 'DFrI_TH', 'ADVr_SLT', 'ADVx_SLT', 'ADVy_SLT', 'DFrI_SLT', 'KPPg_TH', 'KPPg_SLT', 'oceSPtnd', 'oceQsw_AVG', 'TFLUX', 'SFLUX', 'oceFWflx_AVG']
       parameters:
         rSphere: 6.371e+03
         eq_state: mdjwf
@@ -211,29 +213,29 @@ sources:
 
   fld_IGPyearlong:
     description: Fields of IGPyearlong
-    driver: netcdf
+    model: MITGCM
+    driver: zarr
     args:
-      urlpath: /home/idies/workspace/ocean_circulation/data*_*/IGP/day_*.nc
-      xarray_kwargs:
-        engine: netcdf4
-        concat_dim: T
-        parallel: true
-        combine: nested
+      urlpath: /home/idies/workspace/ocean_circulation_ceph/IGPyearlong_zarr
+    xarray_kwargs:
+      engine: zarr
+      concat_dim: T
+      parallel: true
+      combine: nested
     metadata:
-      rename:
-        T: time
+      original_output: snapshot
 
   # ===========================
   # EGshelfIIseas2km_ERAI_6H
   grd_EGshelfIIseas2km_ERAI_6H:
     description: Grid of EGshelfIIseas2km_ERAI_6H
-    driver: netcdf
+    driver: zarr
     model: MITGCM
     args:
-      urlpath: /home/idies/workspace/OceanCirculation/exp_ERAI/grid.nc
-      xarray_kwargs:
-        engine: netcdf4
-        drop_variables: ['RC', 'RF', 'RU', 'RL']
+      urlpath: /home/idies/workspace/ocean_circulation_ceph/exp_ERAI_6H_zarr
+    xarray_kwargs:
+      engine: zarr
+      drop_variables: ['RC', 'RF', 'RU', 'RL']
     metadata:
       manipulate_coords:
         fillna: true
@@ -278,18 +280,16 @@ sources:
 
   fld_EGshelfIIseas2km_ERAI_6H:
     description: 6H-Fields of EGshelfIIseas2km_ERAI_6H
-    driver: netcdf
+    driver: zarr
     model: MITGCM
     args:
-      urlpath: /home/idies/workspace/OceanCirculation/exp_ERAI/6H*.nc
-      xarray_kwargs:
-        engine: netcdf4
-        concat_dim: T
-        parallel: true
-        combine: nested
+      urlpath: /home/idies/workspace/ocean_circulation_ceph/exp_ERAI_6H_zarr
+    xarray_kwargs:
+      engine: zarr
+      concat_dim: T
+      parallel: true
+      combine: nested
     metadata:
-      rename:
-        T: time
       original_output: snapshot
 
   # ===========================
@@ -299,7 +299,7 @@ sources:
     driver: netcdf
     model: MITGCM
     args:
-      urlpath: /home/idies/workspace/OceanCirculation/exp_ERAI/grid.nc
+      urlpath: /home/idies/workspace/ocean_circulation_ceph/exp_ERAI/grid.nc
       xarray_kwargs:
         engine: netcdf4
         drop_variables: ['RC', 'RF', 'RU', 'RL']
@@ -350,7 +350,7 @@ sources:
     driver: netcdf
     model: MITGCM
     args:
-      urlpath: /home/idies/workspace/OceanCirculation/exp_ERAI/6H*.nc
+      urlpath: /home/idies/workspace/ocean_circulation_ceph/exp_ERAI/6H*.nc
       xarray_kwargs:
         engine: netcdf4
         concat_dim: T
@@ -368,7 +368,7 @@ sources:
     driver: netcdf
     model: MITGCM
     args:
-      urlpath: /home/idies/workspace/OceanCirculation/exp_ERAI/1D*.nc
+      urlpath: /home/idies/workspace/ocean_circulation_ceph/exp_ERAI/1D*.nc
       xarray_kwargs:
         engine: netcdf4
         concat_dim: T
@@ -383,13 +383,13 @@ sources:
   # EGshelfIIseas2km_ASR_full
   grd_EGshelfIIseas2km_ASR_full:
     description: Grid of EGshelfIIseas2km_ASR_full
-    driver: netcdf
+    driver: zarr
     model: MITGCM
     args:
-      urlpath: /home/idies/workspace/OceanCirculation/exp_ASR/grid.nc
-      xarray_kwargs:
-        engine: netcdf4
-        drop_variables: ['RC', 'RF', 'RU', 'RL']
+      urlpath: /home/idies/workspace/ocean_circulation_ceph/exp_ASR_zarr
+    xarray_kwargs:
+      engine: zarr
+      drop_variables: ['RC', 'RF', 'RU', 'RL']
     metadata:
       manipulate_coords:
         fillna: true
@@ -434,18 +434,16 @@ sources:
 
   fld_EGshelfIIseas2km_ASR_full:
     description: Fields of EGshelfIIseas2km_ASR_full
-    driver: netcdf
+    driver: zarr
     model: MITGCM
     args:
-      urlpath: /home/idies/workspace/OceanCirculation/exp_ASR/full*.nc
-      xarray_kwargs:
-        engine: netcdf4
-        concat_dim: T
-        parallel: true
-        combine: nested
+      urlpath: /home/idies/workspace/ocean_circulation_ceph/exp_ASR_zarr
+    xarray_kwargs:
+      engine: zarr
+      concat_dim: T
+      parallel: true
+      combine: nested
     metadata:
-      rename:
-        T: time
       original_output: snapshot
 
   # ===========================
@@ -455,7 +453,7 @@ sources:
     driver: netcdf
     model: MITGCM
     args:
-      urlpath: /home/idies/workspace/OceanCirculation/exp_ASR/grid.nc
+      urlpath: /home/idies/workspace/ocean_circulation_ceph/exp_ASR/grid.nc
       xarray_kwargs:
         engine: netcdf4
         drop_variables: ['RC', 'RF', 'RU', 'RL']
@@ -517,7 +515,7 @@ sources:
     driver: netcdf
     model: MITGCM
     args:
-      urlpath: /home/idies/workspace/OceanCirculation/exp_ASR/full*.nc
+      urlpath: /home/idies/workspace/ocean_circulation_ceph/exp_ASR/full*.nc
       xarray_kwargs:
         engine: netcdf4
         concat_dim: T
@@ -540,7 +538,7 @@ sources:
     driver: netcdf
     model: MITGCM
     args:
-      urlpath: /home/idies/workspace/OceanCirculation/exp_ASR/crop*.nc
+      urlpath: /home/idies/workspace/ocean_circulation_ceph/exp_ASR/crop*.nc
       xarray_kwargs:
         engine: netcdf4
         concat_dim: T
@@ -689,7 +687,7 @@ sources:
     driver: zarr
     model: MITGCM
     args:
-      urlpath: '/home/idies/workspace/OceanCirculation/ECCO_v4r4/ecco_v4r4'
+      urlpath: /home/idies/workspace/poseidon_ceph/ecco_v4r4
       #drop_variables: ['k_u', 'k_p1', 'k_l', 'k']
     metadata:
       swap_dims:
@@ -786,7 +784,7 @@ sources:
     driver: netcdf
     model: MITGCM
     args:
-      urlpath: '/home/idies/workspace/poseidon/data03_02/daily_mean_ecco/ECCO-GRID.nc'
+      urlpath: /home/idies/workspace/poseidon_ceph/daily_mean_ecco/ECCO-GRID.nc
       #drop_variables: ['k_u', 'k_p1', 'k_l', 'k']
     metadata:
       swap_dims:
@@ -825,7 +823,7 @@ sources:
     driver: zarr
     model: MITGCM
     args:
-      urlpath: '/home/idies/workspace/poseidon/data0*_02/daily_mean_ecco/zarr/snap*'
+      urlpath: /home/idies/workspace/poseidon_ceph/daily_mean_ecco/zarr/snap*
       drop_variables: ['XC', 'YC']
     xarray_kwargs:
       engine: zarr
@@ -843,7 +841,7 @@ sources:
     driver: zarr
     model: MITGCM
     args:
-      urlpath: '/home/idies/workspace/poseidon/data0*_02/daily_mean_ecco/zarr/mean*'
+      urlpath: /home/idies/workspace/poseidon_ceph/daily_mean_ecco/zarr/mean*
       drop_variables: ['XC', 'YC', 'XG', 'YG', 'time_midp']
     xarray_kwargs:
       engine: zarr
@@ -920,7 +918,7 @@ sources:
     driver: zarr
     model: HyCOM
     args:
-      urlpath: /home/idies/workspace/poseidon/data10_01/HyCOM
+      urlpath: /home/idies/workspace/ocean_circulation_ceph/HyCOM
     xarray_kwargs:
       engine: zarr
     metadata:
@@ -957,7 +955,7 @@ sources:
     driver: zarr
     model: NA
     args:
-      urlpath: '/home/idies/workspace/poseidon/data12_01/ETOPO'
+      urlpath: /home/idies/workspace/ocean_circulation_ceph/ETOPO
     xarray_kwargs:
       engine: zarr
     metadata:
@@ -974,8 +972,7 @@ sources:
     driver: netcdf
     model: MITGCM
     args:
-      # urlpath: /sciserver/oceanography/exp_Arctic_Control/GRID/grid_glued_swapped.nc
-      urlpath: /home/idies/workspace/OceanCirculation/exp_Arctic_Control/GRID/grid_glued_swapped.nc
+      urlpath: /home/idies/workspace/ocean_circulation_ceph/exp_Arctic_Control/GRID/grid_glued_swapped.nc
       xarray_kwargs:
         engine: netcdf4
         drop_variables: ['RC', 'RF', 'RU', 'RL']
@@ -1022,7 +1019,7 @@ sources:
     driver: zarr
     model: MITGCM
     args:
-      urlpath: '/home/idies/workspace/poseidon/data10_02/arctic_control.zarr'
+      urlpath: /home/idies/workspace/ocean_circulation_ceph/exp_Arctic_Control/arctic_control.zarr
     xarray_kwargs:
       engine: zarr
     metadata:

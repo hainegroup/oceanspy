@@ -2,6 +2,7 @@ datasets:
   sciserver:
   - get_started
   - IGPwinter
+  - IGPyearlong
   - EGshelfIIseas2km_ASR_full
   - EGshelfIIseas2km_ASR_crop
   - EGshelfIIseas2km_ERAI_6H
@@ -13,7 +14,7 @@ datasets:
   - Arctic_Control
   - KangerFjord
   - HYCOM
-  - LLC4320
+  # - LLC4320
   - ECCO
   - daily_ecco
   - ETOPO
