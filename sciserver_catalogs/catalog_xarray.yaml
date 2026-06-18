@@ -781,13 +781,14 @@ sources:
 # ECCOv4r4 data
   daily_ecco_grid:
     description: ECCO version 4 release 4 grid
-    driver: netcdf4
+    driver: netcdf
     model: MITGCM
     args:
       urlpath: /home/idies/workspace/poseidon_ceph/daily_mean_ecco/ECCO-GRID.nc
       #drop_variables: ['k_u', 'k_p1', 'k_l', 'k']
-    # xarray_kwargs:
-    #   engine: netcdf4
+      engine: netcdf4
+    xarray_kwargs:
+      engine: netcdf4
     metadata:
       swap_dims:
         k: Z

@@ -34,9 +34,15 @@ import os as _os
 from pathlib import Path as _Path
 
 def _get_sciserver_catalog_dir():
-    """Return local catalog directory if OCEANSPY_CATALOG_DIR is set.
+    
+    """Return the SciServer catalog directory to use.
 
-    Falls back to the package's bundled sciserver_catalogs directory.
+    If the environment variable OCEANSPY_CATALOG_DIR is set, its value is
+    used as the catalog directory. Otherwise, the bundled sciserver_catalogs
+    directory in the OceanSpy source tree is used.
+
+    This is intended to support local development and testing of catalog YAML
+    changes without modifying the package code.
     """
     env_dir = _os.environ.get("OCEANSPY_CATALOG_DIR")
     if env_dir:
@@ -484,11 +490,11 @@ def _find_entries(name, catalog_url):
             url = cat_dir / "catalog_xarray.yaml"
 
         # If local file exists, use it; otherwise fall back to GitHub
-        if not url.exists():
-            url = (
-                "https://raw.githubusercontent.com/hainegroup/oceanspy/"
-                "main/sciserver_catalogs/catalog_xarray.yaml"
-            )
+            if not url.exists():
+                url = (
+                    "https://raw.githubusercontent.com/hainegroup/oceanspy/"
+                    "main/sciserver_catalogs/catalog_xarray.yaml"
+                )
         else:
             url = catalog_url
 
@@ -512,7 +518,7 @@ def _find_entries(name, catalog_url):
         else:
             url = catalog_url  # provided by user
 
-    cat = _intake.open_catalog(str(url))
+        cat = _intake.open_catalog(str(url))
     
         # Is it an url?
         try:
