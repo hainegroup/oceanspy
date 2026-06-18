@@ -29,6 +29,21 @@ try:
 except ImportError:  # pragma: no cover
     pass
 
+# To allow local catalog reading
+import os as _os
+from pathlib import Path as _Path
+
+def _get_sciserver_catalog_dir():
+    """Return local catalog directory if OCEANSPY_CATALOG_DIR is set.
+
+    Falls back to the package's bundled sciserver_catalogs directory.
+    """
+    env_dir = _os.environ.get("OCEANSPY_CATALOG_DIR")
+    if env_dir:
+        return _Path(env_dir).expanduser().resolve()
+
+    # Default: bundled catalogs in the source tree / installed package
+    return _Path(__file__).resolve().parent.parent / "sciserver_catalogs"
 
 def from_netcdf(path, **kwargs):
     """
@@ -434,14 +449,25 @@ def _find_entries(name, catalog_url):
     -------
     cat, entries, url, intake_switch
     """
+    
     # Check parameters
     if catalog_url is None:  # pragma: no cover
-        url = (
-            "https://raw.githubusercontent.com/hainegroup/oceanspy/"
-            "main/sciserver_catalogs/datasets_list.yaml"
-        )
-        f = _urllib.request.urlopen(url)
-        SCISERVER_DATASETS = _yaml.safe_load(f)["datasets"]["sciserver"]
+        cat_dir = _get_sciserver_catalog_dir()
+
+        # datasets_list.yaml
+        datasets_list_path = cat_dir / "datasets_list.yaml"
+        if datasets_list_path.exists():
+            with open(datasets_list_path, "r") as f:
+                SCISERVER_DATASETS = _yaml.safe_load(f)["datasets"]["sciserver"]
+        else:
+            # Fallback to remote datasets list if local file is missing
+            url = (
+                "https://raw.githubusercontent.com/hainegroup/oceanspy/"
+                "main/sciserver_catalogs/datasets_list.yaml"
+            )
+            f = _urllib.request.urlopen(url)
+            SCISERVER_DATASETS = _yaml.safe_load(f)["datasets"]["sciserver"]
+
         if name not in SCISERVER_DATASETS:
             raise ValueError(
                 "[{}] is not available on SciServer."
@@ -454,26 +480,40 @@ def _find_entries(name, catalog_url):
     # Read catalog
     try:
         if catalog_url is None:
+            cat_dir = _get_sciserver_catalog_dir()
+            url = cat_dir / "catalog_xarray.yaml"
+
+        # If local file exists, use it; otherwise fall back to GitHub
+        if not url.exists():
             url = (
                 "https://raw.githubusercontent.com/hainegroup/oceanspy/"
                 "main/sciserver_catalogs/catalog_xarray.yaml"
             )
         else:
             url = catalog_url
-        cat = _intake.open_catalog(url)
+
+        cat = _intake.open_catalog(str(url))
         entries = [entry for entry in list(cat) if name in entry]
         if len(entries) == 0:
             raise ValidationError("", "")
         intake_switch = True
+
     except ValidationError:
         if catalog_url is None:
-            url = (
-                "https://raw.githubusercontent.com/hainegroup/oceanspy/"
-                "main/sciserver_catalogs/catalog_xmitgcm.yaml"
-            )
+            cat_dir = _get_sciserver_catalog_dir()
+            url = cat_dir / "catalog_xmitgcm.yaml"
+
+            # If local file exists, use it; otherwise fall back to GitHub
+            if not url.exists():
+                url = (
+                    "https://raw.githubusercontent.com/hainegroup/oceanspy/"
+                    "main/sciserver_catalogs/catalog_xmitgcm.yaml"
+                )
         else:
             url = catalog_url  # provided by user
 
+    cat = _intake.open_catalog(str(url))
+    
         # Is it an url?
         try:
             f = _urllib.request.urlopen(url)
