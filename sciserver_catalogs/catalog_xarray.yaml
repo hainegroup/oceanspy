@@ -296,12 +296,12 @@ sources:
   # EGshelfIIseas2km_ERAI_1D
   grd_EGshelfIIseas2km_ERAI_1D:
     description: Grid of EGshelfIIseas2km_ERAI_1D
-    driver: netcdf
+    driver: zarr
     model: MITGCM
     args:
-      urlpath: /home/idies/workspace/ocean_circulation_ceph/exp_ERAI/grid.nc
-      xarray_kwargs:
-        engine: netcdf4
+      urlpath: /home/idies/workspace/ocean_circulation_ceph/exp_ERAI_1D_zarr
+    xarray_kwargs:
+        engine: zarr
         drop_variables: ['RC', 'RF', 'RU', 'RL']
     metadata:
       manipulate_coords:
@@ -346,38 +346,20 @@ sources:
       projection: Mercator
 
   fld_EGshelfIIseas2km_ERAI_1D:
-    description: 6H-Fields of EGshelfIIseas2km_ERAI_1D
-    driver: netcdf
+    description: Daily-Fields of EGshelfIIseas2km_ERAI_1D
+    driver: zarr
     model: MITGCM
     args:
-      urlpath: /home/idies/workspace/ocean_circulation_ceph/exp_ERAI/6H*.nc
-      xarray_kwargs:
-        engine: netcdf4
-        concat_dim: T
-        parallel: true
-        combine: nested
+      urlpath: /home/idies/workspace/ocean_circulation_ceph/exp_ERAI_1D_zarr
+    xarray_kwargs:
+      engine: zarr
+      concat_dim: T
+      parallel: false
+      combine: nested
     metadata:
-      rename:
-        T: time
       original_output: snapshot
       isel:
         time: slice(None, None, 4)
-
-  dailyEGshelfIIseas2km_ERAI_1D:
-    description: Daily-Fields of EGshelfIIseas2km_ERAI_1D
-    driver: netcdf
-    model: MITGCM
-    args:
-      urlpath: /home/idies/workspace/ocean_circulation_ceph/exp_ERAI/1D*.nc
-      xarray_kwargs:
-        engine: netcdf4
-        concat_dim: T
-        parallel: true
-        combine: nested
-    metadata:
-      rename:
-        T: time
-      original_output: snapshot
 
   # ===========================
   # EGshelfIIseas2km_ASR_full
@@ -445,18 +427,18 @@ sources:
       combine: nested
     metadata:
       original_output: snapshot
-
+      
   # ===========================
   # EGshelfIIseas2km_ASR_crop
   grd_EGshelfIIseas2km_ASR_crop:
     description: Grid of EGshelfIIseas2km_ASR_crop
-    driver: netcdf
+    driver: zarr
     model: MITGCM
     args:
-      urlpath: /home/idies/workspace/ocean_circulation_ceph/exp_ASR/grid.nc
-      xarray_kwargs:
-        engine: netcdf4
-        drop_variables: ['RC', 'RF', 'RU', 'RL']
+      urlpath: /home/idies/workspace/ocean_circulation_ceph/exp_ASR_zarr
+    xarray_kwargs:
+      engine: zarr
+      drop_variables: ['RC', 'RF', 'RU', 'RL']
     metadata:
       manipulate_coords:
         fillna: true
@@ -475,8 +457,6 @@ sources:
             Zp1: 0.5
             Zu: 0.5
             Zl: -0.5
-          time:
-            time: -0.5
       shift_averages:
         averageList:
       isel:
@@ -512,15 +492,12 @@ sources:
 
   fld_EGshelfIIseas2km_ASR_crop:
     description: Full-Fields of EGshelfIIseas2km_ASR_crop
-    driver: netcdf
+    driver: zarr
     model: MITGCM
     args:
-      urlpath: /home/idies/workspace/ocean_circulation_ceph/exp_ASR/full*.nc
-      xarray_kwargs:
-        engine: netcdf4
-        concat_dim: T
-        parallel: true
-        combine: nested
+      urlpath: /home/idies/workspace/ocean_circulation_ceph/exp_ASR_zarr
+    xarray_kwargs:
+      engine: zarr
     metadata:
       isel:
         Z: slice(None, 55)
@@ -529,156 +506,22 @@ sources:
         Xp1: slice(529, 737)
         Y: slice(582, 736)
         Yp1: slice(582, 737)
-      rename:
-        T: time
       original_output: snapshot
-
+      
   avg_EGshelfIIseas2km_ASR_crop:
     description: Cropped-Fields of EGshelfIIseas2km_ASR_crop
     driver: netcdf
     model: MITGCM
     args:
       urlpath: /home/idies/workspace/ocean_circulation_ceph/exp_ASR/crop*.nc
-      xarray_kwargs:
-        engine: netcdf4
-        concat_dim: T
-        parallel: true
-        combine: nested
+      engine: h5netcdf
+      concat_dim: T
+      parallel: true
+      combine: nested
     metadata:
       rename:
         T: time
       original_output: average
-
-  LLC4320_flds:
-    description: 10 day sample of hourly data from the LLC4320 simulation
-    driver: zarr
-    args:
-      urlpath: '/home/idies/workspace/poseidon/data*/llc4320_tests/10dayhourly/velocities'
-      engine: zarr
-      parallel: true
-    metadata:
-      swap_dims:
-        k: Z
-        k_p1: Zp1
-        k_u: Zu
-        k_l: Zl
-      rename:
-        Theta: Temp
-        Salt: S
-        i: X
-        i_g: Xp1
-        j: Y
-        j_g: Yp1
-      parameters:
-        rSphere: 6.371e+03
-        eq_state: jmd95
-        rho0: 1027
-        g: 9.81
-        eps_nh: 0
-        omega: 7.292123516990373e-05
-        c_p: 3.986e+03
-        tempFrz0: 9.01e-02
-        dTempFrz_dS: -5.75e-02
-      name: LLC4320
-      description: |
-        10 day hourly data from the LLC4320 simulations computed using the MITGCM, a general, curvilinear ocean simulation on the cube-sphere.
-      projection:
-      original_output: snapshot
-
-
-  LLC4320_grid:
-    description: 10 day sample of hourly data from the LLC4320 simulation
-    driver: zarr
-    args:
-      urlpath: '/home/idies/workspace/poseidon/data01_01/llc4320_grid/'
-      engine: zarr
-    metadata:
-      swap_dims:
-        k: Z
-        k_p1: Zp1
-        k_u: Zu
-        k_l: Zl
-      rename:
-        i: X
-        i_g: Xp1
-        j: Y
-        j_g: Yp1
-        hFacC: HFacC
-        hFacW: HFacW
-        hFacS: HFacS
-      grid_coords:
-        add_midp: true
-        grid_coords:
-          Y:
-            Y:
-            Yp1: -0.5
-          X:
-            X:
-            Xp1: -0.5
-          Z:
-            Z:
-            Zp1: 0.5
-            Zu: 0.5
-            Zl: -0.5
-          time:
-            time: -0.5
-      face_connections: # topology
-        face_connections:
-          face:
-            0:
-              X: tuple(((12, 'Y', False), (3, 'X', False)))
-              Y: tuple((None,(1,'Y',False)))
-            1:
-              X: tuple(((11,'Y',False),(4,'X',False)))
-              Y: tuple(((0,'Y',False),(2,'Y',False)))
-            2:
-              X: tuple(((10,'Y',False),(5, 'X', False)))
-              Y: tuple(((1, 'Y', False), (6, 'X', False)))
-            3:
-              X: tuple(((0, 'X', False), (9, 'Y', False)))
-              Y: tuple((None, (4, 'Y', False)))
-            4:
-              X: tuple(((1, 'X', False), (8, 'Y', False)))
-              Y: tuple(((3, 'Y', False), (5, 'Y', False)))
-            5:
-              X: tuple(((2, 'X', False), (7, 'Y', False)))
-              Y: tuple(((4, 'Y', False), (6, 'Y', False)))
-            6:
-              X: tuple(((2, 'Y', False), (7, 'X', False)))
-              Y: tuple(((5, 'Y', False), (10, 'X', False)))
-            7:
-              X: tuple(((6, 'X', False), (8, 'X', False)))
-              Y: tuple(((5, 'X', False), (10, 'Y', False)))
-            8:
-              X: tuple(((7, 'X', False), (9, 'X', False)))
-              Y: tuple(((4, 'X', False), (11, 'Y', False)))
-            9:
-              X: tuple(((8, 'X', False), None))
-              Y: tuple(((3, 'X', False), (12, 'Y', False)))
-            10:
-              X: tuple(((6, 'Y', False), (11, 'X', False)))
-              Y: tuple(((7, 'Y', False), (2, 'X', False)))
-            11:
-              X: tuple(((10, 'X', False), (12, 'X', False)))
-              Y: tuple(((8, 'Y', False), (1, 'X', False)))
-            12:
-              X: tuple(((11, 'X', False), None))
-              Y: tuple(((9, 'Y', False), (0, 'X', False)))
-      parameters:
-        rSphere: 6.371e+03
-        eq_state: jmd95
-        rho0: 1027
-        g: 9.81
-        eps_nh: 0
-        omega: 7.292123516990373e-05
-        c_p: 3.986e+03
-        tempFrz0: 9.01e-02
-        dTempFrz_dS: -5.75e-02
-      name: LLC4320
-      description: |
-        10 day hourly data from the LLC4320 simulations computed using the MITGCM, a general, curvilinear ocean simulation on the cube-sphere.
-      projection:
-      original_output: snapshot
 
 # ======================================================================
 # ECCOv4r4 data
@@ -1010,8 +853,6 @@ sources:
         c_p: 3.986e+03
         tempFrz0: 9.01e-02
         dTempFrz_dS: -5.75e-02
-        grid_type: 'spherical'
-      # grid_type: spherical
       name: Arctic_Control
       description: |
         Curvilinear grid test. Setup by Dr. Renske Gelderloos.
@@ -1028,6 +869,5 @@ sources:
     metadata:
       rename:
         T: time
-        # THETA: Temp
       manipulate_coords:
         coordsUVfromG: true
