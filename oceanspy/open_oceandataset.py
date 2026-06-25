@@ -51,6 +51,18 @@ def _get_sciserver_catalog_dir():
     # Default: bundled catalogs in the source tree / installed package
     return _Path(__file__).resolve().parent.parent / "sciserver_catalogs"
 
+def _get_catalog_path(filename):
+    """
+    Return a local catalog path from OCEANSPY_CATALOG_DIR.
+
+    Raises FileNotFoundError if the file does not exist.
+    """
+    cat_dir = _get_sciserver_catalog_dir()
+    path = cat_dir / filename
+    if not path.exists():
+        raise FileNotFoundError(f"Could not find local catalog: {path}")
+    return path
+
 def from_netcdf(path, **kwargs):
     """
     Load an OceanDataset from a netcdf file.
@@ -484,52 +496,44 @@ def _find_entries(name, catalog_url):
         _check_instance({"catalog_url": catalog_url}, "str")
 
     # Read catalog
+    if catalog_url is None:
+        xarray_url = _get_catalog_path("catalog_xarray.yaml")
+        xmitgcm_url = _get_catalog_path("catalog_xmitgcm.yaml")
+    else:
+        xarray_url = catalog_url
+        xmitgcm_url = catalog_url
+
+    # Try intake/xarray catalog first
     try:
-        if catalog_url is None:
-            cat_dir = _get_sciserver_catalog_dir()
-            url = cat_dir / "catalog_xarray.yaml"
-
-        # If local file exists, use it; otherwise fall back to GitHub
-            if not url.exists():
-                url = (
-                    "https://raw.githubusercontent.com/hainegroup/oceanspy/"
-                    "main/sciserver_catalogs/catalog_xarray.yaml"
-                )
-        else:
-            url = catalog_url
-
-        cat = _intake.open_catalog(str(url))
+        url = xarray_url
+        cat = _intake.open_catalog(str(xarray_url))
         entries = [entry for entry in list(cat) if name in entry]
         if len(entries) == 0:
             raise ValidationError("", "")
         intake_switch = True
 
     except ValidationError:
-        if catalog_url is None:
-            cat_dir = _get_sciserver_catalog_dir()
-            url = cat_dir / "catalog_xmitgcm.yaml"
-
-            # If local file exists, use it; otherwise fall back to GitHub
-            if not url.exists():
-                url = (
-                    "https://raw.githubusercontent.com/hainegroup/oceanspy/"
-                    "main/sciserver_catalogs/catalog_xmitgcm.yaml"
-                )
-        else:
-            url = catalog_url  # provided by user
-
-        cat = _intake.open_catalog(str(url))
-    
-        # Is it an url?
-        try:
-            f = _urllib.request.urlopen(url)
-            cat = _yaml.safe_load(f)
-        except ValueError:
-            with open(url) as f:
+        # Fallback to xmitgcm-style YAML
+        url = xmitgcm_url
+        if isinstance(xmitgcm_url, _Path):
+            with open(xmitgcm_url, "r") as f:
                 cat = _yaml.safe_load(f)
+        else:
+            try:
+                with _urllib.request.urlopen(xmitgcm_url) as f:
+                    cat = _yaml.safe_load(f)
+            except Exception:
+                with open(xmitgcm_url, "r") as f:
+                    cat = _yaml.safe_load(f)
+
         entries = [entry for entry in list(cat) if name in entry]
         intake_switch = False
-
+        
+    # print("DEBUG: xarray_url =", xarray_url)
+    # print("DEBUG: xmitgcm_url =", xmitgcm_url)
+    # print("DEBUG: intake_switch =", intake_switch)
+    # print("DEBUG: entries =", entries)
+    
     # Error if not available
     if len(entries) == 0:
         raise ValueError("[{}] is not in the catalog.".format(name))
