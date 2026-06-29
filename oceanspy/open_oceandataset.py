@@ -33,8 +33,8 @@ except ImportError:  # pragma: no cover
 import os as _os
 from pathlib import Path as _Path
 
+
 def _get_sciserver_catalog_dir():
-    
     """Return the SciServer catalog directory to use.
 
     If the environment variable OCEANSPY_CATALOG_DIR is set, its value is
@@ -51,6 +51,7 @@ def _get_sciserver_catalog_dir():
     # Default: bundled catalogs in the source tree / installed package
     return _Path(__file__).resolve().parent.parent / "sciserver_catalogs"
 
+
 def _get_catalog_path(filename):
     """
     Return a local catalog path from OCEANSPY_CATALOG_DIR.
@@ -62,6 +63,7 @@ def _get_catalog_path(filename):
     if not path.exists():
         raise FileNotFoundError(f"Could not find local catalog: {path}")
     return path
+
 
 def from_netcdf(path, **kwargs):
     """
@@ -467,7 +469,7 @@ def _find_entries(name, catalog_url):
     -------
     cat, entries, url, intake_switch
     """
-    
+
     # Check parameters
     if catalog_url is None:  # pragma: no cover
         cat_dir = _get_sciserver_catalog_dir()
@@ -528,12 +530,12 @@ def _find_entries(name, catalog_url):
 
         entries = [entry for entry in list(cat) if name in entry]
         intake_switch = False
-        
+
     # print("DEBUG: xarray_url =", xarray_url)
     # print("DEBUG: xmitgcm_url =", xmitgcm_url)
     # print("DEBUG: intake_switch =", intake_switch)
     # print("DEBUG: entries =", entries)
-    
+
     # Error if not available
     if len(entries) == 0:
         raise ValueError("[{}] is not in the catalog.".format(name))

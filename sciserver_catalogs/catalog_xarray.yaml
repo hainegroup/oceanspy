@@ -301,8 +301,8 @@ sources:
     args:
       urlpath: /home/idies/workspace/ocean_circulation_ceph/exp_ERAI_1D_zarr
     xarray_kwargs:
-        engine: zarr
-        drop_variables: ['RC', 'RF', 'RU', 'RL']
+      engine: zarr
+      drop_variables: ['RC', 'RF', 'RU', 'RL']
     metadata:
       manipulate_coords:
         fillna: true
@@ -427,7 +427,7 @@ sources:
       combine: nested
     metadata:
       original_output: snapshot
-      
+
   # ===========================
   # EGshelfIIseas2km_ASR_crop
   grd_EGshelfIIseas2km_ASR_crop:
@@ -507,7 +507,7 @@ sources:
         Y: slice(582, 736)
         Yp1: slice(582, 737)
       original_output: snapshot
-      
+
   avg_EGshelfIIseas2km_ASR_crop:
     description: Cropped-Fields of EGshelfIIseas2km_ASR_crop
     driver: netcdf
