@@ -531,11 +531,6 @@ def _find_entries(name, catalog_url):
         entries = [entry for entry in list(cat) if name in entry]
         intake_switch = False
 
-    # print("DEBUG: xarray_url =", xarray_url)
-    # print("DEBUG: xmitgcm_url =", xmitgcm_url)
-    # print("DEBUG: intake_switch =", intake_switch)
-    # print("DEBUG: entries =", entries)
-
     # Error if not available
     if len(entries) == 0:
         raise ValueError("[{}] is not in the catalog.".format(name))
