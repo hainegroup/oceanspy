@@ -29,6 +29,41 @@ try:
 except ImportError:  # pragma: no cover
     pass
 
+# To allow local catalog reading
+import os as _os
+from pathlib import Path as _Path
+
+
+def _get_sciserver_catalog_dir():
+    """Return the SciServer catalog directory to use.
+
+    If the environment variable OCEANSPY_CATALOG_DIR is set, its value is
+    used as the catalog directory. Otherwise, the bundled sciserver_catalogs
+    directory in the OceanSpy source tree is used.
+
+    This is intended to support local development and testing of catalog YAML
+    changes without modifying the package code.
+    """
+    env_dir = _os.environ.get("OCEANSPY_CATALOG_DIR")
+    if env_dir:
+        return _Path(env_dir).expanduser().resolve()
+
+    # Default: bundled catalogs in the source tree / installed package
+    return _Path(__file__).resolve().parent.parent / "sciserver_catalogs"
+
+
+def _get_catalog_path(filename):
+    """
+    Return a local catalog path from OCEANSPY_CATALOG_DIR.
+
+    Raises FileNotFoundError if the file does not exist.
+    """
+    cat_dir = _get_sciserver_catalog_dir()
+    path = cat_dir / filename
+    if not path.exists():
+        raise FileNotFoundError(f"Could not find local catalog: {path}")
+    return path
+
 
 def from_netcdf(path, **kwargs):
     """
@@ -434,14 +469,25 @@ def _find_entries(name, catalog_url):
     -------
     cat, entries, url, intake_switch
     """
+
     # Check parameters
     if catalog_url is None:  # pragma: no cover
-        url = (
-            "https://raw.githubusercontent.com/hainegroup/oceanspy/"
-            "main/sciserver_catalogs/datasets_list.yaml"
-        )
-        f = _urllib.request.urlopen(url)
-        SCISERVER_DATASETS = _yaml.safe_load(f)["datasets"]["sciserver"]
+        cat_dir = _get_sciserver_catalog_dir()
+
+        # datasets_list.yaml
+        datasets_list_path = cat_dir / "datasets_list.yaml"
+        if datasets_list_path.exists():
+            with open(datasets_list_path, "r") as f:
+                SCISERVER_DATASETS = _yaml.safe_load(f)["datasets"]["sciserver"]
+        else:
+            # Fallback to remote datasets list if local file is missing
+            url = (
+                "https://raw.githubusercontent.com/hainegroup/oceanspy/"
+                "main/sciserver_catalogs/datasets_list.yaml"
+            )
+            f = _urllib.request.urlopen(url)
+            SCISERVER_DATASETS = _yaml.safe_load(f)["datasets"]["sciserver"]
+
         if name not in SCISERVER_DATASETS:
             raise ValueError(
                 "[{}] is not available on SciServer."
@@ -452,35 +498,36 @@ def _find_entries(name, catalog_url):
         _check_instance({"catalog_url": catalog_url}, "str")
 
     # Read catalog
+    if catalog_url is None:
+        xarray_url = _get_catalog_path("catalog_xarray.yaml")
+        xmitgcm_url = _get_catalog_path("catalog_xmitgcm.yaml")
+    else:
+        xarray_url = catalog_url
+        xmitgcm_url = catalog_url
+
+    # Try intake/xarray catalog first
     try:
-        if catalog_url is None:
-            url = (
-                "https://raw.githubusercontent.com/hainegroup/oceanspy/"
-                "main/sciserver_catalogs/catalog_xarray.yaml"
-            )
-        else:
-            url = catalog_url
-        cat = _intake.open_catalog(url)
+        url = xarray_url
+        cat = _intake.open_catalog(str(xarray_url))
         entries = [entry for entry in list(cat) if name in entry]
         if len(entries) == 0:
             raise ValidationError("", "")
         intake_switch = True
-    except ValidationError:
-        if catalog_url is None:
-            url = (
-                "https://raw.githubusercontent.com/hainegroup/oceanspy/"
-                "main/sciserver_catalogs/catalog_xmitgcm.yaml"
-            )
-        else:
-            url = catalog_url  # provided by user
 
-        # Is it an url?
-        try:
-            f = _urllib.request.urlopen(url)
-            cat = _yaml.safe_load(f)
-        except ValueError:
-            with open(url) as f:
+    except ValidationError:
+        # Fallback to xmitgcm-style YAML
+        url = xmitgcm_url
+        if isinstance(xmitgcm_url, _Path):
+            with open(xmitgcm_url, "r") as f:
                 cat = _yaml.safe_load(f)
+        else:
+            try:
+                with _urllib.request.urlopen(xmitgcm_url) as f:
+                    cat = _yaml.safe_load(f)
+            except Exception:
+                with open(xmitgcm_url, "r") as f:
+                    cat = _yaml.safe_load(f)
+
         entries = [entry for entry in list(cat) if name in entry]
         intake_switch = False
 
