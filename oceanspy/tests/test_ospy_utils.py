@@ -61,30 +61,13 @@ def test_check_instance_raises_typeerror_with_key_name():
 # Integration tests: xarray + OceanDataset
 # -----------------------------------------------------------------------------
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 
-=======
->>>>>>> 443267e (add tests for check_instance)
-=======
-
->>>>>>> 21a91c5 (pre-commit)
 @pytest.fixture(scope="module")
 def oceandataset():
     """
     Load a real OceanDataset from test data.
     """
-<<<<<<< HEAD
-<<<<<<< HEAD
     return open_oceandataset.from_netcdf(f"{DATADIR}MITgcm_rect_nc.nc")
-=======
-    return open_oceandataset.from_netcdf(
-        f"{DATADIR}MITgcm_rect_nc.nc"
-    )
->>>>>>> 443267e (add tests for check_instance)
-=======
-    return open_oceandataset.from_netcdf(f"{DATADIR}MITgcm_rect_nc.nc")
->>>>>>> 21a91c5 (pre-commit)
 
 
 def test_check_instance_accepts_xarray_dataset(oceandataset):
