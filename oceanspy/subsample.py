@@ -658,7 +658,7 @@ def cutout(
     od = od.set_grid_coords(grid_coords, overwrite=True)
 
     # Cut axis can't be periodic
-    od = od.set_grid_periodic(list(periodic) if isinstance(periodic,dict) else [])
+    od = od.set_grid_periodic(list(periodic) if isinstance(periodic, dict) else [])
 
     return od
 

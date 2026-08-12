@@ -577,17 +577,21 @@ class OceanDataset:
         """
 
         # Check parameters
-        _check_instance({"grid_periodic": grid_periodic}, {"grid_periodic": ["list", "str"]})
-        
+        _check_instance(
+            {"grid_periodic": grid_periodic}, {"grid_periodic": ["list", "str"]}
+        )
+
         # Check axes
         if isinstance(grid_periodic, list):
             _check_oceanspy_axes(grid_periodic)
-        else:
-            grid_periodic = [grid_periodic]
 
         # xgcm.Grid expects a dictionary with periodic axes as keys and "periodic"
         #  as values
-        _grid_periodic = {k:"periodic" for k in grid_periodic} if grid_periodic else "fill"
+        _grid_periodic = (
+            {k: "periodic" for k in grid_periodic}
+            if isinstance(grid_periodic, list)
+            else "fill"
+        )
 
         # Set grid_periodic
         # Use overwrite True by default because
@@ -669,7 +673,11 @@ class OceanDataset:
 
         dataset = self.dataset.copy()
         coords = self.grid_coords
-        periodic = {k:"periodic" for k in self.grid_periodic} if self.grid_periodic else "fill"
+        periodic = (
+            {k: "periodic" for k in self.grid_periodic}
+            if self.grid_periodic
+            else "fill"
+        )
         face_connections = self.face_connections
         grid = _create_grid(dataset, coords, periodic, face_connections)
 
@@ -695,7 +703,11 @@ class OceanDataset:
                         coords[axis][aliases[dim]] = coords[axis].pop(dim)
 
         dataset = self._ds.copy()
-        periodic = {k:"periodic" for k in self.grid_periodic} if self.grid_periodic else "fill"
+        periodic = (
+            {k: "periodic" for k in self.grid_periodic}
+            if self.grid_periodic
+            else "fill"
+        )
         face_connections = self.face_connections
         grid = _create_grid(dataset, coords, periodic, face_connections)
 
