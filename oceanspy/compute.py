@@ -243,7 +243,7 @@ def gradient(od, varNameList=None, axesList=None, aliased=True):
 
             # Numerator
             dnum = od._grid.diff(
-                od._ds[varName], axis, boundary="fill", fill_value=_np.nan
+                od._ds[varName], axis, padding="fill", fill_value=_np.nan
             )
 
             # Horizontal gradient
@@ -282,9 +282,9 @@ def gradient(od, varNameList=None, axesList=None, aliased=True):
                 elif set(["Xp1", "Yp1"]).issubset(dnum.dims):
                     grid = od._grid
                     HFac = grid.interp(
-                        grid.interp(od._ds["HFacC"], "X", boundary="extend"),
+                        grid.interp(od._ds["HFacC"], "X", padding="extend"),
                         "Y",
-                        boundary="extend",
+                        padding="extend",
                     )
                 else:
                     HFac = 1
@@ -295,7 +295,7 @@ def gradient(od, varNameList=None, axesList=None, aliased=True):
                 for dim in [coords[coord] for coord in coords]:
                     if dim in od._ds[varName].dims:
                         dden = grid.diff(
-                            od._ds[dim], axis, boundary="fill", fill_value=_np.nan
+                            od._ds[dim], axis, padding="fill", fill_value=_np.nan
                         )
                         if not isinstance(HFac, int):
                             for coord in coords:
@@ -305,7 +305,7 @@ def gradient(od, varNameList=None, axesList=None, aliased=True):
                                             HFac,
                                             axis,
                                             to=coord,
-                                            boundary="fill",
+                                            padding="fill",
                                             fill_value=_np.nan,
                                         )
                                 continue
@@ -326,7 +326,7 @@ def gradient(od, varNameList=None, axesList=None, aliased=True):
                     dden = od._grid.diff(
                         od._ds[axis + "_midp" + add_dist],
                         axis,
-                        boundary="fill",
+                        padding="fill",
                         fill_value=_np.nan,
                     )
                 else:
@@ -334,7 +334,7 @@ def gradient(od, varNameList=None, axesList=None, aliased=True):
                     dden = od._grid.diff(
                         od._ds[axis + add_dist],
                         axis,
-                        boundary="fill",
+                        padding="fill",
                         fill_value=_np.nan,
                     )
                 dden = dden / convert_units
@@ -436,7 +436,7 @@ def divergence(od, iName=None, jName=None, kName=None, aliased=True):
         diff = grid.diff(
             od._ds[NameIN] * od._ds["HFacW"] * od._ds["dyG"],
             suf[-1],
-            boundary="fill",
+            padding="fill",
             fill_value=_np.nan,
         )
         div[pref + NameOUT + suf] = diff / (od._ds["HFacC"] * od._ds["rA"])
@@ -463,7 +463,7 @@ def divergence(od, iName=None, jName=None, kName=None, aliased=True):
         diff = grid.diff(
             od._ds[NameIN] * od._ds["HFacS"] * od._ds["dxG"],
             suf[-1],
-            boundary="fill",
+            padding="fill",
             fill_value=_np.nan,
         )
         div[pref + NameOUT + suf] = diff / (od._ds["HFacC"] * od._ds["rA"])
@@ -575,9 +575,9 @@ def curl(od, iName=None, jName=None, kName=None, aliased=True):
         Name = "d" + jNameOUT + "_dX-d" + iNameOUT + "_dY"
         grid = od._grid
         crl[Name] = grid.diff(
-            od._ds[jNameIN] * od._ds["dyC"], "X", boundary="fill", fill_value=_np.nan
+            od._ds[jNameIN] * od._ds["dyC"], "X", padding="fill", fill_value=_np.nan
         ) - grid.diff(
-            od._ds[iNameIN] * od._ds["dxC"], "Y", boundary="fill", fill_value=_np.nan
+            od._ds[iNameIN] * od._ds["dxC"], "Y", padding="fill", fill_value=_np.nan
         )
         crl[Name] = crl[Name] / od._ds["rAz"]
 
@@ -915,9 +915,9 @@ def _integral_and_mean(
             for t in ["time", "time_midp"]:
                 if t in Int.dims:
                     grid = od._grid
-                    diff = grid.diff(od._ds[t], "time", boundary="extend")
+                    diff = grid.diff(od._ds[t], "time", padding="extend")
                     interp = grid.interp(
-                        diff / _np.timedelta64(1, "s"), "time", boundary="extend"
+                        diff / _np.timedelta64(1, "s"), "time", padding="extend"
                     )
                     delta = delta * interp
                     dims2sum = dims2sum + list(od._ds[t].dims)
@@ -931,8 +931,8 @@ def _integral_and_mean(
             for m in ["mooring", "mooring_midp"]:
                 if m in Int.dims:
                     grid = od._grid
-                    diff = grid.diff(od._ds[m + "_dist"], "mooring", boundary="extend")
-                    interp = grid.interp(diff / 1.0e-3, "mooring", boundary="extend")
+                    diff = grid.diff(od._ds[m + "_dist"], "mooring", padding="extend")
+                    interp = grid.interp(diff / 1.0e-3, "mooring", padding="extend")
                     delta = delta * interp
                     dims2sum = dims2sum + list(od._ds[m + "_dist"].dims)
                     suf = suf + ["dmoor"]
@@ -945,8 +945,8 @@ def _integral_and_mean(
             for s in ["station", "station_midp"]:
                 if s in Int.dims:
                     grid = od._grid
-                    diff = grid.diff(od._ds[s + "_dist"], "station", boundary="extend")
-                    interp = grid.interp(diff / 1.0e-3, "station", boundary="extend")
+                    diff = grid.diff(od._ds[s + "_dist"], "station", padding="extend")
+                    interp = grid.interp(diff / 1.0e-3, "station", padding="extend")
                     delta = delta * interp
                     dims2sum = dims2sum + list(od._ds[s + "_dist"].dims)
                     suf = suf + ["dstat"]
@@ -1022,9 +1022,9 @@ def _integral_and_mean(
                 HFac = od._ds["HFacS"]
             elif set(["Xp1", "Yp1"]).issubset(Int.dims):
                 HFac = od._grid.interp(
-                    od._grid.interp(od._ds["HFacC"], "X", boundary="extend"),
+                    od._grid.interp(od._ds["HFacC"], "X", padding="extend"),
                     "Y",
-                    boundary="extend",
+                    padding="extend",
                 )
             else:
                 HFac = None
@@ -1037,7 +1037,7 @@ def _integral_and_mean(
             for z in zList:
                 if set(od._ds[z].dims).issubset(Int.dims):
                     if z == "drC" and HFac is not None:
-                        HFac = od.grid.interp(HFac, "Z", to="outer", boundary="extend")
+                        HFac = od.grid.interp(HFac, "Z", to="outer", padding="extend")
                     if HFac is None:
                         HFac = 1
                     delta = delta * od._ds[z] * HFac
@@ -1052,11 +1052,11 @@ def _integral_and_mean(
                     z = od._grid.axes["Z"].coords[coord]
                     if set([z]).issubset(Int.dims):
                         dr = od.grid.interp(
-                            od.dataset["drF"], "Z", to=coord, boundary="extend"
+                            od.dataset["drF"], "Z", to=coord, padding="extend"
                         )
                         if HFac is not None:
                             HFac = od._grid.interp(
-                                HFac, "Z", to=coord, boundary="extend"
+                                HFac, "Z", to=coord, padding="extend"
                             )
                         else:
                             HFac = 1
@@ -1270,9 +1270,9 @@ def velocity_magnitude(od):
     print("Computing velocity magnitude")
 
     # Interpolate horizontal velocities
-    U = grid.interp(U, "X", boundary="fill", fill_value=_np.nan)
-    V = grid.interp(V, "Y", boundary="fill", fill_value=_np.nan)
-    W = grid.interp(W, "Z", to="center", boundary="fill", fill_value=_np.nan)
+    U = grid.interp(U, "X", padding="fill", fill_value=_np.nan)
+    V = grid.interp(V, "Y", padding="fill", fill_value=_np.nan)
+    W = grid.interp(W, "Z", to="center", padding="fill", fill_value=_np.nan)
 
     # Compute horizontal velocity magnitude
     vel = _np.sqrt(_np.power(U, 2) + _np.power(V, 2) + _np.power(W, 2))
@@ -1328,8 +1328,8 @@ def horizontal_velocity_magnitude(od):
     print("Computing magnitude of horizontal velocity")
 
     # Interpolate horizontal velocities
-    U = grid.interp(U, "X", boundary="fill", fill_value=_np.nan)
-    V = grid.interp(V, "Y", boundary="fill", fill_value=_np.nan)
+    U = grid.interp(U, "X", padding="fill", fill_value=_np.nan)
+    V = grid.interp(V, "Y", padding="fill", fill_value=_np.nan)
 
     # Compute horizontal velocity magnitude
     hor_vel = _np.sqrt(_np.power(U, 2) + _np.power(V, 2))
@@ -1498,8 +1498,8 @@ def kinetic_energy(od):
     )
 
     # Interpolate horizontal velocities
-    U = grid.interp(U, "X", boundary="fill", fill_value=_np.nan)
-    V = grid.interp(V, "Y", boundary="fill", fill_value=_np.nan)
+    U = grid.interp(U, "X", padding="fill", fill_value=_np.nan)
+    V = grid.interp(V, "Y", padding="fill", fill_value=_np.nan)
 
     # Sum squared values
     sum2 = _np.power(U, 2) + _np.power(V, 2)
@@ -1514,7 +1514,7 @@ def kinetic_energy(od):
         W = od._ds["W"]
 
         # Interpolate vertical velocity
-        W = grid.interp(W, "Z", to="center", boundary="fill", fill_value=_np.nan)
+        W = grid.interp(W, "Z", to="center", padding="fill", fill_value=_np.nan)
 
         # Sum squared values
         sum2 = sum2 + eps_nh * _np.power(W, 2)
@@ -1599,8 +1599,8 @@ def eddy_kinetic_energy(od):
     )
 
     # Interpolate horizontal velocities
-    U = grid.interp(U, "X", boundary="fill", fill_value=_np.nan)
-    V = grid.interp(V, "Y", boundary="fill", fill_value=_np.nan)
+    U = grid.interp(U, "X", padding="fill", fill_value=_np.nan)
+    V = grid.interp(V, "Y", padding="fill", fill_value=_np.nan)
 
     # Sum squared values
     sum2 = _np.power(U, 2) + _np.power(V, 2)
@@ -1619,7 +1619,7 @@ def eddy_kinetic_energy(od):
         W = W - Wmean["w_mean_W"]
 
         # Interpolate vertical velocity
-        W = grid.interp(W, "Z", to="center", boundary="fill", fill_value=_np.nan)
+        W = grid.interp(W, "Z", to="center", padding="fill", fill_value=_np.nan)
 
         # Sum squared values
         sum2 = sum2 + eps_nh * _np.power(W, 2)
@@ -1732,8 +1732,8 @@ def shear_strain(od):
     # Create DataArray
     # Same of vertical relative vorticity with + instead of -
     s_strain = (
-        grid.diff(V * dyC, "X", boundary="fill", fill_value=_np.nan)
-        + grid.diff(U * dxC, "Y", boundary="fill", fill_value=_np.nan)
+        grid.diff(V * dyC, "X", padding="fill", fill_value=_np.nan)
+        + grid.diff(U * dxC, "Y", padding="fill", fill_value=_np.nan)
     ) / rAz
     s_strain.attrs["units"] = "s^-1"
     s_strain.attrs["long_name"] = "shear component of strain"
@@ -1835,15 +1835,15 @@ def Okubo_Weiss_parameter(od):
 
     # Interpolate to C grid points
     momVort3 = grid.interp(
-        grid.interp(momVort3, "X", boundary="fill", fill_value=_np.nan),
+        grid.interp(momVort3, "X", padding="fill", fill_value=_np.nan),
         "Y",
-        boundary="fill",
+        padding="fill",
         fill_value=_np.nan,
     )
     s_strain = grid.interp(
-        grid.interp(s_strain, "X", boundary="fill", fill_value=_np.nan),
+        grid.interp(s_strain, "X", padding="fill", fill_value=_np.nan),
         "Y",
-        boundary="fill",
+        padding="fill",
         fill_value=_np.nan,
     )
 
@@ -1946,32 +1946,32 @@ def Ertel_potential_vorticity(od, full=True):
 
     # Interpolate fields
     fpluszeta = grid.interp(
-        grid.interp(momVort3 + fCoriG, "X", boundary="fill", fill_value=_np.nan),
+        grid.interp(momVort3 + fCoriG, "X", padding="fill", fill_value=_np.nan),
         "Y",
-        boundary="fill",
+        padding="fill",
         fill_value=_np.nan,
     )
-    N2 = grid.interp(N2, "Z", to="center", boundary="fill", fill_value=_np.nan)
+    N2 = grid.interp(N2, "Z", to="center", padding="fill", fill_value=_np.nan)
     if full:
         momVort1 = grid.interp(
             grid.interp(momVort1, "Y"),
             "Z",
             to="center",
-            boundary="fill",
+            padding="fill",
             fill_value=_np.nan,
         )
         momVort2 = grid.interp(
             grid.interp(momVort2, "X"),
             "Z",
             to="center",
-            boundary="fill",
+            padding="fill",
             fill_value=_np.nan,
         )
         dSigma0_dX = grid.interp(
-            Sigma0_grads["dSigma0_dX"], "X", boundary="fill", fill_value=_np.nan
+            Sigma0_grads["dSigma0_dX"], "X", padding="fill", fill_value=_np.nan
         )
         dSigma0_dY = grid.interp(
-            Sigma0_grads["dSigma0_dY"], "Y", boundary="fill", fill_value=_np.nan
+            Sigma0_grads["dSigma0_dY"], "Y", padding="fill", fill_value=_np.nan
         )
         _, e = _utils.Coriolis_parameter(YC, omega)
 
@@ -2319,8 +2319,8 @@ def geographical_aligned_velocities(od):
     grid = od._grid
 
     # Move to C grid
-    U = grid.interp(U, "X", boundary="fill", fill_value=_np.nan)
-    V = grid.interp(V, "Y", boundary="fill", fill_value=_np.nan)
+    U = grid.interp(U, "X", padding="fill", fill_value=_np.nan)
+    V = grid.interp(V, "Y", padding="fill", fill_value=_np.nan)
 
     # Compute velocities
     U_zonal = U * AngleCS - V * AngleSN
@@ -2426,7 +2426,7 @@ def survey_aligned_velocities(od):
         * _np.cos(lat[1:]).values
         * _np.cos(grid.diff(lon, "station")),
     )
-    az = grid.interp(az, "station", boundary="extend")
+    az = grid.interp(az, "station", padding="extend")
     az = _xr.where(_np.rad2deg(az) < 0, _np.pi * 2 + az, az)
 
     # Compute rotation angle
@@ -2598,8 +2598,8 @@ def heat_budget(od):
 
     # Horizontal convergence
     ds["adv_hConvH"] = -(
-        grid.diff(ADVx_TH.where(HFacW != 0), "X", boundary="fill", fill_value=_np.nan)
-        + grid.diff(ADVy_TH.where(HFacS != 0), "Y", boundary="fill", fill_value=_np.nan)
+        grid.diff(ADVx_TH.where(HFacW != 0), "X", padding="fill", fill_value=_np.nan)
+        + grid.diff(ADVy_TH.where(HFacS != 0), "Y", padding="fill", fill_value=_np.nan)
     )
     ds["adv_hConvH"] = ds["adv_hConvH"] / CellVol
     ds["adv_hConvH"].attrs["units"] = units
@@ -2615,7 +2615,7 @@ def heat_budget(od):
             ["advective", "diffusive", "kpp"],
         )
     ):
-        ds[name_out] = grid.diff(var_in, "Z", boundary="fill", fill_value=_np.nan)
+        ds[name_out] = grid.diff(var_in, "Z", padding="fill", fill_value=_np.nan)
         ds[name_out] = ds[name_out].where(HFacC != 0) / CellVol
         ds[name_out].attrs["units"] = units
         ds[name_out].attrs["long_name"] = "Heat vertical {} convergence" "".format(
@@ -2775,10 +2775,10 @@ def salt_budget(od):
     ds["adv_hConvS"] = (
         -(
             grid.diff(
-                ADVx_SLT.where(HFacW != 0), "X", boundary="fill", fill_value=_np.nan
+                ADVx_SLT.where(HFacW != 0), "X", padding="fill", fill_value=_np.nan
             )
             + grid.diff(
-                ADVy_SLT.where(HFacS != 0), "Y", boundary="fill", fill_value=_np.nan
+                ADVy_SLT.where(HFacS != 0), "Y", padding="fill", fill_value=_np.nan
             )
         )
         / CellVol
@@ -2796,7 +2796,7 @@ def salt_budget(od):
             ["advective", "diffusive", "kpp"],
         )
     ):
-        ds[name_out] = grid.diff(var_in, "Z", boundary="fill", fill_value=_np.nan)
+        ds[name_out] = grid.diff(var_in, "Z", padding="fill", fill_value=_np.nan)
         ds[name_out] = ds[name_out].where(HFacC != 0) / CellVol
         ds[name_out].attrs["units"] = units
         ds[name_out].attrs["long_name"] = "Salt vertical {} convergence" "".format(
@@ -2867,7 +2867,7 @@ def missing_horizontal_spacing(od):
         else:
             suf = "G"
 
-        deltas[var] = grid.interp(ds[pref + suf], axis, boundary="extend")
+        deltas[var] = grid.interp(ds[pref + suf], axis, padding="extend")
 
         # Add attributes
         if "U" in var:

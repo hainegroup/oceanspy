@@ -268,9 +268,9 @@ def test_grid_coords_aliases(od, grid_coords):
 
 
 @pytest.mark.parametrize("od", [od, per_od])
-@pytest.mark.parametrize("grid_periodic", [1, ["Y"], []])
+@pytest.mark.parametrize("grid_periodic", [1, {"Y": "periodic"}, "fill"])
 def test_grid_periodic(od, grid_periodic):
-    if not isinstance(grid_periodic, list):
+    if not isinstance(grid_periodic, list) and not isinstance(grid_periodic, str):
         # Raise error if wrong format
         with pytest.raises(TypeError):
             od.set_grid_periodic(grid_periodic=grid_periodic)

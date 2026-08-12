@@ -490,9 +490,9 @@ def cutout(
 
         # Cut axis can't be periodic
         if (len(ds["Yp1"]) < lenY or "Y" in dropAxes) and "Y" in periodic:
-            periodic.remove("Y")
+            periodic.pop("Y", None)
         if (len(ds["Xp1"]) < lenX or "X" in dropAxes) and "X" in periodic:
-            periodic.remove("X")
+            periodic.pop("X", None)
 
     # ---------------------------
     # Horizontal MASK
@@ -658,7 +658,7 @@ def cutout(
     od = od.set_grid_coords(grid_coords, overwrite=True)
 
     # Cut axis can't be periodic
-    od = od.set_grid_periodic(periodic)
+    od = od.set_grid_periodic(list(periodic) if isinstance(periodic,dict) else [])
 
     return od
 
@@ -819,8 +819,8 @@ def mooring_array(
 
     mooring = new_ds.mooring
 
-    near_Y = new_ds["YC"].values
-    near_X = new_ds["XC"].values
+    near_Y = _np.squeeze(new_ds["YC"].values)
+    near_X = _np.squeeze(new_ds["XC"].values)
 
     # Add distance (0 always first element)
     if R is not None:
@@ -1077,7 +1077,7 @@ def survey_stations(
                     ds[var],
                     axis=dim[0],
                     to="center",
-                    boundary="fill",
+                    padding="fill",
                     fill_value=_np.nan,
                 )
                 ds[var].attrs = attrs
