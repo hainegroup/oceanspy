@@ -2,7 +2,7 @@ name: ospy_docs
 channels:
 - conda-forge
 dependencies:
-- python=3.10
+- python=3.12
 - pandoc
 - sphinx
 - sphinx_rtd_theme
