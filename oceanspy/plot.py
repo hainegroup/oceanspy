@@ -239,7 +239,7 @@ def TS_diagram(
                     )
                     attrs = color.attrs
                     color = grid.interp(
-                        color, axis, to="center", boundary="fill", fill_value=_np.nan
+                        color, axis, to="center", padding="fill", fill_value=_np.nan
                     )
                     color.attrs = attrs
 
