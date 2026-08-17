@@ -654,7 +654,7 @@ for j in range(len(Xc[0])):
             "Xcoords": lons76N,
             "varList": ["T", "UVELMASS", "VVELMASS"],
         },
-        {"Ycoords": lats76N, "Xcoords": lons76N, "xoak_index": "invalid"},
+        {"Ycoords": lats76N, "Xcoords": lons76N},
         {"Ycoords": lats_6E, "Xcoords": lons6E},
         {"Ycoords": lats_6E, "Xcoords": lons90W},
         {"Ycoords": lats_6E, "Xcoords": lons170W},
@@ -665,11 +665,7 @@ for j in range(len(Xc[0])):
 )
 def test_stations(od, args):
     this_od = _copy.deepcopy(od)
-    xoak_index = args.pop("xoak_index", None)
     _dim = args.pop("_dim", None)
-    if xoak_index is not None:
-        with pytest.raises(ValueError):
-            this_od.subsample.stations(**args, xoak_index=xoak_index)
     if _dim is not None and _dim == "mooring":
         DS, diffX, diffY = this_od.subsample.stations(**args, dim_name=_dim)
         assert (abs(diffX) + abs(diffY) == 1).all()

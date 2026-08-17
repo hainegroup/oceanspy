@@ -66,10 +66,6 @@ try:
     import xesmf as _xe
 except ImportError:  # pragma: no cover
     pass
-try:
-    import xoak as _xoak
-except ImportError:  # pragma: no cover
-    pass
 
 
 def cutout(
@@ -669,7 +665,6 @@ def mooring_array(
     Xmoor=None,
     latitude=None,
     longitude=None,
-    xoak_index="scipy_kdtree",
     **kwargs,
 ):
     """
@@ -774,25 +769,18 @@ def mooring_array(
         # create list of coordinates.
         coords = [var for var in ds if "time" not in ds[var].dims]
 
-        ds_grid = ds[["XC", "YC"]]  # by convention center point
-
+        ds_grid = ds.reset_coords()[["XC", "YC"]]  # by convention center point
+        ds_grid = ds_grid.set_coords(["XC", "YC"])
         for key, value in ds_grid.sizes.items():
             ds_grid["i" + f"{key}"] = DataArray(range(value), dims=key)
 
-        if xoak_index not in _xoak.IndexRegistry():
-            raise ValueError(
-                "`xoak_index` [{}] is not supported."
-                "\nAvailable options: {}"
-                "".format(xoak_index, _xoak.IndexRegistry())
-            )
-
-        ds_grid.xoak.set_index(["XC", "YC"], xoak_index)
+        ds_grid = ds_grid.set_xindex(["XC", "YC"], index_cls=_xr.indexes.NDPointIndex)
 
         cdata = {"XC": ("mooring", Xmoor), "YC": ("mooring", Ymoor)}
         ds_data = _xr.Dataset(cdata)  # mooring data
 
         # find nearest points to given data.
-        nds = ds_grid.xoak.sel(XC=ds_data["XC"], YC=ds_data["YC"])
+        nds = ds_grid.sel(XC=ds_data["XC"], YC=ds_data["YC"], method="nearest")
 
         ix, iy = (nds["i" + f"{i}"].data for i in ("X", "Y"))
 
@@ -1182,7 +1170,6 @@ def stations(
     Z=None,
     longitude=None,
     latitude=None,
-    xoak_index="scipy_kdtree",
     method="nearest",
     dim_name="station",
 ):
@@ -1210,8 +1197,6 @@ def stations(
         Latitude coordinates of locations at center point.
     Xcoords: 1D array_like, NoneType
         lon coordinates of locations at center point.
-    xoak_index: str
-        xoak index to be used. `scipy_kdtree` by default.
     method: str, `nearest` (default).
         see .sel via xarray.dataSet.sel method
     dim_name: str
@@ -1286,7 +1271,7 @@ def stations(
         for item in List:
             if len(ds[item]) > 0:
                 args[item] = Coords[i]
-        ds = ds.sel(**args, method="nearest")
+        ds = ds.sel(**args, method=method)
 
     # create list of coordinates.
     co_list = [var for var in ds.coords if var not in ["face"]]
@@ -1295,25 +1280,20 @@ def stations(
         DS = ds
 
     if Xcoords is not None and Ycoords is not None:
-        ds_grid = ds[["XC", "YC"]]
+        ds_grid = ds.reset_coords()[["XC", "YC"]]
+        ds_grid = ds_grid.set_coords(["XC", "YC"])
 
         if dim_name == "mooring":  # needed for transport
             for key, value in ds_grid.sizes.items():
                 ds_grid["i" + f"{key}"] = DataArray(range(value), dims=key)
 
-        if xoak_index not in _xoak.IndexRegistry():
-            raise ValueError(
-                "`xoak_index` [{}] is not supported."
-                "\nAvailable options: {}"
-                "".format(xoak_index, _xoak.IndexRegistry())
-            )
-        ds_grid.xoak.set_index(["XC", "YC"], xoak_index)
+        ds_grid = ds_grid.set_xindex(["XC", "YC"], index_cls=_xr.indexes.NDPointIndex)
 
         cdata = {"XC": (dim_name, Xcoords), "YC": (dim_name, Ycoords)}
         ds_data = _xr.Dataset(cdata)
 
         # find nearest points to given data.
-        nds = ds_grid.xoak.sel(XC=ds_data["XC"], YC=ds_data["YC"])
+        nds = ds_grid.sel(XC=ds_data["XC"], YC=ds_data["YC"], method=method)
 
         if "face" not in ds.dims:  # pragma: no cover
             iX, iY = (nds[f"{i}"].data for i in ("X", "Y"))
