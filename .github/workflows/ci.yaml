@@ -79,7 +79,6 @@ jobs:
     # Wait for priming to finish
     needs: prime-data
     strategy:
-      fail-fast: false
       matrix:
         python-version: ['3.12', '3.13']
     steps:
