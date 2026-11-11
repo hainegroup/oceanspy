@@ -79,6 +79,7 @@ jobs:
     # Wait for priming to finish
     needs: prime-data
     strategy:
+      fail-fast: false
       matrix:
         python-version: ['3.12', '3.13']
     steps:
@@ -105,8 +106,17 @@ jobs:
         python -m pip install -e .
         conda list
 
+    - name: Import check
+      run: python -c "import faulthandler, signal; faulthandler.register(signal.SIGTERM, all_threads=True, chain=True); import xesmf, oceanspy; print('import ok')"
+
     - name: Run Tests
-      run: pytest -v --cov=./ --cov-report=xml
+      run: |
+        python - <<'PY'
+        import faulthandler, signal, sys
+        faulthandler.register(signal.SIGTERM, all_threads=True, chain=True)
+        import pytest
+        sys.exit(pytest.main(["-v", "--cov=./", "--cov-report=xml"]))
+        PY
 
     - name: Upload code coverage to Codecov
       uses: codecov/codecov-action@v7.1.1
