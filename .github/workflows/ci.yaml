@@ -108,19 +108,38 @@ jobs:
     - name: Import check
       run: python -c "import faulthandler, signal; faulthandler.register(signal.SIGTERM, all_threads=True, chain=True); import xesmf, oceanspy; print('import ok')"
 
+    # Temporary diagnostics for intermittent exit 143 during collection:
+    # strace records signals, kills, exits, and handler changes. Remove once diagnosed.
+    - name: Install strace
+      run: |
+        sudo apt-get update -qq
+        sudo apt-get install -y -qq strace > /dev/null
+        strace -V | head -1
+
     - name: Run Tests
       run: |
-        python - <<'PY'
+        strace -f --seccomp-bpf -tt -o strace.log \
+          -e trace=execve,kill,tkill,tgkill,exit_group,rt_sigaction \
+          python - <<'PY'
         import faulthandler, signal, sys
         trace = open("sigterm_trace.log", "w")
         faulthandler.register(signal.SIGTERM, file=trace, all_threads=True, chain=True)
         import pytest
         sys.exit(pytest.main(["-v", "--cov=./", "--cov-report=xml"]))
         PY
+        rc=$?
+        echo "python exit status: $rc"
+        exit $rc
 
-    - name: Show SIGTERM traceback
+    - name: Show diagnostics
       if: failure()
-      run: cat sigterm_trace.log || echo "no trace file"
+      run: |
+        echo "== faulthandler trace =="
+        cat sigterm_trace.log || echo "no trace file"
+        echo "== strace: signals, kills, exits, execs =="
+        grep -nE "SIGTERM|kill\(|exit_group\(|execve|\+\+\+ killed" strace.log | tail -150 || echo "no matching strace lines"
+        echo "== strace: last 40 lines =="
+        tail -40 strace.log || echo "no strace log"
 
     - name: Upload code coverage to Codecov
       uses: codecov/codecov-action@v7.1.1
