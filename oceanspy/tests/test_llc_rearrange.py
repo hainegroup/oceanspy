@@ -10,9 +10,6 @@ from xarray.core.dataarray import DataArray, Dataset
 from oceanspy import open_oceandataset
 from oceanspy.llc_rearrange import (
     Dims,
-)
-from oceanspy.llc_rearrange import LLCtransformation as LLC
-from oceanspy.llc_rearrange import (
     _edge_arc_data,
     _edge_facet_data,
     arc_limits_mask,
@@ -46,6 +43,7 @@ from oceanspy.llc_rearrange import (
     splitter,
     station_singleface,
 )
+from oceanspy.llc_rearrange import LLCtransformation as LLC
 from oceanspy.utils import _reset_range, connector, get_maskH
 
 Datadir = "./oceanspy/tests/Data/"
