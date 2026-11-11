@@ -113,16 +113,21 @@ jobs:
       run: |
         python - <<'PY'
         import faulthandler, signal, sys
-        faulthandler.register(signal.SIGTERM, all_threads=True, chain=True)
+        trace = open("sigterm_trace.log", "w")
+        faulthandler.register(signal.SIGTERM, file=trace, all_threads=True, chain=True)
         import pytest
         sys.exit(pytest.main(["-v", "--cov=./", "--cov-report=xml"]))
         PY
+
+    - name: Show SIGTERM traceback
+      if: failure()
+      run: cat sigterm_trace.log || echo "no trace file"
 
     - name: Upload code coverage to Codecov
       uses: codecov/codecov-action@v7.1.1
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
-        file: ./coverage.xml
+        files: ./coverage.xml
         flags: unittests
         env_vars: OS,PYTHON
         name: codecov-umbrella
