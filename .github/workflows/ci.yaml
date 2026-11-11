@@ -105,49 +105,8 @@ jobs:
         python -m pip install -e .
         conda list
 
-    - name: Import check
-      run: python -c "import faulthandler, signal; faulthandler.register(signal.SIGTERM, all_threads=True, chain=True); import xesmf, oceanspy; print('import ok')"
-
-    # Temporary diagnostics for intermittent exit 143 during collection
-    # (a self-initiated exit_group(136463759), not a signal).
-    # strace -k records the native call stack of each traced call; openat
-    # shows which files were being loaded. Remove once diagnosed.
-    - name: Install strace
-      run: |
-        sudo apt-get update -qq
-        sudo apt-get install -y -qq strace > /dev/null
-        strace -V | head -1
-        strace -k -e trace=exit_group -o /dev/null true \
-          || { echo "this strace build does not support -k (stack traces)"; exit 1; }
-
     - name: Run Tests
-      run: |
-        strace -f --seccomp-bpf -tt -k -s 256 -o strace.log \
-          -e trace=execve,kill,tkill,tgkill,exit_group,openat \
-          python - <<'PY'
-        import faulthandler, signal, sys
-        trace = open("sigterm_trace.log", "w")
-        faulthandler.register(signal.SIGTERM, file=trace, all_threads=True, chain=True)
-        import pytest
-        sys.exit(pytest.main(["-v", "--cov=./", "--cov-report=xml"]))
-        PY
-        rc=$?
-        echo "python exit status: $rc"
-        exit $rc
-
-    - name: Show diagnostics
-      if: failure()
-      run: |
-        echo "== faulthandler trace =="
-        cat sigterm_trace.log || echo "no trace file"
-        echo "== strace: signals, kills, execs =="
-        grep -nE "\-\-\- SIG|kill\(|execve\(|\+\+\+ killed" strace.log | tail -50 || echo "no matching strace lines"
-        echo "== strace: exit_group call and its native stack =="
-        grep -n -A60 "exit_group(" strace.log | head -150 || echo "no exit_group in strace log"
-        echo "== strace: last 40 files opened (.py, .so, .nc, .yaml) =="
-        grep -E 'openat\(.*\.(py|pyc|so[.0-9]*|nc|yaml)"' strace.log | grep -v ENOENT | tail -40 || echo "no matching openat lines"
-        echo "== strace: size =="
-        ls -la strace.log || echo "no strace log"
+      run: pytest -v --cov=./ --cov-report=xml
 
     - name: Upload code coverage to Codecov
       uses: codecov/codecov-action@v7.1.1

@@ -14,7 +14,7 @@ dependencies:
 - esmpy
 - geopy
 - xesmf>0.6.3
-- esmf
+- esmf=*=nompi*  # MPI builds abort intermittently at import on Linux (MPICH/UCX init)
 - xgcm=0.6.1
 - Ipython
 - tqdm
