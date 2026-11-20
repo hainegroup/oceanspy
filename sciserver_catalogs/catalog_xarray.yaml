@@ -7,7 +7,7 @@ sources:
     driver: netcdf
     model: MITGCM
     args:
-      urlpath: /home/idies/workspace/ocean_circulation_ceph/get_started/grid.nc
+      urlpath: /home/idies/workspace/ocean_circulation/get_started/grid.nc
       xarray_kwargs:
         engine: netcdf4
         drop_variables: ['RC', 'RF', 'RU', 'RL']
@@ -67,7 +67,7 @@ sources:
     driver: netcdf
     model: MITGCM
     args:
-      urlpath: /home/idies/workspace/ocean_circulation_ceph/get_started/full_2007-09-01.nc
+      urlpath: /home/idies/workspace/ocean_circulation/get_started/full_2007-09-01.nc
       xarray_kwargs:
         engine: netcdf4
     metadata:
@@ -87,7 +87,7 @@ sources:
     driver: netcdf
     model: MITGCM
     args:
-      urlpath: /home/idies/workspace/ocean_circulation_ceph/get_started/crop_2007-09-01.nc
+      urlpath: /home/idies/workspace/ocean_circulation/get_started/crop_2007-09-01.nc
       xarray_kwargs:
         engine: netcdf4
     metadata:
@@ -104,7 +104,7 @@ sources:
     model: MITGCM
     driver: zarr
     args:
-      urlpath: /home/idies/workspace/ocean_circulation_ceph/IGPwinter_zarr
+      urlpath: /home/idies/workspace/ocean_circulation/IGPwinter_zarr
     xarray_kwargs:
       engine: zarr
       drop_variables: ['RC', 'RF', 'RU', 'RL']
@@ -152,7 +152,7 @@ sources:
     model: MITGCM
     driver: zarr
     args:
-      urlpath: /home/idies/workspace/ocean_circulation_ceph/IGPwinter_zarr
+      urlpath: /home/idies/workspace/ocean_circulation/IGPwinter_zarr
     xarray_kwargs:
       engine: zarr
       concat_dim: T
@@ -168,7 +168,7 @@ sources:
     driver: zarr
     model: MITGCM
     args:
-      urlpath: /home/idies/workspace/ocean_circulation_ceph/IGPyearlong_zarr
+      urlpath: /home/idies/workspace/ocean_circulation/IGPyearlong_zarr
     xarray_kwargs:
       engine: zarr
       drop_variables: ['RC', 'RF', 'RU', 'RL']
@@ -216,7 +216,7 @@ sources:
     model: MITGCM
     driver: zarr
     args:
-      urlpath: /home/idies/workspace/ocean_circulation_ceph/IGPyearlong_zarr
+      urlpath: /home/idies/workspace/ocean_circulation/IGPyearlong_zarr
     xarray_kwargs:
       engine: zarr
       concat_dim: T
@@ -232,7 +232,7 @@ sources:
     driver: zarr
     model: MITGCM
     args:
-      urlpath: /home/idies/workspace/ocean_circulation_ceph/exp_ERAI_6H_zarr
+      urlpath: /home/idies/workspace/ocean_circulation/exp_ERAI_6H_zarr
     xarray_kwargs:
       engine: zarr
       drop_variables: ['RC', 'RF', 'RU', 'RL']
@@ -283,7 +283,7 @@ sources:
     driver: zarr
     model: MITGCM
     args:
-      urlpath: /home/idies/workspace/ocean_circulation_ceph/exp_ERAI_6H_zarr
+      urlpath: /home/idies/workspace/ocean_circulation/exp_ERAI_6H_zarr
     xarray_kwargs:
       engine: zarr
       concat_dim: T
@@ -299,7 +299,7 @@ sources:
     driver: zarr
     model: MITGCM
     args:
-      urlpath: /home/idies/workspace/ocean_circulation_ceph/exp_ERAI_1D_zarr
+      urlpath: /home/idies/workspace/ocean_circulation/exp_ERAI_1D_zarr
     xarray_kwargs:
       engine: zarr
       drop_variables: ['RC', 'RF', 'RU', 'RL']
@@ -350,7 +350,7 @@ sources:
     driver: zarr
     model: MITGCM
     args:
-      urlpath: /home/idies/workspace/ocean_circulation_ceph/exp_ERAI_1D_zarr
+      urlpath: /home/idies/workspace/ocean_circulation/exp_ERAI_1D_zarr
     xarray_kwargs:
       engine: zarr
       concat_dim: T
@@ -368,7 +368,7 @@ sources:
     driver: zarr
     model: MITGCM
     args:
-      urlpath: /home/idies/workspace/ocean_circulation_ceph/exp_ASR_zarr
+      urlpath: /home/idies/workspace/ocean_circulation/exp_ASR_zarr
     xarray_kwargs:
       engine: zarr
       drop_variables: ['RC', 'RF', 'RU', 'RL']
@@ -419,7 +419,7 @@ sources:
     driver: zarr
     model: MITGCM
     args:
-      urlpath: /home/idies/workspace/ocean_circulation_ceph/exp_ASR_zarr
+      urlpath: /home/idies/workspace/ocean_circulation/exp_ASR_zarr
     xarray_kwargs:
       engine: zarr
       concat_dim: T
@@ -435,7 +435,7 @@ sources:
     driver: zarr
     model: MITGCM
     args:
-      urlpath: /home/idies/workspace/ocean_circulation_ceph/exp_ASR_zarr
+      urlpath: /home/idies/workspace/ocean_circulation/exp_ASR_zarr
     xarray_kwargs:
       engine: zarr
       drop_variables: ['RC', 'RF', 'RU', 'RL']
@@ -495,7 +495,7 @@ sources:
     driver: zarr
     model: MITGCM
     args:
-      urlpath: /home/idies/workspace/ocean_circulation_ceph/exp_ASR_zarr
+      urlpath: /home/idies/workspace/ocean_circulation/exp_ASR_zarr
     xarray_kwargs:
       engine: zarr
     metadata:
@@ -513,7 +513,7 @@ sources:
     driver: netcdf
     model: MITGCM
     args:
-      urlpath: /home/idies/workspace/ocean_circulation_ceph/exp_ASR/crop*.nc
+      urlpath: /home/idies/workspace/ocean_circulation/exp_ASR/crop*.nc
       engine: h5netcdf
       concat_dim: T
       parallel: true
@@ -530,7 +530,7 @@ sources:
     driver: zarr
     model: MITGCM
     args:
-      urlpath: /home/idies/workspace/poseidon_ceph/ecco_v4r4
+      urlpath: /home/idies/workspace/poseidon/ecco_v4r4
       #drop_variables: ['k_u', 'k_p1', 'k_l', 'k']
     metadata:
       swap_dims:
@@ -627,7 +627,7 @@ sources:
     driver: netcdf
     model: MITGCM
     args:
-      urlpath: /home/idies/workspace/poseidon_ceph/daily_mean_ecco/ECCO-GRID.nc
+      urlpath: /home/idies/workspace/poseidon/daily_mean_ecco/ECCO-GRID.nc
       #drop_variables: ['k_u', 'k_p1', 'k_l', 'k']
       engine: netcdf4
     xarray_kwargs:
@@ -669,7 +669,7 @@ sources:
     driver: zarr
     model: MITGCM
     args:
-      urlpath: /home/idies/workspace/poseidon_ceph/daily_mean_ecco/zarr/snap*
+      urlpath: /home/idies/workspace/poseidon/daily_mean_ecco/zarr/snap*
       drop_variables: ['XC', 'YC']
     xarray_kwargs:
       engine: zarr
@@ -687,7 +687,7 @@ sources:
     driver: zarr
     model: MITGCM
     args:
-      urlpath: /home/idies/workspace/poseidon_ceph/daily_mean_ecco/zarr/mean*
+      urlpath: /home/idies/workspace/poseidon/daily_mean_ecco/zarr/mean*
       drop_variables: ['XC', 'YC', 'XG', 'YG', 'time_midp']
     xarray_kwargs:
       engine: zarr
@@ -764,7 +764,7 @@ sources:
     driver: zarr
     model: HyCOM
     args:
-      urlpath: /home/idies/workspace/ocean_circulation_ceph/HyCOM
+      urlpath: /home/idies/workspace/ocean_circulation/HyCOM
     xarray_kwargs:
       engine: zarr
     metadata:
@@ -801,7 +801,7 @@ sources:
     driver: zarr
     model: NA
     args:
-      urlpath: /home/idies/workspace/ocean_circulation_ceph/ETOPO
+      urlpath: /home/idies/workspace/ocean_circulation/ETOPO
     xarray_kwargs:
       engine: zarr
     metadata:
@@ -818,7 +818,7 @@ sources:
     driver: netcdf
     model: MITGCM
     args:
-      urlpath: /home/idies/workspace/ocean_circulation_ceph/exp_Arctic_Control/GRID/grid_glued_swapped.nc
+      urlpath: /home/idies/workspace/ocean_circulation/exp_Arctic_Control/GRID/grid_glued_swapped.nc
       xarray_kwargs:
         engine: netcdf4
         drop_variables: ['RC', 'RF', 'RU', 'RL']
@@ -863,7 +863,7 @@ sources:
     driver: zarr
     model: MITGCM
     args:
-      urlpath: /home/idies/workspace/ocean_circulation_ceph/exp_Arctic_Control/arctic_control.zarr
+      urlpath: /home/idies/workspace/ocean_circulation/exp_Arctic_Control/arctic_control.zarr
     xarray_kwargs:
       engine: zarr
     metadata:
