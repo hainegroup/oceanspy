@@ -46,10 +46,6 @@ try:
     import cartopy.crs as _ccrs
 except ImportError:  # pragma: no cover
     pass
-try:
-    import xoak as _xoak
-except ImportError:  # pragma: no cover
-    pass
 
 
 def TS_diagram(
@@ -1069,7 +1065,6 @@ def faces_array(
     Ymoor,
     Xmoor,
     varName="Depth",
-    xoak_index="scipy_kdtree",
     face2axis=None,
     **kwargs,
 ):
@@ -1092,8 +1087,6 @@ def faces_array(
         degrees lat and lons. equal length
     varName: str
         name of (2D) variable to plot. default = `Depth`
-    xoak_index: str
-        default `scipy_kdtree`.
     face2axis: dict, default=None
         {face_count: (face index, subplot_rows, subplot_cols)}.
         face_count = range(len(faces with data)).
@@ -1115,7 +1108,8 @@ def faces_array(
     data = od._ds[varName]  # assert 2D, otherwise pick z=0, time=0
     # =========================================================
     # repeated code from mooring array
-    ds_grid = od._ds[["XC", "YC"]]  # center points
+    ds_grid = od._ds.reset_coords()[["XC", "YC"]]  # center points
+    ds_grid = ds_grid.set_coords(["XC", "YC"])
     R = od.parameters["rSphere"]
     face_connections = od.face_connections["face"]
 
@@ -1123,18 +1117,12 @@ def faces_array(
         Ymoor, Xmoor = circle_path_array(Ymoor, Xmoor, R)
     for key, value in ds_grid.sizes.items():
         ds_grid["i" + f"{key}"] = DataArray(range(value), dims=key)
-    if xoak_index not in _xoak.IndexRegistry():
-        raise ValueError(
-            "`xoak_index` [{}] is not supported."
-            "\nAvailable options: {}"
-            "".format(xoak_index, _xoak.IndexRegistry())
-        )
-    ds_grid.xoak.set_index(["XC", "YC"], xoak_index)
+    ds_grid = ds_grid.set_xindex(["XC", "YC"], index_cls=_xr.indexes.NDPointIndex)
     cdata = {"XC": ("mooring", Xmoor), "YC": ("mooring", Ymoor)}
     ds_data = _xr.Dataset(cdata)  # mooring data
 
     # find nearest points to given data.
-    nds = ds_grid.xoak.sel(XC=ds_data["XC"], YC=ds_data["YC"])
+    nds = ds_grid.sel(XC=ds_data["XC"], YC=ds_data["YC"], method="nearest")
     iX, iY, iface = (nds[f"{i}"].data for i in ("X", "Y", "face"))
     _dat = nds.face.values
     ll = _np.where(abs(_np.diff(_dat)))[0]
