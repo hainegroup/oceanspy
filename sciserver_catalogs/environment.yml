@@ -9,12 +9,11 @@ dependencies:
 - bottleneck
 - netCDF4
 - xarray
-- xoak
 - cartopy
 - esmpy
 - geopy
 - xesmf>0.6.3
-- esmf=*=nompi*  # MPI builds abort intermittently at import on Linux (MPICH/UCX init)
+- esmf=*=nompi*
 - xgcm=0.6.1
 - Ipython
 - tqdm

@@ -15,7 +15,7 @@ classifiers = [
 ]
 dependencies = [
   "dask",
-  "xarray >= 2024.7.0",
+  "xarray >= 2026.2.0",
   "xgcm >= 0.2.0",
   "shapely"
 ]
