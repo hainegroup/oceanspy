@@ -1246,7 +1246,10 @@ def stations(
     # Unpack ds
     od = _copy.deepcopy(od)
     ds = od._ds
-    face_connections = od.face_connections["face"]
+    if od.face_connections is not None:
+        face_connections = od.face_connections["face"]
+    else:
+        face_connections = None
 
     if varList is not None:
         nvarlist = [var for var in ds.data_vars if var not in varList]
@@ -1281,7 +1284,9 @@ def stations(
         ds_grid = ds.reset_coords()[["XC", "YC"]]
         ds_grid = ds_grid.set_coords(["XC", "YC"])
 
-        if dim_name == "mooring":  # needed for transport
+        # integer positions: needed for transport (mooring), and on grids
+        # without faces, where X/Y hold coordinate values, not positions.
+        if dim_name == "mooring" or "face" not in ds.dims:
             for key, value in ds_grid.sizes.items():
                 ds_grid["i" + f"{key}"] = DataArray(range(value), dims=key)
 
@@ -1293,8 +1298,8 @@ def stations(
         # find nearest points to given data.
         nds = ds_grid.sel(XC=ds_data["XC"], YC=ds_data["YC"], method=method)
 
-        if "face" not in ds.dims:  # pragma: no cover
-            iX, iY = (nds[f"{i}"].data for i in ("X", "Y"))
+        if "face" not in ds.dims:
+            iX, iY = (nds[f"i{i}"].data for i in ("X", "Y"))
             DS = eval_dataset(ds, iX, iY, _dim_name=dim_name)
             DS = DS.squeeze()
         else:
