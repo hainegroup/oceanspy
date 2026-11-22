@@ -8,14 +8,13 @@ dependencies:
 - netCDF4
 - numpy<2.4
 - xarray
-- xoak
 - cartopy
 - scipy
 - intake
 - intake-xarray
 - geopy
 - xesmf>0.6.3
-- esmf=*=nompi*  # MPI builds abort intermittently at import on Linux runners (MPICH/UCX init)
+- esmf=*=nompi*
 - xgcm
 - Ipython
 - tqdm
