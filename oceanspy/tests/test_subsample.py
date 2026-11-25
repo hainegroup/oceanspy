@@ -717,6 +717,38 @@ def test_stations(od, args):
                 assert np.round(abs(Vval1), 1) <= 0.1
 
 
+@pytest.mark.parametrize("od", [MITgcm_rect_nc, MITgcm_curv_nc])
+@pytest.mark.parametrize("Vprofile", [True, False])
+def test_stations_no_faces(od, Vprofile):
+    # BUG-001: stations() on datasets without face_connections.
+    this_od = _copy.deepcopy(od)
+    assert this_od.face_connections is None
+    ds = this_od._ds
+    if not Vprofile:
+        od_stns = this_od.subsample.stations(Zcoords=ds["Z"].values[0])
+        assert od_stns._ds.XC.shape == ds.XC.shape
+        return
+    pts = [(1, 1), (5, 3), (8, 9)]  # (Y, X) positions of cell centers
+    jj = xr.DataArray([j for j, _ in pts], dims="station")
+    ii = xr.DataArray([i for _, i in pts], dims="station")
+    XC = ds.XC.isel(Y=jj, X=ii).values
+    YC = ds.YC.isel(Y=jj, X=ii).values
+    od_stns = this_od.subsample.stations(Xcoords=XC, Ycoords=YC)
+    nds = od_stns._ds
+    assert len(nds.station) == len(pts)
+    assert_array_equal(nds.XC.squeeze().values, XC)
+    assert_array_equal(nds.YC.squeeze().values, YC)
+    for n, (j, i) in enumerate(pts):
+        # the 4 corners are those of the selected cell
+        corners = ds.XG.isel(Yp1=[j, j + 1], Xp1=[i, i + 1]).transpose("Yp1", "Xp1")
+        stn_corners = nds.XG.isel(station=n).transpose("Yp1", "Xp1")
+        assert_array_equal(stn_corners.values, corners.values)
+        # tracer values match the source cell
+        stn_temp = nds.Temp.isel(station=n).squeeze()
+        src_temp = ds.Temp.isel(Y=j, X=i)
+        assert_array_equal(stn_temp.values, src_temp.transpose(*stn_temp.dims).values)
+
+
 # =========
 # PARTICLES
 # =========
